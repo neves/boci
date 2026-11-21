@@ -137,7 +137,12 @@ def command_operation(callback, client_map) -> tuple:
             and node.value.func.attr == "build_client"
         ):
             args = node.value.args
-            clients[node.targets[0].id] = (args[0].value, args[1].value)
+            pair = (args[0].value, args[1].value)
+            name = node.targets[0].id
+            if name in clients and clients[name] != pair:
+                # `client` re-bound to a work-request client inside the waiter block.
+                clients.setdefault("work_request_client", pair)
+            clients.setdefault(name, pair)
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr == "list_call_get_all_results":
                 paginated = True
@@ -166,3 +171,104 @@ def command_operation(callback, client_map) -> tuple:
     if "work_request_client" in clients:
         op["workRequestClient"] = ".".join(clients["work_request_client"])
     return key, op, ops[1:]
+
+
+def _subscript_chain(node):
+    """_details['a']['b'] -> ("_details", ["a", "b"]); None if not constant keys on a Name."""
+    keys = []
+    while isinstance(node, ast.Subscript):
+        if not isinstance(node.slice, ast.Constant):
+            return None
+        keys.insert(0, node.slice.value)
+        node = node.value
+    return (node.id, keys) if isinstance(node, ast.Name) and keys else None
+
+
+def _value_binding(value, params: set) -> dict:
+    if isinstance(value, ast.Name) and value.id in params:
+        return {"param": value.id}
+    if isinstance(value, ast.Constant):
+        return {"value": value.value}
+    if isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute):
+        names = [a.id for a in value.args if isinstance(a, ast.Name) and a.id in params]
+        if not names:  # e.g. ipxe_script_file.read()
+            names = sorted({n.id for n in ast.walk(value) if isinstance(n, ast.Name) and n.id in params})
+        out = {"transform": value.func.attr}
+        if names:
+            out["param"] = names[0]
+        return out
+    names = sorted({n.id for n in ast.walk(value) if isinstance(n, ast.Name) and n.id in params})
+    out = {"expr": ast.unparse(value)}
+    if names:
+        out["param"] = names[0]
+    return out
+
+
+def command_bindings(callback, sdk_method: str, params: set) -> list:
+    """Where each CLI param lands in the SDK call: an SDK kwarg or a body field.
+
+    Body dicts are the local variables passed as SDK call arguments (usually `_details`).
+    """
+    fn = _fn_ast(callback)
+    call = None
+    for node in ast.walk(fn):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == sdk_method
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "client"
+        ):
+            call = node
+            break
+    bindings = []
+    body_vars = {}
+    if call is not None:
+        for kw in call.keywords:
+            if kw.arg is None:  # **kwargs
+                continue
+            if isinstance(kw.value, ast.Name) and kw.value.id not in params:
+                body_vars[kw.value.id] = kw.arg
+            else:
+                bindings.append({"target": "kwarg", "key": [kw.arg], **_value_binding(kw.value, params)})
+
+    def visit(stmts, when):
+        for st in stmts:
+            if isinstance(st, ast.If):
+                cond = ast.unparse(st.test)
+                visit(st.body, when + [cond])
+                visit(st.orelse, when + [f"not ({cond})"])
+                continue
+            for child in ("body", "orelse", "finalbody"):
+                if isinstance(st, (ast.Try, ast.With, ast.For)) and hasattr(st, child):
+                    visit(getattr(st, child), when)
+            if not isinstance(st, ast.Assign) or len(st.targets) != 1:
+                continue
+            chain = _subscript_chain(st.targets[0])
+            if chain is None:
+                continue
+            var, keys = chain
+            if var == "kwargs":
+                target = {"target": "kwarg", "key": keys}
+            elif var in body_vars:
+                target = {"target": "body", "bodyArg": body_vars[var], "key": keys}
+            else:
+                continue
+            b = {**target, **_value_binding(st.value, params)}
+            if when:
+                b["when"] = " and ".join(when)
+            bindings.append(b)
+
+    visit(fn.body, [])
+    # Params the response is streamed into (e.g. --file for binary downloads).
+    for node in ast.walk(fn):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "write"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id in params
+        ):
+            bindings.append({"target": "output", "key": [], "param": node.func.value.id})
+            break
+    return bindings

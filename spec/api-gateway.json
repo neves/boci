@@ -456,6 +456,37 @@
         "responseType": "Api",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["message"],
+          "param": "message",
+          "when": "message is not None"
+        }
+      ],
       "otherOperations": ["get_api"],
       "params": [
         {
@@ -647,15 +678,19 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.change_api_compartment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.api_gateway",
+        "method": "change_api_compartment",
+        "http": "POST",
+        "path": "/apis/{apiId}/actions/changeCompartment",
+        "positionalArgs": ["api_id", "change_api_compartment_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "apiId": "api_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -663,13 +698,50 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "change_api_compartment_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_api_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -887,6 +959,35 @@
         "responseType": "stream",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["range"],
+          "param": "range",
+          "when": "range is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "output",
+          "key": [],
+          "param": "file"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1009,14 +1110,12 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.create_api",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "apigateway.api_gateway",
+        "method": "create_api",
+        "http": "POST",
+        "path": "/apis",
+        "positionalArgs": ["create_api_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -1025,13 +1124,69 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_api_details",
+        "responseType": "Api",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_api_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_api_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_api_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_api_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_api_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_api_details",
+          "key": ["content"],
+          "param": "content",
+          "when": "content is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1258,15 +1413,19 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.delete_api",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.api_gateway",
+        "method": "delete_api",
+        "http": "DELETE",
+        "path": "/apis/{apiId}",
+        "positionalArgs": ["api_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "apiId": "api_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -1274,13 +1433,40 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1495,6 +1681,24 @@
         "responseType": "ApiSpecification",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1602,6 +1806,18 @@
         "responseType": "Api",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1710,6 +1926,60 @@
         "responseType": "ApiCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1968,6 +2238,30 @@
         "responseType": "Api",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "remove_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        }
+      ],
       "otherOperations": ["get_api"],
       "params": [
         {
@@ -2140,15 +2434,19 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.update_api",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.api_gateway",
+        "method": "update_api",
+        "http": "PUT",
+        "path": "/apis/{apiId}",
+        "positionalArgs": ["api_id", "update_api_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "apiId": "api_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -2156,13 +2454,71 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_api_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_api_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_api_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_api_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_api_details",
+          "key": ["content"],
+          "param": "content",
+          "when": "content is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2454,6 +2810,24 @@
         "responseType": "ApiValidations",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2565,6 +2939,37 @@
         "responseType": "Certificate",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["certificate_id"],
+          "param": "certificate_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["message"],
+          "param": "message",
+          "when": "message is not None"
+        }
+      ],
       "otherOperations": ["get_certificate"],
       "params": [
         {
@@ -2792,6 +3197,36 @@
         "body": "change_certificate_compartment_details",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["certificate_id"],
+          "param": "certificate_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_certificate_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3177,15 +3612,19 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.delete_certificate",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.api_gateway",
+        "method": "delete_certificate",
+        "http": "DELETE",
+        "path": "/certificates/{certificateId}",
+        "positionalArgs": ["certificate_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "certificateId": "certificate_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -3193,13 +3632,40 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["certificate_id"],
+          "param": "certificate_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3411,6 +3877,18 @@
         "responseType": "Certificate",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["certificate_id"],
+          "param": "certificate_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3519,6 +3997,60 @@
         "responseType": "CertificateCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3777,6 +4309,30 @@
         "responseType": "Certificate",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["certificate_id"],
+          "param": "certificate_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "remove_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        }
+      ],
       "otherOperations": ["get_certificate"],
       "params": [
         {
@@ -3949,15 +4505,19 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.update_certificate",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.api_gateway",
+        "method": "update_certificate",
+        "http": "PUT",
+        "path": "/certificates/{certificateId}",
+        "positionalArgs": ["certificate_id", "update_certificate_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "certificateId": "certificate_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -3965,13 +4525,64 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_certificate_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["certificate_id"],
+          "param": "certificate_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_certificate_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_certificate_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_certificate_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4245,6 +4856,37 @@
         "responseType": "Deployment",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["deployment_id"],
+          "param": "deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["message"],
+          "param": "message",
+          "when": "message is not None"
+        }
+      ],
       "otherOperations": ["get_deployment"],
       "params": [
         {
@@ -4436,15 +5078,22 @@
       "callback": "services.apigateway.src.oci_cli_deployment.generated.deployment_cli.change_deployment_compartment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.deployment",
+        "method": "change_deployment_compartment",
+        "http": "POST",
+        "path": "/deployments/{deploymentId}/actions/changeCompartment",
+        "positionalArgs": [
+          "deployment_id",
+          "change_deployment_compartment_details"
+        ],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "deploymentId": "deployment_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -4452,13 +5101,50 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "change_deployment_compartment_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["deployment_id"],
+          "param": "deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_deployment_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4647,14 +5333,12 @@
       "callback": "services.apigateway.src.oci_cli_deployment.generated.deployment_cli.create_deployment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "apigateway.deployment",
+        "method": "create_deployment",
+        "http": "POST",
+        "path": "/deployments",
+        "positionalArgs": ["create_deployment_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -4663,13 +5347,81 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_deployment_details",
+        "responseType": "Deployment",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["gatewayId"],
+          "param": "gateway_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["pathPrefix"],
+          "param": "path_prefix"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["specification"],
+          "transform": "parse_json_parameter",
+          "param": "specification"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4934,15 +5686,19 @@
       "callback": "services.apigateway.src.oci_cli_deployment.generated.deployment_cli.delete_deployment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.deployment",
+        "method": "delete_deployment",
+        "http": "DELETE",
+        "path": "/deployments/{deploymentId}",
+        "positionalArgs": ["deployment_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "deploymentId": "deployment_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -4950,13 +5706,40 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["deployment_id"],
+          "param": "deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5168,6 +5951,18 @@
         "responseType": "Deployment",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["deployment_id"],
+          "param": "deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5279,6 +6074,66 @@
         "responseType": "DeploymentCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["gateway_id"],
+          "param": "gateway_id",
+          "when": "gateway_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5556,6 +6411,30 @@
         "responseType": "Deployment",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["deployment_id"],
+          "param": "deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "remove_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        }
+      ],
       "otherOperations": ["get_deployment"],
       "params": [
         {
@@ -5728,15 +6607,19 @@
       "callback": "services.apigateway.src.oci_cli_deployment.generated.deployment_cli.update_deployment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.deployment",
+        "method": "update_deployment",
+        "http": "PUT",
+        "path": "/deployments/{deploymentId}",
+        "positionalArgs": ["deployment_id", "update_deployment_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "deploymentId": "deployment_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -5744,13 +6627,72 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_deployment_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["deployment_id"],
+          "param": "deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["specification"],
+          "transform": "parse_json_parameter",
+          "param": "specification",
+          "when": "specification is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6043,6 +6985,37 @@
         "responseType": "Gateway",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["gateway_id"],
+          "param": "gateway_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["message"],
+          "param": "message",
+          "when": "message is not None"
+        }
+      ],
       "otherOperations": ["get_gateway"],
       "params": [
         {
@@ -6234,15 +7207,19 @@
       "callback": "services.apigateway.src.oci_cli_gateway.generated.gateway_cli.change_gateway_compartment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.gateway",
+        "method": "change_gateway_compartment",
+        "http": "POST",
+        "path": "/gateways/{gatewayId}/actions/changeCompartment",
+        "positionalArgs": ["gateway_id", "change_gateway_compartment_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "gatewayId": "gateway_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -6250,13 +7227,50 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "change_gateway_compartment_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["gateway_id"],
+          "param": "gateway_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_gateway_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6445,14 +7459,12 @@
       "callback": "services.apigateway.src.oci_cli_gateway.generated.gateway_cli.create_gateway",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "apigateway.gateway",
+        "method": "create_gateway",
+        "http": "POST",
+        "path": "/gateways",
+        "positionalArgs": ["create_gateway_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -6461,13 +7473,128 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_gateway_details",
+        "responseType": "Gateway",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["endpointType"],
+          "param": "endpoint_type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["subnetId"],
+          "param": "subnet_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["networkSecurityGroupIds"],
+          "transform": "parse_json_parameter",
+          "param": "network_security_group_ids",
+          "when": "network_security_group_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["certificateId"],
+          "param": "certificate_id",
+          "when": "certificate_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["responseCacheDetails"],
+          "transform": "parse_json_parameter",
+          "param": "response_cache_details",
+          "when": "response_cache_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["caBundles"],
+          "transform": "parse_json_parameter",
+          "param": "ca_bundles",
+          "when": "ca_bundles is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["ipMode"],
+          "param": "ip_mode",
+          "when": "ip_mode is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["ipv6AddressConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "ipv6_address_configuration",
+          "when": "ipv6_address_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_gateway_details",
+          "key": ["ipv4AddressConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "ipv4_address_configuration",
+          "when": "ipv4_address_configuration is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6846,15 +7973,19 @@
       "callback": "services.apigateway.src.oci_cli_gateway.generated.gateway_cli.delete_gateway",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.gateway",
+        "method": "delete_gateway",
+        "http": "DELETE",
+        "path": "/gateways/{gatewayId}",
+        "positionalArgs": ["gateway_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "gatewayId": "gateway_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -6862,13 +7993,40 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["gateway_id"],
+          "param": "gateway_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7080,6 +8238,18 @@
         "responseType": "Gateway",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["gateway_id"],
+          "param": "gateway_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7191,6 +8361,66 @@
         "responseType": "GatewayCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["certificate_id"],
+          "param": "certificate_id",
+          "when": "certificate_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7468,6 +8698,30 @@
         "responseType": "Gateway",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["gateway_id"],
+          "param": "gateway_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "remove_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        }
+      ],
       "otherOperations": ["get_gateway"],
       "params": [
         {
@@ -7640,15 +8894,19 @@
       "callback": "services.apigateway.src.oci_cli_gateway.generated.gateway_cli.update_gateway",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.gateway",
+        "method": "update_gateway",
+        "http": "PUT",
+        "path": "/gateways/{gatewayId}",
+        "positionalArgs": ["gateway_id", "update_gateway_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "gatewayId": "gateway_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -7656,13 +8914,95 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_gateway_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["gateway_id"],
+          "param": "gateway_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_gateway_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_gateway_details",
+          "key": ["networkSecurityGroupIds"],
+          "transform": "parse_json_parameter",
+          "param": "network_security_group_ids",
+          "when": "network_security_group_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_gateway_details",
+          "key": ["certificateId"],
+          "param": "certificate_id",
+          "when": "certificate_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_gateway_details",
+          "key": ["responseCacheDetails"],
+          "transform": "parse_json_parameter",
+          "param": "response_cache_details",
+          "when": "response_cache_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_gateway_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_gateway_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_gateway_details",
+          "key": ["caBundles"],
+          "transform": "parse_json_parameter",
+          "param": "ca_bundles",
+          "when": "ca_bundles is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8012,6 +9352,37 @@
         "responseType": "Sdk",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["sdk_id"],
+          "param": "sdk_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["message"],
+          "param": "message",
+          "when": "message is not None"
+        }
+      ],
       "otherOperations": ["get_sdk"],
       "params": [
         {
@@ -8196,14 +9567,12 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.create_sdk",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "apigateway.api_gateway",
+        "method": "create_sdk",
+        "http": "POST",
+        "path": "/sdks",
+        "positionalArgs": ["create_sdk_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -8212,13 +9581,76 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_sdk_details",
+        "responseType": "Sdk",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_sdk_details",
+          "key": ["targetLanguage"],
+          "param": "target_language"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_sdk_details",
+          "key": ["apiId"],
+          "param": "api_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_sdk_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_sdk_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_sdk_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_sdk_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_sdk_details",
+          "key": ["parameters"],
+          "transform": "parse_json_parameter",
+          "param": "parameters",
+          "when": "parameters is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8464,15 +9896,19 @@
       "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.delete_sdk",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.api_gateway",
+        "method": "delete_sdk",
+        "http": "DELETE",
+        "path": "/sdks/{sdkId}",
+        "positionalArgs": ["sdk_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "sdkId": "sdk_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -8482,11 +9918,38 @@
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["sdk_id"],
+          "param": "sdk_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8698,6 +10161,18 @@
         "responseType": "Sdk",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["sdk_id"],
+          "param": "sdk_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8809,6 +10284,67 @@
         "responseType": "SdkCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["sdk_id"],
+          "param": "sdk_id",
+          "when": "sdk_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["api_id"],
+          "param": "api_id",
+          "when": "api_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9079,6 +10615,30 @@
         "responseType": "Sdk",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["sdk_id"],
+          "param": "sdk_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "remove_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        }
+      ],
       "otherOperations": ["get_sdk"],
       "params": [
         {
@@ -9275,6 +10835,53 @@
         "responseType": "Sdk",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["sdk_id"],
+          "param": "sdk_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_sdk_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_sdk_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_sdk_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "otherOperations": ["get_sdk"],
       "params": [
         {
@@ -9555,6 +11162,54 @@
         "responseType": "SdkLanguageTypeCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9785,6 +11440,37 @@
         "responseType": "Subscriber",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["subscriber_id"],
+          "param": "subscriber_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["message"],
+          "param": "message",
+          "when": "message is not None"
+        }
+      ],
       "otherOperations": ["get_subscriber"],
       "params": [
         {
@@ -9976,15 +11662,22 @@
       "callback": "services.apigateway.src.oci_cli_subscribers.generated.subscribers_cli.change_subscriber_compartment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.subscribers",
+        "method": "change_subscriber_compartment",
+        "http": "POST",
+        "path": "/subscribers/{subscriberId}/actions/changeCompartment",
+        "positionalArgs": [
+          "subscriber_id",
+          "change_subscriber_compartment_details"
+        ],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "subscriberId": "subscriber_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -9992,13 +11685,50 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "change_subscriber_compartment_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["subscriber_id"],
+          "param": "subscriber_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_subscriber_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10187,14 +11917,12 @@
       "callback": "services.apigateway.src.oci_cli_subscribers.generated.subscribers_cli.create_subscriber",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "apigateway.subscribers",
+        "method": "create_subscriber",
+        "http": "POST",
+        "path": "/subscribers",
+        "positionalArgs": ["create_subscriber_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -10203,13 +11931,76 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_subscriber_details",
+        "responseType": "Subscriber",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_subscriber_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_subscriber_details",
+          "key": ["clients"],
+          "transform": "parse_json_parameter",
+          "param": "clients"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_subscriber_details",
+          "key": ["usagePlans"],
+          "transform": "parse_json_parameter",
+          "param": "usage_plans"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_subscriber_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_subscriber_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_subscriber_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_subscriber_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10455,15 +12246,19 @@
       "callback": "services.apigateway.src.oci_cli_subscribers.generated.subscribers_cli.delete_subscriber",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.subscribers",
+        "method": "delete_subscriber",
+        "http": "DELETE",
+        "path": "/subscribers/{subscriberId}",
+        "positionalArgs": ["subscriber_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "subscriberId": "subscriber_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -10471,13 +12266,40 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["subscriber_id"],
+          "param": "subscriber_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10689,6 +12511,18 @@
         "responseType": "Subscriber",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["subscriber_id"],
+          "param": "subscriber_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10797,6 +12631,60 @@
         "responseType": "SubscriberCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11055,6 +12943,30 @@
         "responseType": "Subscriber",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["subscriber_id"],
+          "param": "subscriber_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "remove_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        }
+      ],
       "otherOperations": ["get_subscriber"],
       "params": [
         {
@@ -11227,15 +13139,19 @@
       "callback": "services.apigateway.src.oci_cli_subscribers.generated.subscribers_cli.update_subscriber",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.subscribers",
+        "method": "update_subscriber",
+        "http": "PUT",
+        "path": "/subscribers/{subscriberId}",
+        "positionalArgs": ["subscriber_id", "update_subscriber_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "subscriberId": "subscriber_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -11243,13 +13159,80 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_subscriber_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["subscriber_id"],
+          "param": "subscriber_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_subscriber_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_subscriber_details",
+          "key": ["clients"],
+          "transform": "parse_json_parameter",
+          "param": "clients",
+          "when": "clients is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_subscriber_details",
+          "key": ["usagePlans"],
+          "transform": "parse_json_parameter",
+          "param": "usage_plans",
+          "when": "usage_plans is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_subscriber_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_subscriber_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11561,6 +13544,37 @@
         "responseType": "UsagePlan",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["usage_plan_id"],
+          "param": "usage_plan_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_resource_lock_details",
+          "key": ["message"],
+          "param": "message",
+          "when": "message is not None"
+        }
+      ],
       "otherOperations": ["get_usage_plan"],
       "params": [
         {
@@ -11752,15 +13766,22 @@
       "callback": "services.apigateway.src.oci_cli_usage_plans.generated.usageplans_cli.change_usage_plan_compartment",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.usage_plans",
+        "method": "change_usage_plan_compartment",
+        "http": "POST",
+        "path": "/usagePlans/{usagePlanId}/actions/changeCompartment",
+        "positionalArgs": [
+          "usage_plan_id",
+          "change_usage_plan_compartment_details"
+        ],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "usagePlanId": "usage_plan_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -11768,13 +13789,50 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "change_usage_plan_compartment_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["usage_plan_id"],
+          "param": "usage_plan_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_usage_plan_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11963,14 +14021,12 @@
       "callback": "services.apigateway.src.oci_cli_usage_plans.generated.usageplans_cli.create_usage_plan",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "apigateway.usage_plans",
+        "method": "create_usage_plan",
+        "http": "POST",
+        "path": "/usagePlans",
+        "positionalArgs": ["create_usage_plan_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -11979,13 +14035,69 @@
           "content-type": {
             "value": "application/json"
           },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_usage_plan_details",
+        "responseType": "UsagePlan",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_usage_plan_details",
+          "key": ["entitlements"],
+          "transform": "parse_json_parameter",
+          "param": "entitlements"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_usage_plan_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_usage_plan_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_usage_plan_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_usage_plan_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_usage_plan_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12212,15 +14324,19 @@
       "callback": "services.apigateway.src.oci_cli_usage_plans.generated.usageplans_cli.delete_usage_plan",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.usage_plans",
+        "method": "delete_usage_plan",
+        "http": "DELETE",
+        "path": "/usagePlans/{usagePlanId}",
+        "positionalArgs": ["usage_plan_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "usagePlanId": "usage_plan_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -12228,13 +14344,40 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["usage_plan_id"],
+          "param": "usage_plan_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12446,6 +14589,18 @@
         "responseType": "UsagePlan",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["usage_plan_id"],
+          "param": "usage_plan_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12554,6 +14709,60 @@
         "responseType": "UsagePlanCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12812,6 +15021,30 @@
         "responseType": "UsagePlan",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["usage_plan_id"],
+          "param": "usage_plan_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "remove_resource_lock_details",
+          "key": ["type"],
+          "param": "type"
+        }
+      ],
       "otherOperations": ["get_usage_plan"],
       "params": [
         {
@@ -12984,15 +15217,19 @@
       "callback": "services.apigateway.src.oci_cli_usage_plans.generated.usageplans_cli.update_usage_plan",
       "kind": "generated",
       "operation": {
-        "client": "apigateway.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "apigateway.usage_plans",
+        "method": "update_usage_plan",
+        "http": "PUT",
+        "path": "/usagePlans/{usagePlanId}",
+        "positionalArgs": ["usage_plan_id", "update_usage_plan_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "usagePlanId": "usage_plan_id"
         },
-        "queryParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
         "headerParams": {
           "accept": {
             "value": "application/json"
@@ -13000,13 +15237,72 @@
           "content-type": {
             "value": "application/json"
           },
+          "if-match": {
+            "arg": "if_match"
+          },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_usage_plan_details",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["usage_plan_id"],
+          "param": "usage_plan_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_usage_plan_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_usage_plan_details",
+          "key": ["entitlements"],
+          "transform": "parse_json_parameter",
+          "param": "entitlements",
+          "when": "entitlements is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_usage_plan_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_usage_plan_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13300,6 +15596,24 @@
         },
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13426,6 +15740,18 @@
         "responseType": "WorkRequest",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13531,6 +15857,54 @@
         "responseType": "WorkRequestCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["resource_id"],
+          "param": "resource_id",
+          "when": "resource_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13770,6 +16144,48 @@
         "responseType": "WorkRequestErrorCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13990,6 +16406,48 @@
         "responseType": "WorkRequestLogCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",

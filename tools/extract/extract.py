@@ -119,6 +119,7 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict) -> Non
             client_key, op, others = sdk.command_operation(cmd.callback, CLIENT_MAP)
             if op:
                 entry["operation"] = op
+                entry["bindings"] = sdk.command_bindings(cmd.callback, op["method"], {p.name for p in cmd.params})
                 if others:
                     entry["otherOperations"] = others
                 spec_name, service_name = client_key.split(".", 1)

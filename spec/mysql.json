@@ -488,13 +488,13 @@
       "callback": "services.mysql.src.oci_cli_db_backups.generated.dbbackups_cli.cancel_backup_deletion",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_backups",
+        "method": "cancel_backup_deletion",
+        "http": "POST",
+        "path": "/backups/{backupId}/actions/cancelDeletion",
+        "positionalArgs": ["backup_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "backupId": "backup_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -504,16 +504,37 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -664,13 +685,13 @@
       "callback": "services.mysql.src.oci_cli_db_backups.generated.dbbackups_cli.change_backup_compartment",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_backups",
+        "method": "change_backup_compartment",
+        "http": "POST",
+        "path": "/backups/{backupId}/actions/changeCompartment",
+        "positionalArgs": ["backup_id", "change_backup_compartment_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "backupId": "backup_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -680,16 +701,44 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "change_backup_compartment_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_backup_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -859,14 +908,12 @@
       "callback": "services.mysql.src.oci_cli_db_backups.generated.dbbackups_cli.copy_backup",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "mysql.db_backups",
+        "method": "copy_backup",
+        "http": "POST",
+        "path": "/backups/actions/copy",
+        "positionalArgs": ["copy_backup_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -875,16 +922,81 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "copy_backup_details",
+        "responseType": "Backup",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_backup_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_backup_details",
+          "key": ["sourceBackupId"],
+          "param": "source_backup_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_backup_details",
+          "key": ["sourceRegion"],
+          "param": "source_region"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_backup_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_backup_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_backup_details",
+          "key": ["backupCopyRetentionInDays"],
+          "param": "backup_copy_retention_in_days",
+          "when": "backup_copy_retention_in_days is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_backup_details",
+          "key": ["encryptData"],
+          "transform": "parse_json_parameter",
+          "param": "encrypt_data",
+          "when": "encrypt_data is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1149,14 +1261,12 @@
       "callback": "services.mysql.src.oci_cli_db_backups.generated.dbbackups_cli.create_backup",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "mysql.db_backups",
+        "method": "create_backup",
+        "http": "POST",
+        "path": "/backups",
+        "positionalArgs": ["create_backup_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -1165,16 +1275,82 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_backup_details",
+        "responseType": "Backup",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["dbSystemId"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["softDelete"],
+          "param": "soft_delete",
+          "when": "soft_delete is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["backupType"],
+          "param": "backup_type",
+          "when": "backup_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["retentionInDays"],
+          "param": "retention_in_days",
+          "when": "retention_in_days is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_backup_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1443,13 +1619,13 @@
       "callback": "services.mysql.src.oci_cli_db_backups.generated.dbbackups_cli.delete_backup",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_backups",
+        "method": "delete_backup",
+        "http": "DELETE",
+        "path": "/backups/{backupId}",
+        "positionalArgs": ["backup_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "backupId": "backup_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -1459,16 +1635,34 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1638,13 +1832,13 @@
       "callback": "services.mysql.src.oci_cli_db_backups.generated.dbbackups_cli.export_backup",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_backups",
+        "method": "export_backup",
+        "http": "POST",
+        "path": "/backups/{backupId}/actions/export",
+        "positionalArgs": ["backup_id", "export_backup_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "backupId": "backup_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -1654,16 +1848,56 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "export_backup_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_backup_details",
+          "key": ["bucketName"],
+          "param": "bucket_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_backup_details",
+          "key": ["namespaceName"],
+          "param": "namespace_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_backup_details",
+          "key": ["exportOptions"],
+          "transform": "parse_json_parameter",
+          "param": "export_options",
+          "when": "export_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_backup_details",
+          "key": ["subnetId"],
+          "param": "subnet_id",
+          "when": "subnet_id is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1897,6 +2131,24 @@
         "responseType": "Backup",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2042,6 +2294,96 @@
         "responseType": "list[BackupSummary]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id",
+          "when": "backup_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id",
+          "when": "db_system_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["soft_delete"],
+          "param": "soft_delete",
+          "when": "soft_delete is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["backup_preparation_status"],
+          "param": "backup_preparation_status",
+          "when": "backup_preparation_status is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["validation_status"],
+          "param": "validation_status",
+          "when": "validation_status is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["creation_type"],
+          "param": "creation_type",
+          "when": "creation_type is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2429,6 +2771,68 @@
         "responseType": "Backup",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_backup_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_backup_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_backup_details",
+          "key": ["softDelete"],
+          "param": "soft_delete",
+          "when": "soft_delete is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_backup_details",
+          "key": ["retentionInDays"],
+          "param": "retention_in_days",
+          "when": "retention_in_days is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_backup_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_backup_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "otherOperations": ["get_backup"],
       "params": [
         {
@@ -2718,13 +3122,13 @@
       "callback": "services.mysql.src.oci_cli_db_backups.generated.dbbackups_cli.validate_backup",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_backups",
+        "method": "validate_backup",
+        "http": "POST",
+        "path": "/backups/{backupId}/actions/validate",
+        "positionalArgs": ["backup_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "backupId": "backup_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -2734,16 +3138,45 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "validate_backup_details",
+        "responseType": "Backup",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["backup_id"],
+          "param": "backup_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "validate_backup_details",
+          "key": ["isPreparedBackupRequired"],
+          "param": "is_prepared_backup_required"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2913,13 +3346,16 @@
       "callback": "services.mysql.src.oci_cli_blue_green_deployments.generated.bluegreendeployments_cli.change_blue_green_deployment_compartment",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.blue_green_deployments",
+        "method": "change_blue_green_deployment_compartment",
+        "http": "POST",
+        "path": "/blueGreenDeployments/{blueGreenDeploymentId}/actions/changeCompartment",
+        "positionalArgs": [
+          "blue_green_deployment_id",
+          "change_blue_green_deployment_compartment_details"
+        ],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "blueGreenDeploymentId": "blue_green_deployment_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -2929,16 +3365,44 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "change_blue_green_deployment_compartment_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["blue_green_deployment_id"],
+          "param": "blue_green_deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_blue_green_deployment_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3108,14 +3572,12 @@
       "callback": "services.mysql.src.oci_cli_blue_green_deployments.generated.bluegreendeployments_cli.create_blue_green_deployment",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "mysql.blue_green_deployments",
+        "method": "create_blue_green_deployment",
+        "http": "POST",
+        "path": "/blueGreenDeployments",
+        "positionalArgs": ["create_blue_green_deployment_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -3124,16 +3586,73 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_blue_green_deployment_details",
+        "responseType": "BlueGreenDeployment",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_blue_green_deployment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_blue_green_deployment_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_blue_green_deployment_details",
+          "key": ["sourceDbSystemId"],
+          "param": "source_db_system_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_blue_green_deployment_details",
+          "key": ["targetDbSystemDetails"],
+          "transform": "parse_json_parameter",
+          "param": "target_db_system_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_blue_green_deployment_details",
+          "key": ["channelDetails"],
+          "transform": "parse_json_parameter",
+          "param": "channel_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_blue_green_deployment_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_blue_green_deployment_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3379,13 +3898,13 @@
       "callback": "services.mysql.src.oci_cli_blue_green_deployments.generated.bluegreendeployments_cli.delete_blue_green_deployment",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.blue_green_deployments",
+        "method": "delete_blue_green_deployment",
+        "http": "DELETE",
+        "path": "/blueGreenDeployments/{blueGreenDeploymentId}",
+        "positionalArgs": ["blue_green_deployment_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "blueGreenDeploymentId": "blue_green_deployment_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -3395,16 +3914,34 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["blue_green_deployment_id"],
+          "param": "blue_green_deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3600,6 +4137,24 @@
         "responseType": "BlueGreenDeployment",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["blue_green_deployment_id"],
+          "param": "blue_green_deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3733,6 +4288,72 @@
         "responseType": "BlueGreenDeploymentCollection",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["source_db_system_id"],
+          "param": "source_db_system_id",
+          "when": "source_db_system_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["target_db_system_id"],
+          "param": "target_db_system_id",
+          "when": "target_db_system_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4002,13 +4623,16 @@
       "callback": "services.mysql.src.oci_cli_blue_green_deployments.generated.bluegreendeployments_cli.switchover_blue_green_deployment",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.blue_green_deployments",
+        "method": "switchover_blue_green_deployment",
+        "http": "POST",
+        "path": "/blueGreenDeployments/{blueGreenDeploymentId}/actions/switchover",
+        "positionalArgs": [
+          "blue_green_deployment_id",
+          "switchover_blue_green_deployment_details"
+        ],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "blueGreenDeploymentId": "blue_green_deployment_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -4018,16 +4642,46 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "switchover_blue_green_deployment_details",
+        "responseType": "BlueGreenDeployment",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["blue_green_deployment_id"],
+          "param": "blue_green_deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "switchover_blue_green_deployment_details",
+          "key": ["waitTimeInSeconds"],
+          "param": "wait_time_in_seconds",
+          "when": "wait_time_in_seconds is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4197,13 +4851,16 @@
       "callback": "services.mysql.src.oci_cli_blue_green_deployments.generated.bluegreendeployments_cli.update_blue_green_deployment",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.blue_green_deployments",
+        "method": "update_blue_green_deployment",
+        "http": "PUT",
+        "path": "/blueGreenDeployments/{blueGreenDeploymentId}",
+        "positionalArgs": [
+          "blue_green_deployment_id",
+          "update_blue_green_deployment_details"
+        ],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "blueGreenDeploymentId": "blue_green_deployment_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -4213,16 +4870,58 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_blue_green_deployment_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["blue_green_deployment_id"],
+          "param": "blue_green_deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_blue_green_deployment_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_blue_green_deployment_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_blue_green_deployment_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4941,13 +5640,13 @@
       "callback": "services.mysql.src.oci_cli_channels.generated.channels_cli.delete_channel",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.channels",
+        "method": "delete_channel",
+        "http": "DELETE",
+        "path": "/channels/{channelId}",
+        "positionalArgs": ["channel_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "channelId": "channel_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -4957,16 +5656,34 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5162,6 +5879,24 @@
         "responseType": "Channel",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5298,6 +6033,78 @@
         "responseType": "list[ChannelSummary]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id",
+          "when": "db_system_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id",
+          "when": "channel_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_enabled"],
+          "param": "is_enabled",
+          "when": "is_enabled is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5588,13 +6395,13 @@
       "callback": "services.mysql.src.oci_cli_channels.generated.channels_cli.reset_channel",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.channels",
+        "method": "reset_channel",
+        "http": "POST",
+        "path": "/channels/{channelId}/actions/reset",
+        "positionalArgs": ["channel_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "channelId": "channel_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -5604,16 +6411,37 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5764,13 +6592,13 @@
       "callback": "services.mysql.src.oci_cli_channels.generated.channels_cli.resume_channel",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.channels",
+        "method": "resume_channel",
+        "http": "POST",
+        "path": "/channels/{channelId}/actions/resume",
+        "positionalArgs": ["channel_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "channelId": "channel_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -5780,16 +6608,37 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5940,13 +6789,13 @@
       "callback": "services.mysql.src.oci_cli_channels.generated.channels_cli.generate_channel_status",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.channels",
+        "method": "generate_channel_status",
+        "http": "POST",
+        "path": "/channels/{channelId}/actions/generateChannelStatus",
+        "positionalArgs": ["channel_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "channelId": "channel_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -5956,16 +6805,29 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "responseType": "ChannelStatus",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6120,6 +6982,18 @@
         "responseType": "ChannelStatus",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6696,14 +7570,12 @@
       "callback": "services.mysql.src.oci_cli_mysqlaas.generated.mysqlaas_cli.create_configuration",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "mysql.mysqlaas",
+        "method": "create_configuration",
+        "http": "POST",
+        "path": "/configurations",
+        "positionalArgs": ["create_configuration_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -6712,16 +7584,98 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_configuration_details",
+        "responseType": "Configuration",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["shapeName"],
+          "param": "shape_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["initVariables"],
+          "transform": "parse_json_parameter",
+          "param": "init_variables",
+          "when": "init_variables is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["variables"],
+          "transform": "parse_json_parameter",
+          "param": "variables",
+          "when": "variables is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["options"],
+          "transform": "parse_json_parameter",
+          "param": "options",
+          "when": "options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["parentConfigurationId"],
+          "param": "parent_configuration_id",
+          "when": "parent_configuration_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_configuration_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7049,6 +8003,24 @@
         },
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["configuration_id"],
+          "param": "configuration_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "otherOperations": ["get_configuration"],
       "params": [
         {
@@ -7238,6 +8210,24 @@
         "responseType": "Configuration",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["configuration_id"],
+          "param": "configuration_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7375,6 +8365,78 @@
         "responseType": "list[ConfigurationSummary]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["configuration_id"],
+          "param": "configuration_id",
+          "when": "configuration_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["type"],
+          "param": "type",
+          "when": "type is not None and len(type) > 0"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["shape_name"],
+          "param": "shape_name",
+          "when": "shape_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7685,6 +8747,54 @@
         "responseType": "Configuration",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["configuration_id"],
+          "param": "configuration_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_configuration_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_configuration_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_configuration_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_configuration_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "otherOperations": ["get_configuration"],
       "params": [
         {
@@ -8800,13 +9910,16 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.controlled_update_db_system",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "controlled_update_db_system",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/actions/controlledUpdate",
+        "positionalArgs": [
+          "db_system_id",
+          "controlled_update_db_system_details"
+        ],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -8816,16 +9929,52 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "controlled_update_db_system_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "controlled_update_db_system_details",
+          "key": ["targetMysqlVersion"],
+          "param": "target_mysql_version",
+          "when": "target_mysql_version is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "controlled_update_db_system_details",
+          "key": ["targetDbInstances"],
+          "param": "target_db_instances",
+          "when": "target_db_instances is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9891,13 +11040,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.delete_db_system",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "delete_db_system",
+        "http": "DELETE",
+        "path": "/dbSystems/{dbSystemId}",
+        "positionalArgs": ["db_system_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -9907,16 +11056,34 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10112,6 +11279,24 @@
         "responseType": "DbSystem",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10196,13 +11381,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.add_heat_wave_cluster",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "add_heat_wave_cluster",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/heatWaveCluster/actions/add",
+        "positionalArgs": ["db_system_id", "add_heat_wave_cluster_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -10212,16 +11397,58 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "add_heat_wave_cluster_details",
+        "responseType": "HeatWaveCluster",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_heat_wave_cluster_details",
+          "key": ["shapeName"],
+          "param": "shape_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_heat_wave_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size"
+        },
+        {
+          "target": "body",
+          "bodyArg": "add_heat_wave_cluster_details",
+          "key": ["isLakehouseEnabled"],
+          "param": "is_lakehouse_enabled",
+          "when": "is_lakehouse_enabled is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10429,13 +11656,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.delete_heat_wave_cluster",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "delete_heat_wave_cluster",
+        "http": "DELETE",
+        "path": "/dbSystems/{dbSystemId}/heatWaveCluster",
+        "positionalArgs": ["db_system_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -10445,16 +11672,34 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10650,6 +11895,24 @@
         "responseType": "HeatWaveCluster",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10734,13 +11997,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.restart_heat_wave_cluster",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "restart_heat_wave_cluster",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/heatWaveCluster/actions/restart",
+        "positionalArgs": ["db_system_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -10750,16 +12013,37 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10910,13 +12194,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.start_heat_wave_cluster",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "start_heat_wave_cluster",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/heatWaveCluster/actions/start",
+        "positionalArgs": ["db_system_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -10926,16 +12210,37 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11086,13 +12391,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.stop_heat_wave_cluster",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "stop_heat_wave_cluster",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/heatWaveCluster/actions/stop",
+        "positionalArgs": ["db_system_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -11102,16 +12407,37 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11262,13 +12588,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.update_heat_wave_cluster",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "update_heat_wave_cluster",
+        "http": "PUT",
+        "path": "/dbSystems/{dbSystemId}/heatWaveCluster",
+        "positionalArgs": ["db_system_id", "update_heat_wave_cluster_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -11278,16 +12604,56 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_heat_wave_cluster_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_heat_wave_cluster_details",
+          "key": ["shapeName"],
+          "param": "shape_name",
+          "when": "shape_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_heat_wave_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size",
+          "when": "cluster_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_heat_wave_cluster_details",
+          "key": ["isLakehouseEnabled"],
+          "param": "is_lakehouse_enabled",
+          "when": "is_lakehouse_enabled is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11495,13 +12861,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.generate_heat_wave_cluster_memory_estimate",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "generate_heat_wave_cluster_memory_estimate",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/heatWaveClusterMemoryEstimate/actions/generate",
+        "positionalArgs": ["db_system_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -11511,16 +12877,29 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "responseType": "HeatWaveClusterMemoryEstimate",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11675,6 +13054,18 @@
         "responseType": "HeatWaveClusterMemoryEstimate",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12994,6 +14385,78 @@
         "responseType": "list[MaintenanceEvent]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["mysql_version_before_maintenance"],
+          "param": "mysql_version_before_maintenance",
+          "when": "mysql_version_before_maintenance is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["mysql_version_after_maintenance"],
+          "param": "mysql_version_after_maintenance",
+          "when": "mysql_version_after_maintenance is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["maintenance_type"],
+          "param": "maintenance_type",
+          "when": "maintenance_type is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["maintenance_action"],
+          "param": "maintenance_action",
+          "when": "maintenance_action is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["maintenance_status"],
+          "param": "maintenance_status",
+          "when": "maintenance_status is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13284,13 +14747,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.restart_db_system",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "restart_db_system",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/actions/restart",
+        "positionalArgs": ["db_system_id", "restart_db_system_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -13300,16 +14763,44 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "restart_db_system_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "restart_db_system_details",
+          "key": ["shutdownType"],
+          "param": "shutdown_type"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13631,13 +15122,13 @@
       "callback": "services.mysql.src.oci_cli_db_system.generated.dbsystem_cli.generate_db_system_status",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.db_system",
+        "method": "generate_db_system_status",
+        "http": "POST",
+        "path": "/dbSystems/{dbSystemId}/actions/generateDbSystemStatus",
+        "positionalArgs": ["db_system_id", "generate_db_system_status_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "dbSystemId": "db_system_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -13647,16 +15138,52 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "generate_db_system_status_details",
+        "responseType": "DbSystemStatus",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "generate_db_system_status_details",
+          "key": ["gtidSetType"],
+          "param": "gtid_set_type",
+          "when": "gtid_set_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "generate_db_system_status_details",
+          "key": ["gtidSetToApply"],
+          "param": "gtid_set_to_apply",
+          "when": "gtid_set_to_apply is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "generate_db_system_status_details",
+          "key": ["channelIds"],
+          "transform": "parse_json_parameter",
+          "param": "channel_ids",
+          "when": "channel_ids is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13870,6 +15397,18 @@
         "responseType": "DbSystemStatus",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15001,14 +16540,12 @@
       "callback": "services.mysql.src.oci_cli_replicas.generated.replicas_cli.create_replica",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
-        "pathParams": {
-          "workRequestId": "work_request_id"
-        },
+        "client": "mysql.replicas",
+        "method": "create_replica",
+        "http": "POST",
+        "path": "/replicas",
+        "positionalArgs": ["create_replica_details"],
+        "pathParams": {},
         "queryParams": {},
         "headerParams": {
           "accept": {
@@ -15017,16 +16554,76 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
-          },
           "opc-request-id": {
             "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "create_replica_details",
+        "responseType": "Replica",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_replica_details",
+          "key": ["dbSystemId"],
+          "param": "db_system_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_replica_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_replica_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_replica_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_replica_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_replica_details",
+          "key": ["isDeleteProtected"],
+          "param": "is_delete_protected",
+          "when": "is_delete_protected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_replica_details",
+          "key": ["replicaOverrides"],
+          "transform": "parse_json_parameter",
+          "param": "replica_overrides",
+          "when": "replica_overrides is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15272,13 +16869,13 @@
       "callback": "services.mysql.src.oci_cli_replicas.generated.replicas_cli.delete_replica",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.replicas",
+        "method": "delete_replica",
+        "http": "DELETE",
+        "path": "/replicas/{replicaId}",
+        "positionalArgs": ["replica_id"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "replicaId": "replica_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -15288,16 +16885,34 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["replica_id"],
+          "param": "replica_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15493,6 +17108,24 @@
         "responseType": "Replica",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["replica_id"],
+          "param": "replica_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15632,6 +17265,84 @@
         "responseType": "list[ReplicaSummary]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["db_system_id"],
+          "param": "db_system_id",
+          "when": "db_system_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["replica_id"],
+          "param": "replica_id",
+          "when": "replica_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["configuration_id"],
+          "param": "configuration_id",
+          "when": "configuration_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_up_to_date"],
+          "param": "is_up_to_date",
+          "when": "is_up_to_date is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15941,13 +17652,13 @@
       "callback": "services.mysql.src.oci_cli_replicas.generated.replicas_cli.update_replica",
       "kind": "generated",
       "operation": {
-        "client": "mysql.work_requests",
-        "method": "get_work_request",
-        "http": "GET",
-        "path": "/workRequests/{workRequestId}",
-        "positionalArgs": ["work_request_id"],
+        "client": "mysql.replicas",
+        "method": "update_replica",
+        "http": "PUT",
+        "path": "/replicas/{replicaId}",
+        "positionalArgs": ["replica_id", "update_replica_details"],
         "pathParams": {
-          "workRequestId": "work_request_id"
+          "replicaId": "replica_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -15957,16 +17668,80 @@
           "content-type": {
             "value": "application/json"
           },
-          "if-none-match": {
-            "arg": "if_none_match"
+          "if-match": {
+            "arg": "if_match"
           },
           "opc-request-id": {
             "arg": "opc_request_id"
           }
         },
-        "responseType": "WorkRequest",
-        "paginated": false
+        "body": "update_replica_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["replica_id"],
+          "param": "replica_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_replica_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_replica_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_replica_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_replica_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_replica_details",
+          "key": ["isDeleteProtected"],
+          "param": "is_delete_protected",
+          "when": "is_delete_protected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_replica_details",
+          "key": ["replicaOverrides"],
+          "transform": "parse_json_parameter",
+          "param": "replica_overrides",
+          "when": "replica_overrides is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16286,6 +18061,36 @@
         "responseType": "list[ShapeSummary]",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_supported_for"],
+          "param": "is_supported_for",
+          "when": "is_supported_for is not None and len(is_supported_for) > 0"
+        },
+        {
+          "target": "kwarg",
+          "key": ["availability_domain"],
+          "param": "availability_domain",
+          "when": "availability_domain is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["name"],
+          "param": "name",
+          "when": "name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16455,6 +18260,18 @@
         "responseType": "list[VersionSummary]",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16565,6 +18382,24 @@
         },
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16694,6 +18529,24 @@
         "responseType": "WorkRequest",
         "paginated": false
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_none_match"],
+          "param": "if_none_match",
+          "when": "if_none_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16815,6 +18668,48 @@
         "responseType": "list[WorkRequestSummary]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17036,6 +18931,36 @@
         "responseType": "list[WorkRequestError]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17208,6 +19133,36 @@
         "responseType": "list[WorkRequestLogEntry]",
         "paginated": true
       },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["work_request_id"],
+          "param": "work_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -64,7 +64,7 @@ function normalizeRequest(req: CapturedRequest): NormalizedRequest {
   };
 }
 
-const mask = (s: string) =>
+export const mask = (s: string) =>
   OUTPUT_MASKS.reduce((acc, [re, to]) => acc.replace(re, to), s);
 
 export function normalizeRun(run: Run): NormalizedRun {
@@ -74,4 +74,9 @@ export function normalizeRun(run: Run): NormalizedRun {
     exitCode: run.exitCode,
     requests: run.requests.map(normalizeRequest),
   };
+}
+
+/** Re-apply the current output masks to a stored observation (goldens predate new masks). */
+export function remask(run: NormalizedRun): NormalizedRun {
+  return { ...run, stdout: mask(run.stdout), stderr: mask(run.stderr) };
 }

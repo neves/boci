@@ -20,4 +20,9 @@ export const IGNORED_REQUEST_HEADERS: Record<string, string> = {
 /** Regexes applied to stdout and stderr before comparing. */
 export const OUTPUT_MASKS: [RegExp, string, string][] = [
   // [pattern, replacement, reason]
+  [
+    /^\S+\.py:\d+: \w*Warning: [^\n]*\n {2}[^\n]*\n/gm,
+    "",
+    "Python warnings from oci's own bugs (e.g. duplicate --from-json), carrying local install paths; see DIVERGENCES.md",
+  ],
 ];

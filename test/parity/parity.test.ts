@@ -9,7 +9,7 @@ import {
   loadGolden,
   RESULTS_FILE,
 } from "../harness/cases.ts";
-import { normalizeRun } from "../harness/compare.ts";
+import { normalizeRun, remask } from "../harness/compare.ts";
 import { CLIS, runCli } from "../harness/runner.ts";
 
 const cases = await loadCases();
@@ -34,7 +34,9 @@ describe("parity", () => {
       ).toBe(caseHash(c));
       const run = await runCli(CLIS.boci, c.argv, c);
       try {
-        expect(normalizeRun(run)).toEqual(golden?.observed as never);
+        expect(normalizeRun(run)).toEqual(
+          remask(golden?.observed as never) as never,
+        );
         record(c.key, true);
       } catch (e) {
         record(c.key, false);

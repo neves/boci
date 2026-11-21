@@ -49,3 +49,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** reports the invalid `key_file` path through its config error handling, exit 1
 - **Why:** reproducing the interpreter traceback and machine-specific Python paths is not useful; both commands fail before sending a request
 - **State:** accepted
+
+### Any command: connection timeout includes waiting for response headers
+
+- **Invocation:** `oci --connection-timeout 1 os ns get` against a local endpoint that accepts TCP and delays its response headers for 1.5 seconds
+- **Reference CLI:** completes the request because its connection timeout only covers TCP connection establishment
+- **boci:** Bun's fetch abort signal also covers waiting for response headers, so the request times out
+- **Why:** Bun's `fetch` API exposes a request signal but no separate TCP connection timeout. The Bun type declarations also expose no separate connection-timeout option; a preflight socket would not govern the actual fetch connection, proxy, or TLS handshake.
+- **State:** unresolved (tried: AbortSignal around fetch, delayed-response parity reproduction, checked Bun Fetch API types)

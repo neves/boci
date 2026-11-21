@@ -77,7 +77,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Service error mapping: non-2xx → same stderr JSON (`code`, `message`, `status`, `target_service`, …) and exit code.
 - [x] Global option: `--request-id`.
 - [x] Global option: `--debug` (shape only).
-- [ ] Global option: `--connection-timeout`.
+- [~] Global option: `--connection-timeout`.
 - [x] Global option: `--read-timeout`.
 - [ ] Global options: `--max-retries`/`--no-retry`.
 - [ ] External region sources (`~/.oci/regions-config.json`, `OCI_REGION_METADATA`) and realm-specific service params (`{namespaceName+Dot}`) in endpoints.

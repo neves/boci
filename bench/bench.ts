@@ -437,6 +437,8 @@ const lines = [
 const report = lines.join("\n");
 console.log(report);
 
+// A filtered run (--only) is partial: print it, but keep the full saved results.
+if (flags.only) process.exit(0);
 const outDir = join(ROOT, "bench", "results");
 await mkdir(outDir, { recursive: true });
 await Bun.write(join(outDir, "latest.md"), `${report}\n`);

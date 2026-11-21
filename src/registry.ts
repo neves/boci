@@ -5,6 +5,8 @@ import { GENERATED_REQUEST_COVERAGE } from "./generated-request-coverage.ts";
 
 const IMPLEMENTED = new Set<string>([
   "--version",
+  "generate-full-command-json-input",
+  "generate-param-json-input",
   "--query",
   "--output table",
   "--raw-output",

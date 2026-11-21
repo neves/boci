@@ -363,6 +363,43 @@ export async function run(argv: string[]): Promise<void> {
     out(`${commandHelp(commandPath, cmd.helpDoc)}\n`);
     throw new Exit(0);
   }
+  const fullJsonParam = (cmd.params ?? []).find(
+    (p) => p.name === "generate_full_command_json_input",
+  );
+  if (fullJsonParam && parsed.opts[fullJsonParam.name] === true) {
+    const sample: Record<string, unknown> = {};
+    for (const p of cmd.params ?? []) {
+      if (
+        p.kind !== "option" ||
+        p.name.startsWith("generate_") ||
+        p.name === "from_json"
+      )
+        continue;
+      const keyName = p.name.replace(/_([a-z])/g, (_, letter: string) =>
+        letter.toUpperCase(),
+      );
+      sample[keyName] = p.multiple ? ["string"] : "string";
+    }
+    out(`${JSON.stringify(sample, null, 2)}\n`);
+    throw new Exit(0);
+  }
+  const paramJson = parsed.opts.generate_param_json_input;
+  if (typeof paramJson === "string") {
+    const p = (cmd.params ?? []).find(
+      (candidate) => candidate.name.replaceAll("_", "-") === paramJson,
+    );
+    if (
+      !p ||
+      p.typeClass !== "oci_cli.custom_types.cli_complex_type.CliComplexType"
+    ) {
+      err(
+        `Option ${paramJson} is not a recognized complex type, so no example JSON can be produced. Invoke help for this command (--help/-h/-?) to see available documentation on this option\n`,
+      );
+      throw new Exit(0);
+    }
+    out("{}\n");
+    throw new Exit(0);
+  }
   const values: Record<string, unknown> = {};
   for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
     if (parsed.opts[p.name] === undefined) continue;

@@ -67,6 +67,10 @@ def param_spec(p: click.Parameter) -> dict:
         "expose": bool(p.expose_value),
         "eager": bool(p.is_eager),
     }
+    if getattr(p, "is_bool_flag", False):
+        out["isBoolFlag"] = True
+    if getattr(p, "_flag_needs_value", False):
+        out["flagNeedsValue"] = True
     if isinstance(t, click.Choice):
         out["choices"] = list(t.choices)
         out["caseSensitive"] = bool(t.case_sensitive)
@@ -113,6 +117,14 @@ def help_doc(cmd: click.Command, ctx: click.Context) -> dict:
         if rec is not None:
             records.append(list(rec))
     doc = {"usage": " ".join(cmd.collect_usage_pieces(ctx)), "text": text, "records": records}
+    # Parser settings Click derives from the context (see ADR 0003).
+    # (click.Context() alone ignores command.context_settings; make_context applies them.)
+    settings = getattr(cmd, "context_settings", None) or {}
+    doc["parse"] = {
+        "interspersed": bool(settings.get("allow_interspersed_args", ctx.allow_interspersed_args)),
+        "ignoreUnknown": bool(settings.get("ignore_unknown_options", ctx.ignore_unknown_options)),
+        "allowExtra": bool(settings.get("allow_extra_args", ctx.allow_extra_args)),
+    }
     if cmd.epilog:
         doc["epilog"] = inspect.cleandoc(cmd.epilog)
     if cmd.short_help:

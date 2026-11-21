@@ -52,7 +52,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Group help (`oci os --help`, `oci os ns --help`): Click group help with command short-help truncation; stderr, exit 2 (Click's no-subcommand path).
 - [x] Root help (`oci --help`): oci's category-grouped command list and global options; stdout, exit 0.
 - [x] Ship `spec/` inside the compiled binary (today `dist/boci` reads `spec/` from the source tree): per-service embedded files, loaded lazily; keep `--help` within the start-up budget.
-- [ ] Click-compatible parser (ADR 0003): `--opt value`, `--opt=value`, flags, `--x/--no-x`, multiple, short aliases.
+- [x] Click-compatible parser (ADR 0003): `--opt value`, `--opt=value`, flags, `--x/--no-x`, multiple, short aliases. (Port of Click's _OptionParser + difflib suggestions, checked against 1,075 cases from Click's real parser.)
 - [ ] Usage errors: unknown command, unknown option, missing required option — same message and exit code 2.
 - [ ] Missing-command handling: "not implemented yet" error with a distinct exit code; `BOCI_FALLBACK=oci` hands the command to the Reference CLI.
 - [ ] Config file: `--config-file`, `--profile`, `OCI_CLI_PROFILE`, `OCI_CLI_CONFIG_FILE`, `DEFAULT` inheritance, missing-profile/missing-file errors, file-permission warnings, the missing `OCI_API_KEY` key-label warning.

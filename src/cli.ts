@@ -268,9 +268,25 @@ export async function run(argv: string[]): Promise<void> {
     );
   }
 
+  // oci's required check (cli_util._coalesce_param → wrap_exceptions): params marked
+  // required that got no value, in processing order, reported with sys.exit → stderr, 1.
+  // TODO: values from oci_cli_rc, --from-json, and the os/iam service fallbacks.
+  const missing = processingOrder(parsed.order, cmd.params ?? [])
+    .filter((p) => p.required && !p.isFlag && isMissing(parsed.opts[p.name]))
+    .map((p) => p.name.replaceAll("_", "-"));
+  if (missing.length) {
+    err(
+      `${usage(commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
+    );
+    throw new Exit(1);
+  }
+
   err("boci: not implemented yet\n");
   throw new Exit(1);
 }
+
+const isMissing = (v: unknown) =>
+  v === undefined || (Array.isArray(v) && v.length === 0);
 
 /** Root group's registered commands in insertion order (core first, then the loaded service). */
 function rootCommandOrder(index: Index, loaded: Set<string>): string[] {

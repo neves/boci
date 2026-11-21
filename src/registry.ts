@@ -10,6 +10,7 @@ const IMPLEMENTED = new Set<string>([
   "usage:unknown-option",
   "usage:unknown-command",
   "convert",
+  "required",
 ]);
 
 export function isImplemented(key: string): boolean {

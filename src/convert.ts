@@ -5,6 +5,7 @@ import type { ParamSpec } from "./parser.ts";
 export type TypedParam = ParamSpec & {
   type: string;
   typeClass: string;
+  required?: boolean;
   choices?: string[];
   caseSensitive?: boolean;
   range?: {

@@ -25,3 +25,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** prints nothing extra
 - **Why:** it reports a bug in oci's own command definitions and embeds a machine-specific path; no script can rely on it. Masked in `test/harness/masks.ts`.
 - **State:** accepted
+
+### Datetime options: Unix timestamps beyond year 9999
+
+- **Invocation:** `oci database-management diagnosability managed-database list-alert-logs --time-less-than-or-equal-to 99999999999999999999 ...`
+- **Reference CLI:** crashes with a Python `OverflowError: timestamp out of range for platform time_t` traceback, exit 1
+- **boci:** usage error `Value … is not a value Unix time.` (the message oci uses for other unparseable timestamps), exit 2
+- **Why:** reproducing an interpreter traceback is meaningless; the input is invalid either way
+- **State:** accepted

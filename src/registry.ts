@@ -9,6 +9,7 @@ const IMPLEMENTED = new Set<string>([
   "usage",
   "usage:unknown-option",
   "usage:unknown-command",
+  "convert",
 ]);
 
 export function isImplemented(key: string): boolean {

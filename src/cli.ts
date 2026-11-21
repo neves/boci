@@ -3,6 +3,12 @@
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { commandHelp, groupHelp, rootHelp } from "./help/render.ts";
 import { HelpFormatter, helpWidth } from "./help/formatter.ts";
+import {
+  BadParameter,
+  convert,
+  errorHint,
+  processingOrder,
+} from "./convert.ts";
 import { getCloseMatches } from "./difflib.ts";
 import {
   OptionParser,
@@ -96,12 +102,25 @@ export async function run(argv: string[]): Promise<void> {
     if (e instanceof UsageError) showStock(usageFor(e, rootUsage), e.message);
     throw e;
   }
-  // Eager root params, in invocation order. TODO(rung 0): --release-info, --latest-version,
-  // --cli-rc-file, --generate-*-json-input.
-  for (const p of root.order) {
-    if (p.name === "version") {
+  // Root params in Click's processing order: eager first (--version exits here), then type
+  // conversion. Errors still use the stock display: the root callback hasn't run yet.
+  // TODO(rung 0): --release-info, --latest-version, --cli-rc-file, --generate-*-json-input.
+  const rootValues: Record<string, unknown> = {};
+  for (const p of processingOrder(root.order, index.globalParams)) {
+    if (p.name === "version" && root.opts.version !== undefined) {
       out(`${REFERENCE_VERSION}\n`);
       throw new Exit(0);
+    }
+    if (root.opts[p.name] === undefined) continue;
+    try {
+      rootValues[p.name] = convert(p, root.opts[p.name], index.datetime);
+    } catch (e) {
+      if (e instanceof BadParameter)
+        showStock(
+          rootUsage(),
+          `Invalid value for ${errorHint(p)}: ${e.message}`,
+        );
+      throw e;
     }
   }
   const rest = root.args;
@@ -226,6 +245,20 @@ export async function run(argv: string[]): Promise<void> {
     // cli_util.help_callback: eager, prints when the root saw a help flag.
     out(`${commandHelp(commandPath, cmd.helpDoc)}\n`);
     throw new Exit(0);
+  }
+  const values: Record<string, unknown> = {};
+  for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
+    if (parsed.opts[p.name] === undefined) continue;
+    try {
+      values[p.name] = convert(p, parsed.opts[p.name], index.datetime);
+    } catch (e) {
+      if (e instanceof BadParameter)
+        showPatched(
+          usage(commandPath, cmd.helpDoc),
+          `Invalid value for ${errorHint(p)}: ${e.message}`,
+        );
+      throw e;
+    }
   }
   if (parsed.args.length && !cmd.helpDoc.parse.allowExtra) {
     const n = parsed.args.length;

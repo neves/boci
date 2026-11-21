@@ -71,6 +71,10 @@ def param_spec(p: click.Parameter) -> dict:
         out["isBoolFlag"] = True
     if getattr(p, "_flag_needs_value", False):
         out["flagNeedsValue"] = True
+    if isinstance(t, click.types._NumberRangeBase):
+        out["range"] = {"min": t.min, "max": t.max, "minOpen": bool(t.min_open), "maxOpen": bool(t.max_open), "clamp": bool(t.clamp)}
+    if type(t).__name__ == "CliDatetime":
+        out["datetimeRounding"] = t.apply_rounding
     if isinstance(t, click.Choice):
         out["choices"] = list(t.choices)
         out["caseSensitive"] = bool(t.case_sensitive)
@@ -193,6 +197,19 @@ def kind_counts(spec: dict) -> dict:
     return {"generated": kinds.count("generated"), "custom": kinds.count("custom")}
 
 
+def datetime_spec() -> dict:
+    """oci's CliDatetime accepted formats (regex + arrow format + assumed tz) and error text."""
+    from oci_cli.custom_types.cli_datetime import CliDatetime
+
+    return {
+        "formats": [
+            {"format": f["format_string"], "regex": f["regex_pattern"].pattern, "timezone": f["use_timezone"]}
+            for f in CliDatetime.VALID_DATETIME_FORMATS
+        ],
+        "message": CliDatetime.VALID_DATETIME_EXCEPTION_MESSAGE,
+    }
+
+
 def write_json(path: str, data) -> None:
     with open(path, "w") as f:
         json.dump(data, f, indent=1, ensure_ascii=False)
@@ -267,6 +284,7 @@ def main() -> None:
         "rootHelp": root.help,
         "globalParams": [param_spec(p) for p in root.params],
         "rootHelpDoc": help_doc(root, click.Context(root, info_name="oci")),
+        "datetime": datetime_spec(),
         # cli_root.echo_help swaps OCI_HELP for the wrapped OCI_USER_HELP in root help.
         "ociHelp": __import__("oci_cli.cli_root", fromlist=["x"]).OCI_HELP,
         "ociUserHelp": __import__("oci_cli.cli_root", fromlist=["x"]).OCI_USER_HELP,

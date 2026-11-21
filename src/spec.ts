@@ -2,7 +2,8 @@
 // the Reference CLI loads only the service named on the command line.
 import { join } from "node:path";
 
-import type { ParamSpec, ParseSettings } from "./parser.ts";
+import type { DatetimeSpec, TypedParam } from "./convert.ts";
+import type { ParseSettings } from "./parser.ts";
 
 export type HelpDoc = {
   usage: string;
@@ -25,7 +26,7 @@ export type SpecNode = {
   help?: string;
   shortHelp?: string;
   helpDoc: HelpDoc;
-  params?: ParamSpec[];
+  params?: TypedParam[];
 };
 
 export type ServiceSpec = {
@@ -42,7 +43,8 @@ export type Index = {
   ociUserHelp: string;
   nonServiceCommands: string[];
   servicesWithoutCommands: string[];
-  globalParams: ParamSpec[];
+  globalParams: TypedParam[];
+  datetime: DatetimeSpec;
   services: Record<string, { dir: string; title: string; category: string }>;
   root: TreeNode;
 };

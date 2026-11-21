@@ -486,49 +486,73 @@ async function runNamespaceGet(
     }
     throw e;
   }
-  signRequest(req, { keyId, privateKey });
   const connectionTimeout = timeoutSecondsFor(
     rootValues.connection_timeout ?? config.connection_timeout,
   );
   const readTimeout = timeoutSecondsFor(
     rootValues.read_timeout ?? config.read_timeout,
   );
-  const connectionController = new AbortController();
-  const connectionTimer =
-    connectionTimeout === undefined
-      ? undefined
-      : setTimeout(
-          () =>
-            connectionController.abort(
-              new DOMException("Connection timed out", "TimeoutError"),
-            ),
-          connectionTimeout * 1000,
-        );
-  const readTimer =
-    readTimeout === undefined
-      ? undefined
-      : setTimeout(
-          () =>
-            connectionController.abort(
-              new DOMException("Response read timed out", "TimeoutError"),
-            ),
-          readTimeout * 1000,
-        );
+  const maxAttempts =
+    rootValues.no_retry === true
+      ? 1
+      : Math.max(1, Number(rootValues.max_retries) || 8);
   let response: Response;
   let raw: string;
-  try {
-    response = await fetch(req.url, {
-      method: req.method,
-      headers: req.headers,
-      ...(connectionTimer === undefined && readTimer === undefined
-        ? {}
-        : { signal: connectionController.signal }),
-    });
-    if (connectionTimer !== undefined) clearTimeout(connectionTimer);
-    raw = await response.text();
-  } finally {
-    if (connectionTimer !== undefined) clearTimeout(connectionTimer);
-    if (readTimer !== undefined) clearTimeout(readTimer);
+  for (let attempt = 1; ; attempt++) {
+    delete req.headers.date;
+    delete req.headers.authorization;
+    signRequest(req, { keyId, privateKey });
+    const controller = new AbortController();
+    const connectionTimer =
+      connectionTimeout === undefined
+        ? undefined
+        : setTimeout(
+            () =>
+              controller.abort(
+                new DOMException("Connection timed out", "TimeoutError"),
+              ),
+            connectionTimeout * 1000,
+          );
+    const readTimer =
+      readTimeout === undefined
+        ? undefined
+        : setTimeout(
+            () =>
+              controller.abort(
+                new DOMException("Response read timed out", "TimeoutError"),
+              ),
+            readTimeout * 1000,
+          );
+    try {
+      response = await fetch(req.url, {
+        method: req.method,
+        headers: req.headers,
+        ...(connectionTimer === undefined && readTimer === undefined
+          ? {}
+          : { signal: controller.signal }),
+      });
+      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+      raw = await response.text();
+    } catch (e) {
+      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+      if (readTimer !== undefined) clearTimeout(readTimer);
+      if (attempt >= maxAttempts) throw e;
+      const delay = Math.min(
+        1000 * 2 ** (attempt - 1) + Math.random() * 1000,
+        30000,
+      );
+      await Bun.sleep(delay);
+      continue;
+    } finally {
+      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+      if (readTimer !== undefined) clearTimeout(readTimer);
+    }
+    if (attempt >= maxAttempts || !retryableResponse(response, raw)) break;
+    const delay = Math.min(
+      1000 * 2 ** (attempt - 1) + Math.random() * 1000,
+      30000,
+    );
+    await Bun.sleep(delay);
   }
   if (rootValues.debug === true) {
     err(`DEBUG:oci.base_client: Request: ${req.method} ${url}\n`);
@@ -574,6 +598,23 @@ function timeoutSecondsFor(value: unknown): number | undefined {
   const seconds = Number(value);
   if (Number.isFinite(seconds) && seconds > 0) return seconds;
   return undefined;
+}
+
+function retryableResponse(response: Response, raw: string): boolean {
+  if (response.status === 429) return true;
+  if (response.status >= 500 && response.status !== 501) return true;
+  if (response.status !== 409) return false;
+  try {
+    const body: unknown = JSON.parse(raw);
+    return (
+      typeof body === "object" &&
+      body !== null &&
+      "code" in body &&
+      (body.code === "IncorrectState" || body.code === "LockConflict")
+    );
+  } catch {
+    return false;
+  }
 }
 
 function warnFilePermissions(file: string) {

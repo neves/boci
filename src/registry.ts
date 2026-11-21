@@ -20,6 +20,7 @@ const IMPLEMENTED = new Set<string>([
   "debug",
   "read-timeout",
   "no-retry",
+  "max-retries",
 ]);
 
 export function isImplemented(key: string): boolean {

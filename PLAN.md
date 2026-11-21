@@ -90,7 +90,9 @@ DIVERGENCES.md             recorded Divergences
 - [x] Generated GET query parameters, verified with `compute global-image-capability-schema list`.
 - [x] Auto-generate request-only parity cases for all generated GETs in Compute.
 - [x] Auto-generate request-only parity cases for all generated GETs in Object Storage and IAM.
-- [ ] Auto-generate request-only parity cases for generated GETs in the remaining services: one pass with `bun run parity:get-cases --all`, then `bun run golden`. Mark what already passes and fix failures grouped by cause (split into one item per cause if needed). No per-service items.
+- [x] Finish 3,230 passing generated GET request-only cases across remaining services; 194 cases fail in two causes.
+- [ ] Fix generated GET requests missing `opc-retry-token` (request-only parity case setup).
+- [ ] Fix generated GET paths that leave operation parameter placeholders literal instead of substituting values.
 - [ ] Response headers surfaced like the Reference CLI (`etag`, `opc-next-page` in output where applicable).
 - [ ] HEAD and DELETE without body; `--force` and confirmation prompts.
 

@@ -57,3 +57,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** Bun's fetch abort signal also covers waiting for response headers, so the request times out
 - **Why:** Bun's `fetch` API exposes a request signal but no separate TCP connection timeout. The Bun type declarations also expose no separate connection-timeout option; a preflight socket would not govern the actual fetch connection, proxy, or TLS handshake.
 - **State:** unresolved (tried: AbortSignal around fetch, delayed-response parity reproduction, checked Bun Fetch API types)
+
+### Generated GET paths: reported operation placeholder substitution failure not reproduced
+
+- **Invocation:** generated request-only parity cases for `compute console-history get-content` and `data-integration user-defined-function-validation get`
+- **Reference CLI:** goldens substitute operation path parameters with `test-value` in every segment
+- **boci:** the focused parity cases match those goldens; the full generated GET parity run also passes
+- **Why:** the earlier reported failing output was unavailable, and three reproduction attempts did not identify a failing case to fix: `bun test test/parity -t 'generated-get-'` (3424 pass, 0 fail), `bun run spec compute console-history get-content` plus `bun test test/parity -t 'generated-get-compute-console-history-get-content'` (1 pass), and `bun run spec data-integration user-defined-function-validation get` plus `bun test test/parity -t 'generated-get-data-integration-user-defined-function-validation-get'` (1 pass). Keep this unresolved until the original failing case ID or another reproducible failure is available.
+- **State:** unresolved (tried: generated GET parity suite; focused compute and data-integration path-parameter cases)

@@ -730,7 +730,18 @@ async function runGeneratedGet(
   if (rendered === null || (Array.isArray(rendered) && rendered.length === 0)) {
     err("Query returned empty result, no output to show.\n");
   } else {
-    out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
+    const format = rootValues.output ?? "json";
+    const tableValue =
+      rendered &&
+      typeof rendered === "object" &&
+      !Array.isArray(rendered) &&
+      "data" in rendered
+        ? (rendered as Record<string, unknown>).data
+        : rendered;
+    if (format === "table") out(renderTable(tableValue));
+    else if (rootValues.raw_output && typeof rendered === "string")
+      out(`${rendered}\n`);
+    else out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
   }
 }
 
@@ -798,6 +809,38 @@ function mapResponseKeys(value: unknown): unknown {
       ]),
     );
   return value;
+}
+
+function renderTable(value: unknown): string {
+  const rows: unknown[][] = Array.isArray(value)
+    ? value.map((item) => (Array.isArray(item) ? item : [item]))
+    : [Array.isArray(value) ? value : [value]];
+  let headers: string[];
+  if (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value[0] &&
+    typeof value[0] === "object" &&
+    !Array.isArray(value[0])
+  ) {
+    headers = Object.keys(value[0] as Record<string, unknown>);
+    for (let i = 0; i < rows.length; i++)
+      rows[i] = headers.map(
+        (key) => (value[i] as Record<string, unknown>)[key],
+      );
+  } else {
+    const width = rows.reduce((max, row) => Math.max(max, row.length), 0);
+    headers = Array.from({ length: width }, (_, i) => `Column${i + 1}`);
+  }
+  const cell = (v: unknown) =>
+    v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v);
+  const widths = headers.map((header, i) =>
+    Math.max(header.length, ...rows.map((row) => cell(row[i]).length)),
+  );
+  const border = `+${widths.map((w) => `-${"-".repeat(w)}-`).join("+")}+`;
+  const line = (values: string[]) =>
+    `| ${values.map((v, i) => v.padEnd(widths[i] ?? 0)).join(" | ")} |`;
+  return `${border}\n${line(headers)}\n${border}\n${rows.map((row) => line(headers.map((_, i) => cell(row[i])))).join("\n")}${rows.length ? "\n" : ""}${border}\n`;
 }
 
 /** Exit code for "boci doesn't implement this yet" (oci itself uses 0, 1 and 2). */

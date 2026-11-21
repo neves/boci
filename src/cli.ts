@@ -2,6 +2,7 @@
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { readFileSync, statSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import {
   ConfigError,
   DEFAULT_LOCATION,
@@ -432,7 +433,118 @@ export async function run(argv: string[]): Promise<void> {
     );
     return;
   }
+  if (
+    specCmd.kind === "generated" &&
+    ["POST", "PUT", "PATCH"].includes(specCmd.operation?.http ?? "") &&
+    isImplemented(`${name} ${key}`)
+  ) {
+    await runGeneratedWrite(values, rootValues, settings, spec, index, specCmd);
+    return;
+  }
   await notImplemented(argv, commandPath);
+}
+
+async function runGeneratedWrite(
+  values: Record<string, unknown>,
+  rootValues: Record<string, unknown>,
+  settings: RootSettings,
+  spec: ServiceSpec,
+  index: Index,
+  command: ServiceSpec["commands"][string] & {
+    bindings?: Record<string, unknown>[];
+  },
+): Promise<void> {
+  const operation = command.operation as OperationSpec;
+  const config = fromFile(settings.configFile, settings.profile);
+  const client = spec.clients[operation.client] as Record<string, unknown>;
+  const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
+    string | undefined;
+  const region = (rootValues.region ??
+    process.env.OCI_CLI_REGION ??
+    config.region) as string | undefined;
+  const serviceParams: Record<string, string> = {};
+  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const value = values[arg];
+    if (value !== undefined) serviceParams[name] = String(value);
+  }
+  const { resolved } = resolveEndpoint(client, index.regions, {
+    region,
+    endpoint: endpointOpt,
+    serviceParams,
+    realmSpecific: configBool(
+      rootValues.realm_specific_endpoint ??
+        config.realm_specific_service_endpoint_template_enabled,
+    ),
+    dualStack: configBool(
+      rootValues.enable_dual_stack ?? config.dual_stack_endpoint_enabled,
+    ),
+  });
+  let path = operation.path;
+  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const value = values[arg];
+    if (value !== undefined)
+      path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
+  }
+  const body: Record<string, unknown> = {};
+  for (const binding of command.bindings ?? []) {
+    if (binding.target !== "body" || !Array.isArray(binding.key)) continue;
+    const value =
+      typeof binding.param === "string" ? values[binding.param] : binding.value;
+    if (value === undefined) continue;
+    let target = body;
+    for (const part of binding.key.slice(0, -1) as string[]) {
+      const nested = target[part];
+      if (typeof nested !== "object" || nested === null) target[part] = {};
+      target = target[part] as Record<string, unknown>;
+    }
+    if (
+      binding.transform === "parse_json_parameter" &&
+      typeof value === "string"
+    ) {
+      target[binding.key.at(-1) as string] = JSON.parse(value);
+    } else {
+      target[binding.key.at(-1) as string] = value;
+    }
+  }
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+  };
+  for (const [name, item] of Object.entries(operation.headerParams ?? {})) {
+    const arg = (item as { arg?: string }).arg;
+    const value =
+      (item as { value?: string }).value ?? (arg ? values[arg] : undefined);
+    if (value !== undefined) headers[name] = String(value);
+  }
+  if (
+    operation.headerParams?.["opc-retry-token"] &&
+    headers["opc-retry-token"] === undefined
+  )
+    headers["opc-retry-token"] = randomBytes(22).toString("base64url");
+  const requestBody = Object.keys(body).length ? JSON.stringify(body) : "";
+  if (rootValues.no_retry !== true) headers["opc-client-retries"] = "true";
+  const keyPath = expandUser(String(config.key_file));
+  const pem = readFileSync(keyPath, "utf8");
+  const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
+  const req = {
+    method: operation.http,
+    url: `${resolved}${path}`,
+    headers,
+    body: requestBody,
+  };
+  prepareContentLength(req);
+  const privateKey = loadPrivateKey(pem, config.pass_phrase as string | null);
+  signRequest(req, { keyId, privateKey });
+  const response = await fetch(req.url, {
+    method: req.method,
+    headers: req.headers,
+    ...(req.body ? { body: req.body } : {}),
+  });
+  const raw = await response.text();
+  if (!response.ok) {
+    err(`ServiceError: ${raw}\n`);
+    throw new Exit(1);
+  }
+  if (raw) out(`${raw}\n`);
 }
 
 async function runGeneratedGet(

@@ -7,6 +7,7 @@ export const IGNORED_REQUEST_HEADERS: Record<string, string> = {
   host: "fake endpoint port differs per run",
   "opc-request-id": "random per invocation",
   "opc-client-request-id": "random per invocation",
+  "opc-retry-token": "random when the command does not supply one",
   "user-agent": "identifies the client (Oracle-PythonCLI vs boci)",
   "opc-client-info": "identifies the client SDK",
   connection: "transport detail",

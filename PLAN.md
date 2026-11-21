@@ -106,7 +106,8 @@ DIVERGENCES.md             recorded Divergences
 
 ## Rung 4 — Request bodies
 
-- [ ] Simple-typed body flags for generated POST/PUT/PATCH; auto-generated request-only cases for every such command.
+- [x] Simple-typed body flags for generated POST/PUT/PATCH.
+- [ ] Auto-generated request-only cases for every generated POST/PUT/PATCH command.
 - [ ] Complex JSON flags, `file://` and `--from-json`, `--generate-full-command-json-input`, `--generate-param-json-input`.
 - [ ] Polymorphic bodies (discriminator subcommands).
 - [ ] `--if-match`, `--if-none-match`, extra headers.

@@ -1,6 +1,7 @@
 // Which Leaf commands and Engine features boci implements. Parity cases for a key
 // only run once it is listed here (test/parity/parity.test.ts). Grows rung by rung.
 import { GENERATED_GET_COVERAGE } from "./generated-get-coverage.ts";
+import { GENERATED_REQUEST_COVERAGE } from "./generated-request-coverage.ts";
 
 const IMPLEMENTED = new Set<string>([
   "--version",
@@ -31,5 +32,9 @@ const IMPLEMENTED = new Set<string>([
 ]);
 
 export function isImplemented(key: string): boolean {
-  return IMPLEMENTED.has(key) || GENERATED_GET_COVERAGE.has(key);
+  return (
+    IMPLEMENTED.has(key) ||
+    GENERATED_GET_COVERAGE.has(key) ||
+    GENERATED_REQUEST_COVERAGE.has(key)
+  );
 }

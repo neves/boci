@@ -38,7 +38,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Extractor v3b: for each generated leaf, join to its SDK client method: HTTP method, path template, path/query/header params, body param and model, response model, whether it paginates.
 - [x] Extractor v3c: for each generated leaf, map every CLI option to where it lands (path/query/header param or body field with its JSON key and complex type).
 - [x] `bun run status`: reads `spec/`, parity results and this Ladder; prints per-service missing/implemented/verified counts, totals, the engine-feature (Ladder) checklist, and Divergences. Everything starts as missing.
-- [ ] Offline fixtures: generate a throwaway RSA key + `test/fixtures/config` with a fake tenancy/user so both CLIs sign requests with no real credentials.
+- [x] Offline fixtures: generate a throwaway RSA key + `test/fixtures/config` with a fake tenancy/user so both CLIs sign requests with no real credentials.
 - [ ] Harness: fake endpoint (`Bun.serve`) that records every request and serves a canned response; runner that runs `oci` and `boci` with identical argv/env against it; comparator for requests, stdout (masked), stderr error JSON, exit code.
 - [ ] Recorder proxy: forwards to the real OCI endpoint, saves request+response, scrubs tenancy/user OCIDs and namespace. Used only by `bun run parity:live`.
 - [ ] `DIVERGENCES.md` with the entry format and an empty list.
@@ -50,7 +50,7 @@ DIVERGENCES.md             recorded Divergences
 - [ ] Click-compatible parser (ADR 0003): `--opt value`, `--opt=value`, flags, `--x/--no-x`, multiple, short aliases.
 - [ ] Usage errors: unknown command, unknown option, missing required option — same message and exit code 2.
 - [ ] Missing-command handling: "not implemented yet" error with a distinct exit code; `BOCI_FALLBACK=oci` hands the command to the Reference CLI.
-- [ ] Config file: `--config-file`, `--profile`, `OCI_CLI_PROFILE`, `OCI_CLI_CONFIG_FILE`, `DEFAULT` inheritance, missing-profile/missing-file errors, file-permission warnings.
+- [ ] Config file: `--config-file`, `--profile`, `OCI_CLI_PROFILE`, `OCI_CLI_CONFIG_FILE`, `DEFAULT` inheritance, missing-profile/missing-file errors, file-permission warnings, the missing `OCI_API_KEY` key-label warning.
 - [ ] `oci_cli_rc`: default values per command, command aliases, parameter aliases, `--cli-rc-file`.
 
 ## Rung 1 — First signed request

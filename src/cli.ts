@@ -7,6 +7,10 @@ import { parseConfig, sectionItems } from "./configparser.ts";
 import {
   type Rc,
   RC_DEFAULT_LOCATION,
+  aliasRecords,
+  applyParamAliases,
+  badAliasMessages,
+  effectiveAliases,
   loadRc,
   lookupDefault,
   rcDefaults,
@@ -139,18 +143,55 @@ export async function run(argv: string[]): Promise<void> {
   );
   const rest = root.args;
 
+  // populate_parameter_aliases runs inside that eager callback: it shims rc parameter
+  // aliases into every loaded leaf command and the root params (too late for the root
+  // parser of this invocation, but visible in help), reporting problems in red.
+  const loaded = new Set(index.nonServiceCommands);
+  const named = argv.find((a) => a in index.services);
+  if (named && !index.servicesWithoutCommands.includes(named))
+    loaded.add(named);
+  const aliases = effectiveAliases(rc);
+  const hasAliases = Object.values(aliases).some((a) => a.length);
+  const shimmed = new Set(loaded); // services whose commands got the aliases
+  const rootParamsAliased = hasAliases
+    ? applyParamAliases(index.globalParams, aliases)
+    : null;
+  {
+    const messages = badAliasMessages(rc);
+    for (const m of messages) err(`${style(m, "red", process.stderr.isTTY)}\n`);
+    if (hasAliases) {
+      const collisions: string[] = [];
+      for (const service of loaded) {
+        for (const c of Object.values((await loadService(service)).commands)) {
+          for (const m of applyParamAliases(c.params ?? [], aliases).collisions)
+            if (!collisions.includes(m)) collisions.push(m);
+        }
+      }
+      for (const m of rootParamsAliased?.collisions ?? [])
+        if (!collisions.includes(m)) collisions.push(m);
+      if (collisions.length)
+        err(`${style(collisions.join("\n"), "red", process.stderr.isTTY)}\n`);
+    }
+  }
+  const rootHelpDoc = rootParamsAliased
+    ? {
+        ...index.rootHelpDoc,
+        records: aliasRecords(
+          index.rootHelpDoc.records,
+          index.globalParams,
+          rootParamsAliased.params,
+        ),
+      }
+    : index.rootHelpDoc;
+
   // 2. No subcommand: invoke_without_command → root callback → echo_help.
   if (rest.length === 0) {
-    await printRootHelp(index);
+    await printRootHelp(index, rootHelpDoc);
     throw new Exit(0);
   }
 
   // 3. Resolve the service. Only the core commands and the first service named anywhere
   //    in argv are registered (dynamic_loader.load_service_from_command).
-  const loaded = new Set(index.nonServiceCommands);
-  const named = argv.find((a) => a in index.services);
-  if (named && !index.servicesWithoutCommands.includes(named))
-    loaded.add(named);
   const typedName = rest[0] as string;
   const rootAlias = resolveAlias(rc, "oci", typedName, true, (n) => {
     // An alias target is loaded on demand (dynamic_loader.load_service).
@@ -266,8 +307,27 @@ export async function run(argv: string[]): Promise<void> {
 
   // 6. Leaf: parse, eager help, then extra-argument check.
   const key = canon.slice(1).join(" ");
-  const cmd = spec.commands[key];
-  if (!cmd) throw new Error(`boci: spec has no command ${path.join(" ")}`);
+  const specCmd = spec.commands[key];
+  if (!specCmd) throw new Error(`boci: spec has no command ${path.join(" ")}`);
+  // rc parameter aliases apply to commands of services loaded before the root callback.
+  const aliased =
+    hasAliases && shimmed.has(name)
+      ? applyParamAliases(specCmd.params ?? [], aliases).params
+      : null;
+  const cmd = aliased
+    ? {
+        ...specCmd,
+        params: aliased,
+        helpDoc: {
+          ...specCmd.helpDoc,
+          records: aliasRecords(
+            specCmd.helpDoc.records,
+            specCmd.params ?? [],
+            aliased,
+          ),
+        },
+      }
+    : specCmd;
   const commandPath = [PROG, ...path].join(" ");
   let parsed: ReturnType<OptionParser["parse"]>;
   try {
@@ -382,7 +442,7 @@ function children(spec: ServiceSpec, node: TreeNode, sub: string[]) {
   });
 }
 
-async function printRootHelp(index: Index) {
+async function printRootHelp(index: Index, doc: HelpDoc) {
   const core = await Promise.all(
     index.nonServiceCommands.map(async (n) => {
       const top = (await loadService(n)).top;
@@ -395,7 +455,7 @@ async function printRootHelp(index: Index) {
     }),
   );
   out(
-    `${rootHelp(index.rootHelpDoc, core, index.services, index.ociHelp, index.ociUserHelp)}\n`,
+    `${rootHelp(doc, core, index.services, index.ociHelp, index.ociUserHelp)}\n`,
   );
 }
 

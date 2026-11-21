@@ -130,3 +130,96 @@ export function lookupDefault(
   }
   return undefined;
 }
+
+/** cli_root.populate_parameter_aliases: messages for single-dash aliases longer than one letter. */
+export function badAliasMessages(rc: Rc): string[] {
+  const out: string[] = [];
+  for (const aliases of Object.values(rc.parameterAliases)) {
+    for (const alias of aliases) {
+      if (!alias.startsWith("--") && alias.length > 2) {
+        out.push(
+          `Could not create an alias for ${alias} as aliases need to be prefixed with '--' or be a single dash followed by a single letter. For example: --alias, -a`,
+        );
+      }
+    }
+  }
+  return out;
+}
+
+/** parameter_alias.remove_redundant_aliases: drop aliases equal to their canonical option. */
+export function effectiveAliases(rc: Rc): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(rc.parameterAliases).map(([canonical, aliases]) => [
+      canonical,
+      aliases.filter((a) => a !== canonical),
+    ]),
+  );
+}
+
+type AliasableParam = { name: string; opts: string[] };
+
+/**
+ * parameter_alias.add_alias_to_command_params: extend each param's opts with the aliases of
+ * any of its options (including aliases added on the way), unless another param of the
+ * same command already uses that name. Returns new params and the collision messages.
+ */
+export function applyParamAliases<T extends AliasableParam>(
+  params: T[],
+  aliases: Record<string, string[]>,
+): { params: T[]; collisions: string[] } {
+  const copies = params.map((p) => ({ ...p, opts: [...p.opts] }));
+  const collisions: string[] = [];
+  for (const param of copies) {
+    const opts = param.opts;
+    for (let i = 0; i < opts.length; i++) {
+      const extra = aliases[opts[i] as string];
+      if (!extra) continue;
+      const clash = copies.find(
+        (other) =>
+          other.name !== param.name &&
+          extra.some((a) => other.opts.includes(a)),
+      );
+      if (clash) {
+        const a = extra.find((x) => clash.opts.includes(x)) as string;
+        const msg = `Could not add alias ${a} to param ${opts[0]} as it conflicts with existing options for parameter ${clash.opts[0]}`;
+        if (!collisions.includes(msg)) collisions.push(msg);
+      } else opts.push(...extra);
+    }
+  }
+  return { params: copies, collisions };
+}
+
+/** click.formatting.join_options: options sorted by prefix length (stable), ", "-joined. */
+export function joinOptions(opts: string[]): string {
+  const prefixLen = (o: string) =>
+    /^[\p{L}\p{N}]/u.test(o) ? 0 : o[1] === o[0] ? 2 : 1;
+  return opts
+    .map((o, i) => ({ o, i, len: prefixLen(o) }))
+    .sort((a, b) => a.len - b.len || a.i - b.i)
+    .map(({ o }) => o)
+    .join(", ");
+}
+
+/** Rewrite help-record terms for params whose option list grew. */
+export function aliasRecords(
+  records: [string, string][],
+  before: AliasableParam[],
+  after: AliasableParam[],
+): [string, string][] {
+  const changes = before
+    .map(
+      (p, i) =>
+        [
+          joinOptions(p.opts),
+          joinOptions((after[i] as AliasableParam).opts),
+        ] as const,
+    )
+    .filter(([a, b]) => a !== b);
+  return records.map(([term, help]) => {
+    for (const [old, now] of changes) {
+      if (term === old || term.startsWith(`${old} `))
+        return [now + term.slice(old.length), help] as [string, string];
+    }
+    return [term, help];
+  });
+}

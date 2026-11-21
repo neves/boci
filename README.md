@@ -4,10 +4,10 @@
 
 **The OCI CLI, without the wait.**
 
-boci is a drop-in replacement for Oracle's [`oci` CLI](https://github.com/oracle/oci-cli), built on [Bun](https://bun.sh). It has the same commands, the same flags and the same output, with a start-up measured **30× faster**. Swap `oci` for `boci` and your scripts keep working.
+boci is a drop-in replacement for Oracle's [`oci` CLI](https://github.com/oracle/oci-cli), built on [Bun](https://bun.sh). It has the same commands, the same flags and the same output, and it starts **32× faster** (13 ms vs 416 ms for `--version`). Swap `oci` for `boci` and your scripts keep working.
 
 > [!WARNING]
-> **Early development.** boci is being built in the open and can't run commands yet. See [Progress](#progress).
+> **Early development.** boci can't call OCI yet. Help, argument parsing, usage errors and config handling already match `oci` byte for byte. See [Progress](#progress).
 
 - One static binary
 - No Python, no venv
@@ -19,31 +19,31 @@ Homepage: [`site/index.html`](site/index.html)
 
 Before `oci` sends a single request, Python has to start and import the whole CLI package. That costs over 400 ms on every call, and it adds up in scripts.
 
-|                                            |                  boci |                  oci |              |
-| ------------------------------------------ | --------------------: | -------------------: | ------------ |
-| Start-up: launch the CLI and load its code |             **14 ms** |               419 ms | 30× faster   |
-| Peak memory at start-up                    |             **44 MB** |                68 MB | 35% less     |
-| Install size                               | **104 MB** (one file) | 339 MB (Python venv) | 3.3× smaller |
+|                           |                  boci |                  oci |              |
+| ------------------------- | --------------------: | -------------------: | ------------ |
+| Start-up (`--version`)    |             **13 ms** |               416 ms | 32× faster   |
+| Peak memory (`--version`) |             **50 MB** |                69 MB | 28% less     |
+| Install size              | **106 MB** (one file) | 465 MB (Python venv) | 4.4× smaller |
 
 Where `oci`'s time goes today (median of 10 runs). Offline rows use a local fake endpoint, so they measure CLI overhead only:
 
-| Command                                |     oci | of which start-up | boci   |
-| -------------------------------------- | ------: | ----------------: | ------ |
-| `oci --version`                        |  417 ms |              100% | coming |
-| `oci --help`                           |  435 ms |               96% | coming |
-| `oci os --help`                        |  456 ms |               92% | coming |
-| `oci compute instance launch --help`   |  727 ms |               58% | coming |
-| usage error (unknown flag)             |  455 ms |               92% | coming |
-| `oci os ns get`                        |  494 ms |               85% | coming |
-| `oci iam region list`                  |  476 ms |               88% | coming |
-| `oci os bucket list --all` (20 pages)  |  593 ms |               71% | coming |
-| `oci compute instance list` (5k items) | 1493 ms |               28% | coming |
-| … `--query` (5k items)                 | 1286 ms |               33% | coming |
-| … `--output table` (5k items)          | 1334 ms |               31% | coming |
-| live: `oci os ns get`                  |  569 ms |               74% | coming |
-| live: `oci iam region list`            |  669 ms |               63% | coming |
+| Command                                |     oci | of which start-up | boci            |
+| -------------------------------------- | ------: | ----------------: | --------------- |
+| `oci --version`                        |  416 ms |              100% | **13 ms** (32×) |
+| `oci --help`                           |  434 ms |               96% | **21 ms** (21×) |
+| `oci os --help`                        |  454 ms |               92% | **18 ms** (25×) |
+| `oci compute instance launch --help`   |  723 ms |               58% | **26 ms** (28×) |
+| usage error (unknown flag)             |  456 ms |               91% | **18 ms** (25×) |
+| `oci os ns get`                        |  493 ms |               84% | coming          |
+| `oci iam region list`                  |  477 ms |               87% | coming          |
+| `oci os bucket list --all` (20 pages)  |  592 ms |               70% | coming          |
+| `oci compute instance list` (5k items) | 1480 ms |               28% | coming          |
+| … `--query` (5k items)                 | 1284 ms |               32% | coming          |
+| … `--output table` (5k items)          | 1332 ms |               31% | coming          |
+| live: `oci os ns get`                  |  572 ms |               73% | coming          |
+| live: `oci iam region list`            |  631 ms |               66% | coming          |
 
-Measured on an Intel Core i3-7100 (4 threads), Linux, oci-cli 3.96.3 on Python 3.12, Bun 1.4.5. Peak memory is taken through a tiny C launcher so the parent process doesn't inflate it. Reproduce with `bun run bench`, or `bun run bench:live` to add real API calls. Results are written to [`bench/results/latest.md`](bench/results/latest.md). The boci column fills in as each command lands.
+Start-up share = oci's own start-up (416 ms) divided by the command's total. Measured on an Intel Core i3-7100 (4 threads), Linux, oci-cli 3.96.3 on Python 3.12, Bun 1.4.5. Peak memory is taken through a tiny C launcher so the parent process doesn't inflate it. Reproduce with `bun run bench`, or `bun run bench:live` to add real API calls. Results are written to [`bench/results/latest.md`](bench/results/latest.md). The boci column fills in as each command lands.
 
 ## Drop-in
 
@@ -83,17 +83,17 @@ $ bun run status --service os
 
 Snapshot: **0 of 9,372 commands verified.**
 
-| Rung                                             | Done |
-| ------------------------------------------------ | ---: |
-| Foundations: extractor, status, test harness     | 8/13 |
-| Offline: version, help, parser, config           |  0/7 |
-| First signed request: `os ns get`                |  0/5 |
-| Generated reads (GET)                            |  0/3 |
-| Lists, pagination, `--query`, tables             |  0/4 |
-| Request bodies and writes                        |  0/5 |
-| Waiters: `--wait-for-state`                      |  0/2 |
-| Other auth methods                               |  0/4 |
-| Hand-written commands, interactive mode, Windows |  0/6 |
+| Rung                                             |  Done |
+| ------------------------------------------------ | ----: |
+| Foundations: extractor, status, test harness     | 13/13 |
+| Offline: version, help, parser, config, rc file  | 15/15 |
+| First signed request: `os ns get`                |   2/8 |
+| Generated reads (GET)                            |   0/3 |
+| Lists, pagination, `--query`, tables             |   0/5 |
+| Request bodies and writes                        |   0/5 |
+| Waiters: `--wait-for-state`                      |   0/2 |
+| Other auth methods                               |   0/4 |
+| Hand-written commands, interactive mode, Windows |   0/6 |
 
 ## Install
 
@@ -116,7 +116,7 @@ $ boci os ns get --profile my-profile
 # or make it the default, scripts unchanged
 $ alias oci=boci
 
-# planned: hand unimplemented commands to the real oci
+# hand commands boci doesn't implement yet to the real oci (otherwise: exit code 3)
 $ export BOCI_FALLBACK=oci
 ```
 
@@ -144,8 +144,8 @@ That's the point of the parity tests: the same invocation should produce the sam
 **Why Bun?**
 Bun compiles TypeScript into one self-contained executable that starts in milliseconds, with fast built-in crypto, HTTP and JSON. boci also skips the OCI SDK and signs requests itself, so there's very little to load.
 
-**Why is the binary 104 MB?**
-Most of it is the Bun runtime, which every compiled Bun app embeds. It's still one file, a third of the size of the Python install, with nothing else to set up.
+**Why is the binary 106 MB?**
+Most of it is the Bun runtime, which every compiled Bun app embeds. The command data for all 9,372 commands adds only 2.3 MB compressed. It's still one file, under a quarter of the size of the Python install, with nothing else to set up.
 
 **Which oci version does boci match?**
 oci-cli 3.96.3. Moving to a newer oci release regenerates the command data and shows exactly what changed.

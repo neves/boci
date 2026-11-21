@@ -66,7 +66,7 @@ DIVERGENCES.md             recorded Divergences
 ## Rung 1 — First signed request
 
 - [x] Start-up: split the runtime index so `--version`/root parsing reads only what it needs (the command tree per service lives with the service). Target `--version` ≤ 15 ms and ≤ 50 MB RSS with the compiled binary (now 27 ms / 57 MB).
-- [ ] Refresh README.md and site/index.html numbers from `bench/results/latest.json` (help and usage errors are now measured).
+- [x] Refresh README.md and site/index.html numbers from `bench/results/latest.json` (help and usage errors are now measured).
 - [ ] API-key request signer (ADR 0002), verified byte-for-byte against the Reference CLI's signature over the fake endpoint.
 - [ ] Region → endpoint resolution (region, realm, `--region`, `--endpoint`, `OCI_CLI_REGION`).
 - [ ] `boci os ns get` — request-only parity, then live parity confirmed once with the `.env.test` profile.

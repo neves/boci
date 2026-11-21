@@ -20,6 +20,7 @@ export type ParityCase = {
   stdin?: string;
   env?: Record<string, string>;
   config?: string;
+  sandbox?: { keyLabel?: boolean };
 };
 
 export type Golden = {

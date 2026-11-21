@@ -37,7 +37,12 @@ def node(cmd: click.Command, name: str) -> dict:
     return out
 
 
+HOME = os.path.expanduser("~")
+
+
 def jsonable(value):
+    if isinstance(value, str) and HOME and (value == HOME or value.startswith(HOME + os.sep)):
+        return "~" + value[len(HOME):]  # defaults expanded at import time; keep them portable
     if value is None or isinstance(value, (bool, int, float, str)):
         return value
     if isinstance(value, (list, tuple)):

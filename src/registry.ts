@@ -11,6 +11,7 @@ const IMPLEMENTED = new Set<string>([
   "usage:unknown-command",
   "convert",
   "required",
+  "root-callback",
 ]);
 
 export function isImplemented(key: string): boolean {

@@ -57,7 +57,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Value conversion errors: Click types (Choice, INT, FLOAT, BOOL, File, oci custom types) with Click's messages, for root and leaf options.
 - [x] Missing required options: oci's own check (`Missing option(s) --x.` with usage, stderr, exit 1), after defaults from `oci_cli_rc`/`--from-json` are considered.
 - [x] Missing-command handling: "not implemented yet" error with a distinct exit code; `BOCI_FALLBACK=oci` hands the command to the Reference CLI.
-- [ ] Config file: `--config-file`, `--profile`, `OCI_CLI_PROFILE`, `OCI_CLI_CONFIG_FILE`, `DEFAULT` inheritance, missing-profile/missing-file errors, file-permission warnings, the missing `OCI_API_KEY` key-label warning.
+- [x] Config file: configparser + `oci.config.from_file` ports (76 fixtures from oci itself), `--config-file`/`OCI_CLI_CONFIG_FILE`, `--profile`/`OCI_CLI_PROFILE`, `OCI_CLI_AUTH`, DEFAULT inheritance, the `OCI_API_KEY` key-label warning (8 parity cases). File-permission warnings and config-error display happen when the client is built → rung 1.
 - [ ] `oci_cli_rc`: default values per command, command aliases, parameter aliases, `--cli-rc-file`.
 
 ## Rung 1 — First signed request
@@ -65,6 +65,7 @@ DIVERGENCES.md             recorded Divergences
 - [ ] API-key request signer (ADR 0002), verified byte-for-byte against the Reference CLI's signature over the fake endpoint.
 - [ ] Region → endpoint resolution (region, realm, `--region`, `--endpoint`, `OCI_CLI_REGION`).
 - [ ] `boci os ns get` — request-only parity, then live parity confirmed once with the `.env.test` profile.
+- [ ] Client build errors and warnings: config file/profile not found, invalid key file, file-permission warnings (config and key), as oci prints them when executing.
 - [ ] Service error mapping: non-2xx → same stderr JSON (`code`, `message`, `status`, `target_service`, …) and exit code.
 - [ ] Global options: `--request-id`, `--debug` (shape only), `--connection-timeout`, `--read-timeout`, `--max-retries`/`--no-retry`.
 

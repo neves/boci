@@ -1,6 +1,9 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
+import { readFileSync } from "node:fs";
+import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
+import { parseConfig, sectionItems } from "./configparser.ts";
 import { commandHelp, groupHelp, rootHelp } from "./help/render.ts";
 import { HelpFormatter, helpWidth } from "./help/formatter.ts";
 import {
@@ -164,6 +167,8 @@ export async function run(argv: string[]): Promise<void> {
       "The option --max-retries is not applicable when using the --no-retry flag.",
     );
   }
+  const settings = resolveRootSettings(rootValues, rootUsage);
+  if (name !== "profile") checkKeyForSecurity(settings);
   const helpRequested = root.opts.help === true;
 
   // 5. Walk groups down to the leaf.
@@ -354,3 +359,104 @@ async function printRootHelp(index: Index) {
 }
 
 export type { ParamSpec };
+
+// ---------------------------------------------------------------- root callback
+
+const AUTH_CHOICES = [
+  "api_key",
+  "instance_principal",
+  "security_token",
+  "instance_obo_user",
+  "resource_principal",
+  "oke_workload_identity",
+  "pkcs11",
+];
+
+export type RootSettings = {
+  configFile: string;
+  profile: string;
+  auth: string | null;
+};
+
+/** cli_root.cli: config file (OCI_CLI_CONFIG_FILE), profile (OCI_CLI_PROFILE), auth (OCI_CLI_AUTH).
+ * TODO(rung 0, oci_cli_rc): default_profile from the rc file's settings. */
+function resolveRootSettings(
+  values: Record<string, unknown>,
+  rootUsage: () => string,
+): RootSettings {
+  const env = process.env;
+  let configFile =
+    (values.config_file as string | undefined) ?? DEFAULT_LOCATION;
+  // read_values_from_env: only when not given or equal to the default.
+  if (configFile === DEFAULT_LOCATION && env.OCI_CLI_CONFIG_FILE)
+    configFile = env.OCI_CLI_CONFIG_FILE;
+  const profile =
+    (values.profile as string | undefined) ??
+    env.OCI_CLI_PROFILE ??
+    DEFAULT_PROFILE;
+  let auth = (values.auth as string | undefined) ?? null;
+  if (auth === null && env.OCI_CLI_AUTH !== undefined) {
+    if (!AUTH_CHOICES.includes(env.OCI_CLI_AUTH)) {
+      showPatched(
+        rootUsage(),
+        `Invalid value for OCI_CLI_AUTH: invalid choice: ${env.OCI_CLI_AUTH}. (choose from ${AUTH_CHOICES.join(", ")})`,
+      );
+    }
+    auth = env.OCI_CLI_AUTH;
+  }
+  return { configFile, profile, auth };
+}
+
+/** cli_root.check_key_for_security: warn when the API key lacks the OCI_API_KEY label. */
+function checkKeyForSecurity(s: RootSettings) {
+  if (s.auth !== null && s.auth !== "api_key") return;
+  let keyFile = keyFileFor(s.configFile, s.profile);
+  if (process.env.OCI_CLI_KEY_FILE !== undefined)
+    keyFile = process.env.OCI_CLI_KEY_FILE;
+  if (
+    (process.env.SUPPRESS_LABEL_WARNING ?? "").toLowerCase() === "true" ||
+    !keyFile
+  )
+    return;
+  let content: string;
+  try {
+    content = readFileSync(keyFile, "utf8");
+  } catch {
+    return; // oci crashes here (see DIVERGENCES.md)
+  }
+  if (content.replace(/\s+$/u, "").endsWith("OCI_API_KEY")) return;
+  const message =
+    `Warning: To increase security of your API key located at ${keyFile}, append an extra line with 'OCI_API_KEY' at the end. ` +
+    "For more information, refer to https://docs.oracle.com/iaas/Content/API/Concepts/apisigningkey.htm. " +
+    "To suppress the warning, set the env variable SUPPRESS_LABEL_WARNING=True";
+  err(`${style(message, "yellow", process.stderr.isTTY)}\n`);
+}
+
+/** cli_root.get_key_file: configparser read of the config (missing file → none). */
+function keyFileFor(configFile: string, profile: string): string | null {
+  const path = expandUser(configFile);
+  let text: string;
+  try {
+    text = readFileSync(path, "utf8");
+  } catch {
+    return null;
+  }
+  try {
+    const items = sectionItems(parseConfig(text, path), profile);
+    const keyFile = items?.get("key_file");
+    return keyFile ? expandUser(keyFile) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** click.style for a foreground colour; click.echo strips it when not writing to a TTY. */
+function style(
+  text: string,
+  color: "yellow" | "red",
+  tty: boolean | undefined,
+): string {
+  if (!tty) return text;
+  const code = { yellow: 33, red: 31 }[color];
+  return `\x1b[${code}m${text}\x1b[0m`;
+}

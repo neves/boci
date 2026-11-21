@@ -7,7 +7,7 @@ import {
   type Reply,
   startFakeEndpoint,
 } from "./fake-endpoint.ts";
-import { createSandbox } from "./sandbox.ts";
+import { createSandbox, type SandboxOptions } from "./sandbox.ts";
 
 const ROOT = join(import.meta.dir, "..", "..");
 
@@ -33,6 +33,7 @@ export type RunOptions = {
   env?: Record<string, string>;
   /** Extra lines appended to the sandbox config file. */
   config?: string;
+  sandbox?: SandboxOptions;
 };
 
 export async function runCli(
@@ -40,7 +41,7 @@ export async function runCli(
   argv: string[],
   opts: RunOptions = {},
 ): Promise<Run> {
-  await using sb = await createSandbox(opts.config);
+  await using sb = await createSandbox(opts.config, opts.sandbox);
   using fake = startFakeEndpoint(opts.replies);
   const args = argv.map((a) =>
     a.replaceAll("{endpoint}", fake.url).replaceAll("{config}", sb.configFile),

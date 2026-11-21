@@ -37,13 +37,25 @@ export type Sandbox = {
   [Symbol.asyncDispose](): Promise<void>;
 };
 
-export async function createSandbox(extraConfig = ""): Promise<Sandbox> {
+export type SandboxOptions = {
+  /** false: write the API key without the trailing OCI_API_KEY label line. */
+  keyLabel?: boolean;
+};
+
+export async function createSandbox(
+  extraConfig = "",
+  options: SandboxOptions = {},
+): Promise<Sandbox> {
   const home = await mkdtemp(join(tmpdir(), "boci-sandbox-"));
   const dir = join(home, ".oci");
   await mkdir(dir, { mode: 0o700 });
   const keyFile = join(dir, "key.pem");
   const configFile = join(dir, "config");
-  await Bun.write(keyFile, Bun.file(KEY_SOURCE));
+  const key = await Bun.file(KEY_SOURCE).text();
+  await Bun.write(
+    keyFile,
+    options.keyLabel === false ? key.replace(/OCI_API_KEY\s*$/, "") : key,
+  );
   await Bun.write(
     configFile,
     `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await fingerprint(keyFile)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,

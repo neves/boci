@@ -33,3 +33,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** usage error `Value … is not a value Unix time.` (the message oci uses for other unparseable timestamps), exit 2
 - **Why:** reproducing an interpreter traceback is meaningless; the input is invalid either way
 - **State:** accepted
+
+### Any command: OCI_CLI_KEY_FILE pointing to a missing file
+
+- **Invocation:** `OCI_CLI_KEY_FILE=/nonexistent/key.pem oci compute instance list ...`
+- **Reference CLI:** crashes in the key-label check with a Python `FileNotFoundError` traceback, exit 1
+- **boci:** skips the label check and carries on (the missing key is reported when signing needs it)
+- **Why:** reproducing an interpreter traceback is meaningless
+- **State:** accepted

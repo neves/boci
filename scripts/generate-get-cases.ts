@@ -98,6 +98,7 @@ for (const service of services) {
       if (param.isFlag !== true) argv.push(sample(param));
     }
     argv.push("--endpoint", "{endpoint}");
+    argv.push("--opc-retry-token", "{opc-retry-token}");
     generated.push({
       id: `generated-get-${service}-${command.replaceAll(" ", "-")}`,
       key,

@@ -108,7 +108,7 @@ DIVERGENCES.md             recorded Divergences
 
 - [x] Simple-typed body flags for generated POST/PUT/PATCH.
 - [x] Auto-generated request-only cases for every generated POST/PUT/PATCH command.
-- [ ] Fix generated request query/header mismatches (missing query args and Log Analytics `Expect: 100-continue`).
+- [x] Fix generated request query/header mismatches (missing query args and Log Analytics `Expect: 100-continue`).
 - [ ] Fix generated request signature mismatches for special PUT body shapes.
 - [ ] Complex JSON flags, `file://` and `--from-json`, `--generate-full-command-json-input`, `--generate-param-json-input`.
 - [ ] Polymorphic bodies (discriminator subcommands).

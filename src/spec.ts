@@ -4,6 +4,15 @@ import { join } from "node:path";
 
 import type { DatetimeSpec, TypedParam } from "./convert.ts";
 import type { ParseSettings } from "./parser.ts";
+import type { RegionsSpec, ClientInfo } from "./endpoint.ts";
+
+export type OperationSpec = {
+  client: string;
+  method: string;
+  http: string;
+  path: string;
+  queryParams: Record<string, { arg?: string }>;
+};
 
 export type HelpDoc = {
   usage: string;
@@ -34,7 +43,11 @@ export type ServiceSpec = {
   service: string;
   top: SpecNode;
   groups: Record<string, SpecNode>;
-  commands: Record<string, SpecNode & { kind: "generated" | "custom" }>;
+  commands: Record<
+    string,
+    SpecNode & { kind: "generated" | "custom"; operation?: OperationSpec }
+  >;
+  clients: Record<string, ClientInfo>;
 };
 
 export type Index = {
@@ -47,6 +60,7 @@ export type Index = {
   globalParams: TypedParam[];
   datetime: DatetimeSpec;
   services: Record<string, { dir: string; title: string; category: string }>;
+  regions: RegionsSpec;
 };
 
 const SPEC_DIR = join(import.meta.dir, "..", "spec");

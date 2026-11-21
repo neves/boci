@@ -16,6 +16,7 @@ const IMPLEMENTED = new Set<string>([
   "rc-defaults",
   "rc-aliases",
   "rc-param-aliases",
+  "os ns get",
 ]);
 
 export function isImplemented(key: string): boolean {

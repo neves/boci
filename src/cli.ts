@@ -2,7 +2,12 @@
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { readFileSync } from "node:fs";
-import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
+import {
+  DEFAULT_LOCATION,
+  DEFAULT_PROFILE,
+  expandUser,
+  fromFile,
+} from "./config.ts";
 import { parseConfig, sectionItems } from "./configparser.ts";
 import {
   type Rc,
@@ -40,6 +45,8 @@ import {
   serviceTree,
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
+import { resolveEndpoint } from "./endpoint.ts";
+import { loadPrivateKey, prepareContentLength, signRequest } from "./signer.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -387,7 +394,85 @@ export async function run(argv: string[]): Promise<void> {
     throw new Exit(1);
   }
 
+  if (key === "ns get" && name === "os") {
+    await runNamespaceGet(values, rootValues, settings, spec, index);
+    return;
+  }
   await notImplemented(argv, commandPath);
+}
+
+async function runNamespaceGet(
+  values: Record<string, unknown>,
+  rootValues: Record<string, unknown>,
+  settings: RootSettings,
+  spec: ServiceSpec,
+  index: Index,
+): Promise<void> {
+  const config = fromFile(settings.configFile, settings.profile);
+  const operation = spec.commands["ns get"]?.operation;
+  if (!operation) throw new Error("boci: missing os ns get operation spec");
+  const client = spec.clients[operation.client] as Record<string, unknown>;
+  const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
+    string | undefined;
+  const region = (rootValues.region ??
+    process.env.OCI_CLI_REGION ??
+    config.region) as string | undefined;
+  const { resolved } = resolveEndpoint(client, index.regions, {
+    region,
+    endpoint: endpointOpt,
+    realmSpecific: configBool(
+      values.realm_specific_endpoint ??
+        config.realm_specific_service_endpoint_template_enabled,
+    ),
+    dualStack: configBool(
+      values.enable_dual_stack ?? config.dual_stack_endpoint_enabled,
+    ),
+  });
+  const url = new URL(`${resolved}${operation.path}`);
+  if (values.compartment_id !== undefined)
+    url.searchParams.set("compartmentId", String(values.compartment_id));
+  const headers: Record<string, string> = {
+    accept: "application/json",
+    "content-type": "application/json",
+    "opc-client-retries": "true",
+  };
+  const keyPath = expandUser(String(config.key_file));
+  const pem = readFileSync(keyPath, "utf8");
+  const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
+  const req = { method: "GET", url: url.toString(), headers, body: "" };
+  prepareContentLength(req);
+  signRequest(req, {
+    keyId,
+    privateKey: loadPrivateKey(pem, config.pass_phrase as string | null),
+  });
+  const response = await fetch(req.url, {
+    method: req.method,
+    headers: req.headers,
+  });
+  const raw = await response.text();
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    value = raw;
+  }
+  out(`${JSON.stringify(sortJson({ data: value }), null, 2)}\n`);
+}
+
+function configBool(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+function sortJson(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortJson);
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([k, v]) => [k, sortJson(v)]),
+    );
+  return value;
 }
 
 /** Exit code for "boci doesn't implement this yet" (oci itself uses 0, 1 and 2). */

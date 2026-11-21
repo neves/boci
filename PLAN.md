@@ -69,7 +69,8 @@ DIVERGENCES.md             recorded Divergences
 - [x] Refresh README.md and site/index.html numbers from `bench/results/latest.json` (help and usage errors are now measured).
 - [x] API-key request signer (ADR 0002), verified byte-for-byte against the Reference CLI's signature over the fake endpoint.
 - [x] Region → endpoint resolution: port of oci.regions + BaseClient endpoint logic (short codes, realms, domain-style regions, `OCI_DEFAULT_REALM`, realm-specific templates, `{dualStack?…}` options, base paths, `--endpoint`), 1,800 fixtures from real SDK clients. CLI region precedence (`--region`, `OCI_CLI_REGION`, rc, config) lands with `os ns get`.
-- [ ] `boci os ns get` — request-only parity, then live parity confirmed once with the `.env.test` profile.
+- [x] `boci os ns get` — request-only parity.
+- [ ] `boci os ns get` — live parity confirmed once with the `.env.test` profile.
 - [ ] Client build errors and warnings: config file/profile not found, invalid key file, file-permission warnings (config and key), as oci prints them when executing.
 - [ ] Service error mapping: non-2xx → same stderr JSON (`code`, `message`, `status`, `target_service`, …) and exit code.
 - [ ] Global options: `--request-id`, `--debug` (shape only), `--connection-timeout`, `--read-timeout`, `--max-retries`/`--no-retry`.

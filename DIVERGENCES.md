@@ -65,3 +65,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** the focused parity cases match those goldens; the full generated GET parity run also passes
 - **Why:** the earlier reported failing output was unavailable, and three reproduction attempts did not identify a failing case to fix: `bun test test/parity -t 'generated-get-'` (3424 pass, 0 fail), `bun run spec compute console-history get-content` plus `bun test test/parity -t 'generated-get-compute-console-history-get-content'` (1 pass), and `bun run spec data-integration user-defined-function-validation get` plus `bun test test/parity -t 'generated-get-data-integration-user-defined-function-validation-get'` (1 pass). Keep this unresolved until the original failing case ID or another reproducible failure is available.
 - **State:** unresolved (tried: generated GET parity suite; focused compute and data-integration path-parameter cases)
+
+### Generated PUT requests: special body signature mismatch not reproduced
+
+- **Invocation:** focused generated request-only cases `generated-request-os-ns-update-metadata` and `generated-request-database-management-tablespace-update`.
+- **Reference CLI:** goldens capture PUT bodies and authorization signatures; the namespace metadata case has an empty body, while the tablespace case exercises a structured generated body.
+- **boci:** both focused cases pass, including request body and normalized authorization headers. Inspection of the generated PUT golden requests found no exact mismatch. `src/cli.ts` serializes the generated body before signing; `src/signer.ts` hashes those bytes into `x-content-sha256` and signs `content-length`, `content-type`, and the digest.
+- **Attempts:** broad parity timed out without output; three filtered PUT cases including nested JSON passed; this bounded audit inspected the empty and structured body golden requests plus signing implementation, with no reproducible signature mismatch.
+- **State:** unresolved (no failing invocation or exact mismatch could be reproduced).

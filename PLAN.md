@@ -113,8 +113,8 @@ DIVERGENCES.md             recorded Divergences
 - [x] Complex JSON body flags, including `file://` values.
 - [x] `--from-json` loading and command-line override behavior.
 - [~] `--generate-full-command-json-input` and `--generate-param-json-input`.
-- [ ] Polymorphic bodies (discriminator subcommands).
-- [ ] `--if-match`, `--if-none-match`, extra headers.
+- [x] Polymorphic bodies (discriminator subcommands).
+- [x] `--if-match`, `--if-none-match`, extra headers.
 - [ ] First mutating live tests on Always-Free, test-owned resources in the root compartment (name `boci-parity-*`, freeform tag `boci-parity=true`), with cleanup that deletes only tagged resources.
 
 ## Rung 5 — Waiters

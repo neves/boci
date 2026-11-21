@@ -102,7 +102,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] `--query` (JMESPath, incl. oci's custom functions).
 - [x] `oci_cli_rc` e: `[OCI_CLI_CANNED_QUERIES]` — `--query query://name`.
 - [x] `--output table` byte-exact; `--raw-output`.
-- [ ] Recordings: curated live list/get recordings across services, replayed offline.
+- [x] Recordings: curated live list/get recordings across services, replayed offline.
 
 ## Rung 4 — Request bodies
 

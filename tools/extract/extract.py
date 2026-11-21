@@ -107,6 +107,8 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict) -> Non
             flatten(sub, path + [child], groups, commands)
     else:
         entry["callback"] = f"{cmd.callback.__module__}.{cmd.callback.__qualname__}" if cmd.callback else None
+        # Generated = callback lives in a services.*.generated module (see GLOSSARY: Generated command).
+        entry["kind"] = "generated" if cmd.callback and ".generated." in cmd.callback.__module__ else "custom"
         entry["params"] = [param_spec(p) for p in cmd.params]
         commands[key] = entry
 
@@ -122,6 +124,11 @@ def service_spec(name: str, cmd: click.Command) -> dict:
     if isinstance(cmd, click.Group):
         top["params"] = [param_spec(p) for p in cmd.params]
     return {"service": name, "top": top, "groups": groups, "commands": commands}
+
+
+def kind_counts(spec: dict) -> dict:
+    kinds = [c["kind"] for c in spec["commands"].values()]
+    return {"generated": kinds.count("generated"), "custom": kinds.count("custom")}
 
 
 def write_json(path: str, data) -> None:
@@ -163,6 +170,7 @@ def main() -> None:
 
     services = sorted(service_mapping)
     empty = []
+    kinds = {}
     os.makedirs(SPEC_DIR, exist_ok=True)
     with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as pool:
         for service, sub in pool.map(extract, services):
@@ -171,13 +179,16 @@ def main() -> None:
                 empty.append(service)
                 continue
             tree["commands"][service] = sub["tree"]
+            kinds[service] = kind_counts(sub["spec"])
             write_json(os.path.join(SPEC_DIR, f"{service}.json"), sub["spec"])
     tree["commands"] = dict(sorted(tree["commands"].items()))
     # Top-level commands registered by the core rather than a service (setup, session,
     # raw-request, profile, ...). NON_SERVICE_TOP_LEVEL_COMMANDS is incomplete, so derive them.
     core = sorted(n for n in root.commands if n not in service_mapping)
     for name in core:
-        write_json(os.path.join(SPEC_DIR, f"{name}.json"), service_spec(name, root.commands[name]))
+        spec = service_spec(name, root.commands[name])
+        kinds[name] = kind_counts(spec)
+        write_json(os.path.join(SPEC_DIR, f"{name}.json"), spec)
 
     def count(n):
         return sum(count(c) for c in n["commands"].values()) if "commands" in n else 1
@@ -190,6 +201,7 @@ def main() -> None:
             name: {"dir": m[0], "title": m[1], "category": m[2]}
             for name, m in sorted(service_mapping.items())
         },
+        "kinds": dict(sorted(kinds.items())),
         "rootHelp": root.help,
         "globalParams": [param_spec(p) for p in root.params],
         "root": tree,

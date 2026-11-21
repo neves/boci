@@ -455,6 +455,16 @@ async function runGeneratedWrite(
   },
 ): Promise<void> {
   const operation = command.operation as OperationSpec;
+  const boundValue = (arg: string) => {
+    const binding = command.bindings?.find(
+      (item) =>
+        item.target === "kwarg" &&
+        Array.isArray(item.key) &&
+        item.key[0] === arg &&
+        typeof item.param === "string",
+    );
+    return binding ? values[String(binding.param)] : values[arg];
+  };
   const config = fromFile(settings.configFile, settings.profile);
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
@@ -464,7 +474,7 @@ async function runGeneratedWrite(
     config.region) as string | undefined;
   const serviceParams: Record<string, string> = {};
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = values[arg];
+    const value = boundValue(arg);
     if (value !== undefined) serviceParams[name] = String(value);
   }
   const { resolved } = resolveEndpoint(client, index.regions, {
@@ -481,9 +491,15 @@ async function runGeneratedWrite(
   });
   let path = operation.path;
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = values[arg];
+    const value = boundValue(arg);
     if (value !== undefined)
       path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
+  }
+  const url = new URL(`${resolved}${path}`);
+  for (const [name, item] of Object.entries(operation.queryParams ?? {})) {
+    const arg = (item as { arg?: string }).arg;
+    const value = arg ? boundValue(arg) : undefined;
+    if (value !== undefined) url.searchParams.set(name, String(value));
   }
   const body: Record<string, unknown> = {};
   for (const binding of command.bindings ?? []) {
@@ -509,6 +525,8 @@ async function runGeneratedWrite(
   const headers: Record<string, string> = {
     "content-type": "application/json",
   };
+  if (operation.client.startsWith("log_analytics."))
+    headers.expect = "100-continue";
   for (const [name, item] of Object.entries(operation.headerParams ?? {})) {
     const arg = (item as { arg?: string }).arg;
     const value =
@@ -527,7 +545,7 @@ async function runGeneratedWrite(
   const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
   const req = {
     method: operation.http,
-    url: `${resolved}${path}`,
+    url: url.toString(),
     headers,
     body: requestBody,
   };

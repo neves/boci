@@ -273,6 +273,8 @@ type Result = {
   rssMB: number;
   exit: number;
   note?: string;
+  /** First run's stdout, to check boci produced the same result as oci. */
+  out?: string;
 };
 
 const median = (xs: number[]) => {
@@ -285,8 +287,25 @@ async function measure(
   env: Record<string, string>,
   runs = RUNS,
   allowStub = false,
+  expected?: Result,
 ): Promise<Result> {
   const first = await runOnce(cmd, env);
+  const skip = (note: string): Result => ({
+    first: Number.NaN,
+    median: Number.NaN,
+    min: Number.NaN,
+    rssMB: Number.NaN,
+    exit: first.exit,
+    note,
+  });
+  // A timing only counts if boci did the same thing oci did.
+  if (
+    expected &&
+    !/not implemented yet/.test(first.err) &&
+    (first.exit !== expected.exit || first.out !== expected.out)
+  ) {
+    return skip("differs from oci");
+  }
   if (!allowStub && /not implemented yet/.test(first.err)) {
     return {
       first: Number.NaN,
@@ -306,6 +325,7 @@ async function measure(
     min: Math.min(...(ms.length ? ms : [first.ms])),
     rssMB: Math.max(...samples.map((s) => s.rss)) / 2 ** 20,
     exit: first.exit,
+    out: first.out,
   };
 }
 
@@ -319,7 +339,10 @@ if (!ociBin)
 const ociVenv = `${(await Bun.$`uv tool dir`.text()).trim()}/oci-cli`;
 const ociPython = `${ociVenv}/bin/python`;
 const bociBin = join(ROOT, "dist", "boci");
-await Bun.$`bun build --compile --minify ${join(ROOT, "src/main.ts")} --outfile ${bociBin}`.quiet();
+// The real build (spec embedded); a bare `bun build` binary can't find its command data.
+await Bun.$`bun ${join(ROOT, "scripts/build.ts")} --outfile ${bociBin.slice(ROOT.length + 1)}`
+  .cwd(ROOT)
+  .quiet();
 
 await using sb: Sandbox = await createSandbox();
 if (Bun.which("cc")) {
@@ -395,12 +418,13 @@ for (const s of scenarios) {
   const env = s.live ? (liveEnv as Record<string, string>) : sb.env;
   const argv = s.argv(endpoint);
   const runs = s.live ? Math.min(RUNS, 5) : RUNS;
+  const oci = await measure([ociBin, ...argv], env, runs);
   rows.push({
     group: s.live ? "live" : "offline",
     name: s.name,
     why: s.why,
-    oci: await measure([ociBin, ...argv], env, runs),
-    boci: await measure([bociBin, ...argv], env, runs),
+    oci,
+    boci: await measure([bociBin, ...argv], env, runs, false, oci),
   });
 }
 
@@ -444,5 +468,5 @@ await mkdir(outDir, { recursive: true });
 await Bun.write(join(outDir, "latest.md"), `${report}\n`);
 await Bun.write(
   join(outDir, "latest.json"),
-  `${JSON.stringify({ at: new Date().toISOString(), runs: RUNS, footprint, rows }, null, 2)}\n`,
+  `${JSON.stringify({ at: new Date().toISOString(), runs: RUNS, footprint, rows }, (k, v) => (k === "out" ? undefined : v), 2)}\n`,
 );

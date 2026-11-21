@@ -7,7 +7,7 @@
 boci is a drop-in replacement for Oracle's [`oci` CLI](https://github.com/oracle/oci-cli), built on [Bun](https://bun.sh). It has the same commands, the same flags and the same output, and it starts **32× faster** (13 ms vs 416 ms for `--version`). Swap `oci` for `boci` and your scripts keep working.
 
 > [!WARNING]
-> **Early development.** boci can't call OCI yet. Help, argument parsing, usage errors and config handling already match `oci` byte for byte. See [Progress](#progress).
+> **Early development.** boci can't call OCI yet. Help, argument parsing, usage errors, config handling and request signing already match `oci` byte for byte, and endpoint resolution matches the SDK on 1,800 cases. See [Progress](#progress).
 
 - One static binary
 - No Python, no venv
@@ -87,7 +87,7 @@ Snapshot: **0 of 9,372 commands verified.**
 | ------------------------------------------------ | ----: |
 | Foundations: extractor, status, test harness     | 13/13 |
 | Offline: version, help, parser, config, rc file  | 15/15 |
-| First signed request: `os ns get`                |   2/8 |
+| First signed request: `os ns get`                |   4/9 |
 | Generated reads (GET)                            |   0/3 |
 | Lists, pagination, `--query`, tables             |   0/5 |
 | Request bodies and writes                        |   0/5 |

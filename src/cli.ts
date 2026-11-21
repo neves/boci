@@ -281,8 +281,35 @@ export async function run(argv: string[]): Promise<void> {
     throw new Exit(1);
   }
 
-  err("boci: not implemented yet\n");
-  throw new Exit(1);
+  await notImplemented(argv, commandPath);
+}
+
+/** Exit code for "boci doesn't implement this yet" (oci itself uses 0, 1 and 2). */
+export const NOT_IMPLEMENTED = 3;
+
+/**
+ * The command is valid but boci can't run it yet. With BOCI_FALLBACK set (e.g. to `oci`),
+ * hand the untouched argv, stdin and stdio to the Reference CLI and return its exit code.
+ */
+async function notImplemented(
+  argv: string[],
+  commandPath: string,
+): Promise<never> {
+  const fallback = process.env.BOCI_FALLBACK;
+  const depth = Number(process.env.BOCI_FALLBACK_DEPTH ?? "0");
+  if (fallback && depth === 0) {
+    const bin = Bun.which(fallback) ?? fallback;
+    const proc = Bun.spawn([bin, ...argv], {
+      stdio: ["inherit", "inherit", "inherit"],
+      env: { ...process.env, BOCI_FALLBACK_DEPTH: String(depth + 1) },
+    });
+    throw new Exit(await proc.exited);
+  }
+  err(
+    `boci: '${commandPath}' is not implemented yet (run \`bun run status\` in the boci repo for coverage).\n` +
+      "Set BOCI_FALLBACK=oci to run unimplemented commands with the Reference CLI.\n",
+  );
+  throw new Exit(NOT_IMPLEMENTED);
 }
 
 const isMissing = (v: unknown) =>

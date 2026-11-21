@@ -1,0 +1,100 @@
+[
+  {
+    "id": "rc-default-profile",
+    "key": "rc",
+    "argv": ["compute", "instance", "list"],
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        ".oci/oci_cli_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  },
+  {
+    "id": "rc-cli-rc-file",
+    "key": "rc",
+    "argv": ["compute", "instance", "list", "--cli-rc-file", "~/custom_rc"],
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        "custom_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  },
+  {
+    "id": "rc-defaults-file-alias",
+    "key": "rc",
+    "argv": ["--defaults-file", "~/custom_rc", "compute", "instance", "list"],
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        "custom_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  },
+  {
+    "id": "rc-env-file",
+    "key": "rc",
+    "argv": ["compute", "instance", "list"],
+    "env": { "OCI_CLI_RC_FILE": "~/env_rc" },
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        "env_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  },
+  {
+    "id": "rc-fallback-cli-defaults",
+    "key": "rc",
+    "argv": ["compute", "instance", "list"],
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        ".oci/cli-defaults": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  },
+  {
+    "id": "rc-env-profile-wins",
+    "key": "rc",
+    "argv": ["compute", "instance", "list"],
+    "env": { "OCI_CLI_PROFILE": "DEFAULT" },
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        ".oci/oci_cli_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  },
+  {
+    "id": "rc-missing-custom-falls-back",
+    "key": "rc",
+    "argv": ["compute", "instance", "list", "--cli-rc-file", "~/nope"],
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        ".oci/oci_cli_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  },
+  {
+    "id": "rc-envvar-expansion",
+    "key": "rc",
+    "argv": ["compute", "instance", "list", "--cli-rc-file", "$HOME/custom_rc"],
+    "config": "[p2]\nkey_file = ~/.oci/nolabel.pem\n",
+    "sandbox": {
+      "files": {
+        ".oci/nolabel.pem": "unlabeled",
+        "custom_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
+      }
+    }
+  }
+]

@@ -12,6 +12,7 @@ const IMPLEMENTED = new Set<string>([
   "convert",
   "required",
   "root-callback",
+  "rc",
 ]);
 
 export function isImplemented(key: string): boolean {

@@ -40,6 +40,8 @@ export type Sandbox = {
 export type SandboxOptions = {
   /** false: write the API key without the trailing OCI_API_KEY label line. */
   keyLabel?: boolean;
+  /** Extra files to create, relative to the sandbox HOME (e.g. ".oci/oci_cli_rc"). */
+  files?: Record<string, string>;
 };
 
 export async function createSandbox(
@@ -61,6 +63,11 @@ export async function createSandbox(
     `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await fingerprint(keyFile)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
   );
   await chmod(keyFile, 0o600);
+  for (const [rel, content] of Object.entries(options.files ?? {})) {
+    const path = join(home, rel);
+    await Bun.write(path, content.replaceAll("{home}", home));
+    await chmod(path, 0o600);
+  }
   await chmod(configFile, 0o600);
 
   const env: Record<string, string> = {};

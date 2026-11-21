@@ -20,7 +20,7 @@ export type ParityCase = {
   stdin?: string;
   env?: Record<string, string>;
   config?: string;
-  sandbox?: { keyLabel?: boolean };
+  sandbox?: { keyLabel?: boolean; files?: Record<string, string> };
 };
 
 export type Golden = {

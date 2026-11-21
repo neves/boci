@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
 import { parseConfig, sectionItems } from "./configparser.ts";
+import { type Rc, RC_DEFAULT_LOCATION, loadRc } from "./rc.ts";
 import { commandHelp, groupHelp, rootHelp } from "./help/render.ts";
 import { HelpFormatter, helpWidth } from "./help/formatter.ts";
 import {
@@ -126,6 +127,10 @@ export async function run(argv: string[]): Promise<void> {
       throw e;
     }
   }
+  // --cli-rc-file is eager with a default, so its callback (rc loading) always runs.
+  const rc = loadRc(
+    (rootValues.cli_rc_file as string | undefined) ?? RC_DEFAULT_LOCATION,
+  );
   const rest = root.args;
 
   // 2. No subcommand: invoke_without_command → root callback → echo_help.
@@ -167,7 +172,7 @@ export async function run(argv: string[]): Promise<void> {
       "The option --max-retries is not applicable when using the --no-retry flag.",
     );
   }
-  const settings = resolveRootSettings(rootValues, rootUsage);
+  const settings = resolveRootSettings(rootValues, rc, rootUsage);
   if (name !== "profile") checkKeyForSecurity(settings);
   const helpRequested = root.opts.help === true;
 
@@ -378,10 +383,11 @@ export type RootSettings = {
   auth: string | null;
 };
 
-/** cli_root.cli: config file (OCI_CLI_CONFIG_FILE), profile (OCI_CLI_PROFILE), auth (OCI_CLI_AUTH).
- * TODO(rung 0, oci_cli_rc): default_profile from the rc file's settings. */
+/** cli_root.cli: config file (OCI_CLI_CONFIG_FILE), profile (--profile, OCI_CLI_PROFILE, rc
+ * default_profile), auth (OCI_CLI_AUTH). */
 function resolveRootSettings(
   values: Record<string, unknown>,
+  rc: Rc,
   rootUsage: () => string,
 ): RootSettings {
   const env = process.env;
@@ -393,6 +399,7 @@ function resolveRootSettings(
   const profile =
     (values.profile as string | undefined) ??
     env.OCI_CLI_PROFILE ??
+    rc.settings.default_profile ??
     DEFAULT_PROFILE;
   let auth = (values.auth as string | undefined) ?? null;
   if (auth === null && env.OCI_CLI_AUTH !== undefined) {

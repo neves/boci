@@ -82,7 +82,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Global option: `--no-retry` disables SDK retries and omits `opc-client-retries`.
 - [x] Global option: `--max-retries` sets the maximum attempt count (the Reference CLI's `max_attempts`).
 - [x] External region sources: `~/.oci/regions-config.json` and `OCI_REGION_METADATA`.
-- [ ] Realm-specific endpoint params such as `{namespaceName+Dot}`.
+- [x] Realm-specific endpoint params such as `{namespaceName+Dot}`.
 
 ## Rung 2 — Generated GETs
 

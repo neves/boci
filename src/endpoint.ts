@@ -36,6 +36,8 @@ export type EndpointOptions = {
   dualStack: boolean;
   env?: Record<string, string | undefined>;
   regionMetadata?: RegionMetadata;
+  /** Path/query values used by placeholders in realm-specific endpoint templates. */
+  serviceParams?: Record<string, string>;
 };
 
 /** Loads OCI's external region metadata sources, in their documented priority order. */
@@ -138,7 +140,27 @@ export function resolveEndpoint(
       client.basePath,
     );
   }
-  return { stored, resolved: applyEndpointOptions(stored, opts.dualStack) };
+  return {
+    stored,
+    resolved: applyServiceParams(
+      applyEndpointOptions(stored, opts.dualStack),
+      opts.serviceParams,
+    ),
+  };
+}
+
+function applyServiceParams(
+  endpoint: string,
+  params: Record<string, string> = {},
+): string {
+  return endpoint.replace(
+    /\{([A-Za-z][A-Za-z0-9]*)(\+Dot)?\}/g,
+    (_token, name: string, dot: string | undefined) => {
+      const value = params[name];
+      if (value === undefined) return "";
+      return dot ? `${value}.` : value;
+    },
+  );
 }
 
 function withRegionMetadata(

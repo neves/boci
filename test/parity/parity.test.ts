@@ -39,6 +39,10 @@ describe("parity", () => {
         `stale golden: run \`bun run golden --filter ${c.id}\``,
       ).toBe(caseHash(c));
       const run = await runCli(CLIS.boci, c.argv, c);
+      if (c.id === "os-ns-get-request-id")
+        expect(run.requests[0]?.headers["opc-client-request-id"]).toBe(
+          "boci-request-123",
+        );
       for (const req of run.requests) {
         if (req.headers.authorization)
           expect(

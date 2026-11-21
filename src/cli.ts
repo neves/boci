@@ -469,6 +469,8 @@ async function runNamespaceGet(
     "content-type": "application/json",
     "opc-client-retries": "true",
   };
+  if (rootValues.request_id !== undefined)
+    headers["opc-client-request-id"] = String(rootValues.request_id);
   const keyPath = expandUser(String(config.key_file));
   const pem = readFileSync(keyPath, "utf8");
   const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;

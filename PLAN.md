@@ -39,7 +39,9 @@ DIVERGENCES.md             recorded Divergences
 - [x] Extractor v3c: for each generated leaf, map every CLI option to where it lands (path/query/header param or body field with its JSON key and complex type).
 - [x] `bun run status`: reads `spec/`, parity results and this Ladder; prints per-service missing/implemented/verified counts, totals, the engine-feature (Ladder) checklist, and Divergences. Everything starts as missing.
 - [x] Offline fixtures: generate a throwaway RSA key + `test/fixtures/config` with a fake tenancy/user so both CLIs sign requests with no real credentials.
-- [ ] Harness: fake endpoint (`Bun.serve`) that records every request and serves a canned response; runner that runs `oci` and `boci` with identical argv/env against it; comparator for requests, stdout (masked), stderr error JSON, exit code.
+- [ ] Harness a: fake endpoint (`Bun.serve`) that records every request (method, path, query, headers, body) and serves a canned response per case.
+- [ ] Harness b: CLI runner that runs a CLI (`oci` or `boci`) with argv in a sandbox against the fake endpoint and returns stdout, stderr, exit code and captured requests.
+- [ ] Harness c: Parity case + golden format; `bun run golden` runs the Reference CLI for every case (parallel) and stores its observation; comparator with the central mask list; `bun test` compares boci against goldens only (ADR 0004).
 - [ ] Recorder proxy: forwards to the real OCI endpoint, saves request+response, scrubs tenancy/user OCIDs and namespace. Used only by `bun run parity:live`.
 - [ ] `DIVERGENCES.md` with the entry format and an empty list.
 

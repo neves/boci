@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // boci entry point. Commands are added rung by rung; see PLAN.md.
-import { commandHelp, groupHelp } from "./help/render.ts";
+import { commandHelp, groupHelp, rootHelp } from "./help/render.ts";
 import { loadIndex, loadService, resolvePath } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
 
@@ -18,6 +18,29 @@ if (argv[0] === "--version" || argv[0] === "-v") {
 }
 
 const index = await loadIndex();
+
+// Root help: `oci`, `oci --help`, `-h`, `-?` (cli_root.echo_help), stdout, exit 0.
+// TODO(rung 0, parser): root options before --help (e.g. `--profile x --help`).
+if (
+  argv.length === 0 ||
+  (argv.length === 1 && HELP_FLAGS.has(argv[0] as string))
+) {
+  const core = await Promise.all(
+    index.nonServiceCommands.map(async (name) => {
+      const top = (await loadService(name)).top;
+      return {
+        name,
+        hidden: top.hidden,
+        help: top.help,
+        shortHelp: top.helpDoc.shortHelp,
+      };
+    }),
+  );
+  process.stdout.write(
+    `${rootHelp(index.rootHelpDoc, core, index.services, index.ociHelp, index.ociUserHelp)}\n`,
+  );
+  process.exit(0);
+}
 const { path, node } = resolvePath(index.root, argv);
 const rest = argv.slice(path.length);
 

@@ -34,6 +34,9 @@ export type ServiceSpec = {
 export type Index = {
   referenceVersion: string;
   rootHelpDoc: HelpDoc;
+  ociHelp: string;
+  ociUserHelp: string;
+  nonServiceCommands: string[];
   services: Record<string, { dir: string; title: string; category: string }>;
   root: TreeNode;
 };

@@ -146,11 +146,19 @@ export class HelpFormatter {
     }
   }
 
-  /** OciHelpFormatter.write_dl → click HelpFormatter.write_dl. */
-  writeDl(rows: [string, string][], colMax = 30, colSpacing = 2) {
+  /**
+   * OciHelpFormatter.write_dl → click HelpFormatter.write_dl.
+   * `listBoundaries: false` is plain click.HelpFormatter (oci's root help uses one).
+   */
+  writeDl(
+    rows: [string, string][],
+    colMax = 30,
+    colSpacing = 2,
+    listBoundaries = true,
+  ) {
     let expanded: [string, string][] = [];
     let boundary = false;
-    for (const [first, second] of rows) {
+    for (const [first, second] of listBoundaries ? rows : []) {
       const sections = splitAtListBoundaries(second);
       expanded.push([first, sections[0] as string]);
       if (sections.length > 1) {

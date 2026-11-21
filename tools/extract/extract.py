@@ -255,6 +255,9 @@ def main() -> None:
         "rootHelp": root.help,
         "globalParams": [param_spec(p) for p in root.params],
         "rootHelpDoc": help_doc(root, click.Context(root, info_name="oci")),
+        # cli_root.echo_help swaps OCI_HELP for the wrapped OCI_USER_HELP in root help.
+        "ociHelp": __import__("oci_cli.cli_root", fromlist=["x"]).OCI_HELP,
+        "ociUserHelp": __import__("oci_cli.cli_root", fromlist=["x"]).OCI_USER_HELP,
         "root": tree,
     }
     write_json(os.path.join(SPEC_DIR, "index.json"), index)

@@ -43,14 +43,36 @@ export type Index = {
 
 const SPEC_DIR = join(import.meta.dir, "..", "spec");
 
+/**
+ * In the compiled binary, spec files are embedded zstd-compressed (scripts/build.ts
+ * registers their embedded paths here). From source, they are read from spec/.
+ */
+let embedded: Record<string, string> | undefined;
+export function useEmbeddedSpec(files: Record<string, string>) {
+  embedded = files;
+}
+
+async function readSpec(name: string): Promise<unknown> {
+  if (embedded) {
+    const path = embedded[name];
+    if (!path) throw new Error(`boci: no embedded spec for ${name}`);
+    return JSON.parse(
+      new TextDecoder().decode(
+        Bun.zstdDecompressSync(await Bun.file(path).bytes()),
+      ),
+    );
+  }
+  return Bun.file(join(SPEC_DIR, `${name}.json`)).json();
+}
+
 let index: Index | undefined;
 export async function loadIndex(): Promise<Index> {
-  index ??= (await Bun.file(join(SPEC_DIR, "index.json")).json()) as Index;
+  index ??= (await readSpec("index")) as Index;
   return index;
 }
 
 export async function loadService(name: string): Promise<ServiceSpec> {
-  return (await Bun.file(join(SPEC_DIR, `${name}.json`)).json()) as ServiceSpec;
+  return (await readSpec(name)) as ServiceSpec;
 }
 
 /** Longest prefix of `tokens` naming a node in the tree, stopping at the first option. */

@@ -14,7 +14,10 @@ const ROOT = join(import.meta.dir, "..", "..");
 export const CLIS = {
   /** The Reference CLI. Only `bun run golden` runs it, never `bun test` (ADR 0004). */
   oci: [Bun.which("oci") ?? "oci"],
-  boci: ["bun", join(ROOT, "src", "main.ts")],
+  /** From source by default; BOCI_BIN=dist/boci runs the suite against the compiled binary. */
+  boci: process.env.BOCI_BIN
+    ? [join(ROOT, process.env.BOCI_BIN)]
+    : ["bun", join(ROOT, "src", "main.ts")],
 } as const;
 
 export type Run = {

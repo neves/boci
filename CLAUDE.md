@@ -20,7 +20,7 @@ A Bun drop-in for Oracle's `oci` CLI. Read [GLOSSARY.md](GLOSSARY.md) for vocabu
 2. If the item is too big for one commit, split it into smaller unticked items in PLAN.md first and take the first one.
 3. Write the failing test first. For behaviour: add Parity cases to `test/parity/cases/*.json` (key = Leaf command path or Engine feature), run `bun run golden` to record what the Reference CLI does, then mark the key implemented in `src/registry.ts` so the case runs (and fails). For tooling: a unit test.
 4. Implement until it passes. Use `bun run parity:live` only to record or to confirm a feature against the real account, then rely on the Recording.
-5. Run `bun fmt --check`, `bun check`, `bun test`. All green.
+5. Run `bun fmt --check`, `bun check`, `bun test`. All green. When the item finishes a rung, or touches the build or spec loading, also run `bun run test:dist` (parity suite against the compiled `dist/boci`).
 6. Tick the item in PLAN.md, update DIVERGENCES.md if needed, and commit to local `main`: one feature per commit, message `rung N: <item>`. Never push.
 
 ## When stuck

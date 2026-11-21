@@ -9,10 +9,16 @@ import {
   loadGolden,
   RESULTS_FILE,
 } from "../harness/cases.ts";
-import { normalizeRun, remask } from "../harness/compare.ts";
+import { normalizeRun, remask, signatureValid } from "../harness/compare.ts";
+import { createPublicKey } from "node:crypto";
 import { CLIS, runCli } from "../harness/runner.ts";
 
 const cases = await loadCases();
+const publicKey = createPublicKey(
+  await Bun.file(`${import.meta.dir}/../fixtures/fake_oci_api_key.pem`).text(),
+)
+  .export({ type: "spki", format: "pem" })
+  .toString();
 const results: Record<string, { pass: boolean }> = {};
 const record = (key: string, pass: boolean) => {
   // A key is verified only if all of its cases pass.
@@ -33,6 +39,13 @@ describe("parity", () => {
         `stale golden: run \`bun run golden --filter ${c.id}\``,
       ).toBe(caseHash(c));
       const run = await runCli(CLIS.boci, c.argv, c);
+      for (const req of run.requests) {
+        if (req.headers.authorization)
+          expect(
+            signatureValid(req, publicKey),
+            `${c.id}: invalid signature`,
+          ).toBe(true);
+      }
       try {
         expect(normalizeRun(run)).toEqual(
           remask(golden?.observed as never) as never,

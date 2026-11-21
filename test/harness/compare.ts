@@ -1,3 +1,4 @@
+import { createVerify } from "node:crypto";
 // Normalise a Run so the Reference CLI's observation and boci's compare with toEqual.
 import type { CapturedRequest } from "./fake-endpoint.ts";
 import { IGNORED_REQUEST_HEADERS, OUTPUT_MASKS } from "./masks.ts";
@@ -79,4 +80,29 @@ export function normalizeRun(run: Run): NormalizedRun {
 /** Re-apply the current output masks to a stored observation (goldens predate new masks). */
 export function remask(run: NormalizedRun): NormalizedRun {
   return { ...run, stdout: mask(run.stdout), stderr: mask(run.stderr) };
+}
+
+/**
+ * Check a captured request's signature against the signing string rebuilt from its own
+ * headers, with the sandbox's public key. Goldens can only compare signature structure
+ * (dates differ), so boci's requests are also verified cryptographically.
+ */
+export function signatureValid(
+  req: CapturedRequest,
+  publicKeyPem: string,
+): boolean {
+  const auth = req.headers.authorization;
+  if (!auth) return false;
+  const signature = /signature="([^"]+)"/.exec(auth)?.[1];
+  const names = parseAuthorization(auth).headers?.split(" ") ?? [];
+  if (!signature) return false;
+  const lines = names.map((n) => {
+    if (n === "(request-target)") {
+      return `(request-target): ${req.method.toLowerCase()} ${req.path}${req.rawQuery ? `?${req.rawQuery}` : ""}`;
+    }
+    return `${n}: ${req.headers[n] ?? ""}`;
+  });
+  return createVerify("sha256")
+    .update(lines.join("\n"))
+    .verify(publicKeyPem, signature, "base64");
 }

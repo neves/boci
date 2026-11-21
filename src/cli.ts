@@ -368,6 +368,15 @@ export async function run(argv: string[]): Promise<void> {
     if (parsed.opts[p.name] === undefined) continue;
     try {
       values[p.name] = convert(p, parsed.opts[p.name], index.datetime);
+      if (
+        p.typeClass ===
+          "oci_cli.custom_types.cli_complex_type.CliComplexType" &&
+        typeof values[p.name] === "string"
+      ) {
+        let raw = values[p.name] as string;
+        if (raw.startsWith("file://")) raw = readFileSync(raw.slice(7), "utf8");
+        values[p.name] = JSON.parse(raw) as unknown;
+      }
     } catch (e) {
       if (e instanceof BadParameter)
         showPatched(

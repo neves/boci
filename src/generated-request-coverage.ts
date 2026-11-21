@@ -3134,6 +3134,7 @@ export const GENERATED_REQUEST_COVERAGE = new Set<string>([
   "email work-request list",
   "email work-request-error list",
   "email work-request-log list",
+  "email-data-plane email-raw-submitted-response submit-raw-email",
   "email-data-plane email-submitted-response submit-email",
   "events rule change-compartment",
   "events rule create",

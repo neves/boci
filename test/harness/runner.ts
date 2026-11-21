@@ -44,7 +44,10 @@ export async function runCli(
   await using sb = await createSandbox(opts.config, opts.sandbox);
   using fake = startFakeEndpoint(opts.replies);
   const args = argv.map((a) =>
-    a.replaceAll("{endpoint}", fake.url).replaceAll("{config}", sb.configFile),
+    a
+      .replaceAll("{endpoint}", fake.url)
+      .replaceAll("{config}", sb.configFile)
+      .replaceAll("{home}", sb.home),
   );
   const proc = Bun.spawn([...cli, ...args], {
     cwd: sb.home,

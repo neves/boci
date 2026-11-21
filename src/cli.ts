@@ -411,6 +411,7 @@ export async function run(argv: string[]): Promise<void> {
       settings,
       spec,
       index,
+      rc,
       specCmd.operation as OperationSpec,
     );
     return;
@@ -426,6 +427,7 @@ export async function run(argv: string[]): Promise<void> {
       settings,
       spec,
       index,
+      rc,
       specCmd.operation,
     );
     return;
@@ -439,6 +441,7 @@ async function runGeneratedGet(
   settings: RootSettings,
   spec: ServiceSpec,
   index: Index,
+  rc: Rc,
   operation: OperationSpec,
 ): Promise<void> {
   if (values.all_pages === true && values.limit !== undefined) {
@@ -711,10 +714,24 @@ async function runGeneratedGet(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
   }
-  const query = rootValues.query;
+  let query = rootValues.query;
+  if (typeof query === "string" && query.startsWith("query://")) {
+    const queryName = query.slice("query://".length);
+    query = rc.cannedQueries[queryName];
+    if (query === undefined) {
+      err(
+        `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${rc.path}\n`,
+      );
+      throw new Exit(1);
+    }
+  }
   const rendered =
     typeof query === "string" ? applyQuery(output, query) : output;
-  out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
+  if (rendered === null || (Array.isArray(rendered) && rendered.length === 0)) {
+    err("Query returned empty result, no output to show.\n");
+  } else {
+    out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
+  }
 }
 
 function timeoutSecondsFor(value: unknown): number | undefined {

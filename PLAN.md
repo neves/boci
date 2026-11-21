@@ -100,7 +100,7 @@ DIVERGENCES.md             recorded Divergences
 
 - [x] Pagination: `--limit`, `--page`, `--all`, `--page-size`.
 - [x] `--query` (JMESPath, incl. oci's custom functions).
-- [ ] `oci_cli_rc` e: `[OCI_CLI_CANNED_QUERIES]` — `--query query://name`.
+- [x] `oci_cli_rc` e: `[OCI_CLI_CANNED_QUERIES]` — `--query query://name`.
 - [ ] `--output table` byte-exact; `--raw-output`.
 - [ ] Recordings: curated live list/get recordings across services, replayed offline.
 

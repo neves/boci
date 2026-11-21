@@ -5,6 +5,7 @@ import { GENERATED_GET_COVERAGE } from "./generated-get-coverage.ts";
 const IMPLEMENTED = new Set<string>([
   "--version",
   "--query",
+  "rc-canned-queries",
   "help:leaf",
   "help:group",
   "help:root",

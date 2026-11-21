@@ -96,5 +96,48 @@
         "custom_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n"
       }
     }
+  },
+  {
+    "id": "rc-canned-query",
+    "key": "rc-canned-queries",
+    "argv": [
+      "compute",
+      "instance",
+      "list",
+      "--compartment-id",
+      "test-value",
+      "--endpoint",
+      "{endpoint}",
+      "--query",
+      "query://names"
+    ],
+    "replies": {
+      "body": { "items": [{ "displayName": "one" }, { "displayName": "two" }] }
+    },
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[OCI_CLI_CANNED_QUERIES]\nnames = data.items[].displayName\n"
+      }
+    }
+  },
+  {
+    "id": "rc-canned-query-unknown",
+    "key": "rc-canned-queries",
+    "argv": [
+      "compute",
+      "instance",
+      "list",
+      "--compartment-id",
+      "test-value",
+      "--endpoint",
+      "{endpoint}",
+      "--query",
+      "query://missing"
+    ],
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[OCI_CLI_CANNED_QUERIES]\nnames = data.items[].displayName\n"
+      }
+    }
   }
 ]

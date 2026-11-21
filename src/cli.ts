@@ -40,6 +40,7 @@ import {
 import {
   type HelpDoc,
   type Index,
+  type OperationSpec,
   type ServiceSpec,
   type TreeNode,
   loadIndex,
@@ -402,18 +403,41 @@ export async function run(argv: string[]): Promise<void> {
   }
 
   if (key === "ns get" && name === "os") {
-    await runNamespaceGet(values, rootValues, settings, spec, index);
+    await runGeneratedGet(
+      values,
+      rootValues,
+      settings,
+      spec,
+      index,
+      specCmd.operation as OperationSpec,
+    );
+    return;
+  }
+  if (
+    name === "compute" &&
+    key === "boot-volume-attachment get" &&
+    specCmd.operation
+  ) {
+    await runGeneratedGet(
+      values,
+      rootValues,
+      settings,
+      spec,
+      index,
+      specCmd.operation,
+    );
     return;
   }
   await notImplemented(argv, commandPath);
 }
 
-async function runNamespaceGet(
+async function runGeneratedGet(
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   settings: RootSettings,
   spec: ServiceSpec,
   index: Index,
+  operation: OperationSpec,
 ): Promise<void> {
   let config;
   try {
@@ -433,8 +457,6 @@ async function runNamespaceGet(
     }
     throw e;
   }
-  const operation = spec.commands["ns get"]?.operation;
-  if (!operation) throw new Error("boci: missing os ns get operation spec");
   if (
     (
       process.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? ""
@@ -454,10 +476,20 @@ async function runNamespaceGet(
     region && !endpointOpt
       ? await loadExternalRegionMetadata(region, index.regions)
       : undefined;
+  const serviceParams: Record<string, string> = {};
+  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const value = values[arg];
+    if (value !== undefined) serviceParams[name] = String(value);
+  }
+  for (const [name, { arg }] of Object.entries(operation.queryParams)) {
+    const value = arg ? values[arg] : undefined;
+    if (value !== undefined) serviceParams[name] = String(value);
+  }
   const { resolved } = resolveEndpoint(client, index.regions, {
     region,
     endpoint: endpointOpt,
     regionMetadata,
+    serviceParams,
     realmSpecific: configBool(
       values.realm_specific_endpoint ??
         config.realm_specific_service_endpoint_template_enabled,
@@ -466,20 +498,34 @@ async function runNamespaceGet(
       values.enable_dual_stack ?? config.dual_stack_endpoint_enabled,
     ),
   });
-  const url = new URL(`${resolved}${operation.path}`);
-  if (values.compartment_id !== undefined)
-    url.searchParams.set("compartmentId", String(values.compartment_id));
-  const headers: Record<string, string> = {
-    accept: "application/json",
-    "content-type": "application/json",
-  };
+  let path = operation.path;
+  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const value = values[arg];
+    if (value !== undefined)
+      path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
+  }
+  const url = new URL(`${resolved}${path}`);
+  for (const [name, { arg }] of Object.entries(operation.queryParams)) {
+    const value = arg ? values[arg] : undefined;
+    if (value !== undefined) url.searchParams.set(name, String(value));
+  }
+  const headers: Record<string, string> = {};
+  for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
+    const value = param.value ?? (param.arg ? values[param.arg] : undefined);
+    if (value !== undefined) headers[name] = String(value);
+  }
   if (rootValues.no_retry !== true) headers["opc-client-retries"] = "true";
   if (rootValues.request_id !== undefined)
     headers["opc-client-request-id"] = String(rootValues.request_id);
   const keyPath = expandUser(String(config.key_file));
   const pem = readFileSync(keyPath, "utf8");
   const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
-  const req = { method: "GET", url: url.toString(), headers, body: "" };
+  const req = {
+    method: operation.http,
+    url: url.toString(),
+    headers,
+    body: "",
+  };
   prepareContentLength(req);
   let privateKey;
   try {
@@ -566,7 +612,12 @@ async function runNamespaceGet(
   let value: unknown;
   try {
     const parsed: unknown = JSON.parse(raw);
-    value = typeof parsed === "string" ? parsed : raw;
+    value =
+      typeof parsed === "string"
+        ? parsed
+        : operation.method === "get_namespace"
+          ? raw
+          : mapResponseKeys(parsed);
   } catch {
     value = raw;
   }
@@ -649,6 +700,18 @@ function sortJson(value: unknown): unknown {
       Object.entries(value)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([k, v]) => [k, sortJson(v)]),
+    );
+  return value;
+}
+
+function mapResponseKeys(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(mapResponseKeys);
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`),
+        mapResponseKeys(item),
+      ]),
     );
   return value;
 }

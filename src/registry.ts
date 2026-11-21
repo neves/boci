@@ -21,6 +21,7 @@ const IMPLEMENTED = new Set<string>([
   "read-timeout",
   "no-retry",
   "max-retries",
+  "compute boot-volume-attachment get",
 ]);
 
 export function isImplemented(key: string): boolean {

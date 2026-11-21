@@ -12,6 +12,8 @@ export type OperationSpec = {
   http: string;
   path: string;
   queryParams: Record<string, { arg?: string }>;
+  pathParams?: Record<string, string>;
+  headerParams?: Record<string, { arg?: string; value?: string }>;
 };
 
 export type HelpDoc = {

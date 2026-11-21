@@ -86,7 +86,9 @@ DIVERGENCES.md             recorded Divergences
 
 ## Rung 2 — Generated GETs
 
-- [ ] Path parameters + query parameters for any generated GET. Auto-generate request-only parity cases for every generated GET; a pass marks those leaf commands verified.
+- [x] Generated GET path parameters, verified with `compute boot-volume-attachment get`.
+- [ ] Generated GET query parameters, verified with a simple query-param command.
+- [ ] Auto-generate request-only parity cases for all remaining generated GETs.
 - [ ] Response headers surfaced like the Reference CLI (`etag`, `opc-next-page` in output where applicable).
 - [ ] HEAD and DELETE without body; `--force` and confirmation prompts.
 

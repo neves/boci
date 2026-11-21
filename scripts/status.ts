@@ -22,7 +22,9 @@ const status = buildStatus({
   implemented: isImplemented,
   results: (await resultsFile.exists()) ? await resultsFile.json() : {},
   divergences: (await divergencesFile.exists())
-    ? ((await divergencesFile.text()).match(/^### /gm)?.length ?? 0)
+    ? ((await divergencesFile.text())
+        .replace(/```[\s\S]*?```/g, "") // ignore the entry-format example
+        .match(/^### /gm)?.length ?? 0)
     : 0,
 });
 

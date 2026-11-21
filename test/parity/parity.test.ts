@@ -25,7 +25,9 @@ const record = (key: string, pass: boolean) => {
   results[key] = { pass: (results[key]?.pass ?? true) && pass };
 };
 
-describe("parity", () => {
+// Concurrent: every case runs in its own sandbox against its own fake endpoint, and the
+// suite is dominated by process spawns (~2x faster than serial).
+describe.concurrent("parity", () => {
   for (const c of cases) {
     const implemented = isImplemented(c.key);
     test.skipIf(!implemented)(`${c.id} (${c.key})`, async () => {

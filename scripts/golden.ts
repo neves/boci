@@ -55,8 +55,11 @@ async function worker() {
     };
     await Bun.write(goldenPath(c.id), `${JSON.stringify(golden, null, 2)}\n`);
     done++;
-    process.stdout.write(`\r${done}/${todo.length} ${c.id}`.padEnd(80));
+    // Live progress only on a terminal: captured by an agent, `\r` lines pile up (80 B/case).
+    if (process.stdout.isTTY)
+      process.stdout.write(`\r${done}/${todo.length} ${c.id}`.padEnd(80));
   }
 }
 await Promise.all(Array.from({ length: availableParallelism() }, worker));
-if (todo.length) process.stdout.write("\n");
+if (todo.length && process.stdout.isTTY) process.stdout.write("\n");
+if (todo.length) console.log(`wrote ${done} goldens`);

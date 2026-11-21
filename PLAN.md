@@ -1,6 +1,6 @@
 # boci plan
 
-boci is a Bun drop-in for the Reference CLI (`oci-cli==3.96.3`, Python 3.12). Vocabulary: [GLOSSARY.md](GLOSSARY.md). Decisions: [docs/adr/](docs/adr/). How to execute one step: [CLAUDE.md](CLAUDE.md).
+boci is a Bun drop-in for the Reference CLI (`oci-cli==3.96.3`, Python 3.12). Vocabulary: [GLOSSARY.md](GLOSSARY.md). Decisions: [docs/adr/](docs/adr/). How to execute one step: [AGENTS.md](AGENTS.md).
 
 This file is the **Ladder**. Work top to bottom. Each `- [ ]` item is one baby step = one commit. `bun run status` parses this file, so keep the checkbox format exact. Tick an item only when its acceptance check passes.
 
@@ -90,7 +90,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Generated GET query parameters, verified with `compute global-image-capability-schema list`.
 - [x] Auto-generate request-only parity cases for all generated GETs in Compute.
 - [x] Auto-generate request-only parity cases for all generated GETs in Object Storage and IAM.
-- [ ] Auto-generate request-only parity cases for generated GETs in the remaining services, in service batches.
+- [ ] Auto-generate request-only parity cases for generated GETs in the remaining services: one pass with `bun run parity:get-cases --all`, then `bun run golden`. Mark what already passes and fix failures grouped by cause (split into one item per cause if needed). No per-service items.
 - [ ] Response headers surfaced like the Reference CLI (`etag`, `opc-next-page` in output where applicable).
 - [ ] HEAD and DELETE without body; `--force` and confirmation prompts.
 

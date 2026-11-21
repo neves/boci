@@ -1,21 +1,37 @@
-// Generate request-only parity cases for generated GET commands in one service.
+// Generate request-only parity cases for generated GET commands.
+// `bun run parity:get-cases --service <name>[,<name>…]` or `--all` (every service, one pass).
 import { parseArgs } from "util";
 
 const { values } = parseArgs({
   args: Bun.argv.slice(2),
-  options: { service: { type: "string" } },
+  options: {
+    service: { type: "string" },
+    all: { type: "boolean", default: false },
+  },
 });
-if (!values.service)
-  throw new Error("usage: bun run parity:get-cases --service <name>");
 
 const root = `${import.meta.dir}/..`;
-const spec = await Bun.file(`${root}/spec/${values.service}.json`).json();
-const casePath = `${root}/test/parity/cases/generated-get-${values.service}.json`;
+const services = values.all
+  ? Object.keys(
+      (
+        (await Bun.file(`${root}/spec/index.json`).json()) as {
+          services: Record<string, unknown>;
+        }
+      ).services,
+    )
+  : (values.service?.split(",").filter(Boolean) ?? []);
+if (!services.length)
+  throw new Error(
+    "usage: bun run parity:get-cases --service <name>[,<name>…] | --all",
+  );
+
+const caseFile = (service: string) => `generated-get-${service}.json`;
+const regenerated = new Set(services.map(caseFile));
 const existingKeys = new Set<string>();
 for await (const file of new Bun.Glob("**/*.json").scan(
   `${root}/test/parity/cases`,
 )) {
-  if (file === `generated-get-${values.service}.json`) continue;
+  if (regenerated.has(file)) continue;
   const cases = (await Bun.file(
     `${root}/test/parity/cases/${file}`,
   ).json()) as {
@@ -42,49 +58,63 @@ function sample(param: Record<string, unknown>): string {
   }
 }
 
-const generated: Record<string, unknown>[] = [];
-for (const [command, node] of Object.entries(spec.commands) as [
-  string,
-  Record<string, unknown>,
-][]) {
-  const operation = node.operation as
-    | {
-        http?: string;
-        responseType?: string;
-        pathParams?: Record<string, string>;
-      }
-    | undefined;
-  const key = `${values.service} ${command}`;
-  if (
-    node.kind !== "generated" ||
-    operation?.http !== "GET" ||
-    existingKeys.has(key)
-  )
-    continue;
-  const argv = [values.service, ...command.split(" ")];
-  const params = (node.params ?? []) as Record<string, unknown>[];
-  const pathArgs = new Set(Object.values(operation.pathParams ?? {}));
-  for (const param of params) {
-    if (param.required !== true && !pathArgs.has(String(param.name))) continue;
-    const options = param.opts as string[];
-    const option = options?.find((o) => o.startsWith("--")) ?? options?.[0];
-    if (!option) continue;
-    argv.push(option);
-    if (param.isFlag !== true) argv.push(sample(param));
+let total = 0;
+let files = 0;
+const written: string[] = [];
+for (const service of services) {
+  const specFile = Bun.file(`${root}/spec/${service}.json`);
+  if (!(await specFile.exists())) continue;
+  const spec = await specFile.json();
+  const casePath = `${root}/test/parity/cases/${caseFile(service)}`;
+  const generated: Record<string, unknown>[] = [];
+  for (const [command, node] of Object.entries(spec.commands) as [
+    string,
+    Record<string, unknown>,
+  ][]) {
+    const operation = node.operation as
+      | {
+          http?: string;
+          responseType?: string;
+          pathParams?: Record<string, string>;
+        }
+      | undefined;
+    const key = `${service} ${command}`;
+    if (
+      node.kind !== "generated" ||
+      operation?.http !== "GET" ||
+      existingKeys.has(key)
+    )
+      continue;
+    const argv = [service, ...command.split(" ")];
+    const params = (node.params ?? []) as Record<string, unknown>[];
+    const pathArgs = new Set(Object.values(operation.pathParams ?? {}));
+    for (const param of params) {
+      if (param.required !== true && !pathArgs.has(String(param.name)))
+        continue;
+      const options = param.opts as string[];
+      const option = options?.find((o) => o.startsWith("--")) ?? options?.[0];
+      if (!option) continue;
+      argv.push(option);
+      if (param.isFlag !== true) argv.push(sample(param));
+    }
+    argv.push("--endpoint", "{endpoint}");
+    generated.push({
+      id: `generated-get-${service}-${command.replaceAll(" ", "-")}`,
+      key,
+      argv,
+      requestOnly: true,
+      replies: {
+        body: operation.responseType?.startsWith("list[") ? [] : {},
+      },
+    });
   }
-  argv.push("--endpoint", "{endpoint}");
-  generated.push({
-    id: `generated-get-${values.service}-${command.replaceAll(" ", "-")}`,
-    key,
-    argv,
-    requestOnly: true,
-    replies: {
-      body: operation.responseType?.startsWith("list[") ? [] : {},
-    },
-  });
+  // Don't litter cases/ with empty files for services that have no generated GETs.
+  if (!generated.length && !(await Bun.file(casePath).exists())) continue;
+  await Bun.write(casePath, `${JSON.stringify(generated, null, 2)}\n`);
+  written.push(casePath);
+  total += generated.length;
+  files++;
 }
-
-await Bun.write(casePath, `${JSON.stringify(generated, null, 2)}\n`);
 
 const coverage = new Set<string>();
 for await (const file of new Bun.Glob("**/*.json").scan(
@@ -107,4 +137,8 @@ await Bun.write(
     .map((key) => `  ${JSON.stringify(key)},`)
     .join("\n")}\n]);\n`,
 );
-console.log(`${generated.length} generated GET cases → ${casePath}`);
+// Keep `bun fmt --check` green without a separate step.
+Bun.spawnSync(["bun", "fmt", ...written], { stdout: "ignore" });
+console.log(
+  `${total} generated GET cases in ${files} file(s) → test/parity/cases/generated-get-*.json`,
+);

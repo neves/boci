@@ -14,7 +14,12 @@ type Param = {
   default?: unknown;
   help?: string;
 };
-type Command = { help?: string; hidden: boolean; params: Param[] };
+type Command = {
+  help?: string;
+  hidden: boolean;
+  params: Param[];
+  helpDoc: { usage: string; text: string; records: [string, string][] };
+};
 type ServiceSpec = {
   service: string;
   groups: Record<string, { help?: string; hidden: boolean }>;
@@ -43,7 +48,9 @@ test("leaf commands carry help and options with their Click attributes", () => {
   const name = param(create, "--name");
   expect(name?.required).toBe(true);
   expect(name?.kind).toBe("option");
-  expect(name?.help).toBeString();
+  expect(
+    create?.helpDoc.records.some(([term]) => term.startsWith("--name ")),
+  ).toBe(true);
   const compartment = param(os.commands["ns get"], "--compartment-id");
   expect(compartment?.required).toBe(false);
 });

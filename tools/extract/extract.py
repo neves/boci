@@ -77,8 +77,7 @@ def param_spec(p: click.Parameter) -> dict:
         out["default"] = jsonable(default)
     if getattr(p, "is_flag", False) and getattr(p, "flag_value", None) not in (None, True):
         out["flagValue"] = jsonable(p.flag_value)
-    if getattr(p, "help", None):
-        out["help"] = p.help
+    # Param help text lives in the command's helpDoc records (with Click's extras).
     cb = getattr(p, "callback", None)
     if cb is not None:
         qual = getattr(cb, "__qualname__", repr(cb))
@@ -96,8 +95,37 @@ def param_spec(p: click.Parameter) -> dict:
     return out
 
 
-def flatten(cmd: click.Command, path: list, groups: dict, commands: dict) -> None:
+def help_doc(cmd: click.Command, ctx: click.Context) -> dict:
+    """What Click's format_help needs, computed by Click itself, so boci only has to
+    port the (deterministic) HelpFormatter: usage pieces, the help paragraph text
+    exactly as handed to write_text, and each param's (term, description) record."""
+    import inspect
+
+    text = inspect.cleandoc(cmd.help).partition("\f")[0] if cmd.help is not None else ""
+    if cmd.deprecated:
+        from click.core import _format_deprecated_label
+
+        label = _format_deprecated_label(cmd.deprecated)
+        text = f"{text} {label}" if text else label
+    records = []
+    for p in cmd.get_params(ctx):
+        rec = p.get_help_record(ctx)
+        if rec is not None:
+            records.append(list(rec))
+    doc = {"usage": " ".join(cmd.collect_usage_pieces(ctx)), "text": text, "records": records}
+    if cmd.epilog:
+        doc["epilog"] = inspect.cleandoc(cmd.epilog)
+    if cmd.short_help:
+        doc["shortHelp"] = inspect.cleandoc(cmd.short_help)
+    if cmd.deprecated:
+        doc["deprecated"] = True
+    return doc
+
+
+def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: click.Context = None) -> None:
     entry = {"hidden": bool(getattr(cmd, "hidden", False))}
+    if ctx is not None:
+        entry["helpDoc"] = help_doc(cmd, ctx)
     if cmd.help:
         entry["help"] = cmd.help
     if cmd.short_help:
@@ -108,7 +136,8 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict) -> Non
             entry["params"] = [param_spec(p) for p in cmd.params]
             groups[key] = entry
         for child, sub in sorted(cmd.commands.items()):
-            flatten(sub, path + [child], groups, commands)
+            child_ctx = click.Context(sub, info_name=child, parent=ctx) if ctx is not None else None
+            flatten(sub, path + [child], groups, commands, child_ctx)
     else:
         entry["callback"] = f"{cmd.callback.__module__}.{cmd.callback.__qualname__}" if cmd.callback else None
         # Generated = callback lives in a services.*.generated module (see GLOSSARY: Generated command).
@@ -132,7 +161,9 @@ def service_spec(name: str, cmd: click.Command) -> dict:
     global CLIENTS
     groups, commands = {}, {}
     CLIENTS = {}
-    flatten(cmd, [], groups, commands)
+    root_ctx = click.Context(load_root(), info_name="oci")
+    ctx = click.Context(cmd, info_name=name, parent=root_ctx)
+    flatten(cmd, [], groups, commands, ctx)
     clients, CLIENTS = dict(sorted(CLIENTS.items())), None
     top = {"hidden": bool(getattr(cmd, "hidden", False))}
     if cmd.help:
@@ -141,6 +172,7 @@ def service_spec(name: str, cmd: click.Command) -> dict:
         top["shortHelp"] = cmd.short_help
     if isinstance(cmd, click.Group):
         top["params"] = [param_spec(p) for p in cmd.params]
+    top["helpDoc"] = help_doc(cmd, ctx)
     return {"service": name, "top": top, "clients": clients, "groups": groups, "commands": commands}
 
 
@@ -222,6 +254,7 @@ def main() -> None:
         "kinds": dict(sorted(kinds.items())),
         "rootHelp": root.help,
         "globalParams": [param_spec(p) for p in root.params],
+        "rootHelpDoc": help_doc(root, click.Context(root, info_name="oci")),
         "root": tree,
     }
     write_json(os.path.join(SPEC_DIR, "index.json"), index)

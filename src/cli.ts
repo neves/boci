@@ -37,6 +37,7 @@ import {
   type TreeNode,
   loadIndex,
   loadService,
+  serviceTree,
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
 
@@ -49,8 +50,7 @@ export class Exit {
   constructor(public code: number) {}
 }
 
-const out = (s: string) => process.stdout.write(s);
-const err = (s: string) => process.stderr.write(s);
+import { err, flush, isTTY, out } from "./io.ts";
 
 const repr = (s: string) =>
   s.includes("'") && !s.includes('"')
@@ -158,7 +158,7 @@ export async function run(argv: string[]): Promise<void> {
     : null;
   {
     const messages = badAliasMessages(rc);
-    for (const m of messages) err(`${style(m, "red", process.stderr.isTTY)}\n`);
+    for (const m of messages) err(`${style(m, "red", isTTY(2))}\n`);
     if (hasAliases) {
       const collisions: string[] = [];
       for (const service of loaded) {
@@ -170,7 +170,7 @@ export async function run(argv: string[]): Promise<void> {
       for (const m of rootParamsAliased?.collisions ?? [])
         if (!collisions.includes(m)) collisions.push(m);
       if (collisions.length)
-        err(`${style(collisions.join("\n"), "red", process.stderr.isTTY)}\n`);
+        err(`${style(collisions.join("\n"), "red", isTTY(2))}\n`);
     }
   }
   const rootHelpDoc = rootParamsAliased
@@ -201,7 +201,7 @@ export async function run(argv: string[]): Promise<void> {
       !index.servicesWithoutCommands.includes(n)
     )
       loaded.add(n);
-    return loaded.has(n) && Boolean(index.root.commands?.[n]);
+    return loaded.has(n);
   });
   if (rootAlias.target === undefined) {
     if (splitOpt(typedName)[0]) {
@@ -237,7 +237,7 @@ export async function run(argv: string[]): Promise<void> {
   // 5. Walk groups down to the leaf. `path` holds names as typed (Click's info_name,
   //    shown in usage); `canon` the canonical command names (spec keys).
   const spec = await loadService(name);
-  let node = index.root.commands?.[name] as TreeNode;
+  let node = serviceTree(spec);
   let path: string[] = [typedName];
   let canon: string[] = [name];
   let args = rest.slice(1);
@@ -404,6 +404,7 @@ async function notImplemented(
   const fallback = process.env.BOCI_FALLBACK;
   const depth = Number(process.env.BOCI_FALLBACK_DEPTH ?? "0");
   if (fallback && depth === 0) {
+    await flush(); // anything boci printed (warnings) comes before the child's output
     const bin = Bun.which(fallback) ?? fallback;
     const proc = Bun.spawn([bin, ...argv], {
       stdio: ["inherit", "inherit", "inherit"],
@@ -532,7 +533,7 @@ function checkKeyForSecurity(s: RootSettings) {
     `Warning: To increase security of your API key located at ${keyFile}, append an extra line with 'OCI_API_KEY' at the end. ` +
     "For more information, refer to https://docs.oracle.com/iaas/Content/API/Concepts/apisigningkey.htm. " +
     "To suppress the warning, set the env variable SUPPRESS_LABEL_WARNING=True";
-  err(`${style(message, "yellow", process.stderr.isTTY)}\n`);
+  err(`${style(message, "yellow", isTTY(2))}\n`);
 }
 
 /** cli_root.get_key_file: configparser read of the config (missing file → none). */
@@ -581,7 +582,7 @@ function resolveAlias(
       const shadowed = rc.globalCommandAliases[name] ?? sequence?.[name];
       if (shadowed !== undefined) {
         err(
-          `${style(`Could not use '${name}' as an alias for '${shadowed}' as it belongs to an existing command under '${chain}'`, "red", process.stderr.isTTY)}\n`,
+          `${style(`Could not use '${name}' as an alias for '${shadowed}' as it belongs to an existing command under '${chain}'`, "red", isTTY(2))}\n`,
         );
       }
     }

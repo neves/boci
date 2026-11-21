@@ -47,7 +47,6 @@ export type Index = {
   globalParams: TypedParam[];
   datetime: DatetimeSpec;
   services: Record<string, { dir: string; title: string; category: string }>;
-  root: TreeNode;
 };
 
 const SPEC_DIR = join(import.meta.dir, "..", "spec");
@@ -84,19 +83,31 @@ export async function loadService(name: string): Promise<ServiceSpec> {
   return (await readSpec(name)) as ServiceSpec;
 }
 
-/** Longest prefix of `tokens` naming a node in the tree, stopping at the first option. */
-export function resolvePath(
-  root: TreeNode,
-  tokens: string[],
-): { path: string[]; node: TreeNode } {
-  const path: string[] = [];
-  let node = root;
-  for (const t of tokens) {
-    if (t.startsWith("-")) break;
-    const next = node.commands?.[t];
-    if (!next) break;
-    path.push(t);
-    node = next;
-  }
-  return { path, node };
+/**
+ * The command tree of one service, rebuilt from its spec (group and command keys), so the
+ * runtime index doesn't carry the whole tree (start-up: parse only what's used).
+ */
+export function serviceTree(spec: ServiceSpec): TreeNode {
+  const root: TreeNode = { name: spec.service, hidden: spec.top.hidden };
+  if (spec.commands[""]) return root; // the service itself is a leaf (e.g. raw-request)
+  root.commands = {};
+  const ensure = (path: string[], hidden: boolean, leaf: boolean) => {
+    let node = root;
+    path.forEach((part, i) => {
+      node.commands ??= {};
+      const last = i === path.length - 1;
+      node.commands[part] ??= {
+        name: part,
+        hidden: false,
+        ...(last && leaf ? {} : { commands: {} }),
+      };
+      node = node.commands[part] as TreeNode;
+      if (last) node.hidden = hidden;
+    });
+  };
+  for (const [key, g] of Object.entries(spec.groups))
+    ensure(key.split(" "), g.hidden, false);
+  for (const [key, c] of Object.entries(spec.commands))
+    ensure(key.split(" "), c.hidden, true);
+  return root;
 }

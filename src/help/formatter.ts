@@ -1,5 +1,6 @@
 // Port of click.formatting (Click 8.4) plus oci's OciHelpFormatter tweak, which keeps
 // list items (-, *, +, 1.) on their own lines. Help output must match byte for byte.
+import { isTTY } from "../io.ts";
 import { TextWrapper, expandTabs, splitlines } from "./textwrap.ts";
 
 const len = (s: string) => {
@@ -85,8 +86,7 @@ export function helpWidth(
 ): number {
   // shutil.get_terminal_size: $COLUMNS if a positive int, else the terminal, else 80.
   let columns = Number.parseInt(env.COLUMNS ?? "", 10);
-  if (!(columns > 0))
-    columns = process.stdout.isTTY ? (process.stdout.columns ?? 80) : 80;
+  if (!(columns > 0)) columns = isTTY(1) ? (process.stdout.columns ?? 80) : 80;
   return Math.max(Math.min(columns, 80) - 2, 50);
 }
 

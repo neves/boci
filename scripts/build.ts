@@ -25,7 +25,15 @@ let raw = 0;
 let packed = 0;
 for await (const file of new Bun.Glob("*.json").scan(join(ROOT, "spec"))) {
   const name = file.slice(0, -".json".length);
-  const bytes = await Bun.file(join(ROOT, "spec", file)).bytes();
+  // Minified JSON parses faster; the runtime index doesn't need the full command tree
+  // (each service rebuilds its own from its spec) nor the dev-only summaries.
+  const data = await Bun.file(join(ROOT, "spec", file)).json();
+  if (name === "index") {
+    delete data.root;
+    delete data.kinds;
+    delete data.rootHelp;
+  }
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
   const zst = Bun.zstdCompressSync(bytes, { level: 19 });
   raw += bytes.length;
   packed += zst.length;

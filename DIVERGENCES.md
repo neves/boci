@@ -68,8 +68,8 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 
 ### Generated PUT requests: special body signature mismatch not reproduced
 
-- **Invocation:** focused generated request-only cases `generated-request-os-ns-update-metadata` and `generated-request-database-management-tablespace-update`.
+- **Invocation:** `bun test test/parity -t 'generated-request-os-ns-update-metadata|generated-request-database-management-tablespace-update'`.
 - **Reference CLI:** goldens capture PUT bodies and authorization signatures; the namespace metadata case has an empty body, while the tablespace case exercises a structured generated body.
 - **boci:** both focused cases pass, including request body and normalized authorization headers. Inspection of the generated PUT golden requests found no exact mismatch. `src/cli.ts` serializes the generated body before signing; `src/signer.ts` hashes those bytes into `x-content-sha256` and signs `content-length`, `content-type`, and the digest.
-- **Attempts:** broad parity timed out without output; three filtered PUT cases including nested JSON passed; this bounded audit inspected the empty and structured body golden requests plus signing implementation, with no reproducible signature mismatch.
-- **State:** unresolved (no failing invocation or exact mismatch could be reproduced).
+- **Why:** no exact signature mismatch could be reproduced to guide a fix.
+- **State:** unresolved (tried: broad parity timed out without output; three filtered PUT cases including nested JSON passed; bounded audit inspected empty and structured body goldens and signing implementation without finding a mismatch).

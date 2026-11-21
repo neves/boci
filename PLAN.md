@@ -111,7 +111,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Fix generated request query/header mismatches (missing query args and Log Analytics `Expect: 100-continue`).
 - [~] Fix generated request signature mismatches for special PUT body shapes.
 - [x] Complex JSON body flags, including `file://` values.
-- [ ] `--from-json` loading and command-line override behavior.
+- [x] `--from-json` loading and command-line override behavior.
 - [ ] `--generate-full-command-json-input` and `--generate-param-json-input`.
 - [ ] Polymorphic bodies (discriminator subcommands).
 - [ ] `--if-match`, `--if-none-match`, extra headers.

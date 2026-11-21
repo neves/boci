@@ -99,7 +99,7 @@ DIVERGENCES.md             recorded Divergences
 ## Rung 3 — Lists and output
 
 - [x] Pagination: `--limit`, `--page`, `--all`, `--page-size`.
-- [ ] `--query` (JMESPath, incl. oci's custom functions).
+- [x] `--query` (JMESPath, incl. oci's custom functions).
 - [ ] `oci_cli_rc` e: `[OCI_CLI_CANNED_QUERIES]` — `--query query://name`.
 - [ ] `--output table` byte-exact; `--raw-output`.
 - [ ] Recordings: curated live list/get recordings across services, replayed offline.

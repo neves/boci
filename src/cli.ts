@@ -49,6 +49,7 @@ import {
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
 import { isImplemented } from "./registry.ts";
+import { applyQuery } from "./query.ts";
 import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
 import {
   InvalidPrivateKey,
@@ -710,7 +711,10 @@ async function runGeneratedGet(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
   }
-  out(`${JSON.stringify(sortJson(output), null, 2)}\n`);
+  const query = rootValues.query;
+  const rendered =
+    typeof query === "string" ? applyQuery(output, query) : output;
+  out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
 }
 
 function timeoutSecondsFor(value: unknown): number | undefined {

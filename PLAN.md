@@ -94,7 +94,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Fix generated GET requests missing `opc-retry-token` (request-only parity case setup).
 - [~] Fix generated GET paths that leave operation parameter placeholders literal instead of substituting values.
 - [x] Response headers surfaced like the Reference CLI (`etag`, `opc-next-page` in output where applicable).
-- [ ] HEAD and DELETE without body; `--force` and confirmation prompts.
+- [~] HEAD and DELETE without body; `--force` and confirmation prompts.
 
 ## Rung 3 — Lists and output
 

@@ -42,7 +42,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Harness a: fake endpoint (`Bun.serve`) that records every request (method, path, query, headers, body) and serves a canned response per case.
 - [x] Harness b: CLI runner that runs a CLI (`oci` or `boci`) with argv in a sandbox against the fake endpoint and returns stdout, stderr, exit code and captured requests.
 - [x] Harness c: Parity case + golden format; `bun run golden` runs the Reference CLI for every case (parallel) and stores its observation; comparator with the central mask list; `bun test` compares boci against goldens only (ADR 0004).
-- [ ] Recorder proxy: forwards to the real OCI endpoint, saves request+response, scrubs tenancy/user OCIDs and namespace. Used only by `bun run parity:live`.
+- [x] Recorder: a `sitecustomize.py` hook (loaded via `PYTHONPATH`) logs every request/response the real `oci` makes, so TLS and signatures stay intact; a scrubber replaces OCIDs, namespace and fingerprint with stable fakes; `bun run record <id> -- <oci args>` writes `test/recordings/<id>.json`. Used only for live work. (A forwarding proxy can't work: the signed `host` header would no longer match.)
 - [ ] `DIVERGENCES.md` with the entry format and an empty list.
 
 ## Rung 0 — Offline behavior

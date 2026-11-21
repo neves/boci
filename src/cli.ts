@@ -47,7 +47,12 @@ import {
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
 import { resolveEndpoint } from "./endpoint.ts";
-import { loadPrivateKey, prepareContentLength, signRequest } from "./signer.ts";
+import {
+  InvalidPrivateKey,
+  loadPrivateKey,
+  prepareContentLength,
+  signRequest,
+} from "./signer.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -459,10 +464,17 @@ async function runNamespaceGet(
   const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
   const req = { method: "GET", url: url.toString(), headers, body: "" };
   prepareContentLength(req);
-  signRequest(req, {
-    keyId,
-    privateKey: loadPrivateKey(pem, config.pass_phrase as string | null),
-  });
+  let privateKey;
+  try {
+    privateKey = loadPrivateKey(pem, config.pass_phrase as string | null);
+  } catch (e) {
+    if (e instanceof InvalidPrivateKey) {
+      err(`${e.message}\n`);
+      throw new Exit(1);
+    }
+    throw e;
+  }
+  signRequest(req, { keyId, privateKey });
   const response = await fetch(req.url, {
     method: req.method,
     headers: req.headers,

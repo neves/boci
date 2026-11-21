@@ -72,7 +72,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] `boci os ns get` — request-only parity.
 - [x] `boci os ns get` — live parity confirmed once with the `.env.test` profile.
 - [x] Client build errors: config file/profile not found, as oci prints them when executing.
-- [ ] Client build errors: invalid key file, as oci prints them when executing.
+- [x] Client build errors: invalid key file, as oci prints them when executing.
 - [ ] Client build warnings: file-permission warnings for config and key, as oci prints them when executing.
 - [ ] Service error mapping: non-2xx → same stderr JSON (`code`, `message`, `status`, `target_service`, …) and exit code.
 - [ ] Global options: `--request-id`, `--debug` (shape only), `--connection-timeout`, `--read-timeout`, `--max-retries`/`--no-retry`.

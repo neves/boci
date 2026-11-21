@@ -41,3 +41,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** skips the label check and carries on (the missing key is reported when signing needs it)
 - **Why:** reproducing an interpreter traceback is meaningless
 - **State:** accepted
+
+### Any command: config key_file pointing to a missing file
+
+- **Invocation:** `oci os ns get` with a profile whose `key_file` points to a nonexistent path
+- **Reference CLI:** crashes in the key-label check with a Python `FileNotFoundError` traceback, exit 1
+- **boci:** reports the invalid `key_file` path through its config error handling, exit 1
+- **Why:** reproducing the interpreter traceback and machine-specific Python paths is not useful; both commands fail before sending a request
+- **State:** accepted

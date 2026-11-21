@@ -48,7 +48,12 @@ for (const [command, node] of Object.entries(spec.commands) as [
   Record<string, unknown>,
 ][]) {
   const operation = node.operation as
-    { http?: string; responseType?: string } | undefined;
+    | {
+        http?: string;
+        responseType?: string;
+        pathParams?: Record<string, string>;
+      }
+    | undefined;
   const key = `${values.service} ${command}`;
   if (
     node.kind !== "generated" ||
@@ -58,8 +63,9 @@ for (const [command, node] of Object.entries(spec.commands) as [
     continue;
   const argv = [values.service, ...command.split(" ")];
   const params = (node.params ?? []) as Record<string, unknown>[];
+  const pathArgs = new Set(Object.values(operation.pathParams ?? {}));
   for (const param of params) {
-    if (param.required !== true) continue;
+    if (param.required !== true && !pathArgs.has(String(param.name))) continue;
     const options = param.opts as string[];
     const option = options?.find((o) => o.startsWith("--")) ?? options?.[0];
     if (!option) continue;

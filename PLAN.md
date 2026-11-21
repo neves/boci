@@ -89,7 +89,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Generated GET path parameters, verified with `compute boot-volume-attachment get`.
 - [x] Generated GET query parameters, verified with `compute global-image-capability-schema list`.
 - [x] Auto-generate request-only parity cases for all generated GETs in Compute.
-- [ ] Auto-generate request-only parity cases for all generated GETs in Object Storage and IAM.
+- [x] Auto-generate request-only parity cases for all generated GETs in Object Storage and IAM.
 - [ ] Auto-generate request-only parity cases for generated GETs in the remaining services, in service batches.
 - [ ] Response headers surfaced like the Reference CLI (`etag`, `opc-next-page` in output where applicable).
 - [ ] HEAD and DELETE without body; `--force` and confirmation prompts.

@@ -656,7 +656,17 @@ async function runGeneratedGet(
     err(`ServiceError:\n${JSON.stringify(sortJson(serviceError), null, 4)}\n`);
     throw new Exit(1);
   }
-  out(`${JSON.stringify(sortJson({ data: value }), null, 2)}\n`);
+  const output: Record<string, unknown> = { data: value };
+  const etag = response.headers.get("etag");
+  const nextPage = response.headers.get("opc-next-page");
+  if (etag !== null) output.etag = etag;
+  if (nextPage !== null) {
+    output["opc-next-page"] = nextPage;
+    err(
+      "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
+    );
+  }
+  out(`${JSON.stringify(sortJson(output), null, 2)}\n`);
 }
 
 function timeoutSecondsFor(value: unknown): number | undefined {

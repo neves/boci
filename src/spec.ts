@@ -11,6 +11,7 @@ export type OperationSpec = {
   method: string;
   http: string;
   path: string;
+  responseType?: string;
   queryParams: Record<string, { arg?: string }>;
   pathParams?: Record<string, string>;
   headerParams?: Record<string, { arg?: string; value?: string }>;

@@ -415,7 +415,8 @@ export async function run(argv: string[]): Promise<void> {
   }
   if (
     name === "compute" &&
-    key === "boot-volume-attachment get" &&
+    (key === "boot-volume-attachment get" ||
+      key === "global-image-capability-schema list") &&
     specCmd.operation
   ) {
     await runGeneratedGet(
@@ -617,7 +618,15 @@ async function runGeneratedGet(
         ? parsed
         : operation.method === "get_namespace"
           ? raw
-          : mapResponseKeys(parsed);
+          : mapResponseKeys(
+              operation.responseType?.startsWith("list[") &&
+                parsed &&
+                typeof parsed === "object" &&
+                "items" in parsed &&
+                Array.isArray(parsed.items)
+                ? parsed.items
+                : parsed,
+            );
   } catch {
     value = raw;
   }

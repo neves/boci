@@ -22,6 +22,7 @@ const IMPLEMENTED = new Set<string>([
   "no-retry",
   "max-retries",
   "compute boot-volume-attachment get",
+  "compute global-image-capability-schema list",
 ]);
 
 export function isImplemented(key: string): boolean {

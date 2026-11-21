@@ -26,6 +26,15 @@
       }
     ]
   },
+  "clients": {
+    "container_instances.container_instance": {
+      "class": "oci.container_instances.container_instance_client.ContainerInstanceClient",
+      "basePath": "/20210415",
+      "endpointTemplate": "https://compute-containers.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "container_instance"
+    }
+  },
   "groups": {
     "container": {
       "hidden": false,
@@ -109,6 +118,30 @@
       "help": "Get details about a single container by the container ID. \n[Command Reference](getContainer)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.get_container",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "get_container",
+        "http": "GET",
+        "path": "/containers/{containerId}",
+        "positionalArgs": ["container_id"],
+        "pathParams": {
+          "containerId": "container_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Container",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -173,6 +206,56 @@
       "help": "Returns a list of containers in a compartment. \n[Command Reference](listContainers)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.list_containers",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "list_containers",
+        "http": "GET",
+        "path": "/containers",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "containerInstanceId": {
+            "arg": "container_instance_id"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ContainerCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -442,6 +525,34 @@
       "help": "Returns the most recent 256 KB of logs from the specified container. \n[Command Reference](retrieveLogs)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.retrieve_logs",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "retrieve_logs",
+        "http": "POST",
+        "path": "/containers/{containerId}/actions/retrieveLogs",
+        "positionalArgs": ["container_id"],
+        "pathParams": {
+          "containerId": "container_id"
+        },
+        "queryParams": {
+          "isPrevious": {
+            "arg": "is_previous"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, text/plain"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -544,6 +655,34 @@
       "help": "Updates a container. \n[Command Reference](updateContainer)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.update_container",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "update_container",
+        "http": "PUT",
+        "path": "/containers/{containerId}",
+        "positionalArgs": ["container_id", "update_container_details"],
+        "pathParams": {
+          "containerId": "container_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_container_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -770,6 +909,37 @@
       "help": "Moves a container instance resource from one compartment identifier to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeContainerInstanceCompartment)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.change_container_instance_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "change_container_instance_compartment",
+        "http": "POST",
+        "path": "/containerInstances/{containerInstanceId}/actions/changeCompartment",
+        "positionalArgs": [
+          "container_instance_id",
+          "change_container_instance_compartment_details"
+        ],
+        "pathParams": {
+          "containerInstanceId": "container_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_container_instance_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -938,6 +1108,33 @@
       "help": "Creates a container instance and deploys the containers on it. \n[Command Reference](createContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.create_container_instance",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "create_container_instance",
+        "http": "POST",
+        "path": "/containerInstances",
+        "positionalArgs": ["create_container_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_container_instance_details",
+        "responseType": "ContainerInstance",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1353,6 +1550,33 @@
       "help": "Creates a container instance and deploys the containers on it. \n[Command Reference](createContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.create_container_instance_create_linux_container_instance_security_context_details",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "create_container_instance",
+        "http": "POST",
+        "path": "/containerInstances",
+        "positionalArgs": ["create_container_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_container_instance_details",
+        "responseType": "ContainerInstance",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1789,6 +2013,33 @@
       "help": "Deletes a container instance and its containers. \n[Command Reference](deleteContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.delete_container_instance",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "delete_container_instance",
+        "http": "DELETE",
+        "path": "/containerInstances/{containerInstanceId}",
+        "positionalArgs": ["container_instance_id"],
+        "pathParams": {
+          "containerInstanceId": "container_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1957,6 +2208,30 @@
       "help": "Gets information about the specified container instance. \n[Command Reference](getContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.get_container_instance",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "get_container_instance",
+        "http": "GET",
+        "path": "/containerInstances/{containerInstanceId}",
+        "positionalArgs": ["container_instance_id"],
+        "pathParams": {
+          "containerInstanceId": "container_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ContainerInstance",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2021,6 +2296,53 @@
       "help": "Returns a list of container instances. \n[Command Reference](listContainerInstances)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.list_container_instances",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "list_container_instances",
+        "http": "GET",
+        "path": "/containerInstances",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ContainerInstanceCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2271,6 +2593,41 @@
       "help": "Lists the shapes that can be used to create container instances. \n[Command Reference](listContainerInstanceShapes)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.list_container_instance_shapes",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "list_container_instance_shapes",
+        "http": "GET",
+        "path": "/containerInstanceShapes",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ContainerInstanceShapeCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2431,6 +2788,33 @@
       "help": "Restarts a container instance. When provided, If-Match is checked against ETag values of the container instance. \n[Command Reference](restartContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.restart_container_instance",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "restart_container_instance",
+        "http": "POST",
+        "path": "/containerInstances/{containerInstanceId}/actions/restart",
+        "positionalArgs": ["container_instance_id"],
+        "pathParams": {
+          "containerInstanceId": "container_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2580,6 +2964,33 @@
       "help": "Starts a container instance if it is \"inactive\". No effect otherwise. When provided, If-Match is checked against ETag values of the container instance. \n[Command Reference](startContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.start_container_instance",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "start_container_instance",
+        "http": "POST",
+        "path": "/containerInstances/{containerInstanceId}/actions/start",
+        "positionalArgs": ["container_instance_id"],
+        "pathParams": {
+          "containerInstanceId": "container_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2729,6 +3140,33 @@
       "help": "Stops a container instance if it is \"active\". No effect otherwise. When provided, If-Match is checked against ETag values of the container instance. \n[Command Reference](stopContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.stop_container_instance",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "stop_container_instance",
+        "http": "POST",
+        "path": "/containerInstances/{containerInstanceId}/actions/stop",
+        "positionalArgs": ["container_instance_id"],
+        "pathParams": {
+          "containerInstanceId": "container_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2878,6 +3316,37 @@
       "help": "Updates a container instance. \n[Command Reference](updateContainerInstance)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.update_container_instance",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "update_container_instance",
+        "http": "PUT",
+        "path": "/containerInstances/{containerInstanceId}",
+        "positionalArgs": [
+          "container_instance_id",
+          "update_container_instance_details"
+        ],
+        "pathParams": {
+          "containerInstanceId": "container_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_container_instance_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3104,6 +3573,30 @@
       "help": "Gets the status of the work request with the given ID. \n[Command Reference](getWorkRequest)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3168,6 +3661,56 @@
       "help": "Lists the work requests in a compartment. \n[Command Reference](listWorkRequests)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "workRequestId": {
+            "arg": "work_request_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "resourceId": {
+            "arg": "resource_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestSummaryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3436,6 +3979,43 @@
       "help": "Returns a paginated list of errors for a work request. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestErrorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3619,6 +4199,43 @@
       "help": "Returns a paginated list of logs for a work request. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.container_instances.src.oci_cli_container_instance.generated.containerinstance_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "container_instances.container_instance",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestLogEntryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

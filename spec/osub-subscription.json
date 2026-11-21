@@ -26,6 +26,29 @@
       }
     ]
   },
+  "clients": {
+    "osub_subscription.commitment": {
+      "class": "oci.osub_subscription.commitment_client.CommitmentClient",
+      "basePath": "/oalapp/service/onesubs/proxy/20210501",
+      "endpointTemplate": "https://csaap-e.oracle.com",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "commitment"
+    },
+    "osub_subscription.ratecard": {
+      "class": "oci.osub_subscription.ratecard_client.RatecardClient",
+      "basePath": "/oalapp/service/onesubs/proxy/20210501",
+      "endpointTemplate": "https://csaap-e.oracle.com",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "ratecard"
+    },
+    "osub_subscription.subscription": {
+      "class": "oci.osub_subscription.subscription_client.SubscriptionClient",
+      "basePath": "/oalapp/service/onesubs/proxy/20210501",
+      "endpointTemplate": "https://csaap-e.oracle.com",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "subscription"
+    }
+  },
   "groups": {
     "commitment": {
       "hidden": false,
@@ -212,6 +235,53 @@
       "help": "This list API returns all commitments for a particular Subscribed Service \n[Command Reference](listCommitments)",
       "callback": "services.osub_subscription.src.oci_cli_commitment.generated.commitment_cli.list_commitments",
       "kind": "generated",
+      "operation": {
+        "client": "osub_subscription.commitment",
+        "method": "list_commitments",
+        "http": "GET",
+        "path": "/commitments",
+        "positionalArgs": ["subscribed_service_id", "compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "subscribedServiceId": {
+            "arg": "subscribed_service_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "x-one-gateway-subscription-id": {
+            "arg": "x_one_gateway_subscription_id"
+          },
+          "x-one-origin-region": {
+            "arg": "x_one_origin_region"
+          }
+        },
+        "responseType": "list[CommitmentSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -452,6 +522,36 @@
       "help": "This API returns the commitment details corresponding to the id provided \n[Command Reference](getCommitment)",
       "callback": "services.osub_subscription.src.oci_cli_commitment.generated.commitment_cli.get_commitment",
       "kind": "generated",
+      "operation": {
+        "client": "osub_subscription.commitment",
+        "method": "get_commitment",
+        "http": "GET",
+        "path": "/commitments/{commitmentId}",
+        "positionalArgs": ["commitment_id"],
+        "pathParams": {
+          "commitmentId": "commitment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "x-one-gateway-subscription-id": {
+            "arg": "x_one_gateway_subscription_id"
+          },
+          "x-one-origin-region": {
+            "arg": "x_one_origin_region"
+          }
+        },
+        "responseType": "CommitmentDetail",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -554,6 +654,59 @@
       "help": "List API that returns all ratecards for given Subscription Id and Account ID (if provided) and for a particular date range \n[Command Reference](listRateCards)",
       "callback": "services.osub_subscription.src.oci_cli_ratecard.generated.ratecard_cli.list_rate_cards",
       "kind": "generated",
+      "operation": {
+        "client": "osub_subscription.ratecard",
+        "method": "list_rate_cards",
+        "http": "GET",
+        "path": "/ratecards",
+        "positionalArgs": ["subscription_id", "compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "subscriptionId": {
+            "arg": "subscription_id"
+          },
+          "timeFrom": {
+            "arg": "time_from"
+          },
+          "timeTo": {
+            "arg": "time_to"
+          },
+          "partNumber": {
+            "arg": "part_number"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "x-one-origin-region": {
+            "arg": "x_one_origin_region"
+          }
+        },
+        "responseType": "list[RateCardSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -832,6 +985,62 @@
       "help": "This list API returns all subscriptions for a given plan number or subscription id or buyer email and provides additional parameters to include ratecard and commitment details. This API expects exactly one of the above mentioned parameters as input. If more than one parameters are provided the API will throw a 400 - invalid parameters exception and if no parameters are provided it will throw a 400 - missing parameter exception \n[Command Reference](listSubscriptions)",
       "callback": "services.osub_subscription.src.oci_cli_subscription.generated.subscription_cli.list_subscriptions",
       "kind": "generated",
+      "operation": {
+        "client": "osub_subscription.subscription",
+        "method": "list_subscriptions",
+        "http": "GET",
+        "path": "/subscriptions",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "planNumber": {
+            "arg": "plan_number"
+          },
+          "subscriptionId": {
+            "arg": "subscription_id"
+          },
+          "buyerEmail": {
+            "arg": "buyer_email"
+          },
+          "isCommitInfoRequired": {
+            "arg": "is_commit_info_required"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "x-one-gateway-subscription-id": {
+            "arg": "x_one_gateway_subscription_id"
+          },
+          "x-one-origin-region": {
+            "arg": "x_one_origin_region"
+          }
+        },
+        "responseType": "list[SubscriptionSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

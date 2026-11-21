@@ -26,6 +26,16 @@
       }
     ]
   },
+  "clients": {
+    "core.compute": {
+      "class": "oci.core.compute_client.ComputeClient",
+      "basePath": "/20160918",
+      "endpointTemplate": "https://iaas.{region}.{dualStack?ds.oci.:}{secondLevelDomain}",
+      "endpointServiceName": "iaas",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "compute"
+    }
+  },
   "groups": {
     "boot-volume-attachment": {
       "hidden": false,
@@ -1084,6 +1094,30 @@
       "help": "Attaches the specified boot volume to the specified instance. \n[Command Reference](attachBootVolume)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.attach_boot_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "attach_boot_volume",
+        "http": "POST",
+        "path": "/bootVolumeAttachments",
+        "positionalArgs": ["attach_boot_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "attach_boot_volume_details",
+        "responseType": "BootVolumeAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume_attachment"],
       "params": [
         {
           "kind": "option",
@@ -1266,6 +1300,30 @@
       "help": "Detaches a boot volume from an instance. You must specify the OCID of the boot volume attachment.\n\nThis is an asynchronous operation. The attachment's `lifecycleState` will change to DETACHING temporarily until the attachment is completely removed. \n[Command Reference](detachBootVolume)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.detach_boot_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "detach_boot_volume",
+        "http": "DELETE",
+        "path": "/bootVolumeAttachments/{bootVolumeAttachmentId}",
+        "positionalArgs": ["boot_volume_attachment_id"],
+        "pathParams": {
+          "bootVolumeAttachmentId": "boot_volume_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume_attachment"],
       "params": [
         {
           "kind": "option",
@@ -1427,6 +1485,27 @@
       "help": "Gets information about the specified boot volume attachment. \n[Command Reference](getBootVolumeAttachment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_boot_volume_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_boot_volume_attachment",
+        "http": "GET",
+        "path": "/bootVolumeAttachments/{bootVolumeAttachmentId}",
+        "positionalArgs": ["boot_volume_attachment_id"],
+        "pathParams": {
+          "bootVolumeAttachmentId": "boot_volume_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "BootVolumeAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1491,6 +1570,44 @@
       "help": "Lists the boot volume attachments in the specified compartment. You can filter the list by specifying an instance OCID, boot volume OCID, or both. \n[Command Reference](listBootVolumeAttachments)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_boot_volume_attachments",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_boot_volume_attachments",
+        "http": "GET",
+        "path": "/bootVolumeAttachments",
+        "positionalArgs": ["availability_domain", "compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "instanceId": {
+            "arg": "instance_id"
+          },
+          "bootVolumeId": {
+            "arg": "boot_volume_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[BootVolumeAttachment]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1689,6 +1806,40 @@
       "help": "Moves a compute capacity reservation into a different compartment. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeComputeCapacityReservationCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_compute_capacity_reservation_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_compute_capacity_reservation_compartment",
+        "http": "POST",
+        "path": "/computeCapacityReservations/{capacityReservationId}/actions/changeCompartment",
+        "positionalArgs": [
+          "capacity_reservation_id",
+          "change_compute_capacity_reservation_compartment_details"
+        ],
+        "pathParams": {
+          "capacityReservationId": "capacity_reservation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_compute_capacity_reservation_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -1850,6 +2001,33 @@
       "help": "Creates a new compute capacity reservation in the specified compartment and availability domain. Compute capacity reservations let you reserve instances in a compartment. When you launch an instance using this reservation, you are assured that you have enough space for your instance, and you won't get out of capacity errors. For more information, see [Reserved Capacity]. \n[Command Reference](createComputeCapacityReservation)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_compute_capacity_reservation",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_compute_capacity_reservation",
+        "http": "POST",
+        "path": "/computeCapacityReservations",
+        "positionalArgs": ["create_compute_capacity_reservation_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_compute_capacity_reservation_details",
+        "responseType": "ComputeCapacityReservation",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_capacity_reservation"],
       "params": [
         {
           "kind": "option",
@@ -2094,6 +2272,33 @@
       "help": "Deletes the specified compute capacity reservation. \n[Command Reference](deleteComputeCapacityReservation)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_compute_capacity_reservation",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_compute_capacity_reservation",
+        "http": "DELETE",
+        "path": "/computeCapacityReservations/{capacityReservationId}",
+        "positionalArgs": ["capacity_reservation_id"],
+        "pathParams": {
+          "capacityReservationId": "capacity_reservation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -2255,6 +2460,30 @@
       "help": "Gets information about the specified compute capacity reservation. \n[Command Reference](getComputeCapacityReservation)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_compute_capacity_reservation",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_compute_capacity_reservation",
+        "http": "GET",
+        "path": "/computeCapacityReservations/{capacityReservationId}",
+        "positionalArgs": ["capacity_reservation_id"],
+        "pathParams": {
+          "capacityReservationId": "capacity_reservation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeCapacityReservation",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2319,6 +2548,49 @@
       "help": "Lists the instances launched under a capacity reservation. You can filter results by specifying criteria. \n[Command Reference](listComputeCapacityReservationInstances)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_capacity_reservation_instances",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_capacity_reservation_instances",
+        "http": "GET",
+        "path": "/computeCapacityReservations/{capacityReservationId}/instances",
+        "positionalArgs": ["capacity_reservation_id"],
+        "pathParams": {
+          "capacityReservationId": "capacity_reservation_id"
+        },
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[CapacityReservationInstanceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2540,6 +2812,50 @@
       "help": "Lists the shapes that can be reserved within the specified compartment. \n[Command Reference](listComputeCapacityReservationInstanceShapes)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_capacity_reservation_instance_shapes",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_capacity_reservation_instance_shapes",
+        "http": "GET",
+        "path": "/computeCapacityReservationInstanceShapes",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ComputeCapacityReservationInstanceShapeSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2761,6 +3077,53 @@
       "help": "Lists the compute capacity reservations that match the specified criteria and compartment.\n\nYou can limit the list by specifying a compute capacity reservation display name (the list will include all the identically-named compute capacity reservations in the compartment). \n[Command Reference](listComputeCapacityReservations)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_capacity_reservations",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_capacity_reservations",
+        "http": "GET",
+        "path": "/computeCapacityReservations",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ComputeCapacityReservationSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3010,6 +3373,37 @@
       "help": "Updates the specified capacity reservation and its associated capacity configurations. Fields that are not provided in the request will not be updated. Capacity configurations that are not included will be deleted. Avoid entering confidential information. \n[Command Reference](updateComputeCapacityReservation)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_compute_capacity_reservation",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_compute_capacity_reservation",
+        "http": "PUT",
+        "path": "/computeCapacityReservations/{capacityReservationId}",
+        "positionalArgs": [
+          "capacity_reservation_id",
+          "update_compute_capacity_reservation_details"
+        ],
+        "pathParams": {
+          "capacityReservationId": "capacity_reservation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_compute_capacity_reservation_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -3742,6 +4136,33 @@
       "help": "Creates a new compute capacity topology in the specified compartment and availability domain.\n\nCompute capacity topologies provide the RDMA network topology of your bare metal hosts so that you can launch instances on your bare metal hosts with targeted network locations.\n\nCompute capacity topologies report the health status of your bare metal hosts. \n[Command Reference](createComputeCapacityTopology)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_compute_capacity_topology",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_compute_capacity_topology",
+        "http": "POST",
+        "path": "/computeCapacityTopologies",
+        "positionalArgs": ["create_compute_capacity_topology_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_compute_capacity_topology_details",
+        "responseType": "ComputeCapacityTopology",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_capacity_topology"],
       "params": [
         {
           "kind": "option",
@@ -4460,6 +4881,50 @@
       "help": "Lists the compute capacity topologies in the specified compartment. You can filter the list by a compute capacity topology display name. \n[Command Reference](listComputeCapacityTopologies)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_capacity_topologies",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_capacity_topologies",
+        "http": "GET",
+        "path": "/computeCapacityTopologies",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeCapacityTopologyCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -5195,6 +5660,32 @@
       "help": "Generates a report of the host capacity within an availability domain that is available for you to create compute instances. Host capacity is the physical infrastructure that resources such as compute instances run on.\n\nUse the capacity report to determine whether sufficient capacity is available for a shape before you create an instance or change the shape of an instance. \n[Command Reference](createComputeCapacityReport)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_compute_capacity_report",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_compute_capacity_report",
+        "http": "POST",
+        "path": "/computeCapacityReports",
+        "positionalArgs": ["create_compute_capacity_report_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_compute_capacity_report_details",
+        "responseType": "ComputeCapacityReport",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5297,6 +5788,39 @@
       "help": "Moves a compute cluster into a different compartment within the same tenancy. A [compute cluster] is a remote direct memory access (RDMA) network group.\n\nFor information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeComputeClusterCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_compute_cluster_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_compute_cluster_compartment",
+        "http": "POST",
+        "path": "/computeClusters/{computeClusterId}/actions/changeCompartment",
+        "positionalArgs": [
+          "compute_cluster_id",
+          "change_compute_cluster_compartment_details"
+        ],
+        "pathParams": {
+          "computeClusterId": "compute_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_compute_cluster_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5399,6 +5923,33 @@
       "help": "Creates an empty [compute cluster]. A compute cluster is a remote direct memory access (RDMA) network group.\n\nAfter the compute cluster is created, you can use the compute cluster's OCID with the [LaunchInstance] operation to create instances in the compute cluster. The instances must be created in the same compartment and availability domain as the cluster.\n\nUse compute clusters when you want to manage instances in the cluster individually in the RDMA network group.\n\nIf you want predictable capacity for a specific number of identical instances that are managed as a group, create a cluster network that uses instance pools by using the [CreateClusterNetwork] operation. \n[Command Reference](createComputeCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_compute_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_compute_cluster",
+        "http": "POST",
+        "path": "/computeClusters",
+        "positionalArgs": ["create_compute_cluster_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_compute_cluster_details",
+        "responseType": "ComputeCluster",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_cluster"],
       "params": [
         {
           "kind": "option",
@@ -5617,6 +6168,33 @@
       "help": "Deletes a compute cluster. A [compute cluster] is a remote direct memory access (RDMA) network group.\n\nBefore you delete a compute cluster, first delete all instances in the cluster by using the [TerminateInstance] operation. \n[Command Reference](deleteComputeCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_compute_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_compute_cluster",
+        "http": "DELETE",
+        "path": "/computeClusters/{computeClusterId}",
+        "positionalArgs": ["compute_cluster_id"],
+        "pathParams": {
+          "computeClusterId": "compute_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_cluster"],
       "params": [
         {
           "kind": "option",
@@ -5778,6 +6356,30 @@
       "help": "Gets information about a compute cluster. A [compute cluster] is a remote direct memory access (RDMA) network group. \n[Command Reference](getComputeCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_compute_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_compute_cluster",
+        "http": "GET",
+        "path": "/computeClusters/{computeClusterId}",
+        "positionalArgs": ["compute_cluster_id"],
+        "pathParams": {
+          "computeClusterId": "compute_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeCluster",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5842,6 +6444,50 @@
       "help": "Lists the compute clusters in the specified compartment. A [compute cluster] is a remote direct memory access (RDMA) network group. \n[Command Reference](listComputeClusters)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_clusters",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_clusters",
+        "http": "GET",
+        "path": "/computeClusters",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeClusterCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -6063,6 +6709,41 @@
       "help": "Updates a compute cluster. A [compute cluster] is a remote direct memory access (RDMA) network group.\n\nTo create instances within a compute cluster, use the [LaunchInstance] operation.\n\nTo delete instances from a compute cluster, use the [TerminateInstance] operation. \n[Command Reference](updateComputeCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_compute_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_compute_cluster",
+        "http": "PUT",
+        "path": "/computeClusters/{computeClusterId}",
+        "positionalArgs": [
+          "compute_cluster_id",
+          "update_compute_cluster_details"
+        ],
+        "pathParams": {
+          "computeClusterId": "compute_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_compute_cluster_details",
+        "responseType": "ComputeCluster",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_cluster"],
       "params": [
         {
           "kind": "option",
@@ -6301,6 +6982,39 @@
       "help": "Moves a compute GPU memory cluster into a different compartment. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeComputeGpuMemoryClusterCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_compute_gpu_memory_cluster_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_compute_gpu_memory_cluster_compartment",
+        "http": "POST",
+        "path": "/computeGpuMemoryClusters/{computeGpuMemoryClusterId}/actions/changeCompartment",
+        "positionalArgs": [
+          "compute_gpu_memory_cluster_id",
+          "change_compute_gpu_memory_cluster_compartment_details"
+        ],
+        "pathParams": {
+          "computeGpuMemoryClusterId": "compute_gpu_memory_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_compute_gpu_memory_cluster_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6403,6 +7117,33 @@
       "help": "Create a compute GPU memory cluster instance on a specific compute GPU memory fabric \n[Command Reference](createComputeGpuMemoryCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_compute_gpu_memory_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_compute_gpu_memory_cluster",
+        "http": "POST",
+        "path": "/computeGpuMemoryClusters",
+        "positionalArgs": ["create_compute_gpu_memory_cluster_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_compute_gpu_memory_cluster_details",
+        "responseType": "ComputeGpuMemoryCluster",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_gpu_memory_cluster"],
       "params": [
         {
           "kind": "option",
@@ -6716,6 +7457,33 @@
       "help": "Terminates and deletes the specified compute GPU memory cluster and underlying instances. \n[Command Reference](deleteComputeGpuMemoryCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_compute_gpu_memory_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_compute_gpu_memory_cluster",
+        "http": "DELETE",
+        "path": "/computeGpuMemoryClusters/{computeGpuMemoryClusterId}",
+        "positionalArgs": ["compute_gpu_memory_cluster_id"],
+        "pathParams": {
+          "computeGpuMemoryClusterId": "compute_gpu_memory_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -6877,6 +7645,30 @@
       "help": "Gets information about the specified compute GPU memory cluster \n[Command Reference](getComputeGpuMemoryCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_compute_gpu_memory_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_compute_gpu_memory_cluster",
+        "http": "GET",
+        "path": "/computeGpuMemoryClusters/{computeGpuMemoryClusterId}",
+        "positionalArgs": ["compute_gpu_memory_cluster_id"],
+        "pathParams": {
+          "computeGpuMemoryClusterId": "compute_gpu_memory_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeGpuMemoryCluster",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6941,6 +7733,59 @@
       "help": "List all of the compute GPU memory clusters. \n[Command Reference](listComputeGpuMemoryClusters)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_gpu_memory_clusters",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_gpu_memory_clusters",
+        "http": "GET",
+        "path": "/computeGpuMemoryClusters",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "computeGpuMemoryClusterId": {
+            "arg": "compute_gpu_memory_cluster_id"
+          },
+          "computeGpuMemoryFabricId": {
+            "arg": "compute_gpu_memory_fabric_id"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "computeClusterId": {
+            "arg": "compute_cluster_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeGpuMemoryClusterCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7219,6 +8064,41 @@
       "help": "Updates a compute gpu memory cluster resource. \n[Command Reference](updateComputeGpuMemoryCluster)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_compute_gpu_memory_cluster",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_compute_gpu_memory_cluster",
+        "http": "PUT",
+        "path": "/computeGpuMemoryClusters/{computeGpuMemoryClusterId}",
+        "positionalArgs": [
+          "compute_gpu_memory_cluster_id",
+          "update_compute_gpu_memory_cluster_details"
+        ],
+        "pathParams": {
+          "computeGpuMemoryClusterId": "compute_gpu_memory_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_compute_gpu_memory_cluster_details",
+        "responseType": "ComputeGpuMemoryCluster",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_gpu_memory_cluster"],
       "params": [
         {
           "kind": "option",
@@ -7514,6 +8394,43 @@
       "help": "List all of the GPU memory cluster instances. \n[Command Reference](listComputeGpuMemoryClusterInstances)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_gpu_memory_cluster_instances",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_gpu_memory_cluster_instances",
+        "http": "GET",
+        "path": "/computeGpuMemoryClusters/{computeGpuMemoryClusterId}/instances",
+        "positionalArgs": ["compute_gpu_memory_cluster_id"],
+        "pathParams": {
+          "computeGpuMemoryClusterId": "compute_gpu_memory_cluster_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeGpuMemoryClusterInstanceCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7697,6 +8614,39 @@
       "help": "Moves a compute GPU memory fabric into a different compartment. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeComputeGpuMemoryFabricCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_compute_gpu_memory_fabric_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_compute_gpu_memory_fabric_compartment",
+        "http": "POST",
+        "path": "/computeGpuMemoryFabrics/{computeGpuMemoryFabricId}/actions/changeCompartment",
+        "positionalArgs": [
+          "compute_gpu_memory_fabric_id",
+          "change_compute_gpu_memory_fabric_compartment_details"
+        ],
+        "pathParams": {
+          "computeGpuMemoryFabricId": "compute_gpu_memory_fabric_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_compute_gpu_memory_fabric_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7799,6 +8749,30 @@
       "help": "Gets information about the specified compute GPU memory fabric \n[Command Reference](getComputeGpuMemoryFabric)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_compute_gpu_memory_fabric",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_compute_gpu_memory_fabric",
+        "http": "GET",
+        "path": "/computeGpuMemoryFabrics/{computeGpuMemoryFabricId}",
+        "positionalArgs": ["compute_gpu_memory_fabric_id"],
+        "pathParams": {
+          "computeGpuMemoryFabricId": "compute_gpu_memory_fabric_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeGpuMemoryFabric",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7863,6 +8837,65 @@
       "help": "Lists the compute GPU memory fabrics that match the specified criteria and compartmentId. \n[Command Reference](listComputeGpuMemoryFabrics)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_gpu_memory_fabrics",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_gpu_memory_fabrics",
+        "http": "GET",
+        "path": "/computeGpuMemoryFabrics",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "computeGpuMemoryFabricId": {
+            "arg": "compute_gpu_memory_fabric_id"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "computeHpcIslandId": {
+            "arg": "compute_hpc_island_id"
+          },
+          "computeNetworkBlockId": {
+            "arg": "compute_network_block_id"
+          },
+          "computeGpuMemoryFabricLifecycleState": {
+            "arg": "compute_gpu_memory_fabric_lifecycle_state"
+          },
+          "computeGpuMemoryFabricHealth": {
+            "arg": "compute_gpu_memory_fabric_health"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeGpuMemoryFabricCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8189,6 +9222,41 @@
       "help": "Customer can update displayName, tags and  desired firmware bundle, recycle level for compute GPU memory fabric record \n[Command Reference](updateComputeGpuMemoryFabric)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_compute_gpu_memory_fabric",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_compute_gpu_memory_fabric",
+        "http": "PUT",
+        "path": "/computeGpuMemoryFabrics/{computeGpuMemoryFabricId}",
+        "positionalArgs": [
+          "compute_gpu_memory_fabric_id",
+          "update_compute_gpu_memory_fabric_details"
+        ],
+        "pathParams": {
+          "computeGpuMemoryFabricId": "compute_gpu_memory_fabric_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_compute_gpu_memory_fabric_details",
+        "responseType": "ComputeGpuMemoryFabric",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_gpu_memory_fabric"],
       "params": [
         {
           "kind": "option",
@@ -8433,6 +9501,37 @@
       "help": "Triggers the asynchronous process that applies the host's target configuration \n[Command Reference](applyHostConfiguration)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.apply_host_configuration",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "apply_host_configuration",
+        "http": "POST",
+        "path": "/computeHosts/{computeHostId}/actions/applyConfiguration",
+        "positionalArgs": ["compute_host_id"],
+        "pathParams": {
+          "computeHostId": "compute_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "responseType": "ComputeHost",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_host"],
       "params": [
         {
           "kind": "option",
@@ -8581,6 +9680,41 @@
       "help": "Attaches the Compute BM Host to a Host group \n[Command Reference](attachComputeHostGroupHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.attach_compute_host_group_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "attach_compute_host_group_host",
+        "http": "POST",
+        "path": "/computeHosts/{computeHostId}/actions/attachToHostGroup",
+        "positionalArgs": [
+          "compute_host_id",
+          "attach_compute_host_group_host_details"
+        ],
+        "pathParams": {
+          "computeHostId": "compute_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "attach_compute_host_group_host_details",
+        "responseType": "ComputeHost",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_host"],
       "params": [
         {
           "kind": "option",
@@ -8748,6 +9882,40 @@
       "help": "Moves a compute host into a different compartment. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeComputeHostCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_compute_host_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_compute_host_compartment",
+        "http": "POST",
+        "path": "/computeHosts/{computeHostId}/actions/changeCompartment",
+        "positionalArgs": [
+          "compute_host_id",
+          "change_compute_host_compartment_details"
+        ],
+        "pathParams": {
+          "computeHostId": "compute_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_compute_host_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -8909,6 +10077,37 @@
       "help": "Marks the host to be checked for conformance to its target configuration \n[Command Reference](checkHostConfiguration)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.check_host_configuration",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "check_host_configuration",
+        "http": "POST",
+        "path": "/computeHosts/{computeHostId}/actions/checkConfiguration",
+        "positionalArgs": ["compute_host_id"],
+        "pathParams": {
+          "computeHostId": "compute_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "responseType": "ComputeHost",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_host"],
       "params": [
         {
           "kind": "option",
@@ -9057,6 +10256,40 @@
       "help": "Detaches the specified bare metal host from the compute host group \n[Command Reference](detachComputeHostGroupHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.detach_compute_host_group_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "detach_compute_host_group_host",
+        "http": "POST",
+        "path": "/computeHosts/{computeHostId}/actions/detachFromHostGroup",
+        "positionalArgs": [
+          "compute_host_id",
+          "detach_compute_host_group_host_details"
+        ],
+        "pathParams": {
+          "computeHostId": "compute_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "detach_compute_host_group_host_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -9218,6 +10451,30 @@
       "help": "Gets information about the specified compute host \n[Command Reference](getComputeHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_compute_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_compute_host",
+        "http": "GET",
+        "path": "/computeHosts/{computeHostId}",
+        "positionalArgs": ["compute_host_id"],
+        "pathParams": {
+          "computeHostId": "compute_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeHost",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9282,6 +10539,65 @@
       "help": "Generates a list of summary host details \n[Command Reference](listComputeHosts)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_hosts",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_hosts",
+        "http": "GET",
+        "path": "/computeHosts",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "networkResourceId": {
+            "arg": "network_resource_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "computeHostLifecycleState": {
+            "arg": "compute_host_lifecycle_state"
+          },
+          "computeHostHealth": {
+            "arg": "compute_host_health"
+          },
+          "computeHostGroupId": {
+            "arg": "compute_host_group_id"
+          },
+          "computeHostInSubtree": {
+            "arg": "compute_host_in_subtree"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeHostCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9598,6 +10914,37 @@
       "help": "Customer can update the some fields for ComputeHost record \n[Command Reference](updateComputeHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_compute_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_compute_host",
+        "http": "PUT",
+        "path": "/computeHosts/{computeHostId}",
+        "positionalArgs": ["compute_host_id", "update_compute_host_details"],
+        "pathParams": {
+          "computeHostId": "compute_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_compute_host_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -9817,6 +11164,40 @@
       "help": "Moves a compute host group into a different compartment. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeComputeHostGroupCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_compute_host_group_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_compute_host_group_compartment",
+        "http": "POST",
+        "path": "/computeHostGroups/{computeHostGroupId}/actions/changeCompartment",
+        "positionalArgs": [
+          "compute_host_group_id",
+          "change_compute_host_group_compartment_details"
+        ],
+        "pathParams": {
+          "computeHostGroupId": "compute_host_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_compute_host_group_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -9978,6 +11359,33 @@
       "help": "Creates a new compute host group in the specified compartment and availability domain. \n[Command Reference](createComputeHostGroup)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_compute_host_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_compute_host_group",
+        "http": "POST",
+        "path": "/computeHostGroups",
+        "positionalArgs": ["create_compute_host_group_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_compute_host_group_details",
+        "responseType": "ComputeHostGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_host_group"],
       "params": [
         {
           "kind": "option",
@@ -10215,6 +11623,33 @@
       "help": "Deletes the specified compute host group \n[Command Reference](deleteComputeHostGroup)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_compute_host_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_compute_host_group",
+        "http": "DELETE",
+        "path": "/computeHostGroups/{computeHostGroupId}",
+        "positionalArgs": ["compute_host_group_id"],
+        "pathParams": {
+          "computeHostGroupId": "compute_host_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_host_group"],
       "params": [
         {
           "kind": "option",
@@ -10376,6 +11811,30 @@
       "help": "Gets information about the specified compute host group \n[Command Reference](getComputeHostGroup)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_compute_host_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_compute_host_group",
+        "http": "GET",
+        "path": "/computeHostGroups/{computeHostGroupId}",
+        "positionalArgs": ["compute_host_group_id"],
+        "pathParams": {
+          "computeHostGroupId": "compute_host_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeHostGroup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10440,6 +11899,38 @@
       "help": "Lists the compute host groups that match the specified criteria and compartment. \n[Command Reference](listComputeHostGroups)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_host_groups",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_host_groups",
+        "http": "GET",
+        "path": "/computeHostGroups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ComputeHostGroupCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -10581,6 +12072,41 @@
       "help": "Updates the specified compute host group details. \n[Command Reference](updateComputeHostGroup)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_compute_host_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_compute_host_group",
+        "http": "PUT",
+        "path": "/computeHostGroups/{computeHostGroupId}",
+        "positionalArgs": [
+          "compute_host_group_id",
+          "update_compute_host_group_details"
+        ],
+        "pathParams": {
+          "computeHostGroupId": "compute_host_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_compute_host_group_details",
+        "responseType": "ComputeHostGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_compute_host_group"],
       "params": [
         {
           "kind": "option",
@@ -10838,6 +12364,30 @@
       "help": "Captures the most recent serial console data (up to a megabyte) for the specified instance.\n\nThe `CaptureConsoleHistory` operation works with the other console history operations as described below.\n\n1. Use `CaptureConsoleHistory` to request the capture of up to a megabyte of the most recent console history. This call returns a `ConsoleHistory` object. The object will have a state of REQUESTED. 2. Wait for the capture operation to succeed by polling `GetConsoleHistory` with the identifier of the console history metadata. The state of the `ConsoleHistory` object will go from REQUESTED to GETTING-HISTORY and then SUCCEEDED (or FAILED). 3. Use `GetConsoleHistoryContent` to get the actual console history data (not the metadata). 4. Optionally, use `DeleteConsoleHistory` to delete the console history metadata and the console history data. \n[Command Reference](captureConsoleHistory)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.capture_console_history",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "capture_console_history",
+        "http": "POST",
+        "path": "/instanceConsoleHistories",
+        "positionalArgs": ["capture_console_history_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "capture_console_history_details",
+        "responseType": "ConsoleHistory",
+        "paginated": false
+      },
+      "otherOperations": ["get_console_history"],
       "params": [
         {
           "kind": "option",
@@ -11018,6 +12568,30 @@
       "help": "Deletes the specified console history metadata and the console history data. \n[Command Reference](deleteConsoleHistory)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_console_history",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_console_history",
+        "http": "DELETE",
+        "path": "/instanceConsoleHistories/{instanceConsoleHistoryId}",
+        "positionalArgs": ["instance_console_history_id"],
+        "pathParams": {
+          "instanceConsoleHistoryId": "instance_console_history_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_console_history"],
       "params": [
         {
           "kind": "option",
@@ -11179,6 +12753,27 @@
       "help": "Shows the metadata for the specified console history. See [CaptureConsoleHistory] for details about using the console history operations. \n[Command Reference](getConsoleHistory)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_console_history",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_console_history",
+        "http": "GET",
+        "path": "/instanceConsoleHistories/{instanceConsoleHistoryId}",
+        "positionalArgs": ["instance_console_history_id"],
+        "pathParams": {
+          "instanceConsoleHistoryId": "instance_console_history_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "ConsoleHistory",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11243,6 +12838,34 @@
       "help": "Gets the actual console history data (not the metadata). See [CaptureConsoleHistory] for details about using the console history operations. \n[Command Reference](getConsoleHistoryContent)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_console_history_content",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_console_history_content",
+        "http": "GET",
+        "path": "/instanceConsoleHistories/{instanceConsoleHistoryId}/data",
+        "positionalArgs": ["instance_console_history_id"],
+        "pathParams": {
+          "instanceConsoleHistoryId": "instance_console_history_id"
+        },
+        "queryParams": {
+          "offset": {
+            "arg": "offset"
+          },
+          "length": {
+            "arg": "length"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "bytes",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11364,6 +12987,50 @@
       "help": "Lists the console history metadata for the specified compartment or instance. \n[Command Reference](listConsoleHistories)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_console_histories",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_console_histories",
+        "http": "GET",
+        "path": "/instanceConsoleHistories",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "instanceId": {
+            "arg": "instance_id"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[ConsoleHistory]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -11606,6 +13273,35 @@
       "help": "Updates the specified console history metadata. \n[Command Reference](updateConsoleHistory)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_console_history",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_console_history",
+        "http": "PUT",
+        "path": "/instanceConsoleHistories/{instanceConsoleHistoryId}",
+        "positionalArgs": [
+          "instance_console_history_id",
+          "update_console_history_details"
+        ],
+        "pathParams": {
+          "instanceConsoleHistoryId": "instance_console_history_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_console_history_details",
+        "responseType": "ConsoleHistory",
+        "paginated": false
+      },
+      "otherOperations": ["get_console_history"],
       "params": [
         {
           "kind": "option",
@@ -11825,6 +13521,40 @@
       "help": "Moves a dedicated virtual machine host from one compartment to another. \n[Command Reference](changeDedicatedVmHostCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_dedicated_vm_host_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_dedicated_vm_host_compartment",
+        "http": "POST",
+        "path": "/dedicatedVmHosts/{dedicatedVmHostId}/actions/changeCompartment",
+        "positionalArgs": [
+          "dedicated_vm_host_id",
+          "change_dedicated_vm_host_compartment_details"
+        ],
+        "pathParams": {
+          "dedicatedVmHostId": "dedicated_vm_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_dedicated_vm_host_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -11986,6 +13716,33 @@
       "help": "Creates a new dedicated virtual machine host in the specified compartment and the specified availability domain. Dedicated virtual machine hosts enable you to run your Compute virtual machine (VM) instances on dedicated servers that are a single tenant and not shared with other customers. For more information, see [Dedicated Virtual Machine Hosts]. \n[Command Reference](createDedicatedVmHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_dedicated_vm_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_dedicated_vm_host",
+        "http": "POST",
+        "path": "/dedicatedVmHosts",
+        "positionalArgs": ["create_dedicated_vm_host_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_dedicated_vm_host_details",
+        "responseType": "DedicatedVmHost",
+        "paginated": false
+      },
+      "otherOperations": ["get_dedicated_vm_host"],
       "params": [
         {
           "kind": "option",
@@ -12306,6 +14063,33 @@
       "help": "Creates a new dedicated virtual machine host in the specified compartment and the specified availability domain. Dedicated virtual machine hosts enable you to run your Compute virtual machine (VM) instances on dedicated servers that are a single tenant and not shared with other customers. For more information, see [Dedicated Virtual Machine Hosts]. \n[Command Reference](createDedicatedVmHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_dedicated_vm_host_compute_bare_metal_host_placement_constraint_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_dedicated_vm_host",
+        "http": "POST",
+        "path": "/dedicatedVmHosts",
+        "positionalArgs": ["create_dedicated_vm_host_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_dedicated_vm_host_details",
+        "responseType": "DedicatedVmHost",
+        "paginated": false
+      },
+      "otherOperations": ["get_dedicated_vm_host"],
       "params": [
         {
           "kind": "option",
@@ -12626,6 +14410,33 @@
       "help": "Creates a new dedicated virtual machine host in the specified compartment and the specified availability domain. Dedicated virtual machine hosts enable you to run your Compute virtual machine (VM) instances on dedicated servers that are a single tenant and not shared with other customers. For more information, see [Dedicated Virtual Machine Hosts]. \n[Command Reference](createDedicatedVmHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_dedicated_vm_host_host_group_placement_constraint_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_dedicated_vm_host",
+        "http": "POST",
+        "path": "/dedicatedVmHosts",
+        "positionalArgs": ["create_dedicated_vm_host_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_dedicated_vm_host_details",
+        "responseType": "DedicatedVmHost",
+        "paginated": false
+      },
+      "otherOperations": ["get_dedicated_vm_host"],
       "params": [
         {
           "kind": "option",
@@ -12946,6 +14757,30 @@
       "help": "Deletes the specified dedicated virtual machine host.\n\nIf any VM instances are assigned to the dedicated virtual machine host, the delete operation will fail and the service will return a 409 response code. \n[Command Reference](deleteDedicatedVmHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_dedicated_vm_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_dedicated_vm_host",
+        "http": "DELETE",
+        "path": "/dedicatedVmHosts/{dedicatedVmHostId}",
+        "positionalArgs": ["dedicated_vm_host_id"],
+        "pathParams": {
+          "dedicatedVmHostId": "dedicated_vm_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -13088,6 +14923,30 @@
       "help": "Gets information about the specified dedicated virtual machine host. \n[Command Reference](getDedicatedVmHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_dedicated_vm_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_dedicated_vm_host",
+        "http": "GET",
+        "path": "/dedicatedVmHosts/{dedicatedVmHostId}",
+        "positionalArgs": ["dedicated_vm_host_id"],
+        "pathParams": {
+          "dedicatedVmHostId": "dedicated_vm_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DedicatedVmHost",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -13152,6 +15011,44 @@
       "help": "Lists the shapes that can be used to launch a dedicated virtual machine host within the specified compartment. \n[Command Reference](listDedicatedVmHostShapes)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_dedicated_vm_host_shapes",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_dedicated_vm_host_shapes",
+        "http": "GET",
+        "path": "/dedicatedVmHostShapes",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "instanceShapeName": {
+            "arg": "instance_shape_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[DedicatedVmHostShapeSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13331,6 +15228,44 @@
       "help": "Lists the shapes that can be used to launch a virtual machine instance on a dedicated virtual machine host within the specified compartment. You can filter the list by compatibility with a specific dedicated virtual machine host shape. \n[Command Reference](listDedicatedVmHostInstanceShapes)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_dedicated_vm_host_instance_shapes",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_dedicated_vm_host_instance_shapes",
+        "http": "GET",
+        "path": "/dedicatedVmHostInstanceShapes",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "dedicatedVmHostShape": {
+            "arg": "dedicated_vm_host_shape"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[DedicatedVmHostInstanceShapeSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13510,6 +15445,68 @@
       "help": "Returns the list of dedicated virtual machine hosts that match the specified criteria in the specified compartment.\n\nYou can limit the list by specifying a dedicated virtual machine host display name. The list will include all the identically-named dedicated virtual machine hosts in the compartment. \n[Command Reference](listDedicatedVmHosts)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_dedicated_vm_hosts",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_dedicated_vm_hosts",
+        "http": "GET",
+        "path": "/dedicatedVmHosts",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "instanceShapeName": {
+            "arg": "instance_shape_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "remainingMemoryInGBsGreaterThanOrEqualTo": {
+            "arg": "remaining_memory_in_gbs_greater_than_or_equal_to"
+          },
+          "remainingOcpusGreaterThanOrEqualTo": {
+            "arg": "remaining_ocpus_greater_than_or_equal_to"
+          },
+          "remainingLocalVolumeInGBsGreaterThanOrEqualTo": {
+            "arg": "remaining_local_volume_in_gbs_greater_than_or_equal_to"
+          },
+          "isMemoryEncryptionEnabled": {
+            "arg": "is_memory_encryption_enabled"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[DedicatedVmHostSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13854,6 +15851,41 @@
       "help": "Updates the displayName, freeformTags, and definedTags attributes for the specified dedicated virtual machine host. If an attribute value is not included, it will not be updated. \n[Command Reference](updateDedicatedVmHost)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_dedicated_vm_host",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_dedicated_vm_host",
+        "http": "PUT",
+        "path": "/dedicatedVmHosts/{dedicatedVmHostId}",
+        "positionalArgs": [
+          "dedicated_vm_host_id",
+          "update_dedicated_vm_host_details"
+        ],
+        "pathParams": {
+          "dedicatedVmHostId": "dedicated_vm_host_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_dedicated_vm_host_details",
+        "responseType": "DedicatedVmHost",
+        "paginated": false
+      },
+      "otherOperations": ["get_dedicated_vm_host"],
       "params": [
         {
           "kind": "option",
@@ -14080,6 +16112,52 @@
       "help": "Returns the list of instances on the dedicated virtual machine hosts that match the specified criteria. \n[Command Reference](listDedicatedVmHostInstances)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_dedicated_vm_host_instances",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_dedicated_vm_host_instances",
+        "http": "GET",
+        "path": "/dedicatedVmHosts/{dedicatedVmHostId}/instances",
+        "positionalArgs": ["compartment_id", "dedicated_vm_host_id"],
+        "pathParams": {
+          "dedicatedVmHostId": "dedicated_vm_host_id"
+        },
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "isMemoryEncryptionEnabled": {
+            "arg": "is_memory_encryption_enabled"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[DedicatedVmHostInstanceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -14320,6 +16398,49 @@
       "help": "Gets a list of all the devices for given instance. You can optionally filter results by device availability. \n[Command Reference](listInstanceDevices)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_instance_devices",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_instance_devices",
+        "http": "GET",
+        "path": "/instances/{instanceId}/devices",
+        "positionalArgs": ["instance_id"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {
+          "isAvailable": {
+            "arg": "is_available"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[Device]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -14541,6 +16662,30 @@
       "help": "Returns the Firmware Bundle matching the provided firmwareBundleId. \n[Command Reference](getFirmwareBundle)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_firmware_bundle",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_firmware_bundle",
+        "http": "GET",
+        "path": "/firmwareBundles/{firmwareBundleId}",
+        "positionalArgs": ["firmware_bundle_id"],
+        "pathParams": {
+          "firmwareBundleId": "firmware_bundle_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "FirmwareBundle",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -14605,6 +16750,47 @@
       "help": "Gets a list of all Firmware Bundles in a compartment for specified platform. Can filter results to include only the default (recommended) Firmware Bundle for the given platform. \n[Command Reference](listFirmwareBundles)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_firmware_bundles",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_firmware_bundles",
+        "http": "GET",
+        "path": "/firmwareBundles",
+        "positionalArgs": ["platform"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "platform": {
+            "arg": "platform"
+          },
+          "isDefaultBundle": {
+            "arg": "is_default_bundle"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "FirmwareBundlesCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -14867,6 +17053,44 @@
       "help": "Lists Compute Global Image Capability Schema in the specified compartment. \n[Command Reference](listComputeGlobalImageCapabilitySchemas)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_global_image_capability_schemas",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_global_image_capability_schemas",
+        "http": "GET",
+        "path": "/computeGlobalImageCapabilitySchemas",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[ComputeGlobalImageCapabilitySchemaSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -15354,6 +17578,36 @@
       "help": "Moves an image into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeImageCompartment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.change_image_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "change_image_compartment",
+        "http": "POST",
+        "path": "/images/{imageId}/actions/changeCompartment",
+        "positionalArgs": ["image_id", "change_image_compartment_details"],
+        "pathParams": {
+          "imageId": "image_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_image_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -15456,6 +17710,30 @@
       "help": "Creates a boot disk image for the specified instance or imports an exported image from the Oracle Cloud Infrastructure Object Storage service.\n\nWhen creating a new image, you must provide the OCID of the instance you want to use as the basis for the image, and the OCID of the compartment containing that instance. For more information about images, see [Managing Custom Images].\n\nWhen importing an exported image from Object Storage, you specify the source information in [ImageSourceDetails].\n\nWhen importing an image based on the namespace, bucket name, and object name, use [ImageSourceViaObjectStorageTupleDetails].\n\nWhen importing an image based on the Object Storage URL, use [ImageSourceViaObjectStorageUriDetails]. See [Object Storage URLs] and [Using Pre-Authenticated Requests] for constructing URLs for image import/export.\n\nFor more information about importing exported images, see [Image Import/Export].\n\nYou may optionally specify a *display name* for the image, which is simply a friendly name or description. It does not have to be unique, and you can change it. See [UpdateImage]. Avoid entering confidential information. \n[Command Reference](createImage)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_image",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "create_image",
+        "http": "POST",
+        "path": "/images",
+        "positionalArgs": ["create_image_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_image_details",
+        "responseType": "Image",
+        "paginated": false
+      },
+      "otherOperations": ["get_image"],
       "params": [
         {
           "kind": "option",
@@ -15708,6 +17986,30 @@
       "help": "Deletes an image. \n[Command Reference](deleteImage)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_image",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_image",
+        "http": "DELETE",
+        "path": "/images/{imageId}",
+        "positionalArgs": ["image_id"],
+        "pathParams": {
+          "imageId": "image_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_image"],
       "params": [
         {
           "kind": "option",
@@ -16160,6 +18462,27 @@
       "help": "Gets the specified image. \n[Command Reference](getImage)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_image",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_image",
+        "http": "GET",
+        "path": "/images/{imageId}",
+        "positionalArgs": ["image_id"],
+        "pathParams": {
+          "imageId": "image_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Image",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -16714,6 +19037,56 @@
       "help": "Lists a subset of images available in the specified compartment, including [platform images] and [custom images]. The list of platform images includes the three most recently published versions of each major distribution. The list does not support filtering based on image tags.\n\nThe list of images returned is ordered to first show the recent platform images, then all of the custom images.\n\n**Caution:** Platform images are refreshed regularly. When new images are released, older versions are replaced. The image OCIDs remain available, but when the platform image is replaced, the image OCIDs are no longer returned as part of the platform image list. \n[Command Reference](listImages)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_images",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_images",
+        "http": "GET",
+        "path": "/images",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "operatingSystem": {
+            "arg": "operating_system"
+          },
+          "operatingSystemVersion": {
+            "arg": "operating_system_version"
+          },
+          "shape": {
+            "arg": "shape"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Image]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -17001,6 +19374,35 @@
       "help": "Updates the display name of the image. Avoid entering confidential information. \n[Command Reference](updateImage)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_image",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_image",
+        "http": "PUT",
+        "path": "/images/{imageId}",
+        "positionalArgs": ["image_id", "update_image_details"],
+        "pathParams": {
+          "imageId": "image_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_image_details",
+        "responseType": "Image",
+        "paginated": false
+      },
+      "otherOperations": ["get_image"],
       "params": [
         {
           "kind": "option",
@@ -17848,6 +20250,47 @@
       "help": "Lists Compute Image Capability Schema in the specified compartment. You can also query by a specific imageId. \n[Command Reference](listComputeImageCapabilitySchemas)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_compute_image_capability_schemas",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_compute_image_capability_schemas",
+        "http": "GET",
+        "path": "/computeImageCapabilitySchemas",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "imageId": {
+            "arg": "image_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[ComputeImageCapabilitySchemaSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -18307,6 +20750,29 @@
       "help": "Adds a shape to the compatible shapes list for the image. \n[Command Reference](addImageShapeCompatibilityEntry)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.add_image_shape_compatibility_entry",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "add_image_shape_compatibility_entry",
+        "http": "PUT",
+        "path": "/images/{imageId}/shapes/{shapeName}",
+        "positionalArgs": ["image_id", "shape_name"],
+        "pathParams": {
+          "imageId": "image_id",
+          "shapeName": "shape_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "body": "add_image_shape_compatibility_entry_details",
+        "responseType": "ImageShapeCompatibilityEntry",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18448,6 +20914,31 @@
       "help": "Retrieves an image shape compatibility entry. \n[Command Reference](getImageShapeCompatibilityEntry)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_image_shape_compatibility_entry",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_image_shape_compatibility_entry",
+        "http": "GET",
+        "path": "/images/{imageId}/shapes/{shapeName}",
+        "positionalArgs": ["image_id", "shape_name"],
+        "pathParams": {
+          "imageId": "image_id",
+          "shapeName": "shape_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ImageShapeCompatibilityEntry",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18531,6 +21022,37 @@
       "help": "Lists the compatible shapes for the specified image. \n[Command Reference](listImageShapeCompatibilityEntries)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_image_shape_compatibility_entries",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_image_shape_compatibility_entries",
+        "http": "GET",
+        "path": "/images/{imageId}/shapes",
+        "positionalArgs": ["image_id"],
+        "pathParams": {
+          "imageId": "image_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ImageShapeCompatibilitySummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -18672,6 +21194,27 @@
       "help": "Removes a shape from the compatible shapes list for the image. \n[Command Reference](removeImageShapeCompatibilityEntry)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.remove_image_shape_compatibility_entry",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "remove_image_shape_compatibility_entry",
+        "http": "DELETE",
+        "path": "/images/{imageId}/shapes/{shapeName}",
+        "positionalArgs": ["image_id", "shape_name"],
+        "pathParams": {
+          "imageId": "image_id",
+          "shapeName": "shape_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19674,6 +22217,27 @@
       "help": "Gets information about the specified instance.\n\n**Note:** To retrieve public and private IP addresses for an instance, use the [ListVnicAttachments] operation to get the VNIC ID for the instance, and then call [GetVnic] with the VNIC ID. \n[Command Reference](getInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_instance",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_instance",
+        "http": "GET",
+        "path": "/instances/{instanceId}",
+        "positionalArgs": ["instance_id"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Instance",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19738,6 +22302,27 @@
       "help": "Gets the generated credentials for the instance. Only works for instances that require a password to log in, such as Windows. For certain operating systems, users will be forced to change the initial credentials. \n[Command Reference](getWindowsInstanceInitialCredentials)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_windows_instance_initial_credentials",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_windows_instance_initial_credentials",
+        "http": "GET",
+        "path": "/instances/{instanceId}/initialCredentials",
+        "positionalArgs": ["instance_id"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "InstanceCredentials",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20752,6 +23337,30 @@
       "help": "Creates a new instance in the specified compartment and the specified availability domain. For general information about instances, see [Overview of the Compute Service].\n\nFor information about access control and compartments, see [Overview of the IAM Service].\n\nFor information about availability domains, see [Regions and Availability Domains]. To get a list of availability domains, use the `ListAvailabilityDomains` operation in the Identity and Access Management Service API.\n\nAll Oracle Cloud Infrastructure resources, including instances, get an Oracle-assigned, unique ID called an Oracle Cloud Identifier (OCID). When you create a resource, you can find its OCID in the response. You can also retrieve a resource's OCID by using a List API operation on that resource type, or by viewing the resource in the Console.\n\nTo launch an instance using an image or a boot volume use the `sourceDetails` parameter in [LaunchInstanceDetails].\n\nWhen you launch an instance, it is automatically attached to a virtual network interface card (VNIC), called the *primary VNIC*. The VNIC has a private IP address from the subnet's CIDR. You can either assign a private IP address of your choice or let Oracle automatically assign one. You can choose whether the instance has a public IP address. To retrieve the addresses, use the [ListVnicAttachments] operation to get the VNIC ID for the instance, and then call [GetVnic] with the VNIC ID.\n\nYou can later add secondary VNICs to an instance. For more information, see [Virtual Network Interface Cards (VNICs)].\n\nTo launch an instance from a Marketplace image listing, you must provide the image ID of the listing resource version that you want, but you also must subscribe to the listing before you try to launch the instance. To subscribe to the listing, use the [GetAppCatalogListingAgreements] operation to get the signature for the terms of use agreement for the desired listing resource version. Then, call [CreateAppCatalogSubscription] with the signature. To get the image ID for the LaunchInstance operation, call [GetAppCatalogListingResourceVersion].\n\nWhen launching an instance, you may provide the `securityAttributes` parameter in [LaunchInstanceDetails] to manage security attributes via the instance, or in the embedded [CreateVnicDetails] to manage security attributes via the VNIC directly, but not both.  Providing `securityAttributes` in both locations will return a 400 Bad Request response.\n\nTo determine whether capacity is available for a specific shape before you create an instance, use the [CreateComputeCapacityReport] operation. \n[Command Reference](launchInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.launch_instance_compute_bare_metal_host_placement_constraint_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "launch_instance",
+        "http": "POST",
+        "path": "/instances",
+        "positionalArgs": ["launch_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "launch_instance_details",
+        "responseType": "Instance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance"],
       "params": [
         {
           "kind": "option",
@@ -21493,6 +24102,30 @@
       "help": "Creates a new instance in the specified compartment and the specified availability domain. For general information about instances, see [Overview of the Compute Service].\n\nFor information about access control and compartments, see [Overview of the IAM Service].\n\nFor information about availability domains, see [Regions and Availability Domains]. To get a list of availability domains, use the `ListAvailabilityDomains` operation in the Identity and Access Management Service API.\n\nAll Oracle Cloud Infrastructure resources, including instances, get an Oracle-assigned, unique ID called an Oracle Cloud Identifier (OCID). When you create a resource, you can find its OCID in the response. You can also retrieve a resource's OCID by using a List API operation on that resource type, or by viewing the resource in the Console.\n\nTo launch an instance using an image or a boot volume use the `sourceDetails` parameter in [LaunchInstanceDetails].\n\nWhen you launch an instance, it is automatically attached to a virtual network interface card (VNIC), called the *primary VNIC*. The VNIC has a private IP address from the subnet's CIDR. You can either assign a private IP address of your choice or let Oracle automatically assign one. You can choose whether the instance has a public IP address. To retrieve the addresses, use the [ListVnicAttachments] operation to get the VNIC ID for the instance, and then call [GetVnic] with the VNIC ID.\n\nYou can later add secondary VNICs to an instance. For more information, see [Virtual Network Interface Cards (VNICs)].\n\nTo launch an instance from a Marketplace image listing, you must provide the image ID of the listing resource version that you want, but you also must subscribe to the listing before you try to launch the instance. To subscribe to the listing, use the [GetAppCatalogListingAgreements] operation to get the signature for the terms of use agreement for the desired listing resource version. Then, call [CreateAppCatalogSubscription] with the signature. To get the image ID for the LaunchInstance operation, call [GetAppCatalogListingResourceVersion].\n\nWhen launching an instance, you may provide the `securityAttributes` parameter in [LaunchInstanceDetails] to manage security attributes via the instance, or in the embedded [CreateVnicDetails] to manage security attributes via the VNIC directly, but not both.  Providing `securityAttributes` in both locations will return a 400 Bad Request response.\n\nTo determine whether capacity is available for a specific shape before you create an instance, use the [CreateComputeCapacityReport] operation. \n[Command Reference](launchInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.launch_instance_host_group_placement_constraint_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "launch_instance",
+        "http": "POST",
+        "path": "/instances",
+        "positionalArgs": ["launch_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "launch_instance_details",
+        "responseType": "Instance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance"],
       "params": [
         {
           "kind": "option",
@@ -22234,6 +24867,56 @@
       "help": "Lists the instances in the specified compartment and the specified availability domain. You can filter the results by specifying an instance name (the list will include all the identically-named instances in the compartment).\n\n**Note:** To retrieve public and private IP addresses for an instance, use the [ListVnicAttachments] operation to get the VNIC ID for the instance, and then call [GetVnic] with the VNIC ID. \n[Command Reference](listInstances)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_instances",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_instances",
+        "http": "GET",
+        "path": "/instances",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "capacityReservationId": {
+            "arg": "capacity_reservation_id"
+          },
+          "computeClusterId": {
+            "arg": "compute_cluster_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Instance]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -22703,6 +25386,40 @@
       "help": "Permanently terminates (deletes) the specified instance. Any attached VNICs and volumes are automatically detached when the instance terminates.\n\nTo preserve the boot volume associated with the instance, specify `true` for `PreserveBootVolumeQueryParam`. To delete the boot volume when the instance is deleted, specify `false` or do not specify a value for `PreserveBootVolumeQueryParam`.\n\nTo preserve data volumes created with the instance, specify `true` or do not specify a value for `PreserveDataVolumesQueryParam`. To delete the data volumes when the instance itself is deleted, specify `false` for `PreserveDataVolumesQueryParam`.\n\nThis is an asynchronous operation. The instance's `lifecycleState` changes to TERMINATING temporarily until the instance is completely deleted. After the instance is deleted, the record remains visible in the list of instances with the state TERMINATED for at least 12 hours, but no further action is needed. \n[Command Reference](terminateInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.terminate_instance",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "terminate_instance",
+        "http": "DELETE",
+        "path": "/instances/{instanceId}",
+        "positionalArgs": ["instance_id"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {
+          "preserveBootVolume": {
+            "arg": "preserve_boot_volume"
+          },
+          "preserveDataVolumesCreatedAtLaunch": {
+            "arg": "preserve_data_volumes_created_at_launch"
+          },
+          "recycleLevel": {
+            "arg": "recycle_level"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -22923,6 +25640,35 @@
       "help": "Updates certain fields on the specified instance. Fields that are not provided in the request will not be updated. Avoid entering confidential information.\n\nChanges to metadata fields will be reflected in the instance metadata service (this may take up to a minute).\n\nThe OCID of the instance remains the same. \n[Command Reference](updateInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_instance",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_instance",
+        "http": "PUT",
+        "path": "/instances/{instanceId}",
+        "positionalArgs": ["instance_id", "update_instance_details"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_details",
+        "responseType": "Instance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance"],
       "params": [
         {
           "kind": "option",
@@ -23496,6 +26242,35 @@
       "help": "Updates certain fields on the specified instance. Fields that are not provided in the request will not be updated. Avoid entering confidential information.\n\nChanges to metadata fields will be reflected in the instance metadata service (this may take up to a minute).\n\nThe OCID of the instance remains the same. \n[Command Reference](updateInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_instance_amd_vm_update_instance_platform_config",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_instance",
+        "http": "PUT",
+        "path": "/instances/{instanceId}",
+        "positionalArgs": ["instance_id", "update_instance_details"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_details",
+        "responseType": "Instance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance"],
       "params": [
         {
           "kind": "option",
@@ -24069,6 +26844,35 @@
       "help": "Updates certain fields on the specified instance. Fields that are not provided in the request will not be updated. Avoid entering confidential information.\n\nChanges to metadata fields will be reflected in the instance metadata service (this may take up to a minute).\n\nThe OCID of the instance remains the same. \n[Command Reference](updateInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_instance_intel_vm_update_instance_platform_config",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_instance",
+        "http": "PUT",
+        "path": "/instances/{instanceId}",
+        "positionalArgs": ["instance_id", "update_instance_details"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_details",
+        "responseType": "Instance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance"],
       "params": [
         {
           "kind": "option",
@@ -24642,6 +27446,35 @@
       "help": "Updates certain fields on the specified instance. Fields that are not provided in the request will not be updated. Avoid entering confidential information.\n\nChanges to metadata fields will be reflected in the instance metadata service (this may take up to a minute).\n\nThe OCID of the instance remains the same. \n[Command Reference](updateInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_instance_update_instance_source_via_boot_volume_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_instance",
+        "http": "PUT",
+        "path": "/instances/{instanceId}",
+        "positionalArgs": ["instance_id", "update_instance_details"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_details",
+        "responseType": "Instance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance"],
       "params": [
         {
           "kind": "option",
@@ -25234,6 +28067,35 @@
       "help": "Updates certain fields on the specified instance. Fields that are not provided in the request will not be updated. Avoid entering confidential information.\n\nChanges to metadata fields will be reflected in the instance metadata service (this may take up to a minute).\n\nThe OCID of the instance remains the same. \n[Command Reference](updateInstance)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_instance_update_instance_source_via_image_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_instance",
+        "http": "PUT",
+        "path": "/instances/{instanceId}",
+        "positionalArgs": ["instance_id", "update_instance_details"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_details",
+        "responseType": "Instance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance"],
       "params": [
         {
           "kind": "option",
@@ -26044,6 +28906,30 @@
       "help": "Deletes the specified instance console connection. \n[Command Reference](deleteInstanceConsoleConnection)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_instance_console_connection",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_instance_console_connection",
+        "http": "DELETE",
+        "path": "/instanceConsoleConnections/{instanceConsoleConnectionId}",
+        "positionalArgs": ["instance_console_connection_id"],
+        "pathParams": {
+          "instanceConsoleConnectionId": "instance_console_connection_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_console_connection"],
       "params": [
         {
           "kind": "option",
@@ -26205,6 +29091,27 @@
       "help": "Gets the specified instance console connection's information. \n[Command Reference](getInstanceConsoleConnection)\n\nIf you are attempting to start a VNC connection to an instance from a Windows machine without SSH installed, you can consider using plink instead.\nThe 'oci compute instance-console-connection get-plink-connection-string' command returns a PowerShell command which uses plink to launch the SSH tunnel necessary to start a VNC connection to the instance.",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_instance_console_connection",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_instance_console_connection",
+        "http": "GET",
+        "path": "/instanceConsoleConnections/{instanceConsoleConnectionId}",
+        "positionalArgs": ["instance_console_connection_id"],
+        "pathParams": {
+          "instanceConsoleConnectionId": "instance_console_connection_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "InstanceConsoleConnection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26390,6 +29297,38 @@
       "help": "Lists the console connections for the specified compartment or instance.\n\nFor more information about instance console connections, see [Troubleshooting Instances Using Instance Console Connections]. \n[Command Reference](listInstanceConsoleConnections)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_instance_console_connections",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_instance_console_connections",
+        "http": "GET",
+        "path": "/instanceConsoleConnections",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "instanceId": {
+            "arg": "instance_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[InstanceConsoleConnection]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -26550,6 +29489,38 @@
       "help": "Updates the defined tags and free-form tags for the specified instance console connection. \n[Command Reference](updateInstanceConsoleConnection)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_instance_console_connection",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_instance_console_connection",
+        "http": "PUT",
+        "path": "/instanceConsoleConnections/{instanceConsoleConnectionId}",
+        "positionalArgs": [
+          "instance_console_connection_id",
+          "update_instance_console_connection_details"
+        ],
+        "pathParams": {
+          "instanceConsoleConnectionId": "instance_console_connection_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_console_connection_details",
+        "responseType": "InstanceConsoleConnection",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_console_connection"],
       "params": [
         {
           "kind": "option",
@@ -26750,6 +29721,30 @@
       "help": "Gets the maintenance event for the given instance. \n[Command Reference](getInstanceMaintenanceEvent)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_instance_maintenance_event",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_instance_maintenance_event",
+        "http": "GET",
+        "path": "/instanceMaintenanceEvents/{instanceMaintenanceEventId}",
+        "positionalArgs": ["instance_maintenance_event_id"],
+        "pathParams": {
+          "instanceMaintenanceEventId": "instance_maintenance_event_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "InstanceMaintenanceEvent",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26814,6 +29809,62 @@
       "help": "Gets a list of all the maintenance events for the given compartment. \n[Command Reference](listInstanceMaintenanceEvents)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_instance_maintenance_events",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_instance_maintenance_events",
+        "http": "GET",
+        "path": "/instanceMaintenanceEvents",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "instanceId": {
+            "arg": "instance_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "correlationToken": {
+            "arg": "correlation_token"
+          },
+          "instanceAction": {
+            "arg": "instance_action"
+          },
+          "timeWindowStartGreaterThanOrEqualTo": {
+            "arg": "time_window_start_greater_than_or_equal_to"
+          },
+          "timeWindowStartLessThanOrEqualTo": {
+            "arg": "time_window_start_less_than_or_equal_to"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[InstanceMaintenanceEventSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -27121,6 +30172,40 @@
       "help": "Updates the maintenance event for the given instance. \n[Command Reference](updateInstanceMaintenanceEvent)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_instance_maintenance_event",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_instance_maintenance_event",
+        "http": "PUT",
+        "path": "/instanceMaintenanceEvents/{instanceMaintenanceEventId}",
+        "positionalArgs": [
+          "instance_maintenance_event_id",
+          "update_instance_maintenance_event_details"
+        ],
+        "pathParams": {
+          "instanceMaintenanceEventId": "instance_maintenance_event_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_instance_maintenance_event_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -27399,6 +30484,30 @@
       "help": "Gets the maximum possible date that a maintenance reboot can be extended. For more information, see [Infrastructure Maintenance]. \n[Command Reference](getInstanceMaintenanceReboot)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_instance_maintenance_reboot",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_instance_maintenance_reboot",
+        "http": "GET",
+        "path": "/instances/{instanceId}/maintenanceReboot",
+        "positionalArgs": ["instance_id"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "InstanceMaintenanceReboot",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -27463,6 +30572,35 @@
       "help": "Accept the changes to the PCR values in the measured boot report. \n[Command Reference](acceptShieldedIntegrityPolicy)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.accept_shielded_integrity_policy",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "accept_shielded_integrity_policy",
+        "http": "POST",
+        "path": "/instances/{instanceId}/actions/acceptShieldedIntegrityPolicy",
+        "positionalArgs": ["instance_id"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -27546,6 +30684,30 @@
       "help": "Gets the measured boot report for this shielded instance. \n[Command Reference](getMeasuredBootReport)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_measured_boot_report",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_measured_boot_report",
+        "http": "GET",
+        "path": "/instances/{instanceId}/measuredBootReport",
+        "positionalArgs": ["instance_id"],
+        "pathParams": {
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MeasuredBootReport",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -27693,6 +30855,27 @@
       "help": "Gets the specified listing. \n[Command Reference](getAppCatalogListing)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_app_catalog_listing",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_app_catalog_listing",
+        "http": "GET",
+        "path": "/appCatalogListings/{listingId}",
+        "positionalArgs": ["listing_id"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "AppCatalogListing",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -27757,6 +30940,44 @@
       "help": "Lists the published listings. \n[Command Reference](listAppCatalogListings)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_app_catalog_listings",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_app_catalog_listings",
+        "http": "GET",
+        "path": "/appCatalogListings",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "publisherName": {
+            "arg": "publisher_name"
+          },
+          "publisherType": {
+            "arg": "publisher_type"
+          },
+          "displayName": {
+            "arg": "display_name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[AppCatalogListingSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -28135,6 +31356,34 @@
       "help": "Delete a subscription for a listing resource version for a compartment. \n[Command Reference](deleteAppCatalogSubscription)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.delete_app_catalog_subscription",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "delete_app_catalog_subscription",
+        "http": "DELETE",
+        "path": "/appCatalogSubscriptions",
+        "positionalArgs": ["listing_id", "compartment_id", "resource_version"],
+        "pathParams": {},
+        "queryParams": {
+          "listingId": {
+            "arg": "listing_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "resourceVersion": {
+            "arg": "resource_version"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -28256,6 +31505,44 @@
       "help": "Lists subscriptions for a compartment. \n[Command Reference](listAppCatalogSubscriptions)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_app_catalog_subscriptions",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_app_catalog_subscriptions",
+        "http": "GET",
+        "path": "/appCatalogSubscriptions",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "listingId": {
+            "arg": "listing_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[AppCatalogSubscriptionSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -28458,6 +31745,28 @@
       "help": "Gets the specified listing resource version. \n[Command Reference](getAppCatalogListingResourceVersion)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_app_catalog_listing_resource_version",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_app_catalog_listing_resource_version",
+        "http": "GET",
+        "path": "/appCatalogListings/{listingId}/resourceVersions/{resourceVersion}",
+        "positionalArgs": ["listing_id", "resource_version"],
+        "pathParams": {
+          "listingId": "listing_id",
+          "resourceVersion": "resource_version"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "AppCatalogListingResourceVersion",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -28541,6 +31850,37 @@
       "help": "Gets all resource versions for a particular listing. \n[Command Reference](listAppCatalogListingResourceVersions)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_app_catalog_listing_resource_versions",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_app_catalog_listing_resource_versions",
+        "http": "GET",
+        "path": "/appCatalogListings/{listingId}/resourceVersions",
+        "positionalArgs": ["listing_id"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[AppCatalogListingResourceVersionSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -28703,6 +32043,44 @@
       "help": "Lists the shapes that can be used to launch an instance within the specified compartment. You can filter the list by compatibility with a specific image. \n[Command Reference](listShapes)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_shapes",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_shapes",
+        "http": "GET",
+        "path": "/shapes",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "imageId": {
+            "arg": "image_id"
+          },
+          "shape": {
+            "arg": "shape"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Shape]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -28901,6 +32279,27 @@
       "help": "Gets the information for the specified VNIC attachment. \n[Command Reference](getVnicAttachment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_vnic_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_vnic_attachment",
+        "http": "GET",
+        "path": "/vnicAttachments/{vnicAttachmentId}",
+        "positionalArgs": ["vnic_attachment_id"],
+        "pathParams": {
+          "vnicAttachmentId": "vnic_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VnicAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -28965,6 +32364,44 @@
       "help": "Lists the VNIC attachments in the specified compartment. A VNIC attachment resides in the same compartment as the attached instance. The list can be filtered by instance, VNIC, or availability domain. \n[Command Reference](listVnicAttachments)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_vnic_attachments",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "list_vnic_attachments",
+        "http": "GET",
+        "path": "/vnicAttachments",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "instanceId": {
+            "arg": "instance_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "vnicId": {
+            "arg": "vnic_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VnicAttachment]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -29163,6 +32600,30 @@
       "help": "Attaches the specified storage volume to the specified instance. \n[Command Reference](attachVolume)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.attach_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "attach_volume",
+        "http": "POST",
+        "path": "/volumeAttachments",
+        "positionalArgs": ["attach_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "attach_volume_details",
+        "responseType": "VolumeAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_attachment"],
       "params": [
         {
           "kind": "option",
@@ -29408,6 +32869,30 @@
       "help": "Attaches the specified storage volume to the specified instance. \n[Command Reference](attachVolume)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.attach_volume_attach_i_scsi_volume_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "attach_volume",
+        "http": "POST",
+        "path": "/volumeAttachments",
+        "positionalArgs": ["attach_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "attach_volume_details",
+        "responseType": "VolumeAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_attachment"],
       "params": [
         {
           "kind": "option",
@@ -29685,6 +33170,30 @@
       "help": "Attaches the specified storage volume to the specified instance. \n[Command Reference](attachVolume)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.attach_volume_attach_nvme_volume_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "attach_volume",
+        "http": "POST",
+        "path": "/volumeAttachments",
+        "positionalArgs": ["attach_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "attach_volume_details",
+        "responseType": "VolumeAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_attachment"],
       "params": [
         {
           "kind": "option",
@@ -29903,6 +33412,30 @@
       "help": "Attaches the specified storage volume to the specified instance. \n[Command Reference](attachVolume)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.attach_volume_attach_paravirtualized_volume_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "attach_volume",
+        "http": "POST",
+        "path": "/volumeAttachments",
+        "positionalArgs": ["attach_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "attach_volume_details",
+        "responseType": "VolumeAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_attachment"],
       "params": [
         {
           "kind": "option",
@@ -30140,6 +33673,30 @@
       "help": "Detaches a storage volume from an instance. You must specify the OCID of the volume attachment.\n\nThis is an asynchronous operation. The attachment's `lifecycleState` will change to DETACHING temporarily until the attachment is completely removed. \n[Command Reference](detachVolume)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.detach_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "detach_volume",
+        "http": "DELETE",
+        "path": "/volumeAttachments/{volumeAttachmentId}",
+        "positionalArgs": ["volume_attachment_id"],
+        "pathParams": {
+          "volumeAttachmentId": "volume_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -30301,6 +33858,27 @@
       "help": "Gets information about the specified volume attachment. \n[Command Reference](getVolumeAttachment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.get_volume_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "get_volume_attachment",
+        "http": "GET",
+        "path": "/volumeAttachments/{volumeAttachmentId}",
+        "positionalArgs": ["volume_attachment_id"],
+        "pathParams": {
+          "volumeAttachmentId": "volume_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VolumeAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -30563,6 +34141,38 @@
       "help": "Updates information about the specified volume attachment. \n[Command Reference](updateVolumeAttachment)",
       "callback": "services.core.src.oci_cli_compute.generated.compute_cli.update_volume_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute",
+        "method": "update_volume_attachment",
+        "http": "PUT",
+        "path": "/volumeAttachments/{volumeAttachmentId}",
+        "positionalArgs": [
+          "volume_attachment_id",
+          "update_volume_attachment_details"
+        ],
+        "pathParams": {
+          "volumeAttachmentId": "volume_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_volume_attachment_details",
+        "responseType": "VolumeAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_attachment"],
       "params": [
         {
           "kind": "option",

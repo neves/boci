@@ -26,6 +26,16 @@
       }
     ]
   },
+  "clients": {
+    "core.blockstorage": {
+      "class": "oci.core.blockstorage_client.BlockstorageClient",
+      "basePath": "/20160918",
+      "endpointTemplate": "https://iaas.{region}.{dualStack?ds.oci.:}{secondLevelDomain}",
+      "endpointServiceName": "iaas",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "blockstorage"
+    }
+  },
   "groups": {
     "backup": {
       "hidden": false,
@@ -359,6 +369,33 @@
       "help": "Moves a volume backup into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeVolumeBackupCompartment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.change_volume_backup_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "change_volume_backup_compartment",
+        "http": "POST",
+        "path": "/volumeBackups/{volumeBackupId}/actions/changeCompartment",
+        "positionalArgs": [
+          "volume_backup_id",
+          "change_volume_backup_compartment_details"
+        ],
+        "pathParams": {
+          "volumeBackupId": "volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_volume_backup_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -629,6 +666,30 @@
       "help": "Creates a new backup of the specified volume. For general information about volume backups, see [Overview of Block Volume Service Backups]\n\nWhen the request is received, the backup object is in a REQUEST_RECEIVED state. When the data is imaged, it goes into a CREATING state. After the backup is fully uploaded to the cloud, it goes into an AVAILABLE state. \n[Command Reference](createVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume_backup",
+        "http": "POST",
+        "path": "/volumeBackups",
+        "positionalArgs": ["create_volume_backup_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_volume_backup_details",
+        "responseType": "VolumeBackup",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_backup"],
       "params": [
         {
           "kind": "option",
@@ -932,6 +993,30 @@
       "help": "Deletes a volume backup. \n[Command Reference](deleteVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_volume_backup",
+        "http": "DELETE",
+        "path": "/volumeBackups/{volumeBackupId}",
+        "positionalArgs": ["volume_backup_id"],
+        "pathParams": {
+          "volumeBackupId": "volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_backup"],
       "params": [
         {
           "kind": "option",
@@ -1100,6 +1185,27 @@
       "help": "Gets information for the specified volume backup. \n[Command Reference](getVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_backup",
+        "http": "GET",
+        "path": "/volumeBackups/{volumeBackupId}",
+        "positionalArgs": ["volume_backup_id"],
+        "pathParams": {
+          "volumeBackupId": "volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VolumeBackup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1164,6 +1270,53 @@
       "help": "Lists the volume backups in the specified compartment. You can filter the results by volume. \n[Command Reference](listVolumeBackups)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_volume_backups",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_volume_backups",
+        "http": "GET",
+        "path": "/volumeBackups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "volumeId": {
+            "arg": "volume_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sourceVolumeBackupId": {
+            "arg": "source_volume_backup_id"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VolumeBackup]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1432,6 +1585,32 @@
       "help": "Updates the display name for the specified volume backup. Avoid entering confidential information. \n[Command Reference](updateVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_volume_backup",
+        "http": "PUT",
+        "path": "/volumeBackups/{volumeBackupId}",
+        "positionalArgs": ["volume_backup_id", "update_volume_backup_details"],
+        "pathParams": {
+          "volumeBackupId": "volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_volume_backup_details",
+        "responseType": "VolumeBackup",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_backup"],
       "params": [
         {
           "kind": "option",
@@ -1753,6 +1932,27 @@
       "help": "Gets information for the specified block volume replica. \n[Command Reference](getBlockVolumeReplica)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_block_volume_replica",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_block_volume_replica",
+        "http": "GET",
+        "path": "/blockVolumeReplicas/{blockVolumeReplicaId}",
+        "positionalArgs": ["block_volume_replica_id"],
+        "pathParams": {
+          "blockVolumeReplicaId": "block_volume_replica_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "BlockVolumeReplica",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1817,6 +2017,53 @@
       "help": "Lists the block volume replicas in the specified compartment and availability domain. \n[Command Reference](listBlockVolumeReplicas)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_block_volume_replicas",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_block_volume_replicas",
+        "http": "GET",
+        "path": "/blockVolumeReplicas",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "volumeGroupReplicaId": {
+            "arg": "volume_group_replica_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[BlockVolumeReplica]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2085,6 +2332,33 @@
       "help": "Moves a boot volume into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeBootVolumeCompartment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.change_boot_volume_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "change_boot_volume_compartment",
+        "http": "POST",
+        "path": "/bootVolumes/{bootVolumeId}/actions/changeCompartment",
+        "positionalArgs": [
+          "boot_volume_id",
+          "change_boot_volume_compartment_details"
+        ],
+        "pathParams": {
+          "bootVolumeId": "boot_volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_boot_volume_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2602,6 +2876,30 @@
       "help": "Creates a new boot volume in the specified compartment from an existing boot volume or a boot volume backup. For general information about boot volumes, see [Boot Volumes]. You may optionally specify a *display name* for the volume, which is simply a friendly name or description. It does not have to be unique, and you can change it. Avoid entering confidential information. \n[Command Reference](createBootVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_boot_volume_boot_volume_source_from_boot_volume_replica_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_boot_volume",
+        "http": "POST",
+        "path": "/bootVolumes",
+        "positionalArgs": ["create_boot_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_boot_volume_details",
+        "responseType": "BootVolume",
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume"],
       "params": [
         {
           "kind": "option",
@@ -2998,6 +3296,30 @@
       "help": "Creates a new boot volume in the specified compartment from an existing boot volume or a boot volume backup. For general information about boot volumes, see [Boot Volumes]. You may optionally specify a *display name* for the volume, which is simply a friendly name or description. It does not have to be unique, and you can change it. Avoid entering confidential information. \n[Command Reference](createBootVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_boot_volume_boot_volume_source_from_boot_volume_backup_delta_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_boot_volume",
+        "http": "POST",
+        "path": "/bootVolumes",
+        "positionalArgs": ["create_boot_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_boot_volume_details",
+        "responseType": "BootVolume",
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume"],
       "params": [
         {
           "kind": "option",
@@ -3432,6 +3754,30 @@
       "help": "Deletes the specified boot volume. The volume cannot have an active connection to an instance. To disconnect the boot volume from a connected instance, see [Disconnecting From a Boot Volume]. **Warning:** All data on the boot volume will be permanently lost when the boot volume is deleted. \n[Command Reference](deleteBootVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_boot_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_boot_volume",
+        "http": "DELETE",
+        "path": "/bootVolumes/{bootVolumeId}",
+        "positionalArgs": ["boot_volume_id"],
+        "pathParams": {
+          "bootVolumeId": "boot_volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume"],
       "params": [
         {
           "kind": "option",
@@ -3600,6 +3946,27 @@
       "help": "Gets information for the specified boot volume. \n[Command Reference](getBootVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_boot_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_boot_volume",
+        "http": "GET",
+        "path": "/bootVolumes/{bootVolumeId}",
+        "positionalArgs": ["boot_volume_id"],
+        "pathParams": {
+          "bootVolumeId": "boot_volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "BootVolume",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3664,6 +4031,41 @@
       "help": "Lists the boot volumes in the specified compartment and availability domain. \n[Command Reference](listBootVolumes)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_boot_volumes",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_boot_volumes",
+        "http": "GET",
+        "path": "/bootVolumes",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "volumeGroupId": {
+            "arg": "volume_group_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[BootVolume]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3843,6 +4245,32 @@
       "help": "Updates the specified boot volume's display name, defined tags, and free-form tags. \n[Command Reference](updateBootVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_boot_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_boot_volume",
+        "http": "PUT",
+        "path": "/bootVolumes/{bootVolumeId}",
+        "positionalArgs": ["boot_volume_id", "update_boot_volume_details"],
+        "pathParams": {
+          "bootVolumeId": "boot_volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_boot_volume_details",
+        "responseType": "BootVolume",
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume"],
       "params": [
         {
           "kind": "option",
@@ -4164,6 +4592,33 @@
       "help": "Moves a boot volume backup into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeBootVolumeBackupCompartment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.change_boot_volume_backup_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "change_boot_volume_backup_compartment",
+        "http": "POST",
+        "path": "/bootVolumeBackups/{bootVolumeBackupId}/actions/changeCompartment",
+        "positionalArgs": [
+          "boot_volume_backup_id",
+          "change_boot_volume_backup_compartment_details"
+        ],
+        "pathParams": {
+          "bootVolumeBackupId": "boot_volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_boot_volume_backup_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4434,6 +4889,30 @@
       "help": "Creates a new boot volume backup of the specified boot volume. For general information about boot volume backups, see [Overview of Boot Volume Backups]\n\nWhen the request is received, the backup object is in a REQUEST_RECEIVED state. When the data is imaged, it goes into a CREATING state. After the backup is fully uploaded to the cloud, it goes into an AVAILABLE state. \n[Command Reference](createBootVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_boot_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_boot_volume_backup",
+        "http": "POST",
+        "path": "/bootVolumeBackups",
+        "positionalArgs": ["create_boot_volume_backup_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_boot_volume_backup_details",
+        "responseType": "BootVolumeBackup",
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume_backup"],
       "params": [
         {
           "kind": "option",
@@ -4737,6 +5216,30 @@
       "help": "Deletes a boot volume backup. \n[Command Reference](deleteBootVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_boot_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_boot_volume_backup",
+        "http": "DELETE",
+        "path": "/bootVolumeBackups/{bootVolumeBackupId}",
+        "positionalArgs": ["boot_volume_backup_id"],
+        "pathParams": {
+          "bootVolumeBackupId": "boot_volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume_backup"],
       "params": [
         {
           "kind": "option",
@@ -4905,6 +5408,27 @@
       "help": "Gets information for the specified boot volume backup. \n[Command Reference](getBootVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_boot_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_boot_volume_backup",
+        "http": "GET",
+        "path": "/bootVolumeBackups/{bootVolumeBackupId}",
+        "positionalArgs": ["boot_volume_backup_id"],
+        "pathParams": {
+          "bootVolumeBackupId": "boot_volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "BootVolumeBackup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4969,6 +5493,53 @@
       "help": "Lists the boot volume backups in the specified compartment. You can filter the results by boot volume. \n[Command Reference](listBootVolumeBackups)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_boot_volume_backups",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_boot_volume_backups",
+        "http": "GET",
+        "path": "/bootVolumeBackups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "bootVolumeId": {
+            "arg": "boot_volume_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sourceBootVolumeBackupId": {
+            "arg": "source_boot_volume_backup_id"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[BootVolumeBackup]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -5237,6 +5808,35 @@
       "help": "Updates the display name for the specified boot volume backup. Avoid entering confidential information. \n[Command Reference](updateBootVolumeBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_boot_volume_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_boot_volume_backup",
+        "http": "PUT",
+        "path": "/bootVolumeBackups/{bootVolumeBackupId}",
+        "positionalArgs": [
+          "boot_volume_backup_id",
+          "update_boot_volume_backup_details"
+        ],
+        "pathParams": {
+          "bootVolumeBackupId": "boot_volume_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_boot_volume_backup_details",
+        "responseType": "BootVolumeBackup",
+        "paginated": false
+      },
+      "otherOperations": ["get_boot_volume_backup"],
       "params": [
         {
           "kind": "option",
@@ -5558,6 +6158,29 @@
       "help": "Removes the specified boot volume's assigned Vault Service encryption key. \n[Command Reference](deleteBootVolumeKmsKey)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_boot_volume_kms_key",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_boot_volume_kms_key",
+        "http": "DELETE",
+        "path": "/bootVolumes/{bootVolumeId}/kmsKey",
+        "positionalArgs": ["boot_volume_id"],
+        "pathParams": {
+          "bootVolumeId": "boot_volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5660,6 +6283,30 @@
       "help": "Gets the Vault service encryption key assigned to the specified boot volume. \n[Command Reference](getBootVolumeKmsKey)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_boot_volume_kms_key",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_boot_volume_kms_key",
+        "http": "GET",
+        "path": "/bootVolumes/{bootVolumeId}/kmsKey",
+        "positionalArgs": ["boot_volume_id"],
+        "pathParams": {
+          "bootVolumeId": "boot_volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "BootVolumeKmsKey",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5743,6 +6390,34 @@
       "help": "Updates the specified volume with a new Vault service master encryption key. \n[Command Reference](updateBootVolumeKmsKey)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_boot_volume_kms_key",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_boot_volume_kms_key",
+        "http": "PUT",
+        "path": "/bootVolumes/{bootVolumeId}/kmsKey",
+        "positionalArgs": [
+          "boot_volume_id",
+          "update_boot_volume_kms_key_details"
+        ],
+        "pathParams": {
+          "bootVolumeId": "boot_volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_boot_volume_kms_key_details",
+        "responseType": "BootVolumeKmsKey",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5845,6 +6520,27 @@
       "help": "Gets information for the specified boot volume replica. \n[Command Reference](getBootVolumeReplica)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_boot_volume_replica",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_boot_volume_replica",
+        "http": "GET",
+        "path": "/bootVolumeReplicas/{bootVolumeReplicaId}",
+        "positionalArgs": ["boot_volume_replica_id"],
+        "pathParams": {
+          "bootVolumeReplicaId": "boot_volume_replica_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "BootVolumeReplica",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5909,6 +6605,53 @@
       "help": "Lists the boot volume replicas in the specified compartment and availability domain. \n[Command Reference](listBootVolumeReplicas)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_boot_volume_replicas",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_boot_volume_replicas",
+        "http": "GET",
+        "path": "/bootVolumeReplicas",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "volumeGroupReplicaId": {
+            "arg": "volume_group_replica_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[BootVolumeReplica]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -6177,6 +6920,30 @@
       "help": "Moves a volume into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeVolumeCompartment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.change_volume_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "change_volume_compartment",
+        "http": "POST",
+        "path": "/volumes/{volumeId}/actions/changeCompartment",
+        "positionalArgs": ["volume_id", "change_volume_compartment_details"],
+        "pathParams": {
+          "volumeId": "volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_volume_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6732,6 +7499,30 @@
       "help": "Creates a new volume in the specified compartment. Volumes can be created in sizes ranging from 50 GB (51200 MB) to 32 TB (33554432 MB), in 1 GB (1024 MB) increments. By default, volumes are 1 TB (1048576 MB). For general information about block volumes, see [Overview of Block Volume Service].\n\nA volume and instance can be in separate compartments but must be in the same availability domain. For information about access control and compartments, see [Overview of the IAM Service]. For information about availability domains, see [Regions and Availability Domains]. To get a list of availability domains, use the `ListAvailabilityDomains` operation in the Identity and Access Management Service API.\n\nYou may optionally specify a *display name* for the volume, which is simply a friendly name or description. It does not have to be unique, and you can change it. Avoid entering confidential information. \n[Command Reference](createVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume_volume_source_from_volume_backup_delta_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume",
+        "http": "POST",
+        "path": "/volumes",
+        "positionalArgs": ["create_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_volume_details",
+        "responseType": "Volume",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume"],
       "params": [
         {
           "kind": "option",
@@ -7223,6 +8014,30 @@
       "help": "Creates a new volume in the specified compartment. Volumes can be created in sizes ranging from 50 GB (51200 MB) to 32 TB (33554432 MB), in 1 GB (1024 MB) increments. By default, volumes are 1 TB (1048576 MB). For general information about block volumes, see [Overview of Block Volume Service].\n\nA volume and instance can be in separate compartments but must be in the same availability domain. For information about access control and compartments, see [Overview of the IAM Service]. For information about availability domains, see [Regions and Availability Domains]. To get a list of availability domains, use the `ListAvailabilityDomains` operation in the Identity and Access Management Service API.\n\nYou may optionally specify a *display name* for the volume, which is simply a friendly name or description. It does not have to be unique, and you can change it. Avoid entering confidential information. \n[Command Reference](createVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume_volume_source_from_block_volume_replica_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume",
+        "http": "POST",
+        "path": "/volumes",
+        "positionalArgs": ["create_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_volume_details",
+        "responseType": "Volume",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume"],
       "params": [
         {
           "kind": "option",
@@ -7676,6 +8491,30 @@
       "help": "Deletes the specified volume. The volume cannot have an active connection to an instance. To disconnect the volume from a connected instance, see [Disconnecting From a Volume]. **Warning:** All data on the volume will be permanently lost when the volume is deleted. \n[Command Reference](deleteVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_volume",
+        "http": "DELETE",
+        "path": "/volumes/{volumeId}",
+        "positionalArgs": ["volume_id"],
+        "pathParams": {
+          "volumeId": "volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_volume"],
       "params": [
         {
           "kind": "option",
@@ -7844,6 +8683,27 @@
       "help": "Gets information for the specified volume. \n[Command Reference](getVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume",
+        "http": "GET",
+        "path": "/volumes/{volumeId}",
+        "positionalArgs": ["volume_id"],
+        "pathParams": {
+          "volumeId": "volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Volume",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7908,6 +8768,56 @@
       "help": "Lists the volumes in the specified compartment and availability domain. \n[Command Reference](listVolumes)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_volumes",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_volumes",
+        "http": "GET",
+        "path": "/volumes",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "volumeGroupId": {
+            "arg": "volume_group_id"
+          },
+          "clusterPlacementGroupId": {
+            "arg": "cluster_placement_group_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Volume]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8195,6 +9105,32 @@
       "help": "Updates the specified volume's display name. Avoid entering confidential information. \n[Command Reference](updateVolume)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_volume",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_volume",
+        "http": "PUT",
+        "path": "/volumes/{volumeId}",
+        "positionalArgs": ["volume_id", "update_volume_details"],
+        "pathParams": {
+          "volumeId": "volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_volume_details",
+        "responseType": "Volume",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume"],
       "params": [
         {
           "kind": "option",
@@ -8535,6 +9471,32 @@
       "help": "Creates a new user defined backup policy.\n\nFor more information about Oracle defined backup policies and user defined backup policies, see [Policy-Based Backups]. \n[Command Reference](createVolumeBackupPolicy)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume_backup_policy",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume_backup_policy",
+        "http": "POST",
+        "path": "/volumeBackupPolicies",
+        "positionalArgs": ["create_volume_backup_policy_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_volume_backup_policy_details",
+        "responseType": "VolumeBackupPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8694,6 +9656,32 @@
       "help": "Deletes a user defined backup policy.  For more information about user defined backup policies,  see [Policy-Based Backups].\n\n Avoid entering confidential information. \n[Command Reference](deleteVolumeBackupPolicy)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_volume_backup_policy",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_volume_backup_policy",
+        "http": "DELETE",
+        "path": "/volumeBackupPolicies/{policyId}",
+        "positionalArgs": ["policy_id"],
+        "pathParams": {
+          "policyId": "policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8796,6 +9784,27 @@
       "help": "Gets information for the specified volume backup policy. \n[Command Reference](getVolumeBackupPolicy)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_backup_policy",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_backup_policy",
+        "http": "GET",
+        "path": "/volumeBackupPolicies/{policyId}",
+        "positionalArgs": ["policy_id"],
+        "pathParams": {
+          "policyId": "policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VolumeBackupPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8860,6 +9869,35 @@
       "help": "Lists all the volume backup policies available in the specified compartment.\n\nFor more information about Oracle defined backup policies and user defined backup policies, see [Policy-Based Backups]. \n[Command Reference](listVolumeBackupPolicies)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_volume_backup_policies",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_volume_backup_policies",
+        "http": "GET",
+        "path": "/volumeBackupPolicies",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VolumeBackupPolicy]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9001,6 +10039,37 @@
       "help": "Updates a user defined backup policy.  For more information about user defined backup policies,  see [Policy-Based Backups].\n\n Avoid entering confidential information. \n[Command Reference](updateVolumeBackupPolicy)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_volume_backup_policy",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_volume_backup_policy",
+        "http": "PUT",
+        "path": "/volumeBackupPolicies/{policyId}",
+        "positionalArgs": ["policy_id", "update_volume_backup_policy_details"],
+        "pathParams": {
+          "policyId": "policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_volume_backup_policy_details",
+        "responseType": "VolumeBackupPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9199,6 +10268,26 @@
       "help": "Assigns a volume backup policy to the specified volume. Note that a given volume can only have one backup policy assigned to it. If this operation is used for a volume that already has a different backup policy assigned, the prior backup policy will be silently unassigned. \n[Command Reference](createVolumeBackupPolicyAssignment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume_backup_policy_assignment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume_backup_policy_assignment",
+        "http": "POST",
+        "path": "/volumeBackupPolicyAssignments",
+        "positionalArgs": ["create_volume_backup_policy_assignment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "body": "create_volume_backup_policy_assignment_details",
+        "responseType": "VolumeBackupPolicyAssignment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9301,6 +10390,29 @@
       "help": "Deletes a volume backup policy assignment. \n[Command Reference](deleteVolumeBackupPolicyAssignment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_volume_backup_policy_assignment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_volume_backup_policy_assignment",
+        "http": "DELETE",
+        "path": "/volumeBackupPolicyAssignments/{policyAssignmentId}",
+        "positionalArgs": ["policy_assignment_id"],
+        "pathParams": {
+          "policyAssignmentId": "policy_assignment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9403,6 +10515,27 @@
       "help": "Gets information for the specified volume backup policy assignment. \n[Command Reference](getVolumeBackupPolicyAssignment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_backup_policy_assignment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_backup_policy_assignment",
+        "http": "GET",
+        "path": "/volumeBackupPolicyAssignments/{policyAssignmentId}",
+        "positionalArgs": ["policy_assignment_id"],
+        "pathParams": {
+          "policyAssignmentId": "policy_assignment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VolumeBackupPolicyAssignment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9467,6 +10600,35 @@
       "help": "Gets the volume backup policy assignment for the specified volume. The `assetId` query parameter is required, and the returned list will contain at most one item, since volume can only have one volume backup policy assigned at a time. \n[Command Reference](getVolumeBackupPolicyAssetAssignment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_backup_policy_asset_assignment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_backup_policy_asset_assignment",
+        "http": "GET",
+        "path": "/volumeBackupPolicyAssignments",
+        "positionalArgs": ["asset_id"],
+        "pathParams": {},
+        "queryParams": {
+          "assetId": {
+            "arg": "asset_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VolumeBackupPolicyAssignment]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9569,6 +10731,33 @@
       "help": "Moves a volume group into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeVolumeGroupCompartment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.change_volume_group_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "change_volume_group_compartment",
+        "http": "POST",
+        "path": "/volumeGroups/{volumeGroupId}/actions/changeCompartment",
+        "positionalArgs": [
+          "volume_group_id",
+          "change_volume_group_compartment_details"
+        ],
+        "pathParams": {
+          "volumeGroupId": "volume_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_volume_group_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9652,6 +10841,30 @@
       "help": "Creates a new volume group in the specified compartment. A volume group is a collection of volumes and may be created from a list of volumes, cloning an existing volume group, or by restoring a volume group backup. You may optionally specify a *display name* for the volume group, which is simply a friendly name or description. It does not have to be unique, and you can change it. Avoid entering confidential information.\n\nFor more information, see [Volume Groups]. \n[Command Reference](createVolumeGroup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume_group",
+        "http": "POST",
+        "path": "/volumeGroups",
+        "positionalArgs": ["create_volume_group_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_volume_group_details",
+        "responseType": "VolumeGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_group"],
       "params": [
         {
           "kind": "option",
@@ -9953,6 +11166,30 @@
       "help": "Deletes the specified volume group. Individual volumes are not deleted, only the volume group is deleted. For more information, see [Volume Groups]. \n[Command Reference](deleteVolumeGroup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_volume_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_volume_group",
+        "http": "DELETE",
+        "path": "/volumeGroups/{volumeGroupId}",
+        "positionalArgs": ["volume_group_id"],
+        "pathParams": {
+          "volumeGroupId": "volume_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_group"],
       "params": [
         {
           "kind": "option",
@@ -10121,6 +11358,27 @@
       "help": "Gets information for the specified volume group. For more information, see [Volume Groups]. \n[Command Reference](getVolumeGroup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_group",
+        "http": "GET",
+        "path": "/volumeGroups/{volumeGroupId}",
+        "positionalArgs": ["volume_group_id"],
+        "pathParams": {
+          "volumeGroupId": "volume_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VolumeGroup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10185,6 +11443,50 @@
       "help": "Lists the volume groups in the specified compartment and availability domain. For more information, see [Volume Groups]. \n[Command Reference](listVolumeGroups)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_volume_groups",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_volume_groups",
+        "http": "GET",
+        "path": "/volumeGroups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VolumeGroup]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -10434,6 +11736,36 @@
       "help": "Updates the set of volumes in a volume group along with the display name. Use this operation to add or remove volumes in a volume group. Specify the full list of volume IDs to include in the volume group. If the volume ID is not specified in the call, it will be removed from the volume group. Avoid entering confidential information.\n\nFor more information, see [Volume Groups]. \n[Command Reference](updateVolumeGroup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_volume_group",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_volume_group",
+        "http": "PUT",
+        "path": "/volumeGroups/{volumeGroupId}",
+        "positionalArgs": ["volume_group_id", "update_volume_group_details"],
+        "pathParams": {
+          "volumeGroupId": "volume_group_id"
+        },
+        "queryParams": {
+          "preserveVolumeReplica": {
+            "arg": "preserve_volume_replica"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_volume_group_details",
+        "responseType": "VolumeGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_group"],
       "params": [
         {
           "kind": "option",
@@ -10717,6 +12049,33 @@
       "help": "Moves a volume group backup into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeVolumeGroupBackupCompartment)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.change_volume_group_backup_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "change_volume_group_backup_compartment",
+        "http": "POST",
+        "path": "/volumeGroupBackups/{volumeGroupBackupId}/actions/changeCompartment",
+        "positionalArgs": [
+          "volume_group_backup_id",
+          "change_volume_group_backup_compartment_details"
+        ],
+        "pathParams": {
+          "volumeGroupBackupId": "volume_group_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_volume_group_backup_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10800,6 +12159,38 @@
       "help": "Creates a volume group backup copy in specified region. For general information about volume group backups, see [Overview of Block Volume Backups]. \n[Command Reference](copyVolumeGroupBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.copy_volume_group_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "copy_volume_group_backup",
+        "http": "POST",
+        "path": "/volumeGroupBackups/{volumeGroupBackupId}/actions/copy",
+        "positionalArgs": [
+          "volume_group_backup_id",
+          "copy_volume_group_backup_details"
+        ],
+        "pathParams": {
+          "volumeGroupBackupId": "volume_group_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "copy_volume_group_backup_details",
+        "responseType": "VolumeGroupBackup",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_group_backup"],
       "params": [
         {
           "kind": "option",
@@ -10988,6 +12379,30 @@
       "help": "Creates a new backup volume group of the specified volume group. For more information, see [Volume Groups]. \n[Command Reference](createVolumeGroupBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume_group_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume_group_backup",
+        "http": "POST",
+        "path": "/volumeGroupBackups",
+        "positionalArgs": ["create_volume_group_backup_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_volume_group_backup_details",
+        "responseType": "VolumeGroupBackup",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_group_backup"],
       "params": [
         {
           "kind": "option",
@@ -11292,6 +12707,30 @@
       "help": "Deletes a volume group backup. This operation deletes all the backups in the volume group. For more information, see [Volume Groups]. \n[Command Reference](deleteVolumeGroupBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_volume_group_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_volume_group_backup",
+        "http": "DELETE",
+        "path": "/volumeGroupBackups/{volumeGroupBackupId}",
+        "positionalArgs": ["volume_group_backup_id"],
+        "pathParams": {
+          "volumeGroupBackupId": "volume_group_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_group_backup"],
       "params": [
         {
           "kind": "option",
@@ -11461,6 +12900,27 @@
       "help": "Gets information for the specified volume group backup. For more information, see [Volume Groups]. \n[Command Reference](getVolumeGroupBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_group_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_group_backup",
+        "http": "GET",
+        "path": "/volumeGroupBackups/{volumeGroupBackupId}",
+        "positionalArgs": ["volume_group_backup_id"],
+        "pathParams": {
+          "volumeGroupBackupId": "volume_group_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VolumeGroupBackup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11525,6 +12985,47 @@
       "help": "Lists the volume group backups in the specified compartment. You can filter the results by volume group. For more information, see [Volume Groups]. \n[Command Reference](listVolumeGroupBackups)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_volume_group_backups",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_volume_group_backups",
+        "http": "GET",
+        "path": "/volumeGroupBackups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "volumeGroupId": {
+            "arg": "volume_group_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VolumeGroupBackup]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -11746,6 +13247,35 @@
       "help": "Updates the display name for the specified volume group backup. For more information, see [Volume Groups]. \n[Command Reference](updateVolumeGroupBackup)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_volume_group_backup",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_volume_group_backup",
+        "http": "PUT",
+        "path": "/volumeGroupBackups/{volumeGroupBackupId}",
+        "positionalArgs": [
+          "volume_group_backup_id",
+          "update_volume_group_backup_details"
+        ],
+        "pathParams": {
+          "volumeGroupBackupId": "volume_group_backup_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_volume_group_backup_details",
+        "responseType": "VolumeGroupBackup",
+        "paginated": false
+      },
+      "otherOperations": ["get_volume_group_backup"],
       "params": [
         {
           "kind": "option",
@@ -12049,6 +13579,27 @@
       "help": "Gets information for the specified volume group replica. \n[Command Reference](getVolumeGroupReplica)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_group_replica",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_group_replica",
+        "http": "GET",
+        "path": "/volumeGroupReplicas/{volumeGroupReplicaId}",
+        "positionalArgs": ["volume_group_replica_id"],
+        "pathParams": {
+          "volumeGroupReplicaId": "volume_group_replica_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "VolumeGroupReplica",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12113,6 +13664,50 @@
       "help": "Lists the volume group replicas in the specified compartment. You can filter the results by volume group. For more information, see [Volume Group Replication]. \n[Command Reference](listVolumeGroupReplicas)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.list_volume_group_replicas",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "list_volume_group_replicas",
+        "http": "GET",
+        "path": "/volumeGroupReplicas",
+        "positionalArgs": ["availability_domain", "compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VolumeGroupReplica]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -12362,6 +13957,29 @@
       "help": "Removes the specified volume's assigned Vault service encryption key. \n[Command Reference](deleteVolumeKmsKey)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.delete_volume_kms_key",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "delete_volume_kms_key",
+        "http": "DELETE",
+        "path": "/volumes/{volumeId}/kmsKey",
+        "positionalArgs": ["volume_id"],
+        "pathParams": {
+          "volumeId": "volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12464,6 +14082,30 @@
       "help": "Gets the Vault service encryption key assigned to the specified volume. \n[Command Reference](getVolumeKmsKey)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.get_volume_kms_key",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "get_volume_kms_key",
+        "http": "GET",
+        "path": "/volumes/{volumeId}/kmsKey",
+        "positionalArgs": ["volume_id"],
+        "pathParams": {
+          "volumeId": "volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "VolumeKmsKey",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12547,6 +14189,31 @@
       "help": "Updates the specified volume with a new Key Management master encryption key. \n[Command Reference](updateVolumeKmsKey)",
       "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.update_volume_kms_key",
       "kind": "generated",
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "update_volume_kms_key",
+        "http": "PUT",
+        "path": "/volumes/{volumeId}/kmsKey",
+        "positionalArgs": ["volume_id", "update_volume_kms_key_details"],
+        "pathParams": {
+          "volumeId": "volume_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_volume_kms_key_details",
+        "responseType": "VolumeKmsKey",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",

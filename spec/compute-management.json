@@ -26,6 +26,16 @@
       }
     ]
   },
+  "clients": {
+    "core.compute_management": {
+      "class": "oci.core.compute_management_client.ComputeManagementClient",
+      "basePath": "/20160918",
+      "endpointTemplate": "https://iaas.{region}.{dualStack?ds.oci.:}{secondLevelDomain}",
+      "endpointServiceName": "iaas",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "compute_management"
+    }
+  },
   "groups": {
     "cluster-network": {
       "hidden": false,
@@ -159,6 +169,39 @@
       "help": "Moves a [cluster network with instance pools] into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment].\n\nWhen you move a cluster network to a different compartment, associated resources such as the instances in the cluster network, boot volumes, and VNICs are not moved. \n[Command Reference](changeClusterNetworkCompartment)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.change_cluster_network_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "change_cluster_network_compartment",
+        "http": "POST",
+        "path": "/clusterNetworks/{clusterNetworkId}/actions/changeCompartment",
+        "positionalArgs": [
+          "cluster_network_id",
+          "change_cluster_network_compartment_details"
+        ],
+        "pathParams": {
+          "clusterNetworkId": "cluster_network_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_cluster_network_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -261,6 +304,30 @@
       "help": "Creates a [cluster network with instance pools]. A cluster network is a group of high performance computing (HPC), GPU, or optimized bare metal instances that are connected with an ultra low-latency remote direct memory access (RDMA) network. Cluster networks with instance pools use instance pools to manage groups of identical instances.\n\nUse cluster networks with instance pools when you want predictable capacity for a specific number of identical instances that are managed as a group.\n\nIf you want to manage instances in the RDMA network independently of each other or use different types of instances in the network group, create a compute cluster by using the [CreateComputeCluster] operation.\n\nTo determine whether capacity is available for a specific shape before you create a cluster network, use the [CreateComputeCapacityReport] operation. \n[Command Reference](createClusterNetwork)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.create_cluster_network",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "create_cluster_network",
+        "http": "POST",
+        "path": "/clusterNetworks",
+        "positionalArgs": ["create_cluster_network_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_cluster_network_details",
+        "responseType": "ClusterNetwork",
+        "paginated": false
+      },
+      "otherOperations": ["get_cluster_network"],
       "params": [
         {
           "kind": "option",
@@ -507,6 +574,27 @@
       "help": "Gets information about a [cluster network with instance pools]. \n[Command Reference](getClusterNetwork)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.get_cluster_network",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "get_cluster_network",
+        "http": "GET",
+        "path": "/clusterNetworks/{clusterNetworkId}",
+        "positionalArgs": ["cluster_network_id"],
+        "pathParams": {
+          "clusterNetworkId": "cluster_network_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "ClusterNetwork",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -571,6 +659,47 @@
       "help": "Lists the [cluster networks with instance pools] in the specified compartment. \n[Command Reference](listClusterNetworks)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.list_cluster_networks",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "list_cluster_networks",
+        "http": "GET",
+        "path": "/clusterNetworks",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[ClusterNetworkSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -803,6 +932,46 @@
       "help": "Lists the instances in a [cluster network with instance pools]. \n[Command Reference](listClusterNetworkInstances)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.list_cluster_network_instances",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "list_cluster_network_instances",
+        "http": "GET",
+        "path": "/clusterNetworks/{clusterNetworkId}/instances",
+        "positionalArgs": ["compartment_id", "cluster_network_id"],
+        "pathParams": {
+          "clusterNetworkId": "cluster_network_id"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[InstanceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1024,6 +1193,30 @@
       "help": "Deletes (terminates) a [cluster network with instance pools].\n\nWhen you delete a cluster network, all of its resources are permanently deleted, including associated instances and instance pools. \n[Command Reference](terminateClusterNetwork)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.terminate_cluster_network",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "terminate_cluster_network",
+        "http": "DELETE",
+        "path": "/clusterNetworks/{clusterNetworkId}",
+        "positionalArgs": ["cluster_network_id"],
+        "pathParams": {
+          "clusterNetworkId": "cluster_network_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -1185,6 +1378,38 @@
       "help": "Updates a [cluster network with instance pools]. The OCID of the cluster network remains the same. \n[Command Reference](updateClusterNetwork)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.update_cluster_network",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "update_cluster_network",
+        "http": "PUT",
+        "path": "/clusterNetworks/{clusterNetworkId}",
+        "positionalArgs": [
+          "cluster_network_id",
+          "update_cluster_network_details"
+        ],
+        "pathParams": {
+          "clusterNetworkId": "cluster_network_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_cluster_network_details",
+        "responseType": "ClusterNetwork",
+        "paginated": false
+      },
+      "otherOperations": ["get_cluster_network"],
       "params": [
         {
           "kind": "option",
@@ -1432,6 +1657,39 @@
       "help": "Moves an instance configuration into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment].\n\nWhen you move an instance configuration to a different compartment, associated resources such as instance pools are not moved.\n\n**Important:** Most of the properties for an existing instance configuration, including the compartment, cannot be modified after you create the instance configuration. Although you can move an instance configuration to a different compartment, you will not be able to use the instance configuration to manage instance pools in the new compartment. If you want to update an instance configuration to point to a different compartment, you should instead create a new instance configuration in the target compartment using [CreateInstanceConfiguration]. \n[Command Reference](changeInstanceConfigurationCompartment)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.change_instance_configuration_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "change_instance_configuration_compartment",
+        "http": "POST",
+        "path": "/instanceConfigurations/{instanceConfigurationId}/actions/changeCompartment",
+        "positionalArgs": [
+          "instance_configuration_id",
+          "change_instance_configuration_compartment_details"
+        ],
+        "pathParams": {
+          "instanceConfigurationId": "instance_configuration_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_instance_configuration_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1534,6 +1792,29 @@
       "help": "Creates an instance configuration. An instance configuration is a template that defines the settings to use when creating Compute instances or GPU Memory Clusters. \n[Command Reference](createInstanceConfiguration)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.create_instance_configuration_create_instance_configuration_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "create_instance_configuration",
+        "http": "POST",
+        "path": "/instanceConfigurations",
+        "positionalArgs": ["create_instance_configuration"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_instance_configuration",
+        "responseType": "InstanceConfiguration",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1674,6 +1955,29 @@
       "help": "Creates an instance configuration. An instance configuration is a template that defines the settings to use when creating Compute instances or GPU Memory Clusters. \n[Command Reference](createInstanceConfiguration)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.create_instance_configuration_create_instance_configuration_from_instance_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "create_instance_configuration",
+        "http": "POST",
+        "path": "/instanceConfigurations",
+        "positionalArgs": ["create_instance_configuration"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_instance_configuration",
+        "responseType": "InstanceConfiguration",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1814,6 +2118,29 @@
       "help": "Creates an instance configuration. An instance configuration is a template that defines the settings to use when creating Compute instances or GPU Memory Clusters. \n[Command Reference](createInstanceConfiguration)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.create_instance_configuration_create_gmc_configuration_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "create_instance_configuration",
+        "http": "POST",
+        "path": "/instanceConfigurations",
+        "positionalArgs": ["create_instance_configuration"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_instance_configuration",
+        "responseType": "InstanceConfiguration",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1954,6 +2281,29 @@
       "help": "Deletes an instance configuration. \n[Command Reference](deleteInstanceConfiguration)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.delete_instance_configuration",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "delete_instance_configuration",
+        "http": "DELETE",
+        "path": "/instanceConfigurations/{instanceConfigurationId}",
+        "positionalArgs": ["instance_configuration_id"],
+        "pathParams": {
+          "instanceConfigurationId": "instance_configuration_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2056,6 +2406,27 @@
       "help": "Gets the specified instance configuration \n[Command Reference](getInstanceConfiguration)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.get_instance_configuration",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "get_instance_configuration",
+        "http": "GET",
+        "path": "/instanceConfigurations/{instanceConfigurationId}",
+        "positionalArgs": ["instance_configuration_id"],
+        "pathParams": {
+          "instanceConfigurationId": "instance_configuration_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "InstanceConfiguration",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2120,6 +2491,37 @@
       "help": "Creates an instance from an instance configuration.\n\nIf the instance configuration does not include all of the parameters that are required to create an instance, such as the availability domain and subnet ID, you must provide these parameters when you create an instance from the instance configuration. For more information, see the [InstanceConfiguration] resource.\n\nTo determine whether capacity is available for a specific shape before you create an instance, use the [CreateComputeCapacityReport] operation. \n[Command Reference](launchInstanceConfiguration)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.launch_instance_configuration_compute_instance_details",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "launch_instance_configuration",
+        "http": "POST",
+        "path": "/instanceConfigurations/{instanceConfigurationId}/actions/launch",
+        "positionalArgs": [
+          "instance_configuration_id",
+          "instance_configuration"
+        ],
+        "pathParams": {
+          "instanceConfigurationId": "instance_configuration_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-compute-cluster-id": {
+            "arg": "opc_compute_cluster_id"
+          }
+        },
+        "body": "instance_configuration",
+        "responseType": "Instance",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2260,6 +2662,41 @@
       "help": "Lists the instance configurations in the specified compartment. \n[Command Reference](listInstanceConfigurations)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.list_instance_configurations",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "list_instance_configurations",
+        "http": "GET",
+        "path": "/instanceConfigurations",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[InstanceConfigurationSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2443,6 +2880,37 @@
       "help": "Updates the free-form tags, defined tags, and display name of an instance configuration. \n[Command Reference](updateInstanceConfiguration)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.update_instance_configuration",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "update_instance_configuration",
+        "http": "PUT",
+        "path": "/instanceConfigurations/{instanceConfigurationId}",
+        "positionalArgs": [
+          "instance_configuration_id",
+          "update_instance_configuration_details"
+        ],
+        "pathParams": {
+          "instanceConfigurationId": "instance_configuration_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_configuration_details",
+        "responseType": "InstanceConfiguration",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2603,6 +3071,35 @@
       "help": "Attach a load balancer to the instance pool. \n[Command Reference](attachLoadBalancer)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.attach_load_balancer",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "attach_load_balancer",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/attachLoadBalancer",
+        "positionalArgs": ["instance_pool_id", "attach_load_balancer_details"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "attach_load_balancer_details",
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -2830,6 +3327,39 @@
       "help": "Moves an instance pool into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment].\n\nWhen you move an instance pool to a different compartment, associated resources such as the instances in the pool, boot volumes, VNICs, and autoscaling configurations are not moved. \n[Command Reference](changeInstancePoolCompartment)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.change_instance_pool_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "change_instance_pool_compartment",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/changeCompartment",
+        "positionalArgs": [
+          "instance_pool_id",
+          "change_instance_pool_compartment_details"
+        ],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_instance_pool_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2932,6 +3462,30 @@
       "help": "Creates an instance pool.\n\nTo determine whether capacity is available for a specific shape before you create an instance pool, use the [CreateComputeCapacityReport] operation. You can optionally include `overridePolicy` to define availability domain-scoped launch overrides for future launches. Existing pool members are not modified. \n[Command Reference](createInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.create_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "create_instance_pool",
+        "http": "POST",
+        "path": "/instancePools",
+        "positionalArgs": ["create_instance_pool_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_instance_pool_details",
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -3273,6 +3827,35 @@
       "help": "Detach a load balancer from the instance pool. \n[Command Reference](detachLoadBalancer)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.detach_load_balancer",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "detach_load_balancer",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/detachLoadBalancer",
+        "positionalArgs": ["instance_pool_id", "detach_load_balancer_details"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "detach_load_balancer_details",
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -3462,6 +4045,27 @@
       "help": "Gets the specified instance pool \n[Command Reference](getInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.get_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "get_instance_pool",
+        "http": "GET",
+        "path": "/instancePools/{instancePoolId}",
+        "positionalArgs": ["instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "InstancePool",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4025,6 +4629,47 @@
       "help": "Lists the instance pools in the specified compartment. \n[Command Reference](listInstancePools)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.list_instance_pools",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "list_instance_pools",
+        "http": "GET",
+        "path": "/instancePools",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[InstancePoolSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4257,6 +4902,46 @@
       "help": "List the instances in the specified instance pool. \n[Command Reference](listInstancePoolInstances)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.list_instance_pool_instances",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "list_instance_pool_instances",
+        "http": "GET",
+        "path": "/instancePools/{instancePoolId}/instances",
+        "positionalArgs": ["compartment_id", "instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[InstanceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4478,6 +5163,34 @@
       "help": "Performs the reset (immediate power off and power on) action on the specified instance pool, which performs the action on all the instances in the pool. \n[Command Reference](resetInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.reset_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "reset_instance_pool",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/reset",
+        "positionalArgs": ["instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -4629,6 +5342,34 @@
       "help": "Performs the softreset (ACPI shutdown and power on) action on the specified instance pool, which performs the action on all the instances in the pool.\n\nSoftreset gracefully reboots the instances by sending a shutdown command to the operating systems. After waiting 15 minutes for the OS to shut down, the instances are powered off and then powered back on. \n[Command Reference](softresetInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.softreset_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "softreset_instance_pool",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/softreset",
+        "positionalArgs": ["instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -4780,6 +5521,34 @@
       "help": "Performs the softstop (ACPI shutdown and power on) action on the specified instance pool, which performs the action on all the instances in the pool.\n\nSoftstop gracefully reboots the instances by sending a shutdown command to the operating systems. After waiting 15 minutes for the OS to shutdown, the instances are powered off and then powered back on. \n[Command Reference](softstopInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.softstop_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "softstop_instance_pool",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/softstop",
+        "positionalArgs": ["instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -4931,6 +5700,34 @@
       "help": "Performs the start (power on) action on the specified instance pool, which performs the action on all the instances in the pool. \n[Command Reference](startInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.start_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "start_instance_pool",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/start",
+        "positionalArgs": ["instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -5082,6 +5879,34 @@
       "help": "Performs the stop (immediate power off) action on the specified instance pool, which performs the action on all the instances in the pool. \n[Command Reference](stopInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.stop_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "stop_instance_pool",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/stop",
+        "positionalArgs": ["instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -5233,6 +6058,30 @@
       "help": "Terminate the specified instance pool.\n\n**Warning:** When you delete an instance pool, the resources that were created by the pool are permanently deleted, including associated instances, attached boot volumes, and block volumes.\n\nIf an autoscaling configuration applies to the instance pool, the autoscaling configuration will be deleted asynchronously after the pool is deleted. You can also manually delete the autoscaling configuration using the `DeleteAutoScalingConfiguration` operation in the Autoscaling API. \n[Command Reference](terminateInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.terminate_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "terminate_instance_pool",
+        "http": "DELETE",
+        "path": "/instancePools/{instancePoolId}",
+        "positionalArgs": ["instance_pool_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -5403,6 +6252,35 @@
       "help": "Update the specified instance pool.\n\nThe OCID of the instance pool remains the same.\n\nIf `overridePolicy` is omitted, the stored policy remains unchanged. Provide a non-null `overridePolicy` to replace the stored policy as a whole. Provide `null` to clear the stored policy for future launches. \n[Command Reference](updateInstancePool)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.update_instance_pool",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "update_instance_pool",
+        "http": "PUT",
+        "path": "/instancePools/{instancePoolId}",
+        "positionalArgs": ["instance_pool_id", "update_instance_pool_details"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_instance_pool_details",
+        "responseType": "InstancePool",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool"],
       "params": [
         {
           "kind": "option",
@@ -5764,6 +6642,35 @@
       "help": "Attaches an instance to an instance pool. For information about the prerequisites that an instance must meet before you can attach it to a pool, see [Attaching an Instance to an Instance Pool]. \n[Command Reference](attachInstancePoolInstance)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.attach_instance_pool_instance",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "attach_instance_pool_instance",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/instances",
+        "positionalArgs": [
+          "instance_pool_id",
+          "attach_instance_pool_instance_details"
+        ],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "attach_instance_pool_instance_details",
+        "responseType": "InstancePoolInstance",
+        "paginated": false
+      },
+      "otherOperations": ["get_instance_pool_instance"],
       "params": [
         {
           "kind": "option",
@@ -5912,6 +6819,34 @@
       "help": "Detaches an instance from an instance pool. \n[Command Reference](detachInstancePoolInstance)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.detach_instance_pool_instance",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "detach_instance_pool_instance",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/detachInstance",
+        "positionalArgs": [
+          "instance_pool_id",
+          "detach_instance_pool_instance_details"
+        ],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "detach_instance_pool_instance_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -6092,6 +7027,28 @@
       "help": "Gets information about an instance that belongs to an instance pool. \n[Command Reference](getInstancePoolInstance)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.get_instance_pool_instance",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "get_instance_pool_instance",
+        "http": "GET",
+        "path": "/instancePools/{instancePoolId}/instances/{instanceId}",
+        "positionalArgs": ["instance_pool_id", "instance_id"],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id",
+          "instanceId": "instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "InstancePoolInstance",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6175,6 +7132,33 @@
       "help": "Marks an instance in an instance pool to be ready for termination. \n[Command Reference](terminationProceedInstancePoolInstance)",
       "callback": "services.core.src.oci_cli_compute_management.generated.computemanagement_cli.termination_proceed_instance_pool_instance",
       "kind": "generated",
+      "operation": {
+        "client": "core.compute_management",
+        "method": "termination_proceed_instance_pool_instance",
+        "http": "POST",
+        "path": "/instancePools/{instancePoolId}/actions/terminationProceed",
+        "positionalArgs": [
+          "instance_pool_id",
+          "termination_proceed_instance_pool_instance_details"
+        ],
+        "pathParams": {
+          "instancePoolId": "instance_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "termination_proceed_instance_pool_instance_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",

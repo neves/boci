@@ -26,6 +26,29 @@
       }
     ]
   },
+  "clients": {
+    "oda.management": {
+      "class": "oci.oda.management_client.ManagementClient",
+      "basePath": "/20190506",
+      "endpointTemplate": "https://digitalassistant-api.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "management"
+    },
+    "oda.oda": {
+      "class": "oci.oda.oda_client.OdaClient",
+      "basePath": "/20190506",
+      "endpointTemplate": "https://digitalassistant-api.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "oda"
+    },
+    "oda.odapackage": {
+      "class": "oci.oda.odapackage_client.OdapackageClient",
+      "basePath": "/20190506",
+      "endpointTemplate": "https://digitalassistant-api.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "odapackage"
+    }
+  },
   "groups": {
     "instance": {
       "hidden": false,
@@ -561,6 +584,40 @@
       "help": "Moves an Digital Assistant instance into a different compartment. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeOdaInstanceCompartment)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.change_oda_instance_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "change_oda_instance_compartment",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/actions/changeCompartment",
+        "positionalArgs": [
+          "oda_instance_id",
+          "change_oda_instance_compartment_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_oda_instance_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -729,6 +786,33 @@
       "help": "Starts an asynchronous job to create a Digital Assistant instance.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestId}`. \n[Command Reference](createOdaInstance)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.create_oda_instance",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "create_oda_instance",
+        "http": "POST",
+        "path": "/odaInstances",
+        "positionalArgs": ["create_oda_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_oda_instance_details",
+        "responseType": "OdaInstance",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request", "get_oda_instance"],
       "params": [
         {
           "kind": "option",
@@ -994,6 +1078,37 @@
       "help": "Starts an asynchronous job to delete the specified Digital Assistant instance. To monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestId}`. \n[Command Reference](deleteOdaInstance)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.delete_oda_instance",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "delete_oda_instance",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "retentionTime": {
+            "arg": "retention_time"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1181,6 +1296,30 @@
       "help": "Gets the specified Digital Assistant instance. \n[Command Reference](getOdaInstance)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.get_oda_instance",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "get_oda_instance",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaInstance",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1245,6 +1384,50 @@
       "help": "Returns a page of Digital Assistant instances that belong to the specified compartment.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listOdaInstances)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.list_oda_instances",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "list_oda_instances",
+        "http": "GET",
+        "path": "/odaInstances",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[OdaInstanceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1476,6 +1659,36 @@
       "help": "Starts an inactive Digital Assistant instance. Once active, the instance will be accessible and metering of requests will be started again. \n[Command Reference](startOdaInstance)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.start_oda_instance",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "start_oda_instance",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/actions/start",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1625,6 +1838,36 @@
       "help": "Stops an active Digital Assistant instance. Once inactive, the instance will not be accessible and metering of requests will be stopped until the instance is started again. Data associated with the instance is not affected. \n[Command Reference](stopOdaInstance)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.stop_oda_instance",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "stop_oda_instance",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/actions/stop",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1774,6 +2017,35 @@
       "help": "Updates the specified Digital Assistant instance with the information in the request body. \n[Command Reference](updateOdaInstance)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.update_oda_instance",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "update_oda_instance",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}",
+        "positionalArgs": ["oda_instance_id", "update_oda_instance_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_oda_instance_details",
+        "responseType": "OdaInstance",
+        "paginated": false
+      },
+      "otherOperations": ["get_oda_instance"],
       "params": [
         {
           "kind": "option",
@@ -2020,6 +2292,38 @@
       "help": "Creates a new Authentication Provider \n[Command Reference](createAuthenticationProvider)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_authentication_provider",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_authentication_provider",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/authenticationProviders",
+        "positionalArgs": [
+          "oda_instance_id",
+          "create_authentication_provider_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_authentication_provider_details",
+        "responseType": "AuthenticationProvider",
+        "paginated": false
+      },
+      "otherOperations": ["get_authentication_provider"],
       "params": [
         {
           "kind": "option",
@@ -2459,6 +2763,33 @@
       "help": "Delete the specified Authentication Provider. \n[Command Reference](deleteAuthenticationProvider)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_authentication_provider",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_authentication_provider",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/authenticationProviders/{authenticationProviderId}",
+        "positionalArgs": ["oda_instance_id", "authentication_provider_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "authenticationProviderId": "authentication_provider_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2580,6 +2911,34 @@
       "help": "Gets the specified Authentication Provider. \n[Command Reference](getAuthenticationProvider)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_authentication_provider",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_authentication_provider",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/authenticationProviders/{authenticationProviderId}",
+        "positionalArgs": ["oda_instance_id", "authentication_provider_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "authenticationProviderId": "authentication_provider_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AuthenticationProvider",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2682,6 +3041,55 @@
       "help": "Returns a page of Authentication Providers that belong to the specified Digital Assistant instance.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listAuthenticationProviders)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_authentication_providers",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_authentication_providers",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/authenticationProviders",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "id": {
+            "arg": "id"
+          },
+          "identityProvider": {
+            "arg": "identity_provider"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AuthenticationProviderCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2953,6 +3361,40 @@
       "help": "Updates the specified Authentication Provider with the information in the request body. \n[Command Reference](updateAuthenticationProvider)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_authentication_provider",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_authentication_provider",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/authenticationProviders/{authenticationProviderId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "authentication_provider_id",
+          "update_authentication_provider_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "authenticationProviderId": "authentication_provider_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_authentication_provider_details",
+        "responseType": "AuthenticationProvider",
+        "paginated": false
+      },
+      "otherOperations": ["get_authentication_provider"],
       "params": [
         {
           "kind": "option",
@@ -3370,6 +3812,33 @@
       "help": "Import a Bot archive from Object Storage. \n[Command Reference](importBot)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.import_bot",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "import_bot",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/actions/importBot",
+        "positionalArgs": ["oda_instance_id", "import_bot_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "import_bot_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3519,6 +3988,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3715,6 +4212,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_android_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3931,6 +4456,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_app_event_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4128,6 +4681,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_application_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4325,6 +4906,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_cortana_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4541,6 +5150,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_facebook_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4757,6 +5394,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_ios_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4973,6 +5638,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_ms_teams_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5189,6 +5882,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_oss_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5538,6 +6259,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_osvc_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5851,6 +6600,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_service_cloud_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6107,6 +6884,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_slack_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6380,6 +7185,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_twilio_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6653,6 +7486,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_web_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6888,6 +7749,34 @@
       "help": "Creates a new Channel. \n[Command Reference](createChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_channel_create_webhook_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id", "create_channel_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_channel_details",
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7106,6 +7995,33 @@
       "help": "Delete the specified Channel. \n[Command Reference](deleteChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_channel",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_channel",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": ["oda_instance_id", "channel_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7227,6 +8143,34 @@
       "help": "Gets the specified Channel. \n[Command Reference](getChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_channel",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_channel",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": ["oda_instance_id", "channel_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Channel",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7329,6 +8273,58 @@
       "help": "Returns a page of Channels that belong to the specified Digital Assistant instance.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listChannels)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_channels",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_channels",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/channels",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "category": {
+            "arg": "category"
+          },
+          "type": {
+            "arg": "type"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ChannelCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7644,6 +8640,34 @@
       "help": "This will generate new keys for any generated keys in the Channel (eg. secretKey, verifyToken). If a Channel has no generated keys then no changes will be made. Ensure that you take note of the newly generated keys in the response as they will not be returned again. \n[Command Reference](rotateChannelKeys)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.rotate_channel_keys",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "rotate_channel_keys",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}/actions/rotateKeys",
+        "positionalArgs": ["oda_instance_id", "channel_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "CreateChannelResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7746,6 +8770,35 @@
       "help": "Starts a Channel so that it will begin accepting messages. \n[Command Reference](startChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.start_channel",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "start_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}/actions/start",
+        "positionalArgs": ["oda_instance_id", "channel_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -7915,6 +8968,35 @@
       "help": "Stops a Channel so that it will no longer accept messages. \n[Command Reference](stopChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.stop_channel",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "stop_channel",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}/actions/stop",
+        "positionalArgs": ["oda_instance_id", "channel_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -8084,6 +9166,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -8405,6 +9521,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_android_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -8746,6 +9896,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_app_event_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -9068,6 +10252,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_application_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -9390,6 +10608,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_cortana_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -9731,6 +10983,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_facebook_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -10072,6 +11358,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_ios_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -10413,6 +11733,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_ms_teams_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -10754,6 +12108,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_oss_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -11228,6 +12616,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_osvc_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -11666,6 +13088,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_service_cloud_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -12047,6 +13503,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_slack_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -12445,6 +13935,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_twilio_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -12843,6 +14367,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_web_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -13203,6 +14761,40 @@
       "help": "Updates the specified Channel with the information in the request body. \n[Command Reference](updateChannel)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_channel_update_webhook_channel_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/channels/{channelId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "channel_id",
+          "update_channel_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_channel_details",
+        "responseType": "Channel",
+        "paginated": false
+      },
+      "otherOperations": ["get_channel"],
       "params": [
         {
           "kind": "option",
@@ -13546,6 +15138,36 @@
       "help": "Creates a new Digital Assistant. \n[Command Reference](createDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_digital_assistant",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_digital_assistant",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants",
+        "positionalArgs": [
+          "oda_instance_id",
+          "create_digital_assistant_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_digital_assistant_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -13832,6 +15454,36 @@
       "help": "Creates a new Digital Assistant. \n[Command Reference](createDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_digital_assistant_clone_digital_assistant_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_digital_assistant",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants",
+        "positionalArgs": [
+          "oda_instance_id",
+          "create_digital_assistant_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_digital_assistant_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -14173,6 +15825,36 @@
       "help": "Creates a new Digital Assistant. \n[Command Reference](createDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_digital_assistant_create_digital_assistant_version_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_digital_assistant",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants",
+        "positionalArgs": [
+          "oda_instance_id",
+          "create_digital_assistant_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_digital_assistant_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -14476,6 +16158,36 @@
       "help": "Creates a new Digital Assistant. \n[Command Reference](createDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_digital_assistant_create_new_digital_assistant_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_digital_assistant",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants",
+        "positionalArgs": [
+          "oda_instance_id",
+          "create_digital_assistant_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_digital_assistant_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -14817,6 +16529,36 @@
       "help": "Creates a new Digital Assistant. \n[Command Reference](createDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_digital_assistant_extend_digital_assistant_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_digital_assistant",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants",
+        "positionalArgs": [
+          "oda_instance_id",
+          "create_digital_assistant_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_digital_assistant_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -15158,6 +16900,33 @@
       "help": "Delete the specified Digital Assistant. \n[Command Reference](deleteDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_digital_assistant",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_digital_assistant",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}",
+        "positionalArgs": ["oda_instance_id", "digital_assistant_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -15279,6 +17048,34 @@
       "help": "Gets the specified Digital Assistant. \n[Command Reference](getDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_digital_assistant",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_digital_assistant",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}",
+        "positionalArgs": ["oda_instance_id", "digital_assistant_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DigitalAssistant",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -15381,6 +17178,67 @@
       "help": "Returns a page of Digital Assistants that belong to the specified Digital Assistant instance.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listDigitalAssistants)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_digital_assistants",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_digital_assistants",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "id": {
+            "arg": "id"
+          },
+          "category": {
+            "arg": "category"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "version": {
+            "arg": "version"
+          },
+          "namespace": {
+            "arg": "namespace"
+          },
+          "platformVersion": {
+            "arg": "platform_version"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "lifecycleDetails": {
+            "arg": "lifecycle_details"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DigitalAssistantCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -15726,6 +17584,35 @@
       "help": "Publish a draft Digital Assistant. Once published the Digital Assistant cannot be modified. \n[Command Reference](publishDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.publish_digital_assistant",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "publish_digital_assistant",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}/actions/publish",
+        "positionalArgs": ["oda_instance_id", "digital_assistant_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DigitalAssistant",
+        "paginated": false
+      },
+      "otherOperations": ["get_digital_assistant"],
       "params": [
         {
           "kind": "option",
@@ -15895,6 +17782,40 @@
       "help": "Updates the specified Digital Assistant with the information in the request body. \n[Command Reference](updateDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_digital_assistant",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_digital_assistant",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "digital_assistant_id",
+          "update_digital_assistant_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_digital_assistant_details",
+        "responseType": "DigitalAssistant",
+        "paginated": false
+      },
+      "otherOperations": ["get_digital_assistant"],
       "params": [
         {
           "kind": "option",
@@ -16160,6 +18081,33 @@
       "help": "This will store the provided parameters in the Digital Assistant instance and update any Digital Assistants with matching parameters. \n[Command Reference](configureDigitalAssistantParameters)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.configure_digital_assistant_parameters",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "configure_digital_assistant_parameters",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/actions/configureDigitalAssistantParameters",
+        "positionalArgs": [
+          "oda_instance_id",
+          "configure_digital_assistant_parameters_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "configure_digital_assistant_parameters_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -16243,6 +18191,39 @@
       "help": "Gets the specified Digital Assistant Parameter. \n[Command Reference](getDigitalAssistantParameter)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_digital_assistant_parameter",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_digital_assistant_parameter",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}/parameters/{parameterName}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "digital_assistant_id",
+          "parameter_name"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id",
+          "parameterName": "parameter_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DigitalAssistantParameter",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -16364,6 +18345,50 @@
       "help": "Returns a page of Parameters that belong to the specified Digital Assistant.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listDigitalAssistantParameters)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_digital_assistant_parameters",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_digital_assistant_parameters",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}/parameters",
+        "positionalArgs": ["oda_instance_id", "digital_assistant_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id"
+        },
+        "queryParams": {
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DigitalAssistantParameterCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -16614,6 +18639,42 @@
       "help": "Updates the specified Digital Assistant Parameter with the information in the request body. \n[Command Reference](updateDigitalAssistantParameter)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_digital_assistant_parameter",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_digital_assistant_parameter",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}/parameters/{parameterName}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "digital_assistant_id",
+          "parameter_name",
+          "update_digital_assistant_parameter_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id",
+          "parameterName": "parameter_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_digital_assistant_parameter_details",
+        "responseType": "DigitalAssistantParameter",
+        "paginated": false
+      },
+      "otherOperations": ["get_digital_assistant_parameter"],
       "params": [
         {
           "kind": "option",
@@ -16821,6 +18882,39 @@
       "help": "Starts an asynchronous job to move the specified ODA Private Endpoint into a different compartment.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestID}`. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeOdaPrivateEndpointCompartment)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.change_oda_private_endpoint_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "change_oda_private_endpoint_compartment",
+        "http": "POST",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}/actions/changeCompartment",
+        "positionalArgs": [
+          "oda_private_endpoint_id",
+          "change_oda_private_endpoint_compartment_details"
+        ],
+        "pathParams": {
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_oda_private_endpoint_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -16989,6 +19083,32 @@
       "help": "Starts an asynchronous job to create an ODA Private Endpoint.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestID}`. \n[Command Reference](createOdaPrivateEndpoint)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_oda_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_oda_private_endpoint",
+        "http": "POST",
+        "path": "/odaPrivateEndpoints",
+        "positionalArgs": ["create_oda_private_endpoint_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_oda_private_endpoint_details",
+        "responseType": "OdaPrivateEndpoint",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -17252,6 +19372,32 @@
       "help": "Starts an asynchronous job to delete the specified ODA Private Endpoint. To monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestID}`. \n[Command Reference](deleteOdaPrivateEndpoint)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_oda_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_oda_private_endpoint",
+        "http": "DELETE",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}",
+        "positionalArgs": ["oda_private_endpoint_id"],
+        "pathParams": {
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -17420,6 +19566,30 @@
       "help": "Gets the specified ODA Private Endpoint. \n[Command Reference](getOdaPrivateEndpoint)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_oda_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_oda_private_endpoint",
+        "http": "GET",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}",
+        "positionalArgs": ["oda_private_endpoint_id"],
+        "pathParams": {
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaPrivateEndpoint",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -17484,6 +19654,50 @@
       "help": "Returns a page of ODA Private Endpoints that belong to the specified compartment.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listOdaPrivateEndpoints)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_oda_private_endpoints",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_oda_private_endpoints",
+        "http": "GET",
+        "path": "/odaPrivateEndpoints",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaPrivateEndpointCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -17714,6 +19928,36 @@
       "help": "Starts an asynchronous job to update the specified ODA Private Endpoint with the information in the request body. \n[Command Reference](updateOdaPrivateEndpoint)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_oda_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_oda_private_endpoint",
+        "http": "PUT",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}",
+        "positionalArgs": [
+          "oda_private_endpoint_id",
+          "update_oda_private_endpoint_details"
+        ],
+        "pathParams": {
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_oda_private_endpoint_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -17997,6 +20241,32 @@
       "help": "Starts an asynchronous job to create an ODA Private Endpoint Attachment.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestID}`. \n[Command Reference](createOdaPrivateEndpointAttachment)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_oda_private_endpoint_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_oda_private_endpoint_attachment",
+        "http": "POST",
+        "path": "/odaPrivateEndpointAttachments",
+        "positionalArgs": ["create_oda_private_endpoint_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_oda_private_endpoint_attachment_details",
+        "responseType": "OdaPrivateEndpointAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18146,6 +20416,32 @@
       "help": "Starts an asynchronous job to delete the specified ODA Private Endpoint Attachment. To monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestID}`. \n[Command Reference](deleteOdaPrivateEndpointAttachment)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_oda_private_endpoint_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_oda_private_endpoint_attachment",
+        "http": "DELETE",
+        "path": "/odaPrivateEndpointAttachments/{odaPrivateEndpointAttachmentId}",
+        "positionalArgs": ["oda_private_endpoint_attachment_id"],
+        "pathParams": {
+          "odaPrivateEndpointAttachmentId": "oda_private_endpoint_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18314,6 +20610,30 @@
       "help": "Gets the specified ODA Private Endpoint Attachment. \n[Command Reference](getOdaPrivateEndpointAttachment)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_oda_private_endpoint_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_oda_private_endpoint_attachment",
+        "http": "GET",
+        "path": "/odaPrivateEndpointAttachments/{odaPrivateEndpointAttachmentId}",
+        "positionalArgs": ["oda_private_endpoint_attachment_id"],
+        "pathParams": {
+          "odaPrivateEndpointAttachmentId": "oda_private_endpoint_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaPrivateEndpointAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18378,6 +20698,50 @@
       "help": "Returns a page of ODA Instances attached to this ODA Private Endpoint.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listOdaPrivateEndpointAttachments)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_oda_private_endpoint_attachments",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_oda_private_endpoint_attachments",
+        "http": "GET",
+        "path": "/odaPrivateEndpointAttachments",
+        "positionalArgs": ["oda_private_endpoint_id", "compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "odaPrivateEndpointId": {
+            "arg": "oda_private_endpoint_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaPrivateEndpointAttachmentCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -18608,6 +20972,37 @@
       "help": "Starts an asynchronous job to create an ODA Private Endpoint Scan Proxy.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestID}`. \n[Command Reference](createOdaPrivateEndpointScanProxy)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_oda_private_endpoint_scan_proxy",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_oda_private_endpoint_scan_proxy",
+        "http": "POST",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}/odaPrivateEndpointScanProxies",
+        "positionalArgs": [
+          "create_oda_private_endpoint_scan_proxy_details",
+          "oda_private_endpoint_id"
+        ],
+        "pathParams": {
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_oda_private_endpoint_scan_proxy_details",
+        "responseType": "OdaPrivateEndpointScanProxy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18795,6 +21190,36 @@
       "help": "Starts an asynchronous job to delete the specified ODA Private Endpoint Scan Proxy. To monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestID}`. \n[Command Reference](deleteOdaPrivateEndpointScanProxy)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_oda_private_endpoint_scan_proxy",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_oda_private_endpoint_scan_proxy",
+        "http": "DELETE",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}/odaPrivateEndpointScanProxies/{odaPrivateEndpointScanProxyId}",
+        "positionalArgs": [
+          "oda_private_endpoint_scan_proxy_id",
+          "oda_private_endpoint_id"
+        ],
+        "pathParams": {
+          "odaPrivateEndpointScanProxyId": "oda_private_endpoint_scan_proxy_id",
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18982,6 +21407,34 @@
       "help": "Gets the specified ODA Private Endpoint Scan Proxy. \n[Command Reference](getOdaPrivateEndpointScanProxy)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_oda_private_endpoint_scan_proxy",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_oda_private_endpoint_scan_proxy",
+        "http": "GET",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}/odaPrivateEndpointScanProxies/{odaPrivateEndpointScanProxyId}",
+        "positionalArgs": [
+          "oda_private_endpoint_scan_proxy_id",
+          "oda_private_endpoint_id"
+        ],
+        "pathParams": {
+          "odaPrivateEndpointScanProxyId": "oda_private_endpoint_scan_proxy_id",
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaPrivateEndpointScanProxy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19065,6 +21518,46 @@
       "help": "Returns a page of ODA Private Endpoint Scan Proxies that belong to the specified ODA Private Endpoint.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listOdaPrivateEndpointScanProxies)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_oda_private_endpoint_scan_proxies",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_oda_private_endpoint_scan_proxies",
+        "http": "GET",
+        "path": "/odaPrivateEndpoints/{odaPrivateEndpointId}/odaPrivateEndpointScanProxies",
+        "positionalArgs": ["oda_private_endpoint_id"],
+        "pathParams": {
+          "odaPrivateEndpointId": "oda_private_endpoint_id"
+        },
+        "queryParams": {
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaPrivateEndpointScanProxyCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -19269,6 +21762,38 @@
       "help": "Bulk create composite and value list entities into a skill. \n[Command Reference](bulkCreateSkillEntities)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.bulk_create_skill_entities",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "bulk_create_skill_entities",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/actions/bulkCreateEntities",
+        "positionalArgs": [
+          "oda_instance_id",
+          "skill_id",
+          "bulk_create_skill_entities_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "bulk_create_skill_entities_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19437,6 +21962,36 @@
       "help": "Cascading delete of the custom entities in a skill. \n[Command Reference](cascadingDeleteSkillCustomEntities)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.cascading_delete_skill_custom_entities",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "cascading_delete_skill_custom_entities",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/actions/cascadingDeleteCustomEntities",
+        "positionalArgs": ["oda_instance_id", "skill_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19605,6 +22160,33 @@
       "help": "Creates a new Skill from scratch. \n[Command Reference](createSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_skill",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills",
+        "positionalArgs": ["oda_instance_id", "create_skill_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_skill_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19910,6 +22492,33 @@
       "help": "Creates a new Skill from scratch. \n[Command Reference](createSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_skill_clone_skill_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills",
+        "positionalArgs": ["oda_instance_id", "create_skill_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_skill_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20270,6 +22879,33 @@
       "help": "Creates a new Skill from scratch. \n[Command Reference](createSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_skill_create_new_skill_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills",
+        "positionalArgs": ["oda_instance_id", "create_skill_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_skill_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20630,6 +23266,33 @@
       "help": "Creates a new Skill from scratch. \n[Command Reference](createSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_skill_create_skill_version_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills",
+        "positionalArgs": ["oda_instance_id", "create_skill_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_skill_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20952,6 +23615,33 @@
       "help": "Creates a new Skill from scratch. \n[Command Reference](createSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_skill_extend_skill_details",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills",
+        "positionalArgs": ["oda_instance_id", "create_skill_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_skill_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21312,6 +24002,33 @@
       "help": "Delete the specified Skill. \n[Command Reference](deleteSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_skill",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_skill",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}",
+        "positionalArgs": ["oda_instance_id", "skill_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21433,6 +24150,35 @@
       "help": "Exports the specified Skill as an archive to Object Storage. \n[Command Reference](exportSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.export_skill",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "export_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/actions/export",
+        "positionalArgs": [
+          "oda_instance_id",
+          "skill_id",
+          "export_skill_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "export_skill_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21601,6 +24347,35 @@
       "help": "Exports the specified Digital Assistant as an archive to Object Storage. \n[Command Reference](exportDigitalAssistant)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.export_digital_assistant",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "export_digital_assistant",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/digitalAssistants/{digitalAssistantId}/actions/export",
+        "positionalArgs": [
+          "oda_instance_id",
+          "digital_assistant_id",
+          "export_digital_assistant_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "digitalAssistantId": "digital_assistant_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "export_digital_assistant_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21769,6 +24544,34 @@
       "help": "Gets the specified Skill. \n[Command Reference](getSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_skill",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_skill",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}",
+        "positionalArgs": ["oda_instance_id", "skill_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Skill",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21871,6 +24674,67 @@
       "help": "Returns a page of Skills that belong to the specified Digital Assistant instance.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listSkills)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_skills",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_skills",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/skills",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "id": {
+            "arg": "id"
+          },
+          "category": {
+            "arg": "category"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "version": {
+            "arg": "version"
+          },
+          "namespace": {
+            "arg": "namespace"
+          },
+          "platformVersion": {
+            "arg": "platform_version"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "lifecycleDetails": {
+            "arg": "lifecycle_details"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SkillCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -22216,6 +25080,35 @@
       "help": "Publish a draft Skill. Once published it cannot be modified. \n[Command Reference](publishSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.publish_skill",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "publish_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/actions/publish",
+        "positionalArgs": ["oda_instance_id", "skill_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Skill",
+        "paginated": false
+      },
+      "otherOperations": ["get_skill"],
       "params": [
         {
           "kind": "option",
@@ -22385,6 +25278,41 @@
       "help": "Train a skill. \n[Command Reference](trainSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.train_skill",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "train_skill",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/actions/train",
+        "positionalArgs": [
+          "oda_instance_id",
+          "skill_id",
+          "train_skill_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "train_skill_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22572,6 +25500,40 @@
       "help": "Updates the specified Skill with the information in the request body. \n[Command Reference](updateSkill)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_skill",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_skill",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "skill_id",
+          "update_skill_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_skill_details",
+        "responseType": "Skill",
+        "paginated": false
+      },
+      "otherOperations": ["get_skill"],
       "params": [
         {
           "kind": "option",
@@ -22837,6 +25799,40 @@
       "help": "Creates a new Skill Parameter. \n[Command Reference](createSkillParameter)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_skill_parameter",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_skill_parameter",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/parameters",
+        "positionalArgs": [
+          "oda_instance_id",
+          "skill_id",
+          "create_skill_parameter_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_skill_parameter_details",
+        "responseType": "SkillParameter",
+        "paginated": false
+      },
+      "otherOperations": ["get_skill_parameter"],
       "params": [
         {
           "kind": "option",
@@ -23084,6 +26080,34 @@
       "help": "Delete the specified Skill Parameter. \n[Command Reference](deleteSkillParameter)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_skill_parameter",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_skill_parameter",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/parameters/{parameterName}",
+        "positionalArgs": ["oda_instance_id", "skill_id", "parameter_name"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id",
+          "parameterName": "parameter_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -23224,6 +26248,35 @@
       "help": "Gets the specified Skill Parameter. \n[Command Reference](getSkillParameter)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_skill_parameter",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_skill_parameter",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/parameters/{parameterName}",
+        "positionalArgs": ["oda_instance_id", "skill_id", "parameter_name"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id",
+          "parameterName": "parameter_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SkillParameter",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -23345,6 +26398,50 @@
       "help": "Returns a page of Skill Parameters that belong to the specified Skill.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listSkillParameters)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_skill_parameters",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_skill_parameters",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/parameters",
+        "positionalArgs": ["oda_instance_id", "skill_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id"
+        },
+        "queryParams": {
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SkillParameterCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -23595,6 +26692,42 @@
       "help": "Updates the specified Skill Parameter with the information in the request body. \n[Command Reference](updateSkillParameter)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_skill_parameter",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_skill_parameter",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/skills/{skillId}/parameters/{parameterName}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "skill_id",
+          "parameter_name",
+          "update_skill_parameter_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "skillId": "skill_id",
+          "parameterName": "parameter_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_skill_parameter_details",
+        "responseType": "SkillParameter",
+        "paginated": false
+      },
+      "otherOperations": ["get_skill_parameter"],
       "params": [
         {
           "kind": "option",
@@ -23840,6 +26973,35 @@
       "help": "Creates a new Translator \n[Command Reference](createTranslator)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.create_translator",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "create_translator",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/translators",
+        "positionalArgs": ["oda_instance_id", "create_translator_details"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_translator_details",
+        "responseType": "Translator",
+        "paginated": false
+      },
+      "otherOperations": ["get_translator"],
       "params": [
         {
           "kind": "option",
@@ -24087,6 +27249,33 @@
       "help": "Delete the specified Translator. \n[Command Reference](deleteTranslator)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.delete_translator",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "delete_translator",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/translators/{translatorId}",
+        "positionalArgs": ["oda_instance_id", "translator_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "translatorId": "translator_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -24208,6 +27397,34 @@
       "help": "Gets the specified Translator. \n[Command Reference](getTranslator)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.get_translator",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "get_translator",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/translators/{translatorId}",
+        "positionalArgs": ["oda_instance_id", "translator_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "translatorId": "translator_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Translator",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -24310,6 +27527,55 @@
       "help": "Returns a page of Translators that belong to the specified Digital Assistant instance.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listTranslators)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.list_translators",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "list_translators",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/translators",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "id": {
+            "arg": "id"
+          },
+          "type": {
+            "arg": "type"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "TranslatorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -24581,6 +27847,40 @@
       "help": "Updates the specified Translator with the information in the request body. \n[Command Reference](updateTranslator)",
       "callback": "services.oda.src.oci_cli_management.generated.management_cli.update_translator",
       "kind": "generated",
+      "operation": {
+        "client": "oda.management",
+        "method": "update_translator",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/translators/{translatorId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "translator_id",
+          "update_translator_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "translatorId": "translator_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_translator_details",
+        "responseType": "Translator",
+        "paginated": false
+      },
+      "otherOperations": ["get_translator"],
       "params": [
         {
           "kind": "option",
@@ -24865,6 +28165,37 @@
       "help": "Starts an asynchronous job to create a Digital Assistant instance attachment.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestId}`. \n[Command Reference](createOdaInstanceAttachment)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.create_oda_instance_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "create_oda_instance_attachment",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/attachments",
+        "positionalArgs": [
+          "oda_instance_id",
+          "create_oda_instance_attachment_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_oda_instance_attachment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -25130,6 +28461,34 @@
       "help": "Starts an asynchronous job to delete the specified Digital Assistant instance attachment. \n[Command Reference](deleteOdaInstanceAttachment)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.delete_oda_instance_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "delete_oda_instance_attachment",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/attachments/{attachmentId}",
+        "positionalArgs": ["oda_instance_id", "attachment_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "attachmentId": "attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -25317,6 +28676,35 @@
       "help": "Gets an ODA instance attachment by identifier \n[Command Reference](getOdaInstanceAttachment)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.get_oda_instance_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "get_oda_instance_attachment",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/attachments/{attachmentId}",
+        "positionalArgs": ["oda_instance_id", "attachment_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "attachmentId": "attachment_id"
+        },
+        "queryParams": {
+          "includeOwnerMetadata": {
+            "arg": "include_owner_metadata"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaInstanceAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -25419,6 +28807,39 @@
       "help": "Updates the ODA instance attachment \n[Command Reference](updateOdaInstanceAttachment)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.update_oda_instance_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "update_oda_instance_attachment",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/attachments/{attachmentId}",
+        "positionalArgs": [
+          "oda_instance_id",
+          "attachment_id",
+          "update_oda_instance_attachment_details"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "attachmentId": "attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_oda_instance_attachment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -25702,6 +29123,49 @@
       "help": "Returns a list of ODA instance attachments \n[Command Reference](listOdaInstanceAttachments)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.list_oda_instance_attachments",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "list_oda_instance_attachments",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/attachments",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "includeOwnerMetadata": {
+            "arg": "include_owner_metadata"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "OdaInstanceAttachmentCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -25925,6 +29389,37 @@
       "help": "Starts an asynchronous job to import a package into a Digital Assistant instance.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestId}`. \n[Command Reference](createImportedPackage)",
       "callback": "services.oda.src.oci_cli_odapackage.generated.odapackage_cli.create_imported_package",
       "kind": "generated",
+      "operation": {
+        "client": "oda.odapackage",
+        "method": "create_imported_package",
+        "http": "POST",
+        "path": "/odaInstances/{odaInstanceId}/importedPackages",
+        "positionalArgs": [
+          "create_imported_package_details",
+          "oda_instance_id"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_imported_package_details",
+        "responseType": "ImportedPackage",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26131,6 +29626,36 @@
       "help": "Starts an asynchronous job to delete a package from a Digital Assistant instance.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestId}`. \n[Command Reference](deleteImportedPackage)",
       "callback": "services.oda.src.oci_cli_odapackage.generated.odapackage_cli.delete_imported_package",
       "kind": "generated",
+      "operation": {
+        "client": "oda.odapackage",
+        "method": "delete_imported_package",
+        "http": "DELETE",
+        "path": "/odaInstances/{odaInstanceId}/importedPackages/{packageId}",
+        "positionalArgs": ["oda_instance_id", "package_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "packageId": "package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26318,6 +29843,31 @@
       "help": "Returns a list of summaries for imported packages in the instance. \n[Command Reference](getImportedPackage)",
       "callback": "services.oda.src.oci_cli_odapackage.generated.odapackage_cli.get_imported_package",
       "kind": "generated",
+      "operation": {
+        "client": "oda.odapackage",
+        "method": "get_imported_package",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/importedPackages/{packageId}",
+        "positionalArgs": ["oda_instance_id", "package_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "packageId": "package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ImportedPackage",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26401,6 +29951,46 @@
       "help": "Returns a list of summaries for imported packages in the instance. \n[Command Reference](listImportedPackages)",
       "callback": "services.oda.src.oci_cli_odapackage.generated.odapackage_cli.list_imported_packages",
       "kind": "generated",
+      "operation": {
+        "client": "oda.odapackage",
+        "method": "list_imported_packages",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/importedPackages",
+        "positionalArgs": ["oda_instance_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id"
+        },
+        "queryParams": {
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ImportedPackageSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -26603,6 +30193,46 @@
       "help": "Starts an asynchronous job to update a package within a Digital Assistant instance.\n\nTo monitor the status of the job, take the `opc-work-request-id` response header value and use it to call `GET /workRequests/{workRequestId}`. \n[Command Reference](updateImportedPackage)",
       "callback": "services.oda.src.oci_cli_odapackage.generated.odapackage_cli.update_imported_package",
       "kind": "generated",
+      "operation": {
+        "client": "oda.odapackage",
+        "method": "update_imported_package",
+        "http": "PUT",
+        "path": "/odaInstances/{odaInstanceId}/importedPackages/{packageId}",
+        "positionalArgs": [
+          "update_imported_package_details",
+          "oda_instance_id",
+          "package_id"
+        ],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "packageId": "package_id"
+        },
+        "queryParams": {
+          "isReplaceSkills": {
+            "arg": "is_replace_skills"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_imported_package_details",
+        "responseType": "ImportedPackage",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26886,6 +30516,31 @@
       "help": "Returns details about a package, and how to import it. \n[Command Reference](getPackage)",
       "callback": "services.oda.src.oci_cli_odapackage.generated.odapackage_cli.get_package",
       "kind": "generated",
+      "operation": {
+        "client": "oda.odapackage",
+        "method": "get_package",
+        "http": "GET",
+        "path": "/odaInstances/{odaInstanceId}/packages/{packageId}",
+        "positionalArgs": ["oda_instance_id", "package_id"],
+        "pathParams": {
+          "odaInstanceId": "oda_instance_id",
+          "packageId": "package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Package",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26969,6 +30624,59 @@
       "help": "Returns a page of summaries for packages that are available for import. The optional odaInstanceId query parameter can be used to filter packages that are available for import by a specific instance. If odaInstanceId query parameter is not provided, the returned list will include packages available within the region indicated by the request URL. The optional resourceType query param may be specified to filter packages that contain the indicated resource type. If no resourceType query param is given, packages containing all resource types will be returned. The optional name query parameter can be used to limit the list to packages whose name matches the given name. The optional displayName query parameter can be used to limit the list to packages whose displayName matches the given name. The optional isLatestVersionOnly query parameter can be used to limit the returned list to include only the latest version of any given package. If not specified, all versions of any otherwise matching package will be returned.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listPackages)",
       "callback": "services.oda.src.oci_cli_odapackage.generated.odapackage_cli.list_packages",
       "kind": "generated",
+      "operation": {
+        "client": "oda.odapackage",
+        "method": "list_packages",
+        "http": "GET",
+        "path": "/packages",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "odaInstanceId": {
+            "arg": "oda_instance_id"
+          },
+          "resourceType": {
+            "arg": "resource_type"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "isLatestVersionOnly": {
+            "arg": "is_latest_version_only"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[PackageSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -27247,6 +30955,30 @@
       "help": "Gets information about the work request with the specified ID, including its status.\n\nYou can use this operation to monitor the status of jobs that you requested to create, delete, and update instances. \n[Command Reference](getWorkRequest)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -27311,6 +31043,50 @@
       "help": "Returns a page of work requests for the specified compartment.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listWorkRequests)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "odaInstanceId": {
+            "arg": "oda_instance_id"
+          },
+          "resourceId": {
+            "arg": "resource_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WorkRequestSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -27538,6 +31314,43 @@
       "help": "Returns a page of errors for the specified work request.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WorkRequestError]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -27721,6 +31534,43 @@
       "help": "Returns a page of of log messages for a given work request.\n\nIf the `opc-next-page` header appears in the response, then there are more items to retrieve. To get the next page in the subsequent GET request, include the header's value as the `page` query parameter. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.oda.src.oci_cli_oda.generated.oda_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "oda.oda",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WorkRequestLogEntry]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

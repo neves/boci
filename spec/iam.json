@@ -26,6 +26,15 @@
       }
     ]
   },
+  "clients": {
+    "identity.identity": {
+      "class": "oci.identity.identity_client.IdentityClient",
+      "basePath": "/20160918",
+      "endpointTemplate": "https://identity.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "identity"
+    }
+  },
   "groups": {
     "auth-token": {
       "hidden": false,
@@ -983,6 +992,31 @@
       "help": "Creates a new auth token for the specified user. For information about what auth tokens are for, see [Managing User Credentials].\n\nYou must specify a *description* for the auth token (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateAuthToken].\n\nEvery user has permission to create an auth token for *their own user ID*. An administrator in your organization does not need to write a policy to give users this ability. To compare, administrators who have permission to the tenancy can use this operation to create an auth token for any user, including themselves. \n[Command Reference](createAuthToken)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_auth_token",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_auth_token",
+        "http": "POST",
+        "path": "/users/{userId}/authTokens",
+        "positionalArgs": ["create_auth_token_details", "user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_auth_token_details",
+        "responseType": "AuthToken",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1066,6 +1100,30 @@
       "help": "Deletes the specified auth token for the specified user. \n[Command Reference](deleteAuthToken)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_auth_token",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_auth_token",
+        "http": "DELETE",
+        "path": "/users/{userId}/authTokens/{authTokenId}",
+        "positionalArgs": ["user_id", "auth_token_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "authTokenId": "auth_token_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1187,6 +1245,27 @@
       "help": "Lists the auth tokens for the specified user. The returned object contains the token's OCID, but not the token itself. The actual token is returned only upon creation. \n[Command Reference](listAuthTokens)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_auth_tokens",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_auth_tokens",
+        "http": "GET",
+        "path": "/users/{userId}/authTokens",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[AuthToken]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1271,6 +1350,36 @@
       "help": "Updates the specified auth token's description. \n[Command Reference](updateAuthToken)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_auth_token",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_auth_token",
+        "http": "PUT",
+        "path": "/users/{userId}/authTokens/{authTokenId}",
+        "positionalArgs": [
+          "user_id",
+          "auth_token_id",
+          "update_auth_token_details"
+        ],
+        "pathParams": {
+          "userId": "user_id",
+          "authTokenId": "auth_token_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_auth_token_details",
+        "responseType": "AuthToken",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1392,6 +1501,27 @@
       "help": "Gets the authentication policy for the given tenancy. You must specify your tenant's OCID as the value for the compartment ID (remember that the tenancy is simply the root compartment). \n[Command Reference](getAuthenticationPolicy)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_authentication_policy",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_authentication_policy",
+        "http": "GET",
+        "path": "/authenticationPolicies/{compartmentId}",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "AuthenticationPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1456,6 +1586,34 @@
       "help": "Updates authentication policy for the specified tenancy. \n[Command Reference](updateAuthenticationPolicy)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_authentication_policy",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_authentication_policy",
+        "http": "PUT",
+        "path": "/authenticationPolicies/{compartmentId}",
+        "positionalArgs": [
+          "compartment_id",
+          "update_authentication_policy_details"
+        ],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_authentication_policy_details",
+        "responseType": "AuthenticationPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1597,6 +1755,29 @@
       "help": "Lists the availability domains in your tenancy. Specify the OCID of either the tenancy or another of your compartments as the value for the compartment ID (remember that the tenancy is simply the root compartment). See [Where to Get the Tenancy's OCID and User's OCID]. Note that the order of the results returned can change if availability domains are added or removed; therefore, do not create a dependency on the list order. \n[Command Reference](listAvailabilityDomains)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_availability_domains",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_availability_domains",
+        "http": "GET",
+        "path": "/availabilityDomains",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[AvailabilityDomain]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1681,6 +1862,35 @@
       "help": "Lists the resource-types supported by compartment bulk actions. Use this API to help you provide the correct resource-type information to the [BulkDeleteResources] and [BulkMoveResources] operations. The returned list of resource-types provides the appropriate resource-type names to use with the bulk action operations along with the type of identifying information you'll need to provide for each resource-type. Most resource-types just require an [OCID] to identify a specific resource, but some resource-types, such as buckets, require you to provide other identifying information. \n[Command Reference](listBulkActionResourceTypes)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_bulk_action_resource_types",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_bulk_action_resource_types",
+        "http": "GET",
+        "path": "/compartments/bulkActionResourceTypes",
+        "positionalArgs": ["bulk_action_type"],
+        "pathParams": {},
+        "queryParams": {
+          "bulkActionType": {
+            "arg": "bulk_action_type"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "BulkActionResourceTypeCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1824,6 +2034,34 @@
       "help": "Deletes multiple resources in the compartment. All resources must be in the same compartment. You must have the appropriate permissions to delete the resources in the request. This API can only be invoked from the tenancy's [home region]. This operation creates a [WorkRequest]. Use the [GetWorkRequest] API to monitor the status of the bulk action. \n[Command Reference](bulkDeleteResources)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.bulk_delete_resources",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "bulk_delete_resources",
+        "http": "POST",
+        "path": "/compartments/{compartmentId}/actions/bulkDeleteResources",
+        "positionalArgs": ["compartment_id", "bulk_delete_resources_details"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "bulk_delete_resources_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1973,6 +2211,34 @@
       "help": "Moves multiple resources from one compartment to another. All resources must be in the same compartment. This API can only be invoked from the tenancy's [home region]. To move resources, you must have the appropriate permissions to move the resource in both the source and target compartments. This operation creates a [WorkRequest]. Use the [GetWorkRequest] API to monitor the status of the bulk action. \n[Command Reference](bulkMoveResources)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.bulk_move_resources",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "bulk_move_resources",
+        "http": "POST",
+        "path": "/compartments/{compartmentId}/actions/bulkMoveResources",
+        "positionalArgs": ["compartment_id", "bulk_move_resources_details"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "bulk_move_resources_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2340,6 +2606,30 @@
       "help": "Deletes the specified compartment. The compartment must be empty. \n[Command Reference](deleteCompartment)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_compartment",
+        "http": "DELETE",
+        "path": "/compartments/{compartmentId}",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2508,6 +2798,27 @@
       "help": "Gets the specified compartment's information.\n\nThis operation does not return a list of all the resources inside the compartment. There is no single API operation that does that. Compartments can contain multiple types of resources (instances, block storage volumes, etc.). To find out what's in a compartment, you must call the \"List\" operation for each resource type and specify the compartment's OCID as a query parameter in the request. For example, call the [ListInstances] operation in the Cloud Compute Service or the [ListVolumes] operation in Cloud Block Storage. \n[Command Reference](getCompartment)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_compartment",
+        "http": "GET",
+        "path": "/compartments/{compartmentId}",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Compartment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2855,6 +3166,37 @@
       "help": "Move the compartment to a different parent compartment in the same tenancy. When you move a compartment, all its contents (subcompartments and resources) are moved with it. Note that the `CompartmentId` that you specify in the path is the compartment that you want to move.\n\n**IMPORTANT**: After you move a compartment to a new parent compartment, the access policies of the new parent take effect and the policies of the previous parent no longer apply. Ensure that you are aware of the implications for the compartment contents before you move it. For more information, see [Moving a Compartment]. \n[Command Reference](moveCompartment)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.move_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "move_compartment",
+        "http": "POST",
+        "path": "/compartments/{compartmentId}/actions/moveCompartment",
+        "positionalArgs": ["compartment_id", "move_compartment_details"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "move_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3023,6 +3365,34 @@
       "help": "Recover the compartment from DELETED state to ACTIVE state. \n[Command Reference](recoverCompartment)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.recover_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "recover_compartment",
+        "http": "POST",
+        "path": "/compartments/{compartmentId}/actions/recoverCompartment",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Compartment",
+        "paginated": false
+      },
+      "otherOperations": ["get_compartment"],
       "params": [
         {
           "kind": "option",
@@ -3165,6 +3535,32 @@
       "help": "Updates the specified compartment's description or name. You can't update the root compartment. \n[Command Reference](updateCompartment)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_compartment",
+        "http": "PUT",
+        "path": "/compartments/{compartmentId}",
+        "positionalArgs": ["compartment_id", "update_compartment_details"],
+        "pathParams": {
+          "compartmentId": "compartment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_compartment_details",
+        "responseType": "Compartment",
+        "paginated": false
+      },
+      "otherOperations": ["get_compartment"],
       "params": [
         {
           "kind": "option",
@@ -3403,6 +3799,31 @@
       "help": "Creates a new secret key for the specified user. Secret keys are used for authentication with the Object Storage Service's Amazon S3 compatible API. The secret key consists of an Access Key/Secret Key pair. For information, see [Managing User Credentials].\n\nYou must specify a *description* for the secret key (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateCustomerSecretKey].\n\nEvery user has permission to create a secret key for *their own user ID*. An administrator in your organization does not need to write a policy to give users this ability. To compare, administrators who have permission to the tenancy can use this operation to create a secret key for any user, including themselves. \n[Command Reference](createCustomerSecretKey)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_customer_secret_key",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_customer_secret_key",
+        "http": "POST",
+        "path": "/users/{userId}/customerSecretKeys",
+        "positionalArgs": ["create_customer_secret_key_details", "user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_customer_secret_key_details",
+        "responseType": "CustomerSecretKey",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3486,6 +3907,30 @@
       "help": "Deletes the specified secret key for the specified user. \n[Command Reference](deleteCustomerSecretKey)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_customer_secret_key",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_customer_secret_key",
+        "http": "DELETE",
+        "path": "/users/{userId}/customerSecretKeys/{customerSecretKeyId}",
+        "positionalArgs": ["user_id", "customer_secret_key_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "customerSecretKeyId": "customer_secret_key_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3607,6 +4052,27 @@
       "help": "Lists the secret keys for the specified user. The returned object contains the secret key's OCID, but not the secret key itself. The actual secret key is returned only upon creation. \n[Command Reference](listCustomerSecretKeys)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_customer_secret_keys",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_customer_secret_keys",
+        "http": "GET",
+        "path": "/users/{userId}/customerSecretKeys",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[CustomerSecretKeySummary]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3691,6 +4157,36 @@
       "help": "Updates the specified secret key's description. \n[Command Reference](updateCustomerSecretKey)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_customer_secret_key",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_customer_secret_key",
+        "http": "PUT",
+        "path": "/users/{userId}/customerSecretKeys/{customerSecretKeyId}",
+        "positionalArgs": [
+          "user_id",
+          "customer_secret_key_id",
+          "update_customer_secret_key_details"
+        ],
+        "pathParams": {
+          "userId": "user_id",
+          "customerSecretKeyId": "customer_secret_key_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_customer_secret_key_details",
+        "responseType": "CustomerSecretKeySummary",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3897,6 +4393,36 @@
       "help": "(For tenancies that support identity domains) Activates a deactivated identity domain. You can only activate identity domains that your user account is not a part of.\n\nAfter you send the request, the `lifecycleDetails` of the identity domain is set to ACTIVATING. When the operation completes, the `lifecycleDetails` is set to null and the `lifecycleState` of the identity domain is set to ACTIVE.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status. \n[Command Reference](activateDomain)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.activate_domain",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "activate_domain",
+        "http": "POST",
+        "path": "/domains/{domainId}/actions/activate",
+        "positionalArgs": ["domain_id"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4046,6 +4572,37 @@
       "help": "(For tenancies that support identity domains) Moves the identity domain to a different compartment in the tenancy.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status. \n[Command Reference](changeDomainCompartment)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.change_domain_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "change_domain_compartment",
+        "http": "POST",
+        "path": "/domains/{domainId}/actions/changeCompartment",
+        "positionalArgs": ["domain_id", "change_domain_compartment_details"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "change_domain_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4214,6 +4771,37 @@
       "help": "(For tenancies that support identity domains) Changes the license type of the given identity domain. The identity domain's `lifecycleState` must be set to ACTIVE and the requested `licenseType` must be allowed. To retrieve the allowed `licenseType` for the identity domain, use [ListAllowedDomainLicenseTypes].\n\nAfter you send your request, the `lifecycleDetails` of this identity domain is set to UPDATING. When the update of the identity domain completes, then the `lifecycleDetails` is set to null.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status. \n[Command Reference](changeDomainLicenseType)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.change_domain_license_type",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "change_domain_license_type",
+        "http": "POST",
+        "path": "/domains/{domainId}/actions/changeLicenseType",
+        "positionalArgs": ["domain_id", "change_domain_license_type_details"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "change_domain_license_type_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4382,6 +4970,32 @@
       "help": "(For tenancies that support identity domains) Creates a new identity domain in the tenancy with the identity domain home in `homeRegion`. After you send your request, the temporary `lifecycleState` of this identity domain is set to CREATING and `lifecycleDetails` to UPDATING. When creation of the identity domain completes, this identity domain's `lifecycleState` is set to ACTIVE and `lifecycleDetails` to null.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status.\n\nAfter creating an `identity domain`, first make sure its `lifecycleState` changes from CREATING to ACTIVE before you use it. \n[Command Reference](createDomain)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_domain",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_domain",
+        "http": "POST",
+        "path": "/domains",
+        "positionalArgs": ["create_domain_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_domain_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4759,6 +5373,36 @@
       "help": "(For tenancies that support identity domains) Deactivates the specified identity domain. Identity domains must be in an ACTIVE `lifecycleState` and have no active apps present in the domain or underlying Identity Cloud Service stripe. You cannot deactivate the default identity domain.\n\nAfter you send your request, the `lifecycleDetails` of this identity domain is set to DEACTIVATING. When the operation completes, then the `lifecycleDetails` is set to null and the `lifecycleState` is set to INACTIVE.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status. \n[Command Reference](deactivateDomain)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.deactivate_domain",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "deactivate_domain",
+        "http": "POST",
+        "path": "/domains/{domainId}/actions/deactivate",
+        "positionalArgs": ["domain_id"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4908,6 +5552,33 @@
       "help": "(For tenancies that support identity domains) Deletes an identity domain. The identity domain must have no active apps present in the underlying IDCS stripe. You must also deactivate the identity domain, rendering the `lifecycleState` of the identity domain INACTIVE. Furthermore, as the authenticated user performing the operation, you cannot be a member of the identity domain you are deleting. Lastly, you cannot delete the default identity domain. A tenancy must always have at least the default identity domain.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status. \n[Command Reference](deleteDomain)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_domain",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_domain",
+        "http": "DELETE",
+        "path": "/domains/{domainId}",
+        "positionalArgs": ["domain_id"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -5076,6 +5747,37 @@
       "help": "(For tenancies that support identity domains) Replicates the identity domain to a new region (provided that the region is the tenancy home region or other region that the tenancy subscribes to). You can only replicate identity domains that are in an ACTIVE `lifecycleState` and not currently updating or already replicating. You also can only trigger the replication of secondary identity domains. The default identity domain is automatically replicated to all regions that the tenancy subscribes to.\n\nAfter you send the request, the `state` of the identity domain in the replica region is set to ENABLING_REPLICATION. When the operation completes, the `state` is set to REPLICATION_ENABLED.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status. \n[Command Reference](enableReplicationToRegion)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.enable_replication_to_region",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "enable_replication_to_region",
+        "http": "POST",
+        "path": "/domains/{domainId}/actions/enableReplicationToRegion",
+        "positionalArgs": ["domain_id", "enable_replication_to_region_details"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "enable_replication_to_region_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -5244,6 +5946,30 @@
       "help": "(For tenancies that support identity domains) Gets the specified identity domain's information. \n[Command Reference](getDomain)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_domain",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_domain",
+        "http": "GET",
+        "path": "/domains/{domainId}",
+        "positionalArgs": ["domain_id"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Domain",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5308,6 +6034,68 @@
       "help": "(For tenancies that support identity domains) Lists all identity domains within a tenancy. \n[Command Reference](listDomains)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_domains",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_domains",
+        "http": "GET",
+        "path": "/domains",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "url": {
+            "arg": "url"
+          },
+          "homeRegionUrl": {
+            "arg": "home_region_url"
+          },
+          "type": {
+            "arg": "type"
+          },
+          "licenseType": {
+            "arg": "license_type"
+          },
+          "isHiddenOnLogin": {
+            "arg": "is_hidden_on_login"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[DomainSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -5645,6 +6433,32 @@
       "help": "(For tenancies that support identity domains) Lists the license types for identity domains supported by Oracle Cloud Infrastructure. (License types are also referred to as domain types.)\n\nIf `currentLicenseTypeName` is provided, then the request returns license types that the identity domain with the specified license type name can change to. Otherwise, the request returns all valid license types currently supported. \n[Command Reference](listAllowedDomainLicenseTypes)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_allowed_domain_license_types",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_allowed_domain_license_types",
+        "http": "GET",
+        "path": "/allowedDomainLicenseTypes",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "currentLicenseTypeName": {
+            "arg": "current_license_type_name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[AllowedDomainLicenseTypeSummary]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5729,6 +6543,34 @@
       "help": "(For tenancies that support identity domains) Updates identity domain information and the associated Identity Cloud Service (IDCS) stripe.\n\nTo track the progress of the request, submitting an HTTP GET on the /iamWorkRequests/{iamWorkRequestsId} endpoint retrieves the operation's status. \n[Command Reference](updateDomain)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_domain",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_domain",
+        "http": "PUT",
+        "path": "/domains/{domainId}",
+        "positionalArgs": ["domain_id", "update_domain_details"],
+        "pathParams": {
+          "domainId": "domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_domain_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_iam_work_request"],
       "params": [
         {
           "kind": "option",
@@ -5993,6 +6835,30 @@
       "help": "Creates a new dynamic group in your tenancy.\n\nYou must specify your tenancy's OCID as the compartment ID in the request object (remember that the tenancy is simply the root compartment). Notice that IAM resources (users, groups, compartments, and some policies) reside within the tenancy itself, unlike cloud resources such as compute instances, which typically reside within compartments inside the tenancy. For information about OCIDs, see [Resource Identifiers].\n\nYou must also specify a *name* for the dynamic group, which must be unique across all dynamic groups in your tenancy, and cannot be changed. Note that this name has to be also unique across all groups in your tenancy. You can use this name or the OCID when writing policies that apply to the dynamic group. For more information about policies, see [How Policies Work].\n\nYou must also specify a *description* for the dynamic group (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateDynamicGroup].\n\nAfter you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE. \n[Command Reference](createDynamicGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_dynamic_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_dynamic_group",
+        "http": "POST",
+        "path": "/dynamicGroups",
+        "positionalArgs": ["create_dynamic_group_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_dynamic_group_details",
+        "responseType": "DynamicGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_dynamic_group"],
       "params": [
         {
           "kind": "option",
@@ -6211,6 +7077,30 @@
       "help": "Deletes the specified dynamic group. \n[Command Reference](deleteDynamicGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_dynamic_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_dynamic_group",
+        "http": "DELETE",
+        "path": "/dynamicGroups/{dynamicGroupId}",
+        "positionalArgs": ["dynamic_group_id"],
+        "pathParams": {
+          "dynamicGroupId": "dynamic_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_dynamic_group"],
       "params": [
         {
           "kind": "option",
@@ -6372,6 +7262,27 @@
       "help": "Gets the specified dynamic group's information. \n[Command Reference](getDynamicGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_dynamic_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_dynamic_group",
+        "http": "GET",
+        "path": "/dynamicGroups/{dynamicGroupId}",
+        "positionalArgs": ["dynamic_group_id"],
+        "pathParams": {
+          "dynamicGroupId": "dynamic_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "DynamicGroup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6436,6 +7347,47 @@
       "help": "Lists the dynamic groups in your tenancy. You must specify your tenancy's OCID as the value for the compartment ID (remember that the tenancy is simply the root compartment). See [Where to Get the Tenancy's OCID and User's OCID]. \n[Command Reference](listDynamicGroups)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_dynamic_groups",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_dynamic_groups",
+        "http": "GET",
+        "path": "/dynamicGroups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[DynamicGroup]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -6659,6 +7611,32 @@
       "help": "Updates the specified dynamic group. \n[Command Reference](updateDynamicGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_dynamic_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_dynamic_group",
+        "http": "PUT",
+        "path": "/dynamicGroups/{dynamicGroupId}",
+        "positionalArgs": ["dynamic_group_id", "update_dynamic_group_details"],
+        "pathParams": {
+          "dynamicGroupId": "dynamic_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_dynamic_group_details",
+        "responseType": "DynamicGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_dynamic_group"],
       "params": [
         {
           "kind": "option",
@@ -6897,6 +7875,32 @@
       "help": "Lists the Fault Domains in your tenancy. Specify the OCID of either the tenancy or another of your compartments as the value for the compartment ID (remember that the tenancy is simply the root compartment). See [Where to Get the Tenancy's OCID and User's OCID]. \n[Command Reference](listFaultDomains)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_fault_domains",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_fault_domains",
+        "http": "GET",
+        "path": "/faultDomains",
+        "positionalArgs": ["compartment_id", "availability_domain"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[FaultDomain]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7083,6 +8087,30 @@
       "help": "Creates a new group in your tenancy.\n\nYou must specify your tenancy's OCID as the compartment ID in the request object (remember that the tenancy is simply the root compartment). Notice that IAM resources (users, groups, compartments, and some policies) reside within the tenancy itself, unlike cloud resources such as compute instances, which typically reside within compartments inside the tenancy. For information about OCIDs, see [Resource Identifiers].\n\nYou must also specify a *name* for the group, which must be unique across all groups in your tenancy and cannot be changed. You can use this name or the OCID when writing policies that apply to the group. For more information about policies, see [How Policies Work].\n\nYou must also specify a *description* for the group (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateGroup].\n\nAfter you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE.\n\nAfter creating the group, you need to put users in it and write policies for it. See [AddUserToGroup] and [CreatePolicy]. \n[Command Reference](createGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_group",
+        "http": "POST",
+        "path": "/groups",
+        "positionalArgs": ["create_group_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_group_details",
+        "responseType": "Group",
+        "paginated": false
+      },
+      "otherOperations": ["get_group"],
       "params": [
         {
           "kind": "option",
@@ -7282,6 +8310,30 @@
       "help": "Deletes the specified group. The group must be empty. \n[Command Reference](deleteGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_group",
+        "http": "DELETE",
+        "path": "/groups/{groupId}",
+        "positionalArgs": ["group_id"],
+        "pathParams": {
+          "groupId": "group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_group"],
       "params": [
         {
           "kind": "option",
@@ -7443,6 +8495,27 @@
       "help": "Gets the specified group's information.\n\nThis operation does not return a list of all the users in the group. To do that, use [ListUserGroupMemberships] and provide the group's OCID as a query parameter in the request. \n[Command Reference](getGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_group",
+        "http": "GET",
+        "path": "/groups/{groupId}",
+        "positionalArgs": ["group_id"],
+        "pathParams": {
+          "groupId": "group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Group",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7507,6 +8580,47 @@
       "help": "Lists the groups in your tenancy. You must specify your tenancy's OCID as the value for the compartment ID (remember that the tenancy is simply the root compartment). See [Where to Get the Tenancy's OCID and User's OCID]. \n[Command Reference](listGroups)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_groups",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_groups",
+        "http": "GET",
+        "path": "/groups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Group]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8012,6 +9126,32 @@
       "help": "Updates the specified group. \n[Command Reference](updateGroup)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_group",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_group",
+        "http": "PUT",
+        "path": "/groups/{groupId}",
+        "positionalArgs": ["group_id", "update_group_details"],
+        "pathParams": {
+          "groupId": "group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_group_details",
+        "responseType": "Group",
+        "paginated": false
+      },
+      "otherOperations": ["get_group"],
       "params": [
         {
           "kind": "option",
@@ -8231,6 +9371,30 @@
       "help": "Gets the details of a specified IAM work request. The workRequestID is returned in the opc-workrequest-id header for any asynchronous operation in the Identity and Access Management service. \n[Command Reference](getIamWorkRequest)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_iam_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_iam_work_request",
+        "http": "GET",
+        "path": "/iamWorkRequests/{iamWorkRequestId}",
+        "positionalArgs": ["iam_work_request_id"],
+        "pathParams": {
+          "iamWorkRequestId": "iam_work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "IamWorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8295,6 +9459,41 @@
       "help": "Lists the IAM work requests in compartment. The workRequestID is returned in the opc-workrequest-id header for any asynchronous operation in the Identity and Access Management service. \n[Command Reference](listIamWorkRequests)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_iam_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_iam_work_requests",
+        "http": "GET",
+        "path": "/iamWorkRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "resourceIdentifier": {
+            "arg": "resource_identifier"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[IamWorkRequestSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8455,6 +9654,40 @@
       "help": "Gets error details for a specified IAM work request. The workRequestID is returned in the opc-workrequest-id header for any asynchronous operation in the Identity and Access Management service. \n[Command Reference](listIamWorkRequestErrors)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_iam_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_iam_work_request_errors",
+        "http": "GET",
+        "path": "/iamWorkRequests/{iamWorkRequestId}/errors",
+        "positionalArgs": ["iam_work_request_id"],
+        "pathParams": {
+          "iamWorkRequestId": "iam_work_request_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[IamWorkRequestErrorSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8617,6 +9850,40 @@
       "help": "Gets logs for a specified IAM work request. The workRequestID is returned in the opc-workrequest-id header for any asynchronous operation in the Identity and Access Management service. \n[Command Reference](listIamWorkRequestLogs)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_iam_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_iam_work_request_logs",
+        "http": "GET",
+        "path": "/iamWorkRequests/{iamWorkRequestId}/logs",
+        "positionalArgs": ["iam_work_request_id"],
+        "pathParams": {
+          "iamWorkRequestId": "iam_work_request_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[IamWorkRequestLogSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8779,6 +10046,30 @@
       "help": "**Deprecated.** For more information, see [Deprecated IAM Service APIs].\n\nCreates a new identity provider in your tenancy. For more information, see [Identity Providers and Federation].\n\nYou must specify your tenancy's OCID as the compartment ID in the request object. Remember that the tenancy is simply the root compartment. For information about OCIDs, see [Resource Identifiers].\n\nYou must also specify a *name* for the `IdentityProvider`, which must be unique across all `IdentityProvider` objects in your tenancy and cannot be changed.\n\nYou must also specify a *description* for the `IdentityProvider` (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateIdentityProvider].\n\nAfter you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE. \n[Command Reference](createIdentityProvider)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_identity_provider",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_identity_provider",
+        "http": "POST",
+        "path": "/identityProviders",
+        "positionalArgs": ["create_identity_provider_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_identity_provider_details",
+        "responseType": "IdentityProvider",
+        "paginated": false
+      },
+      "otherOperations": ["get_identity_provider"],
       "params": [
         {
           "kind": "option",
@@ -9020,6 +10311,30 @@
       "help": "**Deprecated.** For more information, see [Deprecated IAM Service APIs].\n\nDeletes the specified identity provider. The identity provider must not have any group mappings (see [IdpGroupMapping]). \n[Command Reference](deleteIdentityProvider)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_identity_provider",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_identity_provider",
+        "http": "DELETE",
+        "path": "/identityProviders/{identityProviderId}",
+        "positionalArgs": ["identity_provider_id"],
+        "pathParams": {
+          "identityProviderId": "identity_provider_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_identity_provider"],
       "params": [
         {
           "kind": "option",
@@ -9181,6 +10496,27 @@
       "help": "**Deprecated.** For more information, see [Deprecated IAM Service APIs].\n\nGets the specified identity provider's information. \n[Command Reference](getIdentityProvider)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_identity_provider",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_identity_provider",
+        "http": "GET",
+        "path": "/identityProviders/{identityProviderId}",
+        "positionalArgs": ["identity_provider_id"],
+        "pathParams": {
+          "identityProviderId": "identity_provider_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "IdentityProvider",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9245,6 +10581,50 @@
       "help": "**Deprecated.** For more information, see [Deprecated IAM Service APIs].\n\nLists all the identity providers in your tenancy. You must specify the identity provider type (e.g., `SAML2` for identity providers using the SAML2.0 protocol). You must specify your tenancy's OCID as the value for the compartment ID (remember that the tenancy is simply the root compartment). See [Where to Get the Tenancy's OCID and User's OCID]. \n[Command Reference](listIdentityProviders)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_identity_providers",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_identity_providers",
+        "http": "GET",
+        "path": "/identityProviders",
+        "positionalArgs": ["protocol", "compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "protocol": {
+            "arg": "protocol"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[IdentityProvider]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9487,6 +10867,35 @@
       "help": "**Deprecated.** For more information, see [Deprecated IAM Service APIs].\n\nUpdates the specified identity provider. \n[Command Reference](updateIdentityProvider)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_identity_provider",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_identity_provider",
+        "http": "PUT",
+        "path": "/identityProviders/{identityProviderId}",
+        "positionalArgs": [
+          "identity_provider_id",
+          "update_identity_provider_details"
+        ],
+        "pathParams": {
+          "identityProviderId": "identity_provider_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_identity_provider_details",
+        "responseType": "IdentityProvider",
+        "paginated": false
+      },
+      "otherOperations": ["get_identity_provider"],
       "params": [
         {
           "kind": "option",
@@ -9727,6 +11136,40 @@
       "help": "**Deprecated.** For more information, see [Deprecated IAM Service APIs].\n\nLists the identity provider groups. \n[Command Reference](listIdentityProviderGroups)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_identity_provider_groups",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_identity_provider_groups",
+        "http": "GET",
+        "path": "/identityProviders/{identityProviderId}/groups",
+        "positionalArgs": ["identity_provider_id"],
+        "pathParams": {
+          "identityProviderId": "identity_provider_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[IdentityProviderGroupSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9908,6 +11351,35 @@
       "help": "Activates the specified MFA TOTP device for the user. Activation requires manual interaction with the Console. \n[Command Reference](activateMfaTotpDevice)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.activate_mfa_totp_device",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "activate_mfa_totp_device",
+        "http": "POST",
+        "path": "/users/{userId}/mfaTotpDevices/{mfaTotpDeviceId}/actions/activate",
+        "positionalArgs": ["user_id", "mfa_totp_device_id", "mfa_totp_token"],
+        "pathParams": {
+          "userId": "user_id",
+          "mfaTotpDeviceId": "mfa_totp_device_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "mfa_totp_token",
+        "responseType": "MfaTotpDeviceSummary",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10029,6 +11501,31 @@
       "help": "Creates a new MFA TOTP device for the user. A user can have one MFA TOTP device. \n[Command Reference](createMfaTotpDevice)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_mfa_totp_device",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_mfa_totp_device",
+        "http": "POST",
+        "path": "/users/{userId}/mfaTotpDevices",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "responseType": "MfaTotpDevice",
+        "paginated": false
+      },
+      "otherOperations": ["get_mfa_totp_device"],
       "params": [
         {
           "kind": "option",
@@ -10152,6 +11649,30 @@
       "help": "Deletes the specified MFA TOTP device for the specified user. \n[Command Reference](deleteMfaTotpDevice)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_mfa_totp_device",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_mfa_totp_device",
+        "http": "DELETE",
+        "path": "/users/{userId}/mfaTotpDevices/{mfaTotpDeviceId}",
+        "positionalArgs": ["user_id", "mfa_totp_device_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "mfaTotpDeviceId": "mfa_totp_device_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10273,6 +11794,32 @@
       "help": "Generate seed for the MFA TOTP device. \n[Command Reference](generateTotpSeed)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.generate_totp_seed",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "generate_totp_seed",
+        "http": "POST",
+        "path": "/users/{userId}/mfaTotpDevices/{mfaTotpDeviceId}/actions/generateSeed",
+        "positionalArgs": ["user_id", "mfa_totp_device_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "mfaTotpDeviceId": "mfa_totp_device_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "responseType": "MfaTotpDevice",
+        "paginated": false
+      },
+      "otherOperations": ["get_mfa_totp_device"],
       "params": [
         {
           "kind": "option",
@@ -10434,6 +11981,28 @@
       "help": "Get the specified MFA TOTP device for the specified user. \n[Command Reference](getMfaTotpDevice)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_mfa_totp_device",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_mfa_totp_device",
+        "http": "GET",
+        "path": "/users/{userId}/mfaTotpDevices/{mfaTotpDeviceId}",
+        "positionalArgs": ["user_id", "mfa_totp_device_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "mfaTotpDeviceId": "mfa_totp_device_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "MfaTotpDeviceSummary",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10517,6 +12086,40 @@
       "help": "Lists the MFA TOTP devices for the specified user. The returned object contains the device's OCID, but not the seed. The seed is returned only upon creation or when the IAM service regenerates the MFA seed for the device. \n[Command Reference](listMfaTotpDevices)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_mfa_totp_devices",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_mfa_totp_devices",
+        "http": "GET",
+        "path": "/users/{userId}/mfaTotpDevices",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[MfaTotpDeviceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -10700,6 +12303,29 @@
       "help": "Creates a new network source in your tenancy.\n\nYou must specify your tenancy's OCID as the compartment ID in the request object (remember that the tenancy is simply the root compartment). Notice that IAM resources (users, groups, compartments, and some policies) reside within the tenancy itself, unlike cloud resources such as compute instances, which typically reside within compartments inside the tenancy. For information about OCIDs, see [Resource Identifiers].\n\nYou must also specify a *name* for the network source, which must be unique across all network sources in your tenancy, and cannot be changed. You can use this name or the OCID when writing policies that apply to the network source. For more information about policies, see [How Policies Work].\n\nYou must also specify a *description* for the network source (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateNetworkSource].\n\nAfter you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE.\n\nAfter your network resource is created, you can use it in policy to restrict access to only requests made from an allowed IP address specified in your network source. For more information, see [Managing Network Sources]. \n[Command Reference](createNetworkSource)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_network_source",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_network_source",
+        "http": "POST",
+        "path": "/networkSources",
+        "positionalArgs": ["create_network_source_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_network_source_details",
+        "responseType": "NetworkSources",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10897,6 +12523,29 @@
       "help": "Deletes the specified network source. \n[Command Reference](deleteNetworkSource)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_network_source",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_network_source",
+        "http": "DELETE",
+        "path": "/networkSources/{networkSourceId}",
+        "positionalArgs": ["network_source_id"],
+        "pathParams": {
+          "networkSourceId": "network_source_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10999,6 +12648,27 @@
       "help": "Gets the specified network source's information. \n[Command Reference](getNetworkSource)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_network_source",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_network_source",
+        "http": "GET",
+        "path": "/networkSources/{networkSourceId}",
+        "positionalArgs": ["network_source_id"],
+        "pathParams": {
+          "networkSourceId": "network_source_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "NetworkSources",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11063,6 +12733,47 @@
       "help": "Lists the network sources in your tenancy. You must specify your tenancy's OCID as the value for the compartment ID (remember that the tenancy is simply the root compartment). See [Where to Get the Tenancy's OCID and User's OCID]. \n[Command Reference](listNetworkSources)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_network_sources",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_network_sources",
+        "http": "GET",
+        "path": "/networkSources",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[NetworkSourcesSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -11286,6 +12997,34 @@
       "help": "Updates the specified network source. \n[Command Reference](updateNetworkSource)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_network_source",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_network_source",
+        "http": "PUT",
+        "path": "/networkSources/{networkSourceId}",
+        "positionalArgs": [
+          "network_source_id",
+          "update_network_source_details"
+        ],
+        "pathParams": {
+          "networkSourceId": "network_source_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_network_source_details",
+        "responseType": "NetworkSources",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11503,6 +13242,30 @@
       "help": "Creates a new policy in the specified compartment (either the tenancy or another of your compartments). If you're new to policies, see [Get Started with Policies].\n\nYou must specify a *name* for the policy, which must be unique across all policies in your tenancy and cannot be changed.\n\nYou must also specify a *description* for the policy (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdatePolicy].\n\nYou must specify one or more policy statements in the statements array. For information about writing policies, see [How Policies Work] and [Common Policies].\n\nAfter you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE.\n\nNew policies take effect typically within 10 seconds. \n[Command Reference](createPolicy)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_policy",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_policy",
+        "http": "POST",
+        "path": "/policies",
+        "positionalArgs": ["create_policy_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_policy_details",
+        "responseType": "Policy",
+        "paginated": false
+      },
+      "otherOperations": ["get_policy"],
       "params": [
         {
           "kind": "option",
@@ -11740,6 +13503,30 @@
       "help": "Deletes the specified policy. The deletion takes effect typically within 10 seconds. \n[Command Reference](deletePolicy)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_policy",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_policy",
+        "http": "DELETE",
+        "path": "/policies/{policyId}",
+        "positionalArgs": ["policy_id"],
+        "pathParams": {
+          "policyId": "policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_policy"],
       "params": [
         {
           "kind": "option",
@@ -11901,6 +13688,27 @@
       "help": "Gets the specified policy's information. \n[Command Reference](getPolicy)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_policy",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_policy",
+        "http": "GET",
+        "path": "/policies/{policyId}",
+        "positionalArgs": ["policy_id"],
+        "pathParams": {
+          "policyId": "policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Policy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11965,6 +13773,47 @@
       "help": "Lists the policies in the specified compartment (either the tenancy or another of your compartments). See [Where to Get the Tenancy's OCID and User's OCID].\n\nTo determine which policies apply to a particular group or compartment, you must view the individual statements inside all your policies. There isn't a way to automatically obtain that information via the API. \n[Command Reference](listPolicies)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_policies",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_policies",
+        "http": "GET",
+        "path": "/policies",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Policy]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -12386,6 +14235,25 @@
       "help": "Lists all the regions offered by Oracle Cloud Infrastructure. \n[Command Reference](listRegions)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_regions",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_regions",
+        "http": "GET",
+        "path": "/regions",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Region]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12451,6 +14319,31 @@
       "help": "Creates a subscription to a region for a tenancy. \n[Command Reference](createRegionSubscription)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_region_subscription",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_region_subscription",
+        "http": "POST",
+        "path": "/tenancies/{tenancyId}/regionSubscriptions",
+        "positionalArgs": ["create_region_subscription_details", "tenancy_id"],
+        "pathParams": {
+          "tenancyId": "tenancy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_region_subscription_details",
+        "responseType": "RegionSubscription",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12534,6 +14427,27 @@
       "help": "Lists the region subscriptions for the specified tenancy. \n[Command Reference](listRegionSubscriptions)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_region_subscriptions",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_region_subscriptions",
+        "http": "GET",
+        "path": "/tenancies/{tenancyId}/regionSubscriptions",
+        "positionalArgs": ["tenancy_id"],
+        "pathParams": {
+          "tenancyId": "tenancy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[RegionSubscription]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12618,6 +14532,27 @@
       "help": "Resets the OAuth2 client credentials for the SCIM client associated with this identity provider. \n[Command Reference](resetIdpScimClient)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.reset_idp_scim_client",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "reset_idp_scim_client",
+        "http": "POST",
+        "path": "/identityProviders/{identityProviderId}/actions/resetScimClient",
+        "positionalArgs": ["identity_provider_id"],
+        "pathParams": {
+          "identityProviderId": "identity_provider_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "ScimClientCredentials",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12682,6 +14617,31 @@
       "help": "Creates a new SMTP credential for the specified user. An SMTP credential has an SMTP user name and an SMTP password. You must specify a *description* for the SMTP credential (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateSmtpCredential]. \n[Command Reference](createSmtpCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_smtp_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_smtp_credential",
+        "http": "POST",
+        "path": "/users/{userId}/smtpCredentials",
+        "positionalArgs": ["create_smtp_credential_details", "user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_smtp_credential_details",
+        "responseType": "SmtpCredential",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12765,6 +14725,30 @@
       "help": "Deletes the specified SMTP credential for the specified user. \n[Command Reference](deleteSmtpCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_smtp_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_smtp_credential",
+        "http": "DELETE",
+        "path": "/users/{userId}/smtpCredentials/{smtpCredentialId}",
+        "positionalArgs": ["user_id", "smtp_credential_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "smtpCredentialId": "smtp_credential_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12886,6 +14870,27 @@
       "help": "Lists the SMTP credentials for the specified user. The returned object contains the credential's OCID, the SMTP user name but not the SMTP password. The SMTP password is returned only upon creation. \n[Command Reference](listSmtpCredentials)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_smtp_credentials",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_smtp_credentials",
+        "http": "GET",
+        "path": "/users/{userId}/smtpCredentials",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[SmtpCredentialSummary]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12970,6 +14975,36 @@
       "help": "Updates the specified SMTP credential's description. \n[Command Reference](updateSmtpCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_smtp_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_smtp_credential",
+        "http": "PUT",
+        "path": "/users/{userId}/smtpCredentials/{smtpCredentialId}",
+        "positionalArgs": [
+          "user_id",
+          "smtp_credential_id",
+          "update_smtp_credential_details"
+        ],
+        "pathParams": {
+          "userId": "user_id",
+          "smtpCredentialId": "smtp_credential_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_smtp_credential_details",
+        "responseType": "SmtpCredentialSummary",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -13091,6 +15126,31 @@
       "help": "Retrieve the standard tag namespace template given the standard tag namespace name. \n[Command Reference](getStandardTagTemplate)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_standard_tag_template",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_standard_tag_template",
+        "http": "GET",
+        "path": "/tags/standardTagNamespaceTemplates/{standardTagNamespaceName}",
+        "positionalArgs": ["compartment_id", "standard_tag_namespace_name"],
+        "pathParams": {
+          "standardTagNamespaceName": "standard_tag_namespace_name"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "StandardTagNamespaceTemplate",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -13174,6 +15234,35 @@
       "help": "Lists available standard tag namespaces that users can create. \n[Command Reference](listStandardTagNamespaces)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_standard_tag_namespaces",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_standard_tag_namespaces",
+        "http": "GET",
+        "path": "/tags/standardTagNamespaceTemplates",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[StandardTagNamespaceTemplateSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13315,6 +15404,36 @@
       "help": "Deletes the specified tag key definitions. This operation triggers a process that removes the tags from all resources in your tenancy. The tag key definitions must be within the same tag namespace.\n\nThe following actions happen immediately:\n\n  * If the tag is a cost-tracking tag, the tag no longer counts against your   10 cost-tracking tags limit, even if you do not disable the tag before running this operation.   * If the tag is used with dynamic groups, the rules that contain the tag are no longer   evaluated against the tag.\n\nAfter you start this operation, the state of the tag changes to DELETING, and tag removal from resources begins. This process can take up to 48 hours depending on the number of resources that are tagged and the regions in which those resources reside.\n\nWhen all tags have been removed, the state changes to DELETED. You cannot restore a deleted tag. After the tag state changes to DELETED, you can use the same tag name again.\n\nAfter you start this operation, you cannot start either the [DeleteTag] or the [CascadeDeleteTagNamespace] operation until this process completes.\n\nIn order to delete tags, you must first retire the tags. Use [UpdateTag] to retire a tag. \n[Command Reference](bulkDeleteTags)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.bulk_delete_tags",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "bulk_delete_tags",
+        "http": "POST",
+        "path": "/tags/actions/bulkDelete",
+        "positionalArgs": ["bulk_delete_tags_details"],
+        "pathParams": {},
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "bulk_delete_tags_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_tagging_work_request"],
       "params": [
         {
           "kind": "option",
@@ -13464,6 +15583,32 @@
       "help": "Edits the specified list of tag key definitions for the selected resources. This operation triggers a process that edits the tags on all selected resources. The possible actions are:\n\n  * Add a defined tag when the tag does not already exist on the resource.   * Update the value for a defined tag when the tag is present on the resource.   * Add a defined tag when it does not already exist on the resource or update the value for a defined tag when the tag is present on the resource.   * Remove a defined tag from a resource. The tag is removed from the resource regardless of the tag value.\n\nSee [BulkEditOperationDetails] for more information.\n\nThe edits can include a combination of operations and tag sets. However, multiple operations cannot apply to one key definition in the same request. For example, if one request adds `tag set-1` to a resource and sets a tag value to `tag set-2`, `tag set-1` and `tag set-2` cannot have any common tag definitions. \n[Command Reference](bulkEditTags)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.bulk_edit_tags",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "bulk_edit_tags",
+        "http": "POST",
+        "path": "/tags/actions/bulkEdit",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "bulk_edit_tags_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_tagging_work_request"],
       "params": [
         {
           "kind": "option",
@@ -13632,6 +15777,32 @@
       "help": "Lists the resource types that support bulk tag editing. \n[Command Reference](listBulkEditTagsResourceTypes)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_bulk_edit_tags_resource_types",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_bulk_edit_tags_resource_types",
+        "http": "GET",
+        "path": "/tags/bulkEditResourceTypes",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "BulkEditTagsResourceTypeCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13755,6 +15926,36 @@
       "shortHelp": "Create new tag in a given tagNamespace",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_tag",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_tag",
+        "http": "POST",
+        "path": "/tagNamespaces/{tagNamespaceId}/tags",
+        "positionalArgs": ["tag_namespace_id", "create_tag_details"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_tag_details",
+        "responseType": "Tag",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag"],
       "params": [
         {
           "kind": "option",
@@ -14011,6 +16212,35 @@
       "help": "Deletes the specified tag definition. This operation triggers a process that removes the tag from all resources in your tenancy.\n\nThese things happen immediately:   * If the tag was a cost-tracking tag, it no longer counts against your 10 cost-tracking   tags limit, whether you first disabled it or not.   * If the tag was used with dynamic groups, none of the rules that contain the tag will   be evaluated against the tag.\n\nWhen you start the delete operation, the state of the tag changes to DELETING and tag removal from resources begins. This can take up to 48 hours depending on the number of resources that were tagged as well as the regions in which those resources reside.\n\nWhen all tags have been removed, the state changes to DELETED. You cannot restore a deleted tag. Once the deleted tag changes its state to DELETED, you can use the same tag name again.\n\nAfter you start this operation, you cannot start either the [BulkDeleteTags] or the [CascadeDeleteTagNamespace] operation until this process completes.\n\nTo delete a tag, you must first retire it. Use [UpdateTag] to retire a tag. \n[Command Reference](deleteTag)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_tag",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_tag",
+        "http": "DELETE",
+        "path": "/tagNamespaces/{tagNamespaceId}/tags/{tagName}",
+        "positionalArgs": ["tag_namespace_id", "tag_name"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id",
+          "tagName": "tag_name"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_tagging_work_request"],
       "params": [
         {
           "kind": "option",
@@ -14218,6 +16448,28 @@
       "shortHelp": "Gets the specified tags information",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_tag",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_tag",
+        "http": "GET",
+        "path": "/tagNamespaces/{tagNamespaceId}/tags/{tagName}",
+        "positionalArgs": ["tag_namespace_id", "tag_name"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id",
+          "tagName": "tag_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Tag",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -14301,6 +16553,32 @@
       "help": "OCI will release Tag Namespaces that our customers can import. These Tag Namespaces will provide Tags for our customers and Partners to provide consistency and enable data reporting. \n[Command Reference](importStandardTags)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.import_standard_tags",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "import_standard_tags",
+        "http": "POST",
+        "path": "/tags/actions/importStandardTags",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "import_standard_tags_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_tagging_work_request"],
       "params": [
         {
           "kind": "option",
@@ -14451,6 +16729,37 @@
       "shortHelp": "List tags in a given tagNamespace",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_tags",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_tags",
+        "http": "GET",
+        "path": "/tagNamespaces/{tagNamespaceId}/tags",
+        "positionalArgs": ["tag_namespace_id"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[TagSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -14613,6 +16922,35 @@
       "help": "Lists all the tags enabled for cost-tracking in the specified tenancy. For information about cost-tracking tags, see [Using Cost-tracking Tags]. \n[Command Reference](listCostTrackingTags)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_cost_tracking_tags",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_cost_tracking_tags",
+        "http": "GET",
+        "path": "/tagNamespaces/actions/listCostTrackingTags",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[Tag]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -15216,6 +17554,38 @@
       "help": "Add a resource lock to a tag default. \n[Command Reference](addTagDefaultLock)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.add_tag_default_lock",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "add_tag_default_lock",
+        "http": "POST",
+        "path": "/tagDefaults/{tagDefaultId}/actions/addLock",
+        "positionalArgs": ["tag_default_id", "add_lock_details"],
+        "pathParams": {
+          "tagDefaultId": "tag_default_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "add_lock_details",
+        "responseType": "TagDefault",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_default"],
       "params": [
         {
           "kind": "option",
@@ -15417,6 +17787,32 @@
       "help": "Assembles tag defaults in the specified compartment and any parent compartments to determine the tags to apply. Tag defaults from parent compartments do not override tag defaults referencing the same tag in a compartment lower down the hierarchy. This set of tag defaults includes all tag defaults from the current compartment back to the root compartment. \n[Command Reference](assembleEffectiveTagSet)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.assemble_effective_tag_set",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "assemble_effective_tag_set",
+        "http": "GET",
+        "path": "/tagDefaults/actions/assembleEffectiveTagSet",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[TagDefaultSummary]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -15502,6 +17898,33 @@
       "help": "Creates a new tag default in the specified compartment for the specified tag definition.\n\nIf you specify that a value is required, a value is set during resource creation (either by the user creating the resource or another tag defualt). If no value is set, resource creation is blocked.\n\n* If the `isRequired` flag is set to \"true\", the value is set during resource creation. * If the `isRequired` flag is set to \"false\", the value you enter is set during resource creation. \n[Command Reference](createTagDefault)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_tag_default",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_tag_default",
+        "http": "POST",
+        "path": "/tagDefaults",
+        "positionalArgs": ["create_tag_default_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_tag_default_details",
+        "responseType": "TagDefault",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_default"],
       "params": [
         {
           "kind": "option",
@@ -15701,6 +18124,37 @@
       "help": "Deletes the the specified tag default. \n[Command Reference](deleteTagDefault)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_tag_default",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_tag_default",
+        "http": "DELETE",
+        "path": "/tagDefaults/{tagDefaultId}",
+        "positionalArgs": ["tag_default_id"],
+        "pathParams": {
+          "tagDefaultId": "tag_default_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_default"],
       "params": [
         {
           "kind": "option",
@@ -15881,6 +18335,27 @@
       "help": "Retrieves the specified tag default. \n[Command Reference](getTagDefault)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_tag_default",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_tag_default",
+        "http": "GET",
+        "path": "/tagDefaults/{tagDefaultId}",
+        "positionalArgs": ["tag_default_id"],
+        "pathParams": {
+          "tagDefaultId": "tag_default_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "TagDefault",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -15945,6 +18420,44 @@
       "help": "Lists the tag defaults for tag definitions in the specified compartment. \n[Command Reference](listTagDefaults)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_tag_defaults",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_tag_defaults",
+        "http": "GET",
+        "path": "/tagDefaults",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "tagDefinitionId": {
+            "arg": "tag_definition_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[TagDefaultSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -16145,6 +18658,38 @@
       "help": "Remove a resource lock from a tag default. \n[Command Reference](removeTagDefaultLock)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.remove_tag_default_lock",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "remove_tag_default_lock",
+        "http": "POST",
+        "path": "/tagDefaults/{tagDefaultId}/actions/removeLock",
+        "positionalArgs": ["tag_default_id", "remove_lock_details"],
+        "pathParams": {
+          "tagDefaultId": "tag_default_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "remove_lock_details",
+        "responseType": "TagDefault",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_default"],
       "params": [
         {
           "kind": "option",
@@ -16308,6 +18853,39 @@
       "help": "Updates the specified tag default. If you specify that a value is required, a value is set during resource creation (either by the user creating the resource or another tag defualt). If no value is set, resource creation is blocked.\n\n* If the `isRequired` flag is set to \"true\", the value is set during resource creation. * If the `isRequired` flag is set to \"false\", the value you enter is set during resource creation. \n[Command Reference](updateTagDefault)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_tag_default",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_tag_default",
+        "http": "PUT",
+        "path": "/tagDefaults/{tagDefaultId}",
+        "positionalArgs": ["tag_default_id", "update_tag_default_details"],
+        "pathParams": {
+          "tagDefaultId": "tag_default_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_tag_default_details",
+        "responseType": "TagDefault",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_default"],
       "params": [
         {
           "kind": "option",
@@ -16507,6 +19085,38 @@
       "help": "Add a resource lock to a tag namespace. \n[Command Reference](addTagNamespaceLock)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.add_tag_namespace_lock",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "add_tag_namespace_lock",
+        "http": "POST",
+        "path": "/tagNamespaces/{tagNamespaceId}/actions/addLock",
+        "positionalArgs": ["tag_namespace_id", "add_lock_details"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "add_lock_details",
+        "responseType": "TagNamespace",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_namespace"],
       "params": [
         {
           "kind": "option",
@@ -16708,6 +19318,40 @@
       "help": "Deletes the specified tag namespace. This operation triggers a process that removes all of the tags defined in the specified tag namespace from all resources in your tenancy and then deletes the tag namespace.\n\nAfter you start the delete operation:\n\n  * New tag key definitions cannot be created under the namespace.   * The state of the tag namespace changes to DELETING.   * Tag removal from the resources begins.\n\nThis process can take up to 48 hours depending on the number of tag definitions in the namespace, the number of resources that are tagged, and the locations of the regions in which those resources reside.\n\nAfter all tags are removed, the state changes to DELETED. You cannot restore a deleted tag namespace. After the deleted tag namespace changes its state to DELETED, you can use the name of the deleted tag namespace again.\n\nAfter you start this operation, you cannot start either the [DeleteTag] or the [BulkDeleteTags] operation until this process completes.\n\nTo delete a tag namespace, you must first retire it. Use [UpdateTagNamespace] to retire a tag namespace. \n[Command Reference](cascadeDeleteTagNamespace)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.cascade_delete_tag_namespace",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "cascade_delete_tag_namespace",
+        "http": "POST",
+        "path": "/tagNamespaces/{tagNamespaceId}/actions/cascadeDelete",
+        "positionalArgs": ["tag_namespace_id"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_tagging_work_request"],
       "params": [
         {
           "kind": "option",
@@ -16876,6 +19520,37 @@
       "help": "Moves the specified tag namespace to the specified compartment within the same tenancy.\n\nTo move the tag namespace, you must have the manage tag-namespaces permission on both compartments. For more information about IAM policies, see [Details for IAM].\n\nMoving a tag namespace moves all the tag key definitions contained in the tag namespace. \n[Command Reference](changeTagNamespaceCompartment)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.change_tag_namespace_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "change_tag_namespace_compartment",
+        "http": "POST",
+        "path": "/tagNamespaces/{tagNamespaceId}/actions/changeCompartment",
+        "positionalArgs": [
+          "tag_namespace_id",
+          "change_tag_namespace_compartment_detail"
+        ],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_tag_namespace_compartment_detail",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -16979,6 +19654,30 @@
       "shortHelp": "Create new tagNamespace in a compartment",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_tag_namespace",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_tag_namespace",
+        "http": "POST",
+        "path": "/tagNamespaces",
+        "positionalArgs": ["create_tag_namespace_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_tag_namespace_details",
+        "responseType": "TagNamespace",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_namespace"],
       "params": [
         {
           "kind": "option",
@@ -17197,6 +19896,37 @@
       "help": "Deletes the specified tag namespace. Only an empty tag namespace can be deleted with this operation. To use this operation to delete a tag namespace that contains tag definitions, first delete all of its tag definitions.\n\nUse [CascadeDeleteTagNamespace] to delete a tag namespace along with all of the tag definitions contained within that namespace.\n\nUse [DeleteTag] to delete a tag definition. \n[Command Reference](deleteTagNamespace)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_tag_namespace",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_tag_namespace",
+        "http": "DELETE",
+        "path": "/tagNamespaces/{tagNamespaceId}",
+        "positionalArgs": ["tag_namespace_id"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_namespace"],
       "params": [
         {
           "kind": "option",
@@ -17378,6 +20108,27 @@
       "shortHelp": "Get a tagNamespaces information",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_tag_namespace",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_tag_namespace",
+        "http": "GET",
+        "path": "/tagNamespaces/{tagNamespaceId}",
+        "positionalArgs": ["tag_namespace_id"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "TagNamespace",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -17443,6 +20194,41 @@
       "shortHelp": "List the tagNamespaces in a compartment",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_tag_namespaces",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_tag_namespaces",
+        "http": "GET",
+        "path": "/tagNamespaces",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "includeSubcompartments": {
+            "arg": "include_subcompartments"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[TagNamespaceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -17689,6 +20475,38 @@
       "help": "Remove a resource lock from a tag namespace. \n[Command Reference](removeTagNamespaceLock)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.remove_tag_namespace_lock",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "remove_tag_namespace_lock",
+        "http": "POST",
+        "path": "/tagNamespaces/{tagNamespaceId}/actions/removeLock",
+        "positionalArgs": ["tag_namespace_id", "remove_lock_details"],
+        "pathParams": {
+          "tagNamespaceId": "tag_namespace_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "remove_lock_details",
+        "responseType": "TagNamespace",
+        "paginated": false
+      },
+      "otherOperations": ["get_tag_namespace"],
       "params": [
         {
           "kind": "option",
@@ -18136,6 +20954,27 @@
       "help": "Gets details on a specified work request. The workRequestID is returned in the opc-workrequest-id header for any asynchronous operation in tagging service. \n[Command Reference](getTaggingWorkRequest)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_tagging_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_tagging_work_request",
+        "http": "GET",
+        "path": "/taggingWorkRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "TaggingWorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18200,6 +21039,38 @@
       "help": "Lists the tagging work requests in compartment. \n[Command Reference](listTaggingWorkRequests)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_tagging_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_tagging_work_requests",
+        "http": "GET",
+        "path": "/taggingWorkRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "resourceIdentifier": {
+            "arg": "resource_identifier"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[TaggingWorkRequestSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -18360,6 +21231,34 @@
       "help": "Gets the errors for a work request. \n[Command Reference](listTaggingWorkRequestErrors)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_tagging_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_tagging_work_request_errors",
+        "http": "GET",
+        "path": "/taggingWorkRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[TaggingWorkRequestErrorSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -18501,6 +21400,34 @@
       "help": "Gets the logs for a work request. \n[Command Reference](listTaggingWorkRequestLogs)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_tagging_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_tagging_work_request_logs",
+        "http": "GET",
+        "path": "/taggingWorkRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[TaggingWorkRequestLogSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -18642,6 +21569,27 @@
       "help": "Get the specified tenancy's information. \n[Command Reference](getTenancy)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_tenancy",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_tenancy",
+        "http": "GET",
+        "path": "/tenancies/{tenancyId}",
+        "positionalArgs": ["tenancy_id"],
+        "pathParams": {
+          "tenancyId": "tenancy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "Tenancy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18706,6 +21654,27 @@
       "help": "Gets the specified user's console password information. The returned object contains the user's OCID, but not the password itself. The actual password is returned only when created or reset. \n[Command Reference](getUserUIPasswordInformation)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_user_ui_password_information",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_user_ui_password_information",
+        "http": "GET",
+        "path": "/users/{userId}/uiPassword",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "UIPasswordInformation",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18770,6 +21739,30 @@
       "help": "Deletes the specified API signing key for the specified user.\n\nEvery user has permission to use this operation to delete a key for *their own user ID*. An administrator in your organization does not need to write a policy to give users this ability. To compare, administrators who have permission to the tenancy can use this operation to delete a key for any user, including themselves. \n[Command Reference](deleteApiKey)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_api_key",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_api_key",
+        "http": "DELETE",
+        "path": "/users/{userId}/apiKeys/{fingerprint}",
+        "positionalArgs": ["user_id", "fingerprint"],
+        "pathParams": {
+          "userId": "user_id",
+          "fingerprint": "fingerprint"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -18891,6 +21884,27 @@
       "help": "Lists the API signing keys for the specified user. A user can have a maximum of three keys.\n\nEvery user has permission to use this API call for *their own user ID*.  An administrator in your organization does not need to write a policy to give users this ability. \n[Command Reference](listApiKeys)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_api_keys",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_api_keys",
+        "http": "GET",
+        "path": "/users/{userId}/apiKeys",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[ApiKey]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19077,6 +22091,30 @@
       "help": "Creates a new user in your tenancy. For conceptual information about users, your tenancy, and other IAM Service components, see [Overview of IAM].\n\nYou must specify your tenancy's OCID as the compartment ID in the request object (remember that the tenancy is simply the root compartment). Notice that IAM resources (users, groups, compartments, and some policies) reside within the tenancy itself, unlike cloud resources such as compute instances, which typically reside within compartments inside the tenancy. For information about OCIDs, see [Resource Identifiers].\n\nYou must also specify a *name* for the user, which must be unique across all users in your tenancy and cannot be changed. Allowed characters: No spaces. Only letters, numerals, hyphens, periods, underscores, +, and @. If you specify a name that's already in use, you'll get a 409 error. This name will be the user's login to the Console. You might want to pick a name that your company's own identity system (e.g., Active Directory, LDAP, etc.) already uses. If you delete a user and then create a new user with the same name, they'll be considered different users because they have different OCIDs.\n\nYou must also specify a *description* for the user (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateUser]. You can use the field to provide the user's full name, a description, a nickname, or other information to generally identify the user.\n\nAfter you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE.\n\nA new user has no permissions until you place the user in one or more groups (see [AddUserToGroup]). If the user needs to access the Console, you need to provide the user a password (see [CreateOrResetUIPassword]). If the user needs to access the Oracle Cloud Infrastructure REST API, you need to upload a public API signing key for that user (see [Required Keys and OCIDs] and also [UploadApiKey]).\n\n**Important:** Make sure to inform the new user which compartment(s) they have access to. \n[Command Reference](createUser)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_user",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_user",
+        "http": "POST",
+        "path": "/users",
+        "positionalArgs": ["create_user_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_user_details",
+        "responseType": "User",
+        "paginated": false
+      },
+      "otherOperations": ["get_user"],
       "params": [
         {
           "kind": "option",
@@ -19295,6 +22333,34 @@
       "help": "Creates a new DB credential for the specified user. \n[Command Reference](createDbCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_db_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_db_credential",
+        "http": "POST",
+        "path": "/users/{userId}/dbCredentials",
+        "positionalArgs": ["create_db_credential_details", "user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_db_credential_details",
+        "responseType": "DbCredential",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19397,6 +22463,30 @@
       "help": "Deletes the specified user. The user must not be in any groups. \n[Command Reference](deleteUser)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_user",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_user",
+        "http": "DELETE",
+        "path": "/users/{userId}",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_user"],
       "params": [
         {
           "kind": "option",
@@ -19558,6 +22648,33 @@
       "help": "Deletes the specified DB credential for the specified user. \n[Command Reference](deleteDbCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_db_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_db_credential",
+        "http": "DELETE",
+        "path": "/users/{userId}/dbCredentials/{dbCredentialId}",
+        "positionalArgs": ["user_id", "db_credential_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "dbCredentialId": "db_credential_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19679,6 +22796,27 @@
       "help": "Gets the specified user's information. \n[Command Reference](getUser)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_user",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_user",
+        "http": "GET",
+        "path": "/users/{userId}",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "User",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19743,6 +22881,53 @@
       "help": "Lists the users in your tenancy. You must specify your tenancy's OCID as the value for the compartment ID (remember that the tenancy is simply the root compartment). See [Where to Get the Tenancy's OCID and User's OCID]. \n[Command Reference](listUsers)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_users",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_users",
+        "http": "GET",
+        "path": "/users",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "identityProviderId": {
+            "arg": "identity_provider_id"
+          },
+          "externalIdentifier": {
+            "arg": "external_identifier"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[User]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -20004,6 +23189,49 @@
       "help": "Lists the DB credentials for the specified user. The returned object contains the credential's OCID \n[Command Reference](listDbCredentials)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_db_credentials",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_db_credentials",
+        "http": "GET",
+        "path": "/users/{userId}/dbCredentials",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[DbCredentialSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -20387,6 +23615,34 @@
       "help": "Creates Oauth token for the user \n[Command Reference](createOAuthClientCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_o_auth_client_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_o_auth_client_credential",
+        "http": "POST",
+        "path": "/users/{userId}/oauth2ClientCredentials",
+        "positionalArgs": [
+          "user_id",
+          "create_o_auth2_client_credential_details"
+        ],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_o_auth2_client_credential_details",
+        "responseType": "OAuth2ClientCredential",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20508,6 +23764,30 @@
       "help": "Delete Oauth token for the user \n[Command Reference](deleteOAuthClientCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_o_auth_client_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_o_auth_client_credential",
+        "http": "DELETE",
+        "path": "/users/{userId}/oauth2ClientCredentials/{oauth2ClientCredentialId}",
+        "positionalArgs": ["user_id", "oauth2_client_credential_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "oauth2ClientCredentialId": "oauth2_client_credential_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20629,6 +23909,37 @@
       "help": "List of Oauth tokens for the user \n[Command Reference](listOAuthClientCredentials)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_o_auth_client_credentials",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_o_auth_client_credentials",
+        "http": "GET",
+        "path": "/users/{userId}/oauth2ClientCredentials",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[OAuth2ClientCredentialSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -20791,6 +24102,36 @@
       "help": "Updates Oauth token for the user \n[Command Reference](updateOAuthClientCredential)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_o_auth_client_credential",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_o_auth_client_credential",
+        "http": "PUT",
+        "path": "/users/{userId}/oauth2ClientCredentials/{oauth2ClientCredentialId}",
+        "positionalArgs": [
+          "user_id",
+          "oauth2_client_credential_id",
+          "update_o_auth2_client_credential_details"
+        ],
+        "pathParams": {
+          "userId": "user_id",
+          "oauth2ClientCredentialId": "oauth2_client_credential_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_o_auth2_client_credential_details",
+        "responseType": "OAuth2ClientCredential",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20970,6 +24311,31 @@
       "help": "**Deprecated. Use [CreateAuthToken] instead.**\n\nCreates a new Swift password for the specified user. For information about what Swift passwords are for, see [Managing User Credentials].\n\nYou must specify a *description* for the Swift password (although it can be an empty string). It does not have to be unique, and you can change it anytime with [UpdateSwiftPassword].\n\nEvery user has permission to create a Swift password for *their own user ID*. An administrator in your organization does not need to write a policy to give users this ability. To compare, administrators who have permission to the tenancy can use this operation to create a Swift password for any user, including themselves. \n[Command Reference](createSwiftPassword)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_swift_password",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_swift_password",
+        "http": "POST",
+        "path": "/users/{userId}/swiftPasswords",
+        "positionalArgs": ["create_swift_password_details", "user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_swift_password_details",
+        "responseType": "SwiftPassword",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21053,6 +24419,30 @@
       "help": "**Deprecated. Use [DeleteAuthToken] instead.**\n\nDeletes the specified Swift password for the specified user. \n[Command Reference](deleteSwiftPassword)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.delete_swift_password",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "delete_swift_password",
+        "http": "DELETE",
+        "path": "/users/{userId}/swiftPasswords/{swiftPasswordId}",
+        "positionalArgs": ["user_id", "swift_password_id"],
+        "pathParams": {
+          "userId": "user_id",
+          "swiftPasswordId": "swift_password_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21174,6 +24564,27 @@
       "help": "**Deprecated. Use [ListAuthTokens] instead.**\n\nLists the Swift passwords for the specified user. The returned object contains the password's OCID, but not the password itself. The actual password is returned only upon creation. \n[Command Reference](listSwiftPasswords)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_swift_passwords",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_swift_passwords",
+        "http": "GET",
+        "path": "/users/{userId}/swiftPasswords",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[SwiftPassword]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21258,6 +24669,36 @@
       "help": "**Deprecated. Use [UpdateAuthToken] instead.**\n\nUpdates the specified Swift password's description. \n[Command Reference](updateSwiftPassword)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_swift_password",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_swift_password",
+        "http": "PUT",
+        "path": "/users/{userId}/swiftPasswords/{swiftPasswordId}",
+        "positionalArgs": [
+          "user_id",
+          "swift_password_id",
+          "update_swift_password_details"
+        ],
+        "pathParams": {
+          "userId": "user_id",
+          "swiftPasswordId": "swift_password_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_swift_password_details",
+        "responseType": "SwiftPassword",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21379,6 +24820,30 @@
       "help": "Creates a new Console one-time password for the specified user. For more information about user credentials, see [User Credentials].\n\nUse this operation after creating a new user, or if a user forgets their password. The new one-time password is returned to you in the response, and you must securely deliver it to the user. They'll be prompted to change this password the next time they sign in to the Console. If they don't change it within 7 days, the password will expire and you'll need to create a new one-time password for the user.\n\n(For tenancies that support identity domains) Resetting a user's password generates a reset password email with a link that the user must follow to reset their password. If the user does not reset their password before the link expires, you'll need to reset the user's password again.\n\n**Note:** The user's Console login is the unique name you specified when you created the user (see [CreateUser]). \n[Command Reference](createOrResetUIPassword)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.create_or_reset_ui_password",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "create_or_reset_ui_password",
+        "http": "POST",
+        "path": "/users/{userId}/uiPassword",
+        "positionalArgs": ["user_id"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "responseType": "UIPassword",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -21443,6 +24908,32 @@
       "help": "Updates the description of the specified user. \n[Command Reference](updateUser)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_user",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_user",
+        "http": "PUT",
+        "path": "/users/{userId}",
+        "positionalArgs": ["user_id", "update_user_details"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_user_details",
+        "responseType": "User",
+        "paginated": false
+      },
+      "otherOperations": ["get_user"],
       "params": [
         {
           "kind": "option",
@@ -21700,6 +25191,32 @@
       "help": "Updates the capabilities of the specified user. \n[Command Reference](updateUserCapabilities)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_user_capabilities",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_user_capabilities",
+        "http": "PUT",
+        "path": "/users/{userId}/capabilities",
+        "positionalArgs": ["user_id", "update_user_capabilities_details"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_user_capabilities_details",
+        "responseType": "User",
+        "paginated": false
+      },
+      "otherOperations": ["get_user"],
       "params": [
         {
           "kind": "option",
@@ -21975,6 +25492,32 @@
       "help": "Updates the state of the specified user. \n[Command Reference](updateUserState)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.update_user_state",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "update_user_state",
+        "http": "PUT",
+        "path": "/users/{userId}/state",
+        "positionalArgs": ["user_id", "update_state_details"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_state_details",
+        "responseType": "User",
+        "paginated": false
+      },
+      "otherOperations": ["get_user"],
       "params": [
         {
           "kind": "option",
@@ -22136,6 +25679,27 @@
       "help": "Gets details on a specified work request. The workRequestID is returned in the opc-workrequest-id header for any asynchronous operation in the compartment service. \n[Command Reference](getWorkRequest)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22200,6 +25764,38 @@
       "help": "Lists the work requests in compartment. \n[Command Reference](listWorkRequests)",
       "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "identity.identity",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "resourceIdentifier": {
+            "arg": "resource_identifier"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[WorkRequestSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

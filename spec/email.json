@@ -26,6 +26,15 @@
       }
     ]
   },
+  "clients": {
+    "email.email": {
+      "class": "oci.email.email_client.EmailClient",
+      "basePath": "/20170907",
+      "endpointTemplate": "https://ctrl.email.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "email"
+    }
+  },
   "groups": {
     "configuration": {
       "hidden": false,
@@ -309,6 +318,32 @@
       "help": "Returns  email configuration associated with the specified compartment. \n[Command Reference](getEmailConfiguration)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_email_configuration",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_email_configuration",
+        "http": "GET",
+        "path": "/configuration",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Configuration",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -373,6 +408,33 @@
       "help": "Creates a new DKIM for an email domain. This DKIM signs all approved senders in the tenancy that are in this email domain. Best security practices indicate to periodically rotate the DKIM that is doing the signing. When a second DKIM is applied, all senders seamlessly pick up the new key without interruption in signing. \n[Command Reference](createDkim)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.create_dkim",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "create_dkim",
+        "http": "POST",
+        "path": "/dkims",
+        "positionalArgs": ["create_dkim_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_dkim_details",
+        "responseType": "Dkim",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -600,6 +662,33 @@
       "help": "Deletes a DKIM. If this key is currently the active key for the email domain, deleting the key will stop signing the domain's outgoing mail. DKIM keys are left in DELETING state for about a day to allow DKIM signatures on in-transit mail to be validated. Consider creating a new DKIM for this domain so the signing can be rotated to it instead of deletion. \n[Command Reference](deleteDkim)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.delete_dkim",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "delete_dkim",
+        "http": "DELETE",
+        "path": "/dkims/{dkimId}",
+        "positionalArgs": ["dkim_id"],
+        "pathParams": {
+          "dkimId": "dkim_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -770,6 +859,30 @@
       "help": "Retrieves the specified DKIM. \n[Command Reference](getDkim)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_dkim",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_dkim",
+        "http": "GET",
+        "path": "/dkims/{dkimId}",
+        "positionalArgs": ["dkim_id"],
+        "pathParams": {
+          "dkimId": "dkim_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Dkim",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -834,6 +947,53 @@
       "help": "Lists DKIMs for an email domain. \n[Command Reference](listDkims)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_dkims",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_dkims",
+        "http": "GET",
+        "path": "/dkims",
+        "positionalArgs": ["email_domain_id"],
+        "pathParams": {},
+        "queryParams": {
+          "emailDomainId": {
+            "arg": "email_domain_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DkimCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1085,6 +1245,34 @@
       "help": "Modifies a DKIM. \n[Command Reference](updateDkim)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.update_dkim",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "update_dkim",
+        "http": "PUT",
+        "path": "/dkims/{dkimId}",
+        "positionalArgs": ["dkim_id", "update_dkim_details"],
+        "pathParams": {
+          "dkimId": "dkim_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_dkim_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1313,6 +1501,35 @@
       "help": "Adds a lock to a resource. \n[Command Reference](addEmailDomainLock)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.add_email_domain_lock",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "add_email_domain_lock",
+        "http": "POST",
+        "path": "/emailDomains/{emailDomainId}/actions/addLock",
+        "positionalArgs": ["email_domain_id", "add_lock_details"],
+        "pathParams": {
+          "emailDomainId": "email_domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "add_lock_details",
+        "responseType": "EmailDomain",
+        "paginated": false
+      },
+      "otherOperations": ["get_email_domain"],
       "params": [
         {
           "kind": "option",
@@ -1540,6 +1757,44 @@
       "help": "Moves an email domain into a different compartment. When provided, If-Match is checked against ETag value of the resource. For information about moving resources between compartments, see [Moving Resources to a Different Compartment].\n\n**Note:** All DKIM objects associated with this email domain will also be moved into the provided compartment. \n[Command Reference](changeEmailDomainCompartment)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.change_email_domain_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "change_email_domain_compartment",
+        "http": "POST",
+        "path": "/emailDomains/{emailDomainId}/actions/changeCompartment",
+        "positionalArgs": [
+          "email_domain_id",
+          "change_email_domain_compartment_details"
+        ],
+        "pathParams": {
+          "emailDomainId": "email_domain_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_email_domain_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1729,6 +1984,33 @@
       "help": "Creates a new email domain. Avoid entering confidential information. \n[Command Reference](createEmailDomain)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.create_email_domain",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "create_email_domain",
+        "http": "POST",
+        "path": "/emailDomains",
+        "positionalArgs": ["create_email_domain_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_email_domain_details",
+        "responseType": "EmailDomain",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1956,6 +2238,37 @@
       "help": "Deletes an email domain. \n[Command Reference](deleteEmailDomain)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.delete_email_domain",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "delete_email_domain",
+        "http": "DELETE",
+        "path": "/emailDomains/{emailDomainId}",
+        "positionalArgs": ["email_domain_id"],
+        "pathParams": {
+          "emailDomainId": "email_domain_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2145,6 +2458,30 @@
       "help": "Retrieves the specified email domain. \n[Command Reference](getEmailDomain)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_email_domain",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_email_domain",
+        "http": "GET",
+        "path": "/emailDomains/{emailDomainId}",
+        "positionalArgs": ["email_domain_id"],
+        "pathParams": {
+          "emailDomainId": "email_domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "EmailDomain",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2209,6 +2546,53 @@
       "help": "Lists email domains in the specified compartment. \n[Command Reference](listEmailDomains)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_email_domains",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_email_domains",
+        "http": "GET",
+        "path": "/emailDomains",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "EmailDomainCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2458,6 +2842,35 @@
       "help": "Remove a lock to a resource. \n[Command Reference](removeEmailDomainLock)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.remove_email_domain_lock",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "remove_email_domain_lock",
+        "http": "POST",
+        "path": "/emailDomains/{emailDomainId}/actions/removeLock",
+        "positionalArgs": ["email_domain_id", "remove_lock_details"],
+        "pathParams": {
+          "emailDomainId": "email_domain_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "remove_lock_details",
+        "responseType": "EmailDomain",
+        "paginated": false
+      },
+      "otherOperations": ["get_email_domain"],
       "params": [
         {
           "kind": "option",
@@ -2647,6 +3060,38 @@
       "help": "Modifies an email domain. \n[Command Reference](updateEmailDomain)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.update_email_domain",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "update_email_domain",
+        "http": "PUT",
+        "path": "/emailDomains/{emailDomainId}",
+        "positionalArgs": ["email_domain_id", "update_email_domain_details"],
+        "pathParams": {
+          "emailDomainId": "email_domain_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_email_domain_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2913,6 +3358,37 @@
       "help": "Add OutboundIps to EmailIpPool. \n[Command Reference](addEmailOutboundIp)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.add_email_outbound_ip",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "add_email_outbound_ip",
+        "http": "POST",
+        "path": "/emailIpPools/{emailIpPoolId}/actions/addEmailOutboundIp",
+        "positionalArgs": ["add_email_outbound_ip_details", "email_ip_pool_id"],
+        "pathParams": {
+          "emailIpPoolId": "email_ip_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "add_email_outbound_ip_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3083,6 +3559,44 @@
       "help": "Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeEmailIpPoolCompartment)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.change_email_ip_pool_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "change_email_ip_pool_compartment",
+        "http": "POST",
+        "path": "/emailIpPools/{emailIpPoolId}/actions/changeCompartment",
+        "positionalArgs": [
+          "email_ip_pool_id",
+          "change_email_ip_pool_compartment_details"
+        ],
+        "pathParams": {
+          "emailIpPoolId": "email_ip_pool_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_email_ip_pool_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3518,6 +4032,37 @@
       "help": "Deletes an EmailIpPool resource by identifier \n[Command Reference](deleteEmailIpPool)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.delete_email_ip_pool",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "delete_email_ip_pool",
+        "http": "DELETE",
+        "path": "/emailIpPools/{emailIpPoolId}",
+        "positionalArgs": ["email_ip_pool_id"],
+        "pathParams": {
+          "emailIpPoolId": "email_ip_pool_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3707,6 +4252,30 @@
       "help": "Retrieves the specified IpPool by identifier \n[Command Reference](getEmailIpPool)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_email_ip_pool",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_email_ip_pool",
+        "http": "GET",
+        "path": "/emailIpPools/{emailIpPoolId}",
+        "positionalArgs": ["email_ip_pool_id"],
+        "pathParams": {
+          "emailIpPoolId": "email_ip_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "EmailIpPool",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3771,6 +4340,53 @@
       "help": "Returns a list of EmailIpPools. \n[Command Reference](listEmailIpPools)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_email_ip_pools",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_email_ip_pools",
+        "http": "GET",
+        "path": "/emailIpPools",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "EmailIpPoolCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4021,6 +4637,40 @@
       "help": "Remove OutboundIps from EmailIpPool. \n[Command Reference](removeEmailOutboundIp)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.remove_email_outbound_ip",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "remove_email_outbound_ip",
+        "http": "POST",
+        "path": "/emailIpPools/{emailIpPoolId}/actions/removeEmailOutboundIp",
+        "positionalArgs": [
+          "remove_email_outbound_ip_details",
+          "email_ip_pool_id"
+        ],
+        "pathParams": {
+          "emailIpPoolId": "email_ip_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "remove_email_outbound_ip_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4457,6 +5107,53 @@
       "help": "Returns a list of all Outbound Public IPs assigned for a given tenant. \n[Command Reference](listEmailOutboundIps)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_email_outbound_ips",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_email_outbound_ips",
+        "http": "GET",
+        "path": "/emailOutboundIps",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "outboundIp": {
+            "arg": "outbound_ip"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "assignmentState": {
+            "arg": "assignment_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "EmailOutboundIpCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4701,6 +5398,35 @@
       "help": "Adds a lock to a resource. \n[Command Reference](addReturnPathLock)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.add_return_path_lock",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "add_return_path_lock",
+        "http": "POST",
+        "path": "/emailReturnPaths/{emailReturnPathId}/actions/addLock",
+        "positionalArgs": ["email_return_path_id", "add_lock_details"],
+        "pathParams": {
+          "emailReturnPathId": "email_return_path_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "add_lock_details",
+        "responseType": "EmailReturnPath",
+        "paginated": false
+      },
+      "otherOperations": ["get_email_return_path"],
       "params": [
         {
           "kind": "option",
@@ -4929,6 +5655,33 @@
       "help": "Creates a new email return path. Avoid entering confidential information. \n[Command Reference](createEmailReturnPath)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.create_email_return_path",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "create_email_return_path",
+        "http": "POST",
+        "path": "/emailReturnPaths",
+        "positionalArgs": ["create_email_return_path_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_email_return_path_details",
+        "responseType": "EmailReturnPath",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -5137,6 +5890,37 @@
       "help": "Deletes an email return path. \n[Command Reference](deleteEmailReturnPath)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.delete_email_return_path",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "delete_email_return_path",
+        "http": "DELETE",
+        "path": "/emailReturnPaths/{emailReturnPathId}",
+        "positionalArgs": ["email_return_path_id"],
+        "pathParams": {
+          "emailReturnPathId": "email_return_path_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -5326,6 +6110,30 @@
       "help": "Retrieves the specified email return path. \n[Command Reference](getEmailReturnPath)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_email_return_path",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_email_return_path",
+        "http": "GET",
+        "path": "/emailReturnPaths/{emailReturnPathId}",
+        "positionalArgs": ["email_return_path_id"],
+        "pathParams": {
+          "emailReturnPathId": "email_return_path_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "EmailReturnPath",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5390,6 +6198,56 @@
       "help": "Lists email return paths in the specified compartment or emaildomain. \n[Command Reference](listEmailReturnPaths)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_email_return_paths",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_email_return_paths",
+        "http": "GET",
+        "path": "/emailReturnPaths",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "parentResourceId": {
+            "arg": "parent_resource_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "EmailReturnPathCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -5659,6 +6517,35 @@
       "help": "Remove a lock to a resource. \n[Command Reference](removeReturnPathLock)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.remove_return_path_lock",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "remove_return_path_lock",
+        "http": "POST",
+        "path": "/emailReturnPaths/{emailReturnPathId}/actions/removeLock",
+        "positionalArgs": ["email_return_path_id", "remove_lock_details"],
+        "pathParams": {
+          "emailReturnPathId": "email_return_path_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "remove_lock_details",
+        "responseType": "EmailReturnPath",
+        "paginated": false
+      },
+      "otherOperations": ["get_email_return_path"],
       "params": [
         {
           "kind": "option",
@@ -5849,6 +6736,41 @@
       "help": "Modifies an email return path. \n[Command Reference](updateEmailReturnPath)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.update_email_return_path",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "update_email_return_path",
+        "http": "PUT",
+        "path": "/emailReturnPaths/{emailReturnPathId}",
+        "positionalArgs": [
+          "email_return_path_id",
+          "update_email_return_path_details"
+        ],
+        "pathParams": {
+          "emailReturnPathId": "email_return_path_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_email_return_path_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -6096,6 +7018,35 @@
       "help": "Adds a lock to a resource. \n[Command Reference](addSenderLock)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.add_sender_lock",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "add_sender_lock",
+        "http": "POST",
+        "path": "/senders/{senderId}/actions/addLock",
+        "positionalArgs": ["sender_id", "add_lock_details"],
+        "pathParams": {
+          "senderId": "sender_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "add_lock_details",
+        "responseType": "Sender",
+        "paginated": false
+      },
+      "otherOperations": ["get_sender"],
       "params": [
         {
           "kind": "option",
@@ -6325,6 +7276,37 @@
       "help": "Moves a sender into a different compartment. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeSenderCompartment)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.change_sender_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "change_sender_compartment",
+        "http": "POST",
+        "path": "/senders/{senderId}/actions/changeCompartment",
+        "positionalArgs": ["sender_id", "change_sender_compartment_details"],
+        "pathParams": {
+          "senderId": "sender_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_sender_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6446,6 +7428,30 @@
       "help": "Creates a sender for a tenancy in a given compartment. \n[Command Reference](createSender)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.create_sender",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "create_sender",
+        "http": "POST",
+        "path": "/senders",
+        "positionalArgs": ["create_sender_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_sender_details",
+        "responseType": "Sender",
+        "paginated": false
+      },
+      "otherOperations": ["get_sender"],
       "params": [
         {
           "kind": "option",
@@ -6654,6 +7660,37 @@
       "help": "Deletes an approved sender for a tenancy in a given compartment for a provided `senderId`. \n[Command Reference](deleteSender)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.delete_sender",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "delete_sender",
+        "http": "DELETE",
+        "path": "/senders/{senderId}",
+        "positionalArgs": ["sender_id"],
+        "pathParams": {
+          "senderId": "sender_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_sender"],
       "params": [
         {
           "kind": "option",
@@ -6843,6 +7880,30 @@
       "help": "Gets an approved sender for a given `senderId`. \n[Command Reference](getSender)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_sender",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_sender",
+        "http": "GET",
+        "path": "/senders/{senderId}",
+        "positionalArgs": ["sender_id"],
+        "pathParams": {
+          "senderId": "sender_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Sender",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6907,6 +7968,56 @@
       "help": "Gets a collection of approved sender email addresses and sender IDs. \n[Command Reference](listSenders)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_senders",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_senders",
+        "http": "GET",
+        "path": "/senders",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "domain": {
+            "arg": "domain"
+          },
+          "emailAddress": {
+            "arg": "email_address"
+          },
+          "emailIpPoolId": {
+            "arg": "email_ip_pool_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[SenderSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7177,6 +8288,35 @@
       "help": "Remove a lock to a resource. \n[Command Reference](removeSenderLock)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.remove_sender_lock",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "remove_sender_lock",
+        "http": "POST",
+        "path": "/senders/{senderId}/actions/removeLock",
+        "positionalArgs": ["sender_id", "remove_lock_details"],
+        "pathParams": {
+          "senderId": "sender_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "remove_lock_details",
+        "responseType": "Sender",
+        "paginated": false
+      },
+      "otherOperations": ["get_sender"],
       "params": [
         {
           "kind": "option",
@@ -7368,6 +8508,39 @@
       "help": "Replaces the set of tags for a sender with the tags provided. If either freeform or defined tags are omitted, the tags for that set remain the same. Each set must include the full set of tags for the sender, partial updates are not permitted. For more information about tagging, see [Resource Tags]. \n[Command Reference](updateSender)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.update_sender",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "update_sender",
+        "http": "PUT",
+        "path": "/senders/{senderId}",
+        "positionalArgs": ["sender_id", "update_sender_details"],
+        "pathParams": {
+          "senderId": "sender_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_sender_details",
+        "responseType": "Sender",
+        "paginated": false
+      },
+      "otherOperations": ["get_sender"],
       "params": [
         {
           "kind": "option",
@@ -7615,6 +8788,29 @@
       "help": "Adds recipient email addresses to the suppression list for a tenancy. Addresses added to the suppression list via the API are denoted as \"MANUAL\" in the `reason` field. *Note:* All email addresses added to the suppression list are normalized to include only lowercase letters. \n[Command Reference](createSuppression)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.create_suppression",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "create_suppression",
+        "http": "POST",
+        "path": "/suppressions",
+        "positionalArgs": ["create_suppression_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_suppression_details",
+        "responseType": "Suppression",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7698,6 +8894,29 @@
       "help": "Removes a suppressed recipient email address from the suppression list for a tenancy in a given compartment for a provided `suppressionId`. \n[Command Reference](deleteSuppression)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.delete_suppression",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "delete_suppression",
+        "http": "DELETE",
+        "path": "/suppressions/{suppressionId}",
+        "positionalArgs": ["suppression_id"],
+        "pathParams": {
+          "suppressionId": "suppression_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7781,6 +9000,30 @@
       "help": "Gets the details of a suppressed recipient email address for a given `suppressionId`. Each suppression is given a unique OCID. \n[Command Reference](getSuppression)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_suppression",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_suppression",
+        "http": "GET",
+        "path": "/suppressions/{suppressionId}",
+        "positionalArgs": ["suppression_id"],
+        "pathParams": {
+          "suppressionId": "suppression_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Suppression",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7845,6 +9088,53 @@
       "help": "Gets a list of suppressed recipient email addresses for a user. The `compartmentId` for suppressions must be a tenancy OCID. The returned list is sorted by creation time in descending order. \n[Command Reference](listSuppressions)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_suppressions",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_suppressions",
+        "http": "GET",
+        "path": "/suppressions",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "emailAddress": {
+            "arg": "email_address"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[SuppressionSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8085,6 +9375,30 @@
       "help": "Gets the status of the work request with the given ID. \n[Command Reference](getWorkRequest)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8149,6 +9463,53 @@
       "help": "Lists the work requests in a compartment. \n[Command Reference](listWorkRequests)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "workRequestId": {
+            "arg": "work_request_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "operationType": {
+            "arg": "operation_type"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestSummaryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8418,6 +9779,43 @@
       "help": "Return a (paginated) list of errors for a given work request. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestErrorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8601,6 +9999,43 @@
       "help": "Return a (paginated) list of logs for a given work request. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.email.src.oci_cli_email.generated.email_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "email.email",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestLogEntryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

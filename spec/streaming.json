@@ -26,6 +26,22 @@
       }
     ]
   },
+  "clients": {
+    "streaming.stream": {
+      "class": "oci.streaming.stream_client.StreamClient",
+      "basePath": "/20180418",
+      "endpointTemplate": "https://streaming.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "stream"
+    },
+    "streaming.stream_admin": {
+      "class": "oci.streaming.stream_admin_client.StreamAdminClient",
+      "basePath": "/20180418",
+      "endpointTemplate": "https://streaming.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "stream_admin"
+    }
+  },
   "groups": {
     "admin": {
       "hidden": false,
@@ -336,6 +352,37 @@
       "help": "Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeConnectHarnessCompartment)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.change_connect_harness_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "change_connect_harness_compartment",
+        "http": "POST",
+        "path": "/connectharnesses/{connectHarnessId}/actions/changeCompartment",
+        "positionalArgs": [
+          "connect_harness_id",
+          "change_connect_harness_compartment_details"
+        ],
+        "pathParams": {
+          "connectHarnessId": "connect_harness_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_connect_harness_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -506,6 +553,33 @@
       "help": "Starts the provisioning of a new connect harness. To track the progress of the provisioning, you can periodically call [GetConnectHarness]. In the response, the `lifecycleState` parameter of the [ConnectHarness] object tells you its current state. \n[Command Reference](createConnectHarness)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.create_connect_harness",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "create_connect_harness",
+        "http": "POST",
+        "path": "/connectharnesses",
+        "positionalArgs": ["create_connect_harness_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_connect_harness_details",
+        "responseType": "ConnectHarness",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -695,6 +769,33 @@
       "help": "Deletes a connect harness and its content. Connect harness contents are deleted immediately. The service retains records of the connect harness itself for 90 days after deletion. The `lifecycleState` parameter of the `ConnectHarness` object changes to `DELETING` and the connect harness becomes inaccessible for read or write operations. To verify that a connect harness has been deleted, make a [GetConnectHarness] request. If the call returns the connect harness's lifecycle state as `DELETED`, then the connect harness has been deleted. If the call returns a \"404 Not Found\" error, that means all records of the connect harness have been deleted. \n[Command Reference](deleteConnectHarness)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.delete_connect_harness",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "delete_connect_harness",
+        "http": "DELETE",
+        "path": "/connectharnesses/{connectHarnessId}",
+        "positionalArgs": ["connect_harness_id"],
+        "pathParams": {
+          "connectHarnessId": "connect_harness_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -865,6 +966,30 @@
       "help": "Gets detailed information about a connect harness. \n[Command Reference](getConnectHarness)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.get_connect_harness",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "get_connect_harness",
+        "http": "GET",
+        "path": "/connectharnesses/{connectHarnessId}",
+        "positionalArgs": ["connect_harness_id"],
+        "pathParams": {
+          "connectHarnessId": "connect_harness_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ConnectHarness",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -929,6 +1054,53 @@
       "help": "Lists the connectharness. \n[Command Reference](listConnectHarnesses)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.list_connect_harnesses",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "list_connect_harnesses",
+        "http": "GET",
+        "path": "/connectharnesses",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ConnectHarnessSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1178,6 +1350,38 @@
       "help": "Updates the tags applied to the connect harness. \n[Command Reference](updateConnectHarness)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.update_connect_harness",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "update_connect_harness",
+        "http": "PUT",
+        "path": "/connectharnesses/{connectHarnessId}",
+        "positionalArgs": [
+          "connect_harness_id",
+          "update_connect_harness_details"
+        ],
+        "pathParams": {
+          "connectHarnessId": "connect_harness_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_connect_harness_details",
+        "responseType": "ConnectHarness",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1387,6 +1591,34 @@
       "help": "Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource. The stream will also be moved into the default stream pool in the destination compartment. \n[Command Reference](changeStreamCompartment)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.change_stream_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "change_stream_compartment",
+        "http": "POST",
+        "path": "/streams/{streamId}/actions/changeCompartment",
+        "positionalArgs": ["stream_id", "change_stream_compartment_details"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_stream_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1557,6 +1789,30 @@
       "help": "Starts the provisioning of a new stream. The stream will be created in the given compartment id or stream pool id, depending on which parameter is specified. Compartment id and stream pool id cannot be specified at the same time. To track the progress of the provisioning, you can periodically call [GetStream]. In the response, the `lifecycleState` parameter of the [Stream] object tells you its current state. \n[Command Reference](createStream)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.create_stream",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "create_stream",
+        "http": "POST",
+        "path": "/streams",
+        "positionalArgs": ["create_stream_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_stream_details",
+        "responseType": "Stream",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1803,6 +2059,33 @@
       "help": "Deletes a stream and its content. Stream contents are deleted immediately. The service retains records of the stream itself for 90 days after deletion. The `lifecycleState` parameter of the `Stream` object changes to `DELETING` and the stream becomes inaccessible for read or write operations. To verify that a stream has been deleted, make a [GetStream] request. If the call returns the stream's lifecycle state as `DELETED`, then the stream has been deleted. If the call returns a \"404 Not Found\" error, that means all records of the stream have been deleted. \n[Command Reference](deleteStream)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.delete_stream",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "delete_stream",
+        "http": "DELETE",
+        "path": "/streams/{streamId}",
+        "positionalArgs": ["stream_id"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1973,6 +2256,30 @@
       "help": "Gets detailed information about a stream, including the number of partitions. \n[Command Reference](getStream)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.get_stream",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "get_stream",
+        "http": "GET",
+        "path": "/streams/{streamId}",
+        "positionalArgs": ["stream_id"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Stream",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2037,6 +2344,56 @@
       "help": "Lists the streams in the given compartment id. If the compartment id is specified, it will list streams in the compartment, regardless of their stream pool. If the stream pool id is specified, the action will be scoped to that stream pool. The compartment id and stream pool id cannot be specified at the same time. \n[Command Reference](listStreams)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.list_streams",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "list_streams",
+        "http": "GET",
+        "path": "/streams",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "streamPoolId": {
+            "arg": "stream_pool_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[StreamSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2305,6 +2662,35 @@
       "help": "Updates the stream. Only specified values will be updated. \n[Command Reference](updateStream)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.update_stream",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "update_stream",
+        "http": "PUT",
+        "path": "/streams/{streamId}",
+        "positionalArgs": ["stream_id", "update_stream_details"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_stream_details",
+        "responseType": "Stream",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2533,6 +2919,37 @@
       "help": "Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeStreamPoolCompartment)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.change_stream_pool_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "change_stream_pool_compartment",
+        "http": "POST",
+        "path": "/streampools/{streamPoolId}/actions/changeCompartment",
+        "positionalArgs": [
+          "stream_pool_id",
+          "change_stream_pool_compartment_details"
+        ],
+        "pathParams": {
+          "streamPoolId": "stream_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_stream_pool_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2703,6 +3120,33 @@
       "help": "Starts the provisioning of a new stream pool. To track the progress of the provisioning, you can periodically call GetStreamPool. In the response, the `lifecycleState` parameter of the object tells you its current state. \n[Command Reference](createStreamPool)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.create_stream_pool",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "create_stream_pool",
+        "http": "POST",
+        "path": "/streampools",
+        "positionalArgs": ["create_stream_pool_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_stream_pool_details",
+        "responseType": "StreamPool",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2968,6 +3412,33 @@
       "help": "Deletes a stream pool. All containing streams will also be deleted. The default stream pool of a compartment cannot be deleted. \n[Command Reference](deleteStreamPool)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.delete_stream_pool",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "delete_stream_pool",
+        "http": "DELETE",
+        "path": "/streampools/{streamPoolId}",
+        "positionalArgs": ["stream_pool_id"],
+        "pathParams": {
+          "streamPoolId": "stream_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3138,6 +3609,30 @@
       "help": "Gets detailed information about the stream pool, such as Kafka settings. \n[Command Reference](getStreamPool)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.get_stream_pool",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "get_stream_pool",
+        "http": "GET",
+        "path": "/streampools/{streamPoolId}",
+        "positionalArgs": ["stream_pool_id"],
+        "pathParams": {
+          "streamPoolId": "stream_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "StreamPool",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3202,6 +3697,53 @@
       "help": "List the stream pools for a given compartment ID. \n[Command Reference](listStreamPools)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.list_stream_pools",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "list_stream_pools",
+        "http": "GET",
+        "path": "/streampools",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[StreamPoolSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3451,6 +3993,35 @@
       "help": "Updates the specified stream pool. \n[Command Reference](updateStreamPool)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.update_stream_pool",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "update_stream_pool",
+        "http": "PUT",
+        "path": "/streampools/{streamPoolId}",
+        "positionalArgs": ["stream_pool_id", "update_stream_pool_details"],
+        "pathParams": {
+          "streamPoolId": "stream_pool_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_stream_pool_details",
+        "responseType": "StreamPool",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3736,6 +4307,30 @@
       "help": "Gets the details of a work request. \n[Command Reference](getWorkRequest)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3800,6 +4395,43 @@
       "help": "Lists the errors for a work request. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestErrorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3983,6 +4615,43 @@
       "help": "Lists the logs for a work request. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestLogEntryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4166,6 +4835,50 @@
       "help": "Lists the work requests in a compartment. \n[Command Reference](listWorkRequests)",
       "callback": "services.streaming.src.oci_cli_stream_admin.generated.streamadmin_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream_admin",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "workRequestId": {
+            "arg": "work_request_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "resourceId": {
+            "arg": "resource_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestSummaryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4387,6 +5100,31 @@
       "help": "Creates a cursor. Cursors are used to consume a stream, starting from a specific point in the partition and going forward from there. You can create a cursor based on an offset, a time, the trim horizon, or the most recent message in the stream. As the oldest message inside the retention period boundary, using the trim horizon effectively lets you consume all messages in the stream. A cursor based on the most recent message allows consumption of only messages that are added to the stream after you create the cursor. Cursors expire five minutes after you receive them from the service.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](createCursor)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.create_cursor",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "create_cursor",
+        "http": "POST",
+        "path": "/streams/{streamId}/cursors",
+        "positionalArgs": ["stream_id", "create_cursor_details"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_cursor_details",
+        "responseType": "Cursor",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4535,6 +5273,31 @@
       "help": "Creates a group-cursor.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](createGroupCursor)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.create_group_cursor",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "create_group_cursor",
+        "http": "POST",
+        "path": "/streams/{streamId}/groupCursors",
+        "positionalArgs": ["stream_id", "create_group_cursor_details"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_group_cursor_details",
+        "responseType": "Cursor",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4715,6 +5478,34 @@
       "help": "Provides a mechanism to manually commit offsets, if not using commit-on-get consumer semantics. This commits offsets assicated with the provided cursor, extends the timeout on each of the affected partitions, and returns an updated cursor.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](consumerCommit)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.consumer_commit",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "consumer_commit",
+        "http": "POST",
+        "path": "/streams/{streamId}/commit",
+        "positionalArgs": ["stream_id", "cursor"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {
+          "cursor": {
+            "arg": "cursor"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Cursor",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4798,6 +5589,31 @@
       "help": "Returns the current state of a consumer group.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](getGroup)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.get_group",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "get_group",
+        "http": "GET",
+        "path": "/streams/{streamId}/groups/{groupName}",
+        "positionalArgs": ["stream_id", "group_name"],
+        "pathParams": {
+          "streamId": "stream_id",
+          "groupName": "group_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Group",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4881,6 +5697,34 @@
       "help": "Allows long-running processes to extend the timeout on partitions reserved by a consumer instance.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](consumerHeartbeat)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.consumer_heartbeat",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "consumer_heartbeat",
+        "http": "POST",
+        "path": "/streams/{streamId}/heartbeat",
+        "positionalArgs": ["stream_id", "cursor"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {
+          "cursor": {
+            "arg": "cursor"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Cursor",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4964,6 +5808,31 @@
       "help": "Forcefully changes the current location of a group as a whole; reseting processing location of all consumers to a particular location in the stream.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](updateGroup)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.update_group",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "update_group",
+        "http": "PUT",
+        "path": "/streams/{streamId}/groups/{groupName}",
+        "positionalArgs": ["stream_id", "group_name", "update_group_details"],
+        "pathParams": {
+          "streamId": "stream_id",
+          "groupName": "group_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_group_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5087,6 +5956,37 @@
       "help": "Returns messages from the specified stream using the specified cursor as the starting point for consumption. By default, the number of messages returned is undefined, but the service returns as many as possible. To get messages, you must first obtain a cursor using the [CreateCursor] operation. In the response, retrieve the value of the 'opc-next-cursor' header to pass as a parameter to get the next batch of messages in the stream.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](getMessages)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.get_messages",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "get_messages",
+        "http": "GET",
+        "path": "/streams/{streamId}/messages",
+        "positionalArgs": ["stream_id", "cursor"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {
+          "cursor": {
+            "arg": "cursor"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[Message]",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5189,6 +6089,32 @@
       "help": "Emits messages to a stream. There's no limit to the number of messages in a request, but the total size of a message or request must be 1 MiB or less. The service calculates the partition ID from the message key and stores messages that share a key on the same partition. If a message does not contain a key or if the key is null, the service generates a message key for you. The partition ID cannot be passed as a parameter.\n\nThe top level --endpoint parameter must be supplied for this operation. \n[Command Reference](putMessages)",
       "callback": "services.streaming.src.oci_cli_stream.generated.stream_cli.put_messages",
       "kind": "generated",
+      "operation": {
+        "client": "streaming.stream",
+        "method": "put_messages",
+        "http": "POST",
+        "path": "/streams/{streamId}/messages",
+        "positionalArgs": ["stream_id", "put_messages_details"],
+        "pathParams": {
+          "streamId": "stream_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "put_messages_details",
+        "responseType": "PutMessagesResult",
+        "enforce_content_headers": false,
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",

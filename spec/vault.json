@@ -26,6 +26,15 @@
       }
     ]
   },
+  "clients": {
+    "vault.vaults": {
+      "class": "oci.vault.vaults_client.VaultsClient",
+      "basePath": "/20180608",
+      "endpointTemplate": "https://vaults.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "vaults"
+    }
+  },
   "groups": {
     "secret": {
       "hidden": false,
@@ -84,6 +93,32 @@
       "help": "Cancels the pending deletion of the specified secret. Canceling a scheduled deletion restores the secret's lifecycle state to what it was before you scheduled the secret for deletion. \n[Command Reference](cancelSecretDeletion)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.cancel_secret_deletion",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "cancel_secret_deletion",
+        "http": "POST",
+        "path": "/secrets/{secretId}/actions/cancelDeletion",
+        "positionalArgs": ["secret_id"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -167,6 +202,32 @@
       "help": "Cancels the ongoing secret rotation. The cancellation is contingent on how far the rotation process has progressed. Upon cancelling a rotation, all future rotations are also disabled. \n[Command Reference](cancelSecretRotation)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.cancel_secret_rotation",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "cancel_secret_rotation",
+        "http": "POST",
+        "path": "/secrets/{secretId}/actions/cancelRotation",
+        "positionalArgs": ["secret_id"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -250,6 +311,36 @@
       "help": "Moves a secret into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment].\n\nWhen provided, if-match is checked against the ETag values of the secret. \n[Command Reference](changeSecretCompartment)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.change_secret_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "change_secret_compartment",
+        "http": "POST",
+        "path": "/secrets/{secretId}/actions/changeCompartment",
+        "positionalArgs": ["secret_id", "change_secret_compartment_details"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_secret_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -772,6 +863,30 @@
       "help": "Gets information about the specified secret. \n[Command Reference](getSecret)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.get_secret",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "get_secret",
+        "http": "GET",
+        "path": "/secrets/{secretId}",
+        "positionalArgs": ["secret_id"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Secret",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -836,6 +951,53 @@
       "help": "Lists all secrets in the specified vault and compartment. \n[Command Reference](listSecrets)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.list_secrets",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "list_secrets",
+        "http": "GET",
+        "path": "/secrets",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "vaultId": {
+            "arg": "vault_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[SecretSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1088,6 +1250,36 @@
       "help": "API to force rotation of an existing secret in Vault and the specified target system; expects secret to have a valid Target System Details object \n[Command Reference](rotateSecret)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.rotate_secret",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "rotate_secret",
+        "http": "POST",
+        "path": "/secrets/{secretId}/actions/rotate",
+        "positionalArgs": ["secret_id"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -1230,6 +1422,33 @@
       "help": "Schedules the deletion of the specified secret. This sets the lifecycle state of the secret to `PENDING_DELETION` and then deletes it after the specified retention period ends. \n[Command Reference](scheduleSecretDeletion)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.schedule_secret_deletion",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "schedule_secret_deletion",
+        "http": "POST",
+        "path": "/secrets/{secretId}/actions/scheduleDeletion",
+        "positionalArgs": ["secret_id", "schedule_secret_deletion_details"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "schedule_secret_deletion_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1332,6 +1551,35 @@
       "help": "Updates the properties of a secret. Specifically, you can update the version number of the secret to make that version number the current version. You can also update a secret's description, its free-form or defined tags, rules and the secret contents. Updating the secret content automatically creates a new secret version. You cannot, however, update the current secret version number, secret contents, and secret rules at the same time. Furthermore, the secret must in an `ACTIVE` lifecycle state to be updated.\n\nThis operation is not supported by the Oracle Cloud Infrastructure Terraform Provider. \n[Command Reference](updateSecret)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.update_secret",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "update_secret",
+        "http": "PUT",
+        "path": "/secrets/{secretId}",
+        "positionalArgs": ["secret_id", "update_secret_details"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_secret_details",
+        "responseType": "Secret",
+        "paginated": false
+      },
+      "otherOperations": ["get_secret"],
       "params": [
         {
           "kind": "option",
@@ -1713,6 +1961,35 @@
       "help": "Updates the properties of a secret. Specifically, you can update the version number of the secret to make that version number the current version. You can also update a secret's description, its free-form or defined tags, rules and the secret contents. Updating the secret content automatically creates a new secret version. You cannot, however, update the current secret version number, secret contents, and secret rules at the same time. Furthermore, the secret must in an `ACTIVE` lifecycle state to be updated.\n\nThis operation is not supported by the Oracle Cloud Infrastructure Terraform Provider. \n[Command Reference](updateSecret)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.update_secret_base64_secret_content_details",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "update_secret",
+        "http": "PUT",
+        "path": "/secrets/{secretId}",
+        "positionalArgs": ["secret_id", "update_secret_details"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_secret_details",
+        "responseType": "Secret",
+        "paginated": false
+      },
+      "otherOperations": ["get_secret"],
       "params": [
         {
           "kind": "option",
@@ -2134,6 +2411,33 @@
       "help": "Cancels the scheduled deletion of a secret version. \n[Command Reference](cancelSecretVersionDeletion)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.cancel_secret_version_deletion",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "cancel_secret_version_deletion",
+        "http": "POST",
+        "path": "/secrets/{secretId}/version/{secretVersionNumber}/actions/cancelDeletion",
+        "positionalArgs": ["secret_id", "secret_version_number"],
+        "pathParams": {
+          "secretId": "secret_id",
+          "secretVersionNumber": "secret_version_number"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2236,6 +2540,31 @@
       "help": "Gets information about the specified version of a secret. \n[Command Reference](getSecretVersion)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.get_secret_version",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "get_secret_version",
+        "http": "GET",
+        "path": "/secrets/{secretId}/version/{secretVersionNumber}",
+        "positionalArgs": ["secret_id", "secret_version_number"],
+        "pathParams": {
+          "secretId": "secret_id",
+          "secretVersionNumber": "secret_version_number"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SecretVersion",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2319,6 +2648,43 @@
       "help": "Lists all secret versions for the specified secret. \n[Command Reference](listSecretVersions)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.list_secret_versions",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "list_secret_versions",
+        "http": "GET",
+        "path": "/secrets/{secretId}/versions",
+        "positionalArgs": ["secret_id"],
+        "pathParams": {
+          "secretId": "secret_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[SecretVersionSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2502,6 +2868,38 @@
       "help": "Schedules the deletion of the specified secret version. This deletes it after the specified retention period ends. You can only delete a secret version if the secret version rotation state is marked as `DEPRECATED`. \n[Command Reference](scheduleSecretVersionDeletion)",
       "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.schedule_secret_version_deletion",
       "kind": "generated",
+      "operation": {
+        "client": "vault.vaults",
+        "method": "schedule_secret_version_deletion",
+        "http": "POST",
+        "path": "/secrets/{secretId}/version/{secretVersionNumber}/actions/scheduleDeletion",
+        "positionalArgs": [
+          "secret_id",
+          "secret_version_number",
+          "schedule_secret_version_deletion_details"
+        ],
+        "pathParams": {
+          "secretId": "secret_id",
+          "secretVersionNumber": "secret_version_number"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "schedule_secret_version_deletion_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",

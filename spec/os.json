@@ -26,6 +26,18 @@
       }
     ]
   },
+  "clients": {
+    "object_storage.object_storage": {
+      "class": "oci.object_storage.object_storage_client.ObjectStorageClient",
+      "basePath": "/",
+      "endpointTemplate": "https://objectstorage.{region}.{dualStack?ds.oci.:}{secondLevelDomain}",
+      "endpointServiceName": "objectstorage",
+      "endpointTemplatePerRealm": {
+        "oc1": "https://{namespaceName+Dot}objectstorage.{region}.{dualStack?ds.:}oci.customer-oci.com"
+      },
+      "serviceName": "object_storage"
+    }
+  },
   "groups": {
     "bucket": {
       "hidden": false,
@@ -329,6 +341,31 @@
       "help": "Creates a bucket in the given namespace with a bucket name and optional user-defined metadata. Avoid entering confidential information in bucket names. \n[Command Reference](createBucket)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.create_bucket",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "create_bucket",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b",
+        "positionalArgs": ["namespace_name", "create_bucket_details"],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "create_bucket_details",
+        "responseType": "Bucket",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -827,6 +864,42 @@
       "shortHelp": "Gets the current representation of the...",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_bucket",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_bucket",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {
+          "fields": {
+            "arg": "fields",
+            "collectionFormat": "csv"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "Bucket",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -968,6 +1041,44 @@
       "help": "Gets a list of all BucketSummary items in a compartment. A BucketSummary contains only summary fields for the bucket and does not contain fields like the user-defined metadata.\n\nListBuckets returns a BucketSummary containing at most 1000 buckets. To paginate through more buckets, use the returned `opc-next-page` value with the `page` request parameter.\n\nTo use this and other API operations, you must be authorized in an IAM policy. If you are not authorized, talk to an administrator. If you are an administrator who needs to write policies to give users access, see [Getting Started with Policies]. \n[Command Reference](listBuckets)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_buckets",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_buckets",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b",
+        "positionalArgs": ["namespace_name", "compartment_id"],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "fields": {
+            "arg": "fields",
+            "collectionFormat": "csv"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[BucketSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1148,6 +1259,35 @@
       "help": "Re-encrypts the unique data encryption key that encrypts each object written to the bucket by using the most recent version of the master encryption key assigned to the bucket. (All data encryption keys are encrypted by a master encryption key. Master encryption keys are assigned to buckets and managed by Oracle by default, but you can assign a key that you created and control through the Oracle Cloud Infrastructure Key Management service.) The kmsKeyId property of the bucket determines which master encryption key is assigned to the bucket. If you assigned a different Key Management master encryption key to the bucket, you can call this API to re-encrypt all data encryption keys with the newly assigned key. Similarly, you might want to re-encrypt all data encryption keys if the assigned key has been rotated to a new key version since objects were last added to the bucket. If you call this API and there is no kmsKeyId associated with the bucket, the call will fail. Also, if you set isBucketKeyEnabled, you might want to re-encrypt all data encryption keys using the bucket key. This will help reduce calls to OCI Vault KMS when older objects are downloaded.\n\nCalling this API starts a work request task to re-encrypt the data encryption key of all objects in the bucket. Only objects created before the time of the API call will be re-encrypted. The call can take a long time, depending on how many objects are in the bucket and how big they are. This API returns a work request ID that you can use to retrieve the status of the work request task. All the versions of objects will be re-encrypted whether versioning is enabled or suspended at the bucket. \n[Command Reference](reencryptBucket)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.reencrypt_bucket",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "reencrypt_bucket",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/actions/reencrypt",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {
+          "isReencryptBucketKeyOnly": {
+            "arg": "is_reencrypt_bucket_key_only"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1315,6 +1455,39 @@
       "help": "Performs a partial or full update of a bucket's user-defined metadata.\n\nUse UpdateBucket to move a bucket from one compartment to another within the same tenancy. Supply the compartmentID of the compartment that you want to move the bucket to. For more information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](updateBucket)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.update_bucket",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "update_bucket",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "update_bucket_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "update_bucket_details",
+        "responseType": "Bucket",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1769,6 +1942,38 @@
       "help": "Lists all of the in-progress multipart uploads for the given bucket in the given Object Storage namespace. \n[Command Reference](listMultipartUploads)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_multipart_uploads",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_multipart_uploads",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/u",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[MultipartUpload]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1929,6 +2134,32 @@
       "shortHelp": "Gets the name of the namespace for the user",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_namespace",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_namespace",
+        "http": "GET",
+        "path": "/n",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "str",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1993,6 +2224,30 @@
       "help": "Gets the metadata for the Object Storage namespace, which contains defaultS3CompartmentId and defaultSwiftCompartmentId.\n\nAny user with the OBJECTSTORAGE_NAMESPACE_READ permission will be able to see the current metadata. If you are not authorized, talk to an administrator. If you are an administrator who needs to write policies to give users access, see [Getting Started with Policies]. \n[Command Reference](getNamespaceMetadata)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_namespace_metadata",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_namespace_metadata",
+        "http": "GET",
+        "path": "/n/{namespaceName}",
+        "positionalArgs": ["namespace_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "NamespaceMetadata",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2056,6 +2311,34 @@
       "help": "By default, buckets created using the Amazon S3 Compatibility API or the Swift API are created in the root compartment of the Oracle Cloud Infrastructure tenancy.\n\nYou can change the default Swift/Amazon S3 compartmentId designation to a different compartmentId. All subsequent bucket creations will use the new default compartment, but no previously created buckets will be modified. A user must have OBJECTSTORAGE_NAMESPACE_UPDATE permission to make changes to the default compartments for Amazon S3 and Swift. \n[Command Reference](updateNamespaceMetadata)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.update_namespace_metadata",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "update_namespace_metadata",
+        "http": "PUT",
+        "path": "/n/{namespaceName}",
+        "positionalArgs": [
+          "namespace_name",
+          "update_namespace_metadata_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "update_namespace_metadata_details",
+        "responseType": "NamespaceMetadata",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2157,6 +2440,36 @@
       "help": "Deletes a batch of objects. \n[Command Reference](batchDeleteObjects)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.batch_delete_objects",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "batch_delete_objects",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/actions/batchDeleteObjects",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "batch_delete_objects_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "batch_delete_objects_details",
+        "responseType": "BatchDeleteObjectsResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3995,6 +4308,38 @@
       "help": "Deletes an object. \n[Command Reference](deleteObject)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.delete_object",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "delete_object",
+        "http": "DELETE",
+        "path": "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+        "positionalArgs": ["namespace_name", "bucket_name", "object_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "objectName": "object_name"
+        },
+        "queryParams": {
+          "versionId": {
+            "arg": "version_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5992,6 +6337,35 @@
       "help": "Rename an object in the given Object Storage namespace.\n\nSee [Object Names] for object naming requirements. \n[Command Reference](renameObject)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.rename_object",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "rename_object",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/actions/renameObject",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "rename_object_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "rename_object_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7057,6 +7431,35 @@
       "help": "Changes the storage tier of the object specified by the objectName parameter. \n[Command Reference](updateObjectStorageTier)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.update_object_storage_tier",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "update_object_storage_tier",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/actions/updateObjectStorageTier",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "update_object_storage_tier_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "update_object_storage_tier_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7198,6 +7601,33 @@
       "help": "Deletes the object lifecycle policy for the bucket. \n[Command Reference](deleteObjectLifecyclePolicy)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.delete_object_lifecycle_policy",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "delete_object_lifecycle_policy",
+        "http": "DELETE",
+        "path": "/n/{namespaceName}/b/{bucketName}/l",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7318,6 +7748,31 @@
       "help": "Gets the object lifecycle policy for the bucket. \n[Command Reference](getObjectLifecyclePolicy)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_object_lifecycle_policy",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_object_lifecycle_policy",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/l",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "ObjectLifecyclePolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7400,6 +7855,42 @@
       "help": "Creates or replaces the object lifecycle policy for the bucket. \n[Command Reference](putObjectLifecyclePolicy)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.put_object_lifecycle_policy",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "put_object_lifecycle_policy",
+        "http": "PUT",
+        "path": "/n/{namespaceName}/b/{bucketName}/l",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "put_object_lifecycle_policy_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          }
+        },
+        "body": "put_object_lifecycle_policy_details",
+        "responseType": "ObjectLifecyclePolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7559,6 +8050,36 @@
       "help": "Creates a pre-authenticated request specific to the bucket. \n[Command Reference](createPreauthenticatedRequest)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.create_preauthenticated_request",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "create_preauthenticated_request",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/p",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "create_preauthenticated_request_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "create_preauthenticated_request_details",
+        "responseType": "PreauthenticatedRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7745,6 +8266,31 @@
       "help": "Deletes the pre-authenticated request for the bucket. \n[Command Reference](deletePreauthenticatedRequest)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.delete_preauthenticated_request",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "delete_preauthenticated_request",
+        "http": "DELETE",
+        "path": "/n/{namespaceName}/b/{bucketName}/p/{parId}",
+        "positionalArgs": ["namespace_name", "bucket_name", "par_id"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "parId": "par_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7865,6 +8411,32 @@
       "help": "Gets the pre-authenticated request for the bucket. \n[Command Reference](getPreauthenticatedRequest)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_preauthenticated_request",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_preauthenticated_request",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/p/{parId}",
+        "positionalArgs": ["namespace_name", "bucket_name", "par_id"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "parId": "par_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "PreauthenticatedRequestSummary",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7966,6 +8538,41 @@
       "help": "Lists pre-authenticated requests for the bucket. \n[Command Reference](listPreauthenticatedRequests)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_preauthenticated_requests",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_preauthenticated_requests",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/p",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {
+          "objectNamePrefix": {
+            "arg": "object_name_prefix"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[PreauthenticatedRequestSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8144,6 +8751,31 @@
       "help": "Create a PrivateEndpoint. \n[Command Reference](createPrivateEndpoint)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.create_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "create_private_endpoint",
+        "http": "POST",
+        "path": "/n/{namespaceName}/pe",
+        "positionalArgs": ["namespace_name", "create_private_endpoint_details"],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "create_private_endpoint_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -8482,6 +9114,34 @@
       "help": "Deletes a Private Endpoint if it exists in the given namespace. \n[Command Reference](deletePrivateEndpoint)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.delete_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "delete_private_endpoint",
+        "http": "DELETE",
+        "path": "/n/{namespaceName}/pe/{peName}",
+        "positionalArgs": ["namespace_name", "pe_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "peName": "pe_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -8668,6 +9328,37 @@
       "help": "Gets the current representation of the given Private Endpoint in the given Object Storage namespace. \n[Command Reference](getPrivateEndpoint)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_private_endpoint",
+        "http": "GET",
+        "path": "/n/{namespaceName}/pe/{peName}",
+        "positionalArgs": ["namespace_name", "pe_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "peName": "pe_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "if-none-match": {
+            "arg": "if_none_match"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "PrivateEndpoint",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8788,6 +9479,47 @@
       "help": "Gets a list of all PrivateEndpointSummary in a compartment associated with a namespace. To use this and other API operations, you must be authorized in an IAM policy. If you are not authorized, talk to an administrator. If you are an administrator who needs to write policies to give users access, see [Getting Started with Policies]. \n[Command Reference](listPrivateEndpoints)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_private_endpoints",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_private_endpoints",
+        "http": "GET",
+        "path": "/n/{namespaceName}/pe",
+        "positionalArgs": ["namespace_name", "compartment_id"],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "fields": {
+            "arg": "fields",
+            "collectionFormat": "csv"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[PrivateEndpointSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8997,6 +9729,39 @@
       "help": "Performs a partial or full update of a user-defined data associated with the Private Endpoint.\n\nUse UpdatePrivateEndpoint to move a Private Endpoint from one compartment to another within the same tenancy. Supply the compartmentID of the compartment that you want to move the Private Endpoint to. Or use it to update the name, subnetId, endpointFqdn or privateEndpointIp or accessTargets of the Private Endpoint. For more information about moving resources between compartments, see [Moving Resources to a Different Compartment].\n\nThis API follows replace semantics (rather than merge semantics). That means if the body provides values for parameters and the resource has exisiting ones, this operation will replace those existing values. \n[Command Reference](updatePrivateEndpoint)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.update_private_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "update_private_endpoint",
+        "http": "POST",
+        "path": "/n/{namespaceName}/pe/{peName}",
+        "positionalArgs": [
+          "namespace_name",
+          "pe_name",
+          "update_private_endpoint_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "peName": "pe_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_private_endpoint_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -9416,6 +10181,31 @@
       "help": "Deletes the replication policy associated with the source bucket. \n[Command Reference](deleteReplicationPolicy)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.delete_replication_policy",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "delete_replication_policy",
+        "http": "DELETE",
+        "path": "/n/{namespaceName}/b/{bucketName}/replicationPolicies/{replicationId}",
+        "positionalArgs": ["namespace_name", "bucket_name", "replication_id"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "replicationId": "replication_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9536,6 +10326,32 @@
       "help": "Get the replication policy. \n[Command Reference](getReplicationPolicy)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_replication_policy",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_replication_policy",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/replicationPolicies/{replicationId}",
+        "positionalArgs": ["namespace_name", "bucket_name", "replication_id"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "replicationId": "replication_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "ReplicationPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9637,6 +10453,38 @@
       "help": "List the replication policies associated with a bucket. \n[Command Reference](listReplicationPolicies)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_replication_policies",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_replication_policies",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/replicationPolicies",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[ReplicationPolicySummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9796,6 +10644,38 @@
       "help": "List the replication sources of a destination bucket. \n[Command Reference](listReplicationSources) If you are replicating to a destination bucket in a different region, you must specify the --region parameter.",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_replication_sources",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_replication_sources",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/replicationSources",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[ReplicationSource]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9955,6 +10835,30 @@
       "help": "Stops replication to the destination bucket and removes the replication policy. When the replication policy was created, this destination bucket became read-only except for new and changed objects replicated automatically from the source bucket. MakeBucketWritable removes the replication policy. This bucket is no longer the target for replication and is now writable, allowing users to make changes to bucket contents. \n[Command Reference](makeBucketWritable) If you are replicating to a destination bucket in a different region, you must specify the --region parameter.",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.make_bucket_writable",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "make_bucket_writable",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/actions/makeBucketWritable",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10197,6 +11101,38 @@
       "help": "Deletes the specified rule. The deletion takes effect typically within 30 seconds. \n[Command Reference](deleteRetentionRule)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.delete_retention_rule",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "delete_retention_rule",
+        "http": "DELETE",
+        "path": "/n/{namespaceName}/b/{bucketName}/retentionRules/{retentionRuleId}",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "retention_rule_id"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "retentionRuleId": "retention_rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10336,6 +11272,36 @@
       "help": "Get the specified retention rule. \n[Command Reference](getRetentionRule)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_retention_rule",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_retention_rule",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/retentionRules/{retentionRuleId}",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "retention_rule_id"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "retentionRuleId": "retention_rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "RetentionRule",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10437,6 +11403,32 @@
       "help": "List the retention rules for a bucket. The retention rules are sorted based on creation time, with the most recently created retention rule returned first. \n[Command Reference](listRetentionRules)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_retention_rules",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_retention_rules",
+        "http": "GET",
+        "path": "/n/{namespaceName}/b/{bucketName}/retentionRules",
+        "positionalArgs": ["namespace_name", "bucket_name"],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "RetentionRuleCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -10756,6 +11748,29 @@
       "help": "Cancels a work request. \n[Command Reference](cancelWorkRequest)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.cancel_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "cancel_work_request",
+        "http": "DELETE",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10839,6 +11854,30 @@
       "help": "Gets the status of the work request for the given ID. \n[Command Reference](getWorkRequest)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10903,6 +11942,41 @@
       "help": "Lists the work requests in a compartment. \n[Command Reference](listWorkRequests)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "privateEndpointName": {
+            "arg": "private_endpoint_name"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[WorkRequestSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -11063,6 +12137,37 @@
       "help": "Lists the errors of the work request with the given ID. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[WorkRequestError]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -11204,6 +12309,37 @@
       "help": "Lists the logs of the work request with the given ID. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "responseType": "list[WorkRequestLogEntry]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

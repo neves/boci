@@ -26,6 +26,22 @@
       }
     ]
   },
+  "clients": {
+    "dashboard_service.dashboard": {
+      "class": "oci.dashboard_service.dashboard_client.DashboardClient",
+      "basePath": "/20210731",
+      "endpointTemplate": "https://dashboard.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "dashboard"
+    },
+    "dashboard_service.dashboard_group": {
+      "class": "oci.dashboard_service.dashboard_group_client.DashboardGroupClient",
+      "basePath": "/20210731",
+      "endpointTemplate": "https://dashboard.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "dashboard_group"
+    }
+  },
   "groups": {
     "dashboard": {
       "hidden": false,
@@ -86,6 +102,33 @@
       "help": "Moves a Dashboard resource from one dashboardGroup identifier to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeDashboardGroup)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard.generated.dashboard_cli.change_dashboard_group",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard",
+        "method": "change_dashboard_group",
+        "http": "POST",
+        "path": "/dashboards/{dashboardId}/actions/changeDashboardGroup",
+        "positionalArgs": ["dashboard_id", "change_dashboard_group_details"],
+        "pathParams": {
+          "dashboardId": "dashboard_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_dashboard_group_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -188,6 +231,36 @@
       "help": "Creates a new dashboard in the dashboard group's compartment using the details provided in request body.\n\n**Caution:** Resources for the Dashboard service are created in the tenacy's home region. Although it is possible to create dashboard resource in regions other than the home region, you won't be able to view those resources in the Console. Therefore, creating resources outside of the home region is not recommended. \n[Command Reference](createDashboard)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard.generated.dashboard_cli.create_dashboard_create_v1_dashboard_details",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard",
+        "method": "create_dashboard",
+        "http": "POST",
+        "path": "/dashboards",
+        "positionalArgs": ["create_dashboard_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "body": "create_dashboard_details",
+        "responseType": "Dashboard",
+        "paginated": false
+      },
+      "otherOperations": ["get_dashboard"],
       "params": [
         {
           "kind": "option",
@@ -451,6 +524,36 @@
       "help": "Deletes the specified dashboard. Uses the dashboard's OCID to determine which dashboard to delete. \n[Command Reference](deleteDashboard)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard.generated.dashboard_cli.delete_dashboard",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard",
+        "method": "delete_dashboard",
+        "http": "DELETE",
+        "path": "/dashboards/{dashboardId}",
+        "positionalArgs": ["dashboard_id"],
+        "pathParams": {
+          "dashboardId": "dashboard_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_dashboard"],
       "params": [
         {
           "kind": "option",
@@ -638,6 +741,33 @@
       "help": "Gets the specified dashboard's information. Uses the dashboard's OCID to determine which dashboard to retrieve. \n[Command Reference](getDashboard)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard.generated.dashboard_cli.get_dashboard",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard",
+        "method": "get_dashboard",
+        "http": "GET",
+        "path": "/dashboards/{dashboardId}",
+        "positionalArgs": ["dashboard_id"],
+        "pathParams": {
+          "dashboardId": "dashboard_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "responseType": "Dashboard",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -721,6 +851,56 @@
       "help": "Returns a list of dashboards with a specific dashboard group ID. \n[Command Reference](listDashboards)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard.generated.dashboard_cli.list_dashboards",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard",
+        "method": "list_dashboards",
+        "http": "GET",
+        "path": "/dashboards",
+        "positionalArgs": ["dashboard_group_id"],
+        "pathParams": {},
+        "queryParams": {
+          "dashboardGroupId": {
+            "arg": "dashboard_group_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "responseType": "DashboardCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -989,6 +1169,38 @@
       "help": "Updates the specified dashboard. Uses the dashboard's OCID to determine which dashboard to update. \n[Command Reference](updateDashboard)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard.generated.dashboard_cli.update_dashboard_update_v1_dashboard_details",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard",
+        "method": "update_dashboard",
+        "http": "PUT",
+        "path": "/dashboards/{dashboardId}",
+        "positionalArgs": ["dashboard_id", "update_dashboard_details"],
+        "pathParams": {
+          "dashboardId": "dashboard_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "body": "update_dashboard_details",
+        "responseType": "Dashboard",
+        "paginated": false
+      },
+      "otherOperations": ["get_dashboard"],
       "params": [
         {
           "kind": "option",
@@ -1291,6 +1503,36 @@
       "help": "Moves a DashboardGroup resource from one compartment identifier to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeDashboardGroupCompartment)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard_group.generated.dashboardgroup_cli.change_dashboard_group_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard_group",
+        "method": "change_dashboard_group_compartment",
+        "http": "POST",
+        "path": "/dashboardGroups/{dashboardGroupId}/actions/changeCompartment",
+        "positionalArgs": [
+          "dashboard_group_id",
+          "change_dashboard_group_compartment_details"
+        ],
+        "pathParams": {
+          "dashboardGroupId": "dashboard_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_dashboard_group_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1393,6 +1635,36 @@
       "help": "Creates a new dashboard group using the details provided in request body.\n\n**Caution:** Resources for the Dashboard service are created in the tenacy's home region. Although it is possible to create dashboard group resource in regions other than the home region, you won't be able to view those resources in the Console. Therefore, creating resources outside of the home region is not recommended. \n[Command Reference](createDashboardGroup)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard_group.generated.dashboardgroup_cli.create_dashboard_group",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard_group",
+        "method": "create_dashboard_group",
+        "http": "POST",
+        "path": "/dashboardGroups",
+        "positionalArgs": ["create_dashboard_group_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "body": "create_dashboard_group_details",
+        "responseType": "DashboardGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_dashboard_group"],
       "params": [
         {
           "kind": "option",
@@ -1618,6 +1890,36 @@
       "help": "Deletes the specified dashboard group. Uses the dashboard group's OCID to determine which dashboard group to delete. \n[Command Reference](deleteDashboardGroup)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard_group.generated.dashboardgroup_cli.delete_dashboard_group",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard_group",
+        "method": "delete_dashboard_group",
+        "http": "DELETE",
+        "path": "/dashboardGroups/{dashboardGroupId}",
+        "positionalArgs": ["dashboard_group_id"],
+        "pathParams": {
+          "dashboardGroupId": "dashboard_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_dashboard_group"],
       "params": [
         {
           "kind": "option",
@@ -1805,6 +2107,33 @@
       "help": "Gets the specified dashboard group's information. Uses the dashboard group's OCID to determine which dashboard to retrieve. \n[Command Reference](getDashboardGroup)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard_group.generated.dashboardgroup_cli.get_dashboard_group",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard_group",
+        "method": "get_dashboard_group",
+        "http": "GET",
+        "path": "/dashboardGroups/{dashboardGroupId}",
+        "positionalArgs": ["dashboard_group_id"],
+        "pathParams": {
+          "dashboardGroupId": "dashboard_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "responseType": "DashboardGroup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1888,6 +2217,56 @@
       "help": "Returns a list of dashboard groups with a specific compartment ID. \n[Command Reference](listDashboardGroups)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard_group.generated.dashboardgroup_cli.list_dashboard_groups",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard_group",
+        "method": "list_dashboard_groups",
+        "http": "GET",
+        "path": "/dashboardGroups",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "responseType": "DashboardGroupCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2156,6 +2535,41 @@
       "help": "Updates the specified dashboard group. Uses the dashboard group's OCID to determine which dashboard group to update. \n[Command Reference](updateDashboardGroup)",
       "callback": "services.dashboard_service.src.oci_cli_dashboard_group.generated.dashboardgroup_cli.update_dashboard_group",
       "kind": "generated",
+      "operation": {
+        "client": "dashboard_service.dashboard_group",
+        "method": "update_dashboard_group",
+        "http": "PUT",
+        "path": "/dashboardGroups/{dashboardGroupId}",
+        "positionalArgs": [
+          "dashboard_group_id",
+          "update_dashboard_group_details"
+        ],
+        "pathParams": {
+          "dashboardGroupId": "dashboard_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-cross-region": {
+            "arg": "opc_cross_region"
+          }
+        },
+        "body": "update_dashboard_group_details",
+        "responseType": "DashboardGroup",
+        "paginated": false
+      },
+      "otherOperations": ["get_dashboard_group"],
       "params": [
         {
           "kind": "option",

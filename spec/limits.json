@@ -26,6 +26,22 @@
       }
     ]
   },
+  "clients": {
+    "limits.limits": {
+      "class": "oci.limits.limits_client.LimitsClient",
+      "basePath": "/",
+      "endpointTemplate": "https://limits.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "limits"
+    },
+    "limits.quotas": {
+      "class": "oci.limits.quotas_client.QuotasClient",
+      "basePath": "/",
+      "endpointTemplate": "https://limits.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "quotas"
+    }
+  },
   "groups": {
     "definition": {
       "hidden": false,
@@ -159,6 +175,53 @@
       "help": "Includes a list of resource limits that are currently supported. If the subscription ID is provided, then only resource limits supported by the subscription will be returned. If the `areQuotasSupported` property is true, you can create quota policies on top of this limit at the compartment level. \n[Command Reference](listLimitDefinitions)",
       "callback": "services.limits.src.oci_cli_limits.generated.limits_cli.list_limit_definitions",
       "kind": "generated",
+      "operation": {
+        "client": "limits.limits",
+        "method": "list_limit_definitions",
+        "http": "GET",
+        "path": "/20190729/limitDefinitions",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "subscriptionId": {
+            "arg": "subscription_id"
+          },
+          "serviceName": {
+            "arg": "service_name"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[LimitDefinitionSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -399,6 +462,35 @@
       "help": "Adds a lock to a resource. \n[Command Reference](addQuotaLock)",
       "callback": "services.limits.src.oci_cli_quotas.generated.quotas_cli.add_quota_lock",
       "kind": "generated",
+      "operation": {
+        "client": "limits.quotas",
+        "method": "add_quota_lock",
+        "http": "POST",
+        "path": "/20181025/quotas/{quotaId}/actions/addLock",
+        "positionalArgs": ["quota_id", "add_lock_details"],
+        "pathParams": {
+          "quotaId": "quota_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "add_lock_details",
+        "responseType": "Quota",
+        "paginated": false
+      },
+      "otherOperations": ["get_quota"],
       "params": [
         {
           "kind": "option",
@@ -600,6 +692,33 @@
       "help": "Creates a new quota with the details supplied. \n[Command Reference](createQuota)",
       "callback": "services.limits.src.oci_cli_quotas.generated.quotas_cli.create_quota",
       "kind": "generated",
+      "operation": {
+        "client": "limits.quotas",
+        "method": "create_quota",
+        "http": "POST",
+        "path": "/20181025/quotas",
+        "positionalArgs": ["create_quota_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_quota_details",
+        "responseType": "Quota",
+        "paginated": false
+      },
+      "otherOperations": ["get_quota"],
       "params": [
         {
           "kind": "option",
@@ -837,6 +956,37 @@
       "help": "Deletes the quota corresponding to the given OCID. \n[Command Reference](deleteQuota)",
       "callback": "services.limits.src.oci_cli_quotas.generated.quotas_cli.delete_quota",
       "kind": "generated",
+      "operation": {
+        "client": "limits.quotas",
+        "method": "delete_quota",
+        "http": "DELETE",
+        "path": "/20181025/quotas/{quotaId}",
+        "positionalArgs": ["quota_id"],
+        "pathParams": {
+          "quotaId": "quota_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_quota"],
       "params": [
         {
           "kind": "option",
@@ -1017,6 +1167,30 @@
       "help": "Gets the quota for the OCID specified. \n[Command Reference](getQuota)",
       "callback": "services.limits.src.oci_cli_quotas.generated.quotas_cli.get_quota",
       "kind": "generated",
+      "operation": {
+        "client": "limits.quotas",
+        "method": "get_quota",
+        "http": "GET",
+        "path": "/20181025/quotas/{quotaId}",
+        "positionalArgs": ["quota_id"],
+        "pathParams": {
+          "quotaId": "quota_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Quota",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1081,6 +1255,50 @@
       "help": "Lists all quotas on resources from the given compartment. \n[Command Reference](listQuotas)",
       "callback": "services.limits.src.oci_cli_quotas.generated.quotas_cli.list_quotas",
       "kind": "generated",
+      "operation": {
+        "client": "limits.quotas",
+        "method": "list_quotas",
+        "http": "GET",
+        "path": "/20181025/quotas",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[QuotaSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1304,6 +1522,35 @@
       "help": "Remove a lock from a resource. \n[Command Reference](removeQuotaLock)",
       "callback": "services.limits.src.oci_cli_quotas.generated.quotas_cli.remove_quota_lock",
       "kind": "generated",
+      "operation": {
+        "client": "limits.quotas",
+        "method": "remove_quota_lock",
+        "http": "POST",
+        "path": "/20181025/quotas/{quotaId}/actions/removeLock",
+        "positionalArgs": ["quota_id", "remove_lock_details"],
+        "pathParams": {
+          "quotaId": "quota_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "remove_lock_details",
+        "responseType": "Quota",
+        "paginated": false
+      },
+      "otherOperations": ["get_quota"],
       "params": [
         {
           "kind": "option",
@@ -1467,6 +1714,39 @@
       "help": "Updates the quota corresponding to given OCID with the details supplied. \n[Command Reference](updateQuota)",
       "callback": "services.limits.src.oci_cli_quotas.generated.quotas_cli.update_quota",
       "kind": "generated",
+      "operation": {
+        "client": "limits.quotas",
+        "method": "update_quota",
+        "http": "PUT",
+        "path": "/20181025/quotas/{quotaId}",
+        "positionalArgs": ["quota_id", "update_quota_details"],
+        "pathParams": {
+          "quotaId": "quota_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_quota_details",
+        "responseType": "Quota",
+        "paginated": false
+      },
+      "otherOperations": ["get_quota"],
       "params": [
         {
           "kind": "option",
@@ -1724,6 +2004,44 @@
       "help": "For a given compartmentId, resource limit name, and scope, returns the following:   * The number of available resources associated with the given limit.   * The usage in the selected compartment for the given limit. If the subscription ID is provided, then usage for resource created in that subscription will be returned. Note that not all resource limits support this API. If the value is not available, the API returns a 404 response. \n[Command Reference](getResourceAvailability)",
       "callback": "services.limits.src.oci_cli_limits.generated.limits_cli.get_resource_availability",
       "kind": "generated",
+      "operation": {
+        "client": "limits.limits",
+        "method": "get_resource_availability",
+        "http": "GET",
+        "path": "/20190729/services/{serviceName}/limits/{limitName}/resourceAvailability",
+        "positionalArgs": ["service_name", "limit_name", "compartment_id"],
+        "pathParams": {
+          "serviceName": "service_name",
+          "limitName": "limit_name"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "subscriptionId": {
+            "arg": "subscription_id"
+          },
+          "externalLocation": {
+            "arg": "external_location"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ResourceAvailability",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1883,6 +2201,47 @@
       "help": "Returns the list of supported services. If subscription ID is provided then only services supported by subscription will be returned. This includes the programmatic service name, along with the friendly service name. \n[Command Reference](listServices)",
       "callback": "services.limits.src.oci_cli_limits.generated.limits_cli.list_services",
       "kind": "generated",
+      "operation": {
+        "client": "limits.limits",
+        "method": "list_services",
+        "http": "GET",
+        "path": "/20190729/services",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "subscriptionId": {
+            "arg": "subscription_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ServiceSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2085,6 +2444,62 @@
       "help": "Includes a full list of resource limits belonging to a given service. If the subscription ID is provided, the limit value for the subscription will be returned. \n[Command Reference](listLimitValues)",
       "callback": "services.limits.src.oci_cli_limits.generated.limits_cli.list_limit_values",
       "kind": "generated",
+      "operation": {
+        "client": "limits.limits",
+        "method": "list_limit_values",
+        "http": "GET",
+        "path": "/20190729/limitValues",
+        "positionalArgs": ["compartment_id", "service_name"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "subscriptionId": {
+            "arg": "subscription_id"
+          },
+          "externalLocation": {
+            "arg": "external_location"
+          },
+          "serviceName": {
+            "arg": "service_name"
+          },
+          "scopeType": {
+            "arg": "scope_type"
+          },
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[LimitValueSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

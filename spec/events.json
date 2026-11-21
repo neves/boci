@@ -26,6 +26,16 @@
       }
     ]
   },
+  "clients": {
+    "events.events": {
+      "class": "oci.events.events_client.EventsClient",
+      "basePath": "/20181201",
+      "endpointTemplate": "https://events.{region}.{dualStack?ds.:}oci.{secondLevelDomain}",
+      "endpointServiceName": "events",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "events"
+    }
+  },
   "groups": {
     "rule": {
       "hidden": false,
@@ -59,6 +69,36 @@
       "help": "Moves a rule into a different compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeRuleCompartment)",
       "callback": "services.events.src.oci_cli_events.generated.events_cli.change_rule_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "events.events",
+        "method": "change_rule_compartment",
+        "http": "POST",
+        "path": "/rules/{ruleId}/actions/changeCompartment",
+        "positionalArgs": ["rule_id", "change_rule_compartment_details"],
+        "pathParams": {
+          "ruleId": "rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_rule_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -161,6 +201,33 @@
       "help": "Creates a new rule. \n[Command Reference](createRule)",
       "callback": "services.events.src.oci_cli_events.generated.events_cli.create_rule",
       "kind": "generated",
+      "operation": {
+        "client": "events.events",
+        "method": "create_rule",
+        "http": "POST",
+        "path": "/rules",
+        "positionalArgs": ["create_rule_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_rule_details",
+        "responseType": "Rule",
+        "paginated": false
+      },
+      "otherOperations": ["get_rule"],
       "params": [
         {
           "kind": "option",
@@ -425,6 +492,33 @@
       "help": "Deletes a rule. \n[Command Reference](deleteRule)",
       "callback": "services.events.src.oci_cli_events.generated.events_cli.delete_rule",
       "kind": "generated",
+      "operation": {
+        "client": "events.events",
+        "method": "delete_rule",
+        "http": "DELETE",
+        "path": "/rules/{ruleId}",
+        "positionalArgs": ["rule_id"],
+        "pathParams": {
+          "ruleId": "rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_rule"],
       "params": [
         {
           "kind": "option",
@@ -594,6 +688,30 @@
       "help": "Retrieves a rule. \n[Command Reference](getRule)",
       "callback": "services.events.src.oci_cli_events.generated.events_cli.get_rule",
       "kind": "generated",
+      "operation": {
+        "client": "events.events",
+        "method": "get_rule",
+        "http": "GET",
+        "path": "/rules/{ruleId}",
+        "positionalArgs": ["rule_id"],
+        "pathParams": {
+          "ruleId": "rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Rule",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -658,6 +776,50 @@
       "help": "Lists rules for this compartment. \n[Command Reference](listRules)",
       "callback": "services.events.src.oci_cli_events.generated.events_cli.list_rules",
       "kind": "generated",
+      "operation": {
+        "client": "events.events",
+        "method": "list_rules",
+        "http": "GET",
+        "path": "/rules",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[RuleSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -889,6 +1051,35 @@
       "help": "Updates a rule. \n[Command Reference](updateRule)",
       "callback": "services.events.src.oci_cli_events.generated.events_cli.update_rule",
       "kind": "generated",
+      "operation": {
+        "client": "events.events",
+        "method": "update_rule",
+        "http": "PUT",
+        "path": "/rules/{ruleId}",
+        "positionalArgs": ["rule_id", "update_rule_details"],
+        "pathParams": {
+          "ruleId": "rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rule_details",
+        "responseType": "Rule",
+        "paginated": false
+      },
+      "otherOperations": ["get_rule"],
       "params": [
         {
           "kind": "option",

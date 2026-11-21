@@ -26,6 +26,22 @@
       }
     ]
   },
+  "clients": {
+    "waas.redirect": {
+      "class": "oci.waas.redirect_client.RedirectClient",
+      "basePath": "/20181116",
+      "endpointTemplate": "https://waas.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "redirect"
+    },
+    "waas.waas": {
+      "class": "oci.waas.waas_client.WaasClient",
+      "basePath": "/20181116",
+      "endpointTemplate": "https://waas.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "waas"
+    }
+  },
   "groups": {
     "access-rule": {
       "hidden": false,
@@ -707,6 +723,37 @@
       "help": "Gets the currently configured access rules for the Web Application Firewall configuration of a specified WAAS policy. The order of the access rules is important. The rules will be checked in the order they are specified and the first matching rule will be used. \n[Command Reference](listAccessRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_access_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_access_rules",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/accessRules",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[AccessRule]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -848,6 +895,37 @@
       "help": "Updates the list of access rules in the Web Application Firewall configuration for a specified WAAS policy. Access rules allow explicit actions to be defined and executed for requests that meet various conditions. A rule action can be set to allow, detect, or block requests. The detect setting allows the request to pass through the Web Application Firewall and is tagged with a `DETECT` flag in the Web Application Firewall's log.\n\nThis operation can create, delete, update, and/or reorder access rules depending on the structure of the request body.\n\nAccess rules can be updated by changing the properties of the access rule object with the rule's key specified in the key field. Access rules can be reordered by changing the order of the access rules in the list when updating.\n\nAccess rules can be created by adding a new access rule object to the list without a `key` property specified. A `key` will be generated for the new access rule upon update.\n\nAny existing access rules that are not specified with a `key` in the list of access rules will be deleted upon update. \n[Command Reference](updateAccessRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_access_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_access_rules",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/accessRules",
+        "positionalArgs": ["waas_policy_id", "access_rules"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "access_rules",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1016,6 +1094,39 @@
       "help": "Moves address list into a different compartment. When provided, If-Match is checked against ETag values of the address list. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeAddressListCompartment)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.change_address_list_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "change_address_list_compartment",
+        "http": "POST",
+        "path": "/addressLists/{addressListId}/actions/changeCompartment",
+        "positionalArgs": [
+          "address_list_id",
+          "change_address_list_compartment_details"
+        ],
+        "pathParams": {
+          "addressListId": "address_list_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_address_list_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1118,6 +1229,33 @@
       "help": "Creates an address list in a set compartment and allows it to be used in a WAAS policy and referenced by access rules. Addresses can be IP addresses and CIDR notations. \n[Command Reference](createAddressList)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.create_address_list",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "create_address_list",
+        "http": "POST",
+        "path": "/addressLists",
+        "positionalArgs": ["create_address_list_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_address_list_details",
+        "responseType": "AddressList",
+        "paginated": false
+      },
+      "otherOperations": ["get_address_list"],
       "params": [
         {
           "kind": "option",
@@ -1324,6 +1462,36 @@
       "help": "Deletes the address list from the compartment if it is not used. \n[Command Reference](deleteAddressList)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.delete_address_list",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "delete_address_list",
+        "http": "DELETE",
+        "path": "/addressLists/{addressListId}",
+        "positionalArgs": ["address_list_id"],
+        "pathParams": {
+          "addressListId": "address_list_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_address_list"],
       "params": [
         {
           "kind": "option",
@@ -1492,6 +1660,30 @@
       "help": "Gets the details of an address list. \n[Command Reference](getAddressList)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_address_list",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_address_list",
+        "http": "GET",
+        "path": "/addressLists/{addressListId}",
+        "positionalArgs": ["address_list_id"],
+        "pathParams": {
+          "addressListId": "address_list_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AddressList",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1556,6 +1748,62 @@
       "help": "Gets a list of address lists that can be used in a WAAS policy. \n[Command Reference](listAddressLists)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_address_lists",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_address_lists",
+        "http": "GET",
+        "path": "/addressLists",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id",
+            "collectionFormat": "multi"
+          },
+          "name": {
+            "arg": "name",
+            "collectionFormat": "multi"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state",
+            "collectionFormat": "multi"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[AddressListSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1843,6 +2091,35 @@
       "help": "Updates the details of an address list. Only the fields specified in the request body will be updated; all other properties will remain unchanged. \n[Command Reference](updateAddressList)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_address_list",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_address_list",
+        "http": "PUT",
+        "path": "/addressLists/{addressListId}",
+        "positionalArgs": ["address_list_id"],
+        "pathParams": {
+          "addressListId": "address_list_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_address_list_details",
+        "responseType": "AddressList",
+        "paginated": false
+      },
+      "otherOperations": ["get_address_list"],
       "params": [
         {
           "kind": "option",
@@ -2088,6 +2365,30 @@
       "help": "Gets the address rate limiting settings of the Web Application Firewall configuration for a WAAS policy. \n[Command Reference](getWafAddressRateLimiting)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_waf_address_rate_limiting",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_waf_address_rate_limiting",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/addressRateLimiting",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AddressRateLimiting",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2152,6 +2453,40 @@
       "help": "Updates the address rate limiting settings in the Web Application Firewall configuration for a policy. Rate limiting allows you to configure a threshold for the number of requests from a unique IP address for the given period. You can also define the response code for the requests from the same address that exceed the threshold. \n[Command Reference](updateWafAddressRateLimiting)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_waf_address_rate_limiting",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_waf_address_rate_limiting",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/addressRateLimiting",
+        "positionalArgs": [
+          "waas_policy_id",
+          "update_waf_address_rate_limiting_details"
+        ],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_waf_address_rate_limiting_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2377,6 +2712,37 @@
       "help": "Gets the currently configured caching rules for the Web Application Firewall configuration of a specified WAAS policy. The rules are processed in the order they are specified in and the first matching rule will be used when processing a request. \n[Command Reference](listCachingRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_caching_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_caching_rules",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/cachingRules",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[CachingRuleSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2518,6 +2884,37 @@
       "help": "Updates the configuration for each specified caching rule.\n\nCaching rules WAF policies allow you to selectively cache content on Oracle Cloud Infrastructure's edge servers, such as webpages or certain file types. For more information about caching rules, see [Caching Rules].\n\nThis operation can create, delete, update, and/or reorder caching rules depending on the structure of the request body. Caching rules can be updated by changing the properties of the caching rule object with the rule's key specified in the key field. Any existing caching rules that are not specified with a key in the list of access rules will be deleted upon update.\n\nThe order the caching rules are specified in is important. The rules are processed in the order they are specified and the first matching rule will be used when processing a request. Use `ListCachingRules` to view a list of all available caching rules in a compartment. \n[Command Reference](updateCachingRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_caching_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_caching_rules",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/cachingRules",
+        "positionalArgs": ["waas_policy_id", "caching_rules_details"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "caching_rules_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2686,6 +3083,37 @@
       "help": "Gets the list of currently configured CAPTCHA challenges in the Web Application Firewall configuration of a WAAS policy.\n\nThe order of the CAPTCHA challenges is important. The URL for each CAPTCHA will be checked in the order they are created. \n[Command Reference](listCaptchas)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_captchas",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_captchas",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/captchas",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[Captcha]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2827,6 +3255,37 @@
       "help": "Updates the list of CAPTCHA challenges in the Web Application Firewall configuration for a WAAS policy. This operation can create, update, or delete CAPTCHAs depending on the structure of the request body. CAPTCHA challenges can be updated by changing the properties of the CAPTCHA object with the rule's key specified in the key field. CAPTCHA challenges can be reordered by changing the order of the CAPTCHA challenges in the list when updating.\n\nCAPTCHA challenges can be created by adding a new access rule object to the list without a `key` property specified. A `key` will be generated for the new CAPTCHA challenges upon update.\n\nAny existing CAPTCHA challenges that are not specified with a `key` in the list of CAPTCHA challenges will be deleted upon update.\n\nQuery parameters are allowed in CAPTCHA URL. \n[Command Reference](updateCaptchas)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_captchas",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_captchas",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/captchas",
+        "positionalArgs": ["waas_policy_id", "captchas"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "captchas",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2995,6 +3454,39 @@
       "help": "Moves certificate into a different compartment. When provided, If-Match is checked against ETag values of the certificate. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeCertificateCompartment)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.change_certificate_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "change_certificate_compartment",
+        "http": "POST",
+        "path": "/certificates/{certificateId}/actions/changeCompartment",
+        "positionalArgs": [
+          "certificate_id",
+          "change_certificate_compartment_details"
+        ],
+        "pathParams": {
+          "certificateId": "certificate_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_certificate_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3097,6 +3589,33 @@
       "help": "Allows an SSL certificate to be added to a WAAS policy. The Web Application Firewall terminates SSL connections to inspect requests in runtime, and then re-encrypts requests before sending them to the origin for fulfillment.\n\nFor more information, see [WAF Settings]. \n[Command Reference](createCertificate)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.create_certificate",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "create_certificate",
+        "http": "POST",
+        "path": "/certificates",
+        "positionalArgs": ["create_certificate_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_certificate_details",
+        "responseType": "Certificate",
+        "paginated": false
+      },
+      "otherOperations": ["get_certificate"],
       "params": [
         {
           "kind": "option",
@@ -3341,6 +3860,36 @@
       "help": "Deletes an SSL certificate from the WAAS service. \n[Command Reference](deleteCertificate)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.delete_certificate",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "delete_certificate",
+        "http": "DELETE",
+        "path": "/certificates/{certificateId}",
+        "positionalArgs": ["certificate_id"],
+        "pathParams": {
+          "certificateId": "certificate_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_certificate"],
       "params": [
         {
           "kind": "option",
@@ -3509,6 +4058,30 @@
       "help": "Gets the details of an SSL certificate. \n[Command Reference](getCertificate)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_certificate",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_certificate",
+        "http": "GET",
+        "path": "/certificates/{certificateId}",
+        "positionalArgs": ["certificate_id"],
+        "pathParams": {
+          "certificateId": "certificate_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Certificate",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3573,6 +4146,62 @@
       "help": "Gets a list of SSL certificates that can be used in a WAAS policy. \n[Command Reference](listCertificates)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_certificates",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_certificates",
+        "http": "GET",
+        "path": "/certificates",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id",
+            "collectionFormat": "multi"
+          },
+          "displayName": {
+            "arg": "display_name",
+            "collectionFormat": "multi"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state",
+            "collectionFormat": "multi"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[CertificateSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3866,6 +4495,35 @@
       "help": "It is not possible to update a certificate, only create and delete. Therefore, this operation can only update the display name, freeform tags, and defined tags of a certificate. \n[Command Reference](updateCertificate)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_certificate",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_certificate",
+        "http": "PUT",
+        "path": "/certificates/{certificateId}",
+        "positionalArgs": ["certificate_id"],
+        "pathParams": {
+          "certificateId": "certificate_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_certificate_details",
+        "responseType": "Certificate",
+        "paginated": false
+      },
+      "otherOperations": ["get_certificate"],
       "params": [
         {
           "kind": "option",
@@ -4337,6 +4995,39 @@
       "help": "Moves a custom protection rule into a different compartment within the same tenancy. When provided, If-Match is checked against ETag values of the custom protection rule. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeCustomProtectionRuleCompartment)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.change_custom_protection_rule_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "change_custom_protection_rule_compartment",
+        "http": "POST",
+        "path": "/customProtectionRules/{customProtectionRuleId}/actions/changeCompartment",
+        "positionalArgs": [
+          "custom_protection_rule_id",
+          "change_custom_protection_rule_compartment_details"
+        ],
+        "pathParams": {
+          "customProtectionRuleId": "custom_protection_rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_custom_protection_rule_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4439,6 +5130,33 @@
       "help": "Creates a new custom protection rule in the specified compartment.\n\nCustom protection rules allow you to create rules in addition to the rulesets provided by the Web Application Firewall service, including rules from [ModSecurity]. The syntax for custom rules is based on the ModSecurity syntax. For more information about custom protection rules, see [Custom Protection Rules]. \n[Command Reference](createCustomProtectionRule)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.create_custom_protection_rule",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "create_custom_protection_rule",
+        "http": "POST",
+        "path": "/customProtectionRules",
+        "positionalArgs": ["create_custom_protection_rule_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_custom_protection_rule_details",
+        "responseType": "CustomProtectionRule",
+        "paginated": false
+      },
+      "otherOperations": ["get_custom_protection_rule"],
       "params": [
         {
           "kind": "option",
@@ -4664,6 +5382,36 @@
       "help": "Deletes a Custom Protection rule. \n[Command Reference](deleteCustomProtectionRule)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.delete_custom_protection_rule",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "delete_custom_protection_rule",
+        "http": "DELETE",
+        "path": "/customProtectionRules/{customProtectionRuleId}",
+        "positionalArgs": ["custom_protection_rule_id"],
+        "pathParams": {
+          "customProtectionRuleId": "custom_protection_rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_custom_protection_rule"],
       "params": [
         {
           "kind": "option",
@@ -4832,6 +5580,30 @@
       "help": "Gets the details of a custom protection rule. \n[Command Reference](getCustomProtectionRule)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_custom_protection_rule",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_custom_protection_rule",
+        "http": "GET",
+        "path": "/customProtectionRules/{customProtectionRuleId}",
+        "positionalArgs": ["custom_protection_rule_id"],
+        "pathParams": {
+          "customProtectionRuleId": "custom_protection_rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CustomProtectionRule",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4896,6 +5668,62 @@
       "help": "Gets a list of custom protection rules for the specified Web Application Firewall. \n[Command Reference](listCustomProtectionRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_custom_protection_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_custom_protection_rules",
+        "http": "GET",
+        "path": "/customProtectionRules",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "id": {
+            "arg": "id",
+            "collectionFormat": "multi"
+          },
+          "displayName": {
+            "arg": "display_name",
+            "collectionFormat": "multi"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state",
+            "collectionFormat": "multi"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[CustomProtectionRuleSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -5189,6 +6017,41 @@
       "help": "Updates the configuration of a custom protection rule. Only the fields specified in the request body will be updated; all other properties will remain unchanged. \n[Command Reference](updateCustomProtectionRule)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_custom_protection_rule",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_custom_protection_rule",
+        "http": "PUT",
+        "path": "/customProtectionRules/{customProtectionRuleId}",
+        "positionalArgs": [
+          "custom_protection_rule_id",
+          "update_custom_protection_rule_details"
+        ],
+        "pathParams": {
+          "customProtectionRuleId": "custom_protection_rule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_custom_protection_rule_details",
+        "responseType": "CustomProtectionRule",
+        "paginated": false
+      },
+      "otherOperations": ["get_custom_protection_rule"],
       "params": [
         {
           "kind": "option",
@@ -5621,6 +6484,30 @@
       "help": "Gets the device fingerprint challenge settings in the Web Application Firewall configuration for a WAAS policy. \n[Command Reference](getDeviceFingerprintChallenge)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_device_fingerprint_challenge",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_device_fingerprint_challenge",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/deviceFingerprintChallenge",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DeviceFingerprintChallenge",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5685,6 +6572,40 @@
       "help": "Updates the Device Fingerprint Challenge (DFC) settings in the Web Application Firewall configuration for a policy. The DFC generates a hashed signature of both virtual and real browsers based on 50+ attributes. These proprietary signatures are then leveraged for real-time correlation to identify and block malicious bots.\n\nThe signature is based on a library of attributes detected via JavaScript listeners; the attributes include OS, screen resolution, fonts, UserAgent, IP address, etc. We are constantly making improvements and considering new libraries to include in our DFC build. We can also exclude attributes from the signature as needed.\n\nDFC collects attributes to generate a hashed signature about a client - if a fingerprint is not possible, then it will result in a block or alert action. Actions can be enforced across multiple devices if they share they have the same fingerprint. \n[Command Reference](updateDeviceFingerprintChallenge)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_device_fingerprint_challenge",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_device_fingerprint_challenge",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/deviceFingerprintChallenge",
+        "positionalArgs": [
+          "waas_policy_id",
+          "update_device_fingerprint_challenge_details"
+        ],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_device_fingerprint_challenge_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -6008,6 +6929,41 @@
       "help": "Return the list of the tenant's edge node subnets. Use these CIDR blocks to restrict incoming traffic to your origin. These subnets are owned by OCI and forward traffic to customer origins. They are not associated with specific regions or compartments. \n[Command Reference](listEdgeSubnets)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_edge_subnets",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_edge_subnets",
+        "http": "GET",
+        "path": "/edgeSubnets",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[EdgeSubnet]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -6172,6 +7128,37 @@
       "help": "Gets the list of good bots defined in the Web Application Firewall configuration for a WAAS policy.\n\nThe list is sorted by `key`, in ascending order. \n[Command Reference](listGoodBots)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_good_bots",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_good_bots",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/goodBots",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[GoodBot]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -6313,6 +7300,37 @@
       "help": "Updates the list of good bots in the Web Application Firewall configuration for a policy. Only the fields specified in the request body will be updated, all other configuration properties will remain unchanged.\n\nGood bots allows you to manage access for bots from known providers, such as Google or Baidu. For more information about good bots, see [Bot Management]. \n[Command Reference](updateGoodBots)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_good_bots",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_good_bots",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/goodBots",
+        "positionalArgs": ["waas_policy_id", "good_bots"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "good_bots",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -6481,6 +7499,39 @@
       "help": "Moves HTTP Redirect into a different compartment. When provided, If-Match is checked against ETag values of the WAAS policy. \n[Command Reference](changeHttpRedirectCompartment)",
       "callback": "services.waas.src.oci_cli_redirect.generated.redirect_cli.change_http_redirect_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "waas.redirect",
+        "method": "change_http_redirect_compartment",
+        "http": "POST",
+        "path": "/httpRedirects/{httpRedirectId}/actions/changeCompartment",
+        "positionalArgs": [
+          "http_redirect_id",
+          "change_http_redirect_compartment_details"
+        ],
+        "pathParams": {
+          "httpRedirectId": "http_redirect_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_http_redirect_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6583,6 +7634,31 @@
       "help": "Creates a new HTTP Redirect on the WAF edge. \n[Command Reference](createHttpRedirect)",
       "callback": "services.waas.src.oci_cli_redirect.generated.redirect_cli.create_http_redirect",
       "kind": "generated",
+      "operation": {
+        "client": "waas.redirect",
+        "method": "create_http_redirect",
+        "http": "POST",
+        "path": "/httpRedirects",
+        "positionalArgs": ["create_http_redirect_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_http_redirect_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6827,6 +7903,35 @@
       "help": "Deletes a redirect. \n[Command Reference](deleteHttpRedirect)",
       "callback": "services.waas.src.oci_cli_redirect.generated.redirect_cli.delete_http_redirect",
       "kind": "generated",
+      "operation": {
+        "client": "waas.redirect",
+        "method": "delete_http_redirect",
+        "http": "DELETE",
+        "path": "/httpRedirects/{httpRedirectId}",
+        "positionalArgs": ["http_redirect_id"],
+        "pathParams": {
+          "httpRedirectId": "http_redirect_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6995,6 +8100,30 @@
       "help": "Gets the details of a HTTP Redirect. \n[Command Reference](getHttpRedirect)",
       "callback": "services.waas.src.oci_cli_redirect.generated.redirect_cli.get_http_redirect",
       "kind": "generated",
+      "operation": {
+        "client": "waas.redirect",
+        "method": "get_http_redirect",
+        "http": "GET",
+        "path": "/httpRedirects/{httpRedirectId}",
+        "positionalArgs": ["http_redirect_id"],
+        "pathParams": {
+          "httpRedirectId": "http_redirect_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "HttpRedirect",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7059,6 +8188,62 @@
       "help": "Gets a list of HTTP Redirects. \n[Command Reference](listHttpRedirects)",
       "callback": "services.waas.src.oci_cli_redirect.generated.redirect_cli.list_http_redirects",
       "kind": "generated",
+      "operation": {
+        "client": "waas.redirect",
+        "method": "list_http_redirects",
+        "http": "GET",
+        "path": "/httpRedirects",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "id": {
+            "arg": "id",
+            "collectionFormat": "multi"
+          },
+          "displayName": {
+            "arg": "display_name",
+            "collectionFormat": "multi"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state",
+            "collectionFormat": "multi"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[HttpRedirectSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7346,6 +8531,36 @@
       "help": "Updates the details of a HTTP Redirect, including target and tags. Only the fields specified in the request body will be updated; all other properties will remain unchanged. \n[Command Reference](updateHttpRedirect)",
       "callback": "services.waas.src.oci_cli_redirect.generated.redirect_cli.update_http_redirect",
       "kind": "generated",
+      "operation": {
+        "client": "waas.redirect",
+        "method": "update_http_redirect",
+        "http": "PUT",
+        "path": "/httpRedirects/{httpRedirectId}",
+        "positionalArgs": ["http_redirect_id", "update_http_redirect_details"],
+        "pathParams": {
+          "httpRedirectId": "http_redirect_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_http_redirect_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7610,6 +8825,30 @@
       "help": "Gets the human interaction challenge settings in the Web Application Firewall configuration for a WAAS policy. \n[Command Reference](getHumanInteractionChallenge)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_human_interaction_challenge",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_human_interaction_challenge",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/humanInteractionChallenge",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "HumanInteractionChallenge",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7674,6 +8913,40 @@
       "help": "Updates the Human Interaction Challenge (HIC) settings in the Web Application Firewall configuration for a WAAS policy. HIC is a countermeasure that allows the proxy to check the user's browser for various behaviors that distinguish a human presence from a bot. \n[Command Reference](updateHumanInteractionChallenge)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_human_interaction_challenge",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_human_interaction_challenge",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/humanInteractionChallenge",
+        "positionalArgs": [
+          "waas_policy_id",
+          "update_human_interaction_challenge_details"
+        ],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_human_interaction_challenge_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -8035,6 +9308,30 @@
       "help": "Gets the JavaScript challenge settings in the Web Application Firewall configuration for a WAAS policy. \n[Command Reference](getJsChallenge)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_js_challenge",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_js_challenge",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/jsChallenge",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "JsChallenge",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8099,6 +9396,37 @@
       "help": "Updates the JavaScript challenge settings in the Web Application Firewall configuration for a WAAS policy. JavaScript Challenge validates that the client can accept JavaScript with a binary decision. For more information, see [Bot Management]. \n[Command Reference](updateJsChallenge)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_js_challenge",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_js_challenge",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/jsChallenge",
+        "positionalArgs": ["waas_policy_id", "update_js_challenge_details"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_js_challenge_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -8441,6 +9769,30 @@
       "help": "Gets the configuration of a WAAS policy. \n[Command Reference](getPolicyConfig)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_policy_config",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_policy_config",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/policyConfig",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "PolicyConfig",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8952,6 +10304,31 @@
       "help": "Gets the details of a protection rule in the Web Application Firewall configuration for a WAAS policy. \n[Command Reference](getProtectionRule)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_protection_rule",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_protection_rule",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/protectionRules/{protectionRuleKey}",
+        "positionalArgs": ["waas_policy_id", "protection_rule_key"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id",
+          "protectionRuleKey": "protection_rule_key"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ProtectionRule",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9035,6 +10412,45 @@
       "help": "Gets the list of available protection rules for a WAAS policy. Use the `GetWafConfig` operation to view a list of currently configured protection rules for the Web Application Firewall, or use the `ListRecommendations` operation to get a list of recommended protection rules for the Web Application Firewall. The list is sorted by `key`, in ascending order. \n[Command Reference](listProtectionRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_protection_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_protection_rules",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/protectionRules",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "modSecurityRuleId": {
+            "arg": "mod_security_rule_id",
+            "collectionFormat": "multi"
+          },
+          "action": {
+            "arg": "action",
+            "collectionFormat": "multi"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ProtectionRule]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9216,6 +10632,34 @@
       "help": "Updates the action for each specified protection rule. Requests can either be allowed, blocked, or trigger an alert if they meet the parameters of an applied rule. For more information on protection rules, see [WAF Protection Rules]. This operation can update or disable protection rules depending on the structure of the request body. Protection rules can be updated by changing the properties of the protection rule object with the rule's key specified in the key field. \n[Command Reference](updateProtectionRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_protection_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_protection_rules",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/protectionRules",
+        "positionalArgs": ["waas_policy_id", "protection_rules"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "protection_rules",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -9384,6 +10828,30 @@
       "help": "Gets the protection settings in the Web Application Firewall configuration for a WAAS policy. \n[Command Reference](getProtectionSettings)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_protection_settings",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_protection_settings",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/protectionSettings",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ProtectionSettings",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9448,6 +10916,40 @@
       "help": "Updates the protection settings in the Web Application Firewall configuration for a WAAS policy. Protection settings allow you define what action is taken when a request is blocked by the Web Application Firewall, such as returning a response code or block page. Only the fields specified in the request body will be updated; all other fields will remain unchanged. \n[Command Reference](updateProtectionSettings)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_protection_settings",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_protection_settings",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/protectionSettings",
+        "positionalArgs": [
+          "waas_policy_id",
+          "update_protection_settings_details"
+        ],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_protection_settings_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -9879,6 +11381,34 @@
       "help": "Performs a purge of the cache for each specified resource. If no resources are passed, the cache for the entire Web Application Firewall will be purged. For more information, see [Caching Rules]. \n[Command Reference](purgeCache)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.purge_cache",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "purge_cache",
+        "http": "POST",
+        "path": "/waasPolicies/{waasPolicyId}/actions/purgeCache",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "purge_cache",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -10047,6 +11577,34 @@
       "help": "Accepts a list of recommended Web Application Firewall protection rules. Web Application Firewall protection rule recommendations are sets of rules generated by observed traffic patterns through the Web Application Firewall and are meant to optimize the Web Application Firewall's security profile. Only the rules specified in the request body will be updated; all other rules will remain unchanged.\n\nUse the `GET /waasPolicies/{waasPolicyId}/wafConfig/recommendations` method to view a list of recommended Web Application Firewall protection rules. For more information, see [WAF Protection Rules]. \n[Command Reference](acceptRecommendations)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.accept_recommendations",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "accept_recommendations",
+        "http": "POST",
+        "path": "/waasPolicies/{waasPolicyId}/actions/acceptWafConfigRecommendations",
+        "positionalArgs": ["waas_policy_id", "protection_rule_keys"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "protection_rule_keys",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -10215,6 +11773,40 @@
       "help": "Gets the list of recommended Web Application Firewall protection rules.\n\nUse the `POST /waasPolicies/{waasPolicyId}/actions/acceptWafConfigRecommendations` method to accept recommended Web Application Firewall protection rules. For more information, see [WAF Protection Rules]. The list is sorted by `key`, in ascending order. \n[Command Reference](listRecommendations)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_recommendations",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_recommendations",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/recommendations",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "recommendedAction": {
+            "arg": "recommended_action"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[Recommendation]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -10377,6 +11969,37 @@
       "help": "Gets the list of available web application threat intelligence feeds and the actions set for each feed. The list is sorted by `key`, in ascending order. \n[Command Reference](listThreatFeeds)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_threat_feeds",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_threat_feeds",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/threatFeeds",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ThreatFeed]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -10518,6 +12141,34 @@
       "help": "Updates the action to take when a request's IP address matches an address in the specified threat intelligence feed. Threat intelligence feeds are compiled lists of IP addresses with malicious reputations based on internet intelligence. Only the threat feeds specified in the request body will be updated; all other threat feeds will remain unchanged. \n[Command Reference](updateThreatFeeds)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_threat_feeds",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_threat_feeds",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/threatFeeds",
+        "positionalArgs": ["waas_policy_id", "threat_feeds"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "threat_feeds",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -10686,6 +12337,39 @@
       "help": "Moves WAAS policy into a different compartment. When provided, If-Match is checked against ETag values of the WAAS policy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment]. \n[Command Reference](changeWaasPolicyCompartment)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.change_waas_policy_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "change_waas_policy_compartment",
+        "http": "POST",
+        "path": "/waasPolicies/{waasPolicyId}/actions/changeCompartment",
+        "positionalArgs": [
+          "waas_policy_id",
+          "change_waas_policy_compartment_details"
+        ],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_waas_policy_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10788,6 +12472,32 @@
       "help": "Creates a new Web Application Acceleration and Security (WAAS) policy in the specified compartment. A WAAS policy must be established before creating Web Application Firewall (WAF) rules. To use WAF rules, your web application's origin servers must defined in the `WaasPolicy` schema.\n\nA domain name must be specified when creating a WAAS policy. The domain name should be different from the origins specified in your `WaasPolicy`. Once domain name is entered and stored, it is unchangeable.\n\nUse the record data returned in the `cname` field of the `WaasPolicy` object to create a CNAME record in your DNS configuration that will direct your domain's traffic through the WAF.\n\nFor the purposes of access control, you must provide the OCID of the compartment where you want the service to reside. For information about access control and compartments, see [Overview of the IAM Service].\n\nYou must specify a display name and domain for the WAAS policy. The display name does not have to be unique and can be changed. The domain name should be different from every origin specified in `WaasPolicy`.\n\nAll Oracle Cloud Infrastructure resources, including WAAS policies, receive a unique, Oracle-assigned ID called an Oracle Cloud Identifier (OCID). When a resource is created, you can find its OCID in the response. You can also retrieve a resource's OCID by using a list API operation for that resource type, or by viewing the resource in the Console. Fore more information, see [Resource Identifiers].\n\n**Note:** After sending the POST request, the new object's state will temporarily be `CREATING`. Ensure that the resource's state has changed to `ACTIVE` before use. \n[Command Reference](createWaasPolicy)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.create_waas_policy",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "create_waas_policy",
+        "http": "POST",
+        "path": "/waasPolicies",
+        "positionalArgs": ["create_waas_policy_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_waas_policy_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -11089,6 +12799,45 @@
       "help": "Gets the list of currently configured custom protection rules for a WAAS policy. \n[Command Reference](listWaasPolicyCustomProtectionRules)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_waas_policy_custom_protection_rules",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_waas_policy_custom_protection_rules",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/customProtectionRules",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "modSecurityRuleId": {
+            "arg": "mod_security_rule_id",
+            "collectionFormat": "multi"
+          },
+          "action": {
+            "arg": "action",
+            "collectionFormat": "multi"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WaasPolicyCustomProtectionRuleSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -11270,6 +13019,36 @@
       "help": "Deletes a policy. \n[Command Reference](deleteWaasPolicy)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.delete_waas_policy",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "delete_waas_policy",
+        "http": "DELETE",
+        "path": "/waasPolicies/{waasPolicyId}",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -11438,6 +13217,30 @@
       "help": "Gets the details of a WAAS policy. \n[Command Reference](getWaasPolicy)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_waas_policy",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_waas_policy",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WaasPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11502,6 +13305,62 @@
       "help": "Gets a list of WAAS policies. \n[Command Reference](listWaasPolicies)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_waas_policies",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_waas_policies",
+        "http": "GET",
+        "path": "/waasPolicies",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "id": {
+            "arg": "id",
+            "collectionFormat": "multi"
+          },
+          "displayName": {
+            "arg": "display_name",
+            "collectionFormat": "multi"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state",
+            "collectionFormat": "multi"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WaasPolicySummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -11789,6 +13648,37 @@
       "help": "Updates the details of a WAAS policy, including origins and tags. Only the fields specified in the request body will be updated; all other properties will remain unchanged. To update platform provided resources such as `GoodBots`, `ProtectionRules`, and `ThreatFeeds`, first retrieve the list of available resources with the related list operation such as `GetThreatFeeds` or `GetProtectionRules`. The returned list will contain objects with `key` properties that can be used to update the resource during the `UpdateWaasPolicy` request. \n[Command Reference](updateWaasPolicy)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_waas_policy",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_waas_policy",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}",
+        "positionalArgs": ["waas_policy_id", "update_waas_policy_details"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_waas_policy_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -12110,6 +14000,47 @@
       "help": "Gets the number of blocked requests by a Web Application Firewall feature in five minute blocks, sorted by `timeObserved` in ascending order (starting from oldest data). \n[Command Reference](listWafBlockedRequests)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_waf_blocked_requests",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_waf_blocked_requests",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/reports/waf/blocked",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "timeObservedGreaterThanOrEqualTo": {
+            "arg": "time_observed_greater_than_or_equal_to"
+          },
+          "timeObservedLessThan": {
+            "arg": "time_observed_less_than"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "wafFeature": {
+            "arg": "waf_feature",
+            "collectionFormat": "multi"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WafBlockedRequest]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -12319,6 +14250,30 @@
       "help": "Gets the Web Application Firewall configuration details for a WAAS policy. \n[Command Reference](getWafConfig)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_waf_config",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_waf_config",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WafConfig",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -12383,6 +14338,37 @@
       "help": "Updates the Web Application Firewall configuration for a specified WAAS policy.\n\nTo update platform provided resources such as `GoodBots`, `ProtectionRules`, and `ThreatFeeds`, first retrieve the list of available resources with the related list operation, such as `GetThreatFeeds` or `GetProtectionRules`.\n\nThe returned list will contain objects with `key` properties that can be used to update the resource during the `UpdateWafConfig` request. \n[Command Reference](updateWafConfig)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_waf_config",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_waf_config",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig",
+        "positionalArgs": ["waas_policy_id", "update_waf_config_details"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_waf_config_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -12837,6 +14823,110 @@
       "help": "Gets structured Web Application Firewall event logs for a WAAS policy. Sorted by the `timeObserved` in ascending order (starting from the oldest recorded event). \n[Command Reference](listWafLogs)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_waf_logs",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_waf_logs",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafLogs",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "timeObservedGreaterThanOrEqualTo": {
+            "arg": "time_observed_greater_than_or_equal_to"
+          },
+          "timeObservedLessThan": {
+            "arg": "time_observed_less_than"
+          },
+          "textContains": {
+            "arg": "text_contains"
+          },
+          "accessRuleKey": {
+            "arg": "access_rule_key",
+            "collectionFormat": "multi"
+          },
+          "action": {
+            "arg": "action",
+            "collectionFormat": "multi"
+          },
+          "clientAddress": {
+            "arg": "client_address",
+            "collectionFormat": "multi"
+          },
+          "countryCode": {
+            "arg": "country_code",
+            "collectionFormat": "multi"
+          },
+          "countryName": {
+            "arg": "country_name",
+            "collectionFormat": "multi"
+          },
+          "fingerprint": {
+            "arg": "fingerprint",
+            "collectionFormat": "multi"
+          },
+          "httpMethod": {
+            "arg": "http_method",
+            "collectionFormat": "multi"
+          },
+          "incidentKey": {
+            "arg": "incident_key",
+            "collectionFormat": "multi"
+          },
+          "logType": {
+            "arg": "log_type",
+            "collectionFormat": "multi"
+          },
+          "originAddress": {
+            "arg": "origin_address",
+            "collectionFormat": "multi"
+          },
+          "referrer": {
+            "arg": "referrer",
+            "collectionFormat": "multi"
+          },
+          "requestUrl": {
+            "arg": "request_url",
+            "collectionFormat": "multi"
+          },
+          "responseCode": {
+            "arg": "response_code",
+            "collectionFormat": "multi"
+          },
+          "threatFeedKey": {
+            "arg": "threat_feed_key",
+            "collectionFormat": "multi"
+          },
+          "userAgent": {
+            "arg": "user_agent",
+            "collectionFormat": "multi"
+          },
+          "protectionRuleKey": {
+            "arg": "protection_rule_key",
+            "collectionFormat": "multi"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WafLog]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13364,6 +15454,43 @@
       "help": "Gets the number of requests managed by a Web Application Firewall over a specified period of time, including blocked requests. Sorted by `timeObserved` in ascending order (starting from oldest requests). \n[Command Reference](listWafRequests)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_waf_requests",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_waf_requests",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/reports/waf/requests",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "timeObservedGreaterThanOrEqualTo": {
+            "arg": "time_observed_greater_than_or_equal_to"
+          },
+          "timeObservedLessThan": {
+            "arg": "time_observed_less_than"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WafRequest]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13543,6 +15670,43 @@
       "help": "Gets the Web Application Firewall traffic data for a WAAS policy. Sorted by `timeObserved` in ascending order (starting from oldest data). \n[Command Reference](listWafTraffic)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_waf_traffic",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_waf_traffic",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/reports/waf/traffic",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "timeObservedGreaterThanOrEqualTo": {
+            "arg": "time_observed_greater_than_or_equal_to"
+          },
+          "timeObservedLessThan": {
+            "arg": "time_observed_less_than"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WafTrafficDatum]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13722,6 +15886,37 @@
       "help": "Gets the list of whitelists defined in the Web Application Firewall configuration for a WAAS policy. \n[Command Reference](listWhitelists)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_whitelists",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_whitelists",
+        "http": "GET",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/whitelists",
+        "positionalArgs": ["waas_policy_id"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[Whitelist]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -13863,6 +16058,37 @@
       "help": "Updates the list of IP addresses that bypass the Web Application Firewall for a WAAS policy. Supports single IP addresses, subnet masks (CIDR notation) and Address Lists.\n\nThis operation can create, delete, update, and/or reorder whitelists depending on the structure of the request body.\n\nWhitelists can be updated by changing the properties of the whitelist object with the rule's key specified in the `key` field. Whitelists can be reordered by changing the order of the whitelists in the list of objects when updating.\n\nWhitelists can be created by adding a new whitelist object to the list without a `key` property specified. A `key` will be generated for the new whitelist upon update.\n\nWhitelists can be deleted by removing the existing whitelist object from the list. Any existing whitelists that are not specified with a `key` in the list of access rules will be deleted upon update. \n[Command Reference](updateWhitelists)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.update_whitelists",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "update_whitelists",
+        "http": "PUT",
+        "path": "/waasPolicies/{waasPolicyId}/wafConfig/whitelists",
+        "positionalArgs": ["waas_policy_id", "whitelists"],
+        "pathParams": {
+          "waasPolicyId": "waas_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "whitelists",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -14031,6 +16257,35 @@
       "help": "Cancels a specified work request. \n[Command Reference](cancelWorkRequest)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.cancel_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "cancel_work_request",
+        "http": "DELETE",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -14133,6 +16388,30 @@
       "help": "Gets the details of a specified work request. \n[Command Reference](getWorkRequest)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -14197,6 +16476,47 @@
       "help": "Gets a list of subnets (CIDR notation) from which the WAAS EDGE may make requests. The subnets are owned by OCI and forward traffic to your origins. Allow traffic from these subnets to your origins. They are not associated with specific regions or compartments. \n[Command Reference](listWorkRequests)",
       "callback": "services.waas.src.oci_cli_waas.generated.waas_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "waas.waas",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["waas_policy_id", "compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "waasPolicyId": {
+            "arg": "waas_policy_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[WorkRequestSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

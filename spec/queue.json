@@ -26,6 +26,22 @@
       }
     ]
   },
+  "clients": {
+    "queue.queue": {
+      "class": "oci.queue.queue_client.QueueClient",
+      "basePath": "/20210201",
+      "endpointTemplate": "https://messaging.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "queue"
+    },
+    "queue.queue_admin": {
+      "class": "oci.queue.queue_admin_client.QueueAdminClient",
+      "basePath": "/20210201",
+      "endpointTemplate": "https://messaging.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "queue_admin"
+    }
+  },
   "groups": {
     "channels": {
       "hidden": false,
@@ -260,6 +276,43 @@
       "help": "Gets the list of IDs of non-empty channels. It will return an approximate list of IDs of non-empty channels. That information is based on the queue level statistics. API supports optional channelFilter parameter which will filter the returned results according to the specified filter. List of channel IDs is approximate, because statistics is refreshed once per-second, and that list represents a snapshot of the past information. API is paginated. \n[Command Reference](listChannels)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.list_channels",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "list_channels",
+        "http": "GET",
+        "path": "/queues/{queueId}/channels",
+        "positionalArgs": ["queue_id"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {
+          "consumerGroupId": {
+            "arg": "consumer_group_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "channelFilter": {
+            "arg": "channel_filter"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ChannelCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -439,6 +492,34 @@
       "help": "Deletes the message represented by the receipt from the queue. You must use the [messages endpoint] to delete messages. The messages endpoint may be different for different queues. Use [`GetQueue`] to find the queue's `messagesEndpoint`. \n[Command Reference](deleteMessage)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.delete_message",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "delete_message",
+        "http": "DELETE",
+        "path": "/queues/{queueId}/messages/{messageReceipt}",
+        "positionalArgs": ["queue_id", "message_receipt"],
+        "pathParams": {
+          "queueId": "queue_id",
+          "messageReceipt": "message_receipt"
+        },
+        "queryParams": {
+          "consumerGroupId": {
+            "arg": "consumer_group_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -560,6 +641,35 @@
       "help": "Deletes multiple messages from the queue or the consumer group. Only messages from the same queue/consumer group can be deleted at once. You must use the [messages endpoint] to delete messages. The messages endpoint may be different for different queues. Use [`GetQueue`] to find the queue's `messagesEndpoint`. \n[Command Reference](deleteMessages)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.delete_messages",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "delete_messages",
+        "http": "POST",
+        "path": "/queues/{queueId}/messages/actions/deleteMessages",
+        "positionalArgs": ["queue_id", "delete_messages_details"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {
+          "consumerGroupId": {
+            "arg": "consumer_group_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "delete_messages_details",
+        "responseType": "DeleteMessagesResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -662,6 +772,46 @@
       "help": "Consumes messages from the queue. You must use the [messages endpoint] to consume messages. The messages endpoint may be different for different queues. Use [`GetQueue`] to find the queue's `messagesEndpoint`. GetMessages accepts optional channelFilter query parameter that can filter source channels of the messages. When channelFilter is present, service will return available messages from the channel which ID exactly matched the filter. When filter is not specified, messages will be returned from a random non-empty channel within a queue. \n[Command Reference](getMessages)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.get_messages",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "get_messages",
+        "http": "GET",
+        "path": "/queues/{queueId}/messages",
+        "positionalArgs": ["queue_id"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {
+          "visibilityInSeconds": {
+            "arg": "visibility_in_seconds"
+          },
+          "timeoutInSeconds": {
+            "arg": "timeout_in_seconds"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "channelFilter": {
+            "arg": "channel_filter"
+          },
+          "consumerGroupId": {
+            "arg": "consumer_group_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "GetMessages",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -821,6 +971,37 @@
       "help": "Gets the statistics for the queue and its dead letter queue. You must use the [messages endpoint] to get a queue's statistics. The messages endpoint may be different for different queues. Use [`GetQueue`] to find the queue's `messagesEndpoint`. \n[Command Reference](getStats)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.get_stats",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "get_stats",
+        "http": "GET",
+        "path": "/queues/{queueId}/stats",
+        "positionalArgs": ["queue_id"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {
+          "channelId": {
+            "arg": "channel_id"
+          },
+          "consumerGroupId": {
+            "arg": "consumer_group_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "QueueStats",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -923,6 +1104,31 @@
       "help": "Puts messages into the queue. You must use the [messages endpoint] to produce messages. The messages endpoint may be different for different queues. Use [`GetQueue`] to find the queue's `messagesEndpoint`. \n[Command Reference](putMessages)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.put_messages",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "put_messages",
+        "http": "POST",
+        "path": "/queues/{queueId}/messages",
+        "positionalArgs": ["queue_id", "put_messages_details"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "put_messages_details",
+        "responseType": "PutMessages",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1006,6 +1212,40 @@
       "help": "Updates the visibility of the message represented by the receipt. You must use the [messages endpoint] to update messages. The messages endpoint may be different for different queues. Use [`GetQueue`] to find the queue's `messagesEndpoint`. \n[Command Reference](updateMessage)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.update_message",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "update_message",
+        "http": "PUT",
+        "path": "/queues/{queueId}/messages/{messageReceipt}",
+        "positionalArgs": [
+          "queue_id",
+          "message_receipt",
+          "update_message_details"
+        ],
+        "pathParams": {
+          "queueId": "queue_id",
+          "messageReceipt": "message_receipt"
+        },
+        "queryParams": {
+          "consumerGroupId": {
+            "arg": "consumer_group_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_message_details",
+        "responseType": "UpdatedMessage",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1127,6 +1367,35 @@
       "help": "Updates multiple messages in the queue or the consumer group. Only messages from the same queue/consumer group can be updated at once. You must use the [messages endpoint] to update messages. The messages endpoint may be different for different queues. Use [`GetQueue`] to find the queue's `messagesEndpoint`. \n[Command Reference](updateMessages)",
       "callback": "services.queue.src.oci_cli_queue.generated.queue_cli.update_messages",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue",
+        "method": "update_messages",
+        "http": "POST",
+        "path": "/queues/{queueId}/messages/actions/updateMessages",
+        "positionalArgs": ["queue_id", "update_messages_details"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {
+          "consumerGroupId": {
+            "arg": "consumer_group_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_messages_details",
+        "responseType": "UpdateMessagesResult",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1473,6 +1742,33 @@
       "help": "Deletes a consumer group resource by identifier. \n[Command Reference](deleteConsumerGroup)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.delete_consumer_group",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "delete_consumer_group",
+        "http": "DELETE",
+        "path": "/consumerGroups/{consumerGroupId}",
+        "positionalArgs": ["consumer_group_id"],
+        "pathParams": {
+          "consumerGroupId": "consumer_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1641,6 +1937,30 @@
       "help": "Gets a consumer group by identifier. \n[Command Reference](getConsumerGroup)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.get_consumer_group",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "get_consumer_group",
+        "http": "GET",
+        "path": "/consumerGroups/{consumerGroupId}",
+        "positionalArgs": ["consumer_group_id"],
+        "pathParams": {
+          "consumerGroupId": "consumer_group_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ConsumerGroup",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1988,6 +2308,53 @@
       "help": "Returns a list of consumer groups. \n[Command Reference](listConsumerGroups)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.list_consumer_groups",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "list_consumer_groups",
+        "http": "GET",
+        "path": "/consumerGroups",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "queueId": {
+            "arg": "queue_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ConsumerGroupCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2238,6 +2605,34 @@
       "help": "Moves a queue from one compartment to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeQueueCompartment)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.change_queue_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "change_queue_compartment",
+        "http": "POST",
+        "path": "/queues/{queueId}/actions/changeCompartment",
+        "positionalArgs": ["queue_id", "change_queue_compartment_details"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_queue_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2726,6 +3121,33 @@
       "help": "Deletes a queue resource by identifier. \n[Command Reference](deleteQueue)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.delete_queue",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "delete_queue",
+        "http": "DELETE",
+        "path": "/queues/{queueId}",
+        "positionalArgs": ["queue_id"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2894,6 +3316,30 @@
       "help": "Gets a queue by identifier. \n[Command Reference](getQueue)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.get_queue",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "get_queue",
+        "http": "GET",
+        "path": "/queues/{queueId}",
+        "positionalArgs": ["queue_id"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Queue",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2958,6 +3404,53 @@
       "help": "Returns a list of queues. \n[Command Reference](listQueues)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.list_queues",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "list_queues",
+        "http": "GET",
+        "path": "/queues",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "QueueCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3208,6 +3701,34 @@
       "help": "Deletes all messages present in the queue or in the specified consumer group, or deletes all the messages in the specific channel at the time of invocation. Only one concurrent purge operation is supported for any given queue. However multiple concurrent purge operations are supported for different queues. Purge request without specification of target channels will clean up all messages in the queue and in the child channels. Purge request without specification of consumer group will either clean up all messages in the queue or in the primary consumer group, depending on the presence of the CONSUMER_GROUPS capability on the queue. To purge all consumer groups, the special value 'all' can be used. \n[Command Reference](purgeQueue)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.purge_queue",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "purge_queue",
+        "http": "POST",
+        "path": "/queues/{queueId}/actions/purge",
+        "positionalArgs": ["queue_id", "purge_queue_details"],
+        "pathParams": {
+          "queueId": "queue_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "purge_queue_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3756,6 +4277,30 @@
       "help": "Gets the status of the work request with the given ID. \n[Command Reference](getWorkRequest)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3820,6 +4365,41 @@
       "help": "Lists the work requests in a compartment. \n[Command Reference](listWorkRequests)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "workRequestId": {
+            "arg": "work_request_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestSummaryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3980,6 +4560,37 @@
       "help": "Return a (paginated) list of errors for a given work request. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestErrorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4121,6 +4732,37 @@
       "help": "Return a (paginated) list of logs for a given work request. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.queue.src.oci_cli_queue_admin.generated.queueadmin_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "queue.queue_admin",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestLogEntryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

@@ -26,6 +26,15 @@
       }
     ]
   },
+  "clients": {
+    "monitoring.monitoring": {
+      "class": "oci.monitoring.monitoring_client.MonitoringClient",
+      "basePath": "/20180401",
+      "endpointTemplate": "https://telemetry.{region}.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "monitoring"
+    }
+  },
   "groups": {
     "alarm": {
       "hidden": false,
@@ -259,6 +268,36 @@
       "help": "Moves an alarm into a different compartment within the same tenancy. For more information, see [Moving an Alarm]. \n[Command Reference](changeAlarmCompartment)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.change_alarm_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "change_alarm_compartment",
+        "http": "POST",
+        "path": "/alarms/{alarmId}/actions/changeCompartment",
+        "positionalArgs": ["alarm_id", "change_alarm_compartment_details"],
+        "pathParams": {
+          "alarmId": "alarm_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_alarm_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -942,6 +981,33 @@
       "help": "Deletes the specified alarm. For more information, see [Deleting an Alarm]. For important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](deleteAlarm)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.delete_alarm",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "delete_alarm",
+        "http": "DELETE",
+        "path": "/alarms/{alarmId}",
+        "positionalArgs": ["alarm_id"],
+        "pathParams": {
+          "alarmId": "alarm_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_alarm"],
       "params": [
         {
           "kind": "option",
@@ -1103,6 +1169,30 @@
       "help": "Gets the specified alarm. For more information, see [Getting an Alarm]. For important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](getAlarm)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.get_alarm",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "get_alarm",
+        "http": "GET",
+        "path": "/alarms/{alarmId}",
+        "positionalArgs": ["alarm_id"],
+        "pathParams": {
+          "alarmId": "alarm_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Alarm",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1167,6 +1257,53 @@
       "help": "Lists the alarms for the specified compartment. For more information, see [Listing Alarms]. For important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](listAlarms)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.list_alarms",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "list_alarms",
+        "http": "GET",
+        "path": "/alarms",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[AlarmSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2048,6 +2185,38 @@
       "help": "Lists the current alarm status of each metric stream, where status is derived from the metric stream's last associated transition. Optionally filter by status value and one or more dimension key-value pairs.\n\nFor more information, see [Listing Metric Stream Status in an Alarm].\n\nFor important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](retrieveDimensionStates)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.retrieve_dimension_states",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "retrieve_dimension_states",
+        "http": "POST",
+        "path": "/alarms/{alarmId}/actions/retrieveDimensionStates",
+        "positionalArgs": ["alarm_id"],
+        "pathParams": {
+          "alarmId": "alarm_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "retrieve_dimension_states_details",
+        "responseType": "AlarmDimensionStatesCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2188,6 +2357,46 @@
       "help": "Get the history of the specified alarm. For more information, see [Getting History of an Alarm]. For important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](getAlarmHistory)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.get_alarm_history",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "get_alarm_history",
+        "http": "GET",
+        "path": "/alarms/{alarmId}/history",
+        "positionalArgs": ["alarm_id"],
+        "pathParams": {
+          "alarmId": "alarm_id"
+        },
+        "queryParams": {
+          "alarmHistorytype": {
+            "arg": "alarm_historytype"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "timestampGreaterThanOrEqualTo": {
+            "arg": "timestamp_greater_than_or_equal_to"
+          },
+          "timestampLessThan": {
+            "arg": "timestamp_less_than"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AlarmHistoryCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2354,6 +2563,62 @@
       "help": "List the status of each alarm in the specified compartment. Status is collective, across all metric streams in the alarm. To list alarm status for each metric stream, use [RetrieveDimensionStates]. Optionally filter by resource or status value.\n\nFor more information, see [Listing Alarm Statuses]. For important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](listAlarmsStatus)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.list_alarms_status",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "list_alarms_status",
+        "http": "GET",
+        "path": "/alarms/status",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "resourceId": {
+            "arg": "resource_id"
+          },
+          "serviceName": {
+            "arg": "service_name"
+          },
+          "entityId": {
+            "arg": "entity_id"
+          },
+          "status": {
+            "arg": "status"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[AlarmStatusSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2653,6 +2918,33 @@
       "help": "Creates a new alarm suppression at the specified level (alarm-wide or dimension-specific). For more information, see [Adding an Alarm-wide Suppression] and [Adding a Dimension-Specific Alarm Suppression].\n\nFor important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](createAlarmSuppression)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.create_alarm_suppression",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "create_alarm_suppression",
+        "http": "POST",
+        "path": "/alarmSuppressions",
+        "positionalArgs": ["create_alarm_suppression_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_alarm_suppression_details",
+        "responseType": "AlarmSuppression",
+        "paginated": false
+      },
+      "otherOperations": ["get_alarm_suppression"],
       "params": [
         {
           "kind": "option",
@@ -2947,6 +3239,33 @@
       "help": "Deletes the specified alarm suppression. For more information, see [Removing an Alarm-wide Suppression] and [Removing a Dimension-Specific Alarm Suppression].\n\nFor important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](deleteAlarmSuppression)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.delete_alarm_suppression",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "delete_alarm_suppression",
+        "http": "DELETE",
+        "path": "/alarmSuppressions/{alarmSuppressionId}",
+        "positionalArgs": ["alarm_suppression_id"],
+        "pathParams": {
+          "alarmSuppressionId": "alarm_suppression_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_alarm_suppression"],
       "params": [
         {
           "kind": "option",
@@ -3108,6 +3427,30 @@
       "help": "Gets the specified alarm suppression. For more information, see [Getting an Alarm-wide Suppression].\n\nFor important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](getAlarmSuppression)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.get_alarm_suppression",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "get_alarm_suppression",
+        "http": "GET",
+        "path": "/alarmSuppressions/{alarmSuppressionId}",
+        "positionalArgs": ["alarm_suppression_id"],
+        "pathParams": {
+          "alarmSuppressionId": "alarm_suppression_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AlarmSuppression",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3172,6 +3515,38 @@
       "help": "Returns history of suppressions for the specified alarm, including both dimension-specific and and alarm-wide suppressions. For more information, see [Getting Suppression History for an Alarm].\n\nFor important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](summarizeAlarmSuppressionHistory)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.summarize_alarm_suppression_history",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "summarize_alarm_suppression_history",
+        "http": "POST",
+        "path": "/alarms/{alarmId}/actions/summarizeAlarmSuppressionHistory",
+        "positionalArgs": ["alarm_id"],
+        "pathParams": {
+          "alarmId": "alarm_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "summarize_alarm_suppression_history_details",
+        "responseType": "AlarmSuppressionHistoryItemCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3331,6 +3706,65 @@
       "help": "Lists alarm suppressions for the specified alarm. For more information, see [Listing Alarm Suppressions].\n\nFor important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](listAlarmSuppressions)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.list_alarm_suppressions",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "list_alarm_suppressions",
+        "http": "GET",
+        "path": "/alarmSuppressions",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "alarmId": {
+            "arg": "alarm_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "level": {
+            "arg": "level"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          },
+          "targetType": {
+            "arg": "target_type"
+          },
+          "isAllSuppressions": {
+            "arg": "is_all_suppressions"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AlarmSuppressionCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3653,6 +4087,42 @@
       "help": "Returns metric definitions that match the criteria specified in the request. Compartment OCID required. For more information, see [Listing Metric Definitions]. For information about metrics, see [Metrics Overview]. For important limits information, see [Limits on Monitoring].\n\nTransactions Per Second (TPS) per-tenancy limit for this operation: 10. \n[Command Reference](listMetrics)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.list_metrics",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "list_metrics",
+        "http": "POST",
+        "path": "/metrics/actions/listMetrics",
+        "positionalArgs": ["compartment_id", "list_metrics_details"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "list_metrics_details",
+        "responseType": "list[Metric]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3950,6 +4420,32 @@
       "help": "Publishes raw metric data points to the Monitoring service. For a data point to be posted, its timestamp must be near current time (less than two hours in the past and less than 10 minutes in the future).\n\nFor more information about publishing metrics, see [Publishing Custom Metrics] and [Custom Metrics Walkthrough]. For information about developing a metric-posting client, see [Developer Guide]. For an example client, see [MonitoringMetricPostExample.java]. For important limits information, see [Limits on Monitoring].\n\nPer-call limits information follows.\n\n* Dimensions per metric group*. Maximum: 20. Minimum: 1. * Unique metric streams*. Maximum: 50. * Transactions Per Second (TPS) per-tenancy limit for this operation: 50.\n\n*A metric group is the combination of a given metric, metric namespace, and tenancy for the purpose of determining limits. A dimension is a qualifier provided in a metric definition. A metric stream is an individual set of aggregated data for a metric with zero or more dimension values. For more information about metric-related concepts, see [Monitoring Concepts].\n\n**Note:** The endpoints for this operation differ from other Monitoring operations. Replace the string `telemetry` with `telemetry-ingestion` in the endpoint, as in the following example:\n\nhttps://telemetry-ingestion.eu-frankfurt-1.oraclecloud.com \n[Command Reference](postMetricData)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.post_metric_data",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "post_metric_data",
+        "http": "POST",
+        "path": "/metrics",
+        "positionalArgs": ["post_metric_data_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "content-encoding": {
+            "arg": "content_encoding"
+          }
+        },
+        "body": "post_metric_data_details",
+        "responseType": "PostMetricDataResponseDetails",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4251,6 +4747,32 @@
       "help": "Removes any existing suppression for the specified alarm. For more information, see [Removing Suppression from an Alarm]. For important limits information, see [Limits on Monitoring].\n\nThis call is subject to a Monitoring limit that applies to the total number of requests across all alarm operations. Monitoring might throttle this call to reject an otherwise valid request when the total rate of alarm operations exceeds 10 requests, or transactions, per second (TPS) for a given tenancy. \n[Command Reference](removeAlarmSuppression)",
       "callback": "services.monitoring.src.oci_cli_monitoring.generated.monitoring_cli.remove_alarm_suppression",
       "kind": "generated",
+      "operation": {
+        "client": "monitoring.monitoring",
+        "method": "remove_alarm_suppression",
+        "http": "POST",
+        "path": "/alarms/{alarmId}/actions/removeSuppression",
+        "positionalArgs": ["alarm_id"],
+        "pathParams": {
+          "alarmId": "alarm_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",

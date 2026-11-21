@@ -26,6 +26,15 @@
       }
     ]
   },
+  "clients": {
+    "dns.dns": {
+      "class": "oci.dns.dns_client.DnsClient",
+      "basePath": "/20180115",
+      "endpointTemplate": "https://dns.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "dns"
+    }
+  },
   "groups": {
     "record": {
       "hidden": false,
@@ -334,6 +343,46 @@
       "help": "Deletes all records at the specified zone and domain.\n\nWhen the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](deleteDomainRecords)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_domain_records",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_domain_records",
+        "http": "DELETE",
+        "path": "/zones/{zoneNameOrId}/records/{domain}",
+        "positionalArgs": ["zone_name_or_id", "domain"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -533,6 +582,65 @@
       "help": "Gets a list of all records at the specified zone and domain.\n\nThe results are sorted by `rtype` in alphabetical order by default. You can optionally filter and/or sort the results using the listed parameters. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](getDomainRecords)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_domain_records",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_domain_records",
+        "http": "GET",
+        "path": "/zones/{zoneNameOrId}/records/{domain}",
+        "positionalArgs": ["zone_name_or_id", "domain"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "zoneVersion": {
+            "arg": "zone_version"
+          },
+          "rtype": {
+            "arg": "rtype"
+          },
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "RecordCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -870,6 +978,52 @@
       "help": "Updates records in the specified zone at a domain.\n\nYou can update one record or all records for the specified zone depending on the changes provided in the request body. You can also add or remove records using this function. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](patchDomainRecords)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.patch_domain_records",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "patch_domain_records",
+        "http": "PATCH",
+        "path": "/zones/{zoneNameOrId}/records/{domain}",
+        "positionalArgs": [
+          "zone_name_or_id",
+          "domain",
+          "patch_domain_records_details"
+        ],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "patch_domain_records_details",
+        "responseType": "RecordCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1069,6 +1223,52 @@
       "help": "Replaces records in the specified zone at a domain with the records specified in the request body.\n\nIf a specified record does not exist, it will be created. If the record exists, then it will be updated to represent the record in the body of the request. If a record in the zone does not exist in the request body, the record will be removed from the zone. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](updateDomainRecords)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_domain_records",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_domain_records",
+        "http": "PUT",
+        "path": "/zones/{zoneNameOrId}/records/{domain}",
+        "positionalArgs": [
+          "zone_name_or_id",
+          "domain",
+          "update_domain_records_details"
+        ],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_domain_records_details",
+        "responseType": "RecordCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1288,6 +1488,47 @@
       "help": "Deletes all records in the specified RRSet.\n\nWhen the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](deleteRRSet)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_rr_set",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_rr_set",
+        "http": "DELETE",
+        "path": "/zones/{zoneNameOrId}/records/{domain}/{rtype}",
+        "positionalArgs": ["zone_name_or_id", "domain", "rtype"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain",
+          "rtype": "rtype"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1506,6 +1747,57 @@
       "help": "Gets a list of all records in the specified RRSet.\n\nThe results are sorted by `recordHash` by default. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](getRRSet)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_rr_set",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_rr_set",
+        "http": "GET",
+        "path": "/zones/{zoneNameOrId}/records/{domain}/{rtype}",
+        "positionalArgs": ["zone_name_or_id", "domain", "rtype"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain",
+          "rtype": "rtype"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "zoneVersion": {
+            "arg": "zone_version"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "RRSet",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1801,6 +2093,54 @@
       "help": "Updates records in the specified RRSet.\n\nWhen the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](patchRRSet)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.patch_rr_set",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "patch_rr_set",
+        "http": "PATCH",
+        "path": "/zones/{zoneNameOrId}/records/{domain}/{rtype}",
+        "positionalArgs": [
+          "zone_name_or_id",
+          "domain",
+          "rtype",
+          "patch_rr_set_details"
+        ],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain",
+          "rtype": "rtype"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "patch_rr_set_details",
+        "responseType": "RecordCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2019,6 +2359,54 @@
       "help": "Replaces records in the specified RRSet.\n\nWhen the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](updateRRSet)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_rr_set",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_rr_set",
+        "http": "PUT",
+        "path": "/zones/{zoneNameOrId}/records/{domain}/{rtype}",
+        "positionalArgs": [
+          "zone_name_or_id",
+          "domain",
+          "rtype",
+          "update_rr_set_details"
+        ],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id",
+          "domain": "domain",
+          "rtype": "rtype"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rr_set_details",
+        "responseType": "RecordCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2257,6 +2645,70 @@
       "help": "Gets all records in the specified zone.\n\nThe results are sorted by `domain` in alphabetical order by default. For more information about records, see [Resource Record (RR) TYPEs]. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](getZoneRecords)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_zone_records",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_zone_records",
+        "http": "GET",
+        "path": "/zones/{zoneNameOrId}/records",
+        "positionalArgs": ["zone_name_or_id"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id"
+        },
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "zoneVersion": {
+            "arg": "zone_version"
+          },
+          "domain": {
+            "arg": "domain"
+          },
+          "domainContains": {
+            "arg": "domain_contains"
+          },
+          "rtype": {
+            "arg": "rtype"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "RecordCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2613,6 +3065,47 @@
       "help": "Updates a collection of records in the specified zone.\n\nYou can update one record or all records for the specified zone depending on the changes provided in the request body. You can also add or remove records using this function. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](patchZoneRecords)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.patch_zone_records",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "patch_zone_records",
+        "http": "PATCH",
+        "path": "/zones/{zoneNameOrId}/records",
+        "positionalArgs": ["zone_name_or_id", "patch_zone_records_details"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "patch_zone_records_details",
+        "responseType": "RecordCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2793,6 +3286,47 @@
       "help": "Replaces records in the specified zone with the records specified in the request body.\n\nIf a specified record does not exist, it will be created. If the record exists, then it will be updated to represent the record in the body of the request. If a record in the zone does not exist in the request body, the record will be removed from the zone. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](updateZoneRecords)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_zone_records",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_zone_records",
+        "http": "PUT",
+        "path": "/zones/{zoneNameOrId}/records",
+        "positionalArgs": ["zone_name_or_id", "update_zone_records_details"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_zone_records_details",
+        "responseType": "RecordCollection",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2993,6 +3527,44 @@
       "help": "Moves a resolver into a different compartment along with its protected default view and any endpoints.\n\nZones in the default view are not moved. VCN-dedicated resolvers are initially created in the same compartment as their corresponding VCN, but can then be moved to a different compartment. \n[Command Reference](changeResolverCompartment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.change_resolver_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "change_resolver_compartment",
+        "http": "POST",
+        "path": "/resolvers/{resolverId}/actions/changeCompartment",
+        "positionalArgs": [
+          "resolver_id",
+          "change_resolver_compartment_details"
+        ],
+        "pathParams": {
+          "resolverId": "resolver_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_resolver_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -3175,6 +3747,40 @@
       "help": "Gets information about a specific resolver.\n\nNote that attempting to get a resolver in the DELETED lifecycleState will result in a `404` response to be consistent with other operations of the API. \n[Command Reference](getResolver)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_resolver",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_resolver",
+        "http": "GET",
+        "path": "/resolvers/{resolverId}",
+        "positionalArgs": ["resolver_id"],
+        "pathParams": {
+          "resolverId": "resolver_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Resolver",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3298,6 +3904,56 @@
       "help": "Gets a list of all resolvers within a compartment.\n\nThe collection can be filtered by display name, id, or lifecycle state. It can be sorted on creation time or displayName both in ASC or DESC order. Note that when no lifecycleState query parameter is provided, the collection does not include resolvers in the DELETED lifecycleState to be consistent with other operations of the API. \n[Command Reference](listResolvers)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_resolvers",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_resolvers",
+        "http": "GET",
+        "path": "/resolvers",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ResolverSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -3568,6 +4224,42 @@
       "help": "Updates the specified resolver with your new information. \n[Command Reference](updateResolver)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_resolver",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_resolver",
+        "http": "PUT",
+        "path": "/resolvers/{resolverId}",
+        "positionalArgs": ["resolver_id", "update_resolver_details"],
+        "pathParams": {
+          "resolverId": "resolver_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_resolver_details",
+        "responseType": "Resolver",
+        "paginated": false
+      },
+      "otherOperations": ["get_resolver"],
       "params": [
         {
           "kind": "option",
@@ -3872,6 +4564,39 @@
       "help": "Creates a new resolver endpoint in the same compartment as the resolver. \n[Command Reference](createResolverEndpoint)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.create_resolver_endpoint_create_resolver_vnic_endpoint_details",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "create_resolver_endpoint",
+        "http": "POST",
+        "path": "/resolvers/{resolverId}/endpoints",
+        "positionalArgs": ["resolver_id", "create_resolver_endpoint_details"],
+        "pathParams": {
+          "resolverId": "resolver_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_resolver_endpoint_details",
+        "responseType": "ResolverEndpoint",
+        "paginated": false
+      },
+      "otherOperations": ["get_resolver_endpoint"],
       "params": [
         {
           "kind": "option",
@@ -4213,6 +4938,41 @@
       "help": "Deletes the specified resolver endpoint.\n\nNote that attempting to delete a resolver endpoint in the DELETED lifecycle state will result in a `404` response to be consistent with other operations of the API. Resolver endpoints may not be deleted if they are referenced by a resolver rule. \n[Command Reference](deleteResolverEndpoint)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_resolver_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_resolver_endpoint",
+        "http": "DELETE",
+        "path": "/resolvers/{resolverId}/endpoints/{resolverEndpointName}",
+        "positionalArgs": ["resolver_id", "resolver_endpoint_name"],
+        "pathParams": {
+          "resolverId": "resolver_id",
+          "resolverEndpointName": "resolver_endpoint_name"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -4433,6 +5193,41 @@
       "help": "Gets information about a specific resolver endpoint.\n\nNote that attempting to get a resolver endpoint in the DELETED lifecycle state will result in a `404` response to be consistent with other operations of the API. \n[Command Reference](getResolverEndpoint)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_resolver_endpoint",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_resolver_endpoint",
+        "http": "GET",
+        "path": "/resolvers/{resolverId}/endpoints/{resolverEndpointName}",
+        "positionalArgs": ["resolver_id", "resolver_endpoint_name"],
+        "pathParams": {
+          "resolverId": "resolver_id",
+          "resolverEndpointName": "resolver_endpoint_name"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ResolverEndpoint",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -4575,6 +5370,52 @@
       "help": "Gets a list of all endpoints within a resolver. The collection can be filtered by name or lifecycle state. It can be sorted on creation time or name both in ASC or DESC order. Note that when no lifecycleState query parameter is provided, the collection does not include resolver endpoints in the DELETED lifecycle state to be consistent with other operations of the API. \n[Command Reference](listResolverEndpoints)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_resolver_endpoints",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_resolver_endpoints",
+        "http": "GET",
+        "path": "/resolvers/{resolverId}/endpoints",
+        "positionalArgs": ["resolver_id"],
+        "pathParams": {
+          "resolverId": "resolver_id"
+        },
+        "queryParams": {
+          "name": {
+            "arg": "name"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ResolverEndpointSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4826,6 +5667,47 @@
       "help": "Updates the specified resolver endpoint with your new information. \n[Command Reference](updateResolverEndpoint)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_resolver_endpoint_update_resolver_vnic_endpoint_details",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_resolver_endpoint",
+        "http": "PUT",
+        "path": "/resolvers/{resolverId}/endpoints/{resolverEndpointName}",
+        "positionalArgs": [
+          "resolver_id",
+          "resolver_endpoint_name",
+          "update_resolver_endpoint_details"
+        ],
+        "pathParams": {
+          "resolverId": "resolver_id",
+          "resolverEndpointName": "resolver_endpoint_name"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_resolver_endpoint_details",
+        "responseType": "ResolverEndpoint",
+        "paginated": false
+      },
+      "otherOperations": ["get_resolver_endpoint"],
       "params": [
         {
           "kind": "option",
@@ -5130,6 +6012,44 @@
       "help": "Moves a steering policy into a different compartment. \n[Command Reference](changeSteeringPolicyCompartment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.change_steering_policy_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "change_steering_policy_compartment",
+        "http": "POST",
+        "path": "/steeringPolicies/{steeringPolicyId}/actions/changeCompartment",
+        "positionalArgs": [
+          "steering_policy_id",
+          "change_steering_policy_compartment_details"
+        ],
+        "pathParams": {
+          "steeringPolicyId": "steering_policy_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_steering_policy_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -5312,6 +6232,37 @@
       "help": "Creates a new steering policy in the specified compartment. For more information on creating policies with templates, see [Traffic Management API Guide]. \n[Command Reference](createSteeringPolicy)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.create_steering_policy",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "create_steering_policy",
+        "http": "POST",
+        "path": "/steeringPolicies",
+        "positionalArgs": ["create_steering_policy_details"],
+        "pathParams": {},
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_steering_policy_details",
+        "responseType": "SteeringPolicy",
+        "paginated": false
+      },
+      "otherOperations": ["get_steering_policy"],
       "params": [
         {
           "kind": "option",
@@ -5617,6 +6568,40 @@
       "help": "Deletes the specified steering policy.\n\nA `204` response indicates that the delete has been successful. Deletion will fail if the policy is attached to any zones. To detach a policy from a zone, see `DeleteSteeringPolicyAttachment`. \n[Command Reference](deleteSteeringPolicy)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_steering_policy",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_steering_policy",
+        "http": "DELETE",
+        "path": "/steeringPolicies/{steeringPolicyId}",
+        "positionalArgs": ["steering_policy_id"],
+        "pathParams": {
+          "steeringPolicyId": "steering_policy_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -5818,6 +6803,40 @@
       "help": "Gets information about the specified steering policy. \n[Command Reference](getSteeringPolicy)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_steering_policy",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_steering_policy",
+        "http": "GET",
+        "path": "/steeringPolicies/{steeringPolicyId}",
+        "positionalArgs": ["steering_policy_id"],
+        "pathParams": {
+          "steeringPolicyId": "steering_policy_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SteeringPolicy",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5941,6 +6960,71 @@
       "help": "Gets a list of all steering policies in the specified compartment. \n[Command Reference](listSteeringPolicies)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_steering_policies",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_steering_policies",
+        "http": "GET",
+        "path": "/steeringPolicies",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "displayNameContains": {
+            "arg": "display_name_contains"
+          },
+          "healthCheckMonitorId": {
+            "arg": "health_check_monitor_id"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          },
+          "template": {
+            "arg": "template"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[SteeringPolicySummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -6299,6 +7383,45 @@
       "help": "Updates the configuration of the specified steering policy. \n[Command Reference](updateSteeringPolicy)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_steering_policy",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_steering_policy",
+        "http": "PUT",
+        "path": "/steeringPolicies/{steeringPolicyId}",
+        "positionalArgs": [
+          "steering_policy_id",
+          "update_steering_policy_details"
+        ],
+        "pathParams": {
+          "steeringPolicyId": "steering_policy_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_steering_policy_details",
+        "responseType": "SteeringPolicy",
+        "paginated": false
+      },
+      "otherOperations": ["get_steering_policy"],
       "params": [
         {
           "kind": "option",
@@ -6662,6 +7785,37 @@
       "help": "Creates a new attachment between a steering policy and a domain, giving the policy permission to answer queries for the specified domain. A steering policy must be attached to a domain for the policy to answer DNS queries for that domain.\n\nFor the purposes of access control, the attachment is automatically placed into the same compartment as the domain's zone.\n\nAttachments cannot be created for private zones. \n[Command Reference](createSteeringPolicyAttachment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.create_steering_policy_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "create_steering_policy_attachment",
+        "http": "POST",
+        "path": "/steeringPolicyAttachments",
+        "positionalArgs": ["create_steering_policy_attachment_details"],
+        "pathParams": {},
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_steering_policy_attachment_details",
+        "responseType": "SteeringPolicyAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_steering_policy_attachment"],
       "params": [
         {
           "kind": "option",
@@ -6863,6 +8017,40 @@
       "help": "Deletes the specified steering policy attachment. A `204` response indicates that the delete has been successful. \n[Command Reference](deleteSteeringPolicyAttachment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_steering_policy_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_steering_policy_attachment",
+        "http": "DELETE",
+        "path": "/steeringPolicyAttachments/{steeringPolicyAttachmentId}",
+        "positionalArgs": ["steering_policy_attachment_id"],
+        "pathParams": {
+          "steeringPolicyAttachmentId": "steering_policy_attachment_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -7064,6 +8252,40 @@
       "help": "Gets information about the specified steering policy attachment. \n[Command Reference](getSteeringPolicyAttachment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_steering_policy_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_steering_policy_attachment",
+        "http": "GET",
+        "path": "/steeringPolicyAttachments/{steeringPolicyAttachmentId}",
+        "positionalArgs": ["steering_policy_attachment_id"],
+        "pathParams": {
+          "steeringPolicyAttachmentId": "steering_policy_attachment_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SteeringPolicyAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7187,6 +8409,74 @@
       "help": "Lists the steering policy attachments in the specified compartment. \n[Command Reference](listSteeringPolicyAttachments)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_steering_policy_attachments",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_steering_policy_attachments",
+        "http": "GET",
+        "path": "/steeringPolicyAttachments",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "steeringPolicyId": {
+            "arg": "steering_policy_id"
+          },
+          "zoneId": {
+            "arg": "zone_id"
+          },
+          "domain": {
+            "arg": "domain"
+          },
+          "domainContains": {
+            "arg": "domain_contains"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[SteeringPolicyAttachmentSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7564,6 +8854,45 @@
       "help": "Updates the specified steering policy attachment with your new information. \n[Command Reference](updateSteeringPolicyAttachment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_steering_policy_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_steering_policy_attachment",
+        "http": "PUT",
+        "path": "/steeringPolicyAttachments/{steeringPolicyAttachmentId}",
+        "positionalArgs": [
+          "steering_policy_attachment_id",
+          "update_steering_policy_attachment_details"
+        ],
+        "pathParams": {
+          "steeringPolicyAttachmentId": "steering_policy_attachment_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_steering_policy_attachment_details",
+        "responseType": "SteeringPolicyAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_steering_policy_attachment"],
       "params": [
         {
           "kind": "option",
@@ -7765,6 +9094,43 @@
       "help": "Moves a TSIG key into a different compartment. \n[Command Reference](changeTsigKeyCompartment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.change_tsig_key_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "change_tsig_key_compartment",
+        "http": "POST",
+        "path": "/tsigKeys/{tsigKeyId}/actions/changeCompartment",
+        "positionalArgs": [
+          "tsig_key_id",
+          "change_tsig_key_compartment_details"
+        ],
+        "pathParams": {
+          "tsigKeyId": "tsig_key_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_tsig_key_compartment_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7888,6 +9254,34 @@
       "help": "Creates a new TSIG key in the specified compartment. There is no `opc-retry-token` header since TSIG key names must be globally unique. \n[Command Reference](createTsigKey)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.create_tsig_key",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "create_tsig_key",
+        "http": "POST",
+        "path": "/tsigKeys",
+        "positionalArgs": ["create_tsig_key_details"],
+        "pathParams": {},
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_tsig_key_details",
+        "responseType": "TsigKey",
+        "paginated": false
+      },
+      "otherOperations": ["get_tsig_key"],
       "params": [
         {
           "kind": "option",
@@ -8134,6 +9528,40 @@
       "help": "Deletes the specified TSIG key. \n[Command Reference](deleteTsigKey)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_tsig_key",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_tsig_key",
+        "http": "DELETE",
+        "path": "/tsigKeys/{tsigKeyId}",
+        "positionalArgs": ["tsig_key_id"],
+        "pathParams": {
+          "tsigKeyId": "tsig_key_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -8335,6 +9763,40 @@
       "help": "Gets information about the specified TSIG key. \n[Command Reference](getTsigKey)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_tsig_key",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_tsig_key",
+        "http": "GET",
+        "path": "/tsigKeys/{tsigKeyId}",
+        "positionalArgs": ["tsig_key_id"],
+        "pathParams": {
+          "tsigKeyId": "tsig_key_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "TsigKey",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8458,6 +9920,56 @@
       "help": "Gets a list of all TSIG keys in the specified compartment. \n[Command Reference](listTsigKeys)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_tsig_keys",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_tsig_keys",
+        "http": "GET",
+        "path": "/tsigKeys",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[TsigKeySummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8728,6 +10240,42 @@
       "help": "Updates the specified TSIG key. \n[Command Reference](updateTsigKey)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_tsig_key",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_tsig_key",
+        "http": "PUT",
+        "path": "/tsigKeys/{tsigKeyId}",
+        "positionalArgs": ["tsig_key_id", "update_tsig_key_details"],
+        "pathParams": {
+          "tsigKeyId": "tsig_key_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_tsig_key_details",
+        "responseType": "TsigKey",
+        "paginated": false
+      },
+      "otherOperations": ["get_tsig_key"],
       "params": [
         {
           "kind": "option",
@@ -8975,6 +10523,41 @@
       "help": "Moves a view into a different compartment.\n\nTo change the compartment of a protected view, change the compartment of its corresponding resolver. \n[Command Reference](changeViewCompartment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.change_view_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "change_view_compartment",
+        "http": "POST",
+        "path": "/views/{viewId}/actions/changeCompartment",
+        "positionalArgs": ["view_id", "change_view_compartment_details"],
+        "pathParams": {
+          "viewId": "view_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_view_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -9157,6 +10740,37 @@
       "help": "Creates a new view in the specified compartment. \n[Command Reference](createView)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.create_view",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "create_view",
+        "http": "POST",
+        "path": "/views",
+        "positionalArgs": ["create_view_details"],
+        "pathParams": {},
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_view_details",
+        "responseType": "View",
+        "paginated": false
+      },
+      "otherOperations": ["get_view"],
       "params": [
         {
           "kind": "option",
@@ -9358,6 +10972,40 @@
       "help": "Deletes the specified view.\n\nNote that attempting to delete a view in the DELETED lifecycleState will result in a `404` response to be consistent with other operations of the API. Views cannot be deleted if they are referenced by non-deleted zones or resolvers. Protected views cannot be deleted. \n[Command Reference](deleteView)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_view",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_view",
+        "http": "DELETE",
+        "path": "/views/{viewId}",
+        "positionalArgs": ["view_id"],
+        "pathParams": {
+          "viewId": "view_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -9559,6 +11207,40 @@
       "help": "Gets information about a specific view.\n\nNote that attempting to get a view in the DELETED lifecycleState will result in a `404` response to be consistent with other operations of the API. \n[Command Reference](getView)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_view",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_view",
+        "http": "GET",
+        "path": "/views/{viewId}",
+        "positionalArgs": ["view_id"],
+        "pathParams": {
+          "viewId": "view_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "View",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -9682,6 +11364,56 @@
       "help": "Gets a list of all views within a compartment.\n\nThe collection can be filtered by display name, id, or lifecycle state. It can be sorted on creation time or displayName both in ASC or DESC order. Note that when no lifecycleState query parameter is provided, the collection does not include views in the DELETED lifecycleState to be consistent with other operations of the API. \n[Command Reference](listViews)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_views",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_views",
+        "http": "GET",
+        "path": "/views",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "id": {
+            "arg": "id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ViewSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -9945,6 +11677,42 @@
       "help": "Updates the specified view with your new information. \n[Command Reference](updateView)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_view",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_view",
+        "http": "PUT",
+        "path": "/views/{viewId}",
+        "positionalArgs": ["view_id", "update_view_details"],
+        "pathParams": {
+          "viewId": "view_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_view_details",
+        "responseType": "View",
+        "paginated": false
+      },
+      "otherOperations": ["get_view"],
       "params": [
         {
           "kind": "option",
@@ -10204,6 +11972,41 @@
       "help": "Moves a zone into a different compartment.\n\nProtected zones cannot have their compartment changed. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required.\n\n**Note:** All SteeringPolicyAttachment objects associated with this zone will also be moved into the provided compartment. \n[Command Reference](changeZoneCompartment)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.change_zone_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "change_zone_compartment",
+        "http": "POST",
+        "path": "/zones/{zoneId}/actions/changeCompartment",
+        "positionalArgs": ["zone_id", "change_zone_compartment_details"],
+        "pathParams": {
+          "zoneId": "zone_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_zone_compartment_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -10714,6 +12517,42 @@
       "help": "Creates a new zone from a zone file in the specified compartment. Not supported for private zones. \n[Command Reference](createZoneFromZoneFile)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.create_zone_from_zone_file",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "create_zone_from_zone_file",
+        "http": "POST",
+        "path": "/actions/createZoneFromZoneFile",
+        "positionalArgs": [
+          "compartment_id",
+          "create_zone_from_zone_file_details"
+        ],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_zone_from_zone_file_details",
+        "responseType": "Zone",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -10837,6 +12676,46 @@
       "help": "Deletes the specified zone and all its steering policy attachments.\n\nA `204` response indicates that the zone has been successfully deleted. Protected zones cannot be deleted. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](deleteZone)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.delete_zone",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "delete_zone",
+        "http": "DELETE",
+        "path": "/zones/{zoneNameOrId}",
+        "positionalArgs": ["zone_name_or_id"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -11076,6 +12955,46 @@
       "help": "Gets information about the specified zone, including its creation date, zone type, and serial.\n\nWhen the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](getZone)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_zone",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_zone",
+        "http": "GET",
+        "path": "/zones/{zoneNameOrId}",
+        "positionalArgs": ["zone_name_or_id"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Zone",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11237,6 +13156,43 @@
       "help": "Gets the requested zone's zone file. \n[Command Reference](getZoneContent)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.get_zone_content",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "get_zone_content",
+        "http": "GET",
+        "path": "/zones/{zoneNameOrId}/content",
+        "positionalArgs": ["zone_name_or_id"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "text/dns"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-None-Match": {
+            "arg": "if_none_match"
+          },
+          "If-Modified-Since": {
+            "arg": "if_modified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11398,6 +13354,74 @@
       "help": "Gets a list of all zones in the specified compartment.\n\nThe collection can be filtered by name, time created, scope, associated view, and zone type. Filtering by view is only supported for private zones. \n[Command Reference](listZones)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_zones",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_zones",
+        "http": "GET",
+        "path": "/zones",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "nameContains": {
+            "arg": "name_contains"
+          },
+          "zoneType": {
+            "arg": "zone_type"
+          },
+          "timeCreatedGreaterThanOrEqualTo": {
+            "arg": "time_created_greater_than_or_equal_to"
+          },
+          "timeCreatedLessThan": {
+            "arg": "time_created_less_than"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "tsigKeyId": {
+            "arg": "tsig_key_id"
+          },
+          "dnssecState": {
+            "arg": "dnssec_state"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ZoneSummary]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -12032,6 +14056,47 @@
       "help": "Promotes a specified `DnssecKeyVersion` on the zone.\n\nIf the `DnssecKeyVersion` identified in the request body is a key signing key (KSK) that is replacing another `DnssecKeyVersion`, then the old `DnssecKeyVersion` is scheduled for removal from the zone.\n\nFor key signing keys (KSKs), you must create the DS record with the new key information **before** promoting the new key to establish a chain of trust. To avoid a service disruption, remove the old DS record as soon as its TTL (time to live) expires.\n\nFor more information, see [DNSSEC]. \n[Command Reference](promoteZoneDnssecKeyVersion)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.promote_zone_dnssec_key_version",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "promote_zone_dnssec_key_version",
+        "http": "POST",
+        "path": "/zones/{zoneId}/actions/promoteDnssecKeyVersion",
+        "positionalArgs": [
+          "zone_id",
+          "promote_zone_dnssec_key_version_details"
+        ],
+        "pathParams": {
+          "zoneId": "zone_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "promote_zone_dnssec_key_version_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -12233,6 +14298,44 @@
       "help": "Stages a new `DnssecKeyVersion` on the zone. Staging is a process that generates a new \"successor\" key version that replaces an existing \"predecessor\" key version. **Note:** A new key-signing key (KSK) version is inert until you update the parent zone DS records.\n\nFor more information, see the [DNSSEC] documentation. \n[Command Reference](stageZoneDnssecKeyVersion)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.stage_zone_dnssec_key_version",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "stage_zone_dnssec_key_version",
+        "http": "POST",
+        "path": "/zones/{zoneId}/actions/stageDnssecKeyVersion",
+        "positionalArgs": ["zone_id", "stage_zone_dnssec_key_version_details"],
+        "pathParams": {
+          "zoneId": "zone_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "stage_zone_dnssec_key_version_details",
+        "paginated": false,
+        "workRequestClient": "work_requests.work_request"
+      },
       "params": [
         {
           "kind": "option",
@@ -12434,6 +14537,48 @@
       "help": "Updates the zone with the specified information.\n\nGlobal secondary zones may have their external masters updated. For more information about secondary zones, see [Manage DNS Service Zone]. When the zone name is provided as a path parameter and `PRIVATE` is used for the scope query parameter then the viewId query parameter is required. \n[Command Reference](updateZone)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.update_zone",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "update_zone",
+        "http": "PUT",
+        "path": "/zones/{zoneNameOrId}",
+        "positionalArgs": ["zone_name_or_id", "update_zone_details"],
+        "pathParams": {
+          "zoneNameOrId": "zone_name_or_id"
+        },
+        "queryParams": {
+          "scope": {
+            "arg": "scope"
+          },
+          "viewId": {
+            "arg": "view_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "If-Match": {
+            "arg": "if_match"
+          },
+          "If-Unmodified-Since": {
+            "arg": "if_unmodified_since"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_zone_details",
+        "responseType": "Zone",
+        "paginated": false
+      },
+      "otherOperations": ["get_zone"],
       "params": [
         {
           "kind": "option",
@@ -12799,6 +14944,38 @@
       "help": "Gets a list of IP addresses of OCI nameservers for inbound and outbound transfer of zones in the specified compartment (which must be the root compartment of a tenancy) that transfer zone data with external master or downstream nameservers. \n[Command Reference](listZoneTransferServers)",
       "callback": "services.dns.src.oci_cli_dns.generated.dns_cli.list_zone_transfer_servers",
       "kind": "generated",
+      "operation": {
+        "client": "dns.dns",
+        "method": "list_zone_transfer_servers",
+        "http": "GET",
+        "path": "/zoneTransferServers",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "scope": {
+            "arg": "scope"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "list[ZoneTransferServer]",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

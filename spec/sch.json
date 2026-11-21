@@ -26,6 +26,22 @@
       }
     ]
   },
+  "clients": {
+    "sch.connector_plugins": {
+      "class": "oci.sch.connector_plugins_client.ConnectorPluginsClient",
+      "basePath": "/20200909",
+      "endpointTemplate": "https://service-connector-hub.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "connector_plugins"
+    },
+    "sch.service_connector": {
+      "class": "oci.sch.service_connector_client.ServiceConnectorClient",
+      "basePath": "/20200909",
+      "endpointTemplate": "https://service-connector-hub.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "service_connector"
+    }
+  },
   "groups": {
     "connector-plugins": {
       "hidden": false,
@@ -160,6 +176,30 @@
       "help": "Gets the specified connector plugin configuration information. \n[Command Reference](getConnectorPlugin)",
       "callback": "services.sch.src.oci_cli_connector_plugins.generated.connectorplugins_cli.get_connector_plugin",
       "kind": "generated",
+      "operation": {
+        "client": "sch.connector_plugins",
+        "method": "get_connector_plugin",
+        "http": "GET",
+        "path": "/connectorPlugins/{connectorPluginName}",
+        "positionalArgs": ["connector_plugin_name"],
+        "pathParams": {
+          "connectorPluginName": "connector_plugin_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ConnectorPlugin",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -224,6 +264,50 @@
       "help": "Lists connector plugins according to the specified filter. \n[Command Reference](listConnectorPlugins)",
       "callback": "services.sch.src.oci_cli_connector_plugins.generated.connectorplugins_cli.list_connector_plugins",
       "kind": "generated",
+      "operation": {
+        "client": "sch.connector_plugins",
+        "method": "list_connector_plugins",
+        "http": "GET",
+        "path": "/connectorPlugins",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ConnectorPluginCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -456,6 +540,36 @@
       "help": "Activates the specified connector.\n\nAfter you send your request, the connector's state is temporarily UPDATING. When the state changes to ACTIVE, data begins transferring from the source service to the target service. For more information, see [Activating a Connector]. \n[Command Reference](activateServiceConnector)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.activate_service_connector",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "activate_service_connector",
+        "http": "POST",
+        "path": "/serviceConnectors/{serviceConnectorId}/actions/activate",
+        "positionalArgs": ["service_connector_id"],
+        "pathParams": {
+          "serviceConnectorId": "service_connector_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -605,6 +719,37 @@
       "help": "Moves a connector into a different compartment within the same tenancy. For more information, see [Moving a Connector].\n\nWhen provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeServiceConnectorCompartment)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.change_service_connector_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "change_service_connector_compartment",
+        "http": "POST",
+        "path": "/serviceConnectors/{serviceConnectorId}/actions/changeCompartment",
+        "positionalArgs": [
+          "service_connector_id",
+          "change_service_connector_compartment_details"
+        ],
+        "pathParams": {
+          "serviceConnectorId": "service_connector_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_service_connector_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -773,6 +918,32 @@
       "help": "Creates a new connector in the specified compartment. A connector is a logically defined flow for moving data from a source service to a destination service in Oracle Cloud Infrastructure. For more information, see [Creating a Connector]. For general information about connectors, see [Overview of Connector Hub].\n\nFor purposes of access control, you must provide the [OCID] of the compartment where you want the connector to reside. Notice that the connector doesn't have to be in the same compartment as the source or target services. For information about access control and compartments, see [Overview of the IAM Service].\n\nAfter you send your request, the new connector's state is temporarily CREATING. When the state changes to ACTIVE, data begins transferring from the source service to the target service. For instructions on deactivating and activating connectors, see [Activating a Connector]. \n[Command Reference](createServiceConnector)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.create_service_connector",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "create_service_connector",
+        "http": "POST",
+        "path": "/serviceConnectors",
+        "positionalArgs": ["create_service_connector_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_service_connector_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1036,6 +1207,36 @@
       "help": "Deactivates the specified connector.\n\nAfter you send your request, the connector's state is temporarily UPDATING and any data transfer stops. The state then changes to INACTIVE. For more information, see [Deactivating a Connector]. \n[Command Reference](deactivateServiceConnector)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.deactivate_service_connector",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "deactivate_service_connector",
+        "http": "POST",
+        "path": "/serviceConnectors/{serviceConnectorId}/actions/deactivate",
+        "positionalArgs": ["service_connector_id"],
+        "pathParams": {
+          "serviceConnectorId": "service_connector_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1185,6 +1386,33 @@
       "help": "Deletes the specified connector. For more information, see [Deleting a Connector].\n\nAfter you send your request, the connector's state is temporarily DELETING and any data transfer stops. The state then changes to DELETED. \n[Command Reference](deleteServiceConnector)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.delete_service_connector",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "delete_service_connector",
+        "http": "DELETE",
+        "path": "/serviceConnectors/{serviceConnectorId}",
+        "positionalArgs": ["service_connector_id"],
+        "pathParams": {
+          "serviceConnectorId": "service_connector_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1353,6 +1581,30 @@
       "help": "Gets the specified connector's configuration information. For more information, see [Getting a Connector]. \n[Command Reference](getServiceConnector)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.get_service_connector",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "get_service_connector",
+        "http": "GET",
+        "path": "/serviceConnectors/{serviceConnectorId}",
+        "positionalArgs": ["service_connector_id"],
+        "pathParams": {
+          "serviceConnectorId": "service_connector_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ServiceConnector",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1417,6 +1669,50 @@
       "help": "Lists connectors in the specified compartment. For more information, see [Listing Connectors]. \n[Command Reference](listServiceConnectors)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.list_service_connectors",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "list_service_connectors",
+        "http": "GET",
+        "path": "/serviceConnectors",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ServiceConnectorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -1649,6 +1945,37 @@
       "help": "Updates the configuration information for the specified connector. For more information, see [Updating a Connector].\n\nAfter you send your request, the connector's state is temporarily UPDATING and any data transfer pauses. The state then changes back to its original value: if ACTIVE, then data transfer resumes. \n[Command Reference](updateServiceConnector)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.update_service_connector",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "update_service_connector",
+        "http": "PUT",
+        "path": "/serviceConnectors/{serviceConnectorId}",
+        "positionalArgs": [
+          "service_connector_id",
+          "update_service_connector_details"
+        ],
+        "pathParams": {
+          "serviceConnectorId": "service_connector_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_service_connector_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1951,6 +2278,30 @@
       "help": "Gets the details of the specified work request. For more information, see [Getting a Work Request's Details]. \n[Command Reference](getWorkRequest)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -2015,6 +2366,38 @@
       "help": "Lists the work requests in the specified compartment. For more information, see [Listing Work Requests]. \n[Command Reference](listWorkRequests)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2156,6 +2539,37 @@
       "help": "Lists work request errors for the specified work request. Results are paginated. For more information, see [Listing Work Request Errors]. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestErrorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -2297,6 +2711,37 @@
       "help": "Lists logs for the specified work request. Results are paginated. For more information, see [Listing Work Request Log Entries]. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.sch.src.oci_cli_service_connector.generated.serviceconnector_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "sch.service_connector",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestLogEntryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

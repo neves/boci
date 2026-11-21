@@ -26,6 +26,36 @@
       }
     ]
   },
+  "clients": {
+    "marketplace_publisher.administrator_artifact": {
+      "class": "oci.marketplace_publisher.administrator_artifact_client.AdministratorArtifactClient",
+      "basePath": "/20241201",
+      "endpointTemplate": "https://marketplace-publisher.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "administrator_artifact"
+    },
+    "marketplace_publisher.administrator_publisher": {
+      "class": "oci.marketplace_publisher.administrator_publisher_client.AdministratorPublisherClient",
+      "basePath": "/20241201",
+      "endpointTemplate": "https://marketplace-publisher.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "administrator_publisher"
+    },
+    "marketplace_publisher.marketplace_administrator": {
+      "class": "oci.marketplace_publisher.marketplace_administrator_client.MarketplaceAdministratorClient",
+      "basePath": "/20241201",
+      "endpointTemplate": "https://marketplace-publisher.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "marketplace_administrator"
+    },
+    "marketplace_publisher.marketplace_publisher": {
+      "class": "oci.marketplace_publisher.marketplace_publisher_client.MarketplacePublisherClient",
+      "basePath": "/20241201",
+      "endpointTemplate": "https://marketplace-publisher.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "serviceName": "marketplace_publisher"
+    }
+  },
   "groups": {
     "administrator-artifact": {
       "hidden": false,
@@ -1512,6 +1542,37 @@
       "help": "Updates the specified Artifact Status identified by the id. \n[Command Reference](updateAdminArtifactStatus)",
       "callback": "services.marketplace_publisher.src.oci_cli_administrator_artifact.generated.administratorartifact_cli.update_admin_artifact_status",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.administrator_artifact",
+        "method": "update_admin_artifact_status",
+        "http": "PUT",
+        "path": "/adminArtifacts/{artifactId}/status/new",
+        "positionalArgs": [
+          "update_admin_artifact_status_details",
+          "artifact_id"
+        ],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_admin_artifact_status_details",
+        "responseType": "Artifact",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1614,6 +1675,30 @@
       "help": "Gets a Publisher by identifier \n[Command Reference](getAdminPublisher)",
       "callback": "services.marketplace_publisher.src.oci_cli_administrator_publisher.generated.administratorpublisher_cli.get_admin_publisher",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.administrator_publisher",
+        "method": "get_admin_publisher",
+        "http": "GET",
+        "path": "/adminPublishers/{publisherId}",
+        "positionalArgs": ["publisher_id"],
+        "pathParams": {
+          "publisherId": "publisher_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminPublisher",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -1678,6 +1763,40 @@
       "help": "Moves the specified artifact to the specified compartment within the same tenancy. \n[Command Reference](changeArtifactCompartment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.change_artifact_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "change_artifact_compartment",
+        "http": "POST",
+        "path": "/artifacts/{artifactId}/actions/changeCompartment",
+        "positionalArgs": [
+          "artifact_id",
+          "change_artifact_compartment_details"
+        ],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "change_artifact_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -1848,6 +1967,32 @@
       "help": "Creates a new artifact in your compartment. You must specify your compartment ID in the request object.\n\nYou must also specify a *name* for the artifact(although it can be an empty string). It does not have to be unique, and you can change it anytime with [Update]..\n\nYou must also specify a *artifactType* for the artifact. Allowed values are CONTAINER_IMAGE and HELM_CHART\n\nYou must also provide the container or helm chart registry details for the corresponding images. Oracle container registry details (Registry/Concepts/registryoverview.htm).\n\nAfter you send your request, the new object's `status` will temporarily be IN_PROGRESS and `lifecycleState` will be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE and the status has changed to ‘AVAILABLE’ for the new Artifact. \n[Command Reference](createArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_artifact",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_artifact",
+        "http": "POST",
+        "path": "/artifacts",
+        "positionalArgs": ["create_artifact_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2063,6 +2208,32 @@
       "help": "Creates a new artifact in your compartment. You must specify your compartment ID in the request object.\n\nYou must also specify a *name* for the artifact(although it can be an empty string). It does not have to be unique, and you can change it anytime with [Update]..\n\nYou must also specify a *artifactType* for the artifact. Allowed values are CONTAINER_IMAGE and HELM_CHART\n\nYou must also provide the container or helm chart registry details for the corresponding images. Oracle container registry details (Registry/Concepts/registryoverview.htm).\n\nAfter you send your request, the new object's `status` will temporarily be IN_PROGRESS and `lifecycleState` will be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE and the status has changed to ‘AVAILABLE’ for the new Artifact. \n[Command Reference](createArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_artifact_create_container_image_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_artifact",
+        "http": "POST",
+        "path": "/artifacts",
+        "positionalArgs": ["create_artifact_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2271,6 +2442,32 @@
       "help": "Creates a new artifact in your compartment. You must specify your compartment ID in the request object.\n\nYou must also specify a *name* for the artifact(although it can be an empty string). It does not have to be unique, and you can change it anytime with [Update]..\n\nYou must also specify a *artifactType* for the artifact. Allowed values are CONTAINER_IMAGE and HELM_CHART\n\nYou must also provide the container or helm chart registry details for the corresponding images. Oracle container registry details (Registry/Concepts/registryoverview.htm).\n\nAfter you send your request, the new object's `status` will temporarily be IN_PROGRESS and `lifecycleState` will be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE and the status has changed to ‘AVAILABLE’ for the new Artifact. \n[Command Reference](createArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_artifact_create_kubernetes_image_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_artifact",
+        "http": "POST",
+        "path": "/artifacts",
+        "positionalArgs": ["create_artifact_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2498,6 +2695,32 @@
       "help": "Creates a new artifact in your compartment. You must specify your compartment ID in the request object.\n\nYou must also specify a *name* for the artifact(although it can be an empty string). It does not have to be unique, and you can change it anytime with [Update]..\n\nYou must also specify a *artifactType* for the artifact. Allowed values are CONTAINER_IMAGE and HELM_CHART\n\nYou must also provide the container or helm chart registry details for the corresponding images. Oracle container registry details (Registry/Concepts/registryoverview.htm).\n\nAfter you send your request, the new object's `status` will temporarily be IN_PROGRESS and `lifecycleState` will be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE and the status has changed to ‘AVAILABLE’ for the new Artifact. \n[Command Reference](createArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_artifact_create_machine_image_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_artifact",
+        "http": "POST",
+        "path": "/artifacts",
+        "positionalArgs": ["create_artifact_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2706,6 +2929,32 @@
       "help": "Creates a new artifact in your compartment. You must specify your compartment ID in the request object.\n\nYou must also specify a *name* for the artifact(although it can be an empty string). It does not have to be unique, and you can change it anytime with [Update]..\n\nYou must also specify a *artifactType* for the artifact. Allowed values are CONTAINER_IMAGE and HELM_CHART\n\nYou must also provide the container or helm chart registry details for the corresponding images. Oracle container registry details (Registry/Concepts/registryoverview.htm).\n\nAfter you send your request, the new object's `status` will temporarily be IN_PROGRESS and `lifecycleState` will be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE and the status has changed to ‘AVAILABLE’ for the new Artifact. \n[Command Reference](createArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_artifact_create_stack_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_artifact",
+        "http": "POST",
+        "path": "/artifacts",
+        "positionalArgs": ["create_artifact_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -2914,6 +3163,36 @@
       "help": "Deletes the specified artifact. \n[Command Reference](deleteArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_artifact",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_artifact",
+        "http": "DELETE",
+        "path": "/artifacts/{artifactId}",
+        "positionalArgs": ["artifact_id"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3084,6 +3363,30 @@
       "help": "Gets the specified artifact's information. \n[Command Reference](getArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_artifact",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_artifact",
+        "http": "GET",
+        "path": "/artifacts/{artifactId}",
+        "positionalArgs": ["artifact_id"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Artifact",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -3148,6 +3451,34 @@
       "help": "Updates the specified artifact identified by the id. \n[Command Reference](updateArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_artifact",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_artifact",
+        "http": "PUT",
+        "path": "/artifacts/{artifactId}",
+        "positionalArgs": ["artifact_id", "update_artifact_details"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3421,6 +3752,34 @@
       "help": "Updates the specified artifact identified by the id. \n[Command Reference](updateArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_artifact_update_container_image_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_artifact",
+        "http": "PUT",
+        "path": "/artifacts/{artifactId}",
+        "positionalArgs": ["artifact_id", "update_artifact_details"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3687,6 +4046,34 @@
       "help": "Updates the specified artifact identified by the id. \n[Command Reference](updateArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_artifact_update_kubernetes_image_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_artifact",
+        "http": "PUT",
+        "path": "/artifacts/{artifactId}",
+        "positionalArgs": ["artifact_id", "update_artifact_details"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -3972,6 +4359,34 @@
       "help": "Updates the specified artifact identified by the id. \n[Command Reference](updateArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_artifact_update_machine_image_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_artifact",
+        "http": "PUT",
+        "path": "/artifacts/{artifactId}",
+        "positionalArgs": ["artifact_id", "update_artifact_details"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4238,6 +4653,34 @@
       "help": "Updates the specified artifact identified by the id. \n[Command Reference](updateArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_artifact_update_stack_artifact_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_artifact",
+        "http": "PUT",
+        "path": "/artifacts/{artifactId}",
+        "positionalArgs": ["artifact_id", "update_artifact_details"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_artifact_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4504,6 +4947,36 @@
       "help": "Validate and publish artifact. \n[Command Reference](validateAndPublishArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.validate_and_publish_artifact",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "validate_and_publish_artifact",
+        "http": "POST",
+        "path": "/artifacts/{artifactId}/actions/validateAndPublish",
+        "positionalArgs": ["artifact_id"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -4655,6 +5128,53 @@
       "help": "Lists the artifacts in your compartment. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listArtifacts)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_artifacts",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_artifacts",
+        "http": "GET",
+        "path": "/artifacts",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ArtifactCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -4906,6 +5426,47 @@
       "help": "List all published service listing revisions \n[Command Reference](listAvailableServices)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_available_services",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_available_services",
+        "http": "GET",
+        "path": "/availableServices",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AvailableServiceCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -5108,6 +5669,34 @@
       "help": "Gets the specified category's information. \n[Command Reference](getCategory)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_category",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_category",
+        "http": "GET",
+        "path": "/categories/{categoryCode}",
+        "positionalArgs": ["category_code", "compartment_id"],
+        "pathParams": {
+          "categoryCode": "category_code"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Category",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -5191,6 +5780,50 @@
       "help": "Lists the categories in your compartment. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listCategories)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_categories",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_categories",
+        "http": "GET",
+        "path": "/categories",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "productCode": {
+            "arg": "product_code"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CategoryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -5412,6 +6045,33 @@
       "help": "Deletes a generated Customer Instance Report export. \n[Command Reference](deleteCustomerInstanceReportExport)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_customer_instance_report_export",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_customer_instance_report_export",
+        "http": "DELETE",
+        "path": "/customerInstanceReportExports/{customerInstanceReportExportId}",
+        "positionalArgs": ["customer_instance_report_export_id"],
+        "pathParams": {
+          "customerInstanceReportExportId": "customer_instance_report_export_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_customer_instance_report_export"],
       "params": [
         {
           "kind": "option",
@@ -5582,6 +6242,32 @@
       "help": "Generates a new asynchronous Customer Instance Report export for the selected filters. \n[Command Reference](generateCustomerInstanceReportExport)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.generate_customer_instance_report_export",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "generate_customer_instance_report_export",
+        "http": "POST",
+        "path": "/customerInstanceReportExports/actions/generate",
+        "positionalArgs": ["generate_customer_instance_report_export_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "generate_customer_instance_report_export_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -6015,6 +6701,30 @@
       "help": "Gets details for a specific Customer Instance Report export. \n[Command Reference](getCustomerInstanceReportExport)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_customer_instance_report_export",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_customer_instance_report_export",
+        "http": "GET",
+        "path": "/customerInstanceReportExports/{customerInstanceReportExportId}",
+        "positionalArgs": ["customer_instance_report_export_id"],
+        "pathParams": {
+          "customerInstanceReportExportId": "customer_instance_report_export_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CustomerInstanceReportExport",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6079,6 +6789,29 @@
       "help": "Downloads the generated Customer Instance Report CSV for the specified export. \n[Command Reference](getCustomerInstanceReportExportContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_customer_instance_report_export_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_customer_instance_report_export_content",
+        "http": "GET",
+        "path": "/customerInstanceReportExports/{customerInstanceReportExportId}/content",
+        "positionalArgs": ["customer_instance_report_export_id"],
+        "pathParams": {
+          "customerInstanceReportExportId": "customer_instance_report_export_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -6143,6 +6876,83 @@
       "help": "Lists existing Customer Instance Report exports for the caller. \n[Command Reference](listCustomerInstanceReportExports)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_customer_instance_report_exports",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_customer_instance_report_exports",
+        "http": "GET",
+        "path": "/customerInstanceReportExports",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "listingId": {
+            "arg": "listing_id"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "shape": {
+            "arg": "shape"
+          },
+          "region": {
+            "arg": "region"
+          },
+          "realm": {
+            "arg": "realm"
+          },
+          "tenantAdminDomain": {
+            "arg": "tenant_admin_domain"
+          },
+          "packageVersion": {
+            "arg": "package_version"
+          },
+          "instanceOcid": {
+            "arg": "instance_ocid"
+          },
+          "timeInstanceCreationFromDate": {
+            "arg": "time_instance_creation_from_date"
+          },
+          "timeInstanceCreationToDate": {
+            "arg": "time_instance_creation_to_date"
+          },
+          "timeInstanceTerminationFromDate": {
+            "arg": "time_instance_termination_from_date"
+          },
+          "timeInstanceTerminationToDate": {
+            "arg": "time_instance_termination_to_date"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CustomerInstanceReportExportCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -6585,6 +7395,83 @@
       "help": "List customer instance report records \n[Command Reference](listCustomerInstanceReportRecords)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_customer_instance_report_records",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_customer_instance_report_records",
+        "http": "GET",
+        "path": "/customerInstanceReportRecords",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "listingId": {
+            "arg": "listing_id"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "shape": {
+            "arg": "shape"
+          },
+          "region": {
+            "arg": "region"
+          },
+          "realm": {
+            "arg": "realm"
+          },
+          "tenantAdminDomain": {
+            "arg": "tenant_admin_domain"
+          },
+          "packageVersion": {
+            "arg": "package_version"
+          },
+          "instanceOcid": {
+            "arg": "instance_ocid"
+          },
+          "timeInstanceCreationFromDate": {
+            "arg": "time_instance_creation_from_date"
+          },
+          "timeInstanceCreationToDate": {
+            "arg": "time_instance_creation_to_date"
+          },
+          "timeInstanceTerminationFromDate": {
+            "arg": "time_instance_termination_from_date"
+          },
+          "timeInstanceTerminationToDate": {
+            "arg": "time_instance_termination_to_date"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CustomerInstanceReportRecordCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7027,6 +7914,50 @@
       "help": "List disbursement report records \n[Command Reference](listDisbursementReportRecords)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_disbursement_report_records",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_disbursement_report_records",
+        "http": "GET",
+        "path": "/disbursementReportRecords",
+        "positionalArgs": ["compartment_id", "date_range"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "dateRange": {
+            "arg": "date_range"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "DisbursementReportRecordCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7257,6 +8188,30 @@
       "help": "Gets the details for a lead. \n[Command Reference](getLead)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_lead",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_lead",
+        "http": "GET",
+        "path": "/leads/{leadId}",
+        "positionalArgs": ["lead_id"],
+        "pathParams": {
+          "leadId": "lead_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Lead",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -7321,6 +8276,47 @@
       "help": "Lists the leads in your compartment that belong to a listing. You must specify your listing's OCID as the value for the listing ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listLeads)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_leads",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_leads",
+        "http": "GET",
+        "path": "/leads",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "listingId": {
+            "arg": "listing_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "LeadCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -7523,6 +8519,36 @@
       "help": "Cascade delete the listing and its subresources. \n[Command Reference](cascadingDeleteListing)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.cascading_delete_listing",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "cascading_delete_listing",
+        "http": "POST",
+        "path": "/listings/{listingId}/actions/cascadingDelete",
+        "positionalArgs": ["listing_id"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -7674,6 +8700,37 @@
       "help": "Moves a listing from one compartment to another \n[Command Reference](changeListingCompartment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.change_listing_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "change_listing_compartment",
+        "http": "POST",
+        "path": "/listings/{listingId}/actions/changeCompartment",
+        "positionalArgs": ["listing_id", "change_listing_compartment_details"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "change_listing_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -7844,6 +8901,33 @@
       "help": "Creates a new listing in your compartment. You must specify your compartment ID in the request object.\n\nYou must also specify a *name* for the listing and cannot be updated later.\n\nYou must also specify a *packageType* for the listing. Allowed values are CONTAINER_IMAGE, HELM_CHART, COMPUTE_IMAGE, TERRAFORM_STACK and SAAS\n\nAfter you send your request, the new object's `lifecycleState` will be CREATING. Before using the object, first make sure its `lifecycleState` has changed to ACTIVE. \n[Command Reference](createListing)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing",
+        "http": "POST",
+        "path": "/listings",
+        "positionalArgs": ["create_listing_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_details",
+        "responseType": "Listing",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing"],
       "params": [
         {
           "kind": "option",
@@ -8080,6 +9164,33 @@
       "help": "Deletes a listing by the identifier \n[Command Reference](deleteListing)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_listing",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_listing",
+        "http": "DELETE",
+        "path": "/listings/{listingId}",
+        "positionalArgs": ["listing_id"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_listing"],
       "params": [
         {
           "kind": "option",
@@ -8249,6 +9360,30 @@
       "help": "Gets the details for a listing. \n[Command Reference](getListing)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_listing",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_listing",
+        "http": "GET",
+        "path": "/listings/{listingId}",
+        "positionalArgs": ["listing_id"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Listing",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -8313,6 +9448,35 @@
       "help": "Updates the specified Listing identified by the id. \n[Command Reference](updateListing)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing",
+        "http": "PUT",
+        "path": "/listings/{listingId}",
+        "positionalArgs": ["listing_id", "update_listing_details"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_details",
+        "responseType": "Listing",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing"],
       "params": [
         {
           "kind": "option",
@@ -8521,6 +9685,53 @@
       "help": "Lists the listings in your compartment. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listListings)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_listings",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_listings",
+        "http": "GET",
+        "path": "/listings",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "listingType": {
+            "arg": "listing_type"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -8773,6 +9984,36 @@
       "help": "Cascade delete listing revision and its subresources. \n[Command Reference](cascadingDeleteListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.cascading_delete_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "cascading_delete_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions/{listingRevisionId}/actions/cascadingDelete",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -8924,6 +10165,34 @@
       "help": "Updates the Listing Revision to New status \n[Command Reference](changeListingRevisionToNewStatus)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.change_listing_revision_to_new_status",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "change_listing_revision_to_new_status",
+        "http": "POST",
+        "path": "/listingRevisions/{listingRevisionId}/actions/changeToNewStatus",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -9073,6 +10342,36 @@
       "help": "Clone the published/withdrawn Listing Revision identified by the identifier. \n[Command Reference](cloneListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.clone_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "clone_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions/{listingRevisionId}/actions/clone",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -9224,6 +10523,33 @@
       "help": "Creates a new Listing Revision. \n[Command Reference](createListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions",
+        "positionalArgs": ["create_listing_revision_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -9641,6 +10967,33 @@
       "help": "Creates a new Listing Revision. \n[Command Reference](createListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_create_lead_gen_listing_revision_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions",
+        "positionalArgs": ["create_listing_revision_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -10227,6 +11580,33 @@
       "help": "Creates a new Listing Revision. \n[Command Reference](createListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_create_oci_listing_revision_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions",
+        "positionalArgs": ["create_listing_revision_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -10870,6 +12250,33 @@
       "help": "Creates a new Listing Revision. \n[Command Reference](createListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_create_service_listing_revision_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions",
+        "positionalArgs": ["create_listing_revision_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -11380,6 +12787,33 @@
       "help": "Deletes a listing by the identifier \n[Command Reference](deleteListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_listing_revision",
+        "http": "DELETE",
+        "path": "/listingRevisions/{listingRevisionId}",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -11548,6 +12982,30 @@
       "help": "Gets the details for a listing revision. \n[Command Reference](getListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_listing_revision",
+        "http": "GET",
+        "path": "/listingRevisions/{listingRevisionId}",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11612,6 +13070,30 @@
       "help": "Gets the content for a listing revision icon. \n[Command Reference](getListingRevisionIconContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_listing_revision_icon_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_listing_revision_icon_content",
+        "http": "GET",
+        "path": "/listingRevisions/{listingRevisionId}/icon/content",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -11695,6 +13177,36 @@
       "help": "Publish the Listing revision identified by Identifier. \n[Command Reference](publishListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.publish_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "publish_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions/{listingRevisionId}/actions/publish",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -11846,6 +13358,40 @@
       "help": "Updates the Listing Revision to PublishAsPrivate \n[Command Reference](publishListingRevisionAsPrivate)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.publish_listing_revision_as_private",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "publish_listing_revision_as_private",
+        "http": "POST",
+        "path": "/listingRevisions/{listingRevisionId}/actions/publishAsPrivate",
+        "positionalArgs": [
+          "publish_listing_revision_as_private_details",
+          "listing_revision_id"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "publish_listing_revision_as_private_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -12016,6 +13562,41 @@
       "help": "Update the Listing Revision identified by the id for review \n[Command Reference](submitListingRevisionForReview)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.submit_listing_revision_for_review",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "submit_listing_revision_for_review",
+        "http": "POST",
+        "path": "/listingRevisions/{listingRevisionId}/actions/submitForReview",
+        "positionalArgs": [
+          "submit_listing_revision_for_review_details",
+          "listing_revision_id"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "submit_listing_revision_for_review_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -12222,6 +13803,38 @@
       "help": "Updates the Listing Revision \n[Command Reference](updateListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision",
+        "http": "PUT",
+        "path": "/listingRevisions/{listingRevisionId}",
+        "positionalArgs": [
+          "listing_revision_id",
+          "update_listing_revision_details"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -12659,6 +14272,40 @@
       "help": "Updates the Listing Revision \n[Command Reference](updateListingRevisionBannerContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_banner_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_banner_content",
+        "http": "PUT",
+        "path": "/listingRevisions/{listingRevisionId}/banner/content",
+        "positionalArgs": [
+          "listing_revision_id",
+          "banner_name",
+          "update_listing_revision_banner_content"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {
+          "bannerName": {
+            "arg": "banner_name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_banner_content",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -12846,6 +14493,35 @@
       "help": "Updates the Listing Revision \n[Command Reference](updateListingRevisionIconContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_icon_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_icon_content",
+        "http": "PUT",
+        "path": "/listingRevisions/{listingRevisionId}/icon/content",
+        "positionalArgs": [
+          "listing_revision_id",
+          "update_listing_revision_icon_content"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_icon_content",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -13014,6 +14690,38 @@
       "help": "Updates the Listing Revision \n[Command Reference](updateListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_update_lead_gen_listing_revision_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision",
+        "http": "PUT",
+        "path": "/listingRevisions/{listingRevisionId}",
+        "positionalArgs": [
+          "listing_revision_id",
+          "update_listing_revision_details"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -13620,6 +15328,38 @@
       "help": "Updates the Listing Revision \n[Command Reference](updateListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_update_oci_listing_revision_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision",
+        "http": "PUT",
+        "path": "/listingRevisions/{listingRevisionId}",
+        "positionalArgs": [
+          "listing_revision_id",
+          "update_listing_revision_details"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -14283,6 +16023,38 @@
       "help": "Updates the Listing Revision \n[Command Reference](updateListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_update_service_listing_revision_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision",
+        "http": "PUT",
+        "path": "/listingRevisions/{listingRevisionId}",
+        "positionalArgs": [
+          "listing_revision_id",
+          "update_listing_revision_details"
+        ],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_details",
+        "responseType": "ListingRevision",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision"],
       "params": [
         {
           "kind": "option",
@@ -14813,6 +16585,36 @@
       "help": "Update the Listing Revision identified by the id as Withdraw/UnPublished. \n[Command Reference](withdrawListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.withdraw_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "withdraw_listing_revision",
+        "http": "POST",
+        "path": "/listingRevisions/{listingRevisionId}/actions/withdraw",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -14964,6 +16766,33 @@
       "help": "Creates a new listing revision attachment. \n[Command Reference](createListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_attachment",
+        "http": "POST",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["create_listing_revision_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -15182,6 +17011,33 @@
       "help": "Creates a new listing revision attachment. \n[Command Reference](createListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_attachment_create_customer_success_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_attachment",
+        "http": "POST",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["create_listing_revision_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -15457,6 +17313,33 @@
       "help": "Creates a new listing revision attachment. \n[Command Reference](createListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_attachment_create_related_document_attachment_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_attachment",
+        "http": "POST",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["create_listing_revision_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -15732,6 +17615,33 @@
       "help": "Creates a new listing revision attachment. \n[Command Reference](createListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_attachment_create_review_support_document_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_attachment",
+        "http": "POST",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["create_listing_revision_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -15988,6 +17898,33 @@
       "help": "Creates a new listing revision attachment. \n[Command Reference](createListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_attachment_create_screen_shot_attachment_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_attachment",
+        "http": "POST",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["create_listing_revision_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -16206,6 +18143,33 @@
       "help": "Creates a new listing revision attachment. \n[Command Reference](createListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_attachment_create_supported_service_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_attachment",
+        "http": "POST",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["create_listing_revision_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -16481,6 +18445,33 @@
       "help": "Creates a new listing revision attachment. \n[Command Reference](createListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_attachment_create_video_attachment_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_attachment",
+        "http": "POST",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["create_listing_revision_attachment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -16699,6 +18690,33 @@
       "help": "Deletes a listing revision attachment by the identifier \n[Command Reference](deleteListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_listing_revision_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_listing_revision_attachment",
+        "http": "DELETE",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": ["listing_revision_attachment_id"],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -16860,6 +18878,30 @@
       "help": "Get the details of the specified listing revision attachment. \n[Command Reference](getListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_listing_revision_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_listing_revision_attachment",
+        "http": "GET",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": ["listing_revision_attachment_id"],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -16924,6 +18966,30 @@
       "help": "Get the attachment content by identifier. \n[Command Reference](getListingRevisionAttachmentContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_listing_revision_attachment_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_listing_revision_attachment_content",
+        "http": "GET",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}/content",
+        "positionalArgs": ["listing_revision_attachment_id"],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -17007,6 +19073,38 @@
       "help": "Updates the Listing Revision Attachment \n[Command Reference](updateListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_details"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -17264,6 +19362,35 @@
       "help": "Update a file to listing revision attachment \n[Command Reference](updateListingRevisionAttachmentContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment_content",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}/content",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_content"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_content",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -17425,6 +19552,38 @@
       "help": "Updates the Listing Revision Attachment \n[Command Reference](updateListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment_update_customer_success_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_details"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -17720,6 +19879,38 @@
       "help": "Updates the Listing Revision Attachment \n[Command Reference](updateListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment_update_related_document_attachment_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_details"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -17996,6 +20187,38 @@
       "help": "Updates the Listing Revision Attachment \n[Command Reference](updateListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment_update_review_support_document_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_details"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -18272,6 +20495,38 @@
       "help": "Updates the Listing Revision Attachment \n[Command Reference](updateListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment_update_screen_shot_attachment_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_details"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -18510,6 +20765,38 @@
       "help": "Updates the Listing Revision Attachment \n[Command Reference](updateListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment_update_supported_service_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_details"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -18824,6 +21111,38 @@
       "help": "Updates the Listing Revision Attachment \n[Command Reference](updateListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_attachment_update_video_attachment_details",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_attachment",
+        "http": "PUT",
+        "path": "/listingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": [
+          "listing_revision_attachment_id",
+          "update_listing_revision_attachment_details"
+        ],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_attachment_details",
+        "responseType": "ListingRevisionAttachment",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_attachment"],
       "params": [
         {
           "kind": "option",
@@ -19062,6 +21381,53 @@
       "help": "Gets the list of attachments for a listing revision in a compartment \n[Command Reference](listListingRevisionAttachments)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_listing_revision_attachments",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_listing_revision_attachments",
+        "http": "GET",
+        "path": "/listingRevisionAttachments",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {},
+        "queryParams": {
+          "listingRevisionId": {
+            "arg": "listing_revision_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevisionAttachmentCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -19304,6 +21670,56 @@
       "help": "Lists the list of listing revisions for a specific listing ID, compartment ID or listing revision status. You can specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listListingRevisions)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_listing_revisions",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_listing_revisions",
+        "http": "GET",
+        "path": "/listingRevisions",
+        "positionalArgs": ["listing_id"],
+        "pathParams": {},
+        "queryParams": {
+          "listingId": {
+            "arg": "listing_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "listingRevisionStatus": {
+            "arg": "listing_revision_status"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevisionCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -19588,6 +22004,33 @@
       "help": "Creates a new Listing Revision Note. \n[Command Reference](createListingRevisionNote)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_note",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_note",
+        "http": "POST",
+        "path": "/listingRevisionNotes",
+        "positionalArgs": ["create_listing_revision_note_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_note_details",
+        "responseType": "ListingRevisionNote",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_note"],
       "params": [
         {
           "kind": "option",
@@ -19768,6 +22211,33 @@
       "help": "Deletes a listing revision note by the identifier. \n[Command Reference](deleteListingRevisionNote)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_listing_revision_note",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_listing_revision_note",
+        "http": "DELETE",
+        "path": "/listingRevisionNotes/{listingRevisionNoteId}",
+        "positionalArgs": ["listing_revision_note_id"],
+        "pathParams": {
+          "listingRevisionNoteId": "listing_revision_note_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_note"],
       "params": [
         {
           "kind": "option",
@@ -19929,6 +22399,30 @@
       "help": "Get note details by the identifier \n[Command Reference](getListingRevisionNote)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_listing_revision_note",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_listing_revision_note",
+        "http": "GET",
+        "path": "/listingRevisionNotes/{listingRevisionNoteId}",
+        "positionalArgs": ["listing_revision_note_id"],
+        "pathParams": {
+          "listingRevisionNoteId": "listing_revision_note_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevisionNote",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -19993,6 +22487,38 @@
       "help": "Updates the Listing Revision Note tag data \n[Command Reference](updateListingRevisionNote)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_note",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_note",
+        "http": "PUT",
+        "path": "/listingRevisionNotes/{listingRevisionNoteId}",
+        "positionalArgs": [
+          "listing_revision_note_id",
+          "update_listing_revision_note_details"
+        ],
+        "pathParams": {
+          "listingRevisionNoteId": "listing_revision_note_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_note_details",
+        "responseType": "ListingRevisionNote",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_note"],
       "params": [
         {
           "kind": "option",
@@ -20193,6 +22719,47 @@
       "help": "Gets the list of notes for a listing revision. \n[Command Reference](listListingRevisionNotes)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_listing_revision_notes",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_listing_revision_notes",
+        "http": "GET",
+        "path": "/listingRevisionNotes",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "listingRevisionId": {
+            "arg": "listing_revision_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevisionNoteCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -20395,6 +22962,33 @@
       "help": "Creates a new Listing Revision Package. \n[Command Reference](createListingRevisionPackage)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_listing_revision_package",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_listing_revision_package",
+        "http": "POST",
+        "path": "/listingRevisionPackages",
+        "positionalArgs": ["create_listing_revision_package_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_listing_revision_package_details",
+        "responseType": "ListingRevisionPackage",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_package"],
       "params": [
         {
           "kind": "option",
@@ -20697,6 +23291,33 @@
       "help": "Deletes a listing revision package by the identifier \n[Command Reference](deleteListingRevisionPackage)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_listing_revision_package",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_listing_revision_package",
+        "http": "DELETE",
+        "path": "/listingRevisionPackages/{listingRevisionPackageId}",
+        "positionalArgs": ["listing_revision_package_id"],
+        "pathParams": {
+          "listingRevisionPackageId": "listing_revision_package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_package"],
       "params": [
         {
           "kind": "option",
@@ -20866,6 +23487,30 @@
       "help": "Get the details of the specified version of a package. \n[Command Reference](getListingRevisionPackage)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_listing_revision_package",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_listing_revision_package",
+        "http": "GET",
+        "path": "/listingRevisionPackages/{listingRevisionPackageId}",
+        "positionalArgs": ["listing_revision_package_id"],
+        "pathParams": {
+          "listingRevisionPackageId": "listing_revision_package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevisionPackage",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -20930,6 +23575,36 @@
       "help": "Mark the Listing Revision Package identified by the id and package version as default \n[Command Reference](markListingRevisionPackageAsDefault)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.mark_listing_revision_package_as_default",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "mark_listing_revision_package_as_default",
+        "http": "POST",
+        "path": "/listingRevisionPackages/{listingRevisionPackageId}/actions/markAsDefault",
+        "positionalArgs": ["listing_revision_package_id"],
+        "pathParams": {
+          "listingRevisionPackageId": "listing_revision_package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -21081,6 +23756,36 @@
       "help": "Updates the Listing Revision Package to publish status \n[Command Reference](publishListingRevisionPackage)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.publish_listing_revision_package",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "publish_listing_revision_package",
+        "http": "POST",
+        "path": "/listingRevisionPackages/{listingRevisionPackageId}/actions/publish",
+        "positionalArgs": ["listing_revision_package_id"],
+        "pathParams": {
+          "listingRevisionPackageId": "listing_revision_package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -21232,6 +23937,36 @@
       "help": "Updates the Listing Revision Package to Unpublish status \n[Command Reference](unPublishListingRevisionPackage)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.un_publish_listing_revision_package",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "un_publish_listing_revision_package",
+        "http": "POST",
+        "path": "/listingRevisionPackages/{listingRevisionPackageId}/actions/unPublish",
+        "positionalArgs": ["listing_revision_package_id"],
+        "pathParams": {
+          "listingRevisionPackageId": "listing_revision_package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -21383,6 +24118,38 @@
       "help": "Updates the Listing Revision Package. \n[Command Reference](updateListingRevisionPackage)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_listing_revision_package",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_listing_revision_package",
+        "http": "PUT",
+        "path": "/listingRevisionPackages/{listingRevisionPackageId}",
+        "positionalArgs": [
+          "listing_revision_package_id",
+          "update_listing_revision_package_details"
+        ],
+        "pathParams": {
+          "listingRevisionPackageId": "listing_revision_package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_listing_revision_package_details",
+        "responseType": "ListingRevisionPackage",
+        "paginated": false
+      },
+      "otherOperations": ["get_listing_revision_package"],
       "params": [
         {
           "kind": "option",
@@ -21724,6 +24491,53 @@
       "help": "Gets the list of packages for a listing revision. \n[Command Reference](listListingRevisionPackages)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_listing_revision_packages",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_listing_revision_packages",
+        "http": "GET",
+        "path": "/listingRevisionPackages",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "listingRevisionId": {
+            "arg": "listing_revision_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ListingRevisionPackageCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -21974,6 +24788,30 @@
       "help": "Gets the specified market's information. \n[Command Reference](getMarket)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_market",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_market",
+        "http": "GET",
+        "path": "/markets/{marketCode}",
+        "positionalArgs": ["market_code"],
+        "pathParams": {
+          "marketCode": "market_code"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Market",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22038,6 +24876,50 @@
       "help": "Lists the markets in your compartment. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listMarkets)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_markets",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_markets",
+        "http": "GET",
+        "path": "/markets",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "listingId": {
+            "arg": "listing_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MarketCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -22259,6 +25141,30 @@
       "help": "Gets the specified artifact's information. \n[Command Reference](getAdminArtifact)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.get_admin_artifact",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "get_admin_artifact",
+        "http": "GET",
+        "path": "/adminArtifacts/{artifactId}",
+        "positionalArgs": ["artifact_id"],
+        "pathParams": {
+          "artifactId": "artifact_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminArtifact",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22323,6 +25229,59 @@
       "help": "Lists the artifacts in your compartment. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listAdminArtifacts)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_artifacts",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_artifacts",
+        "http": "GET",
+        "path": "/adminArtifacts",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "publisherId": {
+            "arg": "publisher_id"
+          },
+          "artifactType": {
+            "arg": "artifact_type"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminArtifactCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -22619,6 +25578,30 @@
       "help": "Returns details of the Listing. \n[Command Reference](getAdminListing)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.get_admin_listing",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "get_admin_listing",
+        "http": "GET",
+        "path": "/adminListings/{listingId}",
+        "positionalArgs": ["listing_id"],
+        "pathParams": {
+          "listingId": "listing_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListing",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22683,6 +25666,33 @@
       "help": "Change the Listing Revision status to New \n[Command Reference](changeListingRevisionStatusToNew)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.change_listing_revision_status_to_new",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "change_listing_revision_status_to_new",
+        "http": "POST",
+        "path": "/adminListingRevisions/{listingRevisionId}/status/new",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListingRevision",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22766,6 +25776,30 @@
       "help": "Returns details of the Listing revision. \n[Command Reference](getAdminListingRevision)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.get_admin_listing_revision",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "get_admin_listing_revision",
+        "http": "GET",
+        "path": "/adminListingRevisions/{listingRevisionId}",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {
+          "listingRevisionId": "listing_revision_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListingRevision",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22830,6 +25864,30 @@
       "help": "Get the details of the specified listing revision attachment. \n[Command Reference](getAdminListingRevisionAttachment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.get_admin_listing_revision_attachment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "get_admin_listing_revision_attachment",
+        "http": "GET",
+        "path": "/adminListingRevisionAttachments/{listingRevisionAttachmentId}",
+        "positionalArgs": ["listing_revision_attachment_id"],
+        "pathParams": {
+          "listingRevisionAttachmentId": "listing_revision_attachment_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListingRevisionAttachment",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -22894,6 +25952,53 @@
       "help": "Gets the list of attachments for a listing revision \n[Command Reference](listAdminListingRevisionAttachments)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_listing_revision_attachments",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_listing_revision_attachments",
+        "http": "GET",
+        "path": "/adminListingRevisionAttachments",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {},
+        "queryParams": {
+          "listingRevisionId": {
+            "arg": "listing_revision_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListingRevisionAttachmentCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -23136,6 +26241,83 @@
       "help": "Returns a list of all the Listing revisions. \n[Command Reference](listAdminListingRevisions)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_listing_revisions",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_listing_revisions",
+        "http": "GET",
+        "path": "/adminListingRevisions",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "listingId": {
+            "arg": "listing_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "listingType": {
+            "arg": "listing_type"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "publisherId": {
+            "arg": "publisher_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "listingRevisionStatus": {
+            "arg": "listing_revision_status"
+          },
+          "statusCsv": {
+            "arg": "status_csv"
+          },
+          "product": {
+            "arg": "product"
+          },
+          "timeCreatedAfter": {
+            "arg": "time_created_after"
+          },
+          "timeUpdatedAfter": {
+            "arg": "time_updated_after"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "pricingType": {
+            "arg": "pricing_type"
+          },
+          "isPrivateOfferEnabled": {
+            "arg": "is_private_offer_enabled"
+          },
+          "dataSource": {
+            "arg": "data_source"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListingRevisionCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -23593,6 +26775,30 @@
       "help": "Get the details of the specified version of a package. \n[Command Reference](getAdminListingRevisionPackage)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.get_admin_listing_revision_package",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "get_admin_listing_revision_package",
+        "http": "GET",
+        "path": "/adminListingRevisionPackages/{listingRevisionPackageId}",
+        "positionalArgs": ["listing_revision_package_id"],
+        "pathParams": {
+          "listingRevisionPackageId": "listing_revision_package_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListingRevisionPackage",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -23657,6 +26863,53 @@
       "help": "Gets the list of packages for a listing revision. \n[Command Reference](listAdminListingRevisionPackages)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_listing_revision_packages",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_listing_revision_packages",
+        "http": "GET",
+        "path": "/adminListingRevisionPackages",
+        "positionalArgs": ["listing_revision_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "listingRevisionId": {
+            "arg": "listing_revision_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminListingRevisionPackageCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -23907,6 +27160,35 @@
       "help": "Retrieve a list of publisher SKUs \n[Command Reference](listAdminPublisherSkus)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_publisher_skus",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_publisher_skus",
+        "http": "GET",
+        "path": "/adminPublisherSkus",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminPublisherSkuCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -24029,6 +27311,30 @@
       "help": "Gets a Term by identifier \n[Command Reference](getAdminTerm)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.get_admin_term",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "get_admin_term",
+        "http": "GET",
+        "path": "/adminTerms/{termId}",
+        "positionalArgs": ["term_id"],
+        "pathParams": {
+          "termId": "term_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminTerm",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -24093,6 +27399,47 @@
       "help": "Returns a list of the publisher terms. \n[Command Reference](listAdminTerms)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_terms",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_terms",
+        "http": "GET",
+        "path": "/adminTerms",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminTermCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -24295,6 +27642,30 @@
       "help": "Gets a Term Version by the identifier \n[Command Reference](getAdminTermVersion)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.get_admin_term_version",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "get_admin_term_version",
+        "http": "GET",
+        "path": "/adminTermVersions/{termVersionId}",
+        "positionalArgs": ["term_version_id"],
+        "pathParams": {
+          "termVersionId": "term_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminTermVersion",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -24359,6 +27730,50 @@
       "help": "Returns a list of the publisher term versions. \n[Command Reference](listAdminTermVersions)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_term_versions",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_term_versions",
+        "http": "GET",
+        "path": "/adminTermVersions",
+        "positionalArgs": ["term_id"],
+        "pathParams": {},
+        "queryParams": {
+          "termId": {
+            "arg": "term_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "displayName": {
+            "arg": "display_name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminTermVersionCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -24580,6 +27995,53 @@
       "help": "Lists the work requests in a compartment. \n[Command Reference](listAdminWorkRequests)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.list_admin_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "list_admin_work_requests",
+        "http": "GET",
+        "path": "/adminWorkRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "workRequestId": {
+            "arg": "work_request_id"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "resourceId": {
+            "arg": "resource_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "AdminWorkRequestSummaryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -24831,6 +28293,31 @@
       "help": "Creates a new Market. \n[Command Reference](createMarket)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_administrator.generated.marketplaceadministrator_cli.create_market",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_administrator",
+        "method": "create_market",
+        "http": "POST",
+        "path": "/adminMarkets",
+        "positionalArgs": ["create_market_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_market_details",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -25020,6 +28507,30 @@
       "help": "Gets a Product by code identifier \n[Command Reference](getProduct)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_product",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_product",
+        "http": "GET",
+        "path": "/products/{productCode}",
+        "positionalArgs": ["product_code"],
+        "pathParams": {
+          "productCode": "product_code"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Product",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -25084,6 +28595,50 @@
       "help": "Lists the products in your compartment. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listProducts)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_products",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_products",
+        "http": "GET",
+        "path": "/products",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "productGroup": {
+            "arg": "product_group"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "ProductCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -25305,6 +28860,32 @@
       "help": "Creates a new publisher \n[Command Reference](createPublisher)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_publisher",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_publisher",
+        "http": "POST",
+        "path": "/publishers",
+        "positionalArgs": ["create_publisher_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_publisher_details",
+        "responseType": "Publisher",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -25635,6 +29216,30 @@
       "help": "Gets a Publisher by identifier \n[Command Reference](getPublisher)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_publisher",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_publisher",
+        "http": "GET",
+        "path": "/publishers/{publisherId}",
+        "positionalArgs": ["publisher_id"],
+        "pathParams": {
+          "publisherId": "publisher_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Publisher",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -25699,6 +29304,47 @@
       "help": "Returns a list of publishers. \n[Command Reference](listPublishers)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_publishers",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_publishers",
+        "http": "GET",
+        "path": "/publishers",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "PublisherCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -25901,6 +29547,30 @@
       "help": "Gets a SupportDoc by code identifier \n[Command Reference](getSupportDoc)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_support_doc",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_support_doc",
+        "http": "GET",
+        "path": "/supportDocs/{supportDocCode}",
+        "positionalArgs": ["support_doc_code"],
+        "pathParams": {
+          "supportDocCode": "support_doc_code"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SupportDoc",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -25965,6 +29635,30 @@
       "help": "Gets a Support Doc content by supportDocCode \n[Command Reference](getSupportDocContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_support_doc_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_support_doc_content",
+        "http": "GET",
+        "path": "/supportDocs/{supportDocCode}/content",
+        "positionalArgs": ["support_doc_code"],
+        "pathParams": {
+          "supportDocCode": "support_doc_code"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -26048,6 +29742,50 @@
       "help": "Lists the supportDocs in your compartment. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listSupportDocs)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_support_docs",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_support_docs",
+        "http": "GET",
+        "path": "/supportDocs",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "supportDocGroup": {
+            "arg": "support_doc_group"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SupportDocCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -26269,6 +30007,44 @@
       "help": "Lists the currencies supported by the Marketplace Publisher Service. You must specify your compartment's OCID as the value for the compartment ID. For information about OCIDs, see Resource Identifiers (Content/General/Concepts/identifiers.htm). \n[Command Reference](listSupportedCurrencies)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_supported_currencies",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_supported_currencies",
+        "http": "GET",
+        "path": "/supportedCurrencies",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SupportedCurrencyCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -26452,6 +30228,47 @@
       "help": "Lists the shapes available to select from. \n[Command Reference](listSupportedShapes)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_supported_shapes",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_supported_shapes",
+        "http": "GET",
+        "path": "/supportedShapes",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "SupportedShapeCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -26654,6 +30471,37 @@
       "help": "Moves a term from one compartment to another \n[Command Reference](changeTermCompartment)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.change_term_compartment",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "change_term_compartment",
+        "http": "POST",
+        "path": "/terms/{termId}/actions/changeCompartment",
+        "positionalArgs": ["term_id", "change_term_compartment_details"],
+        "pathParams": {
+          "termId": "term_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "change_term_compartment_details",
+        "paginated": false
+      },
+      "otherOperations": ["get_work_request"],
       "params": [
         {
           "kind": "option",
@@ -26824,6 +30672,33 @@
       "help": "Creates a new Term. \n[Command Reference](createTerm)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_term",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_term",
+        "http": "POST",
+        "path": "/terms",
+        "positionalArgs": ["create_term_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_term_details",
+        "responseType": "Term",
+        "paginated": false
+      },
+      "otherOperations": ["get_term"],
       "params": [
         {
           "kind": "option",
@@ -27004,6 +30879,33 @@
       "help": "Deletes a Term by the identifier \n[Command Reference](deleteTerm)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_term",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_term",
+        "http": "DELETE",
+        "path": "/terms/{termId}",
+        "positionalArgs": ["term_id"],
+        "pathParams": {
+          "termId": "term_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_term"],
       "params": [
         {
           "kind": "option",
@@ -27165,6 +31067,30 @@
       "help": "Gets a Term by identifier \n[Command Reference](getTerm)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_term",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_term",
+        "http": "GET",
+        "path": "/terms/{termId}",
+        "positionalArgs": ["term_id"],
+        "pathParams": {
+          "termId": "term_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "Term",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -27229,6 +31155,35 @@
       "help": "Updates the Term \n[Command Reference](updateTerm)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_term",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_term",
+        "http": "PUT",
+        "path": "/terms/{termId}",
+        "positionalArgs": ["term_id", "update_term_details"],
+        "pathParams": {
+          "termId": "term_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_term_details",
+        "responseType": "Term",
+        "paginated": false
+      },
+      "otherOperations": ["get_term"],
       "params": [
         {
           "kind": "option",
@@ -27429,6 +31384,47 @@
       "help": "Returns a list of the publisher terms. \n[Command Reference](listTerms)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_terms",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_terms",
+        "http": "GET",
+        "path": "/terms",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "name": {
+            "arg": "name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "TermCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -27631,6 +31627,34 @@
       "help": "Mark the Term Version identified by the id as active \n[Command Reference](activateTermVersion)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.activate_term_version",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "activate_term_version",
+        "http": "POST",
+        "path": "/termVersions/{termVersionId}/actions/Activate",
+        "positionalArgs": ["term_version_id"],
+        "pathParams": {
+          "termVersionId": "term_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "TermVersion",
+        "paginated": false
+      },
+      "otherOperations": ["get_term_version"],
       "params": [
         {
           "kind": "option",
@@ -27773,6 +31797,36 @@
       "help": "Creates a new Term Version. \n[Command Reference](createTermVersion)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.create_term_version",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "create_term_version",
+        "http": "POST",
+        "path": "/termVersions",
+        "positionalArgs": ["create_term_version_content", "term_id"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "display-name": {
+            "arg": "display_name"
+          },
+          "term-id": {
+            "arg": "term_id"
+          }
+        },
+        "body": "create_term_version_content",
+        "responseType": "TermVersion",
+        "paginated": false
+      },
+      "otherOperations": ["get_term_version"],
       "params": [
         {
           "kind": "option",
@@ -27934,6 +31988,33 @@
       "help": "Deletes a Term by the identifier \n[Command Reference](deleteTermVersion)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.delete_term_version",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "delete_term_version",
+        "http": "DELETE",
+        "path": "/termVersions/{termVersionId}",
+        "positionalArgs": ["term_version_id"],
+        "pathParams": {
+          "termVersionId": "term_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "otherOperations": ["get_term_version"],
       "params": [
         {
           "kind": "option",
@@ -28095,6 +32176,30 @@
       "help": "Gets a Term Version by the identifier \n[Command Reference](getTermVersion)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_term_version",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_term_version",
+        "http": "GET",
+        "path": "/termVersions/{termVersionId}",
+        "positionalArgs": ["term_version_id"],
+        "pathParams": {
+          "termVersionId": "term_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "TermVersion",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -28159,6 +32264,30 @@
       "help": "Gets a Term Version content by the identifier. \n[Command Reference](getTermVersionContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_term_version_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_term_version_content",
+        "http": "GET",
+        "path": "/termVersions/{termVersionId}/content",
+        "positionalArgs": ["term_version_id"],
+        "pathParams": {
+          "termVersionId": "term_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -28242,6 +32371,35 @@
       "help": "Updates the Term Version \n[Command Reference](updateTermVersion)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_term_version",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_term_version",
+        "http": "PUT",
+        "path": "/termVersions/{termVersionId}",
+        "positionalArgs": ["term_version_id", "update_term_version_details"],
+        "pathParams": {
+          "termVersionId": "term_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_term_version_details",
+        "responseType": "TermVersion",
+        "paginated": false
+      },
+      "otherOperations": ["get_term_version"],
       "params": [
         {
           "kind": "option",
@@ -28461,6 +32619,35 @@
       "help": "Updates the Term Version attachment \n[Command Reference](updateTermVersionContent)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.update_term_version_content",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "update_term_version_content",
+        "http": "PUT",
+        "path": "/termVersions/{termVersionId}/content",
+        "positionalArgs": ["term_version_id", "update_term_version_content"],
+        "pathParams": {
+          "termVersionId": "term_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "display-name": {
+            "arg": "display_name"
+          }
+        },
+        "body": "update_term_version_content",
+        "responseType": "TermVersion",
+        "paginated": false
+      },
+      "otherOperations": ["get_term_version"],
       "params": [
         {
           "kind": "option",
@@ -28641,6 +32828,50 @@
       "help": "Returns a list of the publisher term versions. \n[Command Reference](listTermVersions)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_term_versions",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_term_versions",
+        "http": "GET",
+        "path": "/termVersions",
+        "positionalArgs": ["term_id"],
+        "pathParams": {},
+        "queryParams": {
+          "termId": {
+            "arg": "term_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "displayName": {
+            "arg": "display_name"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "TermVersionCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -28862,6 +33093,32 @@
       "help": "Cancels the work request with the given ID. \n[Command Reference](cancelWorkRequest)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.cancel_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "cancel_work_request",
+        "http": "DELETE",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -28964,6 +33221,30 @@
       "help": "Gets details of the work request with the given ID. \n[Command Reference](getWorkRequest)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.get_work_request",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "get_work_request",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequest",
+        "paginated": false
+      },
       "params": [
         {
           "kind": "option",
@@ -29028,6 +33309,53 @@
       "help": "Lists the work requests in a compartment. \n[Command Reference](listWorkRequests)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_work_requests",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_work_requests",
+        "http": "GET",
+        "path": "/workRequests",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "workRequestId": {
+            "arg": "work_request_id"
+          },
+          "status": {
+            "arg": "status"
+          },
+          "resourceId": {
+            "arg": "resource_id"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestSummaryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -29279,6 +33607,43 @@
       "help": "Returns a (paginated) list of errors for the work request with the given ID. \n[Command Reference](listWorkRequestErrors)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_work_request_errors",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_work_request_errors",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/errors",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestErrorCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",
@@ -29462,6 +33827,43 @@
       "help": "Returns a (paginated) list of logs for the work request with the given ID. \n[Command Reference](listWorkRequestLogs)",
       "callback": "services.marketplace_publisher.src.oci_cli_marketplace_publisher.generated.marketplacepublisher_cli.list_work_request_logs",
       "kind": "generated",
+      "operation": {
+        "client": "marketplace_publisher.marketplace_publisher",
+        "method": "list_work_request_logs",
+        "http": "GET",
+        "path": "/workRequests/{workRequestId}/logs",
+        "positionalArgs": ["work_request_id"],
+        "pathParams": {
+          "workRequestId": "work_request_id"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "WorkRequestLogEntryCollection",
+        "paginated": true
+      },
       "params": [
         {
           "kind": "option",

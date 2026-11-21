@@ -21,6 +21,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 import click
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sdk  # noqa: E402
+
+CLIENTS = None  # collects SDK clients used while flattening one service
 SPEC_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "spec")
 
 
@@ -109,13 +113,26 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict) -> Non
         entry["callback"] = f"{cmd.callback.__module__}.{cmd.callback.__qualname__}" if cmd.callback else None
         # Generated = callback lives in a services.*.generated module (see GLOSSARY: Generated command).
         entry["kind"] = "generated" if cmd.callback and ".generated." in cmd.callback.__module__ else "custom"
+        if entry["kind"] == "generated" and CLIENTS is not None:
+            from oci_cli.cli_clients import CLIENT_MAP
+
+            client_key, op, others = sdk.command_operation(cmd.callback, CLIENT_MAP)
+            if op:
+                entry["operation"] = op
+                if others:
+                    entry["otherOperations"] = others
+                spec_name, service_name = client_key.split(".", 1)
+                CLIENTS[client_key] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
         entry["params"] = [param_spec(p) for p in cmd.params]
         commands[key] = entry
 
 
 def service_spec(name: str, cmd: click.Command) -> dict:
+    global CLIENTS
     groups, commands = {}, {}
+    CLIENTS = {}
     flatten(cmd, [], groups, commands)
+    clients, CLIENTS = dict(sorted(CLIENTS.items())), None
     top = {"hidden": bool(getattr(cmd, "hidden", False))}
     if cmd.help:
         top["help"] = cmd.help
@@ -123,7 +140,7 @@ def service_spec(name: str, cmd: click.Command) -> dict:
         top["shortHelp"] = cmd.short_help
     if isinstance(cmd, click.Group):
         top["params"] = [param_spec(p) for p in cmd.params]
-    return {"service": name, "top": top, "groups": groups, "commands": commands}
+    return {"service": name, "top": top, "clients": clients, "groups": groups, "commands": commands}
 
 
 def kind_counts(spec: dict) -> dict:

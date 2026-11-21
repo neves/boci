@@ -76,7 +76,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Client build warnings: file-permission warnings for config and key, as oci prints them when executing.
 - [x] Service error mapping: non-2xx → same stderr JSON (`code`, `message`, `status`, `target_service`, …) and exit code.
 - [x] Global option: `--request-id`.
-- [ ] Global option: `--debug` (shape only).
+- [x] Global option: `--debug` (shape only).
 - [ ] Global option: `--connection-timeout`.
 - [ ] Global option: `--read-timeout`.
 - [ ] Global options: `--max-retries`/`--no-retry`.

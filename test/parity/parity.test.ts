@@ -43,6 +43,14 @@ describe("parity", () => {
         expect(run.requests[0]?.headers["opc-client-request-id"]).toBe(
           "boci-request-123",
         );
+      if (c.key === "debug") {
+        expect(run.exitCode).toBe(0);
+        expect(run.stdout).toContain('"data": "fake-namespace"');
+        expect(run.stderr).toMatch(/DEBUG:.*Request: GET .*\/n/);
+        expect(run.stderr).toMatch(/DEBUG:.*Response status: 200/);
+        record(c.key, true);
+        return;
+      }
       for (const req of run.requests) {
         if (req.headers.authorization)
           expect(

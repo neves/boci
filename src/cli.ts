@@ -491,6 +491,10 @@ async function runNamespaceGet(
     method: req.method,
     headers: req.headers,
   });
+  if (rootValues.debug === true) {
+    err(`DEBUG:oci.base_client: Request: ${req.method} ${url}\n`);
+    err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
+  }
   const raw = await response.text();
   let value: unknown;
   try {

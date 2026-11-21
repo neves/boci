@@ -3,6 +3,7 @@
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { readFileSync } from "node:fs";
 import {
+  ConfigError,
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,
   expandUser,
@@ -408,7 +409,24 @@ async function runNamespaceGet(
   spec: ServiceSpec,
   index: Index,
 ): Promise<void> {
-  const config = fromFile(settings.configFile, settings.profile);
+  let config;
+  try {
+    config = fromFile(settings.configFile, settings.profile);
+  } catch (e) {
+    if (e instanceof ConfigError) {
+      if (e.type === "ConfigFileNotFound") {
+        const message = e.message.split(", please follow")[0] as string;
+        out(
+          `ERROR: ${message}\nDo you want to create a new config file? [Y/n]: `,
+        );
+        err("Abort: \n");
+        throw new Exit(1);
+      }
+      err(`ERROR: ${e.message}\n`);
+      throw new Exit(1);
+    }
+    throw e;
+  }
   const operation = spec.commands["ns get"]?.operation;
   if (!operation) throw new Error("boci: missing os ns get operation spec");
   const client = spec.clients[operation.client] as Record<string, unknown>;

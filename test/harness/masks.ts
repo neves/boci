@@ -25,4 +25,9 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "",
     "Python warnings from oci's own bugs (e.g. duplicate --from-json), carrying local install paths; see DIVERGENCES.md",
   ],
+  [
+    /"timestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}\+00:00"/g,
+    '"timestamp": "<timestamp>"',
+    "ServiceError timestamp is generated at response time",
+  ],
 ];

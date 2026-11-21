@@ -497,6 +497,32 @@ async function runNamespaceGet(
   } catch {
     value = raw;
   }
+  if (!response.ok) {
+    let details: Record<string, unknown> = {};
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
+        details = parsed as Record<string, unknown>;
+    } catch {
+      // Non-JSON error bodies still produce the standard ServiceError envelope.
+    }
+    const timestamp = new Date().toISOString().replace(/Z$/, "000+00:00");
+    const serviceError = {
+      ...details,
+      client_version: "Oracle-PythonSDK/2.192.0, Oracle-PythonCLI/3.96.3",
+      logging_tips:
+        "Please run the OCI CLI command using --debug flag to find more debug information.",
+      "opc-request-id": response.headers.get("opc-request-id") ?? "",
+      operation_name: operation.method,
+      request_endpoint: `${operation.http} ${url.toString()}`,
+      status: response.status,
+      timestamp,
+      troubleshooting_tips:
+        "See [https://docs.oracle.com/iaas/Content/API/References/apierrors.htm] for more information about resolving this error. If you are unable to resolve this issue, run this CLI command with --debug option and contact Oracle support and provide them the full error message.",
+    };
+    err(`ServiceError:\n${JSON.stringify(sortJson(serviceError), null, 4)}\n`);
+    throw new Exit(1);
+  }
   out(`${JSON.stringify(sortJson({ data: value }), null, 2)}\n`);
 }
 

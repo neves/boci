@@ -47,7 +47,7 @@ DIVERGENCES.md             recorded Divergences
 
 ## Rung 0 — Offline behavior
 
-- [ ] `boci --version` → `3.96.3`, compiled binary via `bun build --compile`, startup measured in status.
+- [x] `boci --version` → `3.96.3`, compiled binary via `bun build --compile`, startup measured in status.
 - [ ] Top-level `boci --help` and `boci <service> --help` with the same commands and descriptions.
 - [ ] Click-compatible parser (ADR 0003): `--opt value`, `--opt=value`, flags, `--x/--no-x`, multiple, short aliases.
 - [ ] Usage errors: unknown command, unknown option, missing required option — same message and exit code 2.

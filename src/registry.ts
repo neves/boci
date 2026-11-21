@@ -1,5 +1,8 @@
-// Which Leaf commands boci can execute. Grows rung by rung (see PLAN.md).
+// Which Leaf commands and Engine features boci implements. Parity cases for a key
+// only run once it is listed here (test/parity/parity.test.ts). Grows rung by rung.
 
-export function isImplemented(_path: string): boolean {
-  return false;
+const IMPLEMENTED = new Set<string>(["--version"]);
+
+export function isImplemented(key: string): boolean {
+  return IMPLEMENTED.has(key);
 }

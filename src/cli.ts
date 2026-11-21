@@ -47,7 +47,7 @@ import {
   serviceTree,
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
-import { resolveEndpoint } from "./endpoint.ts";
+import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
 import {
   InvalidPrivateKey,
   loadPrivateKey,
@@ -450,9 +450,14 @@ async function runNamespaceGet(
   const region = (rootValues.region ??
     process.env.OCI_CLI_REGION ??
     config.region) as string | undefined;
+  const regionMetadata =
+    region && !endpointOpt
+      ? await loadExternalRegionMetadata(region, index.regions)
+      : undefined;
   const { resolved } = resolveEndpoint(client, index.regions, {
     region,
     endpoint: endpointOpt,
+    regionMetadata,
     realmSpecific: configBool(
       values.realm_specific_endpoint ??
         config.realm_specific_service_endpoint_template_enabled,

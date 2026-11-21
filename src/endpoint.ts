@@ -10,6 +10,13 @@ export type RegionsSpec = {
   domainFormat: string;
 };
 
+export type RegionMetadata = {
+  realmKey: string;
+  realmDomainComponent: string;
+  regionKey: string;
+  regionIdentifier: string;
+};
+
 export type ClientInfo = {
   basePath?: string;
   endpointTemplate?: string;
@@ -28,7 +35,76 @@ export type EndpointOptions = {
   realmSpecific: boolean;
   dualStack: boolean;
   env?: Record<string, string | undefined>;
+  regionMetadata?: RegionMetadata;
 };
+
+/** Loads OCI's external region metadata sources, in their documented priority order. */
+export async function loadExternalRegionMetadata(
+  region: string,
+  regions: RegionsSpec,
+  env: Record<string, string | undefined> = process.env,
+): Promise<RegionMetadata | undefined> {
+  const name = region.toLowerCase();
+  if (regions.regions.includes(name) || name in regions.shortNames)
+    return undefined;
+
+  const home = env.HOME;
+  if (home) {
+    const file = Bun.file(`${home}/.oci/regions-config.json`);
+    if (await file.exists()) {
+      try {
+        const entries: unknown = await file.json();
+        if (Array.isArray(entries)) {
+          for (const entry of entries) {
+            const metadata = parseRegionMetadata(entry);
+            if (metadata && matchesRegion(metadata, name)) return metadata;
+          }
+        }
+      } catch {
+        // Invalid or unreadable configuration falls through to the environment source.
+      }
+    }
+  }
+
+  if (env.OCI_REGION_METADATA) {
+    try {
+      const metadata = parseRegionMetadata(
+        JSON.parse(env.OCI_REGION_METADATA) as unknown,
+      );
+      if (metadata && matchesRegion(metadata, name)) return metadata;
+    } catch {
+      // Invalid metadata falls through to the normal OC1 fallback.
+    }
+  }
+  return undefined;
+}
+
+function parseRegionMetadata(value: unknown): RegionMetadata | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const fields = [
+    "realmKey",
+    "realmDomainComponent",
+    "regionKey",
+    "regionIdentifier",
+  ] as const;
+  if (
+    !fields.every(
+      (field) =>
+        field in record &&
+        typeof record[field] === "string" &&
+        record[field].length > 0,
+    )
+  )
+    return undefined;
+  return Object.fromEntries(
+    fields.map((field) => [field, (record[field] as string).toLowerCase()]),
+  ) as RegionMetadata;
+}
+
+function matchesRegion(metadata: RegionMetadata, region: string): boolean {
+  return metadata.regionIdentifier === region || metadata.regionKey === region;
+}
 
 /** Returns the endpoint as stored by the SDK client and with endpoint options resolved. */
 export function resolveEndpoint(
@@ -37,6 +113,9 @@ export function resolveEndpoint(
   opts: EndpointOptions,
 ): { stored: string; resolved: string } {
   const env = opts.env ?? process.env;
+  const effectiveRegions = opts.regionMetadata
+    ? withRegionMetadata(regions, opts.regionMetadata)
+    : regions;
   let stored: string;
   if (client.regionalClient === false || opts.endpoint) {
     if (!opts.endpoint) {
@@ -46,15 +125,44 @@ export function resolveEndpoint(
     }
     stored = withBasePath(opts.endpoint, client.basePath);
   } else {
-    const region = opts.region ?? null;
+    const region = opts.region?.toLowerCase() ?? null;
     if (!region) throw new Error("Must supply either a region or an endpoint.");
-    const template = templateFor(client, regions, region, opts.realmSpecific);
+    const template = templateFor(
+      client,
+      effectiveRegions,
+      region,
+      opts.realmSpecific,
+    );
     stored = withBasePath(
-      endpointFor(client, regions, region, template, env),
+      endpointFor(client, effectiveRegions, region, template, env),
       client.basePath,
     );
   }
   return { stored, resolved: applyEndpointOptions(stored, opts.dualStack) };
+}
+
+function withRegionMetadata(
+  regions: RegionsSpec,
+  metadata: RegionMetadata,
+): RegionsSpec {
+  const shortNames = { ...regions.shortNames };
+  const regionRealms = { ...regions.regionRealms };
+  const realms = { ...regions.realms };
+  if (!(metadata.regionKey in shortNames))
+    shortNames[metadata.regionKey] = metadata.regionIdentifier;
+  if (!(metadata.regionIdentifier in regionRealms))
+    regionRealms[metadata.regionIdentifier] = metadata.realmKey;
+  if (!(metadata.realmKey in realms))
+    realms[metadata.realmKey] = metadata.realmDomainComponent;
+  return {
+    ...regions,
+    regions: regions.regions.includes(metadata.regionIdentifier)
+      ? regions.regions
+      : [...regions.regions, metadata.regionIdentifier],
+    shortNames,
+    regionRealms,
+    realms,
+  };
 }
 
 /** BaseClient.handle_service_endpoint_template */

@@ -386,6 +386,32 @@ export async function run(argv: string[]): Promise<void> {
       throw e;
     }
   }
+  const fromJson = parsed.opts.from_json;
+  if (typeof fromJson === "string") {
+    const source = fromJson.startsWith("file://")
+      ? readFileSync(fromJson.slice(7), "utf8")
+      : fromJson;
+    const input: unknown = JSON.parse(source);
+    if (typeof input !== "object" || input === null || Array.isArray(input))
+      throw new Error("--from-json must contain a JSON object");
+    for (const [key, value] of Object.entries(input)) {
+      const param = (cmd.params ?? []).find(
+        (p) =>
+          p.name.replaceAll("_", "-") === key ||
+          p.name === key ||
+          p.name.replace(/_([a-z])/g, (_, letter: string) =>
+            letter.toUpperCase(),
+          ) === key,
+      );
+      if (
+        !param ||
+        param.name === "from_json" ||
+        values[param.name] !== undefined
+      )
+        continue;
+      values[param.name] = value;
+    }
+  }
   if (parsed.args.length && !cmd.helpDoc.parse.allowExtra) {
     const n = parsed.args.length;
     showPatched(
@@ -396,14 +422,14 @@ export async function run(argv: string[]): Promise<void> {
 
   // oci's required check (cli_util._coalesce_param → wrap_exceptions): params marked
   // required that got no value, in processing order, reported with sys.exit → stderr, 1.
-  // oci_cli_rc defaults count as provided. TODO: --from-json and the os/iam service fallbacks.
+  // oci_cli_rc defaults count as provided. TODO: the os/iam service fallbacks.
   const defaults = rcDefaults(rc, settings.profile);
   const missing = processingOrder(parsed.order, cmd.params ?? [])
     .filter(
       (p) =>
         p.required &&
         !p.isFlag &&
-        isMissing(parsed.opts[p.name]) &&
+        isMissing(values[p.name] ?? parsed.opts[p.name]) &&
         lookupDefault(defaults, rc, path, p) === undefined,
     )
     .map((p) => p.name.replaceAll("_", "-"));

@@ -1,7 +1,11 @@
 // oci_cli_rc: oci's CLI-specific settings file (cli_root.eager_load_cli_rc_file).
 import { existsSync, readFileSync } from "node:fs";
 import { expandUser } from "./config.ts";
-import { type ParsedConfig, parseConfig } from "./configparser.ts";
+import {
+  type ParsedConfig,
+  parseConfig,
+  sectionItems,
+} from "./configparser.ts";
 
 export const RC_DEFAULT_LOCATION = "~/.oci/oci_cli_rc";
 export const RC_FALLBACK_LOCATION = "~/.oci/cli-defaults";
@@ -84,4 +88,45 @@ export function loadRc(
     (rc.parameterAliases[canonical] ??= []).push(alias);
   }
   return rc;
+}
+
+/** cli_root.load_default_values: the profile's section of the rc file (DEFAULT inherited). */
+export function rcDefaults(
+  rc: Rc,
+  profile: string,
+): Map<string, string | null> {
+  if (!rc.parsed) return new Map();
+  return sectionItems(rc.parsed, profile) ?? new Map();
+}
+
+/**
+ * cli_util.get_default_value_from_defaults_file: most specific command chain first
+ * (compute.instance.launch.x → compute.instance.x → compute.x → x), and for each chain
+ * the param name, its rc aliases, then its own long/short option names.
+ */
+export function lookupDefault(
+  defaults: Map<string, string | null>,
+  rc: Rc,
+  chain: string[],
+  param: { name: string; opts: string[] },
+): string | null | undefined {
+  const paramName = param.name.replaceAll("_", "-");
+  const names = [paramName];
+  for (const alias of rc.parameterAliases[`--${paramName}`] ?? []) {
+    names.push(alias.startsWith("--") ? alias.slice(2) : alias.slice(1));
+  }
+  for (const o of param.opts) {
+    const n = o.startsWith("--") ? o.slice(2) : o.slice(1);
+    if (!names.includes(n)) names.push(n);
+  }
+  const hierarchy = chain
+    .map((_, i) => chain.slice(0, chain.length - i).join("."))
+    .concat([""]);
+  for (const prefix of hierarchy) {
+    for (const n of names) {
+      const key = prefix ? `${prefix}.${n}` : n;
+      if (defaults.has(key)) return defaults.get(key);
+    }
+  }
+  return undefined;
 }

@@ -4,7 +4,13 @@
 import { readFileSync } from "node:fs";
 import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
 import { parseConfig, sectionItems } from "./configparser.ts";
-import { type Rc, RC_DEFAULT_LOCATION, loadRc } from "./rc.ts";
+import {
+  type Rc,
+  RC_DEFAULT_LOCATION,
+  loadRc,
+  lookupDefault,
+  rcDefaults,
+} from "./rc.ts";
 import { commandHelp, groupHelp, rootHelp } from "./help/render.ts";
 import { HelpFormatter, helpWidth } from "./help/formatter.ts";
 import {
@@ -280,9 +286,16 @@ export async function run(argv: string[]): Promise<void> {
 
   // oci's required check (cli_util._coalesce_param → wrap_exceptions): params marked
   // required that got no value, in processing order, reported with sys.exit → stderr, 1.
-  // TODO: values from oci_cli_rc, --from-json, and the os/iam service fallbacks.
+  // oci_cli_rc defaults count as provided. TODO: --from-json and the os/iam service fallbacks.
+  const defaults = rcDefaults(rc, settings.profile);
   const missing = processingOrder(parsed.order, cmd.params ?? [])
-    .filter((p) => p.required && !p.isFlag && isMissing(parsed.opts[p.name]))
+    .filter(
+      (p) =>
+        p.required &&
+        !p.isFlag &&
+        isMissing(parsed.opts[p.name]) &&
+        lookupDefault(defaults, rc, path, p) === undefined,
+    )
     .map((p) => p.name.replaceAll("_", "-"));
   if (missing.length) {
     err(

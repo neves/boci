@@ -1,0 +1,75 @@
+[
+  {
+    "id": "rcdef-top-level",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch"],
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[DEFAULT]\ncompartment-id = ocid1.compartment.oc1..x\n"
+      }
+    }
+  },
+  {
+    "id": "rcdef-hierarchy",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch"],
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[DEFAULT]\ncompute.instance.launch.availability-domain = AD-1\ncompute.subnet-id = s\n"
+      }
+    }
+  },
+  {
+    "id": "rcdef-other-chain",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch"],
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[DEFAULT]\ncompute.instance.list.compartment-id = c\nnetwork.subnet-id = s\n"
+      }
+    }
+  },
+  {
+    "id": "rcdef-profile-section",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch", "--profile", "p2"],
+    "config": "[p2]\nregion = us-phoenix-1\n",
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[DEFAULT]\nsubnet-id = s\n\n[p2]\ncompartment-id = c\n"
+      }
+    }
+  },
+  {
+    "id": "rcdef-profile-missing",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch", "--profile", "p3"],
+    "config": "[p3]\nregion = us-phoenix-1\n",
+    "sandbox": { "files": { ".oci/oci_cli_rc": "[p2]\ncompartment-id = c\n" } }
+  },
+  {
+    "id": "rcdef-short-name",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch"],
+    "sandbox": { "files": { ".oci/oci_cli_rc": "[DEFAULT]\nc = x\n" } }
+  },
+  {
+    "id": "rcdef-default-profile-setting",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch"],
+    "config": "[p2]\nregion = us-phoenix-1\n",
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[OCI_CLI_SETTINGS]\ndefault_profile = p2\n\n[p2]\navailability-domain = a\n"
+      }
+    }
+  },
+  {
+    "id": "rcdef-case-insensitive-key",
+    "key": "rc-defaults",
+    "argv": ["compute", "instance", "launch"],
+    "sandbox": {
+      "files": { ".oci/oci_cli_rc": "[DEFAULT]\nCompartment-ID = x\n" }
+    }
+  }
+]

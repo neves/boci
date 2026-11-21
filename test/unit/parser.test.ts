@@ -84,7 +84,7 @@ test("matches Click's option parser on generated argv for real oci commands", as
         type: e.type,
         message: e.message,
         option: e.option ?? null,
-      }).toEqual({ label, ...(c.error as object) });
+      }).toEqual({ label, ...(c.error as never as object) } as never);
     }
   }
 });

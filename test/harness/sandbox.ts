@@ -56,7 +56,20 @@ export async function createSandbox(extraConfig = ""): Promise<Sandbox> {
     if (v !== undefined && !k.startsWith("OCI_") && !k.startsWith("BOCI_"))
       env[k] = v;
   }
-  Object.assign(env, { HOME: home, LC_ALL: "C.UTF-8", TZ: "UTC" });
+  Object.assign(env, {
+    HOME: home,
+    LC_ALL: "C.UTF-8",
+    TZ: "UTC",
+    // Safety net: anything that is not the local fake endpoint goes to a dead proxy and
+    // fails at once, so a case that accidentally reaches a real OCI endpoint can't leave
+    // the machine. Both python-requests and Bun's fetch honour these.
+    HTTPS_PROXY: "http://127.0.0.1:9",
+    HTTP_PROXY: "http://127.0.0.1:9",
+    https_proxy: "http://127.0.0.1:9",
+    http_proxy: "http://127.0.0.1:9",
+    NO_PROXY: "127.0.0.1,localhost",
+    no_proxy: "127.0.0.1,localhost",
+  });
 
   return {
     home,

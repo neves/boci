@@ -6,6 +6,9 @@ const IMPLEMENTED = new Set<string>([
   "help:leaf",
   "help:group",
   "help:root",
+  "usage",
+  "usage:unknown-option",
+  "usage:unknown-command",
 ]);
 
 export function isImplemented(key: string): boolean {

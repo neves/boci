@@ -53,7 +53,9 @@ DIVERGENCES.md             recorded Divergences
 - [x] Root help (`oci --help`): oci's category-grouped command list and global options; stdout, exit 0.
 - [x] Ship `spec/` inside the compiled binary (today `dist/boci` reads `spec/` from the source tree): per-service embedded files, loaded lazily; keep `--help` within the start-up budget.
 - [x] Click-compatible parser (ADR 0003): `--opt value`, `--opt=value`, flags, `--x/--no-x`, multiple, short aliases. (Port of Click's _OptionParser + difflib suggestions, checked against 1,075 cases from Click's real parser.)
-- [ ] Usage errors: unknown command, unknown option, missing required option — same message and exit code 2.
+- [x] Usage errors: Click's invocation flow (root options anywhere, stock vs oci-patched error display, unknown command/option, missing value, extra args, Missing command, `--max-retries` + `--no-retry`) — 25 parity cases. Sandbox now routes non-local traffic to a dead proxy.
+- [ ] Value conversion errors: Click types (Choice, INT, FLOAT, BOOL, File, oci custom types) with Click's messages, for root and leaf options.
+- [ ] Missing required options: oci's own check (`Missing option(s) --x.` with usage, stderr, exit 1), after defaults from `oci_cli_rc`/`--from-json` are considered.
 - [ ] Missing-command handling: "not implemented yet" error with a distinct exit code; `BOCI_FALLBACK=oci` hands the command to the Reference CLI.
 - [ ] Config file: `--config-file`, `--profile`, `OCI_CLI_PROFILE`, `OCI_CLI_CONFIG_FILE`, `DEFAULT` inheritance, missing-profile/missing-file errors, file-permission warnings, the missing `OCI_API_KEY` key-label warning.
 - [ ] `oci_cli_rc`: default values per command, command aliases, parameter aliases, `--cli-rc-file`.

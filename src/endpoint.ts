@@ -1,0 +1,202 @@
+// Service endpoint resolution, ported from oci.regions + oci.base_client.BaseClient as the
+// CLI builds clients (explicit realm-specific / dual-stack booleans; see build_client).
+
+export type RegionsSpec = {
+  regions: string[];
+  shortNames: Record<string, string>;
+  regionRealms: Record<string, string>;
+  realms: Record<string, string>;
+  serviceEndpoints: Record<string, string>;
+  domainFormat: string;
+};
+
+export type ClientInfo = {
+  basePath?: string;
+  endpointTemplate?: string;
+  endpointServiceName?: string;
+  endpointTemplatePerRealm?: Record<string, string>;
+  regionalClient?: boolean;
+  serviceName?: string;
+};
+
+export class MissingEndpointForNonRegionalServiceClient extends Error {}
+
+export type EndpointOptions = {
+  region?: string | null;
+  /** --endpoint (or config endpoint): used as the endpoint, base path appended if missing. */
+  endpoint?: string | null;
+  realmSpecific: boolean;
+  dualStack: boolean;
+  env?: Record<string, string | undefined>;
+};
+
+/** Returns the endpoint as stored by the SDK client and with endpoint options resolved. */
+export function resolveEndpoint(
+  client: ClientInfo,
+  regions: RegionsSpec,
+  opts: EndpointOptions,
+): { stored: string; resolved: string } {
+  const env = opts.env ?? process.env;
+  let stored: string;
+  if (client.regionalClient === false || opts.endpoint) {
+    if (!opts.endpoint) {
+      throw new MissingEndpointForNonRegionalServiceClient(
+        "An endpoint must be provided for a non-regional service client",
+      );
+    }
+    stored = withBasePath(opts.endpoint, client.basePath);
+  } else {
+    const region = opts.region ?? null;
+    if (!region) throw new Error("Must supply either a region or an endpoint.");
+    const template = templateFor(client, regions, region, opts.realmSpecific);
+    stored = withBasePath(
+      endpointFor(client, regions, region, template, env),
+      client.basePath,
+    );
+  }
+  return { stored, resolved: applyEndpointOptions(stored, opts.dualStack) };
+}
+
+/** BaseClient.handle_service_endpoint_template */
+function templateFor(
+  client: ClientInfo,
+  regions: RegionsSpec,
+  region: string,
+  realmSpecific: boolean,
+) {
+  if (realmSpecific && region in regions.regionRealms) {
+    const realm = regions.regionRealms[region] as string;
+    const perRealm = client.endpointTemplatePerRealm ?? {};
+    if (realm in perRealm) return perRealm[realm];
+  }
+  return client.endpointTemplate;
+}
+
+/** oci.regions.endpoint_for / _endpoint_for / _endpoint (no external region sources yet). */
+function endpointFor(
+  client: ClientInfo,
+  regions: RegionsSpec,
+  regionIn: string,
+  template: string | undefined,
+  env: Record<string, string | undefined>,
+): string {
+  let region = regionIn.toLowerCase();
+  if (region in regions.shortNames)
+    region = regions.shortNames[region] as string;
+  if (region.includes(".")) {
+    if (client.endpointServiceName)
+      return `https://${client.endpointServiceName}.${region}`;
+    return formatEndpoint(client, regions, region, template);
+  }
+  const sld = secondLevelDomain(regions, region, env);
+  if (template)
+    return template
+      .replaceAll("{region}", region)
+      .replaceAll("{secondLevelDomain}", sld);
+  return formatEndpoint(
+    client,
+    regions,
+    regions.domainFormat
+      .replace("{region}", region)
+      .replace("{secondLevelDomain}", sld),
+    undefined,
+  );
+}
+
+/** oci.regions._second_level_domain: the region's realm, OCI_DEFAULT_REALM, else oc1. */
+function secondLevelDomain(
+  regions: RegionsSpec,
+  region: string,
+  env: Record<string, string | undefined>,
+) {
+  const realm = regions.regionRealms[region];
+  if (realm) return regions.realms[realm] as string;
+  if (env.OCI_DEFAULT_REALM) return env.OCI_DEFAULT_REALM;
+  return regions.realms.oc1 as string;
+}
+
+/** oci.regions._format_endpoint */
+function formatEndpoint(
+  client: ClientInfo,
+  regions: RegionsSpec,
+  domain: string,
+  template: string | undefined,
+) {
+  const service = (client.serviceName ?? "").toLowerCase();
+  let format: string | undefined = regions.serviceEndpoints[service];
+  if (!format) {
+    if (template === undefined) {
+      if (!client.endpointServiceName)
+        throw new Error(`Unknown service '${service}'`);
+      format = `https://${client.endpointServiceName}.{domain}`;
+    } else {
+      const pos = template.indexOf("{region}");
+      if (pos !== -1) format = `${template.slice(0, pos)}{domain}`;
+    }
+  }
+  if (!format)
+    throw new Error(
+      `Unable to format endpoint for service, ${service} , and service_endpoint_template, ${template}`,
+    );
+  return format.replace("{domain}", domain);
+}
+
+/** BaseClient.endpoint setter */
+function withBasePath(endpoint: string, basePath: string | undefined): string {
+  if (basePath === "/") return endpoint;
+  if (
+    basePath &&
+    !(endpoint.endsWith(basePath) || endpoint.endsWith(`${basePath}/`))
+  )
+    return `${endpoint}${basePath}`;
+  return endpoint;
+}
+
+/** BaseClient.update_endpoint_template_for_options: resolve `{dualStack?on:off}` blocks. */
+export function applyEndpointOptions(
+  endpoint: string,
+  dualStack: boolean,
+): string {
+  const segments: string[] = [];
+  let last = 0;
+  for (const m of endpoint.matchAll(/\{([^}]+)\}/g)) {
+    const option = m[0];
+    const start = m.index ?? 0;
+    const end = start + option.length;
+    segments.push(endpoint.slice(last, start));
+    if (!(option.includes("?") && option.includes(":"))) {
+      segments.push(option);
+      last = end;
+      continue;
+    }
+    if (!option.includes("{dualStack") || /\s/.test(option)) {
+      last = end;
+      continue;
+    }
+    const on = option.slice(option.indexOf("?") + 1, option.indexOf(":"));
+    const off = option.slice(option.indexOf(":") + 1, -1);
+    const valid = (s: string) => s === "" || /^[\p{L}\p{N}]/u.test(s);
+    if (!(valid(on) && valid(off))) {
+      last = end;
+      continue;
+    }
+    let replacement = dualStack ? on : off;
+    if (
+      replacement.startsWith(".") &&
+      segments.length &&
+      (segments[segments.length - 1] as string).endsWith(".")
+    ) {
+      replacement = replacement.slice(1);
+    }
+    if (
+      replacement.endsWith(".") &&
+      end < endpoint.length &&
+      endpoint[end] === "."
+    )
+      last = end + 1;
+    segments.push(replacement);
+    last = Math.max(last, end);
+  }
+  segments.push(endpoint.slice(last));
+  return segments.join("");
+}

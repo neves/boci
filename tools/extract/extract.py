@@ -207,6 +207,20 @@ def kind_counts(spec: dict) -> dict:
     return {"generated": kinds.count("generated"), "custom": kinds.count("custom")}
 
 
+def regions_spec() -> dict:
+    """oci.regions lookup tables used to turn a region into a service endpoint."""
+    from oci import regions
+
+    return {
+        "regions": sorted(regions.REGIONS),
+        "shortNames": dict(sorted(regions.REGIONS_SHORT_NAMES.items())),
+        "regionRealms": dict(sorted(regions.REGION_REALMS.items())),
+        "realms": dict(regions.REALMS),
+        "serviceEndpoints": dict(sorted(regions.SERVICE_ENDPOINTS.items())),
+        "domainFormat": regions.DOMAIN_FORMAT,
+    }
+
+
 def datetime_spec() -> dict:
     """oci's CliDatetime accepted formats (regex + arrow format + assumed tz) and error text."""
     from oci_cli.custom_types.cli_datetime import CliDatetime
@@ -295,6 +309,7 @@ def main() -> None:
         "globalParams": [param_spec(p) for p in root.params],
         "rootHelpDoc": help_doc(root, click.Context(root, info_name="oci")),
         "datetime": datetime_spec(),
+        "regions": regions_spec(),
         # cli_root.echo_help swaps OCI_HELP for the wrapped OCI_USER_HELP in root help.
         "ociHelp": __import__("oci_cli.cli_root", fromlist=["x"]).OCI_HELP,
         "ociUserHelp": __import__("oci_cli.cli_root", fromlist=["x"]).OCI_USER_HELP,

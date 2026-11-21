@@ -68,11 +68,12 @@ DIVERGENCES.md             recorded Divergences
 - [x] Start-up: split the runtime index so `--version`/root parsing reads only what it needs (the command tree per service lives with the service). Target `--version` ≤ 15 ms and ≤ 50 MB RSS with the compiled binary (now 27 ms / 57 MB).
 - [x] Refresh README.md and site/index.html numbers from `bench/results/latest.json` (help and usage errors are now measured).
 - [x] API-key request signer (ADR 0002), verified byte-for-byte against the Reference CLI's signature over the fake endpoint.
-- [ ] Region → endpoint resolution (region, realm, `--region`, `--endpoint`, `OCI_CLI_REGION`).
+- [x] Region → endpoint resolution: port of oci.regions + BaseClient endpoint logic (short codes, realms, domain-style regions, `OCI_DEFAULT_REALM`, realm-specific templates, `{dualStack?…}` options, base paths, `--endpoint`), 1,800 fixtures from real SDK clients. CLI region precedence (`--region`, `OCI_CLI_REGION`, rc, config) lands with `os ns get`.
 - [ ] `boci os ns get` — request-only parity, then live parity confirmed once with the `.env.test` profile.
 - [ ] Client build errors and warnings: config file/profile not found, invalid key file, file-permission warnings (config and key), as oci prints them when executing.
 - [ ] Service error mapping: non-2xx → same stderr JSON (`code`, `message`, `status`, `target_service`, …) and exit code.
 - [ ] Global options: `--request-id`, `--debug` (shape only), `--connection-timeout`, `--read-timeout`, `--max-retries`/`--no-retry`.
+- [ ] External region sources (`~/.oci/regions-config.json`, `OCI_REGION_METADATA`) and realm-specific service params (`{namespaceName+Dot}`) in endpoints.
 
 ## Rung 2 — Generated GETs
 

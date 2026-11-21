@@ -107,6 +107,8 @@ def client_info(client_cls) -> dict:
         "service_endpoint_template": "endpointTemplate",
         "endpoint_service_name": "endpointServiceName",
         "service_endpoint_template_per_realm": "endpointTemplatePerRealm",
+        "regional_client": "regionalClient",
+        "service_uses_dualstack_endpoints_by_default": "dualStackByDefault",
     }
     if d is not None:
         for k, v in zip(d.keys, d.values):

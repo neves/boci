@@ -110,7 +110,8 @@ DIVERGENCES.md             recorded Divergences
 - [x] Auto-generated request-only cases for every generated POST/PUT/PATCH command.
 - [x] Fix generated request query/header mismatches (missing query args and Log Analytics `Expect: 100-continue`).
 - [~] Fix generated request signature mismatches for special PUT body shapes.
-- [ ] Complex JSON flags, `file://` and `--from-json`, `--generate-full-command-json-input`, `--generate-param-json-input`.
+- [ ] Complex JSON flags, `file://` and `--from-json`.
+- [ ] `--generate-full-command-json-input` and `--generate-param-json-input`.
 - [ ] Polymorphic bodies (discriminator subcommands).
 - [ ] `--if-match`, `--if-none-match`, extra headers.
 - [ ] First mutating live tests on Always-Free, test-owned resources in the root compartment (name `boci-parity-*`, freeform tag `boci-parity=true`), with cleanup that deletes only tagged resources.

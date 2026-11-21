@@ -48,6 +48,7 @@ import {
   serviceTree,
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
+import { isImplemented } from "./registry.ts";
 import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
 import {
   InvalidPrivateKey,
@@ -414,10 +415,9 @@ export async function run(argv: string[]): Promise<void> {
     return;
   }
   if (
-    name === "compute" &&
-    (key === "boot-volume-attachment get" ||
-      key === "global-image-capability-schema list") &&
-    specCmd.operation
+    specCmd.kind === "generated" &&
+    specCmd.operation?.http === "GET" &&
+    isImplemented(`${name} ${key}`)
   ) {
     await runGeneratedGet(
       values,

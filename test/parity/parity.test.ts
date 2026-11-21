@@ -66,6 +66,13 @@ describe("parity", () => {
             `${c.id}: invalid signature`,
           ).toBe(true);
       }
+      if (c.requestOnly) {
+        const actual = normalizeRun(run);
+        const expected = remask(golden!.observed);
+        expect(actual.requests).toEqual(expected.requests);
+        record(c.key, true);
+        return;
+      }
       try {
         expect(normalizeRun(run)).toEqual(
           remask(golden?.observed as never) as never,

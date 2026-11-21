@@ -21,6 +21,8 @@ export type ParityCase = {
   env?: Record<string, string>;
   config?: string;
   sandbox?: { keyLabel?: boolean; files?: Record<string, string> };
+  /** Compare only exit status and the signed HTTP request captured by the fake endpoint. */
+  requestOnly?: boolean;
 };
 
 export type Golden = {

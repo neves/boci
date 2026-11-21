@@ -467,8 +467,8 @@ async function runNamespaceGet(
   const headers: Record<string, string> = {
     accept: "application/json",
     "content-type": "application/json",
-    "opc-client-retries": "true",
   };
+  if (rootValues.no_retry !== true) headers["opc-client-retries"] = "true";
   if (rootValues.request_id !== undefined)
     headers["opc-client-request-id"] = String(rootValues.request_id);
   const keyPath = expandUser(String(config.key_file));

@@ -79,7 +79,8 @@ DIVERGENCES.md             recorded Divergences
 - [x] Global option: `--debug` (shape only).
 - [~] Global option: `--connection-timeout`.
 - [x] Global option: `--read-timeout`.
-- [ ] Global options: `--max-retries`/`--no-retry`.
+- [x] Global option: `--no-retry` disables SDK retries and omits `opc-client-retries`.
+- [ ] Global option: `--max-retries` controls the number of SDK retries.
 - [ ] External region sources (`~/.oci/regions-config.json`, `OCI_REGION_METADATA`) and realm-specific service params (`{namespaceName+Dot}`) in endpoints.
 
 ## Rung 2 — Generated GETs

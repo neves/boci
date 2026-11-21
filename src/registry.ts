@@ -19,6 +19,7 @@ const IMPLEMENTED = new Set<string>([
   "os ns get",
   "debug",
   "read-timeout",
+  "no-retry",
 ]);
 
 export function isImplemented(key: string): boolean {

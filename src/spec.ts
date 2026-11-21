@@ -13,6 +13,7 @@ export type HelpDoc = {
   shortHelp?: string;
   deprecated?: boolean;
   parse: ParseSettings;
+  aliasAware?: boolean;
 };
 
 export type TreeNode = {

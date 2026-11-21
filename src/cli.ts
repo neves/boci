@@ -151,9 +151,19 @@ export async function run(argv: string[]): Promise<void> {
   const named = argv.find((a) => a in index.services);
   if (named && !index.servicesWithoutCommands.includes(named))
     loaded.add(named);
-  const name = rest[0] as string;
-  if (!loaded.has(name) || !index.root.commands?.[name]) {
-    if (splitOpt(name)[0]) {
+  const typedName = rest[0] as string;
+  const rootAlias = resolveAlias(rc, "oci", typedName, true, (n) => {
+    // An alias target is loaded on demand (dynamic_loader.load_service).
+    if (
+      n !== typedName &&
+      n in index.services &&
+      !index.servicesWithoutCommands.includes(n)
+    )
+      loaded.add(n);
+    return loaded.has(n) && Boolean(index.root.commands?.[n]);
+  });
+  if (rootAlias.target === undefined) {
+    if (splitOpt(typedName)[0]) {
       // resolve_command re-parses when the token looks like an option.
       try {
         new OptionParser(index.globalParams, index.rootHelpDoc.parse).parse(
@@ -167,9 +177,10 @@ export async function run(argv: string[]): Promise<void> {
     }
     showStock(
       rootUsage(),
-      noSuchCommand(name, rootCommandOrder(index, loaded)),
+      noSuchCommand(typedName, rootCommandOrder(index, loaded)),
     );
   }
+  const name = rootAlias.target;
 
   // 4. Root callback runs: UsageError.show is now patched to stdout.
   if (has(root.opts, "max_retries") && root.opts.no_retry === true) {
@@ -179,23 +190,25 @@ export async function run(argv: string[]): Promise<void> {
     );
   }
   const settings = resolveRootSettings(rootValues, rc, rootUsage);
-  if (name !== "profile") checkKeyForSecurity(settings);
+  if (typedName !== "profile") checkKeyForSecurity(settings); // invoked_subcommand is the typed name
   const helpRequested = root.opts.help === true;
 
-  // 5. Walk groups down to the leaf.
+  // 5. Walk groups down to the leaf. `path` holds names as typed (Click's info_name,
+  //    shown in usage); `canon` the canonical command names (spec keys).
   const spec = await loadService(name);
-  let node = index.root.commands[name] as TreeNode;
-  let path: string[] = [name];
+  let node = index.root.commands?.[name] as TreeNode;
+  let path: string[] = [typedName];
+  let canon: string[] = [name];
   let args = rest.slice(1);
   while (node.commands) {
-    const sub = path.slice(1).join(" ");
+    const sub = canon.slice(1).join(" ");
     const group = sub ? spec.groups[sub] : spec.top;
     if (!group) break;
     const commandPath = [PROG, ...path].join(" ");
     if (args.length === 0) {
       // NoArgsIsHelpError.show: the group's help on stderr.
       err(
-        `${groupHelp(commandPath, group.helpDoc, children(spec, node, path.slice(1)))}\n`,
+        `${groupHelp(commandPath, group.helpDoc, children(spec, node, canon.slice(1)))}\n`,
       );
       throw new Exit(2);
     }
@@ -215,7 +228,16 @@ export async function run(argv: string[]): Promise<void> {
     if (parsed.args.length === 0)
       showPatched(usage(commandPath, group.helpDoc), "Missing command.");
     const childName = parsed.args[0] as string;
-    const child = node.commands[childName];
+    const commands = node.commands;
+    const resolved = resolveAlias(
+      rc,
+      canon.join(" "),
+      childName,
+      group.helpDoc.aliasAware === true,
+      (n) => Boolean(commands[n]),
+    );
+    const child =
+      resolved.target === undefined ? undefined : commands[resolved.target];
     if (!child) {
       if (splitOpt(childName)[0]) {
         try {
@@ -238,11 +260,12 @@ export async function run(argv: string[]): Promise<void> {
     }
     node = child;
     path = [...path, childName];
+    canon = [...canon, resolved.target as string];
     args = parsed.args.slice(1);
   }
 
   // 6. Leaf: parse, eager help, then extra-argument check.
-  const key = path.slice(1).join(" ");
+  const key = canon.slice(1).join(" ");
   const cmd = spec.commands[key];
   if (!cmd) throw new Error(`boci: spec has no command ${path.join(" ")}`);
   const commandPath = [PROG, ...path].join(" ");
@@ -479,4 +502,34 @@ function style(
   if (!tty) return text;
   const code = { yellow: 33, red: 31 }[color];
   return `\x1b[${code}m${text}\x1b[0m`;
+}
+
+/**
+ * CommandGroupWithAlias.get_command: an exact name wins (warning if an rc alias tried to
+ * shadow it), then a command-sequence alias for this chain, then a global alias.
+ */
+function resolveAlias(
+  rc: Rc,
+  chain: string,
+  name: string,
+  aliasAware: boolean,
+  exists: (name: string) => boolean,
+): { target?: string } {
+  const sequence = rc.commandSequenceAliases[chain];
+  if (exists(name)) {
+    if (aliasAware) {
+      const shadowed = rc.globalCommandAliases[name] ?? sequence?.[name];
+      if (shadowed !== undefined) {
+        err(
+          `${style(`Could not use '${name}' as an alias for '${shadowed}' as it belongs to an existing command under '${chain}'`, "red", process.stderr.isTTY)}\n`,
+        );
+      }
+    }
+    return { target: name };
+  }
+  if (!aliasAware) return {};
+  for (const target of [sequence?.[name], rc.globalCommandAliases[name]]) {
+    if (target !== undefined && exists(target)) return { target };
+  }
+  return {};
 }

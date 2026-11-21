@@ -126,6 +126,11 @@ def help_doc(cmd: click.Command, ctx: click.Context) -> dict:
         if rec is not None:
             records.append(list(rec))
     doc = {"usage": " ".join(cmd.collect_usage_pieces(ctx)), "text": text, "records": records}
+    if isinstance(cmd, click.Group):
+        from oci_cli.aliasing.command_group_with_alias import CommandGroupWithAlias
+
+        # Only CommandGroupWithAlias groups resolve [OCI_CLI_COMMAND_ALIASES].
+        doc["aliasAware"] = isinstance(cmd, CommandGroupWithAlias)
     # Parser settings Click derives from the context (see ADR 0003).
     # (click.Context() alone ignores command.context_settings; make_context applies them.)
     settings = getattr(cmd, "context_settings", None) or {}

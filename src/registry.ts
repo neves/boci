@@ -14,6 +14,7 @@ const IMPLEMENTED = new Set<string>([
   "root-callback",
   "rc",
   "rc-defaults",
+  "rc-aliases",
 ]);
 
 export function isImplemented(key: string): boolean {

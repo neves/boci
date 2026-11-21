@@ -60,7 +60,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Config file: configparser + `oci.config.from_file` ports (76 fixtures from oci itself), `--config-file`/`OCI_CLI_CONFIG_FILE`, `--profile`/`OCI_CLI_PROFILE`, `OCI_CLI_AUTH`, DEFAULT inheritance, the `OCI_API_KEY` key-label warning (8 parity cases). File-permission warnings and config-error display happen when the client is built → rung 1.
 - [x] `oci_cli_rc` a: file location (`--cli-rc-file`/`--defaults-file`, `OCI_CLI_RC_FILE`, `~/.oci/oci_cli_rc`, `~/.oci/cli-defaults`) and `[OCI_CLI_SETTINGS]` `default_profile`.
 - [x] `oci_cli_rc` b: default values per profile section (lookup hierarchy `compute.instance.list.compartment-id` → … → `compartment-id`) feeding the required check.
-- [ ] `oci_cli_rc` c: `[OCI_CLI_COMMAND_ALIASES]` global and command-sequence aliases, incl. the "Could not use … as an alias" warning.
+- [x] `oci_cli_rc` c: `[OCI_CLI_COMMAND_ALIASES]` global and command-sequence aliases, incl. the "Could not use … as an alias" warning.
 - [ ] `oci_cli_rc` d: `[OCI_CLI_PARAM_ALIASES]` (parsing, help text, collision warnings).
 - [ ] `oci_cli_rc` e: `[OCI_CLI_CANNED_QUERIES]` `query://name` (with `--query`, rung 3).
 

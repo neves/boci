@@ -440,6 +440,12 @@ async function runGeneratedGet(
   index: Index,
   operation: OperationSpec,
 ): Promise<void> {
+  if (values.all_pages === true && values.limit !== undefined) {
+    err(
+      "UsageError: If you provide the --all option you cannot provide the --limit option\n",
+    );
+    throw new Exit(1);
+  }
   let config;
   try {
     config = fromFile(settings.configFile, settings.profile);
@@ -510,6 +516,12 @@ async function runGeneratedGet(
     const value = arg ? values[arg] : undefined;
     if (value !== undefined) url.searchParams.set(name, String(value));
   }
+  const allPages = values.all_pages === true;
+  const limit = values.limit;
+  const pageSize = values.page_size;
+  if ((allPages || limit !== undefined) && pageSize !== undefined)
+    url.searchParams.set("limit", String(pageSize));
+  const baseUrl = new URL(url);
   const headers: Record<string, string> = {};
   for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
     const value = param.value ?? (param.arg ? values[param.arg] : undefined);
@@ -550,66 +562,96 @@ async function runGeneratedGet(
       : Math.max(1, Number(rootValues.max_retries) || 8);
   let response: Response;
   let raw: string;
-  for (let attempt = 1; ; attempt++) {
-    delete req.headers.date;
-    delete req.headers.authorization;
-    signRequest(req, { keyId, privateKey });
-    const controller = new AbortController();
-    const connectionTimer =
-      connectionTimeout === undefined
-        ? undefined
-        : setTimeout(
-            () =>
-              controller.abort(
-                new DOMException("Connection timed out", "TimeoutError"),
-              ),
-            connectionTimeout * 1000,
-          );
-    const readTimer =
-      readTimeout === undefined
-        ? undefined
-        : setTimeout(
-            () =>
-              controller.abort(
-                new DOMException("Response read timed out", "TimeoutError"),
-              ),
-            readTimeout * 1000,
-          );
-    try {
-      response = await fetch(req.url, {
-        method: req.method,
-        headers: req.headers,
-        ...(connectionTimer === undefined && readTimer === undefined
-          ? {}
-          : { signal: controller.signal }),
-      });
-      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
-      raw = await response.text();
-    } catch (e) {
-      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
-      if (readTimer !== undefined) clearTimeout(readTimer);
-      if (attempt >= maxAttempts) throw e;
+  const pageItems: unknown[] = [];
+  let nextPage: string | null = null;
+  let page = url.searchParams.get("page");
+  do {
+    const pageUrl = new URL(baseUrl);
+    if (page !== null) pageUrl.searchParams.set("page", page);
+    else pageUrl.searchParams.delete("page");
+    req.url = pageUrl.toString();
+    for (let attempt = 1; ; attempt++) {
+      delete req.headers.date;
+      delete req.headers.authorization;
+      signRequest(req, { keyId, privateKey });
+      const controller = new AbortController();
+      const connectionTimer =
+        connectionTimeout === undefined
+          ? undefined
+          : setTimeout(
+              () =>
+                controller.abort(
+                  new DOMException("Connection timed out", "TimeoutError"),
+                ),
+              connectionTimeout * 1000,
+            );
+      const readTimer =
+        readTimeout === undefined
+          ? undefined
+          : setTimeout(
+              () =>
+                controller.abort(
+                  new DOMException("Response read timed out", "TimeoutError"),
+                ),
+              readTimeout * 1000,
+            );
+      try {
+        response = await fetch(req.url, {
+          method: req.method,
+          headers: req.headers,
+          ...(connectionTimer === undefined && readTimer === undefined
+            ? {}
+            : { signal: controller.signal }),
+        });
+        if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+        raw = await response.text();
+      } catch (e) {
+        if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+        if (readTimer !== undefined) clearTimeout(readTimer);
+        if (attempt >= maxAttempts) throw e;
+        const delay = Math.min(
+          1000 * 2 ** (attempt - 1) + Math.random() * 1000,
+          30000,
+        );
+        await Bun.sleep(delay);
+        continue;
+      } finally {
+        if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+        if (readTimer !== undefined) clearTimeout(readTimer);
+      }
+      if (attempt >= maxAttempts || !retryableResponse(response, raw)) break;
       const delay = Math.min(
         1000 * 2 ** (attempt - 1) + Math.random() * 1000,
         30000,
       );
       await Bun.sleep(delay);
-      continue;
-    } finally {
-      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
-      if (readTimer !== undefined) clearTimeout(readTimer);
     }
-    if (attempt >= maxAttempts || !retryableResponse(response, raw)) break;
-    const delay = Math.min(
-      1000 * 2 ** (attempt - 1) + Math.random() * 1000,
-      30000,
-    );
-    await Bun.sleep(delay);
-  }
-  if (rootValues.debug === true) {
-    err(`DEBUG:oci.base_client: Request: ${req.method} ${url}\n`);
-    err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
-  }
+    if (rootValues.debug === true) {
+      err(`DEBUG:oci.base_client: Request: ${req.method} ${req.url}\n`);
+      err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
+    }
+    nextPage = response.headers.get("opc-next-page");
+    if (
+      allPages &&
+      response.ok &&
+      operation.responseType?.startsWith("list[")
+    ) {
+      try {
+        const parsed: unknown = JSON.parse(raw);
+        if (
+          parsed &&
+          typeof parsed === "object" &&
+          "items" in parsed &&
+          Array.isArray(parsed.items)
+        )
+          pageItems.push(...parsed.items);
+      } catch {
+        // Keep ordinary response handling for a malformed list body.
+      }
+    }
+    page = nextPage;
+    if (!allPages || !operation.responseType?.startsWith("list[")) break;
+  } while (page !== null);
   let value: unknown;
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -619,13 +661,15 @@ async function runGeneratedGet(
         : operation.method === "get_namespace"
           ? raw
           : mapResponseKeys(
-              operation.responseType?.startsWith("list[") &&
-                parsed &&
-                typeof parsed === "object" &&
-                "items" in parsed &&
-                Array.isArray(parsed.items)
-                ? parsed.items
-                : parsed,
+              allPages && operation.responseType?.startsWith("list[")
+                ? pageItems
+                : operation.responseType?.startsWith("list[") &&
+                    parsed &&
+                    typeof parsed === "object" &&
+                    "items" in parsed &&
+                    Array.isArray(parsed.items)
+                  ? parsed.items
+                  : parsed,
             );
   } catch {
     value = raw;
@@ -658,10 +702,10 @@ async function runGeneratedGet(
   }
   const output: Record<string, unknown> = { data: value };
   const etag = response.headers.get("etag");
-  const nextPage = response.headers.get("opc-next-page");
+  const hasNextPage = response.headers.get("opc-next-page");
   if (etag !== null) output.etag = etag;
-  if (nextPage !== null) {
-    output["opc-next-page"] = nextPage;
+  if (hasNextPage !== null && !allPages) {
+    output["opc-next-page"] = hasNextPage;
     err(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );

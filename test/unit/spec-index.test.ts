@@ -30,7 +30,7 @@ test("spec index contains os ns get as a leaf command", () => {
 });
 
 test("spec index covers non-service top-level commands", () => {
-  for (const name of ["setup", "session", "raw-request"]) {
+  for (const name of ["setup", "session", "raw-request", "profile"]) {
     expect(index.root.commands?.[name]).toBeDefined();
   }
 });

@@ -72,6 +72,8 @@ for (const service of services) {
           http?: string;
           responseType?: string;
           pathParams?: Record<string, string>;
+          headerParams?: Record<string, unknown>;
+          body?: string;
         }
       | undefined;
     const key = `${service} ${command}`;
@@ -140,7 +142,16 @@ for (const service of services) {
     for (const param of params) {
       if (bindings.some((b) => b.target === "body" && b.param === param.name))
         continue;
-      if (param.required !== true && !pathArgs.has(String(param.name)))
+      const hasRequestBinding = bindings.some(
+        (binding) =>
+          binding.param === param.name &&
+          ["query", "path", "header"].includes(String(binding.target)),
+      );
+      if (
+        param.required !== true &&
+        !pathArgs.has(String(param.name)) &&
+        !hasRequestBinding
+      )
         continue;
       const options = param.opts as string[];
       const option = options?.find((o) => o.startsWith("--")) ?? options?.[0];

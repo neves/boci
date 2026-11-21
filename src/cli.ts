@@ -1,11 +1,12 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import {
   ConfigError,
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,
+  configPath,
   expandUser,
   fromFile,
 } from "./config.ts";
@@ -434,6 +435,15 @@ async function runNamespaceGet(
   }
   const operation = spec.commands["ns get"]?.operation;
   if (!operation) throw new Error("boci: missing os ns get operation spec");
+  if (
+    (
+      process.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? ""
+    ).toLowerCase() !== "true"
+  ) {
+    warnFilePermissions(configPath(settings.configFile));
+    if (config.key_file)
+      warnFilePermissions(expandUser(String(config.key_file)));
+  }
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
     string | undefined;
@@ -482,11 +492,27 @@ async function runNamespaceGet(
   const raw = await response.text();
   let value: unknown;
   try {
-    value = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
+    value = typeof parsed === "string" ? parsed : raw;
   } catch {
     value = raw;
   }
   out(`${JSON.stringify(sortJson({ data: value }), null, 2)}\n`);
+}
+
+function warnFilePermissions(file: string) {
+  try {
+    if ((statSync(file).mode & 0o077) === 0) return;
+  } catch {
+    return;
+  }
+  err(
+    `WARNING: Permissions on ${file} are too open. \n` +
+      "To fix this please try executing the following command: \n" +
+      `oci setup repair-file-permissions --file ${file} \n` +
+      "Alternatively to hide this warning, you may set the environment variable, OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING: \n" +
+      "export OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING=True\n\n",
+  );
 }
 
 function configBool(value: unknown): boolean {

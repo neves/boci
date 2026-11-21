@@ -42,6 +42,8 @@ export type SandboxOptions = {
   keyLabel?: boolean;
   /** Extra files to create, relative to the sandbox HOME (e.g. ".oci/oci_cli_rc"). */
   files?: Record<string, string>;
+  configMode?: number;
+  keyMode?: number;
 };
 
 export async function createSandbox(
@@ -62,13 +64,13 @@ export async function createSandbox(
     configFile,
     `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await fingerprint(keyFile)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
   );
-  await chmod(keyFile, 0o600);
+  await chmod(keyFile, options.keyMode ?? 0o600);
   for (const [rel, content] of Object.entries(options.files ?? {})) {
     const path = join(home, rel);
     await Bun.write(path, content.replaceAll("{home}", home));
     await chmod(path, 0o600);
   }
-  await chmod(configFile, 0o600);
+  await chmod(configFile, options.configMode ?? 0o600);
 
   const env: Record<string, string> = {};
   for (const [k, v] of Object.entries(process.env)) {

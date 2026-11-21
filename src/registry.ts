@@ -18,6 +18,7 @@ const IMPLEMENTED = new Set<string>([
   "rc-param-aliases",
   "os ns get",
   "debug",
+  "read-timeout",
 ]);
 
 export function isImplemented(key: string): boolean {

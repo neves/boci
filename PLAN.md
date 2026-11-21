@@ -78,7 +78,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Global option: `--request-id`.
 - [x] Global option: `--debug` (shape only).
 - [ ] Global option: `--connection-timeout`.
-- [ ] Global option: `--read-timeout`.
+- [x] Global option: `--read-timeout`.
 - [ ] Global options: `--max-retries`/`--no-retry`.
 - [ ] External region sources (`~/.oci/regions-config.json`, `OCI_REGION_METADATA`) and realm-specific service params (`{namespaceName+Dot}`) in endpoints.
 

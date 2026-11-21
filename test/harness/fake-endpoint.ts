@@ -16,6 +16,7 @@ export type CapturedRequest = {
 
 export type Reply = {
   status?: number;
+  delayMs?: number;
   headers?: Record<string, string>;
   /** Strings are sent verbatim; anything else is JSON-encoded. */
   body?: unknown;
@@ -65,6 +66,7 @@ export function startFakeEndpoint(replies: Reply | Reply[] = {}): FakeEndpoint {
       });
       const reply =
         queue[Math.min(requests.length - 1, queue.length - 1)] ?? {};
+      if (reply.delayMs) await Bun.sleep(reply.delayMs);
       return toResponse(reply);
     },
   });

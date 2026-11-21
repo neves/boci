@@ -487,15 +487,53 @@ async function runNamespaceGet(
     throw e;
   }
   signRequest(req, { keyId, privateKey });
-  const response = await fetch(req.url, {
-    method: req.method,
-    headers: req.headers,
-  });
+  const connectionTimeout = timeoutSecondsFor(
+    rootValues.connection_timeout ?? config.connection_timeout,
+  );
+  const readTimeout = timeoutSecondsFor(
+    rootValues.read_timeout ?? config.read_timeout,
+  );
+  const connectionController = new AbortController();
+  const connectionTimer =
+    connectionTimeout === undefined
+      ? undefined
+      : setTimeout(
+          () =>
+            connectionController.abort(
+              new DOMException("Connection timed out", "TimeoutError"),
+            ),
+          connectionTimeout * 1000,
+        );
+  const readTimer =
+    readTimeout === undefined
+      ? undefined
+      : setTimeout(
+          () =>
+            connectionController.abort(
+              new DOMException("Response read timed out", "TimeoutError"),
+            ),
+          readTimeout * 1000,
+        );
+  let response: Response;
+  let raw: string;
+  try {
+    response = await fetch(req.url, {
+      method: req.method,
+      headers: req.headers,
+      ...(connectionTimer === undefined && readTimer === undefined
+        ? {}
+        : { signal: connectionController.signal }),
+    });
+    if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+    raw = await response.text();
+  } finally {
+    if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+    if (readTimer !== undefined) clearTimeout(readTimer);
+  }
   if (rootValues.debug === true) {
     err(`DEBUG:oci.base_client: Request: ${req.method} ${url}\n`);
     err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
   }
-  const raw = await response.text();
   let value: unknown;
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -530,6 +568,12 @@ async function runNamespaceGet(
     throw new Exit(1);
   }
   out(`${JSON.stringify(sortJson({ data: value }), null, 2)}\n`);
+}
+
+function timeoutSecondsFor(value: unknown): number | undefined {
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds > 0) return seconds;
+  return undefined;
 }
 
 function warnFilePermissions(file: string) {

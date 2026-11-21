@@ -51,6 +51,14 @@ describe("parity", () => {
         record(c.key, true);
         return;
       }
+      if (c.key === "read-timeout") {
+        expect(run.exitCode).toBe(1);
+        expect(run.stdout).toBe("");
+        expect(run.stderr).toContain("TimeoutError");
+        expect(run.requests).toHaveLength(1);
+        record(c.key, true);
+        return;
+      }
       for (const req of run.requests) {
         if (req.headers.authorization)
           expect(

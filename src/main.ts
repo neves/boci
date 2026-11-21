@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // boci entry point. Commands are added rung by rung; see PLAN.md.
-import { commandHelp } from "./help/render.ts";
+import { commandHelp, groupHelp } from "./help/render.ts";
 import { loadIndex, loadService, resolvePath } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
 
@@ -31,6 +31,34 @@ if (path.length > 0 && !node.commands && rest.some((a) => HELP_FLAGS.has(a))) {
       `${commandHelp([PROG, ...path].join(" "), cmd.helpDoc)}\n`,
     );
     process.exit(0);
+  }
+}
+
+// Group help: Click's no-subcommand path prints the group's help to stderr, exit 2,
+// both for `oci os --help` and a bare `oci os`.
+if (
+  path.length > 0 &&
+  node.commands &&
+  (rest.length === 0 || rest.every((a) => HELP_FLAGS.has(a)))
+) {
+  const [service, ...sub] = path as [string, ...string[]];
+  const spec = await loadService(service);
+  const group = sub.length ? spec.groups[sub.join(" ")] : spec.top;
+  if (group) {
+    const children = Object.entries(node.commands).map(([name, child]) => {
+      const key = [...sub, name].join(" ");
+      const s = child.commands ? spec.groups[key] : spec.commands[key];
+      return {
+        name,
+        hidden: child.hidden,
+        help: s?.help,
+        shortHelp: s?.helpDoc.shortHelp,
+      };
+    });
+    process.stderr.write(
+      `${groupHelp([PROG, ...path].join(" "), group.helpDoc, children)}\n`,
+    );
+    process.exit(2);
   }
 }
 

@@ -1,7 +1,7 @@
 // `bun run status [--all] [--service <name>] [--json]`: parity progress vs the Reference CLI.
 import { parseArgs } from "util";
 import { implementedLookup } from "../src/registry.ts";
-import { buildStatus, renderStatus } from "./status-lib.ts";
+import { buildStatus, countDivergences, renderStatus } from "./status-lib.ts";
 
 const root = `${import.meta.dir}/..`;
 const { values } = parseArgs({
@@ -18,16 +18,19 @@ const hasResults = await resultsFile.exists();
 const divergencesFile = Bun.file(`${root}/DIVERGENCES.md`);
 
 const index = await Bun.file(`${root}/spec/index.json`).json();
+const divergenceCounts = countDivergences(
+  (await divergencesFile.exists()) ? await divergencesFile.text() : "",
+);
 const status = buildStatus({
   index,
   ladder: await Bun.file(`${root}/PLAN.md`).text(),
   implemented: await implementedLookup(Object.keys(index.root.commands)),
   results: hasResults ? await resultsFile.json() : {},
-  divergences: (await divergencesFile.exists())
-    ? ((await divergencesFile.text())
-        .replace(/```[\s\S]*?```/g, "") // ignore the entry-format example
-        .match(/^### /gm)?.length ?? 0)
-    : 0,
+  divergences:
+    divergenceCounts.accepted +
+    divergenceCounts.unresolved +
+    divergenceCounts.resolved,
+  divergenceCounts,
 });
 
 if (values.json) {

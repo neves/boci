@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import {
   buildStatus,
   parseLadder,
+  countDivergences,
   renderStatus,
 } from "../../scripts/status-lib.ts";
 
@@ -111,4 +112,19 @@ test("renders totals, the next ladder item and missing leaves for one service", 
   expect(text).toContain("3.96.3");
   expect(text).toContain("Next: Status");
   expect(text).toContain("missing  os ns get");
+});
+
+test("divergence counts distinguish resolved entries and ignore the template", () => {
+  const register = [
+    "- **State:** accepted",
+    "## Entries",
+    "- **State:** accepted",
+    "- **State:** unresolved (tried: capture)",
+    "- **State:** resolved by fixing serialization",
+  ].join("\n");
+  expect(countDivergences(register)).toEqual({
+    accepted: 1,
+    unresolved: 1,
+    resolved: 1,
+  });
 });

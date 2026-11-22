@@ -16,6 +16,19 @@ export type Counts = {
   total: number;
 };
 
+type DivergenceCounts = Record<"accepted" | "unresolved" | "resolved", number>;
+
+export function countDivergences(markdown: string): DivergenceCounts {
+  const counts = { accepted: 0, unresolved: 0, resolved: 0 };
+  const entries = markdown.split(/^## Entries$/m)[1] ?? "";
+  for (const match of entries.matchAll(
+    /^- \*\*State:\*\* (accepted|unresolved|resolved)\b/gm,
+  )) {
+    counts[match[1] as keyof DivergenceCounts]++;
+  }
+  return counts;
+}
+
 export type Status = {
   referenceVersion: string;
   totals: Counts;
@@ -24,6 +37,7 @@ export type Status = {
   rungs: Rung[];
   next?: string;
   divergences: number;
+  divergenceCounts?: DivergenceCounts;
   kinds: { generated: number; custom: number };
 };
 
@@ -37,6 +51,7 @@ export type StatusInput = {
   implemented: (path: string) => boolean;
   results: Record<string, { pass: boolean }>;
   divergences: number;
+  divergenceCounts?: DivergenceCounts;
 };
 
 const STATES = { x: "done", " ": "todo", "~": "stuck" } as const;
@@ -111,6 +126,7 @@ export function buildStatus(input: StatusInput): Status {
     rungs,
     next,
     divergences: input.divergences,
+    divergenceCounts: input.divergenceCounts,
     kinds: Object.values(input.index.kinds ?? {}).reduce(
       (a, k) => ({
         generated: a.generated + k.generated,
@@ -141,7 +157,12 @@ export function renderStatus(
   out.push(
     `  ${status.kinds.generated} generated (engine-driven), ${status.kinds.custom} custom (hand-written)`,
   );
-  out.push(`Divergences: ${status.divergences}`);
+  const counts = status.divergenceCounts;
+  out.push(
+    counts
+      ? `Divergences: ${counts.accepted} accepted, ${counts.unresolved} unresolved, ${counts.resolved} resolved`
+      : `Divergences: ${status.divergences}`,
+  );
   out.push("");
   out.push("Ladder:");
   for (const rung of status.rungs) {

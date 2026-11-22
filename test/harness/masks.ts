@@ -22,9 +22,9 @@ export const IGNORED_REQUEST_HEADERS: Record<string, string> = {
 export const OUTPUT_MASKS: [RegExp, string, string][] = [
   // [pattern, replacement, reason]
   [
-    /^\S+\.py:\d+: \w*Warning: [^\n]*\n {2}[^\n]*\n/gm,
+    /^\S+\.py:\d+: UserWarning: The parameter --from-json is used more than once\. Remove its duplicate as parameters should be unique\.\n {2}[^\n]*\n/gm,
     "",
-    "Python warnings from oci's own bugs (e.g. duplicate --from-json), carrying local install paths; see DIVERGENCES.md",
+    "Click's duplicate --from-json warning carries a local install path; see DIVERGENCES.md",
   ],
   [
     /"timestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}\+00:00"/g,

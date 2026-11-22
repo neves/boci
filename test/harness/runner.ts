@@ -11,6 +11,11 @@ import {
   startFakeEndpoint,
 } from "./fake-endpoint.ts";
 import {
+  type FakeMetadataService,
+  type MetadataServiceOptions,
+  startFakeMetadataService,
+} from "./fake-metadata.ts";
+import {
   PROXY_ENV,
   createSandbox,
   type Sandbox,
@@ -34,6 +39,8 @@ export type Run = {
   stderr: string;
   exitCode: number;
   requests: CapturedRequest[];
+  /** Ephemeral public key captured by the fake federation endpoint, when instanceMetadata is enabled. */
+  sessionPublicKey?: string;
 };
 
 export type RunOptions = {
@@ -43,6 +50,7 @@ export type RunOptions = {
   /** Extra lines appended to the sandbox config file. */
   config?: string;
   sandbox?: SandboxOptions;
+  instanceMetadata?: boolean | MetadataServiceOptions;
 };
 
 /** Starts one CLI process and collects what it printed; Bun.spawn unless replaced. */
@@ -75,11 +83,28 @@ export async function runCli(
 ): Promise<Run> {
   await using sb = await createSandbox(opts.config, opts.sandbox);
   using fake = startFakeEndpoint(opts.replies);
+  using metadata = opts.instanceMetadata
+    ? startFakeMetadataService(
+        opts.instanceMetadata === true ? {} : opts.instanceMetadata,
+      )
+    : undefined;
   const { stdout, stderr, exitCode } = await launch(
-    [...cli, ...substitute(argv, sb, fake.url)],
-    { cwd: sb.home, env: { ...sb.env, ...opts.env }, stdin: opts.stdin },
+    [...cli, ...substitute(argv, sb, fake.url, metadata)],
+    {
+      cwd: sb.home,
+      env: { ...sb.env, ...substituteEnv(opts.env, sb, fake.url, metadata) },
+      stdin: opts.stdin,
+    },
   );
-  return captured(sb, fake.url, stdout, stderr, exitCode, fake.requests);
+  return captured(
+    sb,
+    fake.url,
+    stdout,
+    stderr,
+    exitCode,
+    fake.requests,
+    metadata,
+  );
 }
 
 /**
@@ -95,13 +120,18 @@ export async function runInProcess(
   installProxySafetyNet();
   const sb = await sharedSandbox(opts.config, opts.sandbox);
   using fake = startFakeEndpoint(opts.replies);
+  using metadata = opts.instanceMetadata
+    ? startFakeMetadataService(
+        opts.instanceMetadata === true ? {} : opts.instanceMetadata,
+      )
+    : undefined;
   let stdout = "";
   let stderr = "";
   let exitCode: number;
   try {
     exitCode = await run({
-      argv: substitute(argv, sb, fake.url),
-      env: { ...sb.env, ...opts.env },
+      argv: substitute(argv, sb, fake.url, metadata),
+      env: { ...sb.env, ...substituteEnv(opts.env, sb, fake.url, metadata) },
       cwd: sb.home,
       out: (text) => {
         stdout += text;
@@ -118,15 +148,56 @@ export async function runInProcess(
     stderr += `${Bun.inspect(e)}\n`;
     exitCode = 1;
   }
-  return captured(sb, fake.url, stdout, stderr, exitCode, fake.requests);
+  return captured(
+    sb,
+    fake.url,
+    stdout,
+    stderr,
+    exitCode,
+    fake.requests,
+    metadata,
+  );
 }
 
-function substitute(argv: string[], sb: Sandbox, url: string): string[] {
-  return argv.map((a) =>
-    a
-      .replaceAll("{endpoint}", url)
-      .replaceAll("{config}", sb.configFile)
-      .replaceAll("{home}", sb.home),
+function replacePlaceholders(
+  value: string,
+  sb: Sandbox,
+  url: string,
+  metadata?: FakeMetadataService,
+): string {
+  let out = value
+    .replaceAll("{endpoint}", url)
+    .replaceAll("{config}", sb.configFile)
+    .replaceAll("{home}", sb.home);
+  if (metadata) {
+    out = out
+      .replaceAll("{metadata}", metadata.baseUrl)
+      .replaceAll("{federation}", metadata.federationEndpoint);
+  }
+  return out;
+}
+
+function substitute(
+  argv: string[],
+  sb: Sandbox,
+  url: string,
+  metadata?: FakeMetadataService,
+): string[] {
+  return argv.map((a) => replacePlaceholders(a, sb, url, metadata));
+}
+
+function substituteEnv(
+  env: Record<string, string> | undefined,
+  sb: Sandbox,
+  url: string,
+  metadata?: FakeMetadataService,
+): Record<string, string> {
+  if (!env) return {};
+  return Object.fromEntries(
+    Object.entries(env).map(([k, v]) => [
+      k,
+      replacePlaceholders(v, sb, url, metadata),
+    ]),
   );
 }
 
@@ -137,13 +208,26 @@ function captured(
   stderr: string,
   exitCode: number,
   requests: CapturedRequest[],
+  metadata?: FakeMetadataService,
 ): Run {
+  const norm = (s: string) => {
+    let out = s.replaceAll(sb.home, "{home}").replaceAll(url, "{endpoint}");
+    if (metadata) {
+      out = out
+        .replaceAll(metadata.baseUrl, "{metadata}")
+        .replaceAll(metadata.federationEndpoint, "{federation}");
+    }
+    return out;
+  };
   return {
     // Sandbox paths differ per run; normalise them so runs are comparable.
-    stdout: stdout.replaceAll(sb.home, "{home}").replaceAll(url, "{endpoint}"),
-    stderr: stderr.replaceAll(sb.home, "{home}").replaceAll(url, "{endpoint}"),
+    stdout: norm(stdout),
+    stderr: norm(stderr),
     exitCode,
     requests,
+    ...(metadata?.sessionPublicKey
+      ? { sessionPublicKey: metadata.sessionPublicKey }
+      : {}),
   };
 }
 

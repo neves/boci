@@ -4,6 +4,7 @@
 import { join } from "node:path";
 import type { NormalizedRun } from "./compare.ts";
 import type { Reply } from "./fake-endpoint.ts";
+import type { MetadataServiceOptions } from "./fake-metadata.ts";
 
 export const PARITY_DIR = join(import.meta.dir, "..", "parity");
 export const CASES_DIR = join(PARITY_DIR, "cases");
@@ -20,7 +21,13 @@ export type ParityCase = {
   stdin?: string;
   env?: Record<string, string>;
   config?: string;
-  sandbox?: { keyLabel?: boolean; files?: Record<string, string> };
+  sandbox?: {
+    keyLabel?: boolean;
+    files?: Record<string, string>;
+    noConfig?: boolean;
+  };
+  /** Start a local fake IMDS + X.509 federation server (`{metadata}` and `{federation}`). */
+  instanceMetadata?: boolean | MetadataServiceOptions;
   /** Compare only exit status and the signed HTTP request captured by the fake endpoint. */
   requestOnly?: boolean;
   /** Extra assertions on boci's run. Excluded from caseHash: adding them never stales a golden. */

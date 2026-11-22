@@ -56,6 +56,7 @@ export function signRequest(
   req: SignableRequest,
   key: ApiKey,
   enforceContentHeaders = true,
+  genericHeaders: readonly string[] = GENERIC_HEADERS,
 ): void {
   const verb = req.method.toLowerCase();
   if (!["get", "head", "delete", "put", "post", "patch"].includes(verb)) {
@@ -65,8 +66,8 @@ export function signRequest(
   const h = req.headers;
   const headers =
     signBody && enforceContentHeaders
-      ? [...GENERIC_HEADERS, ...BODY_HEADERS]
-      : GENERIC_HEADERS;
+      ? [...genericHeaders, ...BODY_HEADERS]
+      : [...genericHeaders];
   if (!(signBody && enforceContentHeaders)) delete h["transfer-encoding"];
 
   // inject_missing_headers

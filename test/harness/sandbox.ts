@@ -56,6 +56,8 @@ export type SandboxOptions = {
   keyLabel?: boolean;
   /** Extra files to create, relative to the sandbox HOME (e.g. ".oci/oci_cli_rc"). */
   files?: Record<string, string>;
+  /** true: omit ~/.oci/config and ~/.oci/key.pem (e.g. for instance/resource principal tests). */
+  noConfig?: boolean;
   configMode?: number;
   keyMode?: number;
 };
@@ -71,22 +73,24 @@ export async function createSandbox(
   await mkdir(dir, { mode: 0o700 });
   const keyFile = join(dir, "key.pem");
   const configFile = join(dir, "config");
-  const key = await Bun.file(KEY_SOURCE).text();
-  await Bun.write(
-    keyFile,
-    options.keyLabel === false ? key.replace(/OCI_API_KEY\s*$/, "") : key,
-  );
-  await Bun.write(
-    configFile,
-    `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await keyFingerprint(keyFile, options.keyLabel)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
-  );
-  await chmod(keyFile, options.keyMode ?? 0o600);
+  if (!options.noConfig) {
+    const key = await Bun.file(KEY_SOURCE).text();
+    await Bun.write(
+      keyFile,
+      options.keyLabel === false ? key.replace(/OCI_API_KEY\s*$/, "") : key,
+    );
+    await Bun.write(
+      configFile,
+      `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await keyFingerprint(keyFile, options.keyLabel)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
+    );
+    await chmod(keyFile, options.keyMode ?? 0o600);
+    await chmod(configFile, options.configMode ?? 0o600);
+  }
   for (const [rel, content] of Object.entries(options.files ?? {})) {
     const path = join(home, rel);
     await Bun.write(path, content.replaceAll("{home}", home));
     await chmod(path, 0o600);
   }
-  await chmod(configFile, options.configMode ?? 0o600);
 
   const env: Record<string, string> = {};
   for (const [k, v] of Object.entries(process.env)) {

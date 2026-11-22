@@ -4,9 +4,16 @@
 // oci's generated command and the Python SDK's base client do them.
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
-import { randomBytes } from "node:crypto";
-import { ConfigError, configPath, expandUser, fromFile } from "./config.ts";
+import { randomBytes, type KeyObject } from "node:crypto";
+import {
+  type Config,
+  ConfigError,
+  configPath,
+  expandUser,
+  fromFile,
+} from "./config.ts";
 import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
+import { resolveInstancePrincipal } from "./instance-principal.ts";
 import { Exit, type Invocation } from "./io.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
@@ -199,38 +206,66 @@ export async function callOperation(
   } else requestBody = buildRequestBody(io, command, values, rootValues);
   const boundValue = (arg: string) =>
     boundValueFor(io, command, values, rootValues, arg);
-  let config;
+  const isInstancePrincipal = settings.auth === "instance_principal";
+  let config: Config = {};
+  let configLoaded = false;
   try {
     config = fromFile(settings.configFile, settings.profile, io.env, io.cwd);
+    configLoaded = true;
   } catch (e) {
     if (e instanceof ConfigError) {
       if (e.type === "ConfigFileNotFound") {
-        const message = e.message.split(", please follow")[0] as string;
-        io.out(
-          `ERROR: ${message}\nDo you want to create a new config file? [Y/n]: `,
-        );
-        io.err("Abort: \n");
+        if (!isInstancePrincipal) {
+          const message = e.message.split(", please follow")[0] as string;
+          io.out(
+            `ERROR: ${message}\nDo you want to create a new config file? [Y/n]: `,
+          );
+          io.err("Abort: \n");
+          throw new Exit(1);
+        }
+      } else {
+        io.err(`ERROR: ${e.message}\n`);
         throw new Exit(1);
       }
-      io.err(`ERROR: ${e.message}\n`);
-      throw new Exit(1);
+    } else {
+      throw e;
     }
-    throw e;
   }
   if (
+    configLoaded &&
     (io.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? "").toLowerCase() !==
-    "true"
+      "true"
   ) {
     warnFilePermissions(io, configPath(settings.configFile, io.env, io.cwd));
-    if (config.key_file)
+    if (config.key_file && !isInstancePrincipal)
       warnFilePermissions(io, expandUser(String(config.key_file), io.env));
+  }
+  let instancePrincipal:
+    Awaited<ReturnType<typeof resolveInstancePrincipal>> | undefined;
+  if (isInstancePrincipal) {
+    try {
+      instancePrincipal = await resolveInstancePrincipal({
+        env: io.env,
+        regions: index.regions,
+        federationEndpoint: rootValues.federation_endpoint as
+          string | undefined,
+        authPurpose: rootValues.auth_purpose as string | undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      io.err(
+        `ERROR: Failed retrieving certificates from localhost. Instance principal auth is only possible from OCI compute instances. \nException: ${msg}\n`,
+      );
+      throw new Exit(1);
+    }
   }
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
     string | undefined;
   const region = (rootValues.region ??
     io.env.OCI_CLI_REGION ??
-    config.region) as string | undefined;
+    config.region ??
+    instancePrincipal?.region) as string | undefined;
   const regionMetadata =
     region && !endpointOpt
       ? await loadExternalRegionMetadata(region, index.regions, io.env)
@@ -300,27 +335,43 @@ export async function callOperation(
         : "opc-client-request-id";
     headers[requestIdHeader] = String(rootValues.request_id);
   }
-  let keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
-  if (settings.auth === "security_token") {
-    const tokenFile = config.security_token_file;
-    if (!tokenFile) {
-      io.err(
-        "ERROR: Config value for 'security_token_file' must be specified when using --auth security_token\n",
-      );
-      throw new Exit(1);
+  let keyId: string;
+  let privateKey: KeyObject;
+  if (instancePrincipal) {
+    keyId = instancePrincipal.keyId;
+    privateKey = instancePrincipal.privateKey;
+  } else {
+    keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
+    if (settings.auth === "security_token") {
+      const tokenFile = config.security_token_file;
+      if (!tokenFile) {
+        io.err(
+          "ERROR: Config value for 'security_token_file' must be specified when using --auth security_token\n",
+        );
+        throw new Exit(1);
+      }
+      const tokenPath = expandUser(String(tokenFile), io.env);
+      if (!existsSync(resolve(io.cwd, tokenPath))) {
+        io.err(
+          `ERROR: File specified by 'security_token_file' does not exist: ${tokenPath}\n`,
+        );
+        throw new Exit(1);
+      }
+      const token = readFileSync(resolve(io.cwd, tokenPath), "utf8");
+      keyId = `ST$${token}`;
     }
-    const tokenPath = expandUser(String(tokenFile), io.env);
-    if (!existsSync(resolve(io.cwd, tokenPath))) {
-      io.err(
-        `ERROR: File specified by 'security_token_file' does not exist: ${tokenPath}\n`,
-      );
-      throw new Exit(1);
+    const keyPath = expandUser(String(config.key_file), io.env);
+    const pem = readFileSync(resolve(io.cwd, keyPath), "utf8");
+    try {
+      privateKey = loadPrivateKey(pem, config.pass_phrase as string | null);
+    } catch (e) {
+      if (e instanceof InvalidPrivateKey) {
+        io.err(`${e.message}\n`);
+        throw new Exit(1);
+      }
+      throw e;
     }
-    const token = readFileSync(resolve(io.cwd, tokenPath), "utf8");
-    keyId = `ST$${token}`;
   }
-  const keyPath = expandUser(String(config.key_file), io.env);
-  const pem = readFileSync(resolve(io.cwd, keyPath), "utf8");
   const req = {
     method: operation.http,
     url: url.toString(),
@@ -328,16 +379,6 @@ export async function callOperation(
     body: requestBody,
   };
   prepareContentLength(req);
-  let privateKey;
-  try {
-    privateKey = loadPrivateKey(pem, config.pass_phrase as string | null);
-  } catch (e) {
-    if (e instanceof InvalidPrivateKey) {
-      io.err(`${e.message}\n`);
-      throw new Exit(1);
-    }
-    throw e;
-  }
   const connectionTimeout = timeoutSecondsFor(
     rootValues.connection_timeout ?? config.connection_timeout,
   );

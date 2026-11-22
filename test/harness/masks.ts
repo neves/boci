@@ -36,4 +36,9 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     'File "<site-packages>/$1"',
     "Python tracebacks from oci worker pools carry the local site-packages install path",
   ],
+  [
+    /OS Version: [^,]+,/g,
+    "OS Version: <os>,",
+    "MultipartUploadError embeds the local OS kernel/platform version",
+  ],
 ];

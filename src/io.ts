@@ -28,6 +28,8 @@ export type Invocation = {
   inheritStdio?: { flush(): Promise<void> };
   /** stdin for a child when stdio isn't inherited. */
   stdin?: string;
+  /** Stream raw bytes from stdin (e.g. `os object put --file -`). Falls back to UTF-8 `stdin`. */
+  stdinBytes?(): AsyncIterable<Uint8Array>;
   /** Read a secret (e.g. private key passphrase), suppressing echo when stdin is a TTY. */
   promptSecret?(prompt: string): Promise<string>;
   /** Read one line from stdin (null on EOF), flushing queued stdout/stderr first. */
@@ -95,6 +97,11 @@ export function processStdio() {
     async readLine(): Promise<string | null> {
       await flush();
       return readLineOrEofSync(0);
+    },
+    async *stdinBytes(): AsyncIterable<Uint8Array> {
+      for await (const chunk of Bun.stdin.stream()) {
+        yield chunk;
+      }
     },
   };
 }

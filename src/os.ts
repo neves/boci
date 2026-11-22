@@ -5,9 +5,11 @@ import {
   fstatSync,
   openSync,
   readFileSync,
+  readSync,
+  statSync,
   writeSync,
 } from "node:fs";
-import { basename, resolve } from "node:path";
+import { basename, extname, resolve } from "node:path";
 import { BadParameter, pyRepr } from "./convert.ts";
 import { Exit, type Invocation } from "./io.ts";
 import { parseJsonParameter } from "./json-input.ts";
@@ -69,14 +71,51 @@ export function computeCrc32cBase64(data: Uint8Array): string {
   return Buffer.from(out).toString("base64");
 }
 
-function guessContentType(filePath: string): string {
+const OCTET_STREAM_EXTENSIONS = new Set([
+  ".bin",
+  ".dms",
+  ".lrf",
+  ".mar",
+  ".so",
+  ".dist",
+  ".distz",
+  ".pkg",
+  ".bpk",
+  ".dump",
+  ".elc",
+  ".deploy",
+  ".exe",
+  ".dll",
+  ".deb",
+  ".dmg",
+  ".iso",
+  ".img",
+  ".msi",
+  ".msp",
+  ".msm",
+  ".buffer",
+  ".a",
+  ".o",
+  ".obj",
+]);
+
+function guessContentTypeOptional(filePath: string): string | undefined {
   const mime = Bun.file(filePath).type;
-  if (!mime) return "application/octet-stream";
+  if (!mime) return undefined;
   const semi = mime.indexOf(";");
-  return (
-    (semi === -1 ? mime : mime.slice(0, semi)).trim() ||
-    "application/octet-stream"
-  );
+  const clean = (semi === -1 ? mime : mime.slice(0, semi)).trim();
+  if (!clean) return undefined;
+  if (
+    clean === "application/octet-stream" &&
+    !OCTET_STREAM_EXTENSIONS.has(extname(filePath).toLowerCase())
+  ) {
+    return undefined;
+  }
+  return clean;
+}
+
+function guessContentType(filePath: string): string {
+  return guessContentTypeOptional(filePath) ?? "application/octet-stream";
 }
 
 export type OutputFileHandle = {
@@ -659,7 +698,162 @@ function usageError(io: Invocation, message: string): never {
   throw new Exit(1);
 }
 
-/** `oci os object put` (single-part). */
+const STREAMING_DEFAULT_PART_SIZE_BYTES = 10 * MEBIBYTE;
+const DEFAULT_PARALLEL_UPLOAD_COUNT = 10;
+const MAX_MULTIPART_PARTS = 10000;
+const MULTIPART_UPLOAD_ERROR_MESSAGE =
+  "MultipartUploadError: MultipartUploadError exception has occurred. Client Version: Oracle-PythonSDK/2.192.0, OS Version: <os>, See https://docs.oracle.com/iaas/Content/API/Concepts/sdk_troubleshooting.htm for common issues and steps to resolve them. If you need to contact support, or file a GitHub issue, please include this full error message.\n";
+
+function stripQuery(url: URL): string {
+  return `${url.origin}${url.pathname}`;
+}
+
+export function computePartChecksum(
+  algo: string,
+  data: Uint8Array,
+): { header: string; value: string } | undefined {
+  if (algo === "CRC32C") {
+    return { header: "opc-content-crc32c", value: computeCrc32cBase64(data) };
+  }
+  if (algo === "SHA256") {
+    return {
+      header: "opc-content-sha256",
+      value: new Bun.CryptoHasher("sha256").update(data).digest("base64"),
+    };
+  }
+  if (algo === "SHA384") {
+    return {
+      header: "opc-content-sha384",
+      value: new Bun.CryptoHasher("sha384").update(data).digest("base64"),
+    };
+  }
+  return undefined;
+}
+
+export function computeMultipartMd5(partMd5Base64s: string[]): string {
+  const hasher = new Bun.CryptoHasher("md5");
+  for (const partMd5 of partMd5Base64s) {
+    hasher.update(Buffer.from(partMd5, "base64"));
+  }
+  return `${hasher.digest("base64")}-${partMd5Base64s.length}`;
+}
+
+/** Matches `MultipartObjectAssembler.add_parts_from_file` partitioning + 10,000-part cap. */
+export function resolveMultipartPartSize(
+  totalSize: number,
+  requestedPartSizeMib?: number,
+): { effectivePartSizeMib?: number; partSizeBytes: number } {
+  let effectivePartSizeMib = requestedPartSizeMib;
+  let partSizeBytes =
+    effectivePartSizeMib !== undefined
+      ? effectivePartSizeMib * MEBIBYTE
+      : DEFAULT_PART_SIZE_BYTES;
+  if (
+    totalSize > 0 &&
+    partSizeBytes > 0 &&
+    Math.ceil(totalSize / partSizeBytes) > MAX_MULTIPART_PARTS
+  ) {
+    effectivePartSizeMib = Math.ceil(
+      Math.ceil(totalSize / MAX_MULTIPART_PARTS) / MEBIBYTE,
+    );
+    partSizeBytes = effectivePartSizeMib * MEBIBYTE;
+  }
+  return { effectivePartSizeMib, partSizeBytes };
+}
+
+export function buildMultipartPutParts(
+  totalSize: number,
+  partSizeBytes: number,
+): { partNum: number; offset: number; size: number }[] {
+  const parts: { partNum: number; offset: number; size: number }[] = [];
+  let offset = 0;
+  let partNum = 1;
+  while (offset < totalSize) {
+    const remaining = totalSize - offset;
+    const size = remaining > partSizeBytes ? partSizeBytes : remaining;
+    parts.push({ partNum, offset, size });
+    offset += size;
+    partNum += 1;
+  }
+  return parts;
+}
+
+function readPartFromFile(
+  fd: number,
+  offset: number,
+  size: number,
+): Uint8Array {
+  const buf = new Uint8Array(size);
+  let pos = 0;
+  while (pos < size) {
+    const n = readSync(fd, buf, pos, size - pos, offset + pos);
+    if (n === 0) break;
+    pos += n;
+  }
+  return pos === size ? buf : buf.subarray(0, pos);
+}
+
+async function* readStdinParts(
+  io: Invocation,
+  partSize: number,
+): AsyncGenerator<Uint8Array> {
+  const source: AsyncIterable<Uint8Array> = io.stdinBytes
+    ? io.stdinBytes()
+    : (async function* () {
+        if (io.stdin && io.stdin.length > 0) {
+          yield new TextEncoder().encode(io.stdin);
+        }
+      })();
+  const pending: Uint8Array[] = [];
+  let buffered = 0;
+
+  const takeBytes = (count: number): Uint8Array => {
+    const out = new Uint8Array(count);
+    let written = 0;
+    while (written < count && pending.length > 0) {
+      const head = pending[0] as Uint8Array;
+      const need = count - written;
+      if (head.byteLength <= need) {
+        out.set(head, written);
+        written += head.byteLength;
+        pending.shift();
+      } else {
+        out.set(head.subarray(0, need), written);
+        written += need;
+        pending[0] = head.subarray(need);
+      }
+    }
+    buffered -= count;
+    return out;
+  };
+
+  for await (const chunk of source) {
+    if (chunk.byteLength === 0) continue;
+    pending.push(chunk);
+    buffered += chunk.byteLength;
+    while (buffered >= partSize) {
+      yield takeBytes(partSize);
+    }
+  }
+  if (buffered > 0) {
+    yield takeBytes(buffered);
+  }
+}
+
+function renderObjectPutHeaders(
+  io: Invocation,
+  headers: Headers,
+  outputOptions: OutputOptions,
+): void {
+  const displayHeaders: Record<string, string> = {};
+  for (const name of OBJECT_PUT_DISPLAY_HEADERS) {
+    const val = headers.get(name);
+    if (val !== null) displayHeaders[name] = val;
+  }
+  renderDocument(io, displayHeaders, outputOptions);
+}
+
+/** `oci os object put` (single-part, multipart, and stdin). */
 export async function runOsObjectPut(
   io: Invocation,
   opts: OsObjectPutOptions,
@@ -790,71 +984,118 @@ export async function runOsObjectPut(
     }
   }
 
-  const putHeaders: Record<string, string> = {
-    accept: "application/json",
-    expect: "100-continue",
-  };
-
   const finalIfMatch =
     typeof values.if_match === "string" ? values.if_match : resolvedIfMatch;
-  if (finalIfMatch !== undefined) putHeaders["if-match"] = finalIfMatch;
-  if (ifNoneMatch !== undefined) putHeaders["if-none-match"] = ifNoneMatch;
 
-  if (typeof values.content_md5 === "string")
-    putHeaders["content-md5"] = values.content_md5;
-  if (typeof values.opc_checksum_algorithm === "string")
-    putHeaders["opc-checksum-algorithm"] = values.opc_checksum_algorithm;
-  if (typeof values.opc_content_crc32c === "string")
-    putHeaders["opc-content-crc32c"] = values.opc_content_crc32c;
-  if (typeof values.opc_content_sha256 === "string")
-    putHeaders["opc-content-sha256"] = values.opc_content_sha256;
-  if (typeof values.opc_content_sha384 === "string")
-    putHeaders["opc-content-sha384"] = values.opc_content_sha384;
-
+  let parsedMetadata: Record<string, string> | undefined;
   if (values.metadata !== undefined) {
-    const parsedMeta = parseJsonParameter(io, "metadata", values.metadata);
-    if (
-      parsedMeta &&
-      typeof parsedMeta === "object" &&
-      !Array.isArray(parsedMeta)
-    ) {
-      for (const [k, v] of Object.entries(
-        parsedMeta as Record<string, unknown>,
-      )) {
-        putHeaders[`opc-meta-${k}`] = String(v);
+    const rawMeta = parseJsonParameter(io, "metadata", values.metadata);
+    if (rawMeta && typeof rawMeta === "object" && !Array.isArray(rawMeta)) {
+      parsedMetadata = {};
+      for (const [k, v] of Object.entries(rawMeta as Record<string, unknown>)) {
+        parsedMetadata[k] = String(v);
       }
     }
   }
 
-  if (typeof values.content_type === "string") {
-    putHeaders["content-type"] =
-      values.content_type === "auto"
-        ? guessContentType(isStdin ? objectName : filePath)
-        : values.content_type;
-  } else {
-    putHeaders["content-type"] = "application/octet-stream";
-  }
+  const resolvedContentType =
+    typeof values.content_type === "string"
+      ? values.content_type === "auto"
+        ? guessContentTypeOptional(isStdin ? objectName : filePath)
+        : values.content_type
+      : undefined;
 
-  if (typeof values.content_language === "string")
-    putHeaders["content-language"] = values.content_language;
-  if (typeof values.content_encoding === "string")
-    putHeaders["content-encoding"] = values.content_encoding;
-  if (typeof values.content_disposition === "string")
-    putHeaders["content-disposition"] = values.content_disposition;
-  if (typeof values.cache_control === "string")
-    putHeaders["cache-control"] = values.cache_control;
-  if (typeof values.storage_tier === "string")
-    putHeaders["storage-tier"] = values.storage_tier;
-  if (typeof values.opc_sse_kms_key_id === "string")
-    putHeaders["opc-sse-kms-key-id"] = values.opc_sse_kms_key_id;
+  const sseHeaders =
+    typeof values.encryption_key_file === "string"
+      ? readEncryptionKeyHeaders(io, values.encryption_key_file)
+      : {};
 
-  if (typeof values.encryption_key_file === "string") {
-    Object.assign(
-      putHeaders,
-      readEncryptionKeyHeaders(io, values.encryption_key_file),
-    );
-  }
+  const algo =
+    typeof values.opc_checksum_algorithm === "string"
+      ? values.opc_checksum_algorithm.toUpperCase()
+      : undefined;
 
+  const buildCreateMultipartDetails = (): string => {
+    const body: Record<string, unknown> = { object: objectName };
+    if (resolvedContentType) body.contentType = resolvedContentType;
+    if (typeof values.content_language === "string" && values.content_language)
+      body.contentLanguage = values.content_language;
+    if (typeof values.content_encoding === "string" && values.content_encoding)
+      body.contentEncoding = values.content_encoding;
+    if (
+      typeof values.content_disposition === "string" &&
+      values.content_disposition
+    )
+      body.contentDisposition = values.content_disposition;
+    if (typeof values.cache_control === "string" && values.cache_control)
+      body.cacheControl = values.cache_control;
+    if (typeof values.storage_tier === "string" && values.storage_tier)
+      body.storageTier = values.storage_tier;
+    if (parsedMetadata && Object.keys(parsedMetadata).length > 0) {
+      const prefixed: Record<string, string> = {};
+      for (const [k, v] of Object.entries(parsedMetadata)) {
+        prefixed[k.startsWith("opc-meta-") ? k : `opc-meta-${k}`] = v;
+      }
+      body.metadata = prefixed;
+    }
+    return JSON.stringify(body);
+  };
+
+  const buildCreateMultipartHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {
+      accept: "application/json",
+      "content-type": "application/json",
+      ...sseHeaders,
+    };
+    if (finalIfMatch !== undefined) headers["if-match"] = finalIfMatch;
+    if (ifNoneMatch !== undefined) headers["if-none-match"] = ifNoneMatch;
+    if (typeof values.opc_sse_kms_key_id === "string")
+      headers["opc-sse-kms-key-id"] = values.opc_sse_kms_key_id;
+    if (typeof values.opc_checksum_algorithm === "string")
+      headers["opc-checksum-algorithm"] = values.opc_checksum_algorithm;
+    return headers;
+  };
+
+  const buildSinglePartHeaders = (defaultContentType: string) => {
+    const headers: Record<string, string> = {
+      accept: "application/json",
+      expect: "100-continue",
+      "content-type": resolvedContentType ?? defaultContentType,
+      ...sseHeaders,
+    };
+    if (finalIfMatch !== undefined) headers["if-match"] = finalIfMatch;
+    if (ifNoneMatch !== undefined) headers["if-none-match"] = ifNoneMatch;
+    if (typeof values.content_md5 === "string")
+      headers["content-md5"] = values.content_md5;
+    if (typeof values.opc_checksum_algorithm === "string")
+      headers["opc-checksum-algorithm"] = values.opc_checksum_algorithm;
+    if (typeof values.opc_content_crc32c === "string")
+      headers["opc-content-crc32c"] = values.opc_content_crc32c;
+    if (typeof values.opc_content_sha256 === "string")
+      headers["opc-content-sha256"] = values.opc_content_sha256;
+    if (typeof values.opc_content_sha384 === "string")
+      headers["opc-content-sha384"] = values.opc_content_sha384;
+    if (parsedMetadata) {
+      for (const [k, v] of Object.entries(parsedMetadata)) {
+        headers[`opc-meta-${k}`] = v;
+      }
+    }
+    if (typeof values.content_language === "string")
+      headers["content-language"] = values.content_language;
+    if (typeof values.content_encoding === "string")
+      headers["content-encoding"] = values.content_encoding;
+    if (typeof values.content_disposition === "string")
+      headers["content-disposition"] = values.content_disposition;
+    if (typeof values.cache_control === "string")
+      headers["cache-control"] = values.cache_control;
+    if (typeof values.storage_tier === "string")
+      headers["storage-tier"] = values.storage_tier;
+    if (typeof values.opc_sse_kms_key_id === "string")
+      headers["opc-sse-kms-key-id"] = values.opc_sse_kms_key_id;
+    return headers;
+  };
+
+  // Branch 1: STDIN streaming multipart upload (UploadManager.upload_stream).
   if (isStdin) {
     if (noMultipart) {
       usageError(
@@ -862,100 +1103,452 @@ export async function runOsObjectPut(
         "The --no-multipart flag is not valid when taking input from STDIN.",
       );
     }
-    io.err(
-      "boci: 'oci os object put' from STDIN (multipart) is not implemented yet.\n",
-    );
-    throw new Exit(3);
-  }
 
-  const fileBytes = new Uint8Array(readFileSync(resolve(io.cwd, filePath)));
-  const totalSize = fileBytes.byteLength;
-  const partSizeBytes =
-    partSizeMib !== undefined
-      ? partSizeMib * MEBIBYTE
-      : DEFAULT_PART_SIZE_BYTES;
-  const sizeQualifiesForMultipart = totalSize > partSizeBytes;
-
-  if (totalSize > 0 && !noMultipart && sizeQualifiesForMultipart) {
-    io.err(
-      "boci: multipart upload for 'oci os object put' is not implemented yet.\n",
-    );
-    throw new Exit(3);
-  }
-
-  if (parallelUploadCount !== undefined) {
-    io.err(
-      "Warning: File is being uploaded as a single part so --parallel-upload-count will be ignored.\n",
-    );
-  }
-
-  const algo =
-    typeof values.opc_checksum_algorithm === "string"
-      ? values.opc_checksum_algorithm.toUpperCase()
-      : undefined;
-  const userProvidedChecksum =
-    values.opc_content_crc32c !== undefined ||
-    values.opc_content_sha256 !== undefined ||
-    values.opc_content_sha384 !== undefined;
-  if (algo && !userProvidedChecksum) {
-    if (totalSize > 0) {
+    const createRes = await sendServiceRequest(io, sc, {
+      method: "POST",
+      pathTemplate: "/n/{namespaceName}/b/{bucketName}/u",
+      pathParams: { namespaceName: namespace, bucketName },
+      headers: buildCreateMultipartHeaders(),
+      body: buildCreateMultipartDetails(),
+      noRetry: true,
+    });
+    if (!createRes.response.ok) {
       io.err(
-        "WARNING:oci.util:Reading the stream to calculate its content-length. Process may freeze for very big streams. Consider passing in content length for big objects\n",
+        formatServiceError(
+          { http: "POST", method: "create_multipart_upload" },
+          stripQuery(createRes.url),
+          createRes.response,
+          createRes.raw,
+          sc.targetService,
+        ),
+      );
+      throw new Exit(1);
+    }
+    const uploadId = String(
+      (JSON.parse(createRes.raw) as { uploadId?: string }).uploadId ?? "",
+    );
+
+    const streamPartSizeBytes =
+      partSizeMib !== undefined
+        ? partSizeMib * MEBIBYTE
+        : STREAMING_DEFAULT_PART_SIZE_BYTES;
+    const workerCount = disableParallelUploads
+      ? 1
+      : (parallelUploadCount ?? DEFAULT_PARALLEL_UPLOAD_COUNT);
+
+    const uploadedParts: { partNum: number; etag: string; opcMd5: string }[] =
+      [];
+    let failed = false;
+    const inFlight = new Set<Promise<void>>();
+    let nextPartNum = 1;
+
+    for await (const partBytes of readStdinParts(io, streamPartSizeBytes)) {
+      if (failed) break;
+      const partNum = nextPartNum++;
+      const task = (async () => {
+        try {
+          const partMd5 = new Bun.CryptoHasher("md5")
+            .update(partBytes)
+            .digest("base64");
+          const partRes = await sendServiceRequest(io, sc, {
+            method: "PUT",
+            pathTemplate: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+            pathParams,
+            queryParams: [
+              ["uploadId", uploadId],
+              ["uploadPartNum", String(partNum)],
+            ],
+            headers: {
+              accept: "application/json",
+              "content-md5": partMd5,
+              "content-type": "application/octet-stream",
+              expect: "100-continue",
+            },
+            body: partBytes,
+            enforceContentHeaders: false,
+            noRetry: true,
+          });
+          if (!partRes.response.ok) {
+            failed = true;
+            return;
+          }
+          uploadedParts.push({
+            partNum,
+            etag: partRes.response.headers.get("etag") ?? "",
+            opcMd5: partRes.response.headers.get("opc-content-md5") ?? "",
+          });
+        } catch {
+          failed = true;
+        }
+      })();
+      inFlight.add(task);
+      task.finally(() => inFlight.delete(task));
+      if (inFlight.size >= workerCount) {
+        await Promise.race(inFlight);
+      }
+    }
+    await Promise.all(inFlight);
+
+    if (failed) {
+      await sendServiceRequest(io, sc, {
+        method: "DELETE",
+        pathTemplate: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+        pathParams,
+        queryParams: [["uploadId", uploadId]],
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+        noRetry: true,
+      });
+      io.err(MULTIPART_UPLOAD_ERROR_MESSAGE);
+      throw new Exit(1);
+    }
+
+    let finalResponse: Response;
+    if (uploadedParts.length > 0) {
+      uploadedParts.sort((a, b) => a.partNum - b.partNum);
+      const commitRes = await sendServiceRequest(io, sc, {
+        method: "POST",
+        pathTemplate: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+        pathParams,
+        queryParams: [["uploadId", uploadId]],
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          partsToCommit: uploadedParts.map((p) => ({
+            partNum: p.partNum,
+            etag: p.etag,
+          })),
+          partsToExclude: [],
+        }),
+        noRetry: true,
+      });
+      if (!commitRes.response.ok) {
+        io.err(
+          formatServiceError(
+            { http: "POST", method: "commit_multipart_upload" },
+            stripQuery(commitRes.url),
+            commitRes.response,
+            commitRes.raw,
+            sc.targetService,
+          ),
+        );
+        throw new Exit(1);
+      }
+      io.err("Uploading object part\n");
+      finalResponse = commitRes.response;
+    } else {
+      const abortRes = await sendServiceRequest(io, sc, {
+        method: "DELETE",
+        pathTemplate: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+        pathParams,
+        queryParams: [["uploadId", uploadId]],
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+        noRetry: true,
+      });
+      if (!abortRes.response.ok) {
+        io.err(
+          formatServiceError(
+            { http: "DELETE", method: "abort_multipart_upload" },
+            stripQuery(abortRes.url),
+            abortRes.response,
+            abortRes.raw,
+            sc.targetService,
+          ),
+        );
+        throw new Exit(1);
+      }
+      const emptyPutHeaders = buildSinglePartHeaders("application/json");
+      const putRes = await sendServiceRequest(io, sc, {
+        method: "PUT",
+        pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+        pathParams,
+        headers: emptyPutHeaders,
+        body: new Uint8Array(0),
+        enforceContentHeaders: false,
+        noRetry: true,
+      });
+      if (!putRes.response.ok) {
+        io.err(
+          formatServiceError(
+            { http: "PUT", method: "put_object" },
+            stripQuery(putRes.url),
+            putRes.response,
+            putRes.raw,
+            sc.targetService,
+          ),
+        );
+        throw new Exit(1);
+      }
+      finalResponse = putRes.response;
+    }
+
+    renderObjectPutHeaders(io, finalResponse.headers, outputOptions);
+    if (values.verify_checksum === true) {
+      io.out("Cannot open file to generate hash\n");
+      throw new Exit(1);
+    }
+    return;
+  }
+
+  const resolvedFilePath = resolve(io.cwd, filePath);
+  const totalSize = statSync(resolvedFilePath).size;
+  const { effectivePartSizeMib, partSizeBytes } = resolveMultipartPartSize(
+    totalSize,
+    partSizeMib,
+  );
+  // Matches `objectstorage_cli_extended.py`: when --part-size is given, oci passes the
+  // MiB integer to UploadManager._use_multipart(total_size, part_size).
+  const sizeQualifiesForMultipart = effectivePartSizeMib
+    ? effectivePartSizeMib < totalSize
+    : DEFAULT_PART_SIZE_BYTES < totalSize;
+
+  // Branch 2: File single-part upload.
+  if (totalSize === 0 || noMultipart || !sizeQualifiesForMultipart) {
+    if (parallelUploadCount !== undefined) {
+      io.err(
+        "Warning: File is being uploaded as a single part so --parallel-upload-count will be ignored.\n",
       );
     }
-    if (algo === "CRC32C") {
-      putHeaders["opc-content-crc32c"] = computeCrc32cBase64(fileBytes);
-    } else if (algo === "SHA256") {
-      putHeaders["opc-content-sha256"] = new Bun.CryptoHasher("sha256")
+
+    const fileBytes = new Uint8Array(readFileSync(resolvedFilePath));
+    const putHeaders = buildSinglePartHeaders("application/octet-stream");
+    const userProvidedChecksum =
+      values.opc_content_crc32c !== undefined ||
+      values.opc_content_sha256 !== undefined ||
+      values.opc_content_sha384 !== undefined;
+    if (algo && !userProvidedChecksum) {
+      if (totalSize > 0) {
+        io.err(
+          "WARNING:oci.util:Reading the stream to calculate its content-length. Process may freeze for very big streams. Consider passing in content length for big objects\n",
+        );
+      }
+      const computed = computePartChecksum(algo, fileBytes);
+      if (computed) putHeaders[computed.header] = computed.value;
+    }
+
+    const put = await sendServiceRequest(io, sc, {
+      method: "PUT",
+      pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+      pathParams,
+      headers: putHeaders,
+      body: fileBytes,
+      enforceContentHeaders: false,
+    });
+
+    if (totalSize > 0) {
+      io.err("Uploading object\n");
+    }
+
+    if (!put.response.ok) {
+      io.err(
+        formatServiceError(
+          { http: "PUT", method: "put_object" },
+          put.url,
+          put.response,
+          put.raw,
+          sc.targetService,
+        ),
+      );
+      throw new Exit(1);
+    }
+
+    renderObjectPutHeaders(io, put.response.headers, outputOptions);
+
+    if (values.verify_checksum === true) {
+      const localMd5 = new Bun.CryptoHasher("md5")
         .update(fileBytes)
         .digest("base64");
-    } else if (algo === "SHA384") {
-      putHeaders["opc-content-sha384"] = new Bun.CryptoHasher("sha384")
-        .update(fileBytes)
-        .digest("base64");
+      const serverMd5 =
+        put.response.headers.get("opc-content-md5") ??
+        put.response.headers.get("opc-multipart-md5");
+      const match = localMd5 === serverMd5;
+      io.err(
+        `md5 checksum ${match ? "matches" : "does not match"} [Local: ${localMd5}]\n`,
+      );
+      if (!match) throw new Exit(1);
+    }
+    return;
+  }
+
+  // Branch 3: File multipart upload (MultipartObjectAssembler).
+  if (typeof values.content_md5 === "string") {
+    io.err(
+      "Warning: The --content-md5 option cannot be used with multipart uploads. It will be ignored.\n",
+    );
+  }
+  if (typeof values.opc_content_sha256 === "string") {
+    io.err(
+      "Warning: The --opc_content_sha256 option cannot be used with multipart uploads. It will be ignored.\n",
+    );
+  }
+  if (typeof values.opc_content_sha384 === "string") {
+    io.err(
+      "Warning: The --opc_content_sha384 option cannot be used with multipart uploads. It will be ignored.\n",
+    );
+  }
+  if (typeof values.opc_content_crc32c === "string") {
+    io.err(
+      "Warning: The --opc_content_crc32c option cannot be used with multipart uploads. It will be ignored.\n",
+    );
+  }
+
+  const createRes = await sendServiceRequest(io, sc, {
+    method: "POST",
+    pathTemplate: "/n/{namespaceName}/b/{bucketName}/u",
+    pathParams: { namespaceName: namespace, bucketName },
+    headers: buildCreateMultipartHeaders(),
+    body: buildCreateMultipartDetails(),
+  });
+  if (!createRes.response.ok) {
+    io.err(
+      formatServiceError(
+        { http: "POST", method: "create_multipart_upload" },
+        stripQuery(createRes.url),
+        createRes.response,
+        createRes.raw,
+        sc.targetService,
+      ),
+    );
+    throw new Exit(1);
+  }
+  const uploadId = String(
+    (JSON.parse(createRes.raw) as { uploadId?: string }).uploadId ?? "",
+  );
+  io.err(`Upload ID: ${uploadId}\n`);
+
+  const parts = buildMultipartPutParts(totalSize, partSizeBytes);
+  io.err(`Split file into ${parts.length} parts for upload.\n`);
+
+  const partResults: (
+    { partNum: number; etag: string; opcMd5: string } | undefined
+  )[] = new Array(parts.length);
+  let firstError: string | undefined;
+  let nextIdx = 0;
+
+  const fd = openSync(resolvedFilePath, "r");
+  try {
+    const workerCount = disableParallelUploads
+      ? 1
+      : Math.max(
+          1,
+          Math.min(
+            parallelUploadCount ?? DEFAULT_PARALLEL_UPLOAD_COUNT,
+            parts.length,
+          ),
+        );
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (firstError === undefined) {
+        const idx = nextIdx++;
+        const part = parts[idx];
+        if (!part) break;
+        const partBytes = readPartFromFile(fd, part.offset, part.size);
+        const partHeaders: Record<string, string> = {
+          accept: "application/json",
+          "content-type": "application/octet-stream",
+          expect: "100-continue",
+          ...sseHeaders,
+        };
+        if (algo) {
+          partHeaders["opc-checksum-algorithm"] = String(
+            values.opc_checksum_algorithm,
+          );
+          const computed = computePartChecksum(algo, partBytes);
+          if (computed) partHeaders[computed.header] = computed.value;
+        }
+        const partRes = await sendServiceRequest(io, sc, {
+          method: "PUT",
+          pathTemplate: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+          pathParams,
+          queryParams: [
+            ["uploadId", uploadId],
+            ["uploadPartNum", String(part.partNum)],
+          ],
+          headers: partHeaders,
+          body: partBytes,
+          enforceContentHeaders: false,
+        });
+        if (!partRes.response.ok) {
+          if (firstError === undefined) {
+            firstError = formatServiceError(
+              { http: "PUT", method: "upload_part" },
+              stripQuery(partRes.url),
+              partRes.response,
+              partRes.raw,
+              sc.targetService,
+            );
+          }
+          return;
+        }
+        partResults[idx] = {
+          partNum: part.partNum,
+          etag: partRes.response.headers.get("etag") ?? "",
+          opcMd5: partRes.response.headers.get("opc-content-md5") ?? "",
+        };
+      }
+    });
+    await Promise.all(workers);
+  } finally {
+    closeSync(fd);
+  }
+
+  io.err("Uploading object\n");
+  if (firstError !== undefined) {
+    io.err(firstError);
+    throw new Exit(1);
+  }
+
+  const partsToCommit: { partNum: number; etag: string }[] = [];
+  const partsToExclude: number[] = [];
+  const partMd5s: string[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    const r = partResults[i];
+    if (r) {
+      partsToCommit.push({ partNum: r.partNum, etag: r.etag });
+      partMd5s.push(r.opcMd5);
+    } else {
+      partsToExclude.push(i + 1);
     }
   }
 
-  const put = await sendServiceRequest(io, sc, {
-    method: "PUT",
-    pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+  const commitRes = await sendServiceRequest(io, sc, {
+    method: "POST",
+    pathTemplate: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
     pathParams,
-    headers: putHeaders,
-    body: fileBytes,
-    enforceContentHeaders: false,
+    queryParams: [["uploadId", uploadId]],
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "opc-client-retries": "true",
+    },
+    body: JSON.stringify({ partsToCommit, partsToExclude }),
   });
-
-  if (totalSize > 0) {
-    io.err("Uploading object\n");
-  }
-
-  if (!put.response.ok) {
+  if (!commitRes.response.ok) {
     io.err(
       formatServiceError(
-        { http: "PUT", method: "put_object" },
-        put.url,
-        put.response,
-        put.raw,
+        { http: "POST", method: "commit_multipart_upload" },
+        stripQuery(commitRes.url),
+        commitRes.response,
+        commitRes.raw,
         sc.targetService,
       ),
     );
     throw new Exit(1);
   }
 
-  const displayHeaders: Record<string, string> = {};
-  for (const name of OBJECT_PUT_DISPLAY_HEADERS) {
-    const val = put.response.headers.get(name);
-    if (val !== null) displayHeaders[name] = val;
-  }
-  renderDocument(io, displayHeaders, outputOptions);
+  renderObjectPutHeaders(io, commitRes.response.headers, outputOptions);
 
   if (values.verify_checksum === true) {
-    const localMd5 = new Bun.CryptoHasher("md5")
-      .update(fileBytes)
-      .digest("base64");
+    const localMd5 = computeMultipartMd5(partMd5s);
     const serverMd5 =
-      put.response.headers.get("opc-content-md5") ??
-      put.response.headers.get("opc-multipart-md5");
+      commitRes.response.headers.get("opc-content-md5") ??
+      commitRes.response.headers.get("opc-multipart-md5");
     const match = localMd5 === serverMd5;
     io.err(
       `md5 checksum ${match ? "matches" : "does not match"} [Local: ${localMd5}]\n`,

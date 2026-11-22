@@ -1072,5 +1072,1045 @@
       "--no-multipart",
       "--force"
     ]
+  },
+  {
+    "id": "os-object-put-multipart-basic",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "multi.txt",
+      "--file",
+      "{home}/multi.txt",
+      "--part-size",
+      "1",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "multi.txt": "multipart file body\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-1",
+          "bucket": "mybucket",
+          "namespace": "myns",
+          "object": "multi.txt"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "5xEMdQQKw7oKRiBpxnzckQ=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-1",
+          "opc-multipart-md5": "jXgM+82WIqp3ARVk5hUGXw==-1",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT",
+          "x-ignored-header": "should-not-display"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-options",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "dir/multi+1.txt",
+      "--file",
+      "{home}/multi.txt",
+      "--part-size",
+      "1",
+      "--force",
+      "--if-match",
+      "etag-0",
+      "--metadata",
+      "{\"k1\":\"v1\",\"opc-meta-k2\":\"v2\"}",
+      "--content-type",
+      "text/plain",
+      "--content-language",
+      "en-US",
+      "--content-encoding",
+      "identity",
+      "--content-disposition",
+      "attachment; filename=\"a.txt\"",
+      "--cache-control",
+      "no-cache",
+      "--storage-tier",
+      "InfrequentAccess",
+      "--opc-sse-kms-key-id",
+      "ocid1.key.oc1..fakekmskey",
+      "--encryption-key-file",
+      "{home}/sse.key",
+      "--disable-parallel-uploads"
+    ],
+    "sandbox": {
+      "files": {
+        "multi.txt": "multipart file body\n",
+        "sse.key": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-opts"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-opts",
+          "opc-content-md5": "5xEMdQQKw7oKRiBpxnzckQ=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-opts",
+          "opc-multipart-md5": "jXgM+82WIqp3ARVk5hUGXw==-1"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-content-type-auto",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--file",
+      "{home}/doc.json",
+      "--part-size",
+      "1",
+      "--content-type",
+      "auto",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "doc.json": "{\"a\":1}\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-ct-auto"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-ct",
+          "opc-content-md5": "5xEMdQQKw7oKRiBpxnzckQ=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-ct-auto"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-content-type-auto-unknown",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--file",
+      "{home}/data.unknownext123",
+      "--part-size",
+      "1",
+      "--content-type",
+      "auto",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "data.unknownext123": "raw multipart"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-ct-unk"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-unk",
+          "opc-content-md5": "5xEMdQQKw7oKRiBpxnzckQ=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-ct-unk"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-checksum-sha256",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--part-size",
+      "1",
+      "--opc-checksum-algorithm",
+      "SHA256",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-sha256"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-sha256",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-sha256",
+          "opc-multipart-sha256": "multipart-sha256-val-1"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-checksum-crc32c",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--part-size",
+      "1",
+      "--opc-checksum-algorithm",
+      "CRC32C",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-crc32c"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-crc32c",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-crc32c",
+          "opc-content-crc32c": "8P9ykg=="
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-ignored-checksum-warnings",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--part-size",
+      "1",
+      "--content-md5",
+      "aaa",
+      "--opc-content-sha256",
+      "bbb",
+      "--opc-content-sha384",
+      "ccc",
+      "--opc-content-crc32c",
+      "ddd",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-warn"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-warn",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-warn"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-verify-checksum-match",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--part-size",
+      "1",
+      "--verify-checksum",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-vc-ok"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-vc-ok",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-vc-ok",
+          "opc-multipart-md5": "jXgM+82WIqp3ARVk5hUGXw==-1"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-verify-checksum-mismatch",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--part-size",
+      "1",
+      "--verify-checksum",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-vc-bad"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-vc-bad",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-vc-bad",
+          "opc-multipart-md5": "AAAAAAAAAAAAAAAAAAAAAA==-1"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-new-no-force",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "new-multi.txt",
+      "--file",
+      "{home}/new-multi.txt",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "new-multi.txt": "new multipart body"
+      }
+    },
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-head-404"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-new"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-new",
+          "opc-content-md5": "5xEMdQQKw7oKRiBpxnzckQ=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-new-multi"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-create-error",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "multi.txt",
+      "--file",
+      "{home}/multi.txt",
+      "--part-size",
+      "1",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "multi.txt": "multipart file body\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-create-403"
+        },
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Authorization failed."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-upload-part-error",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "multi.txt",
+      "--file",
+      "{home}/multi.txt",
+      "--part-size",
+      "1",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "multi.txt": "multipart file body\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-part-err"
+        }
+      },
+      {
+        "status": 400,
+        "headers": {
+          "opc-request-id": "req-part-400"
+        },
+        "body": {
+          "code": "InvalidParameter",
+          "message": "Part upload rejected."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-multipart-commit-error",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "multi.txt",
+      "--file",
+      "{home}/multi.txt",
+      "--part-size",
+      "1",
+      "--force"
+    ],
+    "sandbox": {
+      "files": {
+        "multi.txt": "multipart file body\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-commit-err"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "5xEMdQQKw7oKRiBpxnzckQ=="
+        },
+        "body": ""
+      },
+      {
+        "status": 400,
+        "headers": {
+          "opc-request-id": "req-commit-400"
+        },
+        "body": {
+          "code": "InvalidParameter",
+          "message": "Commit rejected."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-stdin-basic",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "stdin.txt",
+      "--file",
+      "-",
+      "--force"
+    ],
+    "stdin": "hello from stdin\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-stdin-1"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "stdin-part-etag-1",
+          "opc-content-md5": "tD+5yHzktqbsD6gOW0RNJA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-stdin-commit",
+          "opc-multipart-md5": "stdin-multi-md5-1",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-stdin-empty",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "empty-stdin.txt",
+      "--file",
+      "-",
+      "--force"
+    ],
+    "stdin": "",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-stdin-empty"
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-stdin-empty",
+          "opc-content-md5": "1B2M2Y8AsgTpgAmY7PhCfg=="
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-stdin-empty-metadata",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "empty-meta.txt",
+      "--file",
+      "-",
+      "--metadata",
+      "{\"k\":\"v\"}",
+      "--content-type",
+      "text/plain",
+      "--force"
+    ],
+    "stdin": "",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-stdin-empty-meta"
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-stdin-empty-meta",
+          "opc-content-md5": "1B2M2Y8AsgTpgAmY7PhCfg=="
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-stdin-options",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "doc.json",
+      "--file",
+      "-",
+      "--force",
+      "--if-match",
+      "etag-prev",
+      "--metadata",
+      "{\"a\":\"1\"}",
+      "--content-type",
+      "auto",
+      "--content-language",
+      "en-US",
+      "--content-encoding",
+      "identity",
+      "--content-disposition",
+      "inline",
+      "--cache-control",
+      "no-store",
+      "--storage-tier",
+      "Archive",
+      "--opc-sse-kms-key-id",
+      "ocid1.key.oc1..fakekmskey",
+      "--encryption-key-file",
+      "{home}/sse.key",
+      "--opc-checksum-algorithm",
+      "SHA256",
+      "--disable-parallel-uploads"
+    ],
+    "stdin": "{\"x\":1}\n",
+    "sandbox": {
+      "files": {
+        "sse.key": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-stdin-opts"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "stdin-part-etag-opts",
+          "opc-content-md5": "tD+5yHzktqbsD6gOW0RNJA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-stdin-opts"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-stdin-new-no-force",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "new-stdin.txt",
+      "--file",
+      "-"
+    ],
+    "stdin": "fresh\n",
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-head-404"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-stdin-new"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "stdin-part-etag-new",
+          "opc-content-md5": "tD+5yHzktqbsD6gOW0RNJA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-stdin-new"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-stdin-part-error",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "fail-stdin.txt",
+      "--file",
+      "-",
+      "--force"
+    ],
+    "stdin": "fail me\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "uploadId": "upload-stdin-fail"
+        }
+      },
+      {
+        "status": 400,
+        "headers": {
+          "opc-request-id": "req-stdin-part-400"
+        },
+        "body": {
+          "code": "InvalidParameter",
+          "message": "Bad part."
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-put-stdin-create-error",
+    "key": "os object put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "fail-create.txt",
+      "--file",
+      "-",
+      "--force"
+    ],
+    "stdin": "fail\n",
+    "replies": [
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-stdin-create-403"
+        },
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Authorization failed."
+        }
+      }
+    ]
   }
 ]

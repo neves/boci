@@ -69,3 +69,8 @@ function isTTY(fd: 1 | 2): boolean {
     return false;
   }
 }
+
+/** Thrown to end an invocation with this exit code; `run()` turns it into its return value. */
+export class Exit {
+  constructor(public code: number) {}
+}

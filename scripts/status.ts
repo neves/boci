@@ -14,13 +14,14 @@ const { values } = parseArgs({
 });
 
 const resultsFile = Bun.file(`${root}/test/parity/results.json`);
+const hasResults = await resultsFile.exists();
 const divergencesFile = Bun.file(`${root}/DIVERGENCES.md`);
 
 const status = buildStatus({
   index: await Bun.file(`${root}/spec/index.json`).json(),
   ladder: await Bun.file(`${root}/PLAN.md`).text(),
   implemented: isImplemented,
-  results: (await resultsFile.exists()) ? await resultsFile.json() : {},
+  results: hasResults ? await resultsFile.json() : {},
   divergences: (await divergencesFile.exists())
     ? ((await divergencesFile.text())
         .replace(/```[\s\S]*?```/g, "") // ignore the entry-format example
@@ -35,4 +36,8 @@ if (values.json) {
   console.log(
     renderStatus(status, { all: values.all, service: values.service }),
   );
+  if (!hasResults)
+    console.log(
+      "\nNo parity results yet: nothing counts as verified until `bun run verify` runs every case.",
+    );
 }

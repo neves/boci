@@ -151,15 +151,14 @@ describe.concurrent("parity", () => {
 
 afterAll(async () => {
   try {
-    // Merge, so running a subset of tests doesn't forget other keys.
-    const file = Bun.file(RESULTS_FILE);
-    const previous = (await file.exists()) ? await file.json() : {};
-    const merged = Object.fromEntries(
-      Object.entries({ ...previous, ...results }).sort(([a], [b]) =>
-        a.localeCompare(b),
-      ),
-    );
-    await Bun.write(RESULTS_FILE, `${JSON.stringify(merged, null, 2)}\n`);
+    // results.json is derived and untracked (read by `bun run status`). Only a run of every
+    // case rewrites it, so a partial run (default `bun test`, `-t`) can't leave stale passes.
+    if (includeGeneratedCases() && completed === runnableCases.length) {
+      const sorted = Object.fromEntries(
+        Object.entries(results).sort(([a], [b]) => a.localeCompare(b)),
+      );
+      await Bun.write(RESULTS_FILE, `${JSON.stringify(sorted, null, 2)}\n`);
+    }
   } finally {
     clearInterval(heartbeat);
     clearProgress();

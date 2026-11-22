@@ -105,3 +105,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** exits 1 with `CLIInstallError: No suitable profile file found.\n` on stderr (no Python stack trace)
 - **Why:** reproducing an interpreter traceback with machine-specific paths is meaningless; both fail with exit 1 and report `CLIInstallError: No suitable profile file found.`.
 - **State:** accepted
+
+### `session validate`: non-401 service error omits Python traceback
+
+- **Invocation:** `oci session validate --no-retry --endpoint <endpoint>` when `identity.list_regions()` returns a non-401 HTTP error (e.g. 500 or 404)
+- **Reference CLI:** exits 1 with a Python traceback ending in `oci_cli.cli_exceptions.ServiceException: <exception str() failed>` because `validate` is wrapped with `@cli_util.wrap_exceptions` without `@json_skeleton_utils.json_skeleton_generation_handler`, so `ServiceException.__str__`'s `sys.exit()` triggers `<exception str() failed>` inside Python 3.12's traceback formatter
+- **boci:** exits 1 with the standard `ServiceError:\n{...}\n` JSON envelope on stderr (no Python stack trace)
+- **Why:** reproducing an interpreter traceback with `<exception str() failed>` and local site-packages paths is meaningless; both fail with exit 1 after sending the same `GET /20160918/regions` request and report the service error details.
+- **State:** accepted

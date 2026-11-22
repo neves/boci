@@ -1,0 +1,313 @@
+[
+  {
+    "id": "session-validate-local-valid",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-local-expired",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjE2MDAwMDAwMDAsImlhdCI6MTU5OTk5NjQwMH0.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-local-minimal-profile",
+    "key": "session validate",
+    "argv": [
+      "session",
+      "validate",
+      "--local",
+      "--config-file",
+      "{home}/.oci/session_config",
+      "--profile",
+      "SESSION"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/session_config": "[SESSION]\nregion=us-ashburn-1\nkey_file={home}/.oci/key.pem\nsecurity_token_file={home}/.oci/session-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-local-rc-default",
+    "key": "session validate",
+    "argv": ["session", "validate", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/oci_cli_rc": "[DEFAULT]\nlocal = true\n",
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "replies": {
+      "body": [{ "key": "IAD", "name": "us-ashburn-1" }]
+    }
+  },
+  {
+    "id": "session-validate-local-env-token",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "env": {
+      "OCI_CLI_SECURITY_TOKEN_FILE": "{home}/.oci/env-token"
+    },
+    "sandbox": {
+      "files": {
+        ".oci/env-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-remote-valid",
+    "key": "session validate",
+    "argv": ["session", "validate", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "replies": {
+      "body": [{ "key": "IAD", "name": "us-ashburn-1" }]
+    }
+  },
+  {
+    "id": "session-validate-remote-minimal-profile",
+    "key": "session validate",
+    "argv": [
+      "session",
+      "validate",
+      "--config-file",
+      "{home}/.oci/session_config",
+      "--profile",
+      "SESSION",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/session_config": "[SESSION]\nregion=us-ashburn-1\nkey_file={home}/.oci/key.pem\nsecurity_token_file={home}/.oci/session-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "replies": {
+      "body": [{ "key": "IAD", "name": "us-ashburn-1" }]
+    }
+  },
+  {
+    "id": "session-validate-remote-override-auth",
+    "key": "session validate",
+    "argv": [
+      "session",
+      "validate",
+      "--auth",
+      "api_key",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "replies": {
+      "body": [{ "key": "IAD", "name": "us-ashburn-1" }]
+    }
+  },
+  {
+    "id": "session-validate-remote-401",
+    "key": "session validate",
+    "argv": ["session", "validate", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "replies": {
+      "status": 401,
+      "body": {
+        "code": "NotAuthenticated",
+        "message": "The required information to complete authentication was not provided or was incorrect."
+      }
+    }
+  },
+  {
+    "id": "session-validate-remote-500",
+    "key": "session validate",
+    "argv": ["session", "validate", "--no-retry", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "replies": {
+      "status": 500,
+      "body": {
+        "code": "InternalError",
+        "message": "Internal error occurred."
+      }
+    },
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "\"status\": 500",
+      "requests": 1
+    }
+  },
+  {
+    "id": "session-validate-remote-expired-decline",
+    "key": "session validate",
+    "argv": ["session", "validate", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "n\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjE2MDAwMDAwMDAsImlhdCI6MTU5OTk5NjQwMH0.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-remote-expired-eof",
+    "key": "session validate",
+    "argv": ["session", "validate", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjE2MDAwMDAwMDAsImlhdCI6MTU5OTk5NjQwMH0.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-remote-passphrase",
+    "key": "session validate",
+    "argv": ["session", "validate", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\npass_phrase=secret-pass\n",
+    "sandbox": {
+      "keyPassphrase": "secret-pass",
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "replies": {
+      "body": [{ "key": "IAD", "name": "us-ashburn-1" }]
+    }
+  },
+  {
+    "id": "session-validate-no-token-in-config",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"]
+  },
+  {
+    "id": "session-validate-no-token-custom-profile",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local", "--profile", "CUSTOM"],
+    "config": "\n[CUSTOM]\nregion=us-ashburn-1\n"
+  },
+  {
+    "id": "session-validate-token-file-missing",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "config": "security_token_file=.oci/missing-token\n"
+  },
+  {
+    "id": "session-validate-token-file-tilde",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "config": "security_token_file=~/.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-missing-config",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "session-validate-missing-profile",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local", "--profile", "NONEXISTENT"]
+  },
+  {
+    "id": "session-validate-invalid-jwt",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "not-a-valid-jwt"
+      }
+    }
+  },
+  {
+    "id": "session-validate-local-missing-exp",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpYXQiOjE2MDAwMDAwMDB9.eA"
+      }
+    }
+  },
+  {
+    "id": "session-validate-local-bad-perms",
+    "key": "session validate",
+    "argv": ["session", "validate", "--local"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "configMode": 420,
+      "keyMode": 420,
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      },
+      "fileModes": {
+        ".oci/session-token": 420
+      }
+    }
+  },
+  {
+    "id": "session-validate-remote-bad-perms",
+    "key": "session validate",
+    "argv": ["session", "validate", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "configMode": 420,
+      "keyMode": 420,
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      },
+      "fileModes": {
+        ".oci/session-token": 420
+      }
+    },
+    "replies": {
+      "body": [{ "key": "IAD", "name": "us-ashburn-1" }]
+    }
+  }
+]

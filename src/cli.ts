@@ -60,6 +60,7 @@ import {
   validateOsNamespace,
 } from "./os.ts";
 import { printResult } from "./output.ts";
+import { runSessionValidate } from "./session.ts";
 import {
   runSetupAutocomplete,
   runSetupConfig,
@@ -537,6 +538,7 @@ async function main(io: Invocation): Promise<void> {
     const missing: string[] = [];
     for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
       if (p.name === "from_json" || p.name === "help") continue;
+      if (p.isFlag && p.default !== null && p.default !== undefined) continue;
       if (!isMissing(values[p.name] ?? parsed.opts[p.name])) continue;
       const rcVal = lookupDefault(defaults, rc, path, p);
       if (rcVal !== undefined && rcVal !== null) {
@@ -707,6 +709,16 @@ async function main(io: Invocation): Promise<void> {
 
     if (name === "setup" && key === "autocomplete") {
       await runSetupAutocomplete(io);
+      return;
+    }
+
+    if (name === "session" && key === "validate") {
+      await runSessionValidate(io, {
+        values,
+        rootValues,
+        settings,
+        index,
+      });
       return;
     }
 

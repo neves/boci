@@ -18,6 +18,13 @@ import { resolveResourcePrincipal } from "./resource-principal.ts";
 import { Exit, type Invocation } from "./io.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
+  SecurityTokenDecodeError,
+  SecurityTokenKeyError,
+  decodeSecurityToken,
+  isSecurityTokenValid,
+} from "./session.ts";
+import { createStdinReader } from "./setup.ts";
+import {
   InvalidPrivateKey,
   MissingPrivateKeyPassphrase,
   loadPrivateKey,
@@ -275,15 +282,13 @@ export async function createServiceClient(
       throw e;
     }
   }
-  if (
-    configLoaded &&
-    (io.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? "").toLowerCase() !==
-      "true"
-  ) {
+  const suppressPermWarning =
+    (io.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? "").toLowerCase() ===
+    "true";
+  if (configLoaded && !suppressPermWarning) {
     warnFilePermissions(io, configPath(settings.configFile, io.env, io.cwd));
-    if (config.key_file && !configOptional)
-      warnFilePermissions(io, expandUser(String(config.key_file), io.env));
   }
+  applyConfigEnvVars(config, io.env);
   let principal:
     { keyId: string; privateKey: KeyObject; region?: string } | undefined;
   if (isInstancePrincipal) {
@@ -329,26 +334,92 @@ export async function createServiceClient(
   if (principal) {
     keyId = principal.keyId;
     privateKey = principal.privateKey;
-  } else {
-    keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
-    if (settings.auth === "security_token") {
-      const tokenFile = config.security_token_file;
-      if (!tokenFile) {
-        io.err(
-          "ERROR: Config value for 'security_token_file' must be specified when using --auth security_token\n",
-        );
-        throw new Exit(1);
-      }
-      const tokenPath = expandUser(String(tokenFile), io.env);
-      if (!existsSync(resolve(io.cwd, tokenPath))) {
-        io.err(
-          `ERROR: File specified by 'security_token_file' does not exist: ${tokenPath}\n`,
-        );
-        throw new Exit(1);
-      }
-      const token = readFileSync(resolve(io.cwd, tokenPath), "utf8");
-      keyId = `ST$${token}`;
+  } else if (settings.auth === "security_token") {
+    const tokenFile = config.security_token_file;
+    if (!tokenFile) {
+      io.err(
+        "ERROR: Config value for 'security_token_file' must be specified when using --auth security_token\n",
+      );
+      throw new Exit(1);
     }
+    const tokenPath = expandUser(String(tokenFile), io.env);
+    if (!existsSync(resolve(io.cwd, tokenPath))) {
+      io.err(
+        `ERROR: File specified by 'security_token_file' does not exist: ${tokenPath}\n`,
+      );
+      throw new Exit(1);
+    }
+    if (!suppressPermWarning) warnFilePermissions(io, tokenPath);
+    const token = readFileSync(resolve(io.cwd, tokenPath), "utf8");
+    const keyPath = expandUser(String(config.key_file), io.env);
+    const pem = readFileSync(resolve(io.cwd, keyPath), "utf8");
+    const loadWithErrors = (passPhrase: string | null): KeyObject => {
+      try {
+        return loadPrivateKey(pem, passPhrase);
+      } catch (e) {
+        if (e instanceof InvalidPrivateKey) {
+          io.err(`${e.message}\n`);
+          throw new Exit(1);
+        }
+        if (e instanceof TypeError) {
+          io.err(`TypeError: ${e.message}\n`);
+          throw new Exit(1);
+        }
+        throw e;
+      }
+    };
+    try {
+      privateKey = loadWithErrors(config.pass_phrase as string | null);
+    } catch (e) {
+      if (e instanceof MissingPrivateKeyPassphrase) {
+        const prompted = io.promptSecret
+          ? ((await io.promptSecret("Private key passphrase:")) ?? "")
+          : promptFromStdin(io, "Private key passphrase:");
+        privateKey = loadWithErrors(prompted);
+      } else {
+        throw e;
+      }
+    }
+    let jwtPayload: Record<string, unknown>;
+    try {
+      jwtPayload = decodeSecurityToken(token);
+      if (!isSecurityTokenValid(jwtPayload)) {
+        io.out(
+          "ERROR: This CLI session has expired, so it cannot currently be used to run commands\n",
+        );
+        const confirmed = await confirmUnderWrapExceptions(
+          io,
+          "Do you want to re-authenticate your CLI session profile?",
+          true,
+        );
+        if (!confirmed) throw new Exit(1);
+        io.err("ERROR: 'oci session authenticate' is not implemented yet.\n");
+        throw new Exit(1);
+      }
+    } catch (e) {
+      if (
+        e instanceof SecurityTokenDecodeError ||
+        e instanceof SecurityTokenKeyError
+      ) {
+        io.err(`${e.name}: ${e.message}\n`);
+        throw new Exit(1);
+      }
+      throw e;
+    }
+    keyId = `ST$${token}`;
+    if (configLoaded && config.key_file && !suppressPermWarning) {
+      warnFilePermissions(io, keyPath);
+    }
+  } else {
+    if (
+      configLoaded &&
+      config.key_file &&
+      !configOptional &&
+      !suppressPermWarning
+    ) {
+      warnFilePermissions(io, expandUser(String(config.key_file), io.env));
+    }
+    keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
     const keyPath = expandUser(String(config.key_file), io.env);
     const pem = readFileSync(resolve(io.cwd, keyPath), "utf8");
     const loadWithErrors = (passPhrase: string | null): KeyObject => {
@@ -701,7 +772,30 @@ function retryableResponse(response: Response, raw: string): boolean {
   }
 }
 
-function warnFilePermissions(io: Invocation, file: string) {
+const OCI_CONFIG_ENV_VARS: Record<string, string> = {
+  OCI_CLI_USER: "user",
+  OCI_CLI_FINGERPRINT: "fingerprint",
+  OCI_CLI_KEY_FILE: "key_file",
+  OCI_CLI_KEY_CONTENT: "key_content",
+  OCI_CLI_TENANCY: "tenancy",
+  OCI_CLI_PASSPHRASE: "pass_phrase",
+  OCI_CLI_DELEGATION_TOKEN_FILE: "delegation_token_file",
+  OCI_CLI_SECURITY_TOKEN_FILE: "security_token_file",
+};
+
+/** cli_util.build_config: apply OCI_CONFIG_ENV_VARS overrides from the environment. */
+export function applyConfigEnvVars(
+  config: Config,
+  env: Record<string, string | undefined>,
+): void {
+  for (const [envVar, key] of Object.entries(OCI_CONFIG_ENV_VARS)) {
+    if (env[envVar] !== undefined) {
+      config[key] = env[envVar] as string;
+    }
+  }
+}
+
+export function warnFilePermissions(io: Invocation, file: string) {
   try {
     if ((statSync(resolve(io.cwd, file)).mode & 0o077) === 0) return;
   } catch {
@@ -719,6 +813,29 @@ function warnFilePermissions(io: Invocation, file: string) {
 function configBool(value: unknown): boolean {
   if (typeof value === "boolean") return value;
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+async function confirmUnderWrapExceptions(
+  io: Invocation,
+  text: string,
+  defaultValue: boolean,
+): Promise<boolean> {
+  const stdin = createStdinReader(io);
+  const suffix = defaultValue ? "[Y/n]: " : "[y/N]: ";
+  const prompt = `${text} ${suffix}`;
+  while (true) {
+    io.out(prompt);
+    const line = await stdin.readLine();
+    if (line === null) {
+      io.err("Abort: \n");
+      throw new Exit(1);
+    }
+    const normalized = line.trim().toLowerCase();
+    if (normalized === "y" || normalized === "yes") return true;
+    if (normalized === "n" || normalized === "no") return false;
+    if (normalized === "") return defaultValue;
+    io.out("Error: invalid input\n");
+  }
 }
 
 function promptFromStdin(io: Invocation, prompt: string): string {

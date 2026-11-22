@@ -43,6 +43,7 @@ const IMPLEMENTED = new Set<string>([
   "setup keys",
   "setup config",
   "setup autocomplete",
+  "session validate",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

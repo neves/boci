@@ -57,13 +57,13 @@ const UPLOAD_PUBLIC_KEY_INSTRUCTIONS =
   "    'How to upload the public key':\n\n" +
   "        https://docs.cloud.oracle.com/Content/API/Concepts/apisigningkey.htm#How2\n\n\n";
 
-type StdinReader = {
+export type StdinReader = {
   readLine(): Promise<string | null>;
   consumeAll(): Promise<string>;
   isExhausted(): boolean;
 };
 
-function createStdinReader(io: Invocation): StdinReader {
+export function createStdinReader(io: Invocation): StdinReader {
   if (io.readLine) {
     const readLineFn = io.readLine.bind(io);
     let exhausted = false;

@@ -6,6 +6,7 @@ export type TypedParam = ParamSpec & {
   type: string;
   typeClass: string;
   required?: boolean;
+  default?: unknown;
   choices?: string[];
   caseSensitive?: boolean;
   range?: {

@@ -146,7 +146,11 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `setup keys`.
 - [x] `setup config`.
 - [x] `setup autocomplete`.
-- [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.
+- [x] `session validate`.
+- [ ] `session refresh`.
+- [ ] `session export`.
+- [ ] `session import`.
+- [ ] `session authenticate`.
 
 ## Rung 8 — Remaining Custom commands
 

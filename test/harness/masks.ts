@@ -46,4 +46,9 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "OS Version: <os>,",
     "MultipartUploadError embeds the local OS kernel/platform version",
   ],
+  [
+    /Public key fingerprint: [0-9a-f]{2}(?::[0-9a-f]{2}){15}/g,
+    "Public key fingerprint: <fingerprint>",
+    "setup keys generates a random RSA key pair per invocation",
+  ],
 ];

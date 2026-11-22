@@ -18,7 +18,7 @@ export type Invocation = {
   outBytes?(bytes: Uint8Array): void;
   err(text: string): void;
   /** Only decides colouring and help width, never behaviour. */
-  isTTY(fd: 1 | 2): boolean;
+  isTTY(fd: 0 | 1 | 2): boolean;
   /** The terminal's width, asked only when stdout is a terminal. */
   columns(): number | undefined;
   /**
@@ -30,8 +30,8 @@ export type Invocation = {
   stdin?: string;
   /** Stream raw bytes from stdin (e.g. `os object put --file -`). Falls back to UTF-8 `stdin`. */
   stdinBytes?(): AsyncIterable<Uint8Array>;
-  /** Read a secret (e.g. private key passphrase), suppressing echo when stdin is a TTY. */
-  promptSecret?(prompt: string): Promise<string>;
+  /** Read a secret (e.g. private key passphrase), suppressing echo when stdin is a TTY. Returns null on EOF. */
+  promptSecret?(prompt: string): Promise<string | null>;
   /** Read one line from stdin (null on EOF), flushing queued stdout/stderr first. */
   readLine?(): Promise<string | null>;
 };
@@ -75,24 +75,28 @@ export function processStdio() {
     flush,
     isTTY,
     columns: () => process.stdout.columns,
-    async promptSecret(prompt: string): Promise<string> {
+    async promptSecret(prompt: string): Promise<string | null> {
       if (isTTY(0)) {
         queue.push({ fd: 2, data: prompt });
         await flush();
         Bun.spawnSync(["stty", "-echo"], { stdin: "inherit" });
+        let line: string | null = null;
         try {
-          return readLineSync(0);
+          line = readLineOrEofSync(0);
         } finally {
           Bun.spawnSync(["stty", "echo"], { stdin: "inherit" });
-          await Bun.write(Bun.stderr, "\n");
+          if (line !== null) await Bun.write(Bun.stderr, "\n");
         }
+        return line;
       }
       queue.push({
         fd: 2,
-        data: `Warning: Password input may be echoed.\n${prompt}\n`,
+        data: `Warning: Password input may be echoed.\n${prompt}`,
       });
       await flush();
-      return readLineSync(0);
+      const line = readLineOrEofSync(0);
+      if (line !== null) queue.push({ fd: 2, data: "\n" });
+      return line;
     },
     async readLine(): Promise<string | null> {
       await flush();
@@ -104,10 +108,6 @@ export function processStdio() {
       }
     },
   };
-}
-
-function readLineSync(fd: number): string {
-  return readLineOrEofSync(fd) ?? "";
 }
 
 function readLineOrEofSync(fd: number): string | null {

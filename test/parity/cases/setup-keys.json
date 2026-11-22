@@ -1,0 +1,518 @@
+[
+  {
+    "id": "setup-keys-passphrase-basic",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "mysecret"
+    ],
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "keys": 448,
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-default-dir-and-name",
+    "key": "setup keys",
+    "argv": ["setup", "keys", "--passphrase", "mysecret"],
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        ".oci": 448,
+        ".oci/oci_api_key.pem": 384,
+        ".oci/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-custom-key-name-relative-dir",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "relkeys",
+      "--key-name",
+      "my_custom_key",
+      "--passphrase",
+      "mysecret"
+    ],
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "relkeys": 448,
+        "relkeys/my_custom_key.pem": 384,
+        "relkeys/my_custom_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-tilde-output-dir",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "~/tilde-keys",
+      "--passphrase",
+      "mysecret"
+    ],
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "tilde-keys": 448,
+        "tilde-keys/oci_api_key.pem": 384,
+        "tilde-keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-existing-dir",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/existing",
+      "--passphrase",
+      "mysecret"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "existing/.keep": ""
+      }
+    },
+    "expect": {
+      "fileModes": {
+        "existing/oci_api_key.pem": 384,
+        "existing/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-passphrase-file",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase-file",
+      "{home}/pass.txt"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "pass.txt": "file-secret\nsecond-line\n"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-passphrase-file-stdin",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase-file",
+      "-"
+    ],
+    "stdin": "stdin-secret\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-passphrase-file-empty",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase-file",
+      "{home}/empty.txt"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "empty.txt": ""
+      }
+    }
+  },
+  {
+    "id": "setup-keys-passphrase-file-whitespace",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase-file",
+      "{home}/ws.txt"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "ws.txt": "   \nactual-secret\n"
+      }
+    }
+  },
+  {
+    "id": "setup-keys-passphrase-file-missing",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase-file",
+      "{home}/missing.txt"
+    ],
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "setup-keys-passphrase-file-directory",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase-file",
+      "{home}/.oci"
+    ]
+  },
+  {
+    "id": "setup-keys-both-passphrase-and-file",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "secret",
+      "--passphrase-file",
+      "{home}/pass.txt"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "pass.txt": "other\n"
+      }
+    }
+  },
+  {
+    "id": "setup-keys-empty-passphrase-and-file",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "",
+      "--passphrase-file",
+      "{home}/pass.txt"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "pass.txt": "from-file\n"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-prompt-no-passphrase",
+    "key": "setup keys",
+    "argv": ["setup", "keys", "--output-dir", "{home}/keys"],
+    "stdin": "N/A\nN/A\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-prompt-passphrase",
+    "key": "setup keys",
+    "argv": ["setup", "keys", "--output-dir", "{home}/keys"],
+    "stdin": "prompt-secret\nprompt-secret\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-prompt-mismatch-then-match",
+    "key": "setup keys",
+    "argv": ["setup", "keys", "--output-dir", "{home}/keys"],
+    "stdin": "first\nsecond\nN/A\nN/A\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-prompt-empty-then-match",
+    "key": "setup keys",
+    "argv": ["setup", "keys", "--output-dir", "{home}/keys"],
+    "stdin": "\nN/A\n\nN/A\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-prompt-eof",
+    "key": "setup keys",
+    "argv": ["setup", "keys", "--output-dir", "{home}/keys"],
+    "stdin": "",
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "setup-keys-prompt-confirm-eof",
+    "key": "setup keys",
+    "argv": ["setup", "keys", "--output-dir", "{home}/keys"],
+    "stdin": "secret\n",
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "setup-keys-overwrite-flag",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "mysecret",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n",
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        "keys/oci_api_key.pem": 384,
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-overwrite-prompt-decline-both",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "mysecret"
+    ],
+    "stdin": "n\nn\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n",
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    },
+    "expect": {
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n",
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    }
+  },
+  {
+    "id": "setup-keys-overwrite-prompt-accept-public-decline-private",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "mysecret"
+    ],
+    "stdin": "y\n\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n",
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    },
+    "expect": {
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n"
+      },
+      "fileModes": {
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-overwrite-prompt-invalid-then-yes",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "mysecret"
+    ],
+    "stdin": "maybe\nyes\nno\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n",
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    },
+    "expect": {
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n"
+      },
+      "fileModes": {
+        "keys/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-keys-overwrite-prompt-eof",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase",
+      "mysecret"
+    ],
+    "stdin": "",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    },
+    "expect": {
+      "files": {
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    }
+  },
+  {
+    "id": "setup-keys-passphrase-file-stdin-and-overwrite-prompt",
+    "key": "setup keys",
+    "argv": [
+      "setup",
+      "keys",
+      "--output-dir",
+      "{home}/keys",
+      "--passphrase-file",
+      "-"
+    ],
+    "stdin": "stdin-secret\ny\nn\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n",
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    },
+    "expect": {
+      "files": {
+        "keys/oci_api_key.pem": "old-priv\n",
+        "keys/oci_api_key_public.pem": "old-pub\n"
+      }
+    }
+  },
+  {
+    "id": "setup-keys-rc-defaults",
+    "key": "setup keys",
+    "argv": ["setup", "keys"],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/oci_cli_rc": "[DEFAULT]\nkey-name = rc_key\noutput-dir = ~/rc-keys\npassphrase = rc-secret\noverwrite = true\n"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        "rc-keys": 448,
+        "rc-keys/rc_key.pem": 384,
+        "rc-keys/rc_key_public.pem": 384
+      }
+    }
+  }
+]

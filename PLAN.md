@@ -143,7 +143,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Object Storage: `os object bulk-delete`.
 - [x] Object Storage: `os object sync`.
 - [x] `setup repair-file-permissions`.
-- [ ] `setup keys`.
+- [x] `setup keys`.
 - [ ] `setup config`.
 - [ ] `setup autocomplete`.
 - [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.

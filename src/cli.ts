@@ -60,7 +60,7 @@ import {
   validateOsNamespace,
 } from "./os.ts";
 import { printResult } from "./output.ts";
-import { runSetupRepairFilePermissions } from "./setup.ts";
+import { runSetupKeys, runSetupRepairFilePermissions } from "./setup.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -498,6 +498,13 @@ async function main(io: Invocation): Promise<void> {
           ) {
             validateClickFileForRead(io, values[p.name] as string);
           }
+        } else if (name === "setup" && key === "keys") {
+          if (
+            p.name === "passphrase_file" &&
+            typeof values[p.name] === "string"
+          ) {
+            validateClickFileForRead(io, values[p.name] as string);
+          }
         }
       } catch (e) {
         if (e instanceof BadParameter)
@@ -668,6 +675,15 @@ async function main(io: Invocation): Promise<void> {
 
     if (name === "setup" && key === "repair-file-permissions") {
       runSetupRepairFilePermissions(io, {
+        values,
+        usageError: (message) =>
+          showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
+      });
+      return;
+    }
+
+    if (name === "setup" && key === "keys") {
+      await runSetupKeys(io, {
         values,
         usageError: (message) =>
           showPatched(io, usage(io, commandPath, cmd.helpDoc), message),

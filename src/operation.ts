@@ -371,7 +371,7 @@ export async function createServiceClient(
     } catch (e) {
       if (e instanceof MissingPrivateKeyPassphrase) {
         const prompted = io.promptSecret
-          ? await io.promptSecret("Private key passphrase:")
+          ? ((await io.promptSecret("Private key passphrase:")) ?? "")
           : promptFromStdin(io, "Private key passphrase:");
         privateKey = loadWithErrors(prompted);
       } else {

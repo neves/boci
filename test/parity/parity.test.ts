@@ -1,10 +1,13 @@
 // Parity: boci against the Reference CLI's goldens. Never runs the Reference CLI (ADR 0004).
 // Cases whose key boci doesn't implement yet are skipped (and recorded as not passing);
 // once a key is implemented, every case for it must match its golden.
+// Generated cases (test/parity/cases/generated-*.json, thousands of them) run only with
+// BOCI_PARITY_ALL=1, which `bun run verify` sets; the default `bun test` stays fast.
 import { afterAll, describe, expect, test } from "bun:test";
 import { isImplemented } from "../../src/registry.ts";
 import {
   caseHash,
+  includeGeneratedCases,
   loadCases,
   loadGolden,
   RESULTS_FILE,
@@ -13,7 +16,7 @@ import { normalizeRun, remask, signatureValid } from "../harness/compare.ts";
 import { createPublicKey } from "node:crypto";
 import { CLIS, runCli } from "../harness/runner.ts";
 
-const cases = await loadCases();
+const cases = await loadCases({ generated: includeGeneratedCases() });
 const runnableCases = cases.filter((c) => isImplemented(c.key));
 const missingCases = cases.length - runnableCases.length;
 const missingKeys = new Set(

@@ -37,9 +37,19 @@ export function caseHash(c: ParityCase): string {
   return Bun.hash(JSON.stringify(inputs)).toString(16);
 }
 
-export async function loadCases(): Promise<ParityCase[]> {
+/** Case files written by scripts/generate-*-cases.ts; their case ids share the prefix. */
+export const isGeneratedCaseFile = (file: string) =>
+  file.startsWith("generated-");
+
+/** Generated cases run only when this is set (`bun run verify` sets it). */
+export const includeGeneratedCases = () => Bun.env.BOCI_PARITY_ALL === "1";
+
+export async function loadCases({ generated = true } = {}): Promise<
+  ParityCase[]
+> {
   const cases: ParityCase[] = [];
   for await (const file of new Bun.Glob("**/*.json").scan(CASES_DIR)) {
+    if (!generated && isGeneratedCaseFile(file)) continue;
     cases.push(
       ...((await Bun.file(join(CASES_DIR, file)).json()) as ParityCase[]),
     );

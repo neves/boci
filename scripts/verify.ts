@@ -2,7 +2,8 @@
 // It keeps a live terminal status showing finished, running, and queued checks. One line per
 // passing step; a failing step prints its (tail-capped) output. All steps run even if one
 // fails, so a single run reports every problem. Parity always runs against the freshly
-// compiled binary, avoiding one Bun/TypeScript startup for every case.
+// compiled binary, avoiding one Bun/TypeScript startup for every case, and includes the
+// generated parity cases that the default `bun test` skips.
 const MAX_LINES = 150;
 
 type Step = { name: string; cmd: string[]; env?: Record<string, string> };
@@ -19,7 +20,7 @@ const steps: Step[] = [
   {
     name: "test",
     cmd: ["bun", "test", "--only-failures"],
-    env: { BOCI_BIN: "dist/boci" },
+    env: { BOCI_BIN: "dist/boci", BOCI_PARITY_ALL: "1" },
   },
 ];
 

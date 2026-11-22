@@ -28,6 +28,7 @@ const IMPLEMENTED = new Set<string>([
   "debug",
   "read-timeout",
   "no-retry",
+  "profile current",
   "max-retries",
   "work-request-waiter",
   "lifecycle-waiter",

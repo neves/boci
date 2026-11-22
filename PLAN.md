@@ -162,7 +162,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <details>
 <summary>2 commands</summary>
 
-- [ ] `profile current`
+- [x] `profile current`
 - [ ] `profile list`
 
 </details>

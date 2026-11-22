@@ -70,6 +70,7 @@ import {
   runSessionRefresh,
   runSessionValidate,
 } from "./session.ts";
+import { runProfileCurrent } from "./profile.ts";
 import {
   runSetupAutocomplete,
   runSetupConfig,
@@ -754,6 +755,11 @@ async function main(io: Invocation): Promise<void> {
         values,
         settings,
       });
+      return;
+    }
+
+    if (name === "profile" && key === "current") {
+      runProfileCurrent(io, { settings });
       return;
     }
 

@@ -52,11 +52,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 
 ### Any command: connection timeout includes waiting for response headers
 
-- **Invocation:** `oci --connection-timeout 1 os ns get` against a local endpoint that accepts TCP and delays its response headers for 1.5 seconds
-- **Reference CLI:** completes the request because its connection timeout only covers TCP connection establishment
-- **boci:** Bun's fetch abort signal also covers waiting for response headers, so the request times out
-- **Why:** Bun's `fetch` API exposes a request signal but no separate TCP connection timeout. The Bun type declarations also expose no separate connection-timeout option; a preflight socket would not govern the actual fetch connection, proxy, or TLS handshake.
-- **State:** unresolved (tried: AbortSignal around fetch, delayed-response parity reproduction, checked Bun Fetch API types)
+- **Invocation:** `oci --connection-timeout 1 os ns get` against a loopback endpoint that accepts TCP immediately and delays its HTTP response headers for 1.5 seconds
+- **Reference CLI:** completes the request (exit 0, one request, expected namespace output); the connection timeout covers connection establishment, not the subsequent wait for response headers
+- **boci:** the focused `sendServiceRequest` unit reproduction with `connection_timeout: 1` and `no_retry: true` failed after about 1.01 seconds with `TimeoutError: Connection timed out`, before the endpoint's 1.2-second response headers arrived
+- **Why:** Bun 1.4.5 `fetch` has request-wide abort signals and an idle socket timeout, neither of which identifies the TCP/TLS connection phase. Installed Bun declarations expose no connect timeout for `fetch`, `FetchSession`, or `Bun.connect`. `Bun.connect` can create a TCP/TLS socket, but `fetch` cannot use that established socket, so a preflight would open a second connection and would not enforce the timeout on the request's actual proxy/TLS path. Replacing `fetch` with a custom HTTP transport would need to reimplement OCI's current HTTP, TLS, proxy, redirect, decompression, and connection-reuse behavior; no safe low-complexity transport seam is available.
+- **State:** unresolved (tried: request-wide AbortSignal; delayed-header test, which confirmed the overbroad abort; pinned OCI 3.96.3 loopback run, which completed; inspected Bun 1.4.5 fetch, FetchSession, and TCP socket APIs; rejected duplicate preflight connection because it cannot enforce the actual request's TCP/TLS connection)
 
 ### Generated GET paths: reported operation placeholder substitution failure not reproduced
 

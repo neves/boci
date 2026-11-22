@@ -55,6 +55,7 @@ import {
   runOsObjectGet,
   runOsObjectPut,
   runOsObjectResumePut,
+  runOsObjectSync,
   validateClickFileForRead,
   validateOsNamespace,
 } from "./os.ts";
@@ -486,7 +487,9 @@ async function main(io: Invocation): Promise<void> {
           }
         } else if (
           name === "os" &&
-          (key === "object bulk-upload" || key === "object bulk-download")
+          (key === "object bulk-upload" ||
+            key === "object bulk-download" ||
+            key === "object sync")
         ) {
           if (
             p.name === "encryption_key_file" &&
@@ -628,6 +631,24 @@ async function main(io: Invocation): Promise<void> {
 
     if (name === "os" && key === "object bulk-delete") {
       await runOsObjectBulkDelete(io, {
+        values,
+        rootValues,
+        settings,
+        spec,
+        index,
+        usageText: () => usage(io, commandPath, cmd.helpDoc),
+        outputOptions: {
+          query: rootValues.query,
+          output: rootValues.output,
+          rawOutput: rootValues.raw_output,
+          rc,
+        },
+      });
+      return;
+    }
+
+    if (name === "os" && key === "object sync") {
+      await runOsObjectSync(io, {
         values,
         rootValues,
         settings,

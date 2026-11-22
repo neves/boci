@@ -38,6 +38,7 @@ const IMPLEMENTED = new Set<string>([
   "os object bulk-upload",
   "os object bulk-download",
   "os object bulk-delete",
+  "os object sync",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

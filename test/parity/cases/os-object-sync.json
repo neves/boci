@@ -1,0 +1,2160 @@
+[
+  {
+    "id": "os-object-sync-missing-required",
+    "key": "os object sync",
+    "argv": ["os", "object", "sync", "-ns", "myns", "--src-dir", "{home}/src"]
+  },
+  {
+    "id": "os-object-sync-missing-dir",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket"
+    ]
+  },
+  {
+    "id": "os-object-sync-both-dirs",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--dest-dir",
+      "{home}/dest"
+    ]
+  },
+  {
+    "id": "os-object-sync-bad-namespace",
+    "key": "os object sync",
+    "argv": [
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "bad ns!",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ]
+  },
+  {
+    "id": "os-object-sync-missing-src-dir",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/does-not-exist"
+    ]
+  },
+  {
+    "id": "os-object-sync-dest-dir-disallowed-storage-tier",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--storage-tier",
+      "Standard"
+    ]
+  },
+  {
+    "id": "os-object-sync-dest-dir-disallowed-cache-control",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--cache-control",
+      "no-cache",
+      "--content-type",
+      "text/plain"
+    ]
+  },
+  {
+    "id": "os-object-sync-src-include-exclude-conflict",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--include",
+      "*.txt",
+      "--exclude",
+      "*.log"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-include-exclude-conflict",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--include",
+      "*.txt",
+      "--exclude",
+      "*.log"
+    ]
+  },
+  {
+    "id": "os-object-sync-bad-encryption-key-file",
+    "key": "os object sync",
+    "argv": [
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--encryption-key-file",
+      "{home}/no-such-key.txt"
+    ]
+  },
+  {
+    "id": "os-object-sync-parallel-out-of-range",
+    "key": "os object sync",
+    "argv": [
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--parallel-operations-count",
+      "0"
+    ]
+  },
+  {
+    "id": "os-object-sync-part-size-out-of-range",
+    "key": "os object sync",
+    "argv": [
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--part-size",
+      "64"
+    ]
+  },
+  {
+    "id": "os-object-sync-src-new",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "The object 'hello.txt' was not found in the bucket 'mybucket'"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-hello",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT",
+          "opc-request-id": "req-put-1"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-skip-up-to-date",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-existing",
+          "content-length": "12",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-upload-newer-mtime",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-old",
+          "content-length": "12",
+          "last-modified": "Wed, 01 Jan 2020 00:00:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-new",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-upload-size-diff",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-old-size",
+          "content-length": "999",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-updated-size",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-prefix-and-nested",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--prefix",
+      "pre/"
+    ],
+    "sandbox": {
+      "files": {
+        "src/sub/child.txt": "child body"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-child",
+          "opc-content-md5": "md5-child",
+          "last-modified": "Wed, 21 Oct 2026 07:28:01 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-headers-metadata-encryption",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--cache-control",
+      "max-age=60",
+      "--content-disposition",
+      "inline",
+      "--content-encoding",
+      "gzip",
+      "--content-language",
+      "en-US",
+      "--content-type",
+      "text/plain",
+      "--metadata",
+      "{\"env\":\"test\"}",
+      "--storage-tier",
+      "InfrequentAccess",
+      "--encryption-key-file",
+      "{home}/sse.key"
+    ],
+    "sandbox": {
+      "files": {
+        "src/item.txt": "payload",
+        "sse.key": "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-meta",
+          "opc-content-md5": "md5-meta",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-content-type-auto",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--content-type",
+      "auto"
+    ],
+    "sandbox": {
+      "files": {
+        "src/data.json": "{\"a\":1}"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-json",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-include",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--include",
+      "*.txt"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep",
+        "src/sub/skip.log": "skip"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-keep",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-exclude",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--exclude",
+      "*.log"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep",
+        "src/sub/skip.log": "skip"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-keep",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-dry-run",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--prefix",
+      "pre/",
+      "--dry-run",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/new.txt": "new",
+        "src/sub/same.txt": "same"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-same",
+          "content-length": "4",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-delete",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--delete",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/same.txt": "same",
+        "src/sub/new.txt": "new"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-same",
+          "content-length": "4",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-new",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            { "name": "same.txt" },
+            { "name": "sub/new.txt" },
+            { "name": "stale.txt" }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-delete-dry-run",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--delete",
+      "--dry-run",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/new.txt": "new",
+        "src/sub/same.txt": "same"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-same",
+          "content-length": "4",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            { "name": "new.txt" },
+            { "name": "sub/same.txt" },
+            { "name": "stale.txt" }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-delete-prefix-include",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--prefix",
+      "pre/",
+      "--include",
+      "*.txt",
+      "--delete",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-keep",
+          "content-length": "4",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            { "name": "pre/keep.txt" },
+            { "name": "pre/extra.txt" },
+            { "name": "pre/extra.log" }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-delete-failure",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--delete",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-keep",
+          "content-length": "4",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [{ "name": "keep.txt" }, { "name": "bad.txt" }]
+        }
+      },
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-del-403"
+        },
+        "body": {
+          "code": "NotAuthorized",
+          "message": "delete denied"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-upload-failure",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/fail.txt": "fail"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-put-403"
+        },
+        "body": {
+          "code": "NotAuthorized",
+          "message": "upload denied"
+        }
+      }
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdoutContains": "\"upload-failures\"",
+      "stderrContains": "Uploaded fail.txt\n",
+      "requests": 3
+    }
+  },
+  {
+    "id": "os-object-sync-src-head-failure",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/fail.txt": "fail"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-head-403"
+        },
+        "body": {
+          "code": "NotAuthorized",
+          "message": "head denied"
+        }
+      }
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdoutContains": "\"upload-failures\"",
+      "requests": 2
+    }
+  },
+  {
+    "id": "os-object-sync-src-bucket-not-found",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "missing-bucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello"
+      }
+    },
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-bucket-404"
+        },
+        "body": {
+          "code": "BucketNotFound",
+          "message": "Either the bucket named 'missing-bucket' does not exist in the namespace 'myns' or you are not authorized to access it"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-auto-namespace",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/auto.txt": "auto"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": "autons"
+      },
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "autons"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-auto",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-output-table",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--delete",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/same.txt": "same",
+        "src/sub/new.txt": "new"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-same",
+          "content-length": "4",
+          "last-modified": "Thu, 01 Jan 2099 00:00:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-new",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            { "name": "same.txt" },
+            { "name": "sub/new.txt" },
+            { "name": "stale.txt" }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-src-query-and-from-json",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "\"uploaded-objects\".\"hello.txt\".etag",
+      "--raw-output",
+      "os",
+      "object",
+      "sync",
+      "--from-json",
+      "{\"namespace\":\"myns\",\"bucketName\":\"mybucket\",\"srcDir\":\"{home}/src\"}"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-q",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-dest-new",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "hello.txt",
+              "size": 12,
+              "timeModified": "2026-10-21T07:28:00.500Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "hello world\n"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/hello.txt": "hello world\n"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-skip-up-to-date",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "hello.txt",
+              "size": 12,
+              "timeModified": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/hello.txt": "hello world\n"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-download-newer-mtime",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/hello.txt": "old content!"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "hello.txt",
+              "size": 12,
+              "timeModified": "2099-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "new content!"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/hello.txt": "new content!"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-download-size-diff",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/hello.txt": "short"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "hello.txt",
+              "size": 12,
+              "timeModified": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "longer body!"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/hello.txt": "longer body!"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-archival-states",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "archived.txt",
+              "size": 5,
+              "timeModified": "2026-10-21T07:28:00.000Z",
+              "archivalState": "Archived"
+            },
+            {
+              "name": "restoring.txt",
+              "size": 5,
+              "timeModified": "2026-10-21T07:28:00.000Z",
+              "archivalState": "Restoring"
+            },
+            {
+              "name": "restored.txt",
+              "size": 8,
+              "timeModified": "2026-10-21T07:28:00.000Z",
+              "archivalState": "Restored"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "restored"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/restored.txt": "restored"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-prefix",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--prefix",
+      "pre/",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "pre/root.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "pre/sub/child.txt",
+              "size": 5,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "root"
+      },
+      {
+        "status": 200,
+        "body": "child"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/root.txt": "root",
+        "dest/sub/child.txt": "child"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-include",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--include",
+      "*.txt"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "skip.log",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "keep"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/keep.txt": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-exclude",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--exclude",
+      "*.log"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "skip.log",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "keep"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/keep.txt": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-encryption-key",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--encryption-key-file",
+      "{home}/sse.key"
+    ],
+    "sandbox": {
+      "files": {
+        "sse.key": "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "secret.txt",
+              "size": 6,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "secret"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/secret.txt": "secret"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-dry-run",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--prefix",
+      "pre/",
+      "--dry-run"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/same.txt": "same"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "pre/new.txt",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "pre/same.txt",
+              "size": 4,
+              "timeModified": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-dest-delete",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--delete",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/same.txt": "same",
+        "dest/sub/extra.txt": "extra"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "new.txt",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "same.txt",
+              "size": 4,
+              "timeModified": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "new"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/new.txt": "new",
+        "dest/same.txt": "same"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-delete-dry-run",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--delete",
+      "--dry-run"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/same.txt": "same",
+        "dest/sub/extra.txt": "extra"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "new.txt",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "same.txt",
+              "size": 4,
+              "timeModified": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/same.txt": "same",
+        "dest/sub/extra.txt": "extra"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-delete-include",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--include",
+      "*.txt",
+      "--delete"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/extra.txt": "extra",
+        "dest/sub/keep.log": "keep"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/sub/keep.log": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-existing-dir-skip",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/sub/nested.txt": "keep"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "sub",
+              "size": 4,
+              "timeModified": "2099-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-dest-download-failure",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "broken.txt",
+              "size": 5,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-get-403"
+        },
+        "body": {
+          "code": "NotAuthorized",
+          "message": "download denied"
+        }
+      }
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdoutContains": "\"download-failures\"",
+      "stderrContains": "Downloaded broken.txt\n",
+      "requests": 2
+    }
+  },
+  {
+    "id": "os-object-sync-dest-auto-namespace",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": "autons"
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "auto.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "auto"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/auto.txt": "auto"
+      }
+    }
+  },
+  {
+    "id": "os-object-sync-dest-output-table",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--delete",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/same.txt": "same",
+        "dest/sub/extra.txt": "extra"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "new.txt",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "same.txt",
+              "size": 4,
+              "timeModified": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "new"
+      }
+    ]
+  },
+  {
+    "id": "os-object-sync-dest-pagination",
+    "key": "os object sync",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "sync",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dest",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "dest/a.txt": "a"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 1,
+              "timeModified": "2020-01-01T00:00:00.000Z"
+            }
+          ],
+          "nextStartWith": "b.txt"
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "b.txt",
+              "size": 1,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "b"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dest/a.txt": "a",
+        "dest/b.txt": "b"
+      }
+    }
+  }
+]

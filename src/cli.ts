@@ -46,7 +46,7 @@ import { isImplemented } from "./registry.ts";
 import { Exit, type Env, type Invocation } from "./io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
-import { callOperation } from "./operation.ts";
+import { callOperation, confirmUnderWrapExceptions } from "./operation.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
@@ -770,7 +770,7 @@ async function main(io: Invocation): Promise<void> {
     if (
       (key === "ns get" && name === "os") ||
       (specCmd.kind === "generated" &&
-        ["GET", "POST", "PUT", "PATCH"].includes(http) &&
+        ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
         isImplemented(`${name} ${key}`, specCmd))
     ) {
       const call = {

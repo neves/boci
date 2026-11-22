@@ -34,7 +34,7 @@ import {
 import type { Index, OperationSpec, ServiceSpec } from "./spec.ts";
 
 export type OperationCall = {
-  /** A Generated command whose operation is GET, POST, PUT or PATCH. */
+  /** A Generated command whose operation is supported by the generic engine. */
   command: GeneratedCommand;
   /** The Leaf command's converted parameter values, by canonical name. */
   values: Record<string, unknown>;
@@ -639,6 +639,17 @@ export async function callOperation(
 ): Promise<OperationResult> {
   const { command, values, rootValues, settings, spec, index } = call;
   const operation = command.operation as OperationSpec;
+  if (operation.http === "DELETE" && values.force !== true) {
+    const confirmed = await confirmUnderWrapExceptions(
+      io,
+      "Are you sure you want to delete this resource?",
+      false,
+    );
+    if (!confirmed) {
+      io.err("Abort: \n");
+      throw new Exit(1);
+    }
+  }
   let requestBody = "";
   if (operation.http === "GET") {
     if (values.all_pages === true && values.limit !== undefined) {
@@ -681,7 +692,10 @@ export async function callOperation(
   }
   const baseHeaders: Record<string, string> =
     operation.http === "GET" ? {} : { "content-type": "application/json" };
-  if (operation.http !== "GET" && operation.client.startsWith("log_analytics."))
+  if (
+    ["POST", "PUT", "PATCH"].includes(operation.http) &&
+    operation.client.startsWith("log_analytics.")
+  )
     baseHeaders.expect = "100-continue";
   for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
     const value =

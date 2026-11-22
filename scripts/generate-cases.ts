@@ -1,6 +1,7 @@
 // Generate request-only parity cases for Generated commands: GETs into
-// test/parity/cases/generated-get-<service>.json, POST/PUT/PATCH into generated-request-<service>.json.
-// `bun run parity:cases --service <name>[,<name>…] | --all [--method GET,POST,PUT,PATCH]`
+// test/parity/cases/generated-get-<service>.json, POST/PUT/PATCH into generated-request-<service>.json,
+// and bodyless HEAD/DELETE into generated-bodyless-<service>.json.
+// `bun run parity:cases --service <name>[,<name>…] | --all [--method GET,POST,PUT,PATCH,HEAD,DELETE]`
 import { parseArgs } from "util";
 
 const { values } = parseArgs({
@@ -66,6 +67,15 @@ const kinds = (
       methods: ["POST", "PUT", "PATCH"],
       build: writeArgv,
       replies: () => ({ body: {} }),
+    },
+    {
+      file: "generated-bodyless",
+      methods: ["HEAD", "DELETE"],
+      build: bodylessArgv,
+      replies: (operation) => ({
+        status: operation.http === "DELETE" ? 204 : 200,
+        body: "",
+      }),
     },
   ] satisfies Kind[]
 ).filter((kind) => kind.methods.some((m) => methods.has(m)));
@@ -189,6 +199,29 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
   return true;
 }
 
+// HEAD and DELETE have no modeled request body. Supply path and required values,
+// plus bound query/header values, so each generated case reaches the fake endpoint.
+function bodylessArgv(argv: string[], command: Command, operation: Operation) {
+  if (operation.body) return false;
+  const params = command.params ?? [];
+  const pathArgs = new Set(Object.values(operation.pathParams ?? {}));
+  const bindings = command.bindings ?? [];
+  for (const param of params) {
+    const name = String(param.name);
+    const hasRequestBinding = bindings.some(
+      (b) =>
+        b.param === name &&
+        ["query", "path", "header"].includes(String(b.target)),
+    );
+    if (param.required === true || pathArgs.has(name) || hasRequestBinding)
+      pushParam(argv, param);
+  }
+  argv.push("--endpoint", "{endpoint}");
+  if (hasRetryToken(params))
+    argv.push("--opc-retry-token", "{opc-retry-token}");
+  return true;
+}
+
 let total = 0;
 const written: string[] = [];
 for (const service of services) {
@@ -211,13 +244,37 @@ for (const service of services) {
         continue;
       const argv = [service, ...command.split(" ")];
       if (!kind.build(argv, node, operation)) continue;
-      generated.push({
+      const testCase = {
         id: `${kind.file}-${service}-${command.replaceAll(" ", "-")}`,
         key,
         argv,
         requestOnly: true,
         replies: kind.replies(operation),
-      });
+        ...(operation.http === "DELETE" ? { stdin: "y\n" } : {}),
+        ...(operation.http === "DELETE"
+          ? {
+              expect: {
+                stdoutContains:
+                  "Are you sure you want to delete this resource? [y/N]: ",
+              },
+            }
+          : {}),
+      };
+      generated.push(testCase);
+      if (
+        operation.http === "DELETE" &&
+        node.params?.some((param) =>
+          (param.opts as string[] | undefined)?.includes("--force"),
+        )
+      ) {
+        generated.push({
+          ...testCase,
+          id: `${kind.file}-${service}-${command.replaceAll(" ", "-")}-force`,
+          argv: [...argv, "--force"],
+          stdin: undefined,
+          expect: { stdout: "" },
+        });
+      }
     }
     // Don't litter cases/ with empty files for services without such commands.
     if (!generated.length && !(await Bun.file(casePath).exists())) continue;
@@ -230,5 +287,5 @@ for (const service of services) {
 // Keep `bun fmt --check` green without a separate step.
 Bun.spawnSync(["bun", "fmt", ...written], { stdout: "ignore" });
 console.log(
-  `${total} generated cases in ${written.length} file(s) → test/parity/cases/generated-{get,request}-*.json`,
+  `${total} generated cases in ${written.length} file(s) → test/parity/cases/generated-*.json`,
 );

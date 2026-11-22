@@ -1,6 +1,42 @@
 import { describe, expect, test } from "bun:test";
 
 describe("parity case generator", () => {
+  test("generates bodyless HEAD and DELETE cases, including force bypasses", async () => {
+    const result = Bun.spawnSync(
+      [
+        "bun",
+        "scripts/generate-cases.ts",
+        "--service",
+        "compute",
+        "--method",
+        "HEAD,DELETE",
+      ],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const cases = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-bodyless-compute.json`,
+    ).json()) as {
+      id: string;
+      key: string;
+      argv: string[];
+      stdin?: string;
+      requestOnly: boolean;
+    }[];
+    const deletion = cases.find(
+      (c) =>
+        c.key === "compute compute-cluster delete" && !c.id.endsWith("-force"),
+    );
+    const forced = cases.find(
+      (c) =>
+        c.key === "compute compute-cluster delete" && c.id.endsWith("-force"),
+    );
+    expect(deletion?.stdin).toBe("y\n");
+    expect(deletion?.requestOnly).toBe(true);
+    expect(forced?.argv).toContain("--force");
+    expect(forced?.stdin).toBeUndefined();
+  });
+
   test("generates simple body flags for write operations", async () => {
     const result = Bun.spawnSync(
       ["bun", "scripts/generate-cases.ts", "--service", "compute"],

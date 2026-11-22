@@ -66,14 +66,15 @@ const isComplex = (p: { type?: string; typeClass?: string }) =>
   String(p.typeClass).includes("Complex");
 
 /**
- * Whether the generic engine runs this Generated command: every GET, and POST/PUT/PATCH
- * whose request body is built from at least one simple (non-complex) bound option.
- * Writes with no body, a direct body, or only complex body options aren't supported yet.
+ * Whether the generic engine runs this Generated command: every GET/HEAD, bodyless DELETE,
+ * and POST/PUT/PATCH whose request body is built from at least one simple body option.
+ * Writes with direct bodies or only complex body options aren't supported yet.
  */
 export function engineSupports(command: Command): boolean {
   if (command.kind !== "generated") return false;
   const http = command.operation?.http ?? "";
-  if (http === "GET") return true;
+  if (http === "GET" || http === "HEAD") return true;
+  if (http === "DELETE") return command.operation?.body === undefined;
   if (!WRITE_METHODS.includes(http)) return false;
   return (command.bindings ?? []).some((b) => {
     if (b.target !== "body") return false;

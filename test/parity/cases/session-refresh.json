@@ -1,0 +1,439 @@
+[
+  {
+    "id": "session-refresh-ok",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.old"
+      },
+      "fileModes": {
+        ".oci/session-token": 420
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDM2MDAsImlhdCI6MjA4NDA5MzYwMH0.new"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDM2MDAsImlhdCI6MjA4NDA5MzYwMH0.new"
+      },
+      "fileModes": {
+        ".oci/session-token": 384
+      }
+    }
+  },
+  {
+    "id": "session-refresh-minimal-profile",
+    "key": "session refresh",
+    "argv": [
+      "session",
+      "refresh",
+      "--config-file",
+      "{home}/.oci/session_config",
+      "--profile",
+      "SESSION"
+    ],
+    "httpsProxy": true,
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/session_config": "[SESSION]\nregion=us-phoenix-1\nkey_file=~/.oci/key.pem\nsecurity_token_file=~/.oci/session-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.old"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "refreshed-minimal-token"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "refreshed-minimal-token"
+      },
+      "fileModes": {
+        ".oci/session-token": 384
+      }
+    }
+  },
+  {
+    "id": "session-refresh-region-flag",
+    "key": "session refresh",
+    "argv": ["session", "refresh", "--region", "phx"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "old-token-value"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-token-phx"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "new-token-phx"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-region-env",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "env": {
+      "OCI_CLI_REGION": "us-langley-1"
+    },
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "old-token-gov"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-token-gov"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "new-token-gov"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-region-metadata",
+    "key": "session refresh",
+    "argv": ["session", "refresh", "--region", "ap-custom-1"],
+    "config": "security_token_file=.oci/session-token\n",
+    "env": {
+      "OCI_REGION_METADATA": "{\"realmKey\":\"OC99\",\"realmDomainComponent\":\"example.com\",\"regionKey\":\"CUS\",\"regionIdentifier\":\"ap-custom-1\"}"
+    },
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "old-token-custom"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-token-custom"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "new-token-custom"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-ignores-endpoint-flag",
+    "key": "session refresh",
+    "argv": ["session", "refresh", "--endpoint", "{endpoint}"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "old-token-ep"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-token-ep"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "new-token-ep"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-env-token",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "env": {
+      "OCI_CLI_SECURITY_TOKEN_FILE": "{home}/.oci/env-token"
+    },
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/env-token": "old-env-token"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-env-token"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/env-token": "new-env-token"
+      },
+      "fileModes": {
+        ".oci/env-token": 384
+      }
+    }
+  },
+  {
+    "id": "session-refresh-passphrase-config",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\npass_phrase=secret-pass\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "keyPassphrase": "secret-pass",
+      "files": {
+        ".oci/session-token": "old-pass-token"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-pass-token"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "new-pass-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-passphrase-prompt",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "secret-pass\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "keyPassphrase": "secret-pass",
+      "files": {
+        ".oci/session-token": "old-prompt-token"
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-prompt-token"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "new-prompt-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-passphrase-wrong",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\npass_phrase=wrong-pass\n",
+    "sandbox": {
+      "keyPassphrase": "secret-pass",
+      "files": {
+        ".oci/session-token": "old-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-passphrase-empty",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\npass_phrase=\n",
+    "sandbox": {
+      "keyPassphrase": "secret-pass",
+      "files": {
+        ".oci/session-token": "old-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-401",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "expired-token"
+      }
+    },
+    "replies": {
+      "status": 401,
+      "body": {
+        "code": "NotAuthenticated",
+        "message": "The required information to complete authentication was not provided or was incorrect."
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "expired-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-500",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "some-token"
+      }
+    },
+    "replies": {
+      "status": 500,
+      "body": {
+        "code": "InternalError",
+        "message": "Internal error occurred."
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "some-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-400",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "bad-token"
+      }
+    },
+    "replies": {
+      "status": 400,
+      "body": "Invalid token payload"
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "bad-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-missing-token-in-reply",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "orig-token"
+      }
+    },
+    "replies": {
+      "status": 200,
+      "body": {}
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "orig-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-no-token-in-config",
+    "key": "session refresh",
+    "argv": ["session", "refresh"]
+  },
+  {
+    "id": "session-refresh-token-file-missing",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=~/.oci/missing-token\n"
+  },
+  {
+    "id": "session-refresh-missing-config",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "session-refresh-missing-profile",
+    "key": "session refresh",
+    "argv": ["session", "refresh", "--profile", "NONEXISTENT"]
+  },
+  {
+    "id": "session-refresh-missing-region",
+    "key": "session refresh",
+    "argv": [
+      "session",
+      "refresh",
+      "--config-file",
+      "{home}/.oci/session_config",
+      "--profile",
+      "NOREGION"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/session_config": "[NOREGION]\nkey_file={home}/.oci/key.pem\nsecurity_token_file={home}/.oci/session-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/session-token": "old-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-missing-key-file",
+    "key": "session refresh",
+    "argv": [
+      "session",
+      "refresh",
+      "--config-file",
+      "{home}/.oci/session_config",
+      "--profile",
+      "NOKEY"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/session_config": "[NOKEY]\nregion=us-ashburn-1\nsecurity_token_file={home}/.oci/session-token\n",
+        ".oci/session-token": "old-token"
+      }
+    }
+  },
+  {
+    "id": "session-refresh-bad-perms",
+    "key": "session refresh",
+    "argv": ["session", "refresh"],
+    "config": "security_token_file=.oci/session-token\n",
+    "httpsProxy": true,
+    "sandbox": {
+      "configMode": 420,
+      "keyMode": 420,
+      "files": {
+        ".oci/session-token": "old-perms-token"
+      },
+      "fileModes": {
+        ".oci/session-token": 420
+      }
+    },
+    "replies": {
+      "body": {
+        "token": "new-perms-token"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/session-token": "new-perms-token"
+      },
+      "fileModes": {
+        ".oci/session-token": 384
+      }
+    }
+  }
+]

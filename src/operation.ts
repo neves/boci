@@ -838,7 +838,7 @@ async function confirmUnderWrapExceptions(
   }
 }
 
-function promptFromStdin(io: Invocation, prompt: string): string {
+export function promptFromStdin(io: Invocation, prompt: string): string {
   io.err(`Warning: Password input may be echoed.\n${prompt}\n`);
   const line = (io.stdin ?? "").split("\n", 1)[0] ?? "";
   return line.endsWith("\r") ? line.slice(0, -1) : line;

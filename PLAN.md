@@ -147,7 +147,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `setup config`.
 - [x] `setup autocomplete`.
 - [x] `session validate`.
-- [ ] `session refresh`.
+- [x] `session refresh`.
 - [ ] `session export`.
 - [ ] `session import`.
 - [ ] `session authenticate`.

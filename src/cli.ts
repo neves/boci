@@ -60,7 +60,7 @@ import {
   validateOsNamespace,
 } from "./os.ts";
 import { printResult } from "./output.ts";
-import { runSessionValidate } from "./session.ts";
+import { runSessionRefresh, runSessionValidate } from "./session.ts";
 import {
   runSetupAutocomplete,
   runSetupConfig,
@@ -715,6 +715,15 @@ async function main(io: Invocation): Promise<void> {
     if (name === "session" && key === "validate") {
       await runSessionValidate(io, {
         values,
+        rootValues,
+        settings,
+        index,
+      });
+      return;
+    }
+
+    if (name === "session" && key === "refresh") {
+      await runSessionRefresh(io, {
         rootValues,
         settings,
         index,

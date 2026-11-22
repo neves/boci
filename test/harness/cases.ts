@@ -33,6 +33,8 @@ export type ParityCase = {
   };
   /** Start a local fake IMDS + X.509 federation server (`{metadata}` and `{federation}`). */
   instanceMetadata?: boolean | MetadataServiceOptions;
+  /** Route HTTPS calls through a local CONNECT proxy + TLS fake server serving `replies`. */
+  httpsProxy?: boolean;
   /** Compare only exit status and the signed HTTP request captured by the fake endpoint. */
   requestOnly?: boolean;
   /** Extra assertions on boci's run. Excluded from caseHash: adding them never stales a golden. */

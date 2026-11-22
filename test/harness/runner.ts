@@ -11,6 +11,7 @@ import {
   type Reply,
   startFakeEndpoint,
 } from "./fake-endpoint.ts";
+import { startFakeHttpsProxy } from "./fake-https-proxy.ts";
 import {
   type FakeMetadataService,
   type MetadataServiceOptions,
@@ -57,6 +58,7 @@ export type RunOptions = {
   config?: string;
   sandbox?: SandboxOptions;
   instanceMetadata?: boolean | MetadataServiceOptions;
+  httpsProxy?: boolean;
   /** Paths relative to the sandbox HOME to read back after the command finishes. */
   captureFiles?: string[];
   /** Paths relative to the sandbox HOME whose Unix mode bits to read back after the command finishes. */
@@ -93,28 +95,45 @@ export async function runCli(
 ): Promise<Run> {
   await using sb = await createSandbox(opts.config, opts.sandbox);
   using fake = startFakeEndpoint(opts.replies);
+  using httpsProxy = opts.httpsProxy
+    ? await startFakeHttpsProxy(opts.replies)
+    : undefined;
   using metadata = opts.instanceMetadata
     ? startFakeMetadataService(
         opts.instanceMetadata === true ? {} : opts.instanceMetadata,
       )
     : undefined;
+  const proxyEnv = httpsProxy
+    ? {
+        HTTPS_PROXY: httpsProxy.proxyUrl,
+        https_proxy: httpsProxy.proxyUrl,
+        REQUESTS_CA_BUNDLE: httpsProxy.caCertPath,
+      }
+    : undefined;
   const { stdout, stderr, exitCode } = await launch(
     [...cli, ...substitute(argv, sb, fake.url, metadata)],
     {
       cwd: sb.home,
-      env: { ...sb.env, ...substituteEnv(opts.env, sb, fake.url, metadata) },
+      env: {
+        ...sb.env,
+        ...proxyEnv,
+        ...substituteEnv(opts.env, sb, fake.url, metadata),
+      },
       stdin: opts.stdin,
     },
   );
   const files = await readCapturedFiles(sb.home, opts.captureFiles);
   const fileModes = await readCapturedFileModes(sb.home, opts.captureFileModes);
+  const requests = httpsProxy
+    ? [...fake.requests, ...httpsProxy.requests]
+    : fake.requests;
   return captured(
     sb,
     fake.url,
     stdout,
     stderr,
     exitCode,
-    fake.requests,
+    requests,
     metadata,
     files,
     fileModes,
@@ -135,17 +154,29 @@ export async function runInProcess(
 ): Promise<Run> {
   installProxySafetyNet();
   const isolated = Boolean(
-    opts.captureFiles?.length || opts.captureFileModes?.length,
+    opts.captureFiles?.length ||
+    opts.captureFileModes?.length ||
+    opts.httpsProxy,
   );
   const sb = isolated
     ? await createSandbox(opts.config, opts.sandbox)
     : await sharedSandbox(opts.config, opts.sandbox);
   try {
     using fake = startFakeEndpoint(opts.replies);
+    using httpsProxy = opts.httpsProxy
+      ? await startFakeHttpsProxy(opts.replies)
+      : undefined;
     using metadata = opts.instanceMetadata
       ? startFakeMetadataService(
           opts.instanceMetadata === true ? {} : opts.instanceMetadata,
         )
+      : undefined;
+    const proxyEnv = httpsProxy
+      ? {
+          HTTPS_PROXY: httpsProxy.proxyUrl,
+          https_proxy: httpsProxy.proxyUrl,
+          REQUESTS_CA_BUNDLE: httpsProxy.caCertPath,
+        }
       : undefined;
     let stdout = "";
     let stderr = "";
@@ -153,7 +184,11 @@ export async function runInProcess(
     try {
       exitCode = await run({
         argv: substitute(argv, sb, fake.url, metadata),
-        env: { ...sb.env, ...substituteEnv(opts.env, sb, fake.url, metadata) },
+        env: {
+          ...sb.env,
+          ...proxyEnv,
+          ...substituteEnv(opts.env, sb, fake.url, metadata),
+        },
         cwd: sb.home,
         out: (text) => {
           stdout += text;
@@ -175,13 +210,16 @@ export async function runInProcess(
       sb.home,
       opts.captureFileModes,
     );
+    const requests = httpsProxy
+      ? [...fake.requests, ...httpsProxy.requests]
+      : fake.requests;
     return captured(
       sb,
       fake.url,
       stdout,
       stderr,
       exitCode,
-      fake.requests,
+      requests,
       metadata,
       files,
       fileModes,

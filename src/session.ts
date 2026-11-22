@@ -1,16 +1,33 @@
 // Custom `oci session` commands (port of oci_cli/cli_session.py).
-import { existsSync, readFileSync } from "node:fs";
+import type { KeyObject } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { type Config, ConfigError, configPath, fromFile } from "./config.ts";
-import { Exit, type Invocation } from "./io.ts";
+import {
+  type Config,
+  ConfigError,
+  configPath,
+  expandUser,
+  fromFile,
+} from "./config.ts";
+import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
+import { type Env, Exit, type Invocation } from "./io.ts";
 import {
   type ClientSettings,
   applyConfigEnvVars,
   createServiceClient,
+  promptFromStdin,
   sendServiceRequest,
   warnFilePermissions,
 } from "./operation.ts";
 import { formatServiceError } from "./output.ts";
+import { applyUserOnlyAccessPermissions } from "./setup.ts";
+import {
+  InvalidPrivateKey,
+  MissingPrivateKeyPassphrase,
+  loadPrivateKey,
+  prepareContentLength,
+  signRequest,
+} from "./signer.ts";
 import { type Index, loadService } from "./spec.ts";
 
 export class SecurityTokenDecodeError extends Error {
@@ -155,8 +172,12 @@ function buildSessionConfig(
     warnFilePermissions(io, configPath(settings.configFile, io.env, io.cwd));
   }
   applyConfigEnvVars(config, io.env);
-  if (typeof rootValues.region === "string" && rootValues.region) {
-    config.region = rootValues.region;
+  const regionOverride =
+    typeof rootValues.region === "string" && rootValues.region
+      ? rootValues.region
+      : io.env.OCI_CLI_REGION;
+  if (regionOverride) {
+    config.region = regionOverride;
   }
   if (typeof rootValues.endpoint === "string" && rootValues.endpoint) {
     config.endpoint = rootValues.endpoint;
@@ -271,4 +292,228 @@ export async function runSessionValidate(
   }
   const expiryTime = formatLocalTimestamp(Number(jwtPayload.exp), io.env.TZ);
   io.err(`Session is valid until ${expiryTime}\n`);
+}
+
+/** Check whether `hostname` matches a comma-separated NO_PROXY / no_proxy list. */
+export function isNoProxyHost(hostname: string, noProxy?: string): boolean {
+  if (!noProxy) return false;
+  const host = hostname.toLowerCase();
+  for (const raw of noProxy.split(",")) {
+    const entry = raw.trim().toLowerCase();
+    if (!entry) continue;
+    if (entry === "*") return true;
+    const withoutPort = entry.includes(":")
+      ? (entry.split(":")[0] ?? entry)
+      : entry;
+    const bare = withoutPort.startsWith(".")
+      ? withoutPort.slice(1)
+      : withoutPort;
+    if (host === bare || host.endsWith(`.${bare}`)) return true;
+  }
+  return false;
+}
+
+/** Resolve proxy URL and custom CA bundle from invocation env (mirrors Python requests). */
+export function fetchTransportFromEnv(
+  url: string,
+  env: Env,
+  cwd: string,
+): { proxy?: string; tls?: { ca: string } } {
+  const parsed = new URL(url);
+  const noProxy = env.NO_PROXY ?? env.no_proxy;
+  let proxy: string | undefined;
+  if (!isNoProxyHost(parsed.hostname, noProxy)) {
+    const raw =
+      parsed.protocol === "https:"
+        ? (env.HTTPS_PROXY ?? env.https_proxy)
+        : (env.HTTP_PROXY ?? env.http_proxy);
+    if (raw) proxy = raw;
+  }
+  const caPath = env.REQUESTS_CA_BUNDLE ?? env.CURL_CA_BUNDLE;
+  let tls: { ca: string } | undefined;
+  if (caPath) {
+    const resolvedCa = resolve(cwd, expandUser(caPath, env));
+    if (existsSync(resolvedCa)) {
+      tls = { ca: readFileSync(resolvedCa, "utf8") };
+    }
+  }
+  return {
+    ...(proxy ? { proxy } : {}),
+    ...(tls ? { tls } : {}),
+  };
+}
+
+/** `oci session refresh` (port of `cli_session.refresh`). */
+export async function runSessionRefresh(
+  io: Invocation,
+  opts: {
+    rootValues: Record<string, unknown>;
+    settings: ClientSettings;
+    index: Pick<Index, "regions">;
+  },
+): Promise<void> {
+  const { rootValues, settings, index } = opts;
+  const clientConfig = buildSessionConfig(io, settings, rootValues);
+
+  const securityTokenFile = clientConfig.security_token_file;
+  if (typeof securityTokenFile !== "string" || !securityTokenFile) {
+    io.err(
+      "ERROR: Cannot refresh a profile that does not have a value for 'security_token_file'\n",
+    );
+    throw new Exit(1);
+  }
+
+  const expandedTokenLocation = expandUser(securityTokenFile, io.env);
+  const resolvedTokenPath = resolve(io.cwd, expandedTokenLocation);
+  if (!existsSync(resolvedTokenPath)) {
+    io.out(
+      `ERROR: Cannot refresh token, 'security_token_file' does not exist: ${expandedTokenLocation}\n`,
+    );
+    throw new Exit(1);
+  }
+
+  const token = readFileSync(resolvedTokenPath, "utf8");
+
+  const keyFile = clientConfig.key_file;
+  if (typeof keyFile !== "string") {
+    io.err(
+      "TypeError: expected str, bytes or os.PathLike object, not NoneType\n",
+    );
+    throw new Exit(1);
+  }
+  const expandedKeyPath = expandUser(keyFile, io.env);
+  const resolvedKeyPath = resolve(io.cwd, expandedKeyPath);
+  let pem: string;
+  try {
+    pem = readFileSync(resolvedKeyPath, "utf8");
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException | null)?.code === "ENOENT") {
+      io.err(
+        `FileNotFoundError: [Errno 2] No such file or directory: '${expandedKeyPath}'\n`,
+      );
+      throw new Exit(1);
+    }
+    throw e;
+  }
+
+  const loadRefreshKey = (passPhrase: string | null): KeyObject => {
+    try {
+      return loadPrivateKey(pem, passPhrase);
+    } catch (e) {
+      if (e instanceof InvalidPrivateKey) {
+        io.err(`InvalidPrivateKey: ${e.message}\n`);
+        throw new Exit(1);
+      }
+      if (e instanceof TypeError) {
+        io.err(`TypeError: ${e.message}\n`);
+        throw new Exit(1);
+      }
+      throw e;
+    }
+  };
+
+  let privateKey: KeyObject;
+  try {
+    privateKey = loadRefreshKey(
+      (clientConfig.pass_phrase as string | null) ?? null,
+    );
+  } catch (e) {
+    if (e instanceof MissingPrivateKeyPassphrase) {
+      const prompted = io.promptSecret
+        ? ((await io.promptSecret("Private key passphrase:")) ?? "")
+        : promptFromStdin(io, "Private key passphrase:");
+      privateKey = loadRefreshKey(prompted);
+    } else {
+      throw e;
+    }
+  }
+
+  const region =
+    typeof clientConfig.region === "string" && clientConfig.region
+      ? clientConfig.region
+      : undefined;
+  if (!region) {
+    io.err("ValueError: Must supply either a region or an endpoint.\n");
+    throw new Exit(1);
+  }
+
+  const regionMetadata = await loadExternalRegionMetadata(
+    region,
+    index.regions,
+    io.env,
+  );
+  const { resolved: authEndpoint } = resolveEndpoint(
+    { serviceName: "auth" },
+    index.regions,
+    {
+      region,
+      realmSpecific: false,
+      dualStack: false,
+      env: io.env,
+      regionMetadata,
+    },
+  );
+  const refreshUrl = `${authEndpoint}/v1/authentication/refresh`;
+  io.err(`Attempting to refresh token from ${refreshUrl}\n`);
+
+  const body = JSON.stringify({ currentToken: token });
+  const req = {
+    method: "POST",
+    url: refreshUrl,
+    headers: {
+      "content-type": "application/json",
+    } as Record<string, string>,
+    body,
+  };
+  prepareContentLength(req);
+  signRequest(req, { keyId: `ST$${token}`, privateKey }, true);
+
+  const transport = fetchTransportFromEnv(refreshUrl, io.env, io.cwd);
+  const init: RequestInit & { proxy?: string; tls?: { ca: string } } = {
+    method: req.method,
+    headers: req.headers,
+    body: req.body,
+    ...transport,
+  };
+  const response = await fetch(req.url, init);
+  const raw = await response.text();
+
+  if (response.status === 200) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      io.err(
+        `JSONDecodeError: ${e instanceof Error ? e.message : String(e)}\n`,
+      );
+      throw new Exit(1);
+    }
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      Array.isArray(parsed) ||
+      !("token" in parsed)
+    ) {
+      io.err("KeyError: 'token'\n");
+      throw new Exit(1);
+    }
+    const refreshedToken = String(
+      (parsed as Record<string, unknown>).token ?? "",
+    );
+    writeFileSync(resolvedTokenPath, refreshedToken, "utf8");
+    applyUserOnlyAccessPermissions(resolvedTokenPath);
+    io.err("Successfully refreshed token\n");
+    return;
+  }
+
+  if (response.status === 401) {
+    io.err(
+      "Your session is no longer valid and cannot be refreshed. Please use 'oci session authenticate' to create a new session.\n",
+    );
+    throw new Exit(1);
+  }
+
+  // Reference CLI (oci-cli 3.96.3) writes this message to stdout with the 'sesison' spelling.
+  io.out(`ERROR: Failed to refresh sesison. Error: ${raw}\n`);
+  throw new Exit(1);
 }

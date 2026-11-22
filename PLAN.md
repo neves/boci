@@ -136,6 +136,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] Object Storage: `object put`/`get` single-part, then multipart, then `bulk-upload`/`bulk-download`/`bulk-delete`, then `sync`.
 - [ ] `setup config`, `setup keys`, `setup repair-file-permissions`, `setup autocomplete`.
 - [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.
-- [ ] Remaining Custom commands, one item each.
-- [ ] Interactive mode (`-i`).
-- [ ] Windows support.
+
+## Rung 8 — Remaining Custom commands
+
+- [ ] Remaining Custom commands, one item each. (Update this todo list with each one)

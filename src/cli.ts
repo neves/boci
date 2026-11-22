@@ -60,7 +60,11 @@ import {
   validateOsNamespace,
 } from "./os.ts";
 import { printResult } from "./output.ts";
-import { runSetupKeys, runSetupRepairFilePermissions } from "./setup.ts";
+import {
+  runSetupConfig,
+  runSetupKeys,
+  runSetupRepairFilePermissions,
+} from "./setup.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -685,6 +689,15 @@ async function main(io: Invocation): Promise<void> {
     if (name === "setup" && key === "keys") {
       await runSetupKeys(io, {
         values,
+        usageError: (message) =>
+          showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
+      });
+      return;
+    }
+
+    if (name === "setup" && key === "config") {
+      await runSetupConfig(io, {
+        regions: index.regions,
         usageError: (message) =>
           showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
       });

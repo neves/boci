@@ -51,4 +51,9 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "Public key fingerprint: <fingerprint>",
     "setup keys generates a random RSA key pair per invocation",
   ],
+  [
+    /^Fingerprint: [0-9a-f]{2}(?::[0-9a-f]{2}){15}$/gm,
+    "Fingerprint: <fingerprint>",
+    "setup config generates a random RSA key pair per invocation",
+  ],
 ];

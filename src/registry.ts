@@ -41,6 +41,7 @@ const IMPLEMENTED = new Set<string>([
   "os object sync",
   "setup repair-file-permissions",
   "setup keys",
+  "setup config",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

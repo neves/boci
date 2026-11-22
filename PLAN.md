@@ -144,7 +144,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Object Storage: `os object sync`.
 - [x] `setup repair-file-permissions`.
 - [x] `setup keys`.
-- [ ] `setup config`.
+- [x] `setup config`.
 - [ ] `setup autocomplete`.
 - [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.
 

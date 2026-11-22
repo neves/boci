@@ -1,0 +1,273 @@
+[
+  {
+    "id": "setup-config-new-key-no-passphrase",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\n1\n\n\n\nN/A\nN/A\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        ".oci": 448,
+        ".oci/config": 384,
+        ".oci/oci_api_key.pem": 384,
+        ".oci/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-new-key-passphrase-written",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "~/custom-cfg/config\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-ashburn-1\ny\n~/custom-keys\nmy_key\nmysecret\nmysecret\ny\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        "custom-cfg": 448,
+        "custom-cfg/config": 384,
+        "custom-keys": 448,
+        "custom-keys/my_key.pem": 384,
+        "custom-keys/my_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-new-key-passphrase-not-written",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nUS-PHOENIX-1\ny\n\n\nmysecret\nmysecret\n\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384,
+        ".oci/oci_api_key.pem": 384,
+        ".oci/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-existing-key-unlabeled-warning",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-ashburn-1\nn\n~/keys/existing.pem\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/existing.pem": "{fakeKey}"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-existing-key-labeled-no-warning",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-ashburn-1\nn\nkeys/labeled.pem\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/labeled.pem": "{fakeKey}OCI_API_KEY"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-existing-encrypted-key-retry-passphrase",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "~/enc-config\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-ashburn-1\nn\n~/.oci/key.pem\nwrong-pass\ncorrect-pass\ny\n",
+    "sandbox": {
+      "keyPassphrase": "correct-pass"
+    },
+    "expect": {
+      "fileModes": {
+        "enc-config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-existing-config-add-profile-collision",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\n\ndefault\nSTAGING\nMy_Prof@1\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-ashburn-1\nn\n~/keys/labeled.pem\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[DEFAULT]\nuser=u\n\n[staging]\nuser=s\n",
+        "keys/labeled.pem": "{fakeKey}OCI_API_KEY"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-existing-config-invalid-profile-chars",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\ny\nbad/name\n"
+  },
+  {
+    "id": "setup-config-existing-config-invalid-profile-dotdot",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\ny\n..\n"
+  },
+  {
+    "id": "setup-config-existing-config-decline-overwrite",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\nn\nn\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[DEFAULT]\nuser=keepme\n"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[DEFAULT]\nuser=keepme\n"
+      }
+    }
+  },
+  {
+    "id": "setup-config-existing-config-accept-overwrite",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\nn\ny\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-ashburn-1\nn\n~/keys/labeled.pem\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[DEFAULT]\nuser=old\n",
+        "keys/labeled.pem": "{fakeKey}OCI_API_KEY"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-malformed-config-decline-overwrite",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "~/bad-config\nn\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "bad-config": "not valid ini content\n"
+      }
+    },
+    "expect": {
+      "files": {
+        "bad-config": "not valid ini content\n"
+      }
+    }
+  },
+  {
+    "id": "setup-config-validation-retries",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "~/.oci\n~/retried-cfg\nbad-user\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nbad-tenancy\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nnot-a-region\nn\nphx\ny\nn\n~/missing.pem\n~/bad.pem\n~/keys/labeled.pem\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "bad.pem": "not a key\n",
+        "keys/labeled.pem": "{fakeKey}OCI_API_KEY"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        "retried-cfg": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-external-region-metadata",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-custom-1\nn\n~/keys/labeled.pem\n",
+    "env": {
+      "OCI_REGION_METADATA": "{\"realmKey\":\"oc99\",\"realmDomainComponent\":\"example.com\",\"regionKey\":\"xyz\",\"regionIdentifier\":\"us-custom-1\"}"
+    },
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "keys/labeled.pem": "{fakeKey}OCI_API_KEY"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-config-decline-overwrite-public-key",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "~/out-cfg\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\n1\ny\n\n\nn\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/oci_api_key_public.pem": "keep-pub\n"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/oci_api_key_public.pem": "keep-pub\n"
+      }
+    }
+  },
+  {
+    "id": "setup-config-decline-overwrite-private-key",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "~/out-cfg\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\n1\ny\n\n\nN/A\nN/A\nn\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/oci_api_key.pem": "keep-priv\n"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/oci_api_key.pem": "keep-priv\n"
+      }
+    }
+  },
+  {
+    "id": "setup-config-eof-abort",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "",
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "setup-config-encrypted-key-passphrase-eof",
+    "key": "setup config",
+    "argv": ["setup", "config"],
+    "stdin": "~/enc-eof-cfg\nocid1.user.oc1..aaaaaaaabocifakeuser000000000000000000000000000000000000000\nocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nus-ashburn-1\nn\n~/.oci/key.pem\n",
+    "sandbox": {
+      "keyPassphrase": "secret"
+    }
+  }
+]

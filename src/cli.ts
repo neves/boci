@@ -21,6 +21,8 @@ import { commandHelp, groupHelp, rootHelp } from "./help/render.ts";
 import { HelpFormatter, helpWidth } from "./help/formatter.ts";
 import {
   BadParameter,
+  TimestampRangeError,
+  pyRepr,
   convert,
   errorHint,
   processingOrder,
@@ -139,6 +141,10 @@ export async function run(io: Invocation): Promise<number> {
     return 0;
   } catch (e) {
     if (e instanceof Exit) return e.code;
+    if (e instanceof TimestampRangeError) {
+      io.err(e.message + "\n");
+      return 1;
+    }
     throw e;
   }
 }
@@ -1048,8 +1054,14 @@ function checkKeyForSecurity(io: Invocation, s: RootSettings) {
   let content: string;
   try {
     content = readFileSync(resolve(io.cwd, keyFile), "utf8");
-  } catch {
-    return; // oci crashes here (see DIVERGENCES.md)
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      io.err(
+        `FileNotFoundError: [Errno 2] No such file or directory: ${pyRepr(keyFile)}\n`,
+      );
+      throw new Exit(1);
+    }
+    return;
   }
   if (content.replace(/\s+$/u, "").endsWith("OCI_API_KEY")) return;
   const message =

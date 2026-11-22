@@ -26,6 +26,7 @@ export type DatetimeSpec = {
 
 /** Raised for click.BadParameter: shown as "Invalid value for <hint>: <message>". */
 export class BadParameter extends Error {}
+export class TimestampRangeError extends Error {}
 
 /** Python repr() of a str. */
 export function pyRepr(s: string): string {
@@ -210,14 +211,28 @@ function toDatetime(p: TypedParam, value: string, spec?: DatetimeSpec): string {
   if (!spec) throw new Error("boci: datetime spec missing");
   let utcMicros: bigint;
   if (/^\p{Nd}+$/u.test(value)) {
-    // arrow.get(value, 'X'): its timestamp pattern needs at least two digits. Past
-    // datetime's year 9999 oci crashes with an OverflowError (see DIVERGENCES.md);
-    // boci reports it as the same invalid-Unix-time error instead.
-    const MAX_SECONDS = 253402300799n;
-    if (!/^\d{2,}$/.test(value) || BigInt(value) > MAX_SECONDS) {
+    // Arrow's X format accepts at least two ASCII digits.
+    if (!/^\d{2,}$/.test(value)) {
       throw new BadParameter(
         `Value ${value} is not a value Unix time. ${spec.message}`,
       );
+    }
+    const seconds = Number(value);
+    if (seconds >= 2 ** 63)
+      throw new TimestampRangeError(
+        "OverflowError: timestamp out of range for platform time_t",
+      );
+    if (seconds > 253402300799) {
+      // Reduce into a Gregorian 400-year cycle within Date's representable range.
+      const cycle = 146097 * 86400;
+      const year =
+        Math.floor(seconds / cycle) * 400 +
+        new Date((seconds % cycle) * 1000).getUTCFullYear();
+      if (year - 1900 > 2147483647)
+        throw new TimestampRangeError(
+          "OSError: [Errno 75] Value too large for defined data type",
+        );
+      throw new TimestampRangeError(`ValueError: year ${year} is out of range`);
     }
     utcMicros = BigInt(value) * 1_000_000n;
   } else {

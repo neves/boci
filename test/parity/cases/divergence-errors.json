@@ -1,0 +1,139 @@
+[
+  {
+    "id": "divergence-date-year",
+    "key": "convert",
+    "argv": [
+      "database-management",
+      "diagnosability",
+      "managed-database",
+      "list-alert-logs",
+      "--time-greater-than-or-equal-to",
+      "253402300800"
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "ValueError: year 10000 is out of range",
+      "requests": 0
+    }
+  },
+  {
+    "id": "divergence-date-overflow",
+    "key": "convert",
+    "argv": [
+      "database-management",
+      "diagnosability",
+      "managed-database",
+      "list-alert-logs",
+      "--time-greater-than-or-equal-to",
+      "99999999999999999999"
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "OverflowError: timestamp out of range for platform time_t",
+      "requests": 0
+    }
+  },
+  {
+    "id": "divergence-date-max",
+    "key": "convert",
+    "argv": [
+      "database-management",
+      "diagnosability",
+      "managed-database",
+      "list-alert-logs",
+      "--time-greater-than-or-equal-to",
+      "253402300799"
+    ]
+  },
+  {
+    "id": "divergence-key-env",
+    "key": "root-callback",
+    "argv": ["compute", "instance", "list"],
+    "env": {
+      "OCI_CLI_KEY_FILE": "missing-env-key.pem"
+    },
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "FileNotFoundError: [Errno 2] No such file or directory: 'missing-env-key.pem'",
+      "requests": 0
+    }
+  },
+  {
+    "id": "divergence-key-config",
+    "key": "root-callback",
+    "argv": ["compute", "instance", "list"],
+    "sandbox": {
+      "files": {
+        ".oci/config": "[DEFAULT]\nkey_file=missing-config-key.pem\n"
+      }
+    },
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "FileNotFoundError: [Errno 2] No such file or directory: 'missing-config-key.pem'",
+      "requests": 0
+    }
+  },
+  {
+    "id": "divergence-key-suppressed",
+    "key": "root-callback",
+    "argv": ["compute", "instance", "list"],
+    "env": {
+      "OCI_CLI_KEY_FILE": "missing-env-key.pem",
+      "SUPPRESS_LABEL_WARNING": "TRUE"
+    }
+  },
+  {
+    "id": "divergence-key-other-auth",
+    "key": "root-callback",
+    "argv": ["compute", "instance", "list", "--auth", "instance_principal"],
+    "env": {
+      "OCI_CLI_KEY_FILE": "missing-env-key.pem"
+    }
+  },
+  {
+    "id": "divergence-date-cycles",
+    "key": "convert",
+    "argv": [
+      "database-management",
+      "diagnosability",
+      "managed-database",
+      "list-alert-logs",
+      "--time-greater-than-or-equal-to",
+      "9999999999999"
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "ValueError: year 318857 is out of range",
+      "requests": 0
+    }
+  },
+  {
+    "id": "divergence-date-libc",
+    "key": "convert",
+    "argv": [
+      "database-management",
+      "diagnosability",
+      "managed-database",
+      "list-alert-logs",
+      "--time-greater-than-or-equal-to",
+      "99999999999999999"
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "OSError: [Errno 75] Value too large for defined data type",
+      "requests": 0
+    }
+  }
+]

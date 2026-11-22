@@ -1,6 +1,6 @@
 # Divergences
 
-Known, recorded differences between boci and the Reference CLI (`oci-cli==3.96.3`). See **Divergence** in [GLOSSARY.md](GLOSSARY.md). `bun run status` counts the `###` entries below.
+Known, recorded differences between boci and the Reference CLI (`oci-cli==3.96.3`). See **Divergence** in [GLOSSARY.md](GLOSSARY.md). `bun run status` reports counts by the recorded state below.
 
 Every entry needs a reason. An entry marked **unresolved** is one the loop gave up on after three attempts (see CLAUDE.md); it stays here until fixed.
 
@@ -13,7 +13,7 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **Reference CLI:** what oci does
 - **boci:** what boci does
 - **Why:** why matching it is hard or not worth it
-- **State:** accepted | unresolved (tried: ...)
+- **State:** accepted | unresolved (tried: ...) | resolved
 ```
 
 ## Entries
@@ -30,7 +30,7 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 
 - **Invocation:** `oci database-management diagnosability managed-database list-alert-logs --time-less-than-or-equal-to 99999999999999999999 ...`
 - **Reference CLI:** crashes with a Python `OverflowError: timestamp out of range for platform time_t` traceback, exit 1
-- **boci:** usage error `Value … is not a value Unix time.` (the message oci uses for other unparseable timestamps), exit 2
+- **boci:** exits 1 with the reference exception message for tested out-of-range timestamps, omitting Python stack frames
 - **Why:** reproducing an interpreter traceback is meaningless; the input is invalid either way
 - **State:** accepted
 
@@ -38,7 +38,7 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 
 - **Invocation:** `OCI_CLI_KEY_FILE=/nonexistent/key.pem oci compute instance list ...`
 - **Reference CLI:** crashes in the key-label check with a Python `FileNotFoundError` traceback, exit 1
-- **boci:** skips the label check and carries on (the missing key is reported when signing needs it)
+- **boci:** reports the missing key during the label check and exits 1 with the reference exception message, omitting Python stack frames
 - **Why:** reproducing an interpreter traceback is meaningless
 - **State:** accepted
 
@@ -46,7 +46,7 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 
 - **Invocation:** `oci os ns get` with a profile whose `key_file` points to a nonexistent path
 - **Reference CLI:** crashes in the key-label check with a Python `FileNotFoundError` traceback, exit 1
-- **boci:** reports the invalid `key_file` path through its config error handling, exit 1
+- **boci:** reports the missing key during the label check and exits 1 with the reference exception message, omitting Python stack frames
 - **Why:** reproducing the interpreter traceback and machine-specific Python paths is not useful; both commands fail before sending a request
 - **State:** accepted
 

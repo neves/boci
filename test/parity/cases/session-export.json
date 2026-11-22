@@ -1,0 +1,329 @@
+[
+  {
+    "id": "session-export-ok",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "{home}/exported-ok"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDB9.sig"
+      }
+    }
+  },
+  {
+    "id": "session-export-relative-output",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "rel-export"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-relative"
+      }
+    }
+  },
+  {
+    "id": "session-export-nested-output-dir",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "nested/sub/my-session"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-nested"
+      }
+    }
+  },
+  {
+    "id": "session-export-profile-and-config-file",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--config-file",
+      "{home}/.oci/custom_config",
+      "--profile",
+      "SESSION",
+      "--output-file",
+      "{home}/exported-prof"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/custom_config": "[DEFAULT]\nregion=us-ashburn-1\n\n[SESSION]\nregion=us-phoenix-1\nkey_file=~/.oci/key.pem\nsecurity_token_file=~/.oci/session-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/session-token": "session-token-data"
+      }
+    }
+  },
+  {
+    "id": "session-export-config-file-tilde",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--config-file",
+      "~/.oci/custom_config",
+      "--profile",
+      "SESSION",
+      "--output-file",
+      "{home}/exported-tilde"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/custom_config": "[SESSION]\nregion=us-phoenix-1\nkey_file=~/.oci/key.pem\nsecurity_token_file=~/.oci/session-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/session-token": "tilde-token-data"
+      }
+    }
+  },
+  {
+    "id": "session-export-relative-config-file",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--config-file",
+      ".oci/custom_config",
+      "--profile",
+      "SESSION",
+      "--output-file",
+      "{home}/exported-relcfg"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/custom_config": "[SESSION]\nregion=us-phoenix-1\nkey_file=.oci/key.pem\nsecurity_token_file=.oci/session-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/session-token": "relcfg-token-data"
+      }
+    }
+  },
+  {
+    "id": "session-export-env-profile-and-config",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "{home}/exported-env"],
+    "env": {
+      "OCI_CLI_CONFIG_FILE": "{home}/.oci/env_config",
+      "OCI_CLI_PROFILE": "ENVPROF"
+    },
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/env_config": "[ENVPROF]\nregion=us-ashburn-1\nkey_file=~/.oci/key.pem\nsecurity_token_file=~/.oci/env-token\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/env-token": "env-token-data"
+      }
+    }
+  },
+  {
+    "id": "session-export-force-overwrite",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "existing-force", "--force"],
+    "config": "security_token_file=.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-force",
+        "existing-force.zip": "old-zip-bytes"
+      }
+    }
+  },
+  {
+    "id": "session-export-existing-confirm-yes",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "existing-yes"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "y\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-yes",
+        "existing-yes.zip": "old-zip-bytes"
+      }
+    }
+  },
+  {
+    "id": "session-export-existing-confirm-no",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "existing-no"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "n\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-no",
+        "existing-no.zip": "keep-me"
+      }
+    },
+    "expect": {
+      "files": {
+        "existing-no.zip": "keep-me"
+      }
+    }
+  },
+  {
+    "id": "session-export-existing-confirm-default",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "existing-def"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-def",
+        "existing-def.zip": "keep-def"
+      }
+    },
+    "expect": {
+      "files": {
+        "existing-def.zip": "keep-def"
+      }
+    }
+  },
+  {
+    "id": "session-export-existing-confirm-invalid-then-yes",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "existing-retry"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "maybe\ny\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-retry",
+        "existing-retry.zip": "old-retry-bytes"
+      }
+    }
+  },
+  {
+    "id": "session-export-existing-confirm-eof",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "existing-eof"],
+    "config": "security_token_file=.oci/session-token\n",
+    "stdin": "",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "token-eof",
+        "existing-eof.zip": "keep-eof"
+      }
+    },
+    "expect": {
+      "files": {
+        "existing-eof.zip": "keep-eof"
+      }
+    }
+  },
+  {
+    "id": "session-export-missing-token-option",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "{home}/no-tok-opt"]
+  },
+  {
+    "id": "session-export-profile-not-found",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--profile",
+      "MISSING",
+      "--output-file",
+      "{home}/missing-prof"
+    ]
+  },
+  {
+    "id": "session-export-missing-config-default",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "{home}/missing-cfg-def"],
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "session-export-missing-config-named-profile",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--profile",
+      "FOO",
+      "--output-file",
+      "{home}/missing-cfg-foo"
+    ],
+    "sandbox": {
+      "noConfig": true
+    }
+  },
+  {
+    "id": "session-export-missing-token-file",
+    "key": "session export",
+    "argv": ["session", "export", "--output-file", "{home}/missing-tok"],
+    "config": "security_token_file=~/.oci/does-not-exist\n"
+  },
+  {
+    "id": "session-export-missing-key-file",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--config-file",
+      "{home}/.oci/missing_key_cfg",
+      "--profile",
+      "SESSION",
+      "--output-file",
+      "{home}/missing-key"
+    ],
+    "env": {
+      "SUPPRESS_LABEL_WARNING": "True"
+    },
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/missing_key_cfg": "[SESSION]\nregion=us-phoenix-1\nkey_file=~/.oci/no-such-key.pem\nsecurity_token_file=~/.oci/session-token\n",
+        ".oci/session-token": "some-token"
+      }
+    }
+  },
+  {
+    "id": "session-export-missing-output-file-opt",
+    "key": "session export",
+    "argv": ["session", "export"]
+  },
+  {
+    "id": "session-export-malformed-config",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--auth",
+      "security_token",
+      "--config-file",
+      "{home}/.oci/bad_config",
+      "--output-file",
+      "{home}/malformed"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/bad_config": "not_a_section = value\n"
+      }
+    }
+  },
+  {
+    "id": "session-export-extra-file-and-token-suffixes",
+    "key": "session export",
+    "argv": [
+      "session",
+      "export",
+      "--config-file",
+      "{home}/.oci/extra_cfg",
+      "--profile",
+      "EXTRA",
+      "--output-file",
+      "{home}/exported-extra"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/extra_cfg": "[EXTRA]\nregion=us-ashburn-1\nkey_file=~/.oci/key.pem\nsecurity_token_file=~/.oci/tok\ncustom_file=~/.oci/custom.txt\nextra_token=~/.oci/extra.tok\n",
+        ".oci/key.pem": "{fakeKey}",
+        ".oci/tok": "primary-token",
+        ".oci/custom.txt": "custom-file-contents",
+        ".oci/extra.tok": "extra-token-contents"
+      }
+    }
+  }
+]

@@ -1,7 +1,13 @@
 // Custom `oci session` commands (port of oci_cli/cli_session.py).
 import type { KeyObject } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import {
   type Config,
   ConfigError,
@@ -9,11 +15,17 @@ import {
   expandUser,
   fromFile,
 } from "./config.ts";
+import {
+  ConfigParserError,
+  parseConfig,
+  sectionItems,
+} from "./configparser.ts";
 import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
 import { type Env, Exit, type Invocation } from "./io.ts";
 import {
   type ClientSettings,
   applyConfigEnvVars,
+  confirmUnderWrapExceptions,
   createServiceClient,
   promptFromStdin,
   sendServiceRequest,
@@ -29,6 +41,7 @@ import {
   signRequest,
 } from "./signer.ts";
 import { type Index, loadService } from "./spec.ts";
+import { type ZipEntryInput, writeZipFile } from "./zip.ts";
 
 export class SecurityTokenDecodeError extends Error {
   constructor(message: string) {
@@ -516,4 +529,188 @@ export async function runSessionRefresh(
   // Reference CLI (oci-cli 3.96.3) writes this message to stdout with the 'sesison' spelling.
   io.out(`ERROR: Failed to refresh sesison. Error: ${raw}\n`);
   throw new Exit(1);
+}
+
+const ZIP_FILE_FORMAT = "zip";
+const CONFIG_KEY_FILE_SUFFIX = "_file";
+const TOKEN_FILE_SUFFIX = "_token";
+
+const isSessionFileKey = (key: string): boolean =>
+  key.endsWith(CONFIG_KEY_FILE_SUFFIX) || key.endsWith(TOKEN_FILE_SUFFIX);
+
+/** POSIX `os.path.basename`: unlike `node:path.basename`, `'a/b/'` yields `''`. */
+function posixBasename(p: string): string {
+  const idx = p.lastIndexOf("/");
+  return idx === -1 ? p : p.slice(idx + 1);
+}
+
+/** Port of `cli_session.translate_config_filepaths_to_prefix`. */
+export function translateConfigFilepathsToPrefix(
+  config: Map<string, string>,
+  prefix = "",
+): Map<string, string> {
+  const translated = new Map<string, string>();
+  for (const [key, value] of config) {
+    if (isSessionFileKey(key)) {
+      const base = posixBasename(value);
+      translated.set(key, prefix ? join(prefix, base) : base);
+    } else {
+      translated.set(key, value);
+    }
+  }
+  return translated;
+}
+
+/** Port of CPython `ConfigParser.write` (default `space_around_delimiters=True`) for one section. */
+export function formatConfigSection(
+  profile: string,
+  entries: Map<string, string>,
+): string {
+  let out = `[${profile}]\n`;
+  for (const [key, value] of entries) {
+    const formatted = value
+      .replaceAll("\r\n", "\n")
+      .replaceAll("\r", "\n")
+      .replaceAll("\n", "\n\t");
+    out += `${key} = ${formatted}\n`;
+  }
+  out += "\n";
+  return out;
+}
+
+/** `oci session export --output-file <path> [--force]` (port of `cli_session.export`). */
+export async function runSessionExport(
+  io: Invocation,
+  opts: {
+    values: Record<string, unknown>;
+    settings: ClientSettings;
+  },
+): Promise<void> {
+  const { values, settings } = opts;
+  const configFile = expandUser(settings.configFile, io.env);
+  const profile = settings.profile;
+
+  const resolvedConfigPath = resolve(io.cwd, configFile);
+  let profileMap: Map<string, string | null> | undefined;
+  let configText: string | undefined;
+  try {
+    configText = readFileSync(resolvedConfigPath, "utf8");
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (code !== "ENOENT" && code !== "ENOTDIR" && code !== "EISDIR") {
+      throw e;
+    }
+  }
+
+  if (configText === undefined) {
+    profileMap = profile === "DEFAULT" ? new Map() : undefined;
+  } else {
+    try {
+      const parsed = parseConfig(configText, configFile);
+      profileMap = sectionItems(parsed, profile);
+    } catch (e) {
+      if (e instanceof ConfigParserError) {
+        io.err(`${e.type}: ${e.message}\n`);
+        throw new Exit(1);
+      }
+      throw e;
+    }
+  }
+
+  if (!profileMap) {
+    io.err(`KeyError: '${profile}'\n`);
+    throw new Exit(1);
+  }
+
+  const profileToExport = new Map<string, string>();
+  for (const [k, v] of profileMap) {
+    profileToExport.set(k, v ?? "");
+  }
+
+  if (!profileToExport.has("security_token_file")) {
+    io.err(
+      "ERROR: Specified profile is not a valid token profile. Please specify valid token profile with --profile\n",
+    );
+    throw new Exit(1);
+  }
+
+  const outputFile = String(values.output_file ?? "");
+  const force = values.force === true;
+  const zipFilename = `${outputFile}.${ZIP_FILE_FORMAT}`;
+  const resolvedZipPath = resolve(io.cwd, zipFilename);
+
+  if (existsSync(resolvedZipPath) && !force) {
+    const confirmed = await confirmUnderWrapExceptions(
+      io,
+      `File ${zipFilename} already exists, do you want to overwrite it?`,
+      false,
+    );
+    if (!confirmed) {
+      io.err("Export canceled.\n");
+      return;
+    }
+  }
+
+  io.err(`Exporting profile: ${profile} from config file: ${configFile}\n`);
+
+  const translated = translateConfigFilepathsToPrefix(profileToExport);
+  const exportedConfig = formatConfigSection(profile, translated);
+  const archiveEntries = new Map<string, ZipEntryInput>();
+  archiveEntries.set("config", {
+    name: "config",
+    data: Buffer.from(exportedConfig, "utf8"),
+    mode: 0o100644,
+  });
+
+  for (const [key, value] of profileToExport) {
+    if (!isSessionFileKey(key)) continue;
+    const expanded = expandUser(value, io.env);
+    if (!expanded) {
+      io.err("FileNotFoundError: [Errno 2] No such file or directory: ''\n");
+      throw new Exit(1);
+    }
+    const diskPath = resolve(io.cwd, expanded);
+    let data: Buffer;
+    let mode: number;
+    let mtime: Date;
+    try {
+      const st = statSync(diskPath);
+      if (st.isDirectory()) {
+        io.err(`IsADirectoryError: [Errno 21] Is a directory: '${expanded}'\n`);
+        throw new Exit(1);
+      }
+      data = readFileSync(diskPath);
+      mode = st.mode;
+      mtime = st.mtime;
+    } catch (e) {
+      if (e instanceof Exit) throw e;
+      const code = (e as NodeJS.ErrnoException | null)?.code;
+      if (code === "ENOENT") {
+        io.err(
+          `FileNotFoundError: [Errno 2] No such file or directory: '${expanded}'\n`,
+        );
+        throw new Exit(1);
+      }
+      if (code === "EISDIR") {
+        io.err(`IsADirectoryError: [Errno 21] Is a directory: '${expanded}'\n`);
+        throw new Exit(1);
+      }
+      throw e;
+    }
+    const entryName = posixBasename(expanded);
+    archiveEntries.set(entryName, {
+      name: entryName,
+      data,
+      mode,
+      mtime,
+    });
+  }
+
+  const archiveDir = dirname(resolvedZipPath);
+  if (archiveDir && !existsSync(archiveDir)) {
+    mkdirSync(archiveDir, { recursive: true });
+  }
+
+  writeZipFile(resolvedZipPath, [...archiveEntries.values()]);
+  io.err(`Export file written to: ${resolvedZipPath}\n`);
 }

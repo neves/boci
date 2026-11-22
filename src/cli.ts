@@ -60,7 +60,11 @@ import {
   validateOsNamespace,
 } from "./os.ts";
 import { printResult } from "./output.ts";
-import { runSessionRefresh, runSessionValidate } from "./session.ts";
+import {
+  runSessionExport,
+  runSessionRefresh,
+  runSessionValidate,
+} from "./session.ts";
 import {
   runSetupAutocomplete,
   runSetupConfig,
@@ -727,6 +731,14 @@ async function main(io: Invocation): Promise<void> {
         rootValues,
         settings,
         index,
+      });
+      return;
+    }
+
+    if (name === "session" && key === "export") {
+      await runSessionExport(io, {
+        values,
+        settings,
       });
       return;
     }

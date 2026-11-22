@@ -815,7 +815,7 @@ function configBool(value: unknown): boolean {
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
 }
 
-async function confirmUnderWrapExceptions(
+export async function confirmUnderWrapExceptions(
   io: Invocation,
   text: string,
   defaultValue: boolean,

@@ -90,7 +90,29 @@ function convertOne(
   value: unknown,
   datetime?: DatetimeSpec,
 ): unknown {
-  if (typeof value !== "string") return value; // flag constants (True/False/flag_value)
+  if (
+    value === undefined ||
+    value === null ||
+    typeof value === "boolean" ||
+    (typeof value === "object" && !Array.isArray(value)) ||
+    Array.isArray(value)
+  )
+    return value; // flag constants (True/False/flag_value) or pre-parsed JSON objects/arrays
+  if (typeof value === "number") {
+    switch (p.typeClass) {
+      case "click.types.IntParamType":
+        return Math.trunc(value);
+      case "click.types.IntRange":
+        return inRange(p, Math.trunc(value));
+      case "click.types.FloatParamType":
+        return value;
+      case "click.types.FloatRange":
+        return inRange(p, value);
+      default:
+        value = String(value);
+    }
+  }
+  if (typeof value !== "string") return value;
   switch (p.typeClass) {
     case "click.types.IntParamType":
       return toInt(value);

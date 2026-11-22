@@ -1,7 +1,7 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import {
   ConfigError,
@@ -19,6 +19,7 @@ import {
   applyParamAliases,
   badAliasMessages,
   effectiveAliases,
+  expandVars,
   loadRc,
   lookupDefault,
   rcDefaults,
@@ -392,16 +393,42 @@ export async function run(argv: string[]): Promise<void> {
       );
     throw new Exit(0);
   }
+  const fromJson = parsed.opts.from_json;
+  const fromJsonDefaults: Record<string, unknown> = {};
+  if (typeof fromJson === "string") {
+    const input = parseJsonParameter("from-json", fromJson);
+    if (typeof input !== "object" || input === null || Array.isArray(input)) {
+      err("We expect a JSON object to be provided to --from-json\n");
+      throw new Exit(1);
+    }
+    const optToCanon: Record<string, string> = {};
+    for (const p of cmd.params ?? []) {
+      for (const o of p.opts) {
+        if (o.startsWith("--")) optToCanon[o.slice(2)] = p.name;
+        else if (o.startsWith("-")) optToCanon[o.slice(1)] = p.name;
+      }
+    }
+    for (const [rawKey, value] of Object.entries(input)) {
+      let key = rawKey;
+      for (const [unit, replacement] of Object.entries(STORAGE_UNIT_MAP)) {
+        if (key.endsWith(unit)) key = key.replaceAll(unit, replacement);
+      }
+      const underscored = underscore(key);
+      fromJsonDefaults[underscored] = value;
+      const canonName = optToCanon[underscored];
+      if (canonName !== undefined) fromJsonDefaults[canonName] = value;
+    }
+  }
   const values: Record<string, unknown> = {};
   for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
-    if (parsed.opts[p.name] === undefined) continue;
+    if (p.name === "from_json") continue;
+    const rawVal =
+      parsed.opts[p.name] !== undefined
+        ? parsed.opts[p.name]
+        : fromJsonDefaults[p.name];
+    if (rawVal === undefined || rawVal === null) continue;
     try {
-      values[p.name] = convert(p, parsed.opts[p.name], index.datetime);
-      if (isComplexParam(p) && typeof values[p.name] === "string") {
-        let raw = values[p.name] as string;
-        if (raw.startsWith("file://")) raw = readFileSync(raw.slice(7), "utf8");
-        values[p.name] = JSON.parse(raw) as unknown;
-      }
+      values[p.name] = convert(p, rawVal, index.datetime);
     } catch (e) {
       if (e instanceof BadParameter)
         showPatched(
@@ -409,30 +436,6 @@ export async function run(argv: string[]): Promise<void> {
           `Invalid value for ${errorHint(p)}: ${e.message}`,
         );
       throw e;
-    }
-  }
-  const fromJson = parsed.opts.from_json;
-  if (typeof fromJson === "string") {
-    const source = fromJson.startsWith("file://")
-      ? readFileSync(fromJson.slice(7), "utf8")
-      : fromJson;
-    const input: unknown = JSON.parse(source);
-    if (typeof input !== "object" || input === null || Array.isArray(input))
-      throw new Error("--from-json must contain a JSON object");
-    for (const [key, value] of Object.entries(input)) {
-      const param = (cmd.params ?? []).find(
-        (p) =>
-          p.name.replaceAll("_", "-") === key ||
-          p.name === key ||
-          toCamelCase(p.name) === key,
-      );
-      if (
-        !param ||
-        param.name === "from_json" ||
-        values[param.name] !== undefined
-      )
-        continue;
-      values[param.name] = value;
     }
   }
   if (parsed.args.length && !cmd.helpDoc.parse.allowExtra) {
@@ -447,20 +450,27 @@ export async function run(argv: string[]): Promise<void> {
   // required that got no value, in processing order, reported with sys.exit → stderr, 1.
   // oci_cli_rc defaults count as provided. TODO: the os/iam service fallbacks.
   const defaults = rcDefaults(rc, settings.profile);
-  const missing = processingOrder(parsed.order, cmd.params ?? [])
-    .filter(
-      (p) =>
-        p.required &&
-        !p.isFlag &&
-        isMissing(values[p.name] ?? parsed.opts[p.name]) &&
-        lookupDefault(defaults, rc, path, p) === undefined,
-    )
-    .map((p) => p.name.replaceAll("_", "-"));
+  const missing: string[] = [];
+  for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
+    if (p.name === "from_json" || p.name === "help") continue;
+    if (!isMissing(values[p.name] ?? parsed.opts[p.name])) continue;
+    const rcVal = lookupDefault(defaults, rc, path, p);
+    if (rcVal !== undefined && rcVal !== null) {
+      values[p.name] = convertDefaultValue(p, rcVal, index.datetime);
+      continue;
+    }
+    if (p.required && !p.isFlag) missing.push(p.name.replaceAll("_", "-"));
+  }
   if (missing.length) {
     err(
       `${usage(commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
     );
     throw new Exit(1);
+  }
+  for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
+    if (values[p.name] !== undefined && isComplexParam(p)) {
+      values[p.name] = parseJsonParameter(p.name, values[p.name]);
+    }
   }
 
   if (key === "ns get" && name === "os") {
@@ -513,12 +523,92 @@ export async function run(argv: string[]): Promise<void> {
 const COMPLEX_TYPE_CLASS =
   "oci_cli.custom_types.cli_complex_type.CliComplexType";
 
+const STORAGE_UNIT_MAP: Record<string, string> = {
+  MBs: "Mbs",
+  KBs: "Kbs",
+  GBs: "Gbs",
+};
+
+const DEFAULT_FILE_TRUTHY = new Set(["1", "y", "t", "yes", "true", "on"]);
+
 function toCamelCase(name: string): string {
   return name.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
+function underscore(word: string): string {
+  return word
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+    .replace(/([a-z\d])([A-Z])/g, "$1_$2")
+    .replaceAll("-", "_")
+    .toLowerCase();
+}
+
 function isComplexParam(param?: { typeClass?: string }): boolean {
   return param?.typeClass === COMPLEX_TYPE_CLASS;
+}
+
+function loadFileContents(path: string): string | null {
+  if (path.toLowerCase().startsWith("file://")) {
+    const filePath = expandVars(expandUser(path.slice("file://".length)));
+    if (!existsSync(filePath)) {
+      err(
+        `The specified file '${path}' did not exist  (Resolved to path: '${filePath}')\n`,
+      );
+      throw new Exit(1);
+    }
+    return readFileSync(filePath, "utf8");
+  }
+  return null;
+}
+
+function parseJsonParameter(
+  parameterName: string,
+  parameterValue: unknown,
+): unknown {
+  if (parameterValue === undefined || parameterValue === null)
+    return parameterValue;
+  if (typeof parameterValue !== "string") return parameterValue;
+  const jsonToParse = loadFileContents(parameterValue) ?? parameterValue;
+  try {
+    return JSON.parse(jsonToParse) as unknown;
+  } catch {
+    err(
+      `Parameter ${repr(parameterName)} must be in JSON format.\nFor help with formatting JSON input see our documentation here: https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/cliusing.htm#ManagingCLIInputandOutput\n`,
+    );
+    throw new Exit(1);
+  }
+}
+
+function convertDefaultValue(
+  p: ParamSpec & { typeClass?: string; datetimeRounding?: string | null },
+  value: string,
+  datetime?: Index["datetime"],
+): unknown {
+  const expanded = expandVars(value);
+  const convertSingle = (val: string): unknown => {
+    switch (p.typeClass) {
+      case "click.types.BoolParamType":
+        return DEFAULT_FILE_TRUTHY.has(val.toLowerCase());
+      case "click.types.IntParamType":
+      case "click.types.IntRange":
+        return Number.parseInt(val, 10);
+      case "click.types.FloatParamType":
+      case "click.types.FloatRange":
+        return Number.parseFloat(val);
+      case "oci_cli.custom_types.cli_datetime.CliDatetime":
+        return convert(p as Parameters<typeof convert>[0], val, datetime);
+      default:
+        return val;
+    }
+  };
+  if (p.multiple) {
+    return expanded
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map(convertSingle);
+  }
+  return convertSingle(expanded);
 }
 
 type GeneratedCommand = ServiceSpec["commands"][string] & {
@@ -578,8 +668,13 @@ function boundValueFor(
       continue;
     }
     if (typeof item.param === "string") {
-      const candidate = values[item.param];
-      if (candidate !== undefined) result = candidate;
+      let candidate = values[item.param];
+      if (candidate !== undefined) {
+        if (item.transform === "parse_json_parameter") {
+          candidate = parseJsonParameter(item.param, candidate);
+        }
+        result = candidate;
+      }
     } else if (item.value !== undefined) {
       result = item.value;
     }
@@ -590,10 +685,13 @@ function boundValueFor(
 function buildRequestBody(
   command: GeneratedCommand,
   values: Record<string, unknown>,
+  rootValues: Record<string, unknown>,
 ): string {
   const body: Record<string, unknown> = {};
+  let hasBodyBindings = false;
   for (const binding of command.bindings ?? []) {
     if (binding.target !== "body" || !Array.isArray(binding.key)) continue;
+    hasBodyBindings = true;
     if (
       !whenMatches(
         typeof binding.when === "string" ? binding.when : undefined,
@@ -610,14 +708,34 @@ function buildRequestBody(
       if (typeof nested !== "object" || nested === null) target[part] = {};
       target = target[part] as Record<string, unknown>;
     }
-    if (
-      binding.transform === "parse_json_parameter" &&
-      typeof value === "string"
+    if (binding.transform === "parse_json_parameter") {
+      target[binding.key.at(-1) as string] = parseJsonParameter(
+        typeof binding.param === "string"
+          ? binding.param
+          : (binding.key.at(-1) as string),
+        value,
+      );
+    } else if (
+      typeof value === "string" &&
+      value.toLowerCase().startsWith("file://")
     ) {
-      target[binding.key.at(-1) as string] = JSON.parse(value);
+      target[binding.key.at(-1) as string] = loadFileContents(value);
     } else {
       target[binding.key.at(-1) as string] = value;
     }
+  }
+  if (!hasBodyBindings && typeof command.operation?.body === "string") {
+    const direct = boundValueFor(
+      command,
+      values,
+      rootValues,
+      command.operation.body,
+    );
+    if (direct === undefined || direct === null) return "";
+    if (typeof direct === "string") {
+      return loadFileContents(direct) ?? direct;
+    }
+    return JSON.stringify(direct);
   }
   return Object.keys(body).length ? JSON.stringify(body) : "";
 }
@@ -631,7 +749,7 @@ async function runGeneratedWrite(
   rc: Rc,
   command: GeneratedCommand,
 ): Promise<void> {
-  const requestBody = buildRequestBody(command, values);
+  const requestBody = buildRequestBody(command, values, rootValues);
   await runGeneratedOperation(
     values,
     rootValues,

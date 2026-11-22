@@ -196,4 +196,179 @@ describe("generated write pipeline", () => {
       compartmentId: "ocid1.compartment.oc1..fake",
     });
   });
+
+  test("loads file:// (including file://~) on body params, complex JSON params, and --from-json", async () => {
+    const bodyFileRun = await runCli(
+      CLIS.boci,
+      [
+        "compute",
+        "compute-cluster",
+        "create",
+        "--availability-domain",
+        "Uocm:PHX-AD-1",
+        "--compartment-id",
+        "ocid1.compartment.oc1..fake",
+        "--display-name",
+        "file://~/display-name.txt",
+        "--freeform-tags",
+        "file://~/tags.json",
+        "--endpoint",
+        "{endpoint}",
+      ],
+      {
+        sandbox: {
+          files: {
+            "display-name.txt": "cluster-from-file",
+            "tags.json": '{"boci-parity":"true"}',
+          },
+        },
+        replies: { body: { id: "cluster-1" } },
+      },
+    );
+    expect(bodyFileRun.exitCode).toBe(0);
+    expect(JSON.parse(bodyFileRun.requests[0]?.body ?? "{}")).toEqual({
+      availabilityDomain: "Uocm:PHX-AD-1",
+      compartmentId: "ocid1.compartment.oc1..fake",
+      displayName: "cluster-from-file",
+      freeformTags: { "boci-parity": "true" },
+    });
+
+    const directBodyFileRun = await runCli(
+      CLIS.boci,
+      [
+        "email-data-plane",
+        "email-raw-submitted-response",
+        "submit-raw-email",
+        "--content-type",
+        "message/rfc822",
+        "--compartment-id",
+        "ocid1.compartment.oc1..fake",
+        "--sender",
+        "sender@example.com",
+        "--recipients",
+        "to@example.com",
+        "--raw-message",
+        "file://~/raw.eml",
+        "--endpoint",
+        "{endpoint}",
+      ],
+      {
+        sandbox: {
+          files: {
+            "raw.eml": "Subject: Test\r\n\r\nHello",
+          },
+        },
+        replies: { body: {} },
+      },
+    );
+    expect(directBodyFileRun.exitCode).toBe(0);
+    expect(directBodyFileRun.requests[0]?.body).toBe(
+      "Subject: Test\r\n\r\nHello",
+    );
+  });
+
+  test("formats Reference CLI errors for invalid JSON and missing file:// paths", async () => {
+    const badFromJson = await runCli(CLIS.boci, [
+      "os",
+      "bucket",
+      "create",
+      "--from-json",
+      "{invalid",
+    ]);
+    expect(badFromJson.exitCode).toBe(1);
+    expect(badFromJson.stdout).toBe("");
+    expect(badFromJson.stderr).toBe(
+      "Parameter 'from-json' must be in JSON format.\nFor help with formatting JSON input see our documentation here: https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/cliusing.htm#ManagingCLIInputandOutput\n",
+    );
+
+    const nonObjectFromJson = await runCli(CLIS.boci, [
+      "os",
+      "bucket",
+      "create",
+      "--from-json",
+      "[1, 2]",
+    ]);
+    expect(nonObjectFromJson.exitCode).toBe(1);
+    expect(nonObjectFromJson.stdout).toBe("");
+    expect(nonObjectFromJson.stderr).toBe(
+      "We expect a JSON object to be provided to --from-json\n",
+    );
+
+    const missingFromJsonFile = await runCli(CLIS.boci, [
+      "os",
+      "bucket",
+      "create",
+      "--from-json",
+      "file://~/missing-input.json",
+    ]);
+    expect(missingFromJsonFile.exitCode).toBe(1);
+    expect(missingFromJsonFile.stdout).toBe("");
+    expect(missingFromJsonFile.stderr).toMatch(
+      /^The specified file 'file:\/\/~\/missing-input\.json' did not exist {2}\(Resolved to path: '.*\/missing-input\.json'\)\n$/,
+    );
+
+    const badComplexJson = await runCli(CLIS.boci, [
+      "os",
+      "bucket",
+      "create",
+      "--namespace-name",
+      "ns",
+      "--name",
+      "b",
+      "--compartment-id",
+      "c",
+      "--metadata",
+      "{invalid",
+    ]);
+    expect(badComplexJson.exitCode).toBe(1);
+    expect(badComplexJson.stdout).toBe("");
+    expect(badComplexJson.stderr).toBe(
+      "Parameter 'metadata' must be in JSON format.\nFor help with formatting JSON input see our documentation here: https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/cliusing.htm#ManagingCLIInputandOutput\n",
+    );
+  });
+
+  test("enforces CLI flags > --from-json > oci_cli_rc defaults precedence and converts --from-json keys and values", async () => {
+    const run = await runCli(
+      CLIS.boci,
+      [
+        "os",
+        "bucket",
+        "create",
+        "--name",
+        "cli-name",
+        "--endpoint",
+        "{endpoint}",
+        "--from-json",
+        "file://~/input.json",
+      ],
+      {
+        sandbox: {
+          files: {
+            "input.json": JSON.stringify({
+              name: "json-name",
+              compartment_id: "json-compartment",
+              "namespace-name": "json-namespace",
+              storageTier: "archive",
+              objectEventsEnabled: "true",
+              metadata: "file://~/meta.json",
+            }),
+            "meta.json": '{"k":"v"}',
+            ".oci/oci_cli_rc":
+              "[DEFAULT]\nname = rc-name\ncompartment-id = rc-compartment\nstorage-tier = Standard\npublic-access-type = ObjectRead\n",
+          },
+        },
+        replies: { body: {} },
+      },
+    );
+    expect(run.exitCode).toBe(0);
+    expect(run.requests[0]?.path).toBe("/n/json-namespace/b");
+    expect(JSON.parse(run.requests[0]?.body ?? "{}")).toEqual({
+      name: "cli-name",
+      compartmentId: "json-compartment",
+      storageTier: "Archive",
+      publicAccessType: "ObjectRead",
+      objectEventsEnabled: true,
+      metadata: { k: "v" },
+    });
+  });
 });

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-describe("request case generator", () => {
+describe("parity case generator", () => {
   test("generates simple body flags for write operations", async () => {
     const result = Bun.spawnSync(
-      ["bun", "scripts/generate-request-cases.ts", "--service", "compute"],
+      ["bun", "scripts/generate-cases.ts", "--service", "compute"],
       { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
     );
     expect(result.exitCode).toBe(0);

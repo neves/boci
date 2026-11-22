@@ -14,6 +14,7 @@ import {
 } from "./config.ts";
 import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
 import { resolveInstancePrincipal } from "./instance-principal.ts";
+import { resolveResourcePrincipal } from "./resource-principal.ts";
 import { Exit, type Invocation } from "./io.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
@@ -207,6 +208,8 @@ export async function callOperation(
   const boundValue = (arg: string) =>
     boundValueFor(io, command, values, rootValues, arg);
   const isInstancePrincipal = settings.auth === "instance_principal";
+  const isResourcePrincipal = settings.auth === "resource_principal";
+  const configOptional = isInstancePrincipal || isResourcePrincipal;
   let config: Config = {};
   let configLoaded = false;
   try {
@@ -215,7 +218,7 @@ export async function callOperation(
   } catch (e) {
     if (e instanceof ConfigError) {
       if (e.type === "ConfigFileNotFound") {
-        if (!isInstancePrincipal) {
+        if (!configOptional) {
           const message = e.message.split(", please follow")[0] as string;
           io.out(
             `ERROR: ${message}\nDo you want to create a new config file? [Y/n]: `,
@@ -237,14 +240,14 @@ export async function callOperation(
       "true"
   ) {
     warnFilePermissions(io, configPath(settings.configFile, io.env, io.cwd));
-    if (config.key_file && !isInstancePrincipal)
+    if (config.key_file && !configOptional)
       warnFilePermissions(io, expandUser(String(config.key_file), io.env));
   }
-  let instancePrincipal:
-    Awaited<ReturnType<typeof resolveInstancePrincipal>> | undefined;
+  let principal:
+    { keyId: string; privateKey: KeyObject; region?: string } | undefined;
   if (isInstancePrincipal) {
     try {
-      instancePrincipal = await resolveInstancePrincipal({
+      principal = await resolveInstancePrincipal({
         env: io.env,
         regions: index.regions,
         federationEndpoint: rootValues.federation_endpoint as
@@ -258,6 +261,17 @@ export async function callOperation(
       );
       throw new Exit(1);
     }
+  } else if (isResourcePrincipal) {
+    try {
+      principal = await resolveResourcePrincipal({
+        env: io.env,
+        regions: index.regions,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      io.err(`ERROR: ${msg}\n`);
+      throw new Exit(1);
+    }
   }
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
@@ -265,7 +279,7 @@ export async function callOperation(
   const region = (rootValues.region ??
     io.env.OCI_CLI_REGION ??
     config.region ??
-    instancePrincipal?.region) as string | undefined;
+    principal?.region) as string | undefined;
   const regionMetadata =
     region && !endpointOpt
       ? await loadExternalRegionMetadata(region, index.regions, io.env)
@@ -337,9 +351,9 @@ export async function callOperation(
   }
   let keyId: string;
   let privateKey: KeyObject;
-  if (instancePrincipal) {
-    keyId = instancePrincipal.keyId;
-    privateKey = instancePrincipal.privateKey;
+  if (principal) {
+    keyId = principal.keyId;
+    privateKey = principal.privateKey;
   } else {
     keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
     if (settings.auth === "security_token") {

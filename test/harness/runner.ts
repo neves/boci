@@ -16,6 +16,7 @@ import {
   startFakeMetadataService,
 } from "./fake-metadata.ts";
 import {
+  FAKE_KEY_PEM,
   PROXY_ENV,
   createSandbox,
   type Sandbox,
@@ -168,7 +169,8 @@ function replacePlaceholders(
   let out = value
     .replaceAll("{endpoint}", url)
     .replaceAll("{config}", sb.configFile)
-    .replaceAll("{home}", sb.home);
+    .replaceAll("{home}", sb.home)
+    .replaceAll("{fakeKeyPem}", FAKE_KEY_PEM);
   if (metadata) {
     out = out
       .replaceAll("{metadata}", metadata.baseUrl)

@@ -126,7 +126,7 @@ DIVERGENCES.md             recorded Divergences
 
 - [x] `--auth security_token` (session token config).
 - [x] `--auth instance_principal` (request-only against a fake metadata service).
-- [ ] `--auth resource_principal`.
+- [x] `--auth resource_principal`.
 - [ ] `--auth api_key` with passphrase-protected keys.
 
 ## Rung 7 — Custom commands (hardest last)

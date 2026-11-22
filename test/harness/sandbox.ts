@@ -18,6 +18,7 @@ const KEY_SOURCE = join(
   "fixtures",
   "fake_oci_api_key.pem",
 );
+export const FAKE_KEY_PEM = await Bun.file(KEY_SOURCE).text();
 
 export async function fingerprint(keyFile: string): Promise<string> {
   const der = createPublicKey(await Bun.file(keyFile).text()).export({
@@ -88,7 +89,10 @@ export async function createSandbox(
   }
   for (const [rel, content] of Object.entries(options.files ?? {})) {
     const path = join(home, rel);
-    await Bun.write(path, content.replaceAll("{home}", home));
+    await Bun.write(
+      path,
+      content.replaceAll("{home}", home).replaceAll("{fakeKey}", FAKE_KEY_PEM),
+    );
     await chmod(path, 0o600);
   }
 

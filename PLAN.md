@@ -119,7 +119,7 @@ DIVERGENCES.md             recorded Divergences
 
 ## Rung 5 — Waiters
 
-- [ ] `--wait-for-state`, `--max-wait-seconds`, `--wait-interval-seconds`.
+- [~] `--wait-for-state`, `--max-wait-seconds`, `--wait-interval-seconds`.
 - [ ] Work-request waiters.
 
 ## Rung 6 — Other auth methods

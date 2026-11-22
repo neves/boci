@@ -115,7 +115,7 @@ DIVERGENCES.md             recorded Divergences
 - [~] `--generate-full-command-json-input` and `--generate-param-json-input`.
 - [x] Polymorphic bodies (discriminator subcommands).
 - [x] `--if-match`, `--if-none-match`, extra headers.
-- [ ] First mutating live tests on Always-Free, test-owned resources in the root compartment (name `boci-parity-*`, freeform tag `boci-parity=true`), with cleanup that deletes only tagged resources.
+- [x] First mutating live tests on Always-Free, test-owned resources in the root compartment (name `boci-parity-*`, freeform tag `boci-parity=true`), with cleanup that deletes only tagged resources.
 
 ## Rung 5 — Waiters
 

@@ -9,6 +9,8 @@ import type { RegionsSpec, ClientInfo } from "./endpoint.ts";
 export type OperationSpec = {
   client: string;
   workRequestClient?: string;
+  lifecycleGetter?: string;
+  lifecycleGetterError?: string;
   method: string;
   http: string;
   path: string;
@@ -56,7 +58,13 @@ export type ServiceSpec = {
       operation?: OperationSpec;
     }
   >;
-  clients: Record<string, ClientInfo & { workRequestGetter?: OperationSpec }>;
+  clients: Record<
+    string,
+    ClientInfo & {
+      workRequestGetter?: OperationSpec;
+      lifecycleGetters?: Record<string, OperationSpec>;
+    }
+  >;
 };
 
 export type Index = {

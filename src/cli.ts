@@ -45,7 +45,7 @@ import { REFERENCE_VERSION } from "./version.ts";
 import { isImplemented } from "./registry.ts";
 import { Exit, type Env, type Invocation } from "./io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
-import { waitForWorkRequest } from "./work-request.ts";
+import { waitForState } from "./waiter.ts";
 import { callOperation } from "./operation.ts";
 import {
   type OutputFileHandle,
@@ -788,11 +788,7 @@ async function main(io: Invocation): Promise<void> {
         rawOutput: rootValues.raw_output,
         rc,
       };
-      printResult(
-        io,
-        await waitForWorkRequest(io, call, result, output),
-        output,
-      );
+      printResult(io, await waitForState(io, call, result, output), output);
       return;
     }
     await notImplemented(io, argv, commandPath);

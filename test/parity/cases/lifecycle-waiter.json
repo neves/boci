@@ -1,0 +1,360 @@
+[
+  {
+    "id": "lifecycle-waiter-completed",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "compute",
+      "instance",
+      "update",
+      "--instance-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.\"lifecycle-state\"",
+      "--wait-for-state",
+      "RUNNING",
+      "--wait-for-state",
+      "STOPPED",
+      "--wait-interval-seconds",
+      "0"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      },
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      },
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STOPPED"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-timeout",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "compute",
+      "instance",
+      "update",
+      "--instance-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.\"lifecycle-state\"",
+      "--wait-for-state",
+      "RUNNING",
+      "--max-wait-seconds",
+      "0"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      },
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-missing-id",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "compute",
+      "instance",
+      "update",
+      "--instance-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.\"lifecycle-state\"",
+      "--wait-for-state",
+      "RUNNING"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": null,
+          "lifecycleState": "STARTING"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-error",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "compute",
+      "instance",
+      "update",
+      "--instance-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.\"lifecycle-state\"",
+      "--wait-for-state",
+      "RUNNING"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "NotFound",
+          "message": "missing"
+        },
+        "headers": {
+          "opc-request-id": "test-error-id"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-sdk-getter",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "network",
+      "public-ip",
+      "update",
+      "--public-ip-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--wait-for-state",
+      "AVAILABLE"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "PROVISIONING"
+        }
+      },
+      {
+        "body": {
+          "assignedEntityId": null,
+          "assignedEntityType": null,
+          "availabilityDomain": null,
+          "compartmentId": null,
+          "definedTags": null,
+          "displayName": null,
+          "freeformTags": null,
+          "id": "response-id",
+          "ipAddress": null,
+          "lifecycleState": "AVAILABLE",
+          "lifetime": null,
+          "privateIpId": null,
+          "scope": null,
+          "timeCreated": null,
+          "publicIpPoolId": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-missing-getter-argument",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "budgets",
+      "budget",
+      "alert-rule",
+      "update",
+      "--budget-id",
+      "parent",
+      "--alert-rule-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.id",
+      "--wait-for-state",
+      "ACTIVE"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "INACTIVE"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-empty-response",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "compute",
+      "instance",
+      "update",
+      "--instance-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.\"lifecycle-state\"",
+      "--wait-for-state",
+      "RUNNING",
+      "--wait-for-state",
+      "STOPPED",
+      "--wait-interval-seconds",
+      "0"
+    ],
+    "replies": [
+      {
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-model-without-id",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "data-catalog",
+      "data-asset",
+      "update",
+      "--catalog-id",
+      "catalog",
+      "--data-asset-key",
+      "asset",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.key",
+      "--wait-for-state",
+      "ACTIVE"
+    ],
+    "replies": [
+      {
+        "body": {
+          "key": "returned-key",
+          "lifecycleState": "UPDATING"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-negative-interval",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "compute",
+      "instance",
+      "update",
+      "--instance-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.\"lifecycle-state\"",
+      "--wait-for-state",
+      "RUNNING",
+      "--wait-for-state",
+      "STOPPED",
+      "--wait-interval-seconds",
+      "-1"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      },
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      },
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lifecycle-waiter-empty-poll",
+    "key": "lifecycle-waiter",
+    "argv": [
+      "compute",
+      "instance",
+      "update",
+      "--instance-id",
+      "request-id",
+      "--display-name",
+      "updated",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "data.\"lifecycle-state\"",
+      "--wait-for-state",
+      "RUNNING",
+      "--max-wait-seconds",
+      "0"
+    ],
+    "replies": [
+      {
+        "body": {
+          "id": "response-id",
+          "lifecycleState": "STARTING"
+        }
+      },
+      {
+        "body": ""
+      }
+    ]
+  }
+]

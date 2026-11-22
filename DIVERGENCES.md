@@ -18,14 +18,6 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 
 ## Entries
 
-### `--wait-for-state`: lifecycle state polling is not implemented
-
-- **Invocation:** `oci compute instance update --instance-id <id> --wait-for-state RUNNING`
-- **Reference CLI:** waits for the instance to reach one of the requested lifecycle states, polling at `--wait-interval-seconds` until `--max-wait-seconds`.
-- **boci:** sends the update request and returns its response without polling.
-- **Why:** the command specs contain the wait options, but generated operation metadata does not identify the follow-up resource getter or the response field that identifies the resource. Custom commands with the same options are not dispatched to an operation handler yet. The separate Work-request waiters item addresses a distinct polling flow.
-- **State:** unresolved (tried: inspected the generated command and operation metadata, which do not describe a lifecycle polling target; checked CLI dispatch, where custom waiter-bearing commands have no handler; identified that the current rung item spans distinct generated and custom paths without a stated first target)
-
 ### Any command with a duplicated parameter: Python UserWarnings on stderr
 
 - **Invocation:** `oci cloud-guard data-mask-rule create-for-services --help` (and the few other commands that register `--from-json` twice)

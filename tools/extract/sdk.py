@@ -6,6 +6,7 @@ uniform, so their source is parsed with `ast` rather than executed.
 
 import ast
 import functools
+import importlib
 import inspect
 import textwrap
 
@@ -124,6 +125,61 @@ def client_info(client_cls) -> dict:
     return info
 
 
+def lifecycle_getter(fn):
+    """Generated resource waiters replace the write response with a GET by its model ID."""
+    for node in ast.walk(fn):
+        if not isinstance(node, ast.Assign) or not isinstance(node.value, ast.Call):
+            continue
+        call = node.value
+        if not isinstance(call.func, ast.Attribute) or call.func.attr != "wait_until":
+            continue
+        if len(call.args) < 4 or ast.unparse(call.args[2]) != "'lifecycle_state'":
+            continue
+        getter = call.args[1]
+        if isinstance(getter, ast.Call) and [ast.unparse(a) for a in getter.args] == ["result.data.id"]:
+            return getter.func.attr
+    return None
+
+
+def add_lifecycle_waiter(op, getter, cls):
+    op["lifecycleGetter"] = getter
+    method = getattr(cls, getter, None)
+    if method is None:
+        return
+    # The CLI always passes result.data.id, even for models without id and
+    # SDK getters with more than one required argument. Preserve those errors.
+    models = importlib.import_module(cls.__module__.rsplit(".", 1)[0] + ".models")
+    model = getattr(models, op["responseType"])
+    if not hasattr(model, "id"):
+        op["lifecycleGetterError"] = f"AttributeError: '{model.__name__}' object has no attribute 'id'"
+        return
+    parameters = list(inspect.signature(method).parameters.values())
+    missing = [repr(p.name) for p in parameters[2:] if p.kind == p.POSITIONAL_OR_KEYWORD and p.default == p.empty]
+    if missing:
+        count = len(missing)
+        names = missing[0]
+        if count > 1:
+            conjunction = ", and " if count > 2 else " and "
+            names = ", ".join(missing[:-1]) + conjunction + missing[-1]
+        noun = "arguments" if count > 1 else "argument"
+        op["lifecycleGetterError"] = f"TypeError: {method.__qualname__}() missing {count} required positional {noun}: {names}"
+
+
+def hidden_lifecycle_getters(commands, clients, client_map):
+    """Keep an SDK getter even when a custom command replaces its generated CLI leaf."""
+    operations = [c["operation"] for c in commands.values() if "operation" in c]
+    exposed = {(op["client"], op["method"]) for op in operations}
+    needed = {(op["client"], op["lifecycleGetter"]) for op in operations if "lifecycleGetter" in op}
+    for key, method in sorted(needed - exposed):
+        directory, name = key.split(".", 1)
+        cls = client_map[directory][name]
+        if hasattr(cls, method):
+            clients[key] = {**clients[key], "lifecycleGetters": {
+                **clients[key].get("lifecycleGetters", {}),
+                method: {"client": key, **sdk_operation(cls, method)},
+            }}
+
+
 def command_operation(callback, client_map) -> tuple:
     """Return (client_key, operation, other_operations) for a generated callback."""
     fn = _fn_ast(callback)
@@ -172,6 +228,9 @@ def command_operation(callback, client_map) -> tuple:
     op = {"client": key, **op, "paginated": paginated}
     if "work_request_client" in clients:
         op["workRequestClient"] = ".".join(clients["work_request_client"])
+    getter = lifecycle_getter(fn)
+    if getter:
+        add_lifecycle_waiter(op, getter, cls)
     return key, op, ops[1:]
 
 

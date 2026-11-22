@@ -200,11 +200,12 @@ def service_spec(name: str, cmd: click.Command) -> dict:
         if "workRequestClient" in c.get("operation", {})
     }
     for key in sorted(waiter_clients):
-        directory, name = key.split(".", 1)
+        directory, client_name = key.split(".", 1)
         dynamic_loader.load_service_dir(directory)
-        cls = CLIENT_MAP[directory][name]
+        cls = CLIENT_MAP[directory][client_name]
         getter = {"client": key, **sdk.sdk_operation(cls, "get_work_request")}
         CLIENTS[key] = {**sdk.client_info(cls), "workRequestGetter": getter}
+    sdk.hidden_lifecycle_getters(commands, CLIENTS, CLIENT_MAP)
     clients, CLIENTS = dict(sorted(CLIENTS.items())), None
     top = {"hidden": bool(getattr(cmd, "hidden", False))}
     if cmd.help:

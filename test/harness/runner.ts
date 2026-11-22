@@ -45,17 +45,17 @@ export type RunOptions = {
   sandbox?: SandboxOptions;
 };
 
-export async function runCli(
-  cli: readonly string[],
-  argv: string[],
-  opts: RunOptions = {},
-): Promise<Run> {
-  await using sb = await createSandbox(opts.config, opts.sandbox);
-  using fake = startFakeEndpoint(opts.replies);
-  const proc = Bun.spawn([...cli, ...substitute(argv, sb, fake.url)], {
-    cwd: sb.home,
-    env: { ...sb.env, ...opts.env },
-    stdin: opts.stdin === undefined ? "ignore" : new Blob([opts.stdin]),
+/** Starts one CLI process and collects what it printed; Bun.spawn unless replaced. */
+export type Launcher = (
+  cmd: string[],
+  io: { cwd: string; env: Record<string, string>; stdin?: string },
+) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
+
+export const spawnLauncher: Launcher = async (cmd, { cwd, env, stdin }) => {
+  const proc = Bun.spawn(cmd, {
+    cwd,
+    env,
+    stdin: stdin === undefined ? "ignore" : new Blob([stdin]),
     stdout: "pipe",
     stderr: "pipe",
   });
@@ -64,6 +64,21 @@ export async function runCli(
     new Response(proc.stderr).text(),
     proc.exited,
   ]);
+  return { stdout, stderr, exitCode };
+};
+
+export async function runCli(
+  cli: readonly string[],
+  argv: string[],
+  opts: RunOptions = {},
+  launch: Launcher = spawnLauncher,
+): Promise<Run> {
+  await using sb = await createSandbox(opts.config, opts.sandbox);
+  using fake = startFakeEndpoint(opts.replies);
+  const { stdout, stderr, exitCode } = await launch(
+    [...cli, ...substitute(argv, sb, fake.url)],
+    { cwd: sb.home, env: { ...sb.env, ...opts.env }, stdin: opts.stdin },
+  );
   return captured(sb, fake.url, stdout, stderr, exitCode, fake.requests);
 }
 

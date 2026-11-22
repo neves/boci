@@ -1,6 +1,8 @@
-// `bun run golden [--force] [--filter <substring>]`
+// `bun run golden [--force] [--filter <substring>] [--spawn]`
 // Runs the Reference CLI for every Parity case whose golden is missing or stale and
 // stores its normalised observation. The only place the Reference CLI runs (ADR 0004).
+// By default each case runs in a child forked from a pre-imported `oci`
+// (scripts/oci-zygote.ts, ~6x faster); --spawn starts `oci` afresh for every case.
 import { availableParallelism } from "node:os";
 import { parseArgs } from "util";
 import { normalizeRun } from "../test/harness/compare.ts";
@@ -12,13 +14,20 @@ import {
   loadCases,
   loadGolden,
 } from "../test/harness/cases.ts";
-import { CLIS, runCli } from "../test/harness/runner.ts";
+import {
+  CLIS,
+  type Launcher,
+  runCli,
+  spawnLauncher,
+} from "../test/harness/runner.ts";
+import { zygoteLauncher } from "./oci-zygote.ts";
 
 const { values } = parseArgs({
   args: Bun.argv.slice(2),
   options: {
     force: { type: "boolean", default: false },
     filter: { type: "string" },
+    spawn: { type: "boolean", default: false },
   },
 });
 
@@ -41,13 +50,28 @@ console.log(
   `${todo.length} of ${cases.length} goldens to (re)generate with oci ${referenceVersion}`,
 );
 
+// Same-service cases back to back, so a worker's zygote is reused (stable sort keeps order).
+if (!values.spawn)
+  todo.sort((a, b) => String(a.argv[0]).localeCompare(String(b.argv[0])));
+
 let next = 0;
 let done = 0;
+let fallbacks = 0;
 async function worker() {
+  const zygote = values.spawn ? undefined : await zygoteLauncher();
+  const launch: Launcher = zygote ?? spawnLauncher;
+  try {
+    await work(launch);
+  } finally {
+    fallbacks += zygote?.fallbacks ?? 0;
+    await zygote?.close();
+  }
+}
+async function work(launch: Launcher) {
   while (next < todo.length) {
     const c = todo[next++];
     if (!c) break;
-    const run = await runCli(CLIS.oci, c.argv, c);
+    const run = await runCli(CLIS.oci, c.argv, c, launch);
     const golden: Golden = {
       caseHash: caseHash(c),
       referenceVersion,
@@ -62,4 +86,7 @@ async function worker() {
 }
 await Promise.all(Array.from({ length: availableParallelism() }, worker));
 if (todo.length && process.stdout.isTTY) process.stdout.write("\n");
-if (todo.length) console.log(`wrote ${done} goldens`);
+if (todo.length)
+  console.log(
+    `wrote ${done} goldens${fallbacks ? ` (${fallbacks} spawned: the zygote couldn't run them)` : ""}`,
+  );

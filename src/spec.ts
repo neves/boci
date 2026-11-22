@@ -8,6 +8,7 @@ import type { RegionsSpec, ClientInfo } from "./endpoint.ts";
 
 export type OperationSpec = {
   client: string;
+  workRequestClient?: string;
   method: string;
   http: string;
   path: string;
@@ -49,7 +50,11 @@ export type ServiceSpec = {
   groups: Record<string, SpecNode>;
   commands: Record<
     string,
-    SpecNode & { kind: "generated" | "custom"; operation?: OperationSpec }
+    SpecNode & {
+      otherOperations?: string[];
+      kind: "generated" | "custom";
+      operation?: OperationSpec;
+    }
   >;
   clients: Record<string, ClientInfo>;
 };

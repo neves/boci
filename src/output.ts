@@ -114,6 +114,8 @@ function renderGeneratedResponse(
   }
   const output: Record<string, unknown> = {};
   if (hasBody) output.data = value;
+  const workRequestId = response.headers.get("opc-work-request-id");
+  if (workRequestId !== null) output["opc-work-request-id"] = workRequestId;
   const etag = response.headers.get("etag");
   const hasNextPage = response.headers.get("opc-next-page");
   if (etag !== null) output.etag = etag;

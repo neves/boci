@@ -1,0 +1,160 @@
+[
+  {
+    "id": "work-request-waiter-completed",
+    "key": "work-request-waiter",
+    "argv": [
+      "analytics",
+      "analytics-instance",
+      "change-compartment",
+      "--analytics-instance-id",
+      "instance",
+      "-c",
+      "compartment",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--wait-for-state",
+      "SUCCEEDED",
+      "--wait-for-state",
+      "FAILED"
+    ],
+    "replies": [
+      {
+        "status": 202,
+        "headers": {
+          "opc-work-request-id": "work-123"
+        },
+        "body": ""
+      },
+      {
+        "body": {
+          "status": "IN_PROGRESS",
+          "id": "work-123",
+          "compartmentId": "compartment",
+          "operationType": "CHANGE_ANALYTICS_INSTANCE_COMPARTMENT",
+          "percentComplete": 99.5,
+          "resources": [],
+          "timeAccepted": null,
+          "timeFinished": null,
+          "timeStarted": null
+        }
+      },
+      {
+        "body": {
+          "status": "SUCCEEDED",
+          "id": "work-123",
+          "compartmentId": "compartment",
+          "operationType": "CHANGE_ANALYTICS_INSTANCE_COMPARTMENT",
+          "percentComplete": 99.5,
+          "resources": [],
+          "timeAccepted": null,
+          "timeFinished": null,
+          "timeStarted": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "work-request-waiter-timeout",
+    "key": "work-request-waiter",
+    "argv": [
+      "analytics",
+      "analytics-instance",
+      "change-compartment",
+      "--analytics-instance-id",
+      "instance",
+      "-c",
+      "compartment",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--wait-for-state",
+      "SUCCEEDED",
+      "--max-wait-seconds",
+      "0"
+    ],
+    "replies": [
+      {
+        "status": 202,
+        "headers": {
+          "opc-work-request-id": "work-123"
+        },
+        "body": ""
+      },
+      {
+        "body": {
+          "status": "ACCEPTED",
+          "id": "work-123",
+          "compartmentId": "compartment",
+          "operationType": "CHANGE_ANALYTICS_INSTANCE_COMPARTMENT",
+          "percentComplete": 99.5,
+          "resources": [],
+          "timeAccepted": null,
+          "timeFinished": null,
+          "timeStarted": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "work-request-waiter-missing-id",
+    "key": "work-request-waiter",
+    "argv": [
+      "analytics",
+      "analytics-instance",
+      "change-compartment",
+      "--analytics-instance-id",
+      "instance",
+      "-c",
+      "compartment",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--wait-for-state",
+      "SUCCEEDED"
+    ],
+    "replies": [
+      {
+        "status": 202,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "work-request-waiter-error",
+    "key": "work-request-waiter",
+    "argv": [
+      "analytics",
+      "analytics-instance",
+      "change-compartment",
+      "--analytics-instance-id",
+      "instance",
+      "-c",
+      "compartment",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--wait-for-state",
+      "SUCCEEDED"
+    ],
+    "replies": [
+      {
+        "status": 202,
+        "headers": {
+          "opc-work-request-id": "work-123"
+        },
+        "body": ""
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "NotFound",
+          "message": "missing"
+        },
+        "headers": {
+          "opc-request-id": "test-error-id"
+        }
+      }
+    ]
+  }
+]

@@ -29,6 +29,7 @@ const IMPLEMENTED = new Set<string>([
   "read-timeout",
   "no-retry",
   "max-retries",
+  "work-request-waiter",
   // Generated commands outside engineSupports, tested by hand-written cases.
   "email-data-plane email-raw-submitted-response submit-raw-email",
   // Custom commands.

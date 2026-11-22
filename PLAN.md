@@ -120,7 +120,8 @@ DIVERGENCES.md             recorded Divergences
 ## Rung 5 — Waiters
 
 - [~] `--wait-for-state`, `--max-wait-seconds`, `--wait-interval-seconds`.
-- [ ] Work-request waiters.
+- [x] Work-request waiters for Generated commands using their own client.
+- [ ] Work-request waiters for Generated commands that use a separate work-request client.
 
 ## Rung 6 — Other auth methods
 

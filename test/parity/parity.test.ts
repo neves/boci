@@ -114,23 +114,20 @@ async function runParityCase(c: (typeof cases)[number]) {
     const run = spawnsProcess(c)
       ? await runCli(CLIS.boci, c.argv, c)
       : await runInProcess(c.argv, c);
-    if (c.id === "os-ns-get-request-id")
-      expect(run.requests[0]?.headers["opc-client-request-id"]).toBe(
-        "boci-request-123",
-      );
-    if (c.key === "debug") {
-      expect(run.exitCode).toBe(0);
-      expect(run.stdout).toContain('"data": "fake-namespace"');
-      expect(run.stderr).toMatch(/DEBUG:.*Request: GET .*\/n/);
-      expect(run.stderr).toMatch(/DEBUG:.*Response status: 200/);
-      record(c.key, true);
-      return;
-    }
-    if (c.key === "read-timeout") {
-      expect(run.exitCode).toBe(1);
-      expect(run.stdout).toBe("");
-      expect(run.stderr).toContain("TimeoutError");
-      expect(run.requests).toHaveLength(1);
+    const want = c.expect ?? {};
+    if (want.exitCode !== undefined) expect(run.exitCode).toBe(want.exitCode);
+    if (want.stdout !== undefined) expect(run.stdout).toBe(want.stdout);
+    if (want.stdoutContains !== undefined)
+      expect(run.stdout).toContain(want.stdoutContains);
+    if (want.stderrContains !== undefined)
+      expect(run.stderr).toContain(want.stderrContains);
+    for (const re of want.stderrMatches ?? [])
+      expect(run.stderr).toMatch(new RegExp(re));
+    if (want.requests !== undefined)
+      expect(run.requests).toHaveLength(want.requests);
+    for (const [name, value] of Object.entries(want.requestHeaders ?? {}))
+      expect(run.requests[0]?.headers[name]).toBe(value);
+    if (want.golden === false) {
       record(c.key, true);
       return;
     }

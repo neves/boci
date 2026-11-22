@@ -23,6 +23,25 @@ export type ParityCase = {
   sandbox?: { keyLabel?: boolean; files?: Record<string, string> };
   /** Compare only exit status and the signed HTTP request captured by the fake endpoint. */
   requestOnly?: boolean;
+  /** Extra assertions on boci's run. Excluded from caseHash: adding them never stales a golden. */
+  expect?: CaseExpectations;
+};
+
+export type CaseExpectations = {
+  /** false: skip signature checks and the golden comparison; only these checks decide the case.
+   * For output the golden can't pin (debug logs, timeout tracebacks). */
+  golden?: false;
+  exitCode?: number;
+  /** Exact stdout. */
+  stdout?: string;
+  stdoutContains?: string;
+  stderrContains?: string;
+  /** Regex sources, each matched against stderr. */
+  stderrMatches?: string[];
+  /** Number of requests the fake endpoint captured. */
+  requests?: number;
+  /** Headers expected on the first captured request. */
+  requestHeaders?: Record<string, string>;
 };
 
 export type Golden = {
@@ -33,7 +52,7 @@ export type Golden = {
 };
 
 export function caseHash(c: ParityCase): string {
-  const { id: _id, key: _key, ...inputs } = c;
+  const { id: _id, key: _key, expect: _expect, ...inputs } = c;
   return Bun.hash(JSON.stringify(inputs)).toString(16);
 }
 

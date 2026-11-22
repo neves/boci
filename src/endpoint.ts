@@ -1,6 +1,8 @@
 // Service endpoint resolution, ported from oci.regions + oci.base_client.BaseClient as the
 // CLI builds clients (explicit realm-specific / dual-stack booleans; see build_client).
 
+import type { Env } from "./io.ts";
+
 export type RegionsSpec = {
   regions: string[];
   shortNames: Record<string, string>;
@@ -44,7 +46,7 @@ export type EndpointOptions = {
 export async function loadExternalRegionMetadata(
   region: string,
   regions: RegionsSpec,
-  env: Record<string, string | undefined> = process.env,
+  env: Env,
 ): Promise<RegionMetadata | undefined> {
   const name = region.toLowerCase();
   if (regions.regions.includes(name) || name in regions.shortNames)
@@ -114,7 +116,7 @@ export function resolveEndpoint(
   regions: RegionsSpec,
   opts: EndpointOptions,
 ): { stored: string; resolved: string } {
-  const env = opts.env ?? process.env;
+  const env = opts.env ?? {};
   const effectiveRegions = opts.regionMetadata
     ? withRegionMetadata(regions, opts.regionMetadata)
     : regions;

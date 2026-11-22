@@ -1,7 +1,9 @@
 // Port of oci.config.from_file (OCI Python SDK): locate the config file, read a profile
 // (inheriting [DEFAULT]) with configparser semantics, and validate it the same way.
+import type { Env } from "./io.ts";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
+import { resolve } from "node:path";
 import {
   ConfigParserError,
   parseConfig,
@@ -34,10 +36,7 @@ export class ConfigError extends Error {
 export type Config = Record<string, string | boolean | null>;
 
 /** os.path.expanduser */
-export function expandUser(
-  path: string,
-  env: Record<string, string | undefined> = process.env,
-): string {
+export function expandUser(path: string, env: Env): string {
   if (!path.startsWith("~")) return path;
   const slash = path.indexOf("/");
   const user = path.slice(1, slash === -1 ? undefined : slash);
@@ -48,9 +47,9 @@ export function expandUser(
   );
 }
 
-const isFile = (p: string) => {
+const isFile = (p: string, cwd: string) => {
   try {
-    return statSync(p).isFile();
+    return statSync(resolve(cwd, p)).isFile();
   } catch {
     return false;
   }
@@ -59,14 +58,16 @@ const isFile = (p: string) => {
 /** oci.config._get_config_path_with_fallback */
 export function configPath(
   fileLocation: string,
-  env: Record<string, string | undefined> = process.env,
+  env: Env,
+  cwd: string,
 ): string {
   const expanded = expandUser(fileLocation, env);
-  if (fileLocation !== DEFAULT_LOCATION || isFile(expanded)) return expanded;
+  if (fileLocation !== DEFAULT_LOCATION || isFile(expanded, cwd))
+    return expanded;
   const fromEnv = env[CONFIG_FILE_PATH_ENV_VAR_NAME];
   if (fromEnv) return expandUser(fromEnv, env);
   const fallback = expandUser(FALLBACK_DEFAULT_LOCATION, env);
-  if (isFile(fallback)) return fallback;
+  if (isFile(fallback, cwd)) return fallback;
   return expanded;
 }
 
@@ -84,10 +85,11 @@ function asBool(x: string | boolean | null): boolean {
 export function fromFile(
   fileLocation = DEFAULT_LOCATION,
   profileName = DEFAULT_PROFILE,
-  env: Record<string, string | undefined> = process.env,
+  env: Env,
+  cwd: string,
 ): Config {
-  const path = configPath(fileLocation, env);
-  if (!existsSync(path) || !isFile(path)) {
+  const path = configPath(fileLocation, env, cwd);
+  if (!existsSync(resolve(cwd, path)) || !isFile(path, cwd)) {
     throw new ConfigError(
       `Could not find config file at ${path}, please follow the instructions in the link to setup the config file https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm`,
       "ConfigFileNotFound",
@@ -95,7 +97,7 @@ export function fromFile(
   }
   let parsed: ReturnType<typeof parseConfig>;
   try {
-    parsed = parseConfig(readFileSync(path, "utf8"), path);
+    parsed = parseConfig(readFileSync(resolve(cwd, path), "utf8"), path);
   } catch (e) {
     if (e instanceof ConfigParserError)
       throw new ConfigError(e.message, e.type);
@@ -123,8 +125,12 @@ export function fromFile(
   }
   if ("key_file" in config) {
     const keyPath = expandUser(String(config.key_file), env);
-    if (!isFile(keyPath)) {
-      const line = lineOf(String(config.key_file), path, profileName);
+    if (!isFile(keyPath, cwd)) {
+      const line = lineOf(
+        String(config.key_file),
+        resolve(cwd, path),
+        profileName,
+      );
       throw new ConfigError(
         `Config file ${path} is invalid: the key_file's value '${keyPath}'${line ? ` at line ${line}` : ""} must be a valid file path. ${DEBUG_INFO}`,
         "InvalidKeyFilePath",

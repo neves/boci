@@ -30,7 +30,7 @@ test("fromFile matches oci.config.from_file", async () => {
       const env = { HOME: dir };
       let got: { config?: unknown; error?: unknown };
       try {
-        const cfg = fromFile(join(dir, "config"), c.profile, env);
+        const cfg = fromFile(join(dir, "config"), c.profile, env, dir);
         got = {
           config: Object.fromEntries(
             Object.entries(cfg).map(([k, v]) => [

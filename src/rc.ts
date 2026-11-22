@@ -1,5 +1,7 @@
 // oci_cli_rc: oci's CLI-specific settings file (cli_root.eager_load_cli_rc_file).
+import type { Env } from "./io.ts";
 import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { expandUser } from "./config.ts";
 import {
   type ParsedConfig,
@@ -22,10 +24,7 @@ export type Rc = {
 };
 
 /** os.path.expandvars: $NAME and ${NAME}; unknown variables are left as-is. */
-export function expandVars(
-  path: string,
-  env: Record<string, string | undefined> = process.env,
-): string {
+export function expandVars(path: string, env: Env): string {
   if (!path.includes("$")) return path;
   return path.replace(/\$(\w+|\{[^}]*\})/g, (m, name: string) => {
     const key = name.startsWith("{") ? name.slice(1, -1) : name;
@@ -37,10 +36,7 @@ const expand = (p: string, env: Record<string, string | undefined>) =>
   expandVars(expandUser(p, env), env);
 
 /** Find and read the rc file: given value, $OCI_CLI_RC_FILE, default, fallback. */
-export function loadRc(
-  value: string,
-  env: Record<string, string | undefined> = process.env,
-): Rc {
+export function loadRc(value: string, env: Env, cwd: string): Rc {
   const candidates = [
     expand(value, env),
     ...(env.OCI_CLI_RC_FILE !== undefined
@@ -49,7 +45,7 @@ export function loadRc(
     expand(RC_DEFAULT_LOCATION, env),
     expand(RC_FALLBACK_LOCATION, env),
   ];
-  const found = candidates.find((p) => existsSync(p));
+  const found = candidates.find((p) => existsSync(resolve(cwd, p)));
   const rc: Rc = {
     path: found ?? value,
     parsed: null,
@@ -62,7 +58,7 @@ export function loadRc(
   if (!found) return rc;
   let text = "";
   try {
-    text = readFileSync(found, "utf8");
+    text = readFileSync(resolve(cwd, found), "utf8");
   } catch {
     // configparser.read() silently skips unreadable files.
     return rc;

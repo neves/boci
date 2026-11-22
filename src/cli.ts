@@ -2,6 +2,7 @@
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { existsSync, readFileSync, statSync } from "node:fs";
+import { resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 import {
   ConfigError,
@@ -69,32 +70,40 @@ export class Exit {
   constructor(public code: number) {}
 }
 
-import { err, flush, isTTY, out } from "./io.ts";
+import type { Env, Invocation } from "./io.ts";
 
 const repr = (s: string) =>
   s.includes("'") && !s.includes('"')
     ? `"${s}"`
     : `'${s.replaceAll("\\", "\\\\").replaceAll("'", "\\'")}'`;
 
-function usage(commandPath: string, doc: HelpDoc): string {
-  const f = new HelpFormatter(helpWidth());
+function usage(io: Invocation, commandPath: string, doc: HelpDoc): string {
+  const f = new HelpFormatter(helpWidth(io));
   f.writeUsage(commandPath, doc.usage);
   return f.getvalue().replace(/\n+$/, "");
 }
 
 /** Click's stock UsageError.show (before the root callback patches it): stderr.
  * `usageText` is null when Click raised the error without a context. */
-function showStock(usageText: string | null, message: string): never {
-  if (usageText !== null) err(`${usageText}\n\n`);
-  err(`Error: ${message}\n`);
+function showStock(
+  io: Invocation,
+  usageText: string | null,
+  message: string,
+): never {
+  if (usageText !== null) io.err(`${usageText}\n\n`);
+  io.err(`Error: ${message}\n`);
   throw new Exit(2);
 }
 
 /** cli_util.update_click_help_message, installed by the root callback: stdout. */
-function showPatched(usageText: string | null, message: string): never {
-  if (usageText !== null) out(`${usageText}\n\n`);
-  out(`Error: ${message}\n\n`);
-  out(`${INTERACTIVE_SUGGESTION}\n`);
+function showPatched(
+  io: Invocation,
+  usageText: string | null,
+  message: string,
+): never {
+  if (usageText !== null) io.out(`${usageText}\n\n`);
+  io.out(`Error: ${message}\n\n`);
+  io.out(`${INTERACTIVE_SUGGESTION}\n`);
   throw new Exit(2);
 }
 
@@ -120,9 +129,21 @@ function noSuchCommand(name: string, possibilities: Iterable<string>): string {
 const has = (opts: Record<string, unknown>, name: string) =>
   opts[name] !== undefined;
 
-export async function run(argv: string[]): Promise<void> {
+/** One invocation: its exit code. Output goes to the invocation's sinks; nothing exits. */
+export async function run(io: Invocation): Promise<number> {
+  try {
+    await main(io);
+    return 0;
+  } catch (e) {
+    if (e instanceof Exit) return e.code;
+    throw e;
+  }
+}
+
+async function main(io: Invocation): Promise<void> {
+  const argv = io.argv;
   const index = await loadIndex();
-  const rootUsage = () => usage(PROG, index.rootHelpDoc);
+  const rootUsage = () => usage(io, PROG, index.rootHelpDoc);
 
   // 1. Root context: interspersed, unknown options ignored, so root options are taken
   //    from anywhere on the command line (that's why `oci os ns get --help` works).
@@ -132,7 +153,8 @@ export async function run(argv: string[]): Promise<void> {
       argv,
     );
   } catch (e) {
-    if (e instanceof UsageError) showStock(usageFor(e, rootUsage), e.message);
+    if (e instanceof UsageError)
+      showStock(io, usageFor(e, rootUsage), e.message);
     throw e;
   }
   // Root params in Click's processing order: eager first (--version exits here), then type
@@ -141,7 +163,7 @@ export async function run(argv: string[]): Promise<void> {
   const rootValues: Record<string, unknown> = {};
   for (const p of processingOrder(root.order, index.globalParams)) {
     if (p.name === "version" && root.opts.version !== undefined) {
-      out(`${REFERENCE_VERSION}\n`);
+      io.out(`${REFERENCE_VERSION}\n`);
       throw new Exit(0);
     }
     if (root.opts[p.name] === undefined) continue;
@@ -150,6 +172,7 @@ export async function run(argv: string[]): Promise<void> {
     } catch (e) {
       if (e instanceof BadParameter)
         showStock(
+          io,
           rootUsage(),
           `Invalid value for ${errorHint(p)}: ${e.message}`,
         );
@@ -159,6 +182,8 @@ export async function run(argv: string[]): Promise<void> {
   // --cli-rc-file is eager with a default, so its callback (rc loading) always runs.
   const rc = loadRc(
     (rootValues.cli_rc_file as string | undefined) ?? RC_DEFAULT_LOCATION,
+    io.env,
+    io.cwd,
   );
   const rest = root.args;
 
@@ -177,7 +202,7 @@ export async function run(argv: string[]): Promise<void> {
     : null;
   {
     const messages = badAliasMessages(rc);
-    for (const m of messages) err(`${style(m, "red", isTTY(2))}\n`);
+    for (const m of messages) io.err(`${style(m, "red", io.isTTY(2))}\n`);
     if (hasAliases) {
       const collisions: string[] = [];
       for (const service of loaded) {
@@ -189,7 +214,7 @@ export async function run(argv: string[]): Promise<void> {
       for (const m of rootParamsAliased?.collisions ?? [])
         if (!collisions.includes(m)) collisions.push(m);
       if (collisions.length)
-        err(`${style(collisions.join("\n"), "red", isTTY(2))}\n`);
+        io.err(`${style(collisions.join("\n"), "red", io.isTTY(2))}\n`);
     }
   }
   const rootHelpDoc = rootParamsAliased
@@ -205,14 +230,14 @@ export async function run(argv: string[]): Promise<void> {
 
   // 2. No subcommand: invoke_without_command → root callback → echo_help.
   if (rest.length === 0) {
-    await printRootHelp(index, rootHelpDoc);
+    await printRootHelp(io, index, rootHelpDoc);
     throw new Exit(0);
   }
 
   // 3. Resolve the service. Only the core commands and the first service named anywhere
   //    in argv are registered (dynamic_loader.load_service_from_command).
   const typedName = rest[0] as string;
-  const rootAlias = resolveAlias(rc, "oci", typedName, true, (n) => {
+  const rootAlias = resolveAlias(io, rc, "oci", typedName, true, (n) => {
     // An alias target is loaded on demand (dynamic_loader.load_service).
     if (
       n !== typedName &&
@@ -231,11 +256,12 @@ export async function run(argv: string[]): Promise<void> {
         );
       } catch (e) {
         if (e instanceof UsageError)
-          showStock(usageFor(e, rootUsage), e.message);
+          showStock(io, usageFor(e, rootUsage), e.message);
         throw e;
       }
     }
     showStock(
+      io,
       rootUsage(),
       noSuchCommand(typedName, rootCommandOrder(index, loaded)),
     );
@@ -245,12 +271,13 @@ export async function run(argv: string[]): Promise<void> {
   // 4. Root callback runs: UsageError.show is now patched to stdout.
   if (has(root.opts, "max_retries") && root.opts.no_retry === true) {
     showPatched(
+      io,
       rootUsage(),
       "The option --max-retries is not applicable when using the --no-retry flag.",
     );
   }
-  const settings = resolveRootSettings(rootValues, rc, rootUsage);
-  if (typedName !== "profile") checkKeyForSecurity(settings); // invoked_subcommand is the typed name
+  const settings = resolveRootSettings(io, rootValues, rc, rootUsage);
+  if (typedName !== "profile") checkKeyForSecurity(io, settings); // invoked_subcommand is the typed name
   const helpRequested = root.opts.help === true;
 
   // 5. Walk groups down to the leaf. `path` holds names as typed (Click's info_name,
@@ -267,8 +294,8 @@ export async function run(argv: string[]): Promise<void> {
     const commandPath = [PROG, ...path].join(" ");
     if (args.length === 0) {
       // NoArgsIsHelpError.show: the group's help on stderr.
-      err(
-        `${groupHelp(commandPath, group.helpDoc, children(spec, node, canon.slice(1)))}\n`,
+      io.err(
+        `${groupHelp(commandPath, group.helpDoc, children(spec, node, canon.slice(1)), helpWidth(io))}\n`,
       );
       throw new Exit(2);
     }
@@ -280,16 +307,22 @@ export async function run(argv: string[]): Promise<void> {
     } catch (e) {
       if (e instanceof UsageError)
         showPatched(
-          usageFor(e, () => usage(commandPath, group.helpDoc)),
+          io,
+          usageFor(e, () => usage(io, commandPath, group.helpDoc)),
           e.message,
         );
       throw e;
     }
     if (parsed.args.length === 0)
-      showPatched(usage(commandPath, group.helpDoc), "Missing command.");
+      showPatched(
+        io,
+        usage(io, commandPath, group.helpDoc),
+        "Missing command.",
+      );
     const childName = parsed.args[0] as string;
     const commands = node.commands;
     const resolved = resolveAlias(
+      io,
       rc,
       canon.join(" "),
       childName,
@@ -307,14 +340,16 @@ export async function run(argv: string[]): Promise<void> {
         } catch (e) {
           if (e instanceof UsageError)
             showPatched(
-              usageFor(e, () => usage(commandPath, group.helpDoc)),
+              io,
+              usageFor(e, () => usage(io, commandPath, group.helpDoc)),
               e.message,
             );
           throw e;
         }
       }
       showPatched(
-        usage(commandPath, group.helpDoc),
+        io,
+        usage(io, commandPath, group.helpDoc),
         noSuchCommand(childName, Object.keys(node.commands)),
       );
     }
@@ -354,14 +389,15 @@ export async function run(argv: string[]): Promise<void> {
   } catch (e) {
     if (e instanceof UsageError)
       showPatched(
-        usageFor(e, () => usage(commandPath, cmd.helpDoc)),
+        io,
+        usageFor(e, () => usage(io, commandPath, cmd.helpDoc)),
         e.message,
       );
     throw e;
   }
   if (helpRequested) {
     // cli_util.help_callback: eager, prints when the root saw a help flag.
-    out(`${commandHelp(commandPath, cmd.helpDoc)}\n`);
+    io.out(`${commandHelp(commandPath, cmd.helpDoc, helpWidth(io))}\n`);
     throw new Exit(0);
   }
   if (rootValues.generate_full_command_json_input === true) {
@@ -377,7 +413,7 @@ export async function run(argv: string[]): Promise<void> {
       const name = toCamelCase(p.name);
       sample[name] = p.multiple ? ["string"] : "string";
     }
-    out(`${JSON.stringify(sample, null, 2)}\n`);
+    io.out(`${JSON.stringify(sample, null, 2)}\n`);
     throw new Exit(0);
   }
   if (typeof rootValues.generate_param_json_input === "string") {
@@ -386,9 +422,9 @@ export async function run(argv: string[]): Promise<void> {
         candidate.name.replaceAll("_", "-") ===
         rootValues.generate_param_json_input,
     );
-    if (isComplexParam(param)) out("{}\n");
+    if (isComplexParam(param)) io.out("{}\n");
     else
-      err(
+      io.err(
         `Option ${rootValues.generate_param_json_input} is not a recognized complex type, so no example JSON can be produced. Invoke help for this command (--help/-h/-?) to see available documentation on this option\n`,
       );
     throw new Exit(0);
@@ -396,9 +432,9 @@ export async function run(argv: string[]): Promise<void> {
   const fromJson = parsed.opts.from_json;
   const fromJsonDefaults: Record<string, unknown> = {};
   if (typeof fromJson === "string") {
-    const input = parseJsonParameter("from-json", fromJson);
+    const input = parseJsonParameter(io, "from-json", fromJson);
     if (typeof input !== "object" || input === null || Array.isArray(input)) {
-      err("We expect a JSON object to be provided to --from-json\n");
+      io.err("We expect a JSON object to be provided to --from-json\n");
       throw new Exit(1);
     }
     const optToCanon: Record<string, string> = {};
@@ -432,7 +468,8 @@ export async function run(argv: string[]): Promise<void> {
     } catch (e) {
       if (e instanceof BadParameter)
         showPatched(
-          usage(commandPath, cmd.helpDoc),
+          io,
+          usage(io, commandPath, cmd.helpDoc),
           `Invalid value for ${errorHint(p)}: ${e.message}`,
         );
       throw e;
@@ -441,7 +478,8 @@ export async function run(argv: string[]): Promise<void> {
   if (parsed.args.length && !cmd.helpDoc.parse.allowExtra) {
     const n = parsed.args.length;
     showPatched(
-      usage(commandPath, cmd.helpDoc),
+      io,
+      usage(io, commandPath, cmd.helpDoc),
       `Got unexpected extra argument${n === 1 ? "" : "s"} (${parsed.args.join(" ")})`,
     );
   }
@@ -456,25 +494,26 @@ export async function run(argv: string[]): Promise<void> {
     if (!isMissing(values[p.name] ?? parsed.opts[p.name])) continue;
     const rcVal = lookupDefault(defaults, rc, path, p);
     if (rcVal !== undefined && rcVal !== null) {
-      values[p.name] = convertDefaultValue(p, rcVal, index.datetime);
+      values[p.name] = convertDefaultValue(io.env, p, rcVal, index.datetime);
       continue;
     }
     if (p.required && !p.isFlag) missing.push(p.name.replaceAll("_", "-"));
   }
   if (missing.length) {
-    err(
-      `${usage(commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
+    io.err(
+      `${usage(io, commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
     );
     throw new Exit(1);
   }
   for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
     if (values[p.name] !== undefined && isComplexParam(p)) {
-      values[p.name] = parseJsonParameter(p.name, values[p.name]);
+      values[p.name] = parseJsonParameter(io, p.name, values[p.name]);
     }
   }
 
   if (key === "ns get" && name === "os") {
     await runGeneratedGet(
+      io,
       values,
       rootValues,
       settings,
@@ -491,6 +530,7 @@ export async function run(argv: string[]): Promise<void> {
     isImplemented(`${name} ${key}`, specCmd)
   ) {
     await runGeneratedGet(
+      io,
       values,
       rootValues,
       settings,
@@ -507,6 +547,7 @@ export async function run(argv: string[]): Promise<void> {
     isImplemented(`${name} ${key}`, specCmd)
   ) {
     await runGeneratedWrite(
+      io,
       values,
       rootValues,
       settings,
@@ -517,7 +558,7 @@ export async function run(argv: string[]): Promise<void> {
     );
     return;
   }
-  await notImplemented(argv, commandPath);
+  await notImplemented(io, argv, commandPath);
 }
 
 const COMPLEX_TYPE_CLASS =
@@ -547,32 +588,36 @@ function isComplexParam(param?: { typeClass?: string }): boolean {
   return param?.typeClass === COMPLEX_TYPE_CLASS;
 }
 
-function loadFileContents(path: string): string | null {
+function loadFileContents(io: Invocation, path: string): string | null {
   if (path.toLowerCase().startsWith("file://")) {
-    const filePath = expandVars(expandUser(path.slice("file://".length)));
-    if (!existsSync(filePath)) {
-      err(
+    const filePath = expandVars(
+      expandUser(path.slice("file://".length), io.env),
+      io.env,
+    );
+    if (!existsSync(resolve(io.cwd, filePath))) {
+      io.err(
         `The specified file '${path}' did not exist  (Resolved to path: '${filePath}')\n`,
       );
       throw new Exit(1);
     }
-    return readFileSync(filePath, "utf8");
+    return readFileSync(resolve(io.cwd, filePath), "utf8");
   }
   return null;
 }
 
 function parseJsonParameter(
+  io: Invocation,
   parameterName: string,
   parameterValue: unknown,
 ): unknown {
   if (parameterValue === undefined || parameterValue === null)
     return parameterValue;
   if (typeof parameterValue !== "string") return parameterValue;
-  const jsonToParse = loadFileContents(parameterValue) ?? parameterValue;
+  const jsonToParse = loadFileContents(io, parameterValue) ?? parameterValue;
   try {
     return JSON.parse(jsonToParse) as unknown;
   } catch {
-    err(
+    io.err(
       `Parameter ${repr(parameterName)} must be in JSON format.\nFor help with formatting JSON input see our documentation here: https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/cliusing.htm#ManagingCLIInputandOutput\n`,
     );
     throw new Exit(1);
@@ -580,11 +625,12 @@ function parseJsonParameter(
 }
 
 function convertDefaultValue(
+  env: Env,
   p: ParamSpec & { typeClass?: string; datetimeRounding?: string | null },
   value: string,
   datetime?: Index["datetime"],
 ): unknown {
-  const expanded = expandVars(value);
+  const expanded = expandVars(value, env);
   const convertSingle = (val: string): unknown => {
     switch (p.typeClass) {
       case "click.types.BoolParamType":
@@ -641,6 +687,7 @@ function whenMatches(
 }
 
 function boundValueFor(
+  io: Invocation,
   command: GeneratedCommand,
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
@@ -671,7 +718,7 @@ function boundValueFor(
       let candidate = values[item.param];
       if (candidate !== undefined) {
         if (item.transform === "parse_json_parameter") {
-          candidate = parseJsonParameter(item.param, candidate);
+          candidate = parseJsonParameter(io, item.param, candidate);
         }
         result = candidate;
       }
@@ -683,6 +730,7 @@ function boundValueFor(
 }
 
 function buildRequestBody(
+  io: Invocation,
   command: GeneratedCommand,
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
@@ -710,6 +758,7 @@ function buildRequestBody(
     }
     if (binding.transform === "parse_json_parameter") {
       target[binding.key.at(-1) as string] = parseJsonParameter(
+        io,
         typeof binding.param === "string"
           ? binding.param
           : (binding.key.at(-1) as string),
@@ -719,13 +768,14 @@ function buildRequestBody(
       typeof value === "string" &&
       value.toLowerCase().startsWith("file://")
     ) {
-      target[binding.key.at(-1) as string] = loadFileContents(value);
+      target[binding.key.at(-1) as string] = loadFileContents(io, value);
     } else {
       target[binding.key.at(-1) as string] = value;
     }
   }
   if (!hasBodyBindings && typeof command.operation?.body === "string") {
     const direct = boundValueFor(
+      io,
       command,
       values,
       rootValues,
@@ -733,7 +783,7 @@ function buildRequestBody(
     );
     if (direct === undefined || direct === null) return "";
     if (typeof direct === "string") {
-      return loadFileContents(direct) ?? direct;
+      return loadFileContents(io, direct) ?? direct;
     }
     return JSON.stringify(direct);
   }
@@ -741,6 +791,7 @@ function buildRequestBody(
 }
 
 async function runGeneratedWrite(
+  io: Invocation,
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   settings: RootSettings,
@@ -749,8 +800,9 @@ async function runGeneratedWrite(
   rc: Rc,
   command: GeneratedCommand,
 ): Promise<void> {
-  const requestBody = buildRequestBody(command, values, rootValues);
+  const requestBody = buildRequestBody(io, command, values, rootValues);
   await runGeneratedOperation(
+    io,
     values,
     rootValues,
     settings,
@@ -763,6 +815,7 @@ async function runGeneratedWrite(
 }
 
 async function runGeneratedGet(
+  io: Invocation,
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   settings: RootSettings,
@@ -772,12 +825,13 @@ async function runGeneratedGet(
   command: GeneratedCommand,
 ): Promise<void> {
   if (values.all_pages === true && values.limit !== undefined) {
-    err(
+    io.err(
       "UsageError: If you provide the --all option you cannot provide the --limit option\n",
     );
     throw new Exit(1);
   }
   await runGeneratedOperation(
+    io,
     values,
     rootValues,
     settings,
@@ -790,6 +844,7 @@ async function runGeneratedGet(
 }
 
 async function runGeneratedOperation(
+  io: Invocation,
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   settings: RootSettings,
@@ -801,43 +856,42 @@ async function runGeneratedOperation(
 ): Promise<void> {
   const operation = command.operation as OperationSpec;
   const boundValue = (arg: string) =>
-    boundValueFor(command, values, rootValues, arg);
+    boundValueFor(io, command, values, rootValues, arg);
   let config;
   try {
-    config = fromFile(settings.configFile, settings.profile);
+    config = fromFile(settings.configFile, settings.profile, io.env, io.cwd);
   } catch (e) {
     if (e instanceof ConfigError) {
       if (e.type === "ConfigFileNotFound") {
         const message = e.message.split(", please follow")[0] as string;
-        out(
+        io.out(
           `ERROR: ${message}\nDo you want to create a new config file? [Y/n]: `,
         );
-        err("Abort: \n");
+        io.err("Abort: \n");
         throw new Exit(1);
       }
-      err(`ERROR: ${e.message}\n`);
+      io.err(`ERROR: ${e.message}\n`);
       throw new Exit(1);
     }
     throw e;
   }
   if (
-    (
-      process.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? ""
-    ).toLowerCase() !== "true"
+    (io.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? "").toLowerCase() !==
+    "true"
   ) {
-    warnFilePermissions(configPath(settings.configFile));
+    warnFilePermissions(io, configPath(settings.configFile, io.env, io.cwd));
     if (config.key_file)
-      warnFilePermissions(expandUser(String(config.key_file)));
+      warnFilePermissions(io, expandUser(String(config.key_file), io.env));
   }
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
     string | undefined;
   const region = (rootValues.region ??
-    process.env.OCI_CLI_REGION ??
+    io.env.OCI_CLI_REGION ??
     config.region) as string | undefined;
   const regionMetadata =
     region && !endpointOpt
-      ? await loadExternalRegionMetadata(region, index.regions)
+      ? await loadExternalRegionMetadata(region, index.regions, io.env)
       : undefined;
   const serviceParams: Record<string, string> = {};
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
@@ -849,6 +903,7 @@ async function runGeneratedOperation(
     if (value !== undefined) serviceParams[name] = String(value);
   }
   const { resolved } = resolveEndpoint(client, index.regions, {
+    env: io.env,
     region,
     endpoint: endpointOpt,
     regionMetadata,
@@ -903,8 +958,8 @@ async function runGeneratedOperation(
         : "opc-client-request-id";
     headers[requestIdHeader] = String(rootValues.request_id);
   }
-  const keyPath = expandUser(String(config.key_file));
-  const pem = readFileSync(keyPath, "utf8");
+  const keyPath = expandUser(String(config.key_file), io.env);
+  const pem = readFileSync(resolve(io.cwd, keyPath), "utf8");
   const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
   const req = {
     method: operation.http,
@@ -918,7 +973,7 @@ async function runGeneratedOperation(
     privateKey = loadPrivateKey(pem, config.pass_phrase as string | null);
   } catch (e) {
     if (e instanceof InvalidPrivateKey) {
-      err(`${e.message}\n`);
+      io.err(`${e.message}\n`);
       throw new Exit(1);
     }
     throw e;
@@ -1003,8 +1058,8 @@ async function runGeneratedOperation(
       await Bun.sleep(delay);
     }
     if (rootValues.debug === true) {
-      err(`DEBUG:oci.base_client: Request: ${req.method} ${req.url}\n`);
-      err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
+      io.err(`DEBUG:oci.base_client: Request: ${req.method} ${req.url}\n`);
+      io.err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
     }
     nextPage = response.headers.get("opc-next-page");
     if (
@@ -1029,10 +1084,11 @@ async function runGeneratedOperation(
     if (!allPages || !operation.responseType?.startsWith("list[")) break;
   } while (page !== null);
   if (!response.ok) {
-    err(formatServiceError(operation, url, response, raw));
+    io.err(formatServiceError(operation, url, response, raw));
     throw new Exit(1);
   }
   renderGeneratedResponse(
+    io,
     operation,
     response,
     raw,
@@ -1075,6 +1131,7 @@ function formatServiceError(
 }
 
 function renderGeneratedResponse(
+  io: Invocation,
   operation: OperationSpec,
   response: Response,
   raw: string,
@@ -1115,7 +1172,7 @@ function renderGeneratedResponse(
   if (etag !== null) output.etag = etag;
   if (hasNextPage !== null && !allPages) {
     output["opc-next-page"] = hasNextPage;
-    err(
+    io.err(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
   }
@@ -1125,7 +1182,7 @@ function renderGeneratedResponse(
     const queryName = query.slice("query://".length);
     query = rc.cannedQueries[queryName];
     if (query === undefined) {
-      err(
+      io.err(
         `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${rc.path}\n`,
       );
       throw new Exit(1);
@@ -1134,7 +1191,7 @@ function renderGeneratedResponse(
   const rendered =
     typeof query === "string" ? applyQuery(output, query) : output;
   if (rendered === null || (Array.isArray(rendered) && rendered.length === 0)) {
-    err("Query returned empty result, no output to show.\n");
+    io.err("Query returned empty result, no output to show.\n");
   } else {
     const format = rootValues.output ?? "json";
     const tableValue =
@@ -1144,10 +1201,10 @@ function renderGeneratedResponse(
       "data" in rendered
         ? (rendered as Record<string, unknown>).data
         : rendered;
-    if (format === "table") out(renderTable(tableValue));
+    if (format === "table") io.out(renderTable(tableValue));
     else if (rootValues.raw_output && typeof rendered === "string")
-      out(`${rendered}\n`);
-    else out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
+      io.out(`${rendered}\n`);
+    else io.out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
   }
 }
 
@@ -1174,13 +1231,13 @@ function retryableResponse(response: Response, raw: string): boolean {
   }
 }
 
-function warnFilePermissions(file: string) {
+function warnFilePermissions(io: Invocation, file: string) {
   try {
-    if ((statSync(file).mode & 0o077) === 0) return;
+    if ((statSync(resolve(io.cwd, file)).mode & 0o077) === 0) return;
   } catch {
     return;
   }
-  err(
+  io.err(
     `WARNING: Permissions on ${file} are too open. \n` +
       "To fix this please try executing the following command: \n" +
       `oci setup repair-file-permissions --file ${file} \n` +
@@ -1257,21 +1314,43 @@ export const NOT_IMPLEMENTED = 3;
  * hand the untouched argv, stdin and stdio to the Reference CLI and return its exit code.
  */
 async function notImplemented(
+  io: Invocation,
   argv: string[],
   commandPath: string,
 ): Promise<never> {
-  const fallback = process.env.BOCI_FALLBACK;
-  const depth = Number(process.env.BOCI_FALLBACK_DEPTH ?? "0");
+  const fallback = io.env.BOCI_FALLBACK;
+  const depth = Number(io.env.BOCI_FALLBACK_DEPTH ?? "0");
   if (fallback && depth === 0) {
-    await flush(); // anything boci printed (warnings) comes before the child's output
-    const bin = Bun.which(fallback) ?? fallback;
+    const bin =
+      Bun.which(fallback, { PATH: io.env.PATH ?? "", cwd: io.cwd }) ?? fallback;
+    const options = {
+      cwd: io.cwd,
+      env: { ...io.env, BOCI_FALLBACK_DEPTH: String(depth + 1) },
+    };
+    if (io.inheritStdio) {
+      await io.inheritStdio.flush(); // boci's warnings come before the child's output
+      const proc = Bun.spawn([bin, ...argv], {
+        ...options,
+        stdio: ["inherit", "inherit", "inherit"],
+      });
+      throw new Exit(await proc.exited);
+    }
     const proc = Bun.spawn([bin, ...argv], {
-      stdio: ["inherit", "inherit", "inherit"],
-      env: { ...process.env, BOCI_FALLBACK_DEPTH: String(depth + 1) },
+      ...options,
+      stdin: io.stdin === undefined ? "ignore" : new Blob([io.stdin]),
+      stdout: "pipe",
+      stderr: "pipe",
     });
-    throw new Exit(await proc.exited);
+    const [stdout, stderr, code] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+      proc.exited,
+    ]);
+    io.out(stdout);
+    io.err(stderr);
+    throw new Exit(code);
   }
-  err(
+  io.err(
     `boci: '${commandPath}' is not implemented yet (run \`bun run status\` in the boci repo for coverage).\n` +
       "Set BOCI_FALLBACK=oci to run unimplemented commands with the Reference CLI.\n",
   );
@@ -1302,7 +1381,7 @@ function children(spec: ServiceSpec, node: TreeNode, sub: string[]) {
   });
 }
 
-async function printRootHelp(index: Index, doc: HelpDoc) {
+async function printRootHelp(io: Invocation, index: Index, doc: HelpDoc) {
   const core = await Promise.all(
     index.nonServiceCommands.map(async (n) => {
       const top = (await loadService(n)).top;
@@ -1314,8 +1393,8 @@ async function printRootHelp(index: Index, doc: HelpDoc) {
       };
     }),
   );
-  out(
-    `${rootHelp(doc, core, index.services, index.ociHelp, index.ociUserHelp)}\n`,
+  io.out(
+    `${rootHelp(doc, core, index.services, index.ociHelp, index.ociUserHelp, helpWidth(io))}\n`,
   );
 }
 
@@ -1342,11 +1421,12 @@ export type RootSettings = {
 /** cli_root.cli: config file (OCI_CLI_CONFIG_FILE), profile (--profile, OCI_CLI_PROFILE, rc
  * default_profile), auth (OCI_CLI_AUTH). */
 function resolveRootSettings(
+  io: Invocation,
   values: Record<string, unknown>,
   rc: Rc,
   rootUsage: () => string,
 ): RootSettings {
-  const env = process.env;
+  const env = io.env;
   let configFile =
     (values.config_file as string | undefined) ?? DEFAULT_LOCATION;
   // read_values_from_env: only when not given or equal to the default.
@@ -1361,6 +1441,7 @@ function resolveRootSettings(
   if (auth === null && env.OCI_CLI_AUTH !== undefined) {
     if (!AUTH_CHOICES.includes(env.OCI_CLI_AUTH)) {
       showPatched(
+        io,
         rootUsage(),
         `Invalid value for OCI_CLI_AUTH: invalid choice: ${env.OCI_CLI_AUTH}. (choose from ${AUTH_CHOICES.join(", ")})`,
       );
@@ -1371,19 +1452,18 @@ function resolveRootSettings(
 }
 
 /** cli_root.check_key_for_security: warn when the API key lacks the OCI_API_KEY label. */
-function checkKeyForSecurity(s: RootSettings) {
+function checkKeyForSecurity(io: Invocation, s: RootSettings) {
   if (s.auth !== null && s.auth !== "api_key") return;
-  let keyFile = keyFileFor(s.configFile, s.profile);
-  if (process.env.OCI_CLI_KEY_FILE !== undefined)
-    keyFile = process.env.OCI_CLI_KEY_FILE;
+  let keyFile = keyFileFor(io, s.configFile, s.profile);
+  if (io.env.OCI_CLI_KEY_FILE !== undefined) keyFile = io.env.OCI_CLI_KEY_FILE;
   if (
-    (process.env.SUPPRESS_LABEL_WARNING ?? "").toLowerCase() === "true" ||
+    (io.env.SUPPRESS_LABEL_WARNING ?? "").toLowerCase() === "true" ||
     !keyFile
   )
     return;
   let content: string;
   try {
-    content = readFileSync(keyFile, "utf8");
+    content = readFileSync(resolve(io.cwd, keyFile), "utf8");
   } catch {
     return; // oci crashes here (see DIVERGENCES.md)
   }
@@ -1392,22 +1472,26 @@ function checkKeyForSecurity(s: RootSettings) {
     `Warning: To increase security of your API key located at ${keyFile}, append an extra line with 'OCI_API_KEY' at the end. ` +
     "For more information, refer to https://docs.oracle.com/iaas/Content/API/Concepts/apisigningkey.htm. " +
     "To suppress the warning, set the env variable SUPPRESS_LABEL_WARNING=True";
-  err(`${style(message, "yellow", isTTY(2))}\n`);
+  io.err(`${style(message, "yellow", io.isTTY(2))}\n`);
 }
 
 /** cli_root.get_key_file: configparser read of the config (missing file → none). */
-function keyFileFor(configFile: string, profile: string): string | null {
-  const path = expandUser(configFile);
+function keyFileFor(
+  io: Invocation,
+  configFile: string,
+  profile: string,
+): string | null {
+  const path = expandUser(configFile, io.env);
   let text: string;
   try {
-    text = readFileSync(path, "utf8");
+    text = readFileSync(resolve(io.cwd, path), "utf8");
   } catch {
     return null;
   }
   try {
     const items = sectionItems(parseConfig(text, path), profile);
     const keyFile = items?.get("key_file");
-    return keyFile ? expandUser(keyFile) : null;
+    return keyFile ? expandUser(keyFile, io.env) : null;
   } catch {
     return null;
   }
@@ -1429,6 +1513,7 @@ function style(
  * shadow it), then a command-sequence alias for this chain, then a global alias.
  */
 function resolveAlias(
+  io: Invocation,
   rc: Rc,
   chain: string,
   name: string,
@@ -1440,8 +1525,8 @@ function resolveAlias(
     if (aliasAware) {
       const shadowed = rc.globalCommandAliases[name] ?? sequence?.[name];
       if (shadowed !== undefined) {
-        err(
-          `${style(`Could not use '${name}' as an alias for '${shadowed}' as it belongs to an existing command under '${chain}'`, "red", isTTY(2))}\n`,
+        io.err(
+          `${style(`Could not use '${name}' as an alias for '${shadowed}' as it belongs to an existing command under '${chain}'`, "red", io.isTTY(2))}\n`,
         );
       }
     }

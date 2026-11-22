@@ -1,18 +1,13 @@
 // Click's Command.format_help for one command, from its extracted HelpDoc.
 import type { HelpDoc } from "../spec.ts";
-import {
-  HelpFormatter,
-  helpWidth,
-  makeDefaultShortHelp,
-  wrapText,
-} from "./formatter.ts";
+import { HelpFormatter, makeDefaultShortHelp, wrapText } from "./formatter.ts";
 import { expandTabs } from "./textwrap.ts";
 
 /** ctx.get_help(): the formatted page without trailing newlines. */
 export function commandHelp(
   commandPath: string,
   doc: HelpDoc,
-  width = helpWidth(),
+  width: number,
 ): string {
   const f = new HelpFormatter(width);
   f.writeUsage(commandPath, doc.usage);
@@ -41,7 +36,7 @@ export function groupHelp(
   commandPath: string,
   doc: HelpDoc,
   children: CommandEntry[],
-  width = helpWidth(),
+  width: number,
 ): string {
   const f = new HelpFormatter(width);
   f.writeUsage(commandPath, doc.usage);
@@ -109,7 +104,7 @@ export function rootHelp(
   services: Record<string, ServiceInfo>,
   ociHelp: string,
   ociUserHelp: string,
-  width = helpWidth(),
+  width: number,
 ): string {
   const clickHelp = groupHelp("oci", doc, coreCommands, width);
   const at = clickHelp.indexOf("Commands:\n");

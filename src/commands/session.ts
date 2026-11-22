@@ -88,19 +88,19 @@ export class SecurityTokenKeyError extends Error {
   }
 }
 
+import { decodeBase64Url } from "../utils/decodeBase64Url.ts";
+import { isNoProxyHost } from "../utils/isNoProxyHost.ts";
+import { openUrlInBrowser as openBrowser } from "../utils/openUrlInBrowser.ts";
+import { publicKeyToJwk as toJwk } from "../utils/publicKeyToJwk.ts";
+
+export { isNoProxyHost, openBrowser, toJwk };
+
 function decodeBase64UrlSegment(segment: string): Buffer {
-  if (!/^[A-Za-z0-9_-]*$/.test(segment)) {
+  try {
+    return decodeBase64Url(segment);
+  } catch {
     throw new SecurityTokenDecodeError("Invalid padding");
   }
-  const rem = segment.length % 4;
-  if (rem === 1) {
-    throw new SecurityTokenDecodeError("Invalid padding");
-  }
-  const padded = rem === 0 ? segment : segment + "=".repeat(4 - rem);
-  return Buffer.from(
-    padded.replaceAll("-", "+").replaceAll("_", "/"),
-    "base64",
-  );
 }
 
 /**
@@ -336,25 +336,6 @@ export async function runSessionValidate(
   }
   const expiryTime = formatLocalTimestamp(Number(jwtPayload.exp), io.env.TZ);
   io.err(`Session is valid until ${expiryTime}\n`);
-}
-
-/** Check whether `hostname` matches a comma-separated NO_PROXY / no_proxy list. */
-export function isNoProxyHost(hostname: string, noProxy?: string): boolean {
-  if (!noProxy) return false;
-  const host = hostname.toLowerCase();
-  for (const raw of noProxy.split(",")) {
-    const entry = raw.trim().toLowerCase();
-    if (!entry) continue;
-    if (entry === "*") return true;
-    const withoutPort = entry.includes(":")
-      ? (entry.split(":")[0] ?? entry)
-      : entry;
-    const bare = withoutPort.startsWith(".")
-      ? withoutPort.slice(1)
-      : withoutPort;
-    if (host === bare || host.endsWith(`.${bare}`)) return true;
-  }
-  return false;
 }
 
 /** Resolve proxy URL and custom CA bundle from invocation env (mirrors Python requests). */
@@ -1119,15 +1100,6 @@ function getOciCliProfileEnvVarError(
   return null;
 }
 
-/** Port of `cli_util.to_jwk(public_key)`. */
-export function toJwk(publicKey: KeyObject): string {
-  const jwk = publicKey.export({ format: "jwk" }) as {
-    n?: string;
-    e?: string;
-  };
-  return `{"kty": "RSA", "n": ${JSON.stringify(jwk.n ?? "")}, "e": ${JSON.stringify(jwk.e ?? "")}, "kid": "Ignored"}`;
-}
-
 /** Port of `cli_setup_bootstrap.get_console_auth_url`. */
 export function getConsoleAuthUrl(
   region: string,
@@ -1143,60 +1115,6 @@ export function getConsoleAuthUrl(
     return `https://login.${region}.ds.oci.${realmDomain}/v1/oauth2/authorize`;
   }
   return `https://login.${region}.${realmDomain}/v1/oauth2/authorize`;
-}
-
-/** Best-effort browser launch mirroring Python `webbrowser.open_new(url)`. */
-export function openBrowser(url: string, env: Env): boolean {
-  const spawnDetached = (cmd: string[]): boolean => {
-    try {
-      const proc = Bun.spawn(cmd, {
-        env,
-        stdin: "ignore",
-        stdout: "ignore",
-        stderr: "ignore",
-      });
-      proc.unref();
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  if (env.BROWSER !== undefined) {
-    for (const rawEntry of env.BROWSER.split(":")) {
-      const entry = rawEntry.trim();
-      if (!entry) continue;
-      const parts = entry.split(/\s+/);
-      const bin = parts[0];
-      if (!bin) continue;
-      const resolvedBin =
-        bin.includes("/") || existsSync(bin)
-          ? existsSync(bin)
-            ? bin
-            : null
-          : Bun.which(bin, { PATH: env.PATH ?? "" });
-      if (!resolvedBin) continue;
-      const hasPlaceholder = parts.some((p) => p.includes("%s"));
-      const args = hasPlaceholder
-        ? parts.slice(1).map((p) => p.replaceAll("%s", url))
-        : [...parts.slice(1), url];
-      if (spawnDetached([resolvedBin, ...args])) return true;
-    }
-    return false;
-  }
-
-  if (process.platform === "darwin") {
-    const openBin = Bun.which("open", { PATH: env.PATH ?? "" });
-    return openBin ? spawnDetached([openBin, url]) : false;
-  }
-  if (process.platform === "win32") {
-    return spawnDetached(["cmd", "/c", "start", "", url]);
-  }
-  if (!env.DISPLAY && !env.WAYLAND_DISPLAY) {
-    return false;
-  }
-  const xdgOpen = Bun.which("xdg-open", { PATH: env.PATH ?? "" });
-  return xdgOpen ? spawnDetached([xdgOpen, url]) : false;
 }
 
 /** Port of `cli_util.get_public_key_from_file` (rejects non-public PEM keys). */

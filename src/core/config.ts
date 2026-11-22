@@ -35,17 +35,8 @@ export class ConfigError extends Error {
 
 export type Config = Record<string, string | boolean | null>;
 
-/** os.path.expanduser */
-export function expandUser(path: string, env: Env): string {
-  if (!path.startsWith("~")) return path;
-  const slash = path.indexOf("/");
-  const user = path.slice(1, slash === -1 ? undefined : slash);
-  if (user) return path; // ~otheruser: left alone (not resolved without pwd lookup)
-  const home = env.HOME ?? homedir();
-  return (
-    home.replace(/\/+$/, "") + (slash === -1 ? "" : path.slice(slash)) || "/"
-  );
-}
+import { expandHomeDir as expandUser } from "../utils/expandHomeDir.ts";
+export { expandUser };
 
 const isFile = (p: string, cwd: string) => {
   try {

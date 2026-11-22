@@ -126,34 +126,18 @@ export function createStdinReader(io: Invocation): StdinReader {
 /**
  * cli_util.apply_user_only_access_permissions (Unix): 0o600 for files, 0o700 for directories.
  */
-export function applyUserOnlyAccessPermissions(path: string): void {
-  let st: ReturnType<typeof statSync>;
-  try {
-    st = statSync(path);
-  } catch {
-    throw new Error(
-      `Failed attempting to set permissions on path that does not exist: ${path}`,
-    );
-  }
-  chmodSync(path, st.isFile() ? 0o600 : 0o700);
-}
+import { applyUserOnlyPermissions as applyUserOnlyAccessPermissions } from "../utils/applyUserOnlyPermissions.ts";
+import { ensureDirectory as createDirectory } from "../utils/ensureDirectory.ts";
+import { escapeRegExp } from "../utils/escapeRegExp.ts";
+import { generateRsaKeyPair as generateKey } from "../utils/generateRsaKeyPair.ts";
+import { publicKeyToMd5Fingerprint as publicKeyToFingerprint } from "../utils/publicKeyToMd5Fingerprint.ts";
 
-/** cli_util.create_directory: create directory tree and restrict the target dir to 0o700. */
-export function createDirectory(dirname: string): void {
-  mkdirSync(dirname, { recursive: true });
-  applyUserOnlyAccessPermissions(dirname);
-}
-
-/** cli_util.generate_key: 2048-bit RSA key pair with public exponent 65537. */
-export function generateKey(keySize = 2048): {
-  privateKey: KeyObject;
-  publicKey: KeyObject;
-} {
-  return generateKeyPairSync("rsa", {
-    modulusLength: keySize,
-    publicExponent: 0x10001,
-  });
-}
+export {
+  applyUserOnlyAccessPermissions,
+  createDirectory,
+  generateKey,
+  publicKeyToFingerprint,
+};
 
 /** cli_util.serialize_key for a public key (SubjectPublicKeyInfo PEM). */
 export function serializePublicKey(publicKey: KeyObject): string {
@@ -176,13 +160,6 @@ export function serializePrivateKey(
       .toString();
   }
   return privateKey.export({ type: "pkcs8", format: "pem" }).toString();
-}
-
-/** cli_setup.public_key_to_fingerprint: colon-separated MD5 of SPKI DER bytes. */
-export function publicKeyToFingerprint(publicKey: KeyObject): string {
-  const der = publicKey.export({ type: "spki", format: "der" });
-  const hex = createHash("md5").update(der).digest("hex");
-  return hex.match(/../g)?.join(":") ?? hex;
 }
 
 /** Python os.path.join(dir, name) for POSIX paths without collapsing leading `./`. */
@@ -238,10 +215,6 @@ export async function confirmClick(
     if (normalized === "") return defaultValue;
     io.out("Error: invalid input\n");
   }
-}
-
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /** Click `click.termui._mask_hidden_input`. */

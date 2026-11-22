@@ -61,6 +61,7 @@ import {
 } from "./os.ts";
 import { printResult } from "./output.ts";
 import {
+  runSessionAuthenticate,
   runSessionExport,
   runSessionImport,
   runSessionRefresh,
@@ -748,6 +749,18 @@ async function main(io: Invocation): Promise<void> {
       await runSessionImport(io, {
         values,
         settings,
+      });
+      return;
+    }
+
+    if (name === "session" && key === "authenticate") {
+      await runSessionAuthenticate(io, {
+        values,
+        rootValues,
+        settings,
+        rc,
+        index,
+        spec,
       });
       return;
     }

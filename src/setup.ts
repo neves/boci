@@ -213,11 +213,12 @@ function readFirstLine(raw: string): string {
 }
 
 /** Click `click.confirm(text, default=defaultValue, err=False)`. */
-async function confirmClick(
+export async function confirmClick(
   io: Invocation,
   stdin: StdinReader,
   text: string,
   defaultValue = false,
+  wrapExceptions = false,
 ): Promise<boolean> {
   const suffix = defaultValue ? "[Y/n]: " : "[y/N]: ";
   const prompt = `${text} ${suffix}`;
@@ -225,7 +226,7 @@ async function confirmClick(
     io.out(prompt);
     const line = await stdin.readLine();
     if (line === null) {
-      io.err("Aborted!\n");
+      io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
       throw new Exit(1);
     }
     const normalized = line.trim().toLowerCase();
@@ -256,12 +257,13 @@ async function readHiddenLine(
   io: Invocation,
   stdin: StdinReader,
   prompt: string,
+  wrapExceptions = false,
 ): Promise<string> {
   if (io.promptSecret) {
     const line = await io.promptSecret(prompt);
     if (line === null) {
       io.out("\n");
-      io.err("Aborted!\n");
+      io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
       throw new Exit(1);
     }
     return line;
@@ -270,7 +272,7 @@ async function readHiddenLine(
   const line = await stdin.readLine();
   if (line === null) {
     io.out("\n");
-    io.err("Aborted!\n");
+    io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
     throw new Exit(1);
   }
   io.err("\n");
@@ -285,23 +287,25 @@ async function promptClick<T = string>(
   opts: {
     default?: string;
     hideInput?: boolean;
+    wrapExceptions?: boolean;
     valueProc?: (value: string) => T | Promise<T>;
   } = {},
 ): Promise<T> {
   const prompt =
     opts.default !== undefined ? `${text} [${opts.default}]: ` : `${text}: `;
   const hideInput = opts.hideInput === true;
+  const wrapExceptions = opts.wrapExceptions === true;
 
   while (true) {
     let value = "";
     while (true) {
       if (hideInput) {
-        value = await readHiddenLine(io, stdin, prompt);
+        value = await readHiddenLine(io, stdin, prompt, wrapExceptions);
       } else {
         io.out(prompt);
         const line = await stdin.readLine();
         if (line === null) {
-          io.err("Aborted!\n");
+          io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
           throw new Exit(1);
         }
         value = line;
@@ -329,9 +333,10 @@ async function promptClick<T = string>(
 }
 
 /** cli_setup.prompt_for_passphrase: hidden prompt with confirmation. */
-async function promptForPassphrase(
+export async function promptForPassphrase(
   io: Invocation,
   stdin: StdinReader,
+  wrapExceptions = false,
 ): Promise<string | null> {
   const promptText = `Enter a passphrase for your private key ("${NO_PASSPHRASE}" for no passphrase): `;
   const confirmText = "Repeat for confirmation: ";
@@ -339,12 +344,12 @@ async function promptForPassphrase(
   while (true) {
     let value = "";
     while (true) {
-      value = await readHiddenLine(io, stdin, promptText);
+      value = await readHiddenLine(io, stdin, promptText, wrapExceptions);
       if (value) break;
     }
     let value2 = "";
     while (true) {
-      value2 = await readHiddenLine(io, stdin, confirmText);
+      value2 = await readHiddenLine(io, stdin, confirmText, wrapExceptions);
       if (value2 || (!value && !value2)) break;
     }
     if (value === value2) {
@@ -693,10 +698,11 @@ async function promptForConfigLocation(
   return { configLocation, profileName: DEFAULT_PROFILE_NAME };
 }
 
-async function promptForRegion(
+export async function promptForRegion(
   io: Invocation,
   stdin: StdinReader,
   regions: RegionsSpec,
+  wrapExceptions = false,
 ): Promise<string> {
   const sortedRegions = [...regions.regions].sort();
   const numeric = sortedRegions.map((r, i) => `${i + 1}: ${r}`);
@@ -725,6 +731,7 @@ async function promptForRegion(
       stdin,
       `Enter a region by index or name(e.g.\n${regionList})`,
       {
+        wrapExceptions,
         valueProc: async (val) => {
           if (!((await isRecognizedRegion(val)) || isValidIndex(val))) {
             io.out(
@@ -736,6 +743,7 @@ async function promptForRegion(
                 stdin,
                 "Continue with unrecognized region? (Enter 'n' to re-enter region)",
                 false,
+                wrapExceptions,
               ))
             ) {
               return null;

@@ -150,7 +150,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `session refresh`.
 - [x] `session export`.
 - [x] `session import`.
-- [ ] `session authenticate`.
+- [x] `session authenticate`.
 
 ## Rung 8 — Remaining Custom commands
 

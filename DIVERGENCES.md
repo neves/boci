@@ -113,3 +113,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** exits 1 with the standard `ServiceError:\n{...}\n` JSON envelope on stderr (no Python stack trace)
 - **Why:** reproducing an interpreter traceback with `<exception str() failed>` and local site-packages paths is meaningless; both fail with exit 1 after sending the same `GET /20160918/regions` request and report the service error details.
 - **State:** accepted
+
+### `session authenticate`: `--no-browser` service error omits Python traceback
+
+- **Invocation:** `oci session authenticate --region us-phoenix-1 --no-browser --no-retry --endpoint <endpoint>` when `identity_data_plane.generate_user_security_token()` returns an HTTP error (e.g. 401 or 500)
+- **Reference CLI:** exits 1 with a Python traceback ending in `oci_cli.cli_exceptions.ServiceException: <exception str() failed>` because `authenticate` is wrapped with `@cli_util.wrap_exceptions` without `@json_skeleton_utils.json_skeleton_generation_handler`, so `ServiceException.__str__`'s `sys.exit()` triggers `<exception str() failed>` inside Python 3.12's traceback formatter
+- **boci:** exits 1 with the standard `ServiceError:\n{...}\n` JSON envelope on stderr (no Python stack trace)
+- **Why:** reproducing an interpreter traceback with `<exception str() failed>` and local site-packages paths is meaningless; both fail with exit 1 after sending the same `POST /v1/token/upst/actions/GenerateUpst` request and report the service error details.
+- **State:** accepted

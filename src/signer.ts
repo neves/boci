@@ -1,6 +1,11 @@
 // OCI HTTP Signature request signing (oci.signer.Signer + httpsig_cffi), ADR 0002.
 // RSA-SHA256 PKCS#1 v1.5 is deterministic, so signatures match the SDK byte for byte.
-import { createPrivateKey, createSign, type KeyObject } from "node:crypto";
+import {
+  createPrivateKey,
+  createPublicKey,
+  createSign,
+  type KeyObject,
+} from "node:crypto";
 
 const GENERIC_HEADERS = ["date", "(request-target)", "host"];
 const BODY_HEADERS = ["content-length", "content-type", "x-content-sha256"];
@@ -16,18 +21,52 @@ export type SignableRequest = {
 export type ApiKey = { keyId: string; privateKey: KeyObject };
 
 export class InvalidPrivateKey extends Error {}
+export class MissingPrivateKeyPassphrase extends Error {}
+
+function isPublicKey(pem: string): boolean {
+  if (/^(ssh-(rsa|dss|ed25519)|ecdsa-sha2-nistp\d+)\s+\S+/.test(pem))
+    return true;
+  try {
+    createPublicKey({ key: pem, format: "pem" });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function loadPrivateKey(
   pem: string,
   passPhrase?: string | null,
 ): KeyObject {
+  const key = pem.trim();
+  const hasPassphrase = passPhrase !== null && passPhrase !== undefined;
   try {
     return createPrivateKey({
-      key: pem.trim(),
+      key,
       format: "pem",
-      ...(passPhrase ? { passphrase: passPhrase } : {}),
+      ...(hasPassphrase && passPhrase !== "" ? { passphrase: passPhrase } : {}),
     });
   } catch (e) {
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (code === "ERR_MISSING_PASSPHRASE") {
+      if (!hasPassphrase) {
+        throw new MissingPrivateKeyPassphrase(
+          "The provided key requires a passphrase.",
+          { cause: e },
+        );
+      }
+      // oci.signer.load_private_key: an empty passphrase string triggers TypeError
+      // in cryptography, then retries with None and raises this TypeError.
+      throw new TypeError(
+        "Password was not given but private key is encrypted",
+      );
+    }
+    if (isPublicKey(key)) {
+      throw new InvalidPrivateKey(
+        "Authentication requires a private key, but a public key was provided.",
+        { cause: e },
+      );
+    }
     throw new InvalidPrivateKey(
       "The provided key is not a private key, or the provided passphrase is incorrect.",
       { cause: e },

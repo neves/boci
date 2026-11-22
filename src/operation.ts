@@ -19,6 +19,7 @@ import { Exit, type Invocation } from "./io.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
   InvalidPrivateKey,
+  MissingPrivateKeyPassphrase,
   loadPrivateKey,
   prepareContentLength,
   signRequest,
@@ -376,14 +377,32 @@ export async function callOperation(
     }
     const keyPath = expandUser(String(config.key_file), io.env);
     const pem = readFileSync(resolve(io.cwd, keyPath), "utf8");
-    try {
-      privateKey = loadPrivateKey(pem, config.pass_phrase as string | null);
-    } catch (e) {
-      if (e instanceof InvalidPrivateKey) {
-        io.err(`${e.message}\n`);
-        throw new Exit(1);
+    const loadWithErrors = (passPhrase: string | null): KeyObject => {
+      try {
+        return loadPrivateKey(pem, passPhrase);
+      } catch (e) {
+        if (e instanceof InvalidPrivateKey) {
+          io.err(`${e.message}\n`);
+          throw new Exit(1);
+        }
+        if (e instanceof TypeError) {
+          io.err(`TypeError: ${e.message}\n`);
+          throw new Exit(1);
+        }
+        throw e;
       }
-      throw e;
+    };
+    try {
+      privateKey = loadWithErrors(config.pass_phrase as string | null);
+    } catch (e) {
+      if (e instanceof MissingPrivateKeyPassphrase) {
+        const prompted = io.promptSecret
+          ? await io.promptSecret("Private key passphrase:")
+          : promptFromStdin(io, "Private key passphrase:");
+        privateKey = loadWithErrors(prompted);
+      } else {
+        throw e;
+      }
     }
   }
   const req = {
@@ -542,4 +561,10 @@ function warnFilePermissions(io: Invocation, file: string) {
 function configBool(value: unknown): boolean {
   if (typeof value === "boolean") return value;
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+function promptFromStdin(io: Invocation, prompt: string): string {
+  io.err(`Warning: Password input may be echoed.\n${prompt}\n`);
+  const line = (io.stdin ?? "").split("\n", 1)[0] ?? "";
+  return line.endsWith("\r") ? line.slice(0, -1) : line;
 }

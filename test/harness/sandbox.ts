@@ -1,6 +1,6 @@
 // Isolated HOME + OCI config signed with a committed throwaway key, so no test
 // ever reads the real ~/.oci or needs real credentials.
-import { createPublicKey } from "node:crypto";
+import { createPrivateKey, createPublicKey } from "node:crypto";
 import { chmod, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -55,6 +55,10 @@ export type Sandbox = {
 export type SandboxOptions = {
   /** false: write the API key without the trailing OCI_API_KEY label line. */
   keyLabel?: boolean;
+  /** Encrypt the sandbox API key with this passphrase. */
+  keyPassphrase?: string;
+  /** PEM format when keyPassphrase is set (default: "pkcs8"). */
+  keyFormat?: "pkcs8" | "pkcs1";
   /** Extra files to create, relative to the sandbox HOME (e.g. ".oci/oci_cli_rc"). */
   files?: Record<string, string>;
   /** true: omit ~/.oci/config and ~/.oci/key.pem (e.g. for instance/resource principal tests). */
@@ -75,14 +79,25 @@ export async function createSandbox(
   const keyFile = join(dir, "key.pem");
   const configFile = join(dir, "config");
   if (!options.noConfig) {
-    const key = await Bun.file(KEY_SOURCE).text();
+    let key = FAKE_KEY_PEM;
+    if (options.keyPassphrase !== undefined) {
+      const exported = createPrivateKey(FAKE_KEY_PEM.trim())
+        .export({
+          type: options.keyFormat ?? "pkcs8",
+          format: "pem",
+          cipher: "aes-256-cbc",
+          passphrase: options.keyPassphrase,
+        })
+        .toString();
+      key = `${exported}OCI_API_KEY\n`;
+    }
     await Bun.write(
       keyFile,
       options.keyLabel === false ? key.replace(/OCI_API_KEY\s*$/, "") : key,
     );
     await Bun.write(
       configFile,
-      `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await keyFingerprint(keyFile, options.keyLabel)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
+      `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await keyFingerprint(KEY_SOURCE, options.keyLabel)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
     );
     await chmod(keyFile, options.keyMode ?? 0o600);
     await chmod(configFile, options.configMode ?? 0o600);

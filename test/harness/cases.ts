@@ -23,6 +23,8 @@ export type ParityCase = {
   config?: string;
   sandbox?: {
     keyLabel?: boolean;
+    keyPassphrase?: string;
+    keyFormat?: "pkcs8" | "pkcs1";
     files?: Record<string, string>;
     noConfig?: boolean;
   };

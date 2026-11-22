@@ -145,7 +145,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `setup repair-file-permissions`.
 - [x] `setup keys`.
 - [x] `setup config`.
-- [ ] `setup autocomplete`.
+- [x] `setup autocomplete`.
 - [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.
 
 ## Rung 8 — Remaining Custom commands

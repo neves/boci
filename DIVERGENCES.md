@@ -97,3 +97,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** exits 1 with `Usage: oci setup repair-file-permissions [OPTIONS]\n\nError: Missing option(s) --file.\n` on stderr
 - **Why:** reproducing an interpreter traceback with machine-specific paths is meaningless; both fail with exit 1 before touching any files.
 - **State:** accepted
+
+### `setup autocomplete`: empty rc file path omits Python `CLIInstallError` traceback
+
+- **Invocation:** `oci setup autocomplete` when no default rc file exists, the user declines creating it, and leaves the rc file path prompt blank
+- **Reference CLI:** exits 1 with a Python traceback ending in `oci_cli.cli_setup.CLIInstallError: No suitable profile file found.`
+- **boci:** exits 1 with `CLIInstallError: No suitable profile file found.\n` on stderr (no Python stack trace)
+- **Why:** reproducing an interpreter traceback with machine-specific paths is meaningless; both fail with exit 1 and report `CLIInstallError: No suitable profile file found.`.
+- **State:** accepted

@@ -72,6 +72,7 @@ def serve():
             without_home(req["env"]) != START_ENV
             or "COMP_WORDS" in req["env"]
             or service_of(req["argv"]) != LOADED
+            or (req["argv"] and req["argv"][0] == "setup")
         ):
             reply({"fallback": True})
             continue

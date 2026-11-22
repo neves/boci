@@ -61,6 +61,7 @@ import {
 } from "./os.ts";
 import { printResult } from "./output.ts";
 import {
+  runSetupAutocomplete,
   runSetupConfig,
   runSetupKeys,
   runSetupRepairFilePermissions,
@@ -701,6 +702,11 @@ async function main(io: Invocation): Promise<void> {
         usageError: (message) =>
           showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
       });
+      return;
+    }
+
+    if (name === "setup" && key === "autocomplete") {
+      await runSetupAutocomplete(io);
       return;
     }
 

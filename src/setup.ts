@@ -10,11 +10,13 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   statSync,
+  symlinkSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { expandUser } from "./config.ts";
 import { ConfigParserError, parseConfig } from "./configparser.ts";
 import { BadParameter, pyRepr } from "./convert.ts";
@@ -942,4 +944,195 @@ export async function runSetupConfig(
 
   io.out(`Config written to ${configLocation}\n`);
   io.out(UPLOAD_PUBLIC_KEY_INSTRUCTIONS);
+}
+
+export const OCI_AUTOCOMPLETE_SCRIPT =
+  "# coding: utf-8\n" +
+  "# Copyright (c) 2016, 2026, Oracle and/or its affiliates. All rights reserved.\n" +
+  "# This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.\n\n" +
+  "_oci_completion() {\n" +
+  '    COMPREPLY=( $( env COMP_WORDS="${COMP_WORDS[*]}" \\\n' +
+  "                   COMP_CWORD=$COMP_CWORD \\\n" +
+  "                   _OCI_COMPLETE=complete $1 ) )\n" +
+  "    return 0\n" +
+  "}\n\n" +
+  "complete -F _oci_completion -o default oci;";
+
+/** Python os.path.realpath: resolves existing ancestor symlinks even when the leaf does not exist. */
+function pyRealpath(rawPath: string, cwd: string): string {
+  let current = resolve(cwd, rawPath);
+  const tail: string[] = [];
+  while (true) {
+    try {
+      const real = realpathSync(current);
+      return tail.length ? join(real, ...tail.reverse()) : real;
+    } catch {
+      const parent = dirname(current);
+      if (parent === current) {
+        return tail.length ? join(current, ...tail.reverse()) : current;
+      }
+      tail.push(basename(current));
+      current = parent;
+    }
+  }
+}
+
+async function promptInput(
+  io: Invocation,
+  stdin: StdinReader,
+  msg: string,
+): Promise<string> {
+  io.out(`\n===> ${msg}`);
+  const line = await stdin.readLine();
+  if (line === null) {
+    io.err("EOFError: EOF when reading a line\n");
+    throw new Exit(1);
+  }
+  return line;
+}
+
+async function promptYN(
+  io: Invocation,
+  stdin: StdinReader,
+  msg: string,
+  defaultValue: "y" | "n" | null = null,
+): Promise<boolean> {
+  const y = defaultValue === "y" ? "Y" : "y";
+  const n = defaultValue === "n" ? "N" : "n";
+  while (true) {
+    const ans = await promptInput(io, stdin, `${msg} (${y}/${n}): `);
+    if (ans.toLowerCase() === "n") return false;
+    if (ans.toLowerCase() === "y") return true;
+    if (defaultValue && !ans) return defaultValue === "y";
+  }
+}
+
+async function promptInputWithDefault(
+  io: Invocation,
+  stdin: StdinReader,
+  msg: string,
+  defaultValue: string | null,
+): Promise<string> {
+  if (defaultValue) {
+    return (
+      (await promptInput(
+        io,
+        stdin,
+        `${msg} (leave blank to use '${defaultValue}'): `,
+      )) || defaultValue
+    );
+  }
+  return promptInput(io, stdin, `${msg}: `);
+}
+
+/**
+ * `oci setup autocomplete` (cli_setup.setup_autocomplete / setup_autocomplete_non_windows).
+ */
+export async function runSetupAutocomplete(io: Invocation): Promise<void> {
+  const stdin = createStdinReader(io);
+  const isDarwin = process.platform === "darwin";
+  const userBashRc = expandUser("~/.bashrc", io.env);
+  const userBashProfile = expandUser("~/.bash_profile", io.env);
+
+  io.out(
+    "To set up autocomplete, we would update few lines in rc/bash_profile file.\n",
+  );
+
+  const bashrcExists = isFileSync(userBashRc);
+  const bashProfileExists = isFileSync(userBashProfile);
+  let defaultRcFile: string | null;
+  if (!bashrcExists && bashProfileExists) {
+    defaultRcFile = userBashProfile;
+  } else if (bashrcExists && bashProfileExists && isDarwin) {
+    defaultRcFile = userBashProfile;
+  } else {
+    defaultRcFile = bashrcExists ? userBashRc : null;
+  }
+
+  let rcFile: string | null = null;
+  if (!defaultRcFile) {
+    const candidate = isDarwin ? userBashProfile : userBashRc;
+    const createNow = await promptYN(
+      io,
+      stdin,
+      `Could not automatically find a suitable file to use. Create ${candidate} now?`,
+      "y",
+    );
+    if (createNow) {
+      appendFileSync(candidate, "");
+      rcFile = candidate;
+    }
+  }
+
+  if (!rcFile) {
+    rcFile = await promptInputWithDefault(
+      io,
+      stdin,
+      "Enter a path to an rc file to update (file will be created if it does not exist)",
+      defaultRcFile,
+    );
+  }
+
+  let rcFilePath: string | null = null;
+  if (rcFile) {
+    rcFilePath = pyRealpath(expandUser(rcFile, io.env), io.cwd);
+    if (!isFileSync(rcFilePath)) {
+      io.out(`-- Automatically created rc file at '${rcFilePath}'\n`);
+    }
+  }
+
+  if (!rcFilePath) {
+    io.err("CLIInstallError: No suitable profile file found.\n");
+    throw new Exit(1);
+  }
+
+  const completionScriptFile = join(
+    expandUser("~/.oci", io.env),
+    "bin",
+    "oci_autocomplete.sh",
+  );
+  io.out(`Using tab completion script at: ${completionScriptFile}\n`);
+
+  const softLink = expandUser("~/lib/oci_autocomplete.sh", io.env);
+  const bashProfileLine = `[[ -e "${softLink}" ]] && source "${softLink}"`;
+  const confirmPrompt = `We need to add a few lines to your ${rcFilePath} file. Please confirm this is ok.`;
+
+  if (await confirmClick(io, stdin, confirmPrompt, true)) {
+    if (existsSync(softLink)) {
+      chmodSync(softLink, 0o644);
+      unlinkSync(softLink);
+    }
+    try {
+      const scriptDir = dirname(completionScriptFile);
+      if (!isDirSync(scriptDir)) mkdirSync(scriptDir, { recursive: true });
+      writeFileSync(completionScriptFile, OCI_AUTOCOMPLETE_SCRIPT, {
+        mode: 0o644,
+      });
+      const linkDir = dirname(softLink);
+      if (!isDirSync(linkDir)) mkdirSync(linkDir, { recursive: true });
+      symlinkSync(completionScriptFile, softLink);
+    } catch {
+      io.out(
+        `Unable to symlink ~/lib/oci_autocomplete.sh to ${bashProfileLine}. \nAdd '${bashProfileLine}' to your rc file and restart your terminal for the changes to take effect.\n`,
+      );
+      return;
+    }
+
+    const existingContent = existsSync(rcFilePath)
+      ? readFileSync(rcFilePath, "utf8")
+      : "";
+    if (!existingContent.includes("lib/oci_autocomplete.sh")) {
+      appendFileSync(rcFilePath, `\n${bashProfileLine}\n`);
+    } else {
+      io.out(
+        `It looks like tab completion for oci is already configured in ${rcFilePath}. If you want to re-run the setup command please remove the line containing 'oci_autocomplete.sh' from ${rcFilePath} and run oci setup authenticate again.\n\n`,
+      );
+    }
+
+    io.out(
+      `Success! \n Restart your terminal or Run '${bashProfileLine}' for the changes to take effect.\n`,
+    );
+  } else {
+    io.out("Exiting script. Tab completion not set up.\n");
+  }
 }

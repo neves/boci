@@ -42,6 +42,16 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "Python tracebacks captured via the zygote carry the local repo path to oci-zygote.py",
   ],
   [
+    /File (\\?)"[^"\\]+\/bin\/oci\1"/g,
+    'File $1"<bin>/oci$1"',
+    "Python tracebacks from spawned oci carry the local entry-script path",
+  ],
+  [
+    /Using tab completion script at: [^\n]+/g,
+    "Using tab completion script at: <completion-script>",
+    "setup autocomplete prints the local install path to oci_autocomplete.sh",
+  ],
+  [
     /OS Version: [^,]+,/g,
     "OS Version: <os>,",
     "MultipartUploadError embeds the local OS kernel/platform version",

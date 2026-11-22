@@ -42,6 +42,7 @@ const IMPLEMENTED = new Set<string>([
   "setup repair-file-permissions",
   "setup keys",
   "setup config",
+  "setup autocomplete",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

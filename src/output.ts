@@ -129,11 +129,19 @@ function renderGeneratedResponse(
 /** Render an already-shaped response document (data and/or headers) with --query/--output/--raw-output. */
 export function renderDocument(
   io: Invocation,
-  output: Record<string, unknown>,
+  output: unknown,
   options: OutputOptions,
 ): void {
   const { rc } = options;
-  if (Object.keys(output).length === 0) return;
+  if (
+    output === null ||
+    output === undefined ||
+    (Array.isArray(output) && output.length === 0) ||
+    (typeof output === "object" &&
+      !Array.isArray(output) &&
+      Object.keys(output).length === 0)
+  )
+    return;
   let query = options.query;
   if (typeof query === "string" && query.startsWith("query://")) {
     const queryName = query.slice("query://".length);
@@ -200,11 +208,21 @@ function renderTable(value: unknown): string {
     typeof value[0] === "object" &&
     !Array.isArray(value[0])
   ) {
-    headers = Object.keys(value[0] as Record<string, unknown>);
+    const cols = new Set<string>();
+    for (const entry of value) {
+      if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+        for (const key of Object.keys(entry as Record<string, unknown>))
+          cols.add(key);
+      }
+    }
+    headers = [...cols].sort();
     for (let i = 0; i < rows.length; i++)
       rows[i] = headers.map(
         (key) => (value[i] as Record<string, unknown>)[key],
       );
+  } else if (value && typeof value === "object" && !Array.isArray(value)) {
+    headers = Object.keys(value as Record<string, unknown>).sort();
+    rows[0] = headers.map((key) => (value as Record<string, unknown>)[key]);
   } else {
     const width = rows.reduce((max, row) => Math.max(max, row.length), 0);
     headers = Array.from({ length: width }, (_, i) => `Column${i + 1}`);

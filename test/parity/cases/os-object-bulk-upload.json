@@ -1,0 +1,1383 @@
+[
+  {
+    "id": "os-object-bulk-upload-basic",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-hello",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT",
+          "opc-request-id": "req-put-1",
+          "x-ignored-header": "ignored"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-nested-and-prefix",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--object-prefix",
+      "pre/",
+      "--overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/root.txt": "root body",
+        "src/sub/child.txt": "child body"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-root",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-child",
+          "last-modified": "Wed, 21 Oct 2026 07:28:01 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-trailing-slash-src-dir",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src/",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/sub/file.txt": "slash body"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-slash"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-auto-namespace",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/auto.txt": "auto"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": "resolvedns"
+      },
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "resolvedns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-auto"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-auto-namespace-error",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/auto.txt": "auto"
+      }
+    },
+    "replies": [
+      {
+        "status": 401,
+        "body": {
+          "code": "NotAuthenticated",
+          "message": "The required information to complete authentication was not provided or was incorrect."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-bucket-not-found",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "missingbucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello"
+      }
+    },
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-bucket-404"
+        },
+        "body": {
+          "code": "BucketNotFound",
+          "message": "Either the bucket named 'missingbucket' does not exist in the namespace 'myns' or you are not authorized to access it"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-dry-run",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite",
+      "--dry-run"
+    ],
+    "sandbox": {
+      "files": {
+        "src/root.txt": "root",
+        "src/sub/child.txt": "child"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-dry-run-no-overwrite",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--no-overwrite",
+      "--dry-run",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/existing.txt": "exists",
+        "src/sub/new.txt": "new"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-existing",
+          "content-length": "6",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-no-overwrite-skip",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--no-overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/existing.txt": "exists"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-existing",
+          "content-length": "6",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-no-overwrite-new",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--no-overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/new.txt": "fresh"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-new"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-prompt-yes",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "stdin": "y\n",
+    "sandbox": {
+      "files": {
+        "src/existing.txt": "updated"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-old",
+          "content-length": "3",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-updated"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-prompt-no",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "stdin": "n\n",
+    "sandbox": {
+      "files": {
+        "src/existing.txt": "updated"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-old",
+          "content-length": "3",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-include",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--include",
+      "*.txt",
+      "--overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep",
+        "src/sub/skip.log": "skip"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-keep"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-exclude",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--exclude",
+      "*.log",
+      "--overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep",
+        "src/sub/skip.log": "skip"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-keep"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-include-exclude-conflict",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--include",
+      "*.txt",
+      "--exclude",
+      "*.log"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-upload-overwrite-conflict",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite",
+      "--no-overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/keep.txt": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-upload-missing-src-dir",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/no-such-dir"
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-headers-and-metadata",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--metadata",
+      "{\"env\":\"test\",\"owner\":\"boci\"}",
+      "--content-type",
+      "text/plain",
+      "--content-language",
+      "en-US",
+      "--content-encoding",
+      "gzip",
+      "--cache-control",
+      "no-cache",
+      "--content-disposition",
+      "inline",
+      "--storage-tier",
+      "InfrequentAccess",
+      "--opc-sse-kms-key-id",
+      "ocid1.key.oc1..example",
+      "--encryption-key-file",
+      "{home}/aes.key",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/doc.txt": "doc body",
+        "aes.key": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-doc"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-content-type-auto",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--content-type",
+      "auto",
+      "--overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/note.txt": "plain text",
+        "src/sub/data.json": "{\"a\":1}"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-txt"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-json"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-verify-checksum-match",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite",
+      "--verify-checksum"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-hello",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-verify-checksum-mismatch",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite",
+      "--verify-checksum"
+    ],
+    "sandbox": {
+      "files": {
+        "src/hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-hello",
+          "opc-content-md5": "WRONGMD5=="
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-upload-failure",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/fail.txt": "fail body"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-fail-1"
+        },
+        "body": {
+          "code": "NotAuthorized",
+          "message": "Authorization failed"
+        }
+      }
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdoutContains": "\"upload-failures\"",
+      "stderrContains": "Uploaded fail.txt\n",
+      "requests": 2
+    }
+  },
+  {
+    "id": "os-object-bulk-upload-output-table",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--no-overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/existing.txt": "old",
+        "src/sub/new.txt": "new"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-old",
+          "content-length": "3",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT"
+        },
+        "body": ""
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "Not found"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-new",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT",
+          "opc-content-md5": "md5-new"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-query-and-from-json",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "\"uploaded-objects\"",
+      "os",
+      "object",
+      "bulk-upload",
+      "--from-json",
+      "{\"namespace\":\"myns\",\"bucketName\":\"mybucket\",\"srcDir\":\"{home}/src\",\"overwrite\":true}"
+    ],
+    "sandbox": {
+      "files": {
+        "src/q.txt": "query body"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-q"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-empty-file",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/empty.txt": ""
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-empty"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-no-multipart",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite",
+      "--no-multipart"
+    ],
+    "sandbox": {
+      "files": {
+        "src/single.txt": "single body"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-single"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-missing-required",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns"
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-bad-namespace",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "bad ns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src"
+    ],
+    "sandbox": {
+      "files": {
+        "src/a.txt": "a"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-upload-bad-encryption-key-file",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--encryption-key-file",
+      "{home}/missing.key"
+    ],
+    "sandbox": {
+      "files": {
+        "src/a.txt": "a"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-upload-parallel-out-of-range",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--parallel-upload-count",
+      "0"
+    ],
+    "sandbox": {
+      "files": {
+        "src/a.txt": "a"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-upload-all-excluded",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--exclude",
+      "*",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/a.txt": "a"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-all-excluded-table",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--exclude",
+      "*",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/a.txt": "a"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-multi-include",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--include",
+      "*.txt",
+      "--include",
+      "*.json",
+      "--overwrite",
+      "--parallel-upload-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "src/a.txt": "txt",
+        "src/sub/b.json": "{}",
+        "src/sub/deep/c.log": "log"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-txt"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-json"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-tilde-missing-src-dir",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "~/missing-dir"
+    ]
+  },
+  {
+    "id": "os-object-bulk-upload-long-object-name",
+    "key": "os object bulk-upload",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-upload",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--src-dir",
+      "{home}/src",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "src/very/deeply/nested/directory/structure/short.txt": "short"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "name": "mybucket",
+          "namespace": "myns"
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-long"
+        },
+        "body": ""
+      }
+    ]
+  }
+]

@@ -32,8 +32,8 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "ServiceError timestamp is generated at response time",
   ],
   [
-    /File "[^"]+\/site-packages\/([^"]+)"/g,
-    'File "<site-packages>/$1"',
+    /File (\\?)"[^"\\]+\/site-packages\/([^"\\]+)\1"/g,
+    'File $1"<site-packages>/$2$1"',
     "Python tracebacks from oci worker pools carry the local site-packages install path",
   ],
   [

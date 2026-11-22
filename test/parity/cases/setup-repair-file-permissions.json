@@ -1,0 +1,122 @@
+[
+  {
+    "id": "setup-repair-file-permissions-basic",
+    "key": "setup repair-file-permissions",
+    "argv": [
+      "setup",
+      "repair-file-permissions",
+      "--file",
+      "{home}/.oci/config"
+    ],
+    "sandbox": {
+      "configMode": 420
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-repair-file-permissions-tilde",
+    "key": "setup repair-file-permissions",
+    "argv": ["setup", "repair-file-permissions", "--file", "~/.oci/key.pem"],
+    "sandbox": {
+      "keyMode": 438
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/key.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-repair-file-permissions-relative",
+    "key": "setup repair-file-permissions",
+    "argv": ["setup", "repair-file-permissions", "--file", ".oci/config"],
+    "sandbox": {
+      "configMode": 420
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-repair-file-permissions-no-config",
+    "key": "setup repair-file-permissions",
+    "argv": ["setup", "repair-file-permissions", "--file", "{home}/secret.txt"],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        "secret.txt": "hello\n"
+      },
+      "fileModes": {
+        "secret.txt": 493
+      }
+    },
+    "expect": {
+      "fileModes": {
+        "secret.txt": 384
+      }
+    }
+  },
+  {
+    "id": "setup-repair-file-permissions-missing-file",
+    "key": "setup repair-file-permissions",
+    "argv": [
+      "setup",
+      "repair-file-permissions",
+      "--file",
+      "{home}/does-not-exist.pem"
+    ]
+  },
+  {
+    "id": "setup-repair-file-permissions-missing-tilde",
+    "key": "setup repair-file-permissions",
+    "argv": [
+      "setup",
+      "repair-file-permissions",
+      "--file",
+      "~/does-not-exist.pem"
+    ]
+  },
+  {
+    "id": "setup-repair-file-permissions-missing-relative",
+    "key": "setup repair-file-permissions",
+    "argv": ["setup", "repair-file-permissions", "--file", "does-not-exist.pem"]
+  },
+  {
+    "id": "setup-repair-file-permissions-directory",
+    "key": "setup repair-file-permissions",
+    "argv": ["setup", "repair-file-permissions", "--file", "{home}/.oci"]
+  },
+  {
+    "id": "setup-repair-file-permissions-missing-option",
+    "key": "setup repair-file-permissions",
+    "argv": ["setup", "repair-file-permissions"],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "Error: Missing option(s) --file."
+    }
+  },
+  {
+    "id": "setup-repair-file-permissions-rc-default",
+    "key": "setup repair-file-permissions",
+    "argv": ["setup", "repair-file-permissions"],
+    "sandbox": {
+      "configMode": 420,
+      "files": {
+        ".oci/oci_cli_rc": "[DEFAULT]\nfile = ~/.oci/config\n"
+      }
+    },
+    "expect": {
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  }
+]

@@ -89,3 +89,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** exits 1 with `RuntimeError: Error downloading parts: ServiceError:\n{...}\n` (no Python stack trace)
 - **Why:** reproducing a Python worker-pool traceback with machine-specific site-packages paths is meaningless; both fail with exit 1 and report `RuntimeError: Error downloading parts:` with the service error details.
 - **State:** accepted
+
+### `setup repair-file-permissions`: missing `--file` omits Python `TypeError` traceback
+
+- **Invocation:** `oci setup repair-file-permissions` (without `--file` and without an `oci_cli_rc` default)
+- **Reference CLI:** exits 1 with a Python `TypeError: expected str, bytes or os.PathLike object, not NoneType` traceback in `os.path.expanduser(file)` because `repair_file_permissions` declares `@cli_util.option('--file', required=True)` without `@cli_util.wrap_exceptions`
+- **boci:** exits 1 with `Usage: oci setup repair-file-permissions [OPTIONS]\n\nError: Missing option(s) --file.\n` on stderr
+- **Why:** reproducing an interpreter traceback with machine-specific paths is meaningless; both fail with exit 1 before touching any files.
+- **State:** accepted

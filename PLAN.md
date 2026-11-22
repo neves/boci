@@ -142,7 +142,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Object Storage: `os object bulk-download`.
 - [x] Object Storage: `os object bulk-delete`.
 - [x] Object Storage: `os object sync`.
-- [ ] `setup config`, `setup keys`, `setup repair-file-permissions`, `setup autocomplete`.
+- [x] `setup repair-file-permissions`.
+- [ ] `setup keys`.
+- [ ] `setup config`.
+- [ ] `setup autocomplete`.
 - [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.
 
 ## Rung 8 — Remaining Custom commands

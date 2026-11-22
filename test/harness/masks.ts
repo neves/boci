@@ -37,6 +37,11 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "Python tracebacks from oci worker pools carry the local site-packages install path",
   ],
   [
+    /File (\\?)"[^"\\]+\/scripts\/oci-zygote\.py\1"/g,
+    'File $1"<scripts>/oci-zygote.py$1"',
+    "Python tracebacks captured via the zygote carry the local repo path to oci-zygote.py",
+  ],
+  [
     /OS Version: [^,]+,/g,
     "OS Version: <os>,",
     "MultipartUploadError embeds the local OS kernel/platform version",

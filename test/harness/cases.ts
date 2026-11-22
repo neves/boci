@@ -26,7 +26,10 @@ export type ParityCase = {
     keyPassphrase?: string;
     keyFormat?: "pkcs8" | "pkcs1";
     files?: Record<string, string>;
+    fileModes?: Record<string, number>;
     noConfig?: boolean;
+    configMode?: number;
+    keyMode?: number;
   };
   /** Start a local fake IMDS + X.509 federation server (`{metadata}` and `{federation}`). */
   instanceMetadata?: boolean | MetadataServiceOptions;
@@ -53,6 +56,8 @@ export type CaseExpectations = {
   requestHeaders?: Record<string, string>;
   /** Expected contents of files written relative to the sandbox HOME. */
   files?: Record<string, string>;
+  /** Expected Unix mode bits (e.g. 0o600 = 384) of files relative to the sandbox HOME. */
+  fileModes?: Record<string, number>;
 };
 
 export type Golden = {

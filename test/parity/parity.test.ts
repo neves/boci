@@ -114,7 +114,13 @@ async function runParityCase(c: (typeof cases)[number]) {
     const captureFiles = c.expect?.files
       ? Object.keys(c.expect.files)
       : undefined;
-    const runOpts = captureFiles ? { ...c, captureFiles } : c;
+    const captureFileModes = c.expect?.fileModes
+      ? Object.keys(c.expect.fileModes)
+      : undefined;
+    const runOpts =
+      captureFiles || captureFileModes
+        ? { ...c, captureFiles, captureFileModes }
+        : c;
     const run = spawnsProcess(c)
       ? await runCli(CLIS.boci, c.argv, runOpts)
       : await runInProcess(c.argv, runOpts);
@@ -133,6 +139,8 @@ async function runParityCase(c: (typeof cases)[number]) {
       expect(run.requests[0]?.headers[name]).toBe(value);
     for (const [rel, content] of Object.entries(want.files ?? {}))
       expect(run.files?.[rel]).toBe(content);
+    for (const [rel, mode] of Object.entries(want.fileModes ?? {}))
+      expect(run.fileModes?.[rel]).toBe(mode);
     if (want.golden === false) {
       record(c.key, true);
       return;

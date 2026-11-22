@@ -3,6 +3,7 @@
 // `{config}` placeholders in argv substituted, everything observable captured.
 // runCli spawns a process; runInProcess calls boci's run() in this process with the same
 // sandbox environment (no spawn, module load or spec parsing per case).
+import { stat } from "node:fs/promises";
 import { join } from "node:path";
 import { run } from "../../src/cli.ts";
 import {
@@ -44,6 +45,8 @@ export type Run = {
   sessionPublicKey?: string;
   /** Contents of requested sandbox files after the invocation finishes. */
   files?: Record<string, string>;
+  /** Unix mode bits (`mode & 0o777`) of requested sandbox files after the invocation finishes. */
+  fileModes?: Record<string, number>;
 };
 
 export type RunOptions = {
@@ -56,6 +59,8 @@ export type RunOptions = {
   instanceMetadata?: boolean | MetadataServiceOptions;
   /** Paths relative to the sandbox HOME to read back after the command finishes. */
   captureFiles?: string[];
+  /** Paths relative to the sandbox HOME whose Unix mode bits to read back after the command finishes. */
+  captureFileModes?: string[];
 };
 
 /** Starts one CLI process and collects what it printed; Bun.spawn unless replaced. */
@@ -102,6 +107,7 @@ export async function runCli(
     },
   );
   const files = await readCapturedFiles(sb.home, opts.captureFiles);
+  const fileModes = await readCapturedFileModes(sb.home, opts.captureFileModes);
   return captured(
     sb,
     fake.url,
@@ -111,13 +117,15 @@ export async function runCli(
     fake.requests,
     metadata,
     files,
+    fileModes,
   );
 }
 
 /**
  * boci's run() in this process, observing what a spawned `boci` would: same argv, env, cwd
  * and stdin, stdout/stderr captured, no terminal. The sandbox is shared between runs with
- * the same config (unless captureFiles is set, indicating the command writes to the sandbox).
+ * the same config (unless captureFiles or captureFileModes is set, indicating the command
+ * mutates the sandbox).
  * Network: fetch reads the proxy settings from this process, so the sandbox's dead-proxy
  * safety net is installed here once.
  */
@@ -126,7 +134,9 @@ export async function runInProcess(
   opts: RunOptions = {},
 ): Promise<Run> {
   installProxySafetyNet();
-  const isolated = Boolean(opts.captureFiles?.length);
+  const isolated = Boolean(
+    opts.captureFiles?.length || opts.captureFileModes?.length,
+  );
   const sb = isolated
     ? await createSandbox(opts.config, opts.sandbox)
     : await sharedSandbox(opts.config, opts.sandbox);
@@ -161,6 +171,10 @@ export async function runInProcess(
       exitCode = 1;
     }
     const files = await readCapturedFiles(sb.home, opts.captureFiles);
+    const fileModes = await readCapturedFileModes(
+      sb.home,
+      opts.captureFileModes,
+    );
     return captured(
       sb,
       fake.url,
@@ -170,6 +184,7 @@ export async function runInProcess(
       fake.requests,
       metadata,
       files,
+      fileModes,
     );
   } finally {
     if (isolated) await sb[Symbol.asyncDispose]();
@@ -232,6 +247,22 @@ async function readCapturedFiles(
   return out;
 }
 
+async function readCapturedFileModes(
+  home: string,
+  paths?: string[],
+): Promise<Record<string, number> | undefined> {
+  if (!paths?.length) return undefined;
+  const out: Record<string, number> = {};
+  for (const rel of paths) {
+    try {
+      out[rel] = (await stat(join(home, rel))).mode & 0o777;
+    } catch {
+      // Missing file: leave unset so assertions see undefined.
+    }
+  }
+  return out;
+}
+
 function captured(
   sb: Sandbox,
   url: string,
@@ -241,6 +272,7 @@ function captured(
   requests: CapturedRequest[],
   metadata?: FakeMetadataService,
   files?: Record<string, string>,
+  fileModes?: Record<string, number>,
 ): Run {
   const norm = (s: string) => {
     let out = s.replaceAll(sb.home, "{home}").replaceAll(url, "{endpoint}");
@@ -261,6 +293,7 @@ function captured(
       ? { sessionPublicKey: metadata.sessionPublicKey }
       : {}),
     ...(files ? { files } : {}),
+    ...(fileModes ? { fileModes } : {}),
   };
 }
 

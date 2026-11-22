@@ -60,6 +60,7 @@ import {
   validateOsNamespace,
 } from "./os.ts";
 import { printResult } from "./output.ts";
+import { runSetupRepairFilePermissions } from "./setup.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -661,6 +662,15 @@ async function main(io: Invocation): Promise<void> {
           rawOutput: rootValues.raw_output,
           rc,
         },
+      });
+      return;
+    }
+
+    if (name === "setup" && key === "repair-file-permissions") {
+      runSetupRepairFilePermissions(io, {
+        values,
+        usageError: (message) =>
+          showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
       });
       return;
     }

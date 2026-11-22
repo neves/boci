@@ -137,7 +137,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Object Storage: `os object put` (single-part).
 - [x] Object Storage: `os object get` (multipart).
 - [x] Object Storage: `os object put` (multipart and stdin).
-- [ ] Object Storage: `os object resume-put`.
+- [x] Object Storage: `os object resume-put`.
 - [ ] Object Storage: `os object bulk-upload`, `bulk-download`, `bulk-delete`.
 - [ ] Object Storage: `os object sync`.
 - [ ] `setup config`, `setup keys`, `setup repair-file-permissions`, `setup autocomplete`.

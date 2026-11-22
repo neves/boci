@@ -34,6 +34,7 @@ const IMPLEMENTED = new Set<string>([
   // Custom commands.
   "os object get",
   "os object put",
+  "os object resume-put",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

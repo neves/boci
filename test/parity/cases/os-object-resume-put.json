@@ -1,0 +1,1298 @@
+[
+  {
+    "id": "os-object-resume-put-basic",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-1",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-1",
+          "opc-multipart-md5": "jXgM+82WIqp3ARVk5hUGXw==-1",
+          "last-modified": "Wed, 21 Oct 2026 07:28:00 GMT",
+          "x-ignored-header": "should-not-display"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-default-part-size",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-default-ps"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-default-ps"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-all-uploaded",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-all",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "etag": "existing-etag-1",
+            "md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+            "size": 12,
+            "partNumber": 1
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-all",
+          "opc-multipart-md5": "jXgM+82WIqp3ARVk5hUGXw==-1"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-size-mismatch",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-size-mismatch",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "etag": "wrong-size-etag-1",
+            "md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+            "size": 5,
+            "partNumber": 1
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "fresh-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-size-mismatch"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-md5-mismatch-same-size",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-md5-mismatch",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "etag": "stale-etag-1",
+            "md5": "00000000000000000000000000000000",
+            "size": 12,
+            "partNumber": 1
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-md5-mismatch"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-extra-server-parts",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-extra",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "etag": "existing-etag-1",
+            "md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+            "size": 12,
+            "partNumber": 1
+          },
+          {
+            "etag": "extra-etag-2",
+            "md5": "AAAAAAAAAAAAAAAAAAAAAA==",
+            "size": 100,
+            "partNumber": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-server-part-num-out-of-range",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-oor",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "etag": "etag-part-2",
+            "md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+            "size": 12,
+            "partNumber": 2
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-oor"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-paginated-list",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-paged",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "opc-next-page": "page-token-2"
+        },
+        "body": []
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "etag": "paged-etag-1",
+            "md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+            "size": 12,
+            "partNumber": 1
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-paged"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-default-name",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--file",
+      "{home}/derived.txt",
+      "--upload-id",
+      "upload-resume-name",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "derived.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-derived"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-nested-name",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "dir/sub dir/file+1.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-nested",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-nested",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-nested"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-auto-namespace",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-autons",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": "\"autons\""
+      },
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-autons",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-autons"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-auto-namespace-error",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-autons-err"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 403,
+        "headers": {
+          "opc-request-id": "req-ns-403"
+        },
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Authorization failed."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-bad-namespace",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "bad ns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-badns"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    }
+  },
+  {
+    "id": "os-object-resume-put-bad-file",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "missing.txt",
+      "--file",
+      "{home}/missing.txt",
+      "--upload-id",
+      "upload-resume-missing"
+    ]
+  },
+  {
+    "id": "os-object-resume-put-directory-file",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "dir.txt",
+      "--file",
+      "{home}",
+      "--upload-id",
+      "upload-resume-dir"
+    ]
+  },
+  {
+    "id": "os-object-resume-put-stdin-file",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "stdin.txt",
+      "--file",
+      "-",
+      "--upload-id",
+      "upload-resume-stdin"
+    ],
+    "stdin": "hello world\n"
+  },
+  {
+    "id": "os-object-resume-put-empty-file",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "empty.txt",
+      "--file",
+      "{home}/empty.txt",
+      "--upload-id",
+      "upload-resume-empty"
+    ],
+    "sandbox": {
+      "files": {
+        "empty.txt": ""
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-empty"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-disable-parallel",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-noparallel",
+      "--part-size",
+      "1",
+      "--disable-parallel-uploads"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-noparallel"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-parallel-count",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-pc",
+      "--part-size",
+      "1",
+      "--parallel-upload-count",
+      "2"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-pc"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-parallel-disable-conflict",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-conflict",
+      "--parallel-upload-count",
+      "2",
+      "--disable-parallel-uploads"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    }
+  },
+  {
+    "id": "os-object-resume-put-parallel-out-of-range",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-range",
+      "--parallel-upload-count",
+      "0"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    }
+  },
+  {
+    "id": "os-object-resume-put-list-error",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-404"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-list-404"
+        },
+        "body": {
+          "code": "NoSuchUpload",
+          "message": "The specified upload does not exist."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-upload-part-error",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-part-err",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 400,
+        "headers": {
+          "opc-request-id": "req-part-400"
+        },
+        "body": {
+          "code": "InvalidParameter",
+          "message": "Part upload rejected."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-commit-error",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-commit-err",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 400,
+        "headers": {
+          "opc-request-id": "req-commit-400"
+        },
+        "body": {
+          "code": "InvalidParameter",
+          "message": "Commit rejected."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-query-output",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "etag",
+      "--raw-output",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-query",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-queried",
+          "opc-multipart-md5": "jXgM+82WIqp3ARVk5hUGXw==-1"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-missing-required",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns"
+    ]
+  },
+  {
+    "id": "os-object-resume-put-from-json",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "--from-json",
+      "file://{home}/input.json"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n",
+        "input.json": "{\"namespace\":\"myns\",\"bucketName\":\"mybucket\",\"name\":\"from-json.txt\",\"file\":\"{home}/hello.txt\",\"uploadId\":\"upload-from-json\",\"partSize\":1}"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-fj",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-from-json"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-size-mismatch-1mib",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-size-1mib",
+      "--part-size",
+      "2"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "etag": "wrong-size-1mib",
+            "md5": "b1kCrCNwJL3QwXbLkwY9xA==",
+            "size": 1048576,
+            "partNumber": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-with-retries",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "os",
+      "object",
+      "resume-put",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/hello.txt",
+      "--upload-id",
+      "upload-resume-retries",
+      "--part-size",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "hello.txt": "hello world\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": []
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "part-etag-1",
+          "opc-content-md5": "b1kCrCNwJL3QwXbLkwY9xA=="
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "etag": "etag-commit-retries"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-empty-file-auto-ns",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-bn",
+      "mybucket",
+      "--name",
+      "empty.txt",
+      "--file",
+      "{home}/empty.txt",
+      "--upload-id",
+      "upload-resume-empty-ns"
+    ],
+    "sandbox": {
+      "files": {
+        "empty.txt": ""
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": "\"autons\""
+      }
+    ]
+  },
+  {
+    "id": "os-object-resume-put-stdin-auto-ns",
+    "key": "os object resume-put",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "resume-put",
+      "-bn",
+      "mybucket",
+      "--name",
+      "stdin.txt",
+      "--file",
+      "-",
+      "--upload-id",
+      "upload-resume-stdin-ns"
+    ],
+    "stdin": "hello world\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": "\"autons\""
+      }
+    ]
+  }
+]

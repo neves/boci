@@ -51,6 +51,7 @@ import {
   openClickFileForWrite,
   runOsObjectGet,
   runOsObjectPut,
+  runOsObjectResumePut,
   validateClickFileForRead,
   validateOsNamespace,
 } from "./os.ts";
@@ -476,6 +477,10 @@ async function main(io: Invocation): Promise<void> {
           ) {
             validateClickFileForRead(io, values[p.name] as string);
           }
+        } else if (name === "os" && key === "object resume-put") {
+          if (p.name === "file" && typeof values[p.name] === "string") {
+            validateClickFileForRead(io, values[p.name] as string);
+          }
         }
       } catch (e) {
         if (e instanceof BadParameter)
@@ -538,6 +543,24 @@ async function main(io: Invocation): Promise<void> {
 
     if (name === "os" && key === "object put") {
       await runOsObjectPut(io, {
+        values,
+        rootValues,
+        settings,
+        spec,
+        index,
+        usageText: () => usage(io, commandPath, cmd.helpDoc),
+        outputOptions: {
+          query: rootValues.query,
+          output: rootValues.output,
+          rawOutput: rootValues.raw_output,
+          rc,
+        },
+      });
+      return;
+    }
+
+    if (name === "os" && key === "object resume-put") {
+      await runOsObjectResumePut(io, {
         values,
         rootValues,
         settings,

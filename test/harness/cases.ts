@@ -51,6 +51,8 @@ export type CaseExpectations = {
   requests?: number;
   /** Headers expected on the first captured request. */
   requestHeaders?: Record<string, string>;
+  /** Expected contents of files written relative to the sandbox HOME. */
+  files?: Record<string, string>;
 };
 
 export type Golden = {

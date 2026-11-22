@@ -111,9 +111,13 @@ async function runParityCase(c: (typeof cases)[number]) {
       golden?.caseHash,
       `stale golden: run \`bun run golden --filter ${c.id}\``,
     ).toBe(caseHash(c));
+    const captureFiles = c.expect?.files
+      ? Object.keys(c.expect.files)
+      : undefined;
+    const runOpts = captureFiles ? { ...c, captureFiles } : c;
     const run = spawnsProcess(c)
-      ? await runCli(CLIS.boci, c.argv, c)
-      : await runInProcess(c.argv, c);
+      ? await runCli(CLIS.boci, c.argv, runOpts)
+      : await runInProcess(c.argv, runOpts);
     const want = c.expect ?? {};
     if (want.exitCode !== undefined) expect(run.exitCode).toBe(want.exitCode);
     if (want.stdout !== undefined) expect(run.stdout).toBe(want.stdout);
@@ -127,6 +131,8 @@ async function runParityCase(c: (typeof cases)[number]) {
       expect(run.requests).toHaveLength(want.requests);
     for (const [name, value] of Object.entries(want.requestHeaders ?? {}))
       expect(run.requests[0]?.headers[name]).toBe(value);
+    for (const [rel, content] of Object.entries(want.files ?? {}))
+      expect(run.files?.[rel]).toBe(content);
     if (want.golden === false) {
       record(c.key, true);
       return;

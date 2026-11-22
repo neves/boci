@@ -14,6 +14,8 @@ export type Invocation = {
   /** Relative paths resolve against this. */
   cwd: string;
   out(text: string): void;
+  /** Write raw bytes to stdout without UTF-8 decoding (falls back to `out` if omitted). */
+  outBytes?(bytes: Uint8Array): void;
   err(text: string): void;
   /** Only decides colouring and help width, never behaviour. */
   isTTY(fd: 1 | 2): boolean;
@@ -35,23 +37,35 @@ export type Invocation = {
  * stack (~7 ms of start-up). Writes are queued in order and flushed with Bun.write.
  */
 export function processStdio() {
-  type Chunk = { fd: 1 | 2; text: string };
+  type Chunk = { fd: 1 | 2; data: string | Uint8Array };
   const queue: Chunk[] = [];
   const flush = async (): Promise<void> => {
     while (queue.length) {
-      const fd = (queue[0] as Chunk).fd;
-      let text = "";
-      while (queue.length && (queue[0] as Chunk).fd === fd)
-        text += (queue.shift() as Chunk).text;
-      await Bun.write(fd === 1 ? Bun.stdout : Bun.stderr, text);
+      const first = queue.shift() as Chunk;
+      const target = first.fd === 1 ? Bun.stdout : Bun.stderr;
+      if (typeof first.data !== "string") {
+        await Bun.write(target, first.data);
+        continue;
+      }
+      let text = first.data;
+      while (
+        queue.length &&
+        (queue[0] as Chunk).fd === first.fd &&
+        typeof (queue[0] as Chunk).data === "string"
+      )
+        text += (queue.shift() as Chunk).data as string;
+      await Bun.write(target, text);
     }
   };
   return {
     out: (text: string) => {
-      queue.push({ fd: 1, text });
+      queue.push({ fd: 1, data: text });
+    },
+    outBytes: (bytes: Uint8Array) => {
+      queue.push({ fd: 1, data: bytes });
     },
     err: (text: string) => {
-      queue.push({ fd: 2, text });
+      queue.push({ fd: 2, data: text });
     },
     /** Write everything queued so far, in order (consecutive chunks per stream are merged). */
     flush,
@@ -59,7 +73,7 @@ export function processStdio() {
     columns: () => process.stdout.columns,
     async promptSecret(prompt: string): Promise<string> {
       if (isTTY(0)) {
-        queue.push({ fd: 2, text: prompt });
+        queue.push({ fd: 2, data: prompt });
         await flush();
         Bun.spawnSync(["stty", "-echo"], { stdin: "inherit" });
         try {
@@ -71,7 +85,7 @@ export function processStdio() {
       }
       queue.push({
         fd: 2,
-        text: `Warning: Password input may be echoed.\n${prompt}\n`,
+        data: `Warning: Password input may be echoed.\n${prompt}\n`,
       });
       await flush();
       return readLineSync(0);

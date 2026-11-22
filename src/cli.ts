@@ -1,7 +1,7 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
-import { readFileSync } from "node:fs";
+import { closeSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
 import { parseConfig, sectionItems } from "./configparser.ts";
@@ -46,6 +46,13 @@ import { isImplemented } from "./registry.ts";
 import { Exit, type Env, type Invocation } from "./io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { callOperation } from "./operation.ts";
+import {
+  type OutputFileHandle,
+  openClickFileForWrite,
+  runOsObjectGet,
+  validateClickFileForRead,
+  validateOsNamespace,
+} from "./os.ts";
 import { printResult } from "./output.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
@@ -432,85 +439,128 @@ async function main(io: Invocation): Promise<void> {
     }
   }
   const values: Record<string, unknown> = {};
-  for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
-    if (p.name === "from_json") continue;
-    const rawVal =
-      parsed.opts[p.name] !== undefined
-        ? parsed.opts[p.name]
-        : fromJsonDefaults[p.name];
-    if (rawVal === undefined || rawVal === null) continue;
-    try {
-      values[p.name] = convert(p, rawVal, index.datetime);
-    } catch (e) {
-      if (e instanceof BadParameter)
-        showPatched(
-          io,
-          usage(io, commandPath, cmd.helpDoc),
-          `Invalid value for ${errorHint(p)}: ${e.message}`,
-        );
-      throw e;
+  let osObjectGetOutputFile: OutputFileHandle | undefined;
+  try {
+    for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
+      if (p.name === "from_json") continue;
+      const rawVal =
+        parsed.opts[p.name] !== undefined
+          ? parsed.opts[p.name]
+          : fromJsonDefaults[p.name];
+      if (rawVal === undefined || rawVal === null) continue;
+      try {
+        values[p.name] = convert(p, rawVal, index.datetime);
+        if (
+          name === "os" &&
+          (p.name === "namespace" || p.name === "namespace_name")
+        ) {
+          validateOsNamespace(values[p.name]);
+        }
+        if (name === "os" && key === "object get") {
+          if (p.name === "file" && typeof values[p.name] === "string") {
+            osObjectGetOutputFile = openClickFileForWrite(
+              io,
+              values[p.name] as string,
+            );
+          } else if (
+            p.name === "encryption_key_file" &&
+            typeof values[p.name] === "string"
+          ) {
+            validateClickFileForRead(io, values[p.name] as string);
+          }
+        }
+      } catch (e) {
+        if (e instanceof BadParameter)
+          showPatched(
+            io,
+            usage(io, commandPath, cmd.helpDoc),
+            `Invalid value for ${errorHint(p)}: ${e.message}`,
+          );
+        throw e;
+      }
     }
-  }
-  if (parsed.args.length && !cmd.helpDoc.parse.allowExtra) {
-    const n = parsed.args.length;
-    showPatched(
-      io,
-      usage(io, commandPath, cmd.helpDoc),
-      `Got unexpected extra argument${n === 1 ? "" : "s"} (${parsed.args.join(" ")})`,
-    );
-  }
+    if (parsed.args.length && !cmd.helpDoc.parse.allowExtra) {
+      const n = parsed.args.length;
+      showPatched(
+        io,
+        usage(io, commandPath, cmd.helpDoc),
+        `Got unexpected extra argument${n === 1 ? "" : "s"} (${parsed.args.join(" ")})`,
+      );
+    }
 
-  // oci's required check (cli_util._coalesce_param → wrap_exceptions): params marked
-  // required that got no value, in processing order, reported with sys.exit → stderr, 1.
-  // oci_cli_rc defaults count as provided. TODO: the os/iam service fallbacks.
-  const defaults = rcDefaults(rc, settings.profile);
-  const missing: string[] = [];
-  for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
-    if (p.name === "from_json" || p.name === "help") continue;
-    if (!isMissing(values[p.name] ?? parsed.opts[p.name])) continue;
-    const rcVal = lookupDefault(defaults, rc, path, p);
-    if (rcVal !== undefined && rcVal !== null) {
-      values[p.name] = convertDefaultValue(io.env, p, rcVal, index.datetime);
-      continue;
+    // oci's required check (cli_util._coalesce_param → wrap_exceptions): params marked
+    // required that got no value, in processing order, reported with sys.exit → stderr, 1.
+    // oci_cli_rc defaults count as provided. TODO: the os/iam service fallbacks.
+    const defaults = rcDefaults(rc, settings.profile);
+    const missing: string[] = [];
+    for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
+      if (p.name === "from_json" || p.name === "help") continue;
+      if (!isMissing(values[p.name] ?? parsed.opts[p.name])) continue;
+      const rcVal = lookupDefault(defaults, rc, path, p);
+      if (rcVal !== undefined && rcVal !== null) {
+        values[p.name] = convertDefaultValue(io.env, p, rcVal, index.datetime);
+        continue;
+      }
+      if (p.required && !p.isFlag) missing.push(p.name.replaceAll("_", "-"));
     }
-    if (p.required && !p.isFlag) missing.push(p.name.replaceAll("_", "-"));
-  }
-  if (missing.length) {
-    io.err(
-      `${usage(io, commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
-    );
-    throw new Exit(1);
-  }
-  for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
-    if (values[p.name] !== undefined && isComplexParam(p)) {
-      values[p.name] = parseJsonParameter(io, p.name, values[p.name]);
+    if (missing.length) {
+      io.err(
+        `${usage(io, commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
+      );
+      throw new Exit(1);
     }
-  }
+    for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
+      if (values[p.name] !== undefined && isComplexParam(p)) {
+        values[p.name] = parseJsonParameter(io, p.name, values[p.name]);
+      }
+    }
 
-  const http = specCmd.operation?.http ?? "";
-  if (
-    (key === "ns get" && name === "os") ||
-    (specCmd.kind === "generated" &&
-      ["GET", "POST", "PUT", "PATCH"].includes(http) &&
-      isImplemented(`${name} ${key}`, specCmd))
-  ) {
-    const result = await callOperation(io, {
-      command: specCmd,
-      values,
-      rootValues,
-      settings,
-      spec,
-      index,
-    });
-    printResult(io, result, {
-      query: rootValues.query,
-      output: rootValues.output,
-      rawOutput: rootValues.raw_output,
-      rc,
-    });
-    return;
+    if (name === "os" && key === "object get") {
+      await runOsObjectGet(io, {
+        values,
+        rootValues,
+        settings,
+        spec,
+        index,
+        usageText: () => usage(io, commandPath, cmd.helpDoc),
+        outputFile: osObjectGetOutputFile,
+      });
+      return;
+    }
+
+    const http = specCmd.operation?.http ?? "";
+    if (
+      (key === "ns get" && name === "os") ||
+      (specCmd.kind === "generated" &&
+        ["GET", "POST", "PUT", "PATCH"].includes(http) &&
+        isImplemented(`${name} ${key}`, specCmd))
+    ) {
+      const result = await callOperation(io, {
+        command: specCmd,
+        values,
+        rootValues,
+        settings,
+        spec,
+        index,
+      });
+      printResult(io, result, {
+        query: rootValues.query,
+        output: rootValues.output,
+        rawOutput: rootValues.raw_output,
+        rc,
+      });
+      return;
+    }
+    await notImplemented(io, argv, commandPath);
+  } finally {
+    if (osObjectGetOutputFile?.fd !== undefined) {
+      try {
+        closeSync(osObjectGetOutputFile.fd);
+      } catch {
+        // Ignore close errors during cleanup.
+      }
+    }
   }
-  await notImplemented(io, argv, commandPath);
 }
 
 const COMPLEX_TYPE_CLASS =

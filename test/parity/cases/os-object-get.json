@@ -1,0 +1,495 @@
+[
+  {
+    "id": "os-object-get-stdout",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "-"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "12",
+          "etag": "etag-hello"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain",
+          "etag": "etag-hello"
+        },
+        "body": "hello world\n"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-file",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/downloaded.txt"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "12",
+          "etag": "etag-hello"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain",
+          "etag": "etag-hello"
+        },
+        "body": "hello world\n"
+      }
+    ],
+    "expect": {
+      "files": {
+        "downloaded.txt": "hello world\n"
+      }
+    }
+  },
+  {
+    "id": "os-object-get-auto-namespace",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-bn",
+      "mybucket",
+      "--name",
+      "auto.txt",
+      "--file",
+      "-"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": "resolvedns"
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "4",
+          "etag": "etag-auto"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "auto"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-auto-namespace-error",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-bn",
+      "mybucket",
+      "--name",
+      "auto.txt",
+      "--file",
+      "-"
+    ],
+    "replies": [
+      {
+        "status": 401,
+        "body": {
+          "code": "NotAuthenticated",
+          "message": "The required information to complete authentication was not provided or was incorrect."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-invalid-namespace",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "bad ns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "-"
+    ]
+  },
+  {
+    "id": "os-object-get-nested-name",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "dir/sub dir/file+1.txt",
+      "--file",
+      "-"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "6"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "nested"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-options",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "-",
+      "--version-id",
+      "v1",
+      "--if-match",
+      "etag-1",
+      "--if-none-match",
+      "etag-2",
+      "--range",
+      "bytes=0-4",
+      "--no-multipart",
+      "--http-response-content-disposition",
+      "attachment; filename=\"a.txt\"",
+      "--http-response-cache-control",
+      "no-cache",
+      "--http-response-content-type",
+      "text/plain",
+      "--http-response-content-language",
+      "en-US",
+      "--http-response-content-encoding",
+      "identity",
+      "--http-response-expires",
+      "Wed, 21 Oct 2026 07:28:00 GMT"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "12",
+          "etag": "etag-1"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "hello"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-encryption-key",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "secret.txt",
+      "--file",
+      "-",
+      "--encryption-key-file",
+      "{home}/sse.key"
+    ],
+    "sandbox": {
+      "files": {
+        "sse.key": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "6"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "secret"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-not-found",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "missing.txt",
+      "--file",
+      "-"
+    ],
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-404"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-get-error",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "-",
+      "--if-match",
+      "wrong-etag"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "12"
+        },
+        "body": ""
+      },
+      {
+        "status": 412,
+        "headers": {
+          "opc-request-id": "req-412"
+        },
+        "body": {
+          "code": "IfMatchFailed",
+          "message": "If-Match failed."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-empty",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "empty.txt",
+      "--file",
+      "-"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "0"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-bad-file-path",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "{home}/no-such-dir/out.txt"
+    ]
+  },
+  {
+    "id": "os-object-get-bad-encryption-key-file",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "hello.txt",
+      "--file",
+      "-",
+      "--encryption-key-file",
+      "{home}/missing.key"
+    ]
+  },
+  {
+    "id": "os-object-get-empty-file",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "empty.bin",
+      "--file",
+      "{home}/empty.bin"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "0"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": ""
+      }
+    ],
+    "expect": {
+      "files": {
+        "empty.bin": ""
+      }
+    }
+  }
+]

@@ -51,6 +51,50 @@ export type OperationResult = {
   allPages: boolean;
   /** With --all on a list operation, every page's items in order. */
   pageItems: unknown[];
+  /** SDK client serviceName for ServiceError.target_service. */
+  targetService?: string;
+};
+
+export type ClientSettings = {
+  configFile: string;
+  profile: string;
+  auth: string | null;
+};
+
+export type ServiceClient = {
+  client: Record<string, unknown>;
+  targetService?: string;
+  index: Pick<Index, "regions">;
+  rootValues: Record<string, unknown>;
+  keyId: string;
+  privateKey: KeyObject;
+  endpointOpt?: string;
+  region?: string;
+  regionMetadata?: Awaited<ReturnType<typeof loadExternalRegionMetadata>>;
+  realmSpecific: boolean;
+  dualStack: boolean;
+  connectionTimeout?: number;
+  readTimeout?: number;
+  maxAttempts: number;
+};
+
+export type ServiceRequestOptions = {
+  method: string;
+  pathTemplate: string;
+  pathParams?: Record<string, string>;
+  queryParams?: [string, string][];
+  headers?: Record<string, string>;
+  body?: string | Uint8Array;
+  requestIdHeader?: "opc-request-id" | "opc-client-request-id";
+  noRetry?: boolean;
+  rawResponse?: boolean;
+  decompress?: boolean;
+};
+
+export type ServiceResponse = {
+  url: URL;
+  response: Response;
+  raw: string;
 };
 
 export type GeneratedCommand = ServiceSpec["commands"][string] & {
@@ -187,27 +231,21 @@ function buildRequestBody(
 }
 
 /**
- * Send the command's request and return the response (any status). Usage, config, key and
- * file:// problems are reported on the invocation's sinks and end it with Exit(1); a network
- * error that outlives the retries is thrown.
+ * Build a reusable authenticated OCI service client for one CLI invocation (config,
+ * permissions warning, auth principal/key, endpoint metadata, timeout & retry settings).
  */
-export async function callOperation(
+export async function createServiceClient(
   io: Invocation,
-  call: OperationCall,
-): Promise<OperationResult> {
-  const { command, values, rootValues, settings, spec, index } = call;
-  const operation = command.operation as OperationSpec;
-  let requestBody = "";
-  if (operation.http === "GET") {
-    if (values.all_pages === true && values.limit !== undefined) {
-      io.err(
-        "UsageError: If you provide the --all option you cannot provide the --limit option\n",
-      );
-      throw new Exit(1);
-    }
-  } else requestBody = buildRequestBody(io, command, values, rootValues);
-  const boundValue = (arg: string) =>
-    boundValueFor(io, command, values, rootValues, arg);
+  opts: {
+    client: Record<string, unknown>;
+    values?: Record<string, unknown>;
+    rootValues: Record<string, unknown>;
+    settings: ClientSettings;
+    index: Pick<Index, "regions">;
+    noRetry?: boolean;
+  },
+): Promise<ServiceClient> {
+  const { client, values = {}, rootValues, settings, index, noRetry } = opts;
   const isInstancePrincipal = settings.auth === "instance_principal";
   const isResourcePrincipal = settings.auth === "resource_principal";
   const configOptional = isInstancePrincipal || isResourcePrincipal;
@@ -274,7 +312,6 @@ export async function callOperation(
       throw new Exit(1);
     }
   }
-  const client = spec.clients[operation.client] as Record<string, unknown>;
   const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
     string | undefined;
   const region = (rootValues.region ??
@@ -285,71 +322,6 @@ export async function callOperation(
     region && !endpointOpt
       ? await loadExternalRegionMetadata(region, index.regions, io.env)
       : undefined;
-  const serviceParams: Record<string, string> = {};
-  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = boundValue(arg);
-    if (value !== undefined) serviceParams[name] = String(value);
-  }
-  for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
-    const value = arg ? boundValue(arg) : undefined;
-    if (value !== undefined) serviceParams[name] = String(value);
-  }
-  const { resolved } = resolveEndpoint(client, index.regions, {
-    env: io.env,
-    region,
-    endpoint: endpointOpt,
-    regionMetadata,
-    serviceParams,
-    realmSpecific: configBool(
-      rootValues.realm_specific_endpoint ??
-        values.realm_specific_endpoint ??
-        config.realm_specific_service_endpoint_template_enabled,
-    ),
-    dualStack: configBool(
-      rootValues.enable_dual_stack ??
-        values.enable_dual_stack ??
-        config.dual_stack_endpoint_enabled,
-    ),
-  });
-  let path = operation.path;
-  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = boundValue(arg);
-    if (value !== undefined)
-      path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
-  }
-  const url = new URL(`${resolved}${path}`);
-  for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
-    const value = arg ? boundValue(arg) : undefined;
-    if (value !== undefined) url.searchParams.set(name, String(value));
-  }
-  const allPages = values.all_pages === true;
-  const limit = values.limit;
-  const pageSize = values.page_size;
-  if ((allPages || limit !== undefined) && pageSize !== undefined)
-    url.searchParams.set("limit", String(pageSize));
-  const baseUrl = new URL(url);
-  const headers: Record<string, string> =
-    operation.http === "GET" ? {} : { "content-type": "application/json" };
-  if (operation.http !== "GET" && operation.client.startsWith("log_analytics."))
-    headers.expect = "100-continue";
-  for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
-    const value =
-      param.value ?? (param.arg ? boundValue(param.arg) : undefined);
-    if (value !== undefined) headers[name] = String(value);
-  }
-  if (
-    operation.headerParams?.["opc-retry-token"] &&
-    headers["opc-retry-token"] === undefined
-  )
-    headers["opc-retry-token"] = randomBytes(22).toString("base64url");
-  if (rootValues.no_retry !== true) headers["opc-client-retries"] = "true";
-  if (rootValues.request_id !== undefined) {
-    const requestIdHeader =
-      operation.headerParams?.["opc-request-id"] !== undefined
-        ? "opc-request-id"
-        : "opc-client-request-id";
-    headers[requestIdHeader] = String(rootValues.request_id);
-  }
   let keyId: string;
   let privateKey: KeyObject;
   if (principal) {
@@ -405,96 +377,268 @@ export async function callOperation(
       }
     }
   }
-  const req = {
-    method: operation.http,
-    url: url.toString(),
-    headers,
-    body: requestBody,
-  };
-  prepareContentLength(req);
   const connectionTimeout = timeoutSecondsFor(
     rootValues.connection_timeout ?? config.connection_timeout,
   );
   const readTimeout = timeoutSecondsFor(
     rootValues.read_timeout ?? config.read_timeout,
   );
-  const hasNoneRetry =
-    command.bindings?.some((b) => b.transform === "NoneRetryStrategy") === true;
   const maxAttempts =
-    rootValues.no_retry === true || hasNoneRetry
+    rootValues.no_retry === true || noRetry
       ? 1
       : Math.max(1, Number(rootValues.max_retries) || 8);
+  return {
+    client,
+    targetService:
+      typeof client.serviceName === "string" ? client.serviceName : undefined,
+    index,
+    rootValues,
+    keyId,
+    privateKey,
+    endpointOpt,
+    region,
+    regionMetadata,
+    realmSpecific: configBool(
+      rootValues.realm_specific_endpoint ??
+        values.realm_specific_endpoint ??
+        config.realm_specific_service_endpoint_template_enabled,
+    ),
+    dualStack: configBool(
+      rootValues.enable_dual_stack ??
+        values.enable_dual_stack ??
+        config.dual_stack_endpoint_enabled,
+    ),
+    connectionTimeout,
+    readTimeout,
+    maxAttempts,
+  };
+}
+
+/** Resolve endpoint + encoded path + query params for a service request. */
+export function buildServiceUrl(
+  io: Invocation,
+  sc: ServiceClient,
+  pathTemplate: string,
+  pathParams: Record<string, string> = {},
+  queryParams: [string, string][] = [],
+): URL {
+  const serviceParams: Record<string, string> = { ...pathParams };
+  for (const [k, v] of queryParams) serviceParams[k] = v;
+  const { resolved } = resolveEndpoint(sc.client, sc.index.regions, {
+    env: io.env,
+    region: sc.region,
+    endpoint: sc.endpointOpt,
+    regionMetadata: sc.regionMetadata,
+    serviceParams,
+    realmSpecific: sc.realmSpecific,
+    dualStack: sc.dualStack,
+  });
+  let path = pathTemplate;
+  for (const [name, value] of Object.entries(pathParams)) {
+    path = path.replace(`{${name}}`, encodeURIComponent(value));
+  }
+  const url = new URL(`${resolved}${path}`);
+  for (const [name, value] of queryParams) {
+    url.searchParams.set(name, value);
+  }
+  return url;
+}
+
+/** Send one signed HTTP request with the client's timeouts, retries and debug logging. */
+export async function sendServiceRequest(
+  io: Invocation,
+  sc: ServiceClient,
+  opts: ServiceRequestOptions,
+): Promise<ServiceResponse> {
+  const url = buildServiceUrl(
+    io,
+    sc,
+    opts.pathTemplate,
+    opts.pathParams,
+    opts.queryParams,
+  );
+  const headers: Record<string, string> = { ...opts.headers };
+  const useRetry = sc.rootValues.no_retry !== true && opts.noRetry !== true;
+  if (useRetry && headers["opc-client-retries"] === undefined) {
+    headers["opc-client-retries"] = "true";
+  }
+  if (sc.rootValues.request_id !== undefined) {
+    const reqIdHeader = opts.requestIdHeader ?? "opc-client-request-id";
+    headers[reqIdHeader] = String(sc.rootValues.request_id);
+  }
+  const req = {
+    method: opts.method,
+    url: url.toString(),
+    headers,
+    body: opts.body ?? "",
+  };
+  prepareContentLength(req);
+  const maxAttempts = opts.noRetry ? 1 : sc.maxAttempts;
   let response: Response;
-  let raw: string;
-  const pageItems: unknown[] = [];
-  let nextPage: string | null = null;
-  let page = url.searchParams.get("page");
-  do {
-    const pageUrl = new URL(baseUrl);
-    if (page !== null) pageUrl.searchParams.set("page", page);
-    else pageUrl.searchParams.delete("page");
-    req.url = pageUrl.toString();
-    for (let attempt = 1; ; attempt++) {
-      delete req.headers.date;
-      delete req.headers.authorization;
-      signRequest(req, { keyId, privateKey });
-      const controller = new AbortController();
-      const connectionTimer =
-        connectionTimeout === undefined
-          ? undefined
-          : setTimeout(
-              () =>
-                controller.abort(
-                  new DOMException("Connection timed out", "TimeoutError"),
-                ),
-              connectionTimeout * 1000,
-            );
-      const readTimer =
-        readTimeout === undefined
-          ? undefined
-          : setTimeout(
-              () =>
-                controller.abort(
-                  new DOMException("Response read timed out", "TimeoutError"),
-                ),
-              readTimeout * 1000,
-            );
-      try {
-        response = await fetch(req.url, {
-          method: req.method,
-          headers: req.headers,
-          ...(req.body ? { body: req.body } : {}),
-          ...(connectionTimer === undefined && readTimer === undefined
-            ? {}
-            : { signal: controller.signal }),
-        });
-        if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+  let raw = "";
+  for (let attempt = 1; ; attempt++) {
+    delete req.headers.date;
+    delete req.headers.authorization;
+    signRequest(req, { keyId: sc.keyId, privateKey: sc.privateKey });
+    const controller = new AbortController();
+    const connectionTimer =
+      sc.connectionTimeout === undefined
+        ? undefined
+        : setTimeout(
+            () =>
+              controller.abort(
+                new DOMException("Connection timed out", "TimeoutError"),
+              ),
+            sc.connectionTimeout * 1000,
+          );
+    const readTimer =
+      sc.readTimeout === undefined
+        ? undefined
+        : setTimeout(
+            () =>
+              controller.abort(
+                new DOMException("Response read timed out", "TimeoutError"),
+              ),
+            sc.readTimeout * 1000,
+          );
+    try {
+      const init: RequestInit & { decompress?: boolean } = {
+        method: req.method,
+        headers: req.headers,
+        ...(req.body !== "" && req.body !== undefined
+          ? { body: req.body }
+          : {}),
+        ...(connectionTimer === undefined && readTimer === undefined
+          ? {}
+          : { signal: controller.signal }),
+        ...(opts.decompress === false ? { decompress: false } : {}),
+      };
+      response = await fetch(req.url, init);
+      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+      if (opts.rawResponse && response.ok) {
+        raw = "";
+      } else {
         raw = await response.text();
-      } catch (e) {
-        if (connectionTimer !== undefined) clearTimeout(connectionTimer);
-        if (readTimer !== undefined) clearTimeout(readTimer);
-        if (attempt >= maxAttempts) throw e;
-        const delay = Math.min(
-          1000 * 2 ** (attempt - 1) + Math.random() * 1000,
-          30000,
-        );
-        await Bun.sleep(delay);
-        continue;
-      } finally {
-        if (connectionTimer !== undefined) clearTimeout(connectionTimer);
-        if (readTimer !== undefined) clearTimeout(readTimer);
       }
-      if (attempt >= maxAttempts || !retryableResponse(response, raw)) break;
+    } catch (e) {
+      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+      if (readTimer !== undefined) clearTimeout(readTimer);
+      if (attempt >= maxAttempts) throw e;
       const delay = Math.min(
         1000 * 2 ** (attempt - 1) + Math.random() * 1000,
         30000,
       );
       await Bun.sleep(delay);
+      continue;
+    } finally {
+      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+      if (readTimer !== undefined) clearTimeout(readTimer);
     }
-    if (rootValues.debug === true) {
-      io.err(`DEBUG:oci.base_client: Request: ${req.method} ${req.url}\n`);
-      io.err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
+    if (attempt >= maxAttempts || !retryableResponse(response, raw)) break;
+    const delay = Math.min(
+      1000 * 2 ** (attempt - 1) + Math.random() * 1000,
+      30000,
+    );
+    await Bun.sleep(delay);
+  }
+  if (sc.rootValues.debug === true) {
+    io.err(`DEBUG:oci.base_client: Request: ${req.method} ${req.url}\n`);
+    io.err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
+  }
+  return { url, response, raw };
+}
+
+/**
+ * Send the command's request and return the response (any status). Usage, config, key and
+ * file:// problems are reported on the invocation's sinks and end it with Exit(1); a network
+ * error that outlives the retries is thrown.
+ */
+export async function callOperation(
+  io: Invocation,
+  call: OperationCall,
+): Promise<OperationResult> {
+  const { command, values, rootValues, settings, spec, index } = call;
+  const operation = command.operation as OperationSpec;
+  let requestBody = "";
+  if (operation.http === "GET") {
+    if (values.all_pages === true && values.limit !== undefined) {
+      io.err(
+        "UsageError: If you provide the --all option you cannot provide the --limit option\n",
+      );
+      throw new Exit(1);
     }
+  } else requestBody = buildRequestBody(io, command, values, rootValues);
+  const boundValue = (arg: string) =>
+    boundValueFor(io, command, values, rootValues, arg);
+  const client = spec.clients[operation.client] as Record<string, unknown>;
+  const hasNoneRetry =
+    command.bindings?.some((b) => b.transform === "NoneRetryStrategy") === true;
+  const sc = await createServiceClient(io, {
+    client,
+    values,
+    rootValues,
+    settings,
+    index,
+    noRetry: hasNoneRetry,
+  });
+  const pathParams: Record<string, string> = {};
+  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const value = boundValue(arg);
+    if (value !== undefined) pathParams[name] = String(value);
+  }
+  const queryParams: [string, string][] = [];
+  for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
+    const value = arg ? boundValue(arg) : undefined;
+    if (value !== undefined) queryParams.push([name, String(value)]);
+  }
+  const allPages = values.all_pages === true;
+  const limit = values.limit;
+  const pageSize = values.page_size;
+  if ((allPages || limit !== undefined) && pageSize !== undefined) {
+    const existing = queryParams.findIndex(([k]) => k === "limit");
+    if (existing >= 0) queryParams[existing] = ["limit", String(pageSize)];
+    else queryParams.push(["limit", String(pageSize)]);
+  }
+  const baseHeaders: Record<string, string> =
+    operation.http === "GET" ? {} : { "content-type": "application/json" };
+  if (operation.http !== "GET" && operation.client.startsWith("log_analytics."))
+    baseHeaders.expect = "100-continue";
+  for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
+    const value =
+      param.value ?? (param.arg ? boundValue(param.arg) : undefined);
+    if (value !== undefined) baseHeaders[name] = String(value);
+  }
+  if (
+    operation.headerParams?.["opc-retry-token"] &&
+    baseHeaders["opc-retry-token"] === undefined
+  )
+    baseHeaders["opc-retry-token"] = randomBytes(22).toString("base64url");
+  const requestIdHeader =
+    operation.headerParams?.["opc-request-id"] !== undefined
+      ? "opc-request-id"
+      : "opc-client-request-id";
+  let firstUrl: URL | undefined;
+  let response: Response;
+  let raw: string;
+  const pageItems: unknown[] = [];
+  let nextPage: string | null = null;
+  let page = queryParams.find(([k]) => k === "page")?.[1] ?? null;
+  do {
+    const pageQuery = queryParams.filter(([k]) => k !== "page");
+    if (page !== null) pageQuery.push(["page", page]);
+    const sent = await sendServiceRequest(io, sc, {
+      method: operation.http,
+      pathTemplate: operation.path,
+      pathParams,
+      queryParams: pageQuery,
+      headers: baseHeaders,
+      body: requestBody,
+      requestIdHeader,
+      noRetry: hasNoneRetry,
+    });
+    firstUrl ??= sent.url;
+    response = sent.response;
+    raw = sent.raw;
     nextPage = response.headers.get("opc-next-page");
     if (
       allPages &&
@@ -517,7 +661,15 @@ export async function callOperation(
     page = nextPage;
     if (!allPages || !operation.responseType?.startsWith("list[")) break;
   } while (page !== null);
-  return { operation, url, response, raw, allPages, pageItems };
+  return {
+    operation,
+    url: firstUrl,
+    response,
+    raw,
+    allPages,
+    pageItems,
+    targetService: sc.targetService,
+  };
 }
 
 function timeoutSecondsFor(value: unknown): number | undefined {

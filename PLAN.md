@@ -133,7 +133,11 @@ DIVERGENCES.md             recorded Divergences
 
 Ordered by the extractor's custom list, simplest first. Expand this rung into one item per Custom command once Extractor v3 exists.
 
-- [ ] Object Storage: `object put`/`get` single-part, then multipart, then `bulk-upload`/`bulk-download`/`bulk-delete`, then `sync`.
+- [x] Object Storage: `os object get` (single-part).
+- [ ] Object Storage: `os object put` (single-part).
+- [ ] Object Storage: `os object put`/`get` multipart (and `resume-put`).
+- [ ] Object Storage: `os object bulk-upload`, `bulk-download`, `bulk-delete`.
+- [ ] Object Storage: `os object sync`.
 - [ ] `setup config`, `setup keys`, `setup repair-file-permissions`, `setup autocomplete`.
 - [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.
 

@@ -26,9 +26,9 @@ export function printResult(
   result: OperationResult,
   options: OutputOptions,
 ): void {
-  const { operation, url, response, raw } = result;
+  const { operation, url, response, raw, targetService } = result;
   if (!response.ok) {
-    io.err(formatServiceError(operation, url, response, raw));
+    io.err(formatServiceError(operation, url, response, raw, targetService));
     throw new Exit(1);
   }
   renderGeneratedResponse(
@@ -42,11 +42,12 @@ export function printResult(
   );
 }
 
-function formatServiceError(
-  operation: OperationSpec,
+export function formatServiceError(
+  operation: Pick<OperationSpec, "http" | "method">,
   url: URL | string,
   response: Response,
   raw: string,
+  targetService?: string,
 ): string {
   let details: Record<string, unknown> = {};
   try {
@@ -57,7 +58,10 @@ function formatServiceError(
     // Non-JSON error bodies still produce the standard ServiceError envelope.
   }
   const timestamp = new Date().toISOString().replace(/Z$/, "000+00:00");
-  const serviceError = {
+  const serviceError: Record<string, unknown> = {
+    code: null,
+    message: `The service returned error code ${response.status}`,
+    ...(targetService !== undefined ? { target_service: targetService } : {}),
     ...details,
     client_version: "Oracle-PythonSDK/2.192.0, Oracle-PythonCLI/3.96.3",
     logging_tips:

@@ -31,6 +31,8 @@ const IMPLEMENTED = new Set<string>([
   "max-retries",
   // Generated commands outside engineSupports, tested by hand-written cases.
   "email-data-plane email-raw-submitted-response submit-raw-email",
+  // Custom commands.
+  "os object get",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

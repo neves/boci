@@ -403,32 +403,29 @@ async function main(io: Invocation): Promise<void> {
     io.out(`${commandHelp(commandPath, cmd.helpDoc, helpWidth(io))}\n`);
     throw new Exit(0);
   }
-  if (rootValues.generate_full_command_json_input === true) {
-    const sample: Record<string, unknown> = {};
-    for (const p of cmd.params ?? []) {
-      if (
-        p.kind !== "option" ||
-        p.name.startsWith("generate_") ||
-        p.name === "from_json" ||
-        p.name === "help"
-      )
-        continue;
-      const name = toCamelCase(p.name);
-      sample[name] = p.multiple ? ["string"] : "string";
-    }
-    io.out(`${JSON.stringify(sample, null, 2)}\n`);
+  const generateFull = rootValues.generate_full_command_json_input === true;
+  const generateParam = rootValues.generate_param_json_input;
+  if (generateFull && typeof generateParam === "string") {
+    io.err(
+      "UsageError: Cannot specify both the --generate-full-command-json-input and --generate-param-json-input parameters\n",
+    );
+    throw new Exit(1);
+  }
+  if (generateFull) {
+    io.out(
+      `${renderJsonExample(cmd.jsonExamples?.full ?? {}, spec.jsonExamplePool)}\n`,
+    );
     throw new Exit(0);
   }
-  if (typeof rootValues.generate_param_json_input === "string") {
-    const param = (cmd.params ?? []).find(
-      (candidate) =>
-        candidate.name.replaceAll("_", "-") ===
-        rootValues.generate_param_json_input,
-    );
-    if (isComplexParam(param)) io.out("{}\n");
+  if (typeof generateParam === "string") {
+    const example = cmd.jsonExamples?.params[generateParam];
+    if (example !== undefined)
+      io.out(
+        `${renderJsonExample({ __bociJsonRef: example }, spec.jsonExamplePool)}\n`,
+      );
     else
       io.err(
-        `Option ${rootValues.generate_param_json_input} is not a recognized complex type, so no example JSON can be produced. Invoke help for this command (--help/-h/-?) to see available documentation on this option\n`,
+        `Option ${generateParam} is not a recognized complex type, so no example JSON can be produced. Invoke help for this command (--help/-h/-?) to see available documentation on this option\n`,
       );
     throw new Exit(0);
   }
@@ -816,6 +813,36 @@ const DEFAULT_FILE_TRUTHY = new Set(["1", "y", "t", "yes", "true", "on"]);
 
 function toCamelCase(name: string): string {
   return name.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
+}
+
+function sortJsonKeys(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortJsonKeys);
+  if (typeof value !== "object" || value === null) return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, child]) => [key, sortJsonKeys(child)]),
+  );
+}
+
+function renderJsonExample(
+  value: unknown,
+  pool: Record<string, unknown>,
+): string {
+  const resolve = (current: unknown): unknown => {
+    if (Array.isArray(current)) return current.map(resolve);
+    if (typeof current !== "object" || current === null) return current;
+    const record = current as Record<string, unknown>;
+    if (typeof record.__bociJsonRef === "string")
+      return resolve(pool[record.__bociJsonRef]);
+    return Object.fromEntries(
+      Object.entries(record).map(([key, child]) => [key, resolve(child)]),
+    );
+  };
+  return JSON.stringify(sortJsonKeys(resolve(value)), null, 2).replace(
+    /\{\s*"__bociJsonNumber":\s*"(-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)"\s*\}/g,
+    "$1",
+  );
 }
 
 function underscore(word: string): string {

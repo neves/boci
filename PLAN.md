@@ -112,7 +112,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Fix generated request signature mismatches for special PUT body shapes.
 - [x] Complex JSON body flags, including `file://` values.
 - [x] `--from-json` loading and command-line override behavior.
-- [~] `--generate-full-command-json-input` and `--generate-param-json-input`.
+- [x] `--generate-full-command-json-input` and `--generate-param-json-input`.
 - [x] Polymorphic bodies (discriminator subcommands).
 - [x] `--if-match`, `--if-none-match`, extra headers.
 - [x] First mutating live tests on Always-Free, test-owned resources in the root compartment (name `boci-parity-*`, freeform tag `boci-parity=true`), with cleanup that deletes only tagged resources.

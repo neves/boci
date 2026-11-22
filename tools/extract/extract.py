@@ -14,6 +14,7 @@ Usage:
 """
 
 import json
+import hashlib
 import os
 import subprocess
 import sys
@@ -25,6 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sdk  # noqa: E402
 
 CLIENTS = None  # collects SDK clients used while flattening one service
+JSON_EXAMPLE_POOL = None  # deduplicates exact complex skeletons within one service
 SPEC_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "spec")
 
 
@@ -166,6 +168,9 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
             flatten(sub, path + [child], groups, commands, child_ctx)
     else:
         entry["callback"] = f"{cmd.callback.__module__}.{cmd.callback.__qualname__}" if cmd.callback else None
+        examples = json_examples(cmd, ctx)
+        if examples is not None:
+            entry["jsonExamples"] = examples
         # Generated = callback lives in a services.*.generated module (see GLOSSARY: Generated command).
         entry["kind"] = "generated" if cmd.callback and ".generated." in cmd.callback.__module__ else "custom"
         if entry["kind"] == "generated" and CLIENTS is not None:
@@ -183,10 +188,63 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
         commands[key] = entry
 
 
+def json_examples(cmd: click.Command, ctx: click.Context) -> dict | None:
+    """Capture the pinned CLI's JSON skeletons while its SDK models are loaded."""
+    callback = cmd.callback
+    metadata = None
+    while callback is not None:
+        closure = getattr(callback, "__closure__", None)
+        if closure:
+            values = dict(zip(callback.__code__.co_freevars, (cell.cell_contents for cell in closure)))
+            if "input_params_to_complex_types" in values:
+                metadata = values["input_params_to_complex_types"]
+                break
+        callback = getattr(callback, "__wrapped__", None)
+    if metadata is None:
+        return None
+
+    from oci_cli.json_skeleton_utils import generate_input_dict_for_skeleton
+
+    # Context data needed by the Reference CLI helper. No local OCI config or RC aliases
+    # participate in extraction; aliases are invocation-specific, not command metadata.
+    ctx.obj = {"input_params_to_complex_types": metadata, "parameter_aliases": {}}
+    def encode_numbers(value):
+        # Preserve Python's JSON spelling of floats (e.g. 0.0); JavaScript parses
+        # those as integers, so a plain extracted JSON value would lose parity.
+        if isinstance(value, float):
+            return {"__bociJsonNumber": repr(value)}
+        if isinstance(value, list):
+            return [encode_numbers(child) for child in value]
+        if isinstance(value, dict):
+            return {key: encode_numbers(child) for key, child in value.items()}
+        return value
+
+    def intern(value):
+        value = encode_numbers(value)
+        key = json.dumps(value, sort_keys=True, separators=(",", ":"))
+        identifier = hashlib.sha256(key.encode()).hexdigest()
+        if identifier not in JSON_EXAMPLE_POOL:
+            JSON_EXAMPLE_POOL[identifier] = value
+        return identifier
+
+    params = {name: intern(generate_input_dict_for_skeleton(ctx, name)) for name in metadata}
+    full = encode_numbers(generate_input_dict_for_skeleton(ctx))
+    from oci_cli.string_utils import camelize
+
+    # Full-command examples contain each complex example again. Replace those
+    # values with references so parameter and full-command cases share one copy.
+    for name, example in params.items():
+        full_name = camelize(name)
+        if full_name in full:
+            full[full_name] = {"__bociJsonRef": example}
+    return {"full": full, "params": params}
+
+
 def service_spec(name: str, cmd: click.Command) -> dict:
-    global CLIENTS
+    global CLIENTS, JSON_EXAMPLE_POOL
     groups, commands = {}, {}
     CLIENTS = {}
+    JSON_EXAMPLE_POOL = {}
     root_ctx = click.Context(load_root(), info_name="oci")
     ctx = click.Context(cmd, info_name=name, parent=root_ctx)
     flatten(cmd, [], groups, commands, ctx)
@@ -215,7 +273,7 @@ def service_spec(name: str, cmd: click.Command) -> dict:
     if isinstance(cmd, click.Group):
         top["params"] = [param_spec(p) for p in cmd.params]
     top["helpDoc"] = help_doc(cmd, ctx)
-    return {"service": name, "top": top, "clients": clients, "groups": groups, "commands": commands}
+    return {"service": name, "top": top, "clients": clients, "groups": groups, "commands": commands, "jsonExamplePool": JSON_EXAMPLE_POOL}
 
 
 def kind_counts(spec: dict) -> dict:

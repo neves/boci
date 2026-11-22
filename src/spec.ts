@@ -44,6 +44,10 @@ export type SpecNode = {
   shortHelp?: string;
   helpDoc: HelpDoc;
   params?: TypedParam[];
+  jsonExamples?: {
+    full: unknown;
+    params: Record<string, string>;
+  };
 };
 
 export type ServiceSpec = {
@@ -65,6 +69,7 @@ export type ServiceSpec = {
       lifecycleGetters?: Record<string, OperationSpec>;
     }
   >;
+  jsonExamplePool: Record<string, unknown>;
 };
 
 export type Index = {

@@ -4,7 +4,7 @@ import { createPrivateKey, createPublicKey } from "node:crypto";
 import { chmod, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildZip } from "../../src/zip.ts";
+import { buildZip } from "../../src/lib/zip.ts";
 
 export const FAKE = {
   tenancy:

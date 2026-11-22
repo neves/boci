@@ -5,7 +5,7 @@ import {
   decodeSecurityToken,
   formatLocalTimestamp,
   isSecurityTokenValid,
-} from "../../src/session.ts";
+} from "../../src/commands/session.ts";
 
 describe("session validate helpers", () => {
   test("decodeSecurityToken parses valid JWT payload", () => {

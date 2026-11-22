@@ -6,7 +6,7 @@ import {
   loadPrivateKey,
   prepareContentLength,
   signRequest,
-} from "../../src/signer.ts";
+} from "../../src/core/signer.ts";
 
 type Case = {
   method: string;

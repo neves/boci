@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { run } from "../../src/cli.ts";
+import { run } from "../../src/core/cli.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object bulk-delete", () => {

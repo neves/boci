@@ -1,7 +1,7 @@
 // Port of CPython 3.12 configparser.ConfigParser(interpolation=None) reading: the parser
 // oci uses for ~/.oci/config and oci_cli_rc. Defaults: delimiters "=" ":", full-line
 // comments "#" ";", no inline comments, strict, empty lines in values, keys lower-cased.
-import { pyRepr } from "./convert.ts";
+import { pyRepr } from "../core/convert.ts";
 
 export class ConfigParserError extends Error {
   constructor(

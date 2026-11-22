@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // boci entry point: the production adapter for run(). Commands are added rung by rung; see PLAN.md.
-import { run } from "./cli.ts";
-import { processStdio } from "./io.ts";
+import { run } from "./core/cli.ts";
+import { processStdio } from "./lib/io.ts";
 
 const stdio = processStdio();
 try {

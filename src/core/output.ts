@@ -1,9 +1,9 @@
 // A Generated command's result as oci prints it: the ServiceError envelope for a failed
 // call; otherwise the data/etag/opc-next-page document, filtered by --query (or an rc canned
 // query) and printed as JSON (keys sorted), a table, or --raw-output text.
-import { Exit, type Invocation } from "./io.ts";
+import { Exit, type Invocation } from "../lib/io.ts";
 import type { OperationResult } from "./operation.ts";
-import { applyQuery } from "./query.ts";
+import { applyQuery } from "../lib/query.ts";
 import type { Rc } from "./rc.ts";
 import type { OperationSpec } from "./spec.ts";
 

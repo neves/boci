@@ -4,7 +4,7 @@ import {
   loadExternalRegionMetadata,
   resolveEndpoint,
   type RegionsSpec,
-} from "../../src/endpoint.ts";
+} from "../../src/core/endpoint.ts";
 
 const regions: RegionsSpec = {
   regions: ["known-region"],

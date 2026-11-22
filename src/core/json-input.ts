@@ -3,7 +3,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expandUser } from "./config.ts";
-import { Exit, type Invocation } from "./io.ts";
+import { Exit, type Invocation } from "../lib/io.ts";
 import { expandVars } from "./rc.ts";
 
 /** Python's repr() of a str, as Click and oci quote names in messages. */

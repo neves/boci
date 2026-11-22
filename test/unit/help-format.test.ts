@@ -3,7 +3,7 @@ import {
   HelpFormatter,
   makeDefaultShortHelp,
   wrapText,
-} from "../../src/help/formatter.ts";
+} from "../../src/core/help/formatter.ts";
 
 type Cases = {
   wrap: { text: string; width: number; out: string }[];

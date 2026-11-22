@@ -85,7 +85,7 @@ export type Index = {
   regions: RegionsSpec;
 };
 
-const SPEC_DIR = join(import.meta.dir, "..", "spec");
+const SPEC_DIR = join(import.meta.dir, "..", "..", "spec");
 
 /**
  * In the compiled binary, spec files are embedded zstd-compressed (scripts/build.ts

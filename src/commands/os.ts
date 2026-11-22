@@ -19,23 +19,23 @@ import {
   writeSync,
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
-import { expandUser } from "./config.ts";
-import { BadParameter, pyRepr } from "./convert.ts";
-import { Exit, type Invocation } from "./io.ts";
-import { parseJsonParameter } from "./json-input.ts";
+import { expandUser } from "../core/config.ts";
+import { BadParameter, pyRepr } from "../core/convert.ts";
+import { Exit, type Invocation } from "../lib/io.ts";
+import { parseJsonParameter } from "../core/json-input.ts";
 import {
   type ClientSettings,
   type ServiceClient,
   createServiceClient,
   sendServiceRequest,
-} from "./operation.ts";
+} from "../core/operation.ts";
 import {
   type OutputOptions,
   formatServiceError,
   renderDocument,
-} from "./output.ts";
-import { expandVars } from "./rc.ts";
-import type { Index, ServiceSpec } from "./spec.ts";
+} from "../core/output.ts";
+import { expandVars } from "../core/rc.ts";
+import type { Index, ServiceSpec } from "../core/spec.ts";
 
 const NAMESPACE_HOST_LABEL_PATTERN = /^[/A-Za-z0-9_.-]+$/;
 const NAMESPACE_VALIDATION_ERROR =

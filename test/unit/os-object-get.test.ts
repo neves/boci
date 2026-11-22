@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
+import { run } from "../../src/core/cli.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object get binary & raw streaming", () => {

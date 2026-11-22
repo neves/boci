@@ -3,7 +3,7 @@ import {
   type ClientInfo,
   MissingEndpointForNonRegionalServiceClient,
   resolveEndpoint,
-} from "../../src/endpoint.ts";
+} from "../../src/core/endpoint.ts";
 
 type Case = {
   client: string;

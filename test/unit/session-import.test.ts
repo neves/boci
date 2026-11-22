@@ -10,10 +10,10 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
-import { formatParsedConfig, parseConfig } from "../../src/configparser.ts";
-import { removeProfileFromConfig } from "../../src/setup.ts";
-import { buildZip } from "../../src/zip.ts";
+import { run } from "../../src/core/cli.ts";
+import { formatParsedConfig, parseConfig } from "../../src/lib/configparser.ts";
+import { removeProfileFromConfig } from "../../src/commands/setup.ts";
+import { buildZip } from "../../src/lib/zip.ts";
 
 async function runCliInHome(
   argv: string[],

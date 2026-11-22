@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import type { RegionsSpec } from "../../src/endpoint.ts";
+import type { RegionsSpec } from "../../src/core/endpoint.ts";
 import {
   defaultFederationEndpoint,
   resolveInstancePrincipal,
-} from "../../src/instance-principal.ts";
-import { signRequest } from "../../src/signer.ts";
+} from "../../src/core/instance-principal.ts";
+import { signRequest } from "../../src/core/signer.ts";
 import { parseAuthorization, signatureValid } from "../harness/compare.ts";
 import {
   DEFAULT_INSTANCE_TOKEN,

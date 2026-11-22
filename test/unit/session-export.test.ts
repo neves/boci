@@ -9,12 +9,12 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
+import { run } from "../../src/core/cli.ts";
 import {
   formatConfigSection,
   translateConfigFilepathsToPrefix,
-} from "../../src/session.ts";
-import { buildZip, readZip } from "../../src/zip.ts";
+} from "../../src/commands/session.ts";
+import { buildZip, readZip } from "../../src/lib/zip.ts";
 
 async function runExport(
   argv: string[],

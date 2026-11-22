@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { resolveEndpoint, type RegionsSpec } from "../../src/endpoint.ts";
+import { resolveEndpoint, type RegionsSpec } from "../../src/core/endpoint.ts";
 
 const regions: RegionsSpec = {
   regions: ["us-ashburn-1"],

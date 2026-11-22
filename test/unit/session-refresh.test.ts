@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { fetchTransportFromEnv, isNoProxyHost } from "../../src/session.ts";
+import {
+  fetchTransportFromEnv,
+  isNoProxyHost,
+} from "../../src/commands/session.ts";
 import { FAKE_HTTPS_CERT_PATH } from "../harness/fake-https-proxy.ts";
 
 describe("session refresh transport helpers", () => {

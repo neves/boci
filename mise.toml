@@ -1,0 +1,15 @@
+[tools]
+"aqua:boyter/scc" = "latest"
+ast-grep = "latest"
+
+[tasks.stats]
+description = "Report lines of code, files, functions, classes, and unit test counts"
+run = """
+echo "=== Lines of Code & Files (scc) ==="
+scc --by-file -s code src test/unit scripts | tail -n 15
+echo ""
+echo "=== Functions & Classes in src/ (ast-grep) ==="
+printf "Functions: " && ast-grep -p 'function $NAME($$$) { $$$ }' -l ts src --json | jq length
+printf "Arrow functions: " && ast-grep -p '($$$) => $BODY' -l ts src --json | jq length
+printf "Classes: " && ast-grep -p 'class $NAME { $$$ }' -l ts src --json | jq length
+"""

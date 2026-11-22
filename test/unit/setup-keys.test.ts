@@ -3,9 +3,12 @@ import { createHash, createPublicKey } from "node:crypto";
 import { chmod, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
-import { PRIVATE_KEY_LABEL, publicKeyToFingerprint } from "../../src/setup.ts";
-import { loadPrivateKey } from "../../src/signer.ts";
+import { run } from "../../src/core/cli.ts";
+import {
+  PRIVATE_KEY_LABEL,
+  publicKeyToFingerprint,
+} from "../../src/commands/setup.ts";
+import { loadPrivateKey } from "../../src/core/signer.ts";
 
 async function runKeys(argv: string[], home: string, stdin?: string) {
   let stdout = "";

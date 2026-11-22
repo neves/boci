@@ -1,5 +1,5 @@
 // oci_cli_rc: oci's CLI-specific settings file (cli_root.eager_load_cli_rc_file).
-import type { Env } from "./io.ts";
+import type { Env } from "../lib/io.ts";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expandUser } from "./config.ts";
@@ -7,7 +7,7 @@ import {
   type ParsedConfig,
   parseConfig,
   sectionItems,
-} from "./configparser.ts";
+} from "../lib/configparser.ts";
 
 export const RC_DEFAULT_LOCATION = "~/.oci/oci_cli_rc";
 export const RC_FALLBACK_LOCATION = "~/.oci/cli-defaults";

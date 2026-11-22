@@ -1,4 +1,4 @@
-import { Exit, type Invocation } from "./io.ts";
+import { Exit, type Invocation } from "../lib/io.ts";
 import {
   callOperation,
   type OperationCall,

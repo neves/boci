@@ -5,7 +5,7 @@
 // sandbox environment (no spawn, module load or spec parsing per case).
 import { stat } from "node:fs/promises";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
+import { run } from "../../src/core/cli.ts";
 import {
   type CapturedRequest,
   type Reply,

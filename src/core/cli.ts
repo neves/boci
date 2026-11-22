@@ -4,7 +4,7 @@
 import { closeSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
-import { parseConfig, sectionItems } from "./configparser.ts";
+import { parseConfig, sectionItems } from "../lib/configparser.ts";
 import {
   type Rc,
   RC_DEFAULT_LOCATION,
@@ -27,7 +27,7 @@ import {
   errorHint,
   processingOrder,
 } from "./convert.ts";
-import { getCloseMatches } from "./difflib.ts";
+import { getCloseMatches } from "../lib/difflib.ts";
 import {
   OptionParser,
   type ParamSpec,
@@ -45,7 +45,7 @@ import {
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
 import { isImplemented } from "./registry.ts";
-import { Exit, type Env, type Invocation } from "./io.ts";
+import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import { callOperation, confirmUnderWrapExceptions } from "./operation.ts";
@@ -61,7 +61,7 @@ import {
   runOsObjectSync,
   validateClickFileForRead,
   validateOsNamespace,
-} from "./os.ts";
+} from "../commands/os.ts";
 import { printResult } from "./output.ts";
 import {
   runSessionAuthenticate,
@@ -69,14 +69,14 @@ import {
   runSessionImport,
   runSessionRefresh,
   runSessionValidate,
-} from "./session.ts";
-import { runProfileCurrent } from "./profile.ts";
+} from "../commands/session.ts";
+import { runProfileCurrent } from "../commands/profile.ts";
 import {
   runSetupAutocomplete,
   runSetupConfig,
   runSetupKeys,
   runSetupRepairFilePermissions,
-} from "./setup.ts";
+} from "../commands/setup.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";

@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { chmodSync, mkdirSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
+import { run } from "../../src/core/cli.ts";
 import {
   computeMultipartMd5,
   fnmatchToRegex,
   formatBulkProgressLabel,
-} from "../../src/os.ts";
+} from "../../src/commands/os.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object bulk-upload", () => {

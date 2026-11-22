@@ -3,12 +3,12 @@ import { createPublicKey } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { RegionsSpec } from "../../src/endpoint.ts";
+import type { RegionsSpec } from "../../src/core/endpoint.ts";
 import {
   ResourcePrincipalError,
   resolveResourcePrincipal,
-} from "../../src/resource-principal.ts";
-import { signRequest } from "../../src/signer.ts";
+} from "../../src/core/resource-principal.ts";
+import { signRequest } from "../../src/core/signer.ts";
 import { parseAuthorization, signatureValid } from "../harness/compare.ts";
 import { startFakeMetadataService } from "../harness/fake-metadata.ts";
 import { FAKE_KEY_PEM } from "../harness/sandbox.ts";

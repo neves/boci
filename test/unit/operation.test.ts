@@ -4,14 +4,14 @@ import { afterAll, afterEach, beforeAll, expect, spyOn, test } from "bun:test";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { RegionsSpec } from "../../src/endpoint.ts";
-import { fetchWithConnectionTimeout } from "../../src/connection-timeout.ts";
-import { Exit, type Invocation } from "../../src/io.ts";
+import type { RegionsSpec } from "../../src/core/endpoint.ts";
+import { fetchWithConnectionTimeout } from "../../src/core/connection-timeout.ts";
+import { Exit, type Invocation } from "../../src/lib/io.ts";
 import {
   type GeneratedCommand,
   type OperationCall,
   callOperation,
-} from "../../src/operation.ts";
+} from "../../src/core/operation.ts";
 import { startFakeEndpoint } from "../harness/fake-endpoint.ts";
 import { startFakeHttpsProxy } from "../harness/fake-https-proxy.ts";
 

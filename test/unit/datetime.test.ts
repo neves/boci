@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test";
-import { BadParameter, type TypedParam, convert } from "../../src/convert.ts";
+import {
+  BadParameter,
+  type TypedParam,
+  convert,
+} from "../../src/core/convert.ts";
 
 const index = await Bun.file(`${import.meta.dir}/../../spec/index.json`).json();
 const cases = (await Bun.file(

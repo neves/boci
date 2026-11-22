@@ -47,7 +47,7 @@ for await (const file of new Bun.Glob("*.json").scan(join(ROOT, "spec"))) {
 await Bun.write(
   join(BUILD, "entry.ts"),
   `${imports.join("\n")}
-import { useEmbeddedSpec } from "../src/spec.ts";
+import { useEmbeddedSpec } from "../src/core/spec.ts";
 useEmbeddedSpec({
 ${entries.join("\n")}
 });

@@ -8,7 +8,7 @@ import {
   type KeyObject,
 } from "node:crypto";
 import type { RegionsSpec } from "./endpoint.ts";
-import type { Env } from "./io.ts";
+import type { Env } from "../lib/io.ts";
 import { loadPrivateKey, prepareContentLength, signRequest } from "./signer.ts";
 
 const DEFAULT_METADATA_URL_BASE = "http://169.254.169.254/opc/v2";

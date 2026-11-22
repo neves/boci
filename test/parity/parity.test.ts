@@ -5,7 +5,7 @@
 // BOCI_PARITY_ALL=1, which `bun run verify` sets; the default `bun test` stays fast.
 // Cases run boci in-process (runInProcess) unless they must spawn (spawnsProcess below).
 import { afterAll, describe, expect, test } from "bun:test";
-import { implementedLookup } from "../../src/registry.ts";
+import { implementedLookup } from "../../src/core/registry.ts";
 import {
   caseHash,
   includeGeneratedCases,

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
-import { pyFloatRepr } from "../../src/os.ts";
+import { run } from "../../src/core/cli.ts";
+import { pyFloatRepr } from "../../src/commands/os.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object resume-put", () => {

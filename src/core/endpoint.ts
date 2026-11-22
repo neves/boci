@@ -1,7 +1,7 @@
 // Service endpoint resolution, ported from oci.regions + oci.base_client.BaseClient as the
 // CLI builds clients (explicit realm-specific / dual-stack booleans; see build_client).
 
-import type { Env } from "./io.ts";
+import type { Env } from "../lib/io.ts";
 
 export type RegionsSpec = {
   regions: string[];

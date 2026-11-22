@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
+import { run } from "../../src/core/cli.ts";
 import {
   buildMultipartPutParts,
   computeCrc32cBase64,
   computeMultipartMd5,
   resolveMultipartPartSize,
-} from "../../src/os.ts";
+} from "../../src/commands/os.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object put binary & checksums", () => {

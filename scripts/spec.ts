@@ -4,7 +4,7 @@
 // With only a service (or a group prefix), lists the matching Leaf commands.
 // `--full` prints the raw spec entry (minus helpDoc). Help text: `bun src/main.ts … --help`.
 import { join } from "node:path";
-import type { ServiceSpec } from "../src/spec.ts";
+import type { ServiceSpec } from "../src/core/spec.ts";
 
 const args = Bun.argv.slice(2);
 const full = args.includes("--full");

@@ -1,9 +1,9 @@
 // printResult through its interface: table output, --query (inline and canned) and the
 // ServiceError envelope.
 import { expect, test } from "bun:test";
-import { Exit, type Invocation } from "../../src/io.ts";
-import type { OperationResult } from "../../src/operation.ts";
-import { type OutputOptions, printResult } from "../../src/output.ts";
+import { Exit, type Invocation } from "../../src/lib/io.ts";
+import type { OperationResult } from "../../src/core/operation.ts";
+import { type OutputOptions, printResult } from "../../src/core/output.ts";
 
 function invocation() {
   const out: string[] = [];

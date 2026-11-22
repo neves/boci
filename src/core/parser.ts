@@ -1,6 +1,6 @@
 // Port of Click 8.4's _OptionParser (click/parser.py) and Option.add_to_parser.
 // Argument handling must match Click exactly, including on malformed input (ADR 0003).
-import { getCloseMatches } from "./difflib.ts";
+import { getCloseMatches } from "../lib/difflib.ts";
 
 export type ParamSpec = {
   kind: "option" | "argument";

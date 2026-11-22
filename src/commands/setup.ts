@@ -17,17 +17,20 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
-import { expandUser } from "./config.ts";
+import { expandUser } from "../core/config.ts";
 import {
   ConfigParserError,
   formatParsedConfig,
   parseConfig,
-} from "./configparser.ts";
-import { BadParameter, pyRepr } from "./convert.ts";
-import { loadExternalRegionMetadata, type RegionsSpec } from "./endpoint.ts";
-import { Exit, type Invocation } from "./io.ts";
+} from "../lib/configparser.ts";
+import { BadParameter, pyRepr } from "../core/convert.ts";
+import {
+  loadExternalRegionMetadata,
+  type RegionsSpec,
+} from "../core/endpoint.ts";
+import { Exit, type Invocation } from "../lib/io.ts";
 import { validateClickFileForRead } from "./os.ts";
-import { loadPrivateKey, MissingPrivateKeyPassphrase } from "./signer.ts";
+import { loadPrivateKey, MissingPrivateKeyPassphrase } from "../core/signer.ts";
 
 export const DEFAULT_KEY_NAME = "oci_api_key";
 export const DEFAULT_DIRECTORY = "~/.oci";

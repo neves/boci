@@ -11,8 +11,8 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
-import { OCI_AUTOCOMPLETE_SCRIPT } from "../../src/setup.ts";
+import { run } from "../../src/core/cli.ts";
+import { OCI_AUTOCOMPLETE_SCRIPT } from "../../src/commands/setup.ts";
 
 async function runAutocomplete(home: string, stdin: string) {
   let stdout = "";

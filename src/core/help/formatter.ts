@@ -1,6 +1,6 @@
 // Port of click.formatting (Click 8.4) plus oci's OciHelpFormatter tweak, which keeps
 // list items (-, *, +, 1.) on their own lines. Help output must match byte for byte.
-import type { Invocation } from "../io.ts";
+import type { Invocation } from "../../lib/io.ts";
 import { TextWrapper, expandTabs, splitlines } from "./textwrap.ts";
 
 const len = (s: string) => {

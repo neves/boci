@@ -3,24 +3,24 @@ import { createPublicKey } from "node:crypto";
 import { chmod, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
-import type { Rc } from "../../src/rc.ts";
+import { run } from "../../src/core/cli.ts";
+import type { Rc } from "../../src/core/rc.ts";
 import {
   getConsoleAuthUrl,
   openBrowser,
   runSessionAuthenticate,
   toJwk,
-} from "../../src/session.ts";
+} from "../../src/commands/session.ts";
 import {
   PRIVATE_KEY_LABEL,
   generateKey,
   publicKeyToFingerprint,
-} from "../../src/setup.ts";
+} from "../../src/commands/setup.ts";
 import {
   MissingPrivateKeyPassphrase,
   loadPrivateKey,
-} from "../../src/signer.ts";
-import { loadIndex, loadService } from "../../src/spec.ts";
+} from "../../src/core/signer.ts";
+import { loadIndex, loadService } from "../../src/core/spec.ts";
 import { startFakeEndpoint } from "../harness/fake-endpoint.ts";
 import { FAKE, FAKE_KEY_PEM } from "../harness/sandbox.ts";
 

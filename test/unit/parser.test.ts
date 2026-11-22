@@ -6,7 +6,7 @@ import {
   type ParseSettings,
   UNSET,
   UsageError,
-} from "../../src/parser.ts";
+} from "../../src/core/parser.ts";
 
 type Case = {
   path: string[];

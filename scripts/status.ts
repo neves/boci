@@ -1,6 +1,6 @@
 // `bun run status [--all] [--service <name>] [--json]`: parity progress vs the Reference CLI.
 import { parseArgs } from "util";
-import { implementedLookup } from "../src/registry.ts";
+import { implementedLookup } from "../src/core/registry.ts";
 import { buildStatus, countDivergences, renderStatus } from "./status-lib.ts";
 
 const root = `${import.meta.dir}/..`;

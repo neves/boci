@@ -1,6 +1,6 @@
 // Port of oci.config.from_file (OCI Python SDK): locate the config file, read a profile
 // (inheriting [DEFAULT]) with configparser semantics, and validate it the same way.
-import type { Env } from "./io.ts";
+import type { Env } from "../lib/io.ts";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
@@ -8,7 +8,7 @@ import {
   ConfigParserError,
   parseConfig,
   sectionItems,
-} from "./configparser.ts";
+} from "../lib/configparser.ts";
 
 export const DEFAULT_LOCATION = "~/.oci/config";
 export const FALLBACK_DEFAULT_LOCATION = "~/.oraclebmc/config";

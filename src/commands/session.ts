@@ -15,19 +15,19 @@ import {
   configPath,
   expandUser,
   fromFile,
-} from "./config.ts";
+} from "../core/config.ts";
 import {
   ConfigParserError,
   parseConfig,
   sectionItems,
-} from "./configparser.ts";
-import { pyRepr } from "./convert.ts";
+} from "../lib/configparser.ts";
+import { pyRepr } from "../core/convert.ts";
 import {
   type RegionsSpec,
   loadExternalRegionMetadata,
   resolveEndpoint,
-} from "./endpoint.ts";
-import { type Env, Exit, type Invocation } from "./io.ts";
+} from "../core/endpoint.ts";
+import { type Env, Exit, type Invocation } from "../lib/io.ts";
 import {
   type ClientSettings,
   applyConfigEnvVars,
@@ -36,9 +36,9 @@ import {
   promptFromStdin,
   sendServiceRequest,
   warnFilePermissions,
-} from "./operation.ts";
-import { formatServiceError } from "./output.ts";
-import type { Rc } from "./rc.ts";
+} from "../core/operation.ts";
+import { formatServiceError } from "../core/output.ts";
+import type { Rc } from "../core/rc.ts";
 import {
   DEFAULT_KEY_NAME,
   DEFAULT_PROFILE_NAME,
@@ -65,14 +65,14 @@ import {
   loadPrivateKey,
   prepareContentLength,
   signRequest,
-} from "./signer.ts";
-import { type Index, type ServiceSpec, loadService } from "./spec.ts";
+} from "../core/signer.ts";
+import { type Index, type ServiceSpec, loadService } from "../core/spec.ts";
 import {
   BadZipFileError,
   type ZipEntryInput,
   readZip,
   writeZipFile,
-} from "./zip.ts";
+} from "../lib/zip.ts";
 
 export class SecurityTokenDecodeError extends Error {
   constructor(message: string) {

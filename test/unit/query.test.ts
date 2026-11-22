@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { applyQuery } from "../../src/query.ts";
+import { applyQuery } from "../../src/lib/query.ts";
 
 describe("OCI JMESPath queries", () => {
   test("evaluates standard projections and functions", () => {

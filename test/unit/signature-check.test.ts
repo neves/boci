@@ -6,7 +6,7 @@ import {
   loadPrivateKey,
   prepareContentLength,
   signRequest,
-} from "../../src/signer.ts";
+} from "../../src/core/signer.ts";
 
 const pem = await Bun.file(
   `${import.meta.dir}/../fixtures/fake_oci_api_key.pem`,

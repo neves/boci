@@ -19,15 +19,15 @@ import {
 import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
 import { resolveInstancePrincipal } from "./instance-principal.ts";
 import { resolveResourcePrincipal } from "./resource-principal.ts";
-import { Exit, type Invocation } from "./io.ts";
+import { Exit, type Invocation } from "../lib/io.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
   SecurityTokenDecodeError,
   SecurityTokenKeyError,
   decodeSecurityToken,
   isSecurityTokenValid,
-} from "./session.ts";
-import { createStdinReader } from "./setup.ts";
+} from "../commands/session.ts";
+import { createStdinReader } from "../commands/setup.ts";
 import {
   InvalidPrivateKey,
   MissingPrivateKeyPassphrase,

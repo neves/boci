@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
-import { expandUser } from "./config.ts";
-import { parseConfig, sectionItems } from "./configparser.ts";
-import { type Env, Exit, type Invocation } from "./io.ts";
+import { expandUser } from "../core/config.ts";
+import { parseConfig, sectionItems } from "../lib/configparser.ts";
+import { type Env, Exit, type Invocation } from "../lib/io.ts";
 
 function fileStatus(path: string | null | undefined, env: Env): string {
   if (!path) return "not_configured";

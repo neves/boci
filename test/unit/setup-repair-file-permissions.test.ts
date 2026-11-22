@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { chmod, mkdir, mkdtemp, rm, stat, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { run } from "../../src/cli.ts";
-import { applyUserOnlyAccessPermissions } from "../../src/setup.ts";
+import { run } from "../../src/core/cli.ts";
+import { applyUserOnlyAccessPermissions } from "../../src/commands/setup.ts";
 
 async function runSetup(argv: string[], home: string) {
   let stdout = "";

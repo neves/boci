@@ -1,0 +1,609 @@
+[
+  {
+    "id": "session-import-ok",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "sandbox": {
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..test\nkey_file = oci_api_key.pem\nsecurity_token_file = token\n",
+          "oci_api_key.pem": "KEY-CONTENT-OK\n",
+          "token": "TOKEN-CONTENT-OK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/sessions/SESSION/oci_api_key.pem": "KEY-CONTENT-OK\n",
+        ".oci/sessions/SESSION/token": "TOKEN-CONTENT-OK"
+      },
+      "fileModes": {
+        ".oci/config": 384,
+        ".oci/sessions/SESSION/oci_api_key.pem": 384,
+        ".oci/sessions/SESSION/token": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-relative-archive",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "archives/rel.zip"],
+    "sandbox": {
+      "zipFiles": {
+        "archives/rel.zip": {
+          "config": "[RELPROF]\nregion = us-ashburn-1\ntenancy = ocid1.tenancy.oc1..rel\nkey_file = key.pem\nsecurity_token_file = tok\n",
+          "key.pem": "REL-KEY",
+          "tok": "REL-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/sessions/RELPROF/key.pem": "REL-KEY",
+        ".oci/sessions/RELPROF/tok": "REL-TOK"
+      },
+      "fileModes": {
+        ".oci/config": 384,
+        ".oci/sessions/RELPROF/key.pem": 384,
+        ".oci/sessions/RELPROF/tok": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-config-file-custom",
+    "key": "session import",
+    "argv": [
+      "session",
+      "import",
+      "--config-file",
+      "{home}/.oci/custom_config",
+      "--session-archive",
+      "{home}/session.zip"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/custom_config": "[OTHER]\nregion=us-ashburn-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[CUSTOM]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..cust\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "CUST-KEY",
+          "token": "CUST-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/custom_config": "[OTHER]\nregion=us-ashburn-1\n\n\n[CUSTOM]\nkey_file={home}/.oci/sessions/CUSTOM/key.pem\ntenancy=ocid1.tenancy.oc1..cust\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/CUSTOM/token\n",
+        ".oci/sessions/CUSTOM/key.pem": "CUST-KEY",
+        ".oci/sessions/CUSTOM/token": "CUST-TOK"
+      },
+      "fileModes": {
+        ".oci/custom_config": 384,
+        ".oci/sessions/CUSTOM/key.pem": 384,
+        ".oci/sessions/CUSTOM/token": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-config-file-tilde",
+    "key": "session import",
+    "argv": [
+      "session",
+      "import",
+      "--config-file",
+      "~/.oci/tilde_config",
+      "--session-archive",
+      "{home}/session.zip"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[TILDE]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..tilde\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "TILDE-KEY",
+          "token": "TILDE-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/tilde_config": "[TILDE]\nkey_file={home}/.oci/sessions/TILDE/key.pem\ntenancy=ocid1.tenancy.oc1..tilde\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/TILDE/token\n"
+      },
+      "fileModes": {
+        ".oci/tilde_config": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-env-config",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "env": {
+      "OCI_CLI_CONFIG_FILE": "{home}/.oci/env_config"
+    },
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[ENVIMP]\nregion = us-ashburn-1\ntenancy = ocid1.tenancy.oc1..env\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "ENV-KEY",
+          "token": "ENV-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/env_config": "[ENVIMP]\nkey_file={home}/.oci/sessions/ENVIMP/key.pem\ntenancy=ocid1.tenancy.oc1..env\nregion=us-ashburn-1\nsecurity_token_file={home}/.oci/sessions/ENVIMP/token\n"
+      },
+      "fileModes": {
+        ".oci/env_config": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-no-existing-config",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[FRESH]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..fresh\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "FRESH-KEY",
+          "token": "FRESH-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[FRESH]\nkey_file={home}/.oci/sessions/FRESH/key.pem\ntenancy=ocid1.tenancy.oc1..fresh\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/FRESH/token\n"
+      },
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-no-existing-config-force",
+    "key": "session import",
+    "argv": [
+      "session",
+      "import",
+      "--session-archive",
+      "{home}/session.zip",
+      "--force"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[FRESHFORCE]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..ff\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "FF-KEY",
+          "token": "FF-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "\n\n[FRESHFORCE]\nkey_file={home}/.oci/sessions/FRESHFORCE/key.pem\ntenancy=ocid1.tenancy.oc1..ff\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/FRESHFORCE/token\n"
+      },
+      "fileModes": {
+        ".oci/config": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-existing-profile-rename",
+    "key": "session import",
+    "argv": [
+      "session",
+      "import",
+      "--config-file",
+      "{home}/.oci/config",
+      "--session-archive",
+      "{home}/session.zip"
+    ],
+    "stdin": "SESSION_RENAMED\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[SESSION]\nregion=us-ashburn-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..ren\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "REN-KEY",
+          "token": "REN-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[SESSION]\nregion=us-ashburn-1\n\n\n[SESSION_RENAMED]\nkey_file={home}/.oci/sessions/SESSION_RENAMED/key.pem\ntenancy=ocid1.tenancy.oc1..ren\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/SESSION_RENAMED/token\n",
+        ".oci/sessions/SESSION_RENAMED/key.pem": "REN-KEY",
+        ".oci/sessions/SESSION_RENAMED/token": "REN-TOK"
+      }
+    }
+  },
+  {
+    "id": "session-import-existing-profile-collision-retry",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "stdin": "OTHER\nNEW_NAME\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[SESSION]\nregion=us-ashburn-1\n\n[OTHER]\nregion=us-phoenix-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..col\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "COL-KEY",
+          "token": "COL-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/sessions/NEW_NAME/token": "COL-TOK"
+      }
+    }
+  },
+  {
+    "id": "session-import-existing-profile-rename-empty-retry",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "stdin": "\nAFTER_EMPTY\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[SESSION]\nregion=us-ashburn-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..emp\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "EMP-KEY",
+          "token": "EMP-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/sessions/AFTER_EMPTY/token": "EMP-TOK"
+      }
+    }
+  },
+  {
+    "id": "session-import-existing-profile-rename-invalid",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "stdin": "bad/name\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[SESSION]\nregion=us-ashburn-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\nsecurity_token_file = token\n",
+          "token": "TOK"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-existing-profile-rename-dotdot",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "stdin": "..\n",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[SESSION]\nregion=us-ashburn-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\nsecurity_token_file = token\n",
+          "token": "TOK"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-existing-profile-eof",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "stdin": "",
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[SESSION]\nregion=us-ashburn-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\nsecurity_token_file = token\n",
+          "token": "TOK"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-default-profile-prompt",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "stdin": "RENAMED_DEFAULT\n",
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[DEFAULT]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..def\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "DEF-KEY",
+          "token": "DEF-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[RENAMED_DEFAULT]\nkey_file={home}/.oci/sessions/RENAMED_DEFAULT/key.pem\ntenancy=ocid1.tenancy.oc1..def\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/RENAMED_DEFAULT/token\n",
+        ".oci/sessions/RENAMED_DEFAULT/token": "DEF-TOK"
+      }
+    }
+  },
+  {
+    "id": "session-import-default-profile-force",
+    "key": "session import",
+    "argv": [
+      "session",
+      "import",
+      "--session-archive",
+      "{home}/session.zip",
+      "--force"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[DEFAULT]\nuser=old_user\nregion=us-ashburn-1\ncustom_opt=keep_me\n\n[OTHER]\nregion=eu-frankfurt-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[DEFAULT]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..defforce\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "DEFF-KEY",
+          "token": "DEFF-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[DEFAULT]\ncustom_opt = keep_me\n\n[OTHER]\nregion = eu-frankfurt-1\n\n\n\n[DEFAULT]\nkey_file={home}/.oci/sessions/DEFAULT/key.pem\ntenancy=ocid1.tenancy.oc1..defforce\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/DEFAULT/token\n",
+        ".oci/sessions/DEFAULT/key.pem": "DEFF-KEY",
+        ".oci/sessions/DEFAULT/token": "DEFF-TOK"
+      }
+    }
+  },
+  {
+    "id": "session-import-existing-profile-force",
+    "key": "session import",
+    "argv": [
+      "session",
+      "import",
+      "--session-archive",
+      "{home}/session.zip",
+      "--force"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "# comment\n[DEFAULT]\nregion=us-ashburn-1\n\n[SESSION]\nregion=ap-tokyo-1\n\n[OTHER]\nregion=eu-frankfurt-1\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..sforce\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "SF-KEY",
+          "token": "SF-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[DEFAULT]\nregion = us-ashburn-1\n\n[OTHER]\nregion = eu-frankfurt-1\n\n\n\n[SESSION]\nkey_file={home}/.oci/sessions/SESSION/key.pem\ntenancy=ocid1.tenancy.oc1..sforce\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/SESSION/token\n",
+        ".oci/sessions/SESSION/key.pem": "SF-KEY",
+        ".oci/sessions/SESSION/token": "SF-TOK"
+      }
+    }
+  },
+  {
+    "id": "session-import-missing-tenancy-and-region",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[MINIMAL]\nkey_file = key.pem\nsecurity_token_file = token\n",
+          "key.pem": "MIN-KEY",
+          "token": "MIN-TOK"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[MINIMAL]\nkey_file={home}/.oci/sessions/MINIMAL/key.pem\ntenancy=None\nregion=None\nsecurity_token_file={home}/.oci/sessions/MINIMAL/token\n"
+      }
+    }
+  },
+  {
+    "id": "session-import-with-extra-keys-and-files",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[FULL]\nuser = ocid1.user.oc1..ignored\nfingerprint = aa:bb:cc\npass_phrase = secret123\nregion = us-phoenix-1\ntenancy = ocid1.tenancy.oc1..full\nkey_file = key.pem\nsecurity_token_file = token\nextra_token = extra.tok\ncustom_file = custom.dat\n",
+          "key.pem": "FULL-KEY",
+          "token": "FULL-TOK",
+          "extra.tok": "EXTRA-TOK",
+          "custom.dat": "CUSTOM-DAT"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[FULL]\nfingerprint=aa:bb:cc\nkey_file={home}/.oci/sessions/FULL/key.pem\ntenancy=ocid1.tenancy.oc1..full\nregion=us-phoenix-1\npass_phrase=secret123\nsecurity_token_file={home}/.oci/sessions/FULL/token\n",
+        ".oci/sessions/FULL/key.pem": "FULL-KEY",
+        ".oci/sessions/FULL/token": "FULL-TOK",
+        ".oci/sessions/FULL/extra.tok": "EXTRA-TOK",
+        ".oci/sessions/FULL/custom.dat": "CUSTOM-DAT"
+      },
+      "fileModes": {
+        ".oci/sessions/FULL/extra.tok": 384,
+        ".oci/sessions/FULL/custom.dat": 384
+      }
+    }
+  },
+  {
+    "id": "session-import-multi-section-picks-last",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/session.zip"],
+    "sandbox": {
+      "noConfig": true,
+      "zipFiles": {
+        "session.zip": {
+          "config": "[DEFAULT]\ntenancy = ocid1.tenancy.oc1..inherited\n\n[FIRST]\nregion = ap-tokyo-1\nsecurity_token_file = first.tok\n\n[SECOND]\nregion = us-phoenix-1\nsecurity_token_file = second.tok\n",
+          "first.tok": "FIRST",
+          "second.tok": "SECOND"
+        }
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[SECOND]\ntenancy=ocid1.tenancy.oc1..inherited\nregion=us-phoenix-1\nsecurity_token_file={home}/.oci/sessions/SECOND/second.tok\n",
+        ".oci/sessions/SECOND/second.tok": "SECOND"
+      }
+    }
+  },
+  {
+    "id": "session-import-archive-not-found",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/missing.zip"]
+  },
+  {
+    "id": "session-import-archive-is-dir",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/.oci"]
+  },
+  {
+    "id": "session-import-not-a-zip",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/not-a-zip.zip"],
+    "sandbox": {
+      "files": {
+        "not-a-zip.zip": "this is definitely not a zip archive"
+      }
+    }
+  },
+  {
+    "id": "session-import-missing-config-in-zip",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/no-cfg.zip"],
+    "sandbox": {
+      "zipFiles": {
+        "no-cfg.zip": {
+          "token": "orphan-token"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-missing-token-option",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/no-tok.zip"],
+    "sandbox": {
+      "zipFiles": {
+        "no-tok.zip": {
+          "config": "[NOTOK]\nregion = us-phoenix-1\nkey_file = key.pem\n",
+          "key.pem": "KEY"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-invalid-profile-name-in-zip",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/bad-prof.zip"],
+    "sandbox": {
+      "zipFiles": {
+        "bad-prof.zip": {
+          "config": "[bad/name]\nregion = us-phoenix-1\nsecurity_token_file = token\n",
+          "token": "TOK"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-dotdot-profile-name-in-zip",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/dotdot.zip"],
+    "sandbox": {
+      "zipFiles": {
+        "dotdot.zip": {
+          "config": "[..]\nregion = us-phoenix-1\nsecurity_token_file = token\n",
+          "token": "TOK"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-malformed-config-file",
+    "key": "session import",
+    "argv": [
+      "session",
+      "import",
+      "--auth",
+      "security_token",
+      "--config-file",
+      "{home}/.oci/bad_config",
+      "--session-archive",
+      "{home}/session.zip"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/bad_config": "not a section\n"
+      },
+      "zipFiles": {
+        "session.zip": {
+          "config": "[SESSION]\nsecurity_token_file = token\n",
+          "token": "TOK"
+        }
+      }
+    }
+  },
+  {
+    "id": "session-import-malformed-archived-config",
+    "key": "session import",
+    "argv": ["session", "import", "--session-archive", "{home}/bad-cfg.zip"],
+    "env": {
+      "TMPDIR": "{home}"
+    },
+    "sandbox": {
+      "zipFiles": {
+        "bad-cfg.zip": {
+          "config": "no section header here\n"
+        }
+      }
+    },
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stderrContains": "MissingSectionHeaderError: File contains no section headers."
+    }
+  },
+  {
+    "id": "session-import-missing-archive-option",
+    "key": "session import",
+    "argv": ["session", "import"]
+  }
+]

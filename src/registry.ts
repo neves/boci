@@ -46,6 +46,7 @@ const IMPLEMENTED = new Set<string>([
   "session validate",
   "session refresh",
   "session export",
+  "session import",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

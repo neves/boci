@@ -26,6 +26,7 @@ export type ParityCase = {
     keyPassphrase?: string;
     keyFormat?: "pkcs8" | "pkcs1";
     files?: Record<string, string>;
+    zipFiles?: Record<string, Record<string, string>>;
     fileModes?: Record<string, number>;
     noConfig?: boolean;
     configMode?: number;

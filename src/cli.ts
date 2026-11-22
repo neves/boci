@@ -62,6 +62,7 @@ import {
 import { printResult } from "./output.ts";
 import {
   runSessionExport,
+  runSessionImport,
   runSessionRefresh,
   runSessionValidate,
 } from "./session.ts";
@@ -737,6 +738,14 @@ async function main(io: Invocation): Promise<void> {
 
     if (name === "session" && key === "export") {
       await runSessionExport(io, {
+        values,
+        settings,
+      });
+      return;
+    }
+
+    if (name === "session" && key === "import") {
+      await runSessionImport(io, {
         values,
         settings,
       });

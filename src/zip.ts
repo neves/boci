@@ -16,6 +16,13 @@ export type ZipEntry = {
   mode: number;
 };
 
+export class BadZipFileError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BadZipFile";
+  }
+}
+
 const SIG_LOCAL = 0x04034b50;
 const SIG_CENTRAL = 0x02014b50;
 const SIG_EOCD = 0x06054b50;
@@ -126,7 +133,7 @@ export function readZip(bytes: Uint8Array): ZipEntry[] {
     }
   }
   if (eocdPos < 0) {
-    throw new Error("File is not a zip file");
+    throw new BadZipFileError("File is not a zip file");
   }
   const entryCount = buf.readUInt16LE(eocdPos + 10);
   const cdOffset = buf.readUInt32LE(eocdPos + 16);
@@ -134,8 +141,8 @@ export function readZip(bytes: Uint8Array): ZipEntry[] {
   let pos = cdOffset;
 
   for (let i = 0; i < entryCount; i++) {
-    if (buf.readUInt32LE(pos) !== SIG_CENTRAL) {
-      throw new Error("Invalid ZIP central directory header");
+    if (pos + 46 > buf.length || buf.readUInt32LE(pos) !== SIG_CENTRAL) {
+      throw new BadZipFileError("Invalid ZIP central directory header");
     }
     const method = buf.readUInt16LE(pos + 10);
     const crc = buf.readUInt32LE(pos + 16);
@@ -145,15 +152,24 @@ export function readZip(bytes: Uint8Array): ZipEntry[] {
     const commentLen = buf.readUInt16LE(pos + 32);
     const externalAttr = buf.readUInt32LE(pos + 38);
     const localOffset = buf.readUInt32LE(pos + 42);
+    if (pos + 46 + nameLen + extraLen + commentLen > buf.length) {
+      throw new BadZipFileError("Invalid ZIP central directory header");
+    }
     const name = buf.subarray(pos + 46, pos + 46 + nameLen).toString("utf8");
     pos += 46 + nameLen + extraLen + commentLen;
 
-    if (buf.readUInt32LE(localOffset) !== SIG_LOCAL) {
-      throw new Error("Invalid ZIP local file header");
+    if (
+      localOffset + 30 > buf.length ||
+      buf.readUInt32LE(localOffset) !== SIG_LOCAL
+    ) {
+      throw new BadZipFileError("Invalid ZIP local file header");
     }
     const localNameLen = buf.readUInt16LE(localOffset + 26);
     const localExtraLen = buf.readUInt16LE(localOffset + 28);
     const dataStart = localOffset + 30 + localNameLen + localExtraLen;
+    if (dataStart + compressedSize > buf.length) {
+      throw new BadZipFileError("Truncated ZIP entry data");
+    }
     const rawSlice = buf.subarray(dataStart, dataStart + compressedSize);
 
     let data: Buffer;
@@ -162,10 +178,12 @@ export function readZip(bytes: Uint8Array): ZipEntry[] {
     } else if (method === METHOD_DEFLATE) {
       data = inflateRawSync(rawSlice);
     } else {
-      throw new Error(`Unsupported ZIP compression method: ${method}`);
+      throw new BadZipFileError(
+        `Unsupported ZIP compression method: ${method}`,
+      );
     }
     if (Bun.hash.crc32(data) >>> 0 !== crc) {
-      throw new Error(`CRC-32 mismatch for ZIP entry: ${name}`);
+      throw new BadZipFileError(`Bad CRC-32 for file '${name}'`);
     }
     entries.push({
       name,

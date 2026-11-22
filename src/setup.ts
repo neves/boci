@@ -18,7 +18,11 @@ import {
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { expandUser } from "./config.ts";
-import { ConfigParserError, parseConfig } from "./configparser.ts";
+import {
+  ConfigParserError,
+  formatParsedConfig,
+  parseConfig,
+} from "./configparser.ts";
 import { BadParameter, pyRepr } from "./convert.ts";
 import { loadExternalRegionMetadata, type RegionsSpec } from "./endpoint.ts";
 import { Exit, type Invocation } from "./io.ts";
@@ -769,14 +773,58 @@ export function writeConfig(
   if (opts.userId) content += `user=${opts.userId}\n`;
   if (opts.fingerprint) content += `fingerprint=${opts.fingerprint}\n`;
   if (writeKeyFile && opts.keyFile) content += `key_file=${opts.keyFile}\n`;
-  content += `tenancy=${opts.tenancy ?? ""}\n`;
-  content += `region=${opts.region ?? ""}\n`;
+  content += `tenancy=${opts.tenancy ?? "None"}\n`;
+  content += `region=${opts.region ?? "None"}\n`;
   if (opts.passPhrase) content += `pass_phrase=${opts.passPhrase}\n`;
   if (opts.securityTokenFile) {
     content += `security_token_file=${opts.securityTokenFile}\n`;
   }
   appendFileSync(filename, content);
   applyUserOnlyAccessPermissions(filename);
+}
+
+const DEFAULT_PROFILE_KEYS_TO_REMOVE = [
+  "user",
+  "fingerprint",
+  "key_file",
+  "tenancy",
+  "region",
+  "pass_phrase",
+  "security_token_file",
+];
+
+/** Port of `cli_setup.remove_profile_from_config`. */
+export function removeProfileFromConfig(
+  diskConfigPath: string,
+  displayConfigPath: string,
+  profileNameToTerminate: string,
+): void {
+  let text: string | undefined;
+  try {
+    text = readFileSync(diskConfigPath, "utf8");
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (code !== "ENOENT" && code !== "ENOTDIR" && code !== "EISDIR") {
+      throw e;
+    }
+  }
+  if (profileNameToTerminate === DEFAULT_PROFILE_NAME) {
+    const parsed =
+      text !== undefined
+        ? parseConfig(text, displayConfigPath)
+        : { defaults: new Map(), sections: new Map() };
+    for (const key of DEFAULT_PROFILE_KEYS_TO_REMOVE) {
+      parsed.defaults.delete(key);
+    }
+    writeFileSync(diskConfigPath, formatParsedConfig(parsed), "utf8");
+    return;
+  }
+  const parsed =
+    text !== undefined
+      ? parseConfig(text, displayConfigPath, "")
+      : { defaults: new Map(), sections: new Map() };
+  parsed.sections.delete(profileNameToTerminate);
+  writeFileSync(diskConfigPath, formatParsedConfig(parsed, ""), "utf8");
 }
 
 /**

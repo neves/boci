@@ -330,7 +330,13 @@ function captured(
     ...(metadata?.sessionPublicKey
       ? { sessionPublicKey: metadata.sessionPublicKey }
       : {}),
-    ...(files ? { files } : {}),
+    ...(files
+      ? {
+          files: Object.fromEntries(
+            Object.entries(files).map(([k, v]) => [k, norm(v)]),
+          ),
+        }
+      : {}),
     ...(fileModes ? { fileModes } : {}),
   };
 }

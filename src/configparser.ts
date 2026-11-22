@@ -31,7 +31,11 @@ const OPTCRE =
 const pyStrip = (s: string) =>
   s.replace(/^[\s\x1c-\x1f\x85]+|[\s\x1c-\x1f\x85]+$/gu, "");
 
-export function parseConfig(text: string, fpname: string): ParsedConfig {
+export function parseConfig(
+  text: string,
+  fpname: string,
+  defaultSection = DEFAULT_SECTION,
+): ParsedConfig {
   const defaults = new Map<string, string[] | null>();
   const sections = new Map<string, Map<string, string[] | null>>();
   const added = new Set<string>();
@@ -87,7 +91,7 @@ export function parseConfig(text: string, fpname: string): ParsedConfig {
           }
           cursect = sections.get(sectname) as Map<string, string[] | null>;
           added.add(sectname);
-        } else if (sectname === DEFAULT_SECTION) {
+        } else if (sectname === defaultSection) {
           cursect = defaults;
         } else {
           cursect = new Map();
@@ -178,4 +182,36 @@ export function sectionItems(
       ...[...cfg.defaults.keys()].filter((k) => !section.has(k)),
     ].map((k) => [k, merged.get(k) ?? null]),
   );
+}
+
+function formatConfigValue(value: string): string {
+  return value
+    .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n")
+    .replaceAll("\n", "\n\t");
+}
+
+/** Port of CPython `ConfigParser.write` (default `space_around_delimiters=True`). */
+export function formatParsedConfig(
+  cfg: ParsedConfig,
+  defaultSection = DEFAULT_SECTION,
+): string {
+  let out = "";
+  if (cfg.defaults.size > 0) {
+    out += `[${defaultSection}]\n`;
+    for (const [key, value] of cfg.defaults) {
+      out +=
+        value === null ? `${key}\n` : `${key} = ${formatConfigValue(value)}\n`;
+    }
+    out += "\n";
+  }
+  for (const [section, entries] of cfg.sections) {
+    out += `[${section}]\n`;
+    for (const [key, value] of entries) {
+      out +=
+        value === null ? `${key}\n` : `${key} = ${formatConfigValue(value)}\n`;
+    }
+    out += "\n";
+  }
+  return out;
 }

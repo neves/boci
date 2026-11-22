@@ -32,7 +32,13 @@ import {
   warnFilePermissions,
 } from "./operation.ts";
 import { formatServiceError } from "./output.ts";
-import { applyUserOnlyAccessPermissions } from "./setup.ts";
+import {
+  type StdinReader,
+  applyUserOnlyAccessPermissions,
+  createStdinReader,
+  removeProfileFromConfig,
+  writeConfig,
+} from "./setup.ts";
 import {
   InvalidPrivateKey,
   MissingPrivateKeyPassphrase,
@@ -41,7 +47,12 @@ import {
   signRequest,
 } from "./signer.ts";
 import { type Index, loadService } from "./spec.ts";
-import { type ZipEntryInput, writeZipFile } from "./zip.ts";
+import {
+  BadZipFileError,
+  type ZipEntryInput,
+  readZip,
+  writeZipFile,
+} from "./zip.ts";
 
 export class SecurityTokenDecodeError extends Error {
   constructor(message: string) {
@@ -713,4 +724,277 @@ export async function runSessionExport(
 
   writeZipFile(resolvedZipPath, [...archiveEntries.values()]);
   io.err(`Export file written to: ${resolvedZipPath}\n`);
+}
+
+const SESSION_PROFILE_NAME_PATTERN = /^[A-Za-z0-9._\-@]+$/;
+
+/** Port of `cli_session.validate_profile_name` under `@cli_util.wrap_exceptions`. */
+function validateSessionProfileName(io: Invocation, profileName: string): void {
+  if (!profileName) {
+    io.err("UsageError: Profile name must be a non-empty string.\n");
+    throw new Exit(1);
+  }
+  if (!SESSION_PROFILE_NAME_PATTERN.test(profileName)) {
+    io.err(
+      `UsageError: Invalid profile name '${profileName}'. Profile names may only contain letters, numbers, '.', '_', '-', or '@'.\n`,
+    );
+    throw new Exit(1);
+  }
+  if (profileName === "." || profileName === "..") {
+    io.err(
+      `UsageError: Invalid profile name '${profileName}': Profile name cannot be '.' or '..'.\n`,
+    );
+    throw new Exit(1);
+  }
+}
+
+/** Port of `click.prompt(text)` (no default) under `@cli_util.wrap_exceptions`. */
+async function promptUnderWrapExceptions(
+  io: Invocation,
+  stdin: StdinReader,
+  text: string,
+): Promise<string> {
+  const prompt = `${text}: `;
+  while (true) {
+    io.out(prompt);
+    const line = await stdin.readLine();
+    if (line === null) {
+      io.err("Abort: \n");
+      throw new Exit(1);
+    }
+    if (line) return line;
+  }
+}
+
+/** Match CPython `zipfile.ZipFile._extract_member` relative path normalization. */
+function normalizeZipMemberPath(name: string): string {
+  const parts = name
+    .replaceAll("\\", "/")
+    .split("/")
+    .filter((p) => p !== "" && p !== "." && p !== "..");
+  return parts.join("/");
+}
+
+/** `oci session import --session-archive <path> [--force]` (port of `cli_session.import_session`). */
+export async function runSessionImport(
+  io: Invocation,
+  opts: {
+    values: Record<string, unknown>;
+    settings: ClientSettings;
+  },
+): Promise<void> {
+  const { values, settings } = opts;
+  const sessionArchive = String(values.session_archive ?? "");
+  const force = values.force === true;
+  const resolvedArchivePath = resolve(io.cwd, sessionArchive);
+
+  if (!existsSync(resolvedArchivePath)) {
+    io.err(`File ${sessionArchive} does not exist.\n`);
+    throw new Exit(1);
+  }
+
+  const configFile = expandUser(settings.configFile, io.env);
+  const resolvedConfigPath = resolve(io.cwd, configFile);
+  let configText: string | undefined;
+  try {
+    configText = readFileSync(resolvedConfigPath, "utf8");
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (code !== "ENOENT" && code !== "ENOTDIR" && code !== "EISDIR") {
+      throw e;
+    }
+  }
+
+  const currentProfiles = new Set<string>(["DEFAULT"]);
+  if (configText !== undefined) {
+    try {
+      const parsed = parseConfig(configText, configFile);
+      for (const section of parsed.sections.keys()) {
+        currentProfiles.add(section);
+      }
+    } catch (e) {
+      if (e instanceof ConfigParserError) {
+        io.err(`${e.type}: ${e.message}\n`);
+        throw new Exit(1);
+      }
+      throw e;
+    }
+  }
+
+  let archiveBytes: Buffer;
+  try {
+    const st = statSync(resolvedArchivePath);
+    if (st.isDirectory()) {
+      io.err(
+        `IsADirectoryError: [Errno 21] Is a directory: '${sessionArchive}'\n`,
+      );
+      throw new Exit(1);
+    }
+    archiveBytes = readFileSync(resolvedArchivePath);
+  } catch (e) {
+    if (e instanceof Exit) throw e;
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (code === "EISDIR") {
+      io.err(
+        `IsADirectoryError: [Errno 21] Is a directory: '${sessionArchive}'\n`,
+      );
+      throw new Exit(1);
+    }
+    throw e;
+  }
+
+  let zipEntries: ReturnType<typeof readZip>;
+  try {
+    zipEntries = readZip(archiveBytes);
+  } catch (e) {
+    if (e instanceof BadZipFileError) {
+      io.err(`BadZipFile: ${e.message}\n`);
+      throw new Exit(1);
+    }
+    throw e;
+  }
+
+  const extracted = new Map<string, Buffer>();
+  for (const entry of zipEntries) {
+    if (entry.name.endsWith("/")) continue;
+    const norm = normalizeZipMemberPath(entry.name);
+    if (norm) extracted.set(norm, entry.data);
+  }
+
+  const archivedConfigBytes = extracted.get("config");
+  if (!archivedConfigBytes) {
+    io.err(
+      `Session archive ${sessionArchive} is invalid. Did not contain file 'config'.\n`,
+    );
+    throw new Exit(1);
+  }
+
+  let archivedConfig: ReturnType<typeof parseConfig>;
+  try {
+    archivedConfig = parseConfig(
+      archivedConfigBytes.toString("utf8"),
+      "config",
+    );
+  } catch (e) {
+    if (e instanceof ConfigParserError) {
+      io.err(`${e.type}: ${e.message}\n`);
+      throw new Exit(1);
+    }
+    throw e;
+  }
+
+  const archivedProfiles = ["DEFAULT", ...archivedConfig.sections.keys()];
+  let archivedProfileName = archivedProfiles[archivedProfiles.length - 1]!;
+  const rawArchivedProfile = sectionItems(archivedConfig, archivedProfileName)!;
+  const archivedProfile = new Map<string, string>();
+  for (const [k, v] of rawArchivedProfile) {
+    archivedProfile.set(k, v ?? "");
+  }
+
+  validateSessionProfileName(io, archivedProfileName);
+
+  if (!archivedProfile.has("security_token_file")) {
+    io.err(
+      "ERROR: Cannot import non token based profile (profile must contain value for security_token_file).\n",
+    );
+    throw new Exit(1);
+  }
+
+  if (force) {
+    try {
+      removeProfileFromConfig(
+        resolvedConfigPath,
+        configFile,
+        archivedProfileName,
+      );
+    } catch (e) {
+      const code = (e as NodeJS.ErrnoException | null)?.code;
+      if (code === "ENOENT") {
+        io.err(
+          `FileNotFoundError: [Errno 2] No such file or directory: '${configFile}'\n`,
+        );
+        throw new Exit(1);
+      }
+      throw e;
+    }
+  }
+
+  let stdin: StdinReader | undefined;
+  while (currentProfiles.has(archivedProfileName) && !force) {
+    stdin ??= createStdinReader(io);
+    archivedProfileName = await promptUnderWrapExceptions(
+      io,
+      stdin,
+      `Config already contains a profile with the same name as the archived profile: ${archivedProfileName}. Provide an alternative name for the imported profile`,
+    );
+    validateSessionProfileName(io, archivedProfileName);
+  }
+
+  const defaultTokenDirectory = join(
+    expandUser("~", io.env),
+    ".oci",
+    "sessions",
+  );
+  const importedResourcesDir = join(defaultTokenDirectory, archivedProfileName);
+  const resolvedTokenDir = resolve(defaultTokenDirectory);
+  const resolvedResourcesDir = resolve(importedResourcesDir);
+  if (
+    resolvedResourcesDir !== resolvedTokenDir &&
+    !resolvedResourcesDir.startsWith(`${resolvedTokenDir}/`)
+  ) {
+    io.out(
+      `ERROR: Invalid profile name: ${archivedProfileName} in session-archive. Attempted to create a session outside ${defaultTokenDirectory}\n`,
+    );
+    throw new Exit(1);
+  }
+
+  if (!existsSync(importedResourcesDir)) {
+    mkdirSync(importedResourcesDir, { recursive: true });
+  }
+
+  for (const [key, value] of archivedProfile) {
+    if (!isSessionFileKey(key)) continue;
+    const normalizedRef = normalizeZipMemberPath(value);
+    const data = normalizedRef ? extracted.get(normalizedRef) : undefined;
+    if (!data) {
+      io.err(
+        `FileNotFoundError: [Errno 2] No such file or directory: '${value}'\n`,
+      );
+      throw new Exit(1);
+    }
+    const destPath = join(importedResourcesDir, posixBasename(value));
+    writeFileSync(destPath, data);
+    applyUserOnlyAccessPermissions(join(importedResourcesDir, value));
+  }
+
+  const translated = translateConfigFilepathsToPrefix(
+    archivedProfile,
+    importedResourcesDir,
+  );
+  try {
+    writeConfig(resolvedConfigPath, {
+      userId: translated.get("user_id"),
+      fingerprint: translated.get("fingerprint"),
+      keyFile: translated.get("key_file"),
+      tenancy: translated.get("tenancy"),
+      region: translated.get("region"),
+      passPhrase: translated.get("pass_phrase"),
+      profileName: archivedProfileName,
+      securityTokenFile: translated.get("security_token_file"),
+    });
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (code === "ENOENT") {
+      io.err(
+        `FileNotFoundError: [Errno 2] No such file or directory: '${configFile}'\n`,
+      );
+      throw new Exit(1);
+    }
+    throw e;
+  }
+
+  io.err(`Imported profile ${archivedProfileName} written to: ${configFile}\n`);
+  io.out(
+    `\n    Try out your newly imported session credentials with the following example command:\n\n    oci iam region list --config-file ${configFile} --profile ${archivedProfileName} --auth security_token\n\n`,
+  );
 }

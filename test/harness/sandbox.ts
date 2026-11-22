@@ -4,6 +4,7 @@ import { createPrivateKey, createPublicKey } from "node:crypto";
 import { chmod, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { buildZip } from "../../src/zip.ts";
 
 export const FAKE = {
   tenancy:
@@ -61,6 +62,8 @@ export type SandboxOptions = {
   keyFormat?: "pkcs8" | "pkcs1";
   /** Extra files to create, relative to the sandbox HOME (e.g. ".oci/oci_cli_rc"). */
   files?: Record<string, string>;
+  /** Extra ZIP archives to create, relative to the sandbox HOME: `{ "a.zip": { "config": "..." } }`. */
+  zipFiles?: Record<string, Record<string, string>>;
   /** Optional Unix mode overrides for extra sandbox files (default 0o600). */
   fileModes?: Record<string, number>;
   /** true: omit ~/.oci/config and ~/.oci/key.pem (e.g. for instance/resource principal tests). */
@@ -110,6 +113,20 @@ export async function createSandbox(
       path,
       content.replaceAll("{home}", home).replaceAll("{fakeKey}", FAKE_KEY_PEM),
     );
+    await chmod(path, options.fileModes?.[rel] ?? 0o600);
+  }
+  for (const [rel, entries] of Object.entries(options.zipFiles ?? {})) {
+    const path = join(home, rel);
+    const zipEntries = Object.entries(entries).map(([name, content]) => ({
+      name,
+      data: Buffer.from(
+        content
+          .replaceAll("{home}", home)
+          .replaceAll("{fakeKey}", FAKE_KEY_PEM),
+        "utf8",
+      ),
+    }));
+    await Bun.write(path, buildZip(zipEntries));
     await chmod(path, options.fileModes?.[rel] ?? 0o600);
   }
 

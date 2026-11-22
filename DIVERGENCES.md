@@ -81,3 +81,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** both focused cases pass, including request body and normalized authorization headers. Inspection of the generated PUT golden requests found no exact mismatch. `src/cli.ts` serializes the generated body before signing; `src/signer.ts` hashes those bytes into `x-content-sha256` and signs `content-length`, `content-type`, and the digest.
 - **Why:** no exact signature mismatch could be reproduced to guide a fix.
 - **State:** unresolved (tried: broad parity timed out without output; three filtered PUT cases including nested JSON passed; bounded audit inspected empty and structured body goldens and signing implementation without finding a mismatch).
+
+### `os object get` (multipart): part failure omits Python traceback
+
+- **Invocation:** `oci os object get -ns myns -bn mybucket --name fail-big.bin --file out.bin` when a ranged GET part returns an HTTP error
+- **Reference CLI:** exits 1 with `RuntimeError: Error downloading parts: Traceback (most recent call last): ... oci.exceptions.ServiceError: {...}` including local Python site-packages paths from `WorkPoolTask`
+- **boci:** exits 1 with `RuntimeError: Error downloading parts: ServiceError:\n{...}\n` (no Python stack trace)
+- **Why:** reproducing a Python worker-pool traceback with machine-specific site-packages paths is meaningless; both fail with exit 1 and report `RuntimeError: Error downloading parts:` with the service error details.
+- **State:** accepted

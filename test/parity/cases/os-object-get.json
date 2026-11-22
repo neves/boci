@@ -491,5 +491,550 @@
         "empty.bin": ""
       }
     }
+  },
+  {
+    "id": "os-object-get-multipart-file",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "big.bin",
+      "--file",
+      "{home}/multi.txt",
+      "--parallel-download-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "300000000",
+          "etag": "etag-big"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "part-0|"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "part-1|"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "part-2"
+      }
+    ],
+    "expect": {
+      "files": {
+        "multi.txt": "part-0|part-1|part-2"
+      }
+    }
+  },
+  {
+    "id": "os-object-get-multipart-stdout",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "two-parts.bin",
+      "--file",
+      "-",
+      "--parallel-download-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "268435456",
+          "etag": "etag-two"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "chunk-a"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "chunk-b"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-part-size",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "custom-part.bin",
+      "--file",
+      "-",
+      "--part-size",
+      "150",
+      "--parallel-download-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "314572805"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "p0-"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "p1-"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "p2"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-exact-boundary",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "exact-128m.bin",
+      "--file",
+      "-"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "134217728"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "single-part-body"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-single-byte-tail",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "tail-1b.bin",
+      "--file",
+      "-",
+      "--parallel-download-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "134217729"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "part-only"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "tail"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-no-multipart",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "big.bin",
+      "--file",
+      "-",
+      "--no-multipart"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "300000000"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "whole-object"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-range-override",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "big.bin",
+      "--file",
+      "-",
+      "--range",
+      "bytes=0-4"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "300000000"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "hello"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-threshold",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "200m.bin",
+      "--file",
+      "-",
+      "--multipart-download-threshold",
+      "256",
+      "--parallel-download-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "209715200"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "p0"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "p1"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-options",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "secret-big.bin",
+      "--file",
+      "-",
+      "--parallel-download-count",
+      "1",
+      "--version-id",
+      "v2",
+      "--if-match",
+      "etag-a",
+      "--if-none-match",
+      "etag-b",
+      "--encryption-key-file",
+      "{home}/sse.key",
+      "--http-response-content-type",
+      "text/csv",
+      "--http-response-content-disposition",
+      "attachment"
+    ],
+    "sandbox": {
+      "files": {
+        "sse.key": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "268435456"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "sec0"
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "sec1"
+      }
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-part-error",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "fail-big.bin",
+      "--file",
+      "{home}/fail.txt",
+      "--parallel-download-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "268435456"
+        },
+        "body": ""
+      },
+      {
+        "status": 206,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": "ok-0"
+      },
+      {
+        "status": 412,
+        "headers": {
+          "opc-request-id": "req-part-412"
+        },
+        "body": {
+          "code": "IfMatchFailed",
+          "message": "If-Match failed."
+        }
+      }
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderrContains": "RuntimeError: Error downloading parts:",
+      "stderrMatches": ["IfMatchFailed", "req-part-412"],
+      "requests": 3
+    }
+  },
+  {
+    "id": "os-object-get-multipart-invalid-part-size",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "big.bin",
+      "--file",
+      "-",
+      "--part-size",
+      "64"
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-invalid-threshold",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "big.bin",
+      "--file",
+      "-",
+      "--multipart-download-threshold",
+      "64"
+    ]
+  },
+  {
+    "id": "os-object-get-multipart-invalid-parallel-count",
+    "key": "os object get",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "get",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--name",
+      "big.bin",
+      "--file",
+      "-",
+      "--parallel-download-count",
+      "0"
+    ]
   }
 ]

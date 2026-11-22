@@ -221,7 +221,122 @@ export type OsObjectGetOptions = {
   outputFile?: OutputFileHandle;
 };
 
-/** `oci os object get` (single-part). */
+const MEBIBYTE = 1024 * 1024;
+const DEFAULT_PART_SIZE_BYTES = 128 * MEBIBYTE;
+const DEFAULT_MULTIPART_DOWNLOAD_THRESHOLD_MIB = 128;
+const DEFAULT_PARALLEL_DOWNLOAD_COUNT = 10;
+const PROGRESS_BAR_GRANULARITY = 10000;
+
+function createChunkWriter(io: Invocation, outputFile: OutputFileHandle) {
+  if (outputFile.isStdout) {
+    if (io.outBytes) {
+      return {
+        write: (chunk: Uint8Array) => io.outBytes?.(chunk),
+        finish: () => {},
+      };
+    }
+    const decoder = new TextDecoder();
+    return {
+      write: (chunk: Uint8Array) =>
+        io.out(decoder.decode(chunk, { stream: true })),
+      finish: () => {
+        const tail = decoder.decode();
+        if (tail) io.out(tail);
+      },
+    };
+  }
+  const fd = outputFile.fd as number;
+  return {
+    write: (chunk: Uint8Array) => {
+      let offset = 0;
+      while (offset < chunk.length) {
+        offset += writeSync(fd, chunk, offset, chunk.length - offset);
+      }
+    },
+    finish: () => {},
+  };
+}
+
+function createNonTtyProgressTracker(
+  io: Invocation,
+  totalBytes: number,
+  label: string,
+  enabled: boolean,
+) {
+  const denom = totalBytes === 0 ? 1 : totalBytes;
+  let progressBytes = 0;
+  let printed = false;
+  return {
+    update(bytes: number) {
+      if (!enabled || bytes <= 0) return;
+      progressBytes += bytes;
+      if (!printed && PROGRESS_BAR_GRANULARITY * (progressBytes / denom) >= 1) {
+        io.err(`${label}\n`);
+        printed = true;
+      }
+    },
+  };
+}
+
+/** Matches `GetObjectMultipartTask` byte-range partitioning in object_storage_transfer_manager. */
+export function buildMultipartGetRanges(
+  contentLength: number,
+  partSizeBytes: number,
+): { index: number; range: string }[] {
+  const ranges: { index: number; range: string }[] = [];
+  let startByte = 0;
+  let endByte = partSizeBytes - 1;
+  let index = 0;
+  while (endByte < contentLength) {
+    if (startByte !== endByte) {
+      ranges.push({ index, range: `bytes=${startByte}-${endByte}` });
+    }
+    index += 1;
+    startByte += partSizeBytes;
+    endByte += partSizeBytes;
+    if (startByte >= contentLength) break;
+    if (endByte >= contentLength) endByte = contentLength - 1;
+  }
+  return ranges;
+}
+
+async function readResponseBytes(
+  response: Response,
+  onChunk?: (byteLength: number) => void,
+): Promise<Uint8Array> {
+  if (!response.body) {
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.length > 0) onChunk?.(bytes.length);
+    return bytes;
+  }
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  const reader = response.body.getReader();
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value && value.length > 0) {
+        chunks.push(value);
+        total += value.length;
+        onChunk?.(value.length);
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  if (chunks.length === 0) return new Uint8Array(0);
+  if (chunks.length === 1) return chunks[0] as Uint8Array;
+  const merged = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return merged;
+}
+
+/** `oci os object get` (single-part and multipart). */
 export async function runOsObjectGet(
   io: Invocation,
   opts: OsObjectGetOptions,
@@ -285,113 +400,208 @@ export async function runOsObjectGet(
       throw new Exit(1);
     }
 
-    // 2. Single-part GET object.
-    const getQuery: [string, string][] = [];
-    if (typeof values.version_id === "string")
-      getQuery.push(["versionId", values.version_id]);
-    const responseHeaderQueryMap: [string, string][] = [
-      ["http_response_content_disposition", "httpResponseContentDisposition"],
-      ["http_response_cache_control", "httpResponseCacheControl"],
-      ["http_response_content_type", "httpResponseContentType"],
-      ["http_response_content_language", "httpResponseContentLanguage"],
-      ["http_response_content_encoding", "httpResponseContentEncoding"],
-      ["http_response_expires", "httpResponseExpires"],
-    ];
-    for (const [paramKey, queryName] of responseHeaderQueryMap) {
-      if (typeof values[paramKey] === "string")
-        getQuery.push([queryName, values[paramKey] as string]);
+    const contentLengthHeader = head.response.headers.get("content-length");
+    const objectSizeBytes =
+      contentLengthHeader !== null
+        ? Number.parseInt(contentLengthHeader, 10) || 0
+        : 0;
+    const partSizeBytes =
+      typeof values.part_size === "number"
+        ? values.part_size * MEBIBYTE
+        : DEFAULT_PART_SIZE_BYTES;
+    const multipartDownloadThreshold =
+      typeof values.multipart_download_threshold === "number"
+        ? values.multipart_download_threshold
+        : DEFAULT_MULTIPART_DOWNLOAD_THRESHOLD_MIB;
+    const parallelDownloadCount =
+      typeof values.parallel_download_count === "number"
+        ? values.parallel_download_count
+        : DEFAULT_PARALLEL_DOWNLOAD_COUNT;
+    const noMultipart = values.no_multipart === true;
+    const hasRange =
+      typeof values.range === "string" && values.range.length > 0;
+    const useSinglePart =
+      hasRange ||
+      noMultipart ||
+      (multipartDownloadThreshold > 0 && partSizeBytes >= objectSizeBytes) ||
+      objectSizeBytes <= multipartDownloadThreshold;
+
+    const writeChunk = createChunkWriter(io, outputFile);
+    const progress = createNonTtyProgressTracker(
+      io,
+      objectSizeBytes,
+      "Downloading object",
+      !outputFile.isStdout,
+    );
+
+    if (useSinglePart) {
+      // 2a. Single-part GET object.
+      const getQuery: [string, string][] = [];
+      if (typeof values.version_id === "string")
+        getQuery.push(["versionId", values.version_id]);
+      const responseHeaderQueryMap: [string, string][] = [
+        ["http_response_content_disposition", "httpResponseContentDisposition"],
+        ["http_response_cache_control", "httpResponseCacheControl"],
+        ["http_response_content_type", "httpResponseContentType"],
+        ["http_response_content_language", "httpResponseContentLanguage"],
+        ["http_response_content_encoding", "httpResponseContentEncoding"],
+        ["http_response_expires", "httpResponseExpires"],
+      ];
+      for (const [paramKey, queryName] of responseHeaderQueryMap) {
+        if (typeof values[paramKey] === "string")
+          getQuery.push([queryName, values[paramKey] as string]);
+      }
+
+      const getHeaders: Record<string, string> = {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...sseHeaders,
+      };
+      if (typeof values.if_match === "string")
+        getHeaders["if-match"] = values.if_match;
+      if (typeof values.if_none_match === "string")
+        getHeaders["if-none-match"] = values.if_none_match;
+      if (typeof values.range === "string") getHeaders.range = values.range;
+
+      const get = await sendServiceRequest(io, sc, {
+        method: "GET",
+        pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+        pathParams,
+        queryParams: getQuery,
+        headers: getHeaders,
+        rawResponse: true,
+        decompress: false,
+      });
+      if (!get.response.ok) {
+        io.err(
+          formatServiceError(
+            { http: "GET", method: "get_object" },
+            get.url,
+            get.response,
+            get.raw,
+            sc.targetService,
+          ),
+        );
+        throw new Exit(1);
+      }
+
+      if (get.response.body) {
+        const reader = get.response.body.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value && value.length > 0) {
+              progress.update(value.length);
+              writeChunk.write(value);
+            }
+          }
+        } finally {
+          reader.releaseLock();
+        }
+      } else {
+        const bytes = new Uint8Array(await get.response.arrayBuffer());
+        if (bytes.length > 0) {
+          progress.update(bytes.length);
+          writeChunk.write(bytes);
+        }
+      }
+      writeChunk.finish();
+      return;
     }
 
-    const getHeaders: Record<string, string> = {
+    // 2b. Multipart ranged GET object (mirrors GetObjectMultipartTask).
+    const ranges = buildMultipartGetRanges(objectSizeBytes, partSizeBytes);
+    const multipartQuery: [string, string][] = [];
+    if (typeof values.version_id === "string")
+      multipartQuery.push(["versionId", values.version_id]);
+
+    const baseHeaders: Record<string, string> = {
       accept: "application/json",
       "content-type": "application/json",
       ...sseHeaders,
     };
     if (typeof values.if_match === "string")
-      getHeaders["if-match"] = values.if_match;
+      baseHeaders["if-match"] = values.if_match;
     if (typeof values.if_none_match === "string")
-      getHeaders["if-none-match"] = values.if_none_match;
-    if (typeof values.range === "string") getHeaders.range = values.range;
+      baseHeaders["if-none-match"] = values.if_none_match;
 
-    const get = await sendServiceRequest(io, sc, {
-      method: "GET",
-      pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
-      pathParams,
-      queryParams: getQuery,
-      headers: getHeaders,
-      rawResponse: true,
-      decompress: false,
+    const reportProgress = !outputFile.isStdout && rootValues.debug !== true;
+    if (reportProgress) progress.update(1);
+
+    const pendingWrites = new Map<number, Uint8Array>();
+    let nextWritePos = 0;
+    const errors: string[] = [];
+    let nextPartPos = 0;
+
+    const flushPendingWrites = () => {
+      while (nextWritePos < ranges.length) {
+        const expected = ranges[nextWritePos];
+        if (!expected || !pendingWrites.has(expected.index)) break;
+        const data = pendingWrites.get(expected.index) as Uint8Array;
+        pendingWrites.delete(expected.index);
+        if (data.length > 0) writeChunk.write(data);
+        nextWritePos += 1;
+      }
+    };
+
+    const workerCount = Math.max(
+      1,
+      Math.min(parallelDownloadCount, ranges.length),
+    );
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (errors.length === 0) {
+        const pos = nextPartPos;
+        if (pos >= ranges.length) break;
+        nextPartPos += 1;
+        const part = ranges[pos];
+        if (!part) break;
+        try {
+          const res = await sendServiceRequest(io, sc, {
+            method: "GET",
+            pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+            pathParams,
+            queryParams: multipartQuery,
+            headers: {
+              ...baseHeaders,
+              range: part.range,
+            },
+            rawResponse: true,
+            decompress: false,
+          });
+          if (!res.response.ok) {
+            errors.push(
+              formatServiceError(
+                { http: "GET", method: "get_object" },
+                res.url,
+                res.response,
+                res.raw,
+                sc.targetService,
+              ).trimEnd(),
+            );
+            return;
+          }
+          const bytes = await readResponseBytes(
+            res.response,
+            reportProgress ? (n) => progress.update(n) : undefined,
+          );
+          if (errors.length > 0) return;
+          pendingWrites.set(part.index, bytes);
+          flushPendingWrites();
+        } catch (e) {
+          errors.push(e instanceof Error ? e.message : String(e));
+          return;
+        }
+      }
     });
-    if (!get.response.ok) {
-      io.err(
-        formatServiceError(
-          { http: "GET", method: "get_object" },
-          get.url,
-          get.response,
-          get.raw,
-          sc.targetService,
-        ),
-      );
+
+    await Promise.all(workers);
+    if (errors.length > 0) {
+      io.err(`RuntimeError: Error downloading parts: ${errors.join("\n")}\n`);
       throw new Exit(1);
     }
-
-    const writeChunk = (() => {
-      if (outputFile.isStdout) {
-        if (io.outBytes) {
-          return {
-            write: (chunk: Uint8Array) => io.outBytes?.(chunk),
-            finish: () => {},
-          };
-        }
-        const decoder = new TextDecoder();
-        return {
-          write: (chunk: Uint8Array) =>
-            io.out(decoder.decode(chunk, { stream: true })),
-          finish: () => {
-            const tail = decoder.decode();
-            if (tail) io.out(tail);
-          },
-        };
-      }
-      const fd = outputFile.fd as number;
-      return {
-        write: (chunk: Uint8Array) => {
-          let offset = 0;
-          while (offset < chunk.length) {
-            offset += writeSync(fd, chunk, offset, chunk.length - offset);
-          }
-        },
-        finish: () => {},
-      };
-    })();
-
-    let bytesWritten = 0;
-    if (get.response.body) {
-      const reader = get.response.body.getReader();
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (value && value.length > 0) {
-            writeChunk.write(value);
-            bytesWritten += value.length;
-          }
-        }
-      } finally {
-        reader.releaseLock();
-      }
-    } else {
-      const bytes = new Uint8Array(await get.response.arrayBuffer());
-      if (bytes.length > 0) {
-        writeChunk.write(bytes);
-        bytesWritten += bytes.length;
-      }
-    }
+    flushPendingWrites();
     writeChunk.finish();
-
-    if (!outputFile.isStdout && bytesWritten > 0) {
-      io.err("Downloading object\n");
-    }
   } finally {
     if (ownedOutputFile && outputFile.fd !== undefined) {
       try {
@@ -412,9 +622,6 @@ export type OsObjectPutOptions = {
   usageText: () => string;
   outputOptions: OutputOptions;
 };
-
-const MEBIBYTE = 1024 * 1024;
-const DEFAULT_PART_SIZE_BYTES = 128 * MEBIBYTE;
 
 async function confirmPrompt(io: Invocation, prompt: string): Promise<boolean> {
   const stdinLines =

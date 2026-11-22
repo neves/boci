@@ -2,6 +2,10 @@
 // out. Config and key loading, endpoint resolution, the request (path, query, headers, body
 // bindings), signing, timeouts, retries and --all pagination all live here, in the order
 // oci's generated command and the Python SDK's base client do them.
+import {
+  ConnectionPhaseTimeout,
+  fetchWithConnectionTimeout,
+} from "./connection-timeout.ts";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { randomBytes, type KeyObject } from "node:crypto";
@@ -605,18 +609,8 @@ export async function sendServiceRequest(
       opts.enforceContentHeaders ?? true,
     );
     const controller = new AbortController();
-    const connectionTimer =
-      sc.connectionTimeout === undefined
-        ? undefined
-        : setTimeout(
-            () =>
-              controller.abort(
-                new DOMException("Connection timed out", "TimeoutError"),
-              ),
-            sc.connectionTimeout * 1000,
-          );
     const readTimer =
-      sc.readTimeout === undefined
+      sc.connectionTimeout !== undefined || sc.readTimeout === undefined
         ? undefined
         : setTimeout(
             () =>
@@ -632,22 +626,38 @@ export async function sendServiceRequest(
         ...(req.body !== "" && req.body !== undefined
           ? { body: req.body }
           : {}),
-        ...(connectionTimer === undefined && readTimer === undefined
-          ? {}
-          : { signal: controller.signal }),
+        ...(readTimer === undefined ? {} : { signal: controller.signal }),
         ...(opts.decompress === false ? { decompress: false } : {}),
       };
-      response = await fetch(req.url, init);
-      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
+      response =
+        sc.connectionTimeout === undefined
+          ? await fetch(req.url, init)
+          : await fetchWithConnectionTimeout(
+              io,
+              url,
+              req,
+              sc.connectionTimeout * 1000,
+              controller.signal,
+              opts.decompress,
+              (sc.readTimeout ?? 0) * 1000,
+            );
       if (opts.rawResponse && response.ok) {
         raw = "";
       } else {
         raw = await response.text();
       }
     } catch (e) {
-      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
       if (readTimer !== undefined) clearTimeout(readTimer);
-      if (attempt >= maxAttempts) throw e;
+      if (attempt >= maxAttempts) {
+        if (
+          e instanceof ConnectionPhaseTimeout &&
+          sc.rootValues.debug !== true
+        ) {
+          io.err(e.report());
+          throw new Exit(1);
+        }
+        throw e;
+      }
       const delay = Math.min(
         1000 * 2 ** (attempt - 1) + Math.random() * 1000,
         30000,
@@ -655,7 +665,6 @@ export async function sendServiceRequest(
       await Bun.sleep(delay);
       continue;
     } finally {
-      if (connectionTimer !== undefined) clearTimeout(connectionTimer);
       if (readTimer !== undefined) clearTimeout(readTimer);
     }
     if (attempt >= maxAttempts || !retryableResponse(response, raw)) break;

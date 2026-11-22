@@ -77,7 +77,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Service error mapping: non-2xx → same stderr JSON (`code`, `message`, `status`, `target_service`, …) and exit code.
 - [x] Global option: `--request-id`.
 - [x] Global option: `--debug` (shape only).
-- [~] Global option: `--connection-timeout`.
+- [x] Global option: `--connection-timeout`.
 - [x] Global option: `--read-timeout`.
 - [x] Global option: `--no-retry` disables SDK retries and omits `opc-client-retries`.
 - [x] Global option: `--max-retries` sets the maximum attempt count (the Reference CLI's `max_attempts`).

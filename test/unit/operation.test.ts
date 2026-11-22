@@ -5,6 +5,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { RegionsSpec } from "../../src/endpoint.ts";
+import { fetchWithConnectionTimeout } from "../../src/connection-timeout.ts";
 import { Exit, type Invocation } from "../../src/io.ts";
 import {
   type GeneratedCommand,
@@ -12,6 +13,7 @@ import {
   callOperation,
 } from "../../src/operation.ts";
 import { startFakeEndpoint } from "../harness/fake-endpoint.ts";
+import { startFakeHttpsProxy } from "../harness/fake-https-proxy.ts";
 
 let dir = "";
 beforeAll(() => {
@@ -186,4 +188,124 @@ test("--all with --limit is a usage error before any request", async () => {
   expect((thrown as Exit).code).toBe(1);
   expect(err.join("")).toContain("--all option you cannot provide the --limit");
   expect(fake.requests).toHaveLength(0);
+});
+
+test("connection timeout ends a stalled TLS handshake on the request socket", async () => {
+  let connections = 0;
+  const listener = Bun.listen({
+    hostname: "127.0.0.1",
+    port: 0,
+    socket: {
+      open() {
+        connections++;
+      },
+      data() {},
+    },
+  });
+  try {
+    const { io, err } = invocation();
+    const endpoint = `https://127.0.0.1:${listener.port}`;
+    await expect(
+      callOperation(
+        io,
+        call(
+          endpoint,
+          {},
+          {
+            connection_timeout: 0.15,
+            read_timeout: 0.05,
+            no_retry: true,
+          },
+        ),
+      ),
+    ).rejects.toBeInstanceOf(Exit);
+    expect(connections).toBe(1);
+    expect(err.join("")).toContain("RequestException:");
+    expect(err.join("")).toContain("The request timed out.");
+  } finally {
+    listener.stop(true);
+  }
+});
+
+test("connection timeout allows delayed response headers through a trusted TLS proxy", async () => {
+  sleep.mockImplementationOnce(
+    (ms) => new Promise((resolve) => setTimeout(resolve, Number(ms))),
+  );
+  using proxy = await startFakeHttpsProxy({
+    delayMs: 350,
+    body: { items: [] },
+  });
+  const { io } = invocation();
+  io.env.HTTPS_PROXY = proxy.proxyUrl;
+  io.env.REQUESTS_CA_BUNDLE = proxy.caCertPath;
+  const result = await callOperation(
+    io,
+    call(
+      "https://auth.custom.example.com",
+      {},
+      {
+        connection_timeout: 0.2,
+        no_retry: true,
+      },
+    ),
+  );
+  expect(result.response.status).toBe(200);
+  expect(proxy.requests.map((request) => request.path)).toEqual(["/v1/things"]);
+});
+
+test("connection timeout preserves redirected request bytes and compressed downloads", async () => {
+  const requests: {
+    method: string;
+    body: string;
+    authorization: string | null;
+  }[] = [];
+  const bytes = Bun.gzipSync("object bytes");
+  const target = Bun.serve({
+    hostname: "127.0.0.1",
+    port: 0,
+    async fetch(req) {
+      requests.push({
+        method: req.method,
+        body: await req.text(),
+        authorization: req.headers.get("authorization"),
+      });
+      return new Response(bytes, { headers: { "content-encoding": "gzip" } });
+    },
+  });
+  const redirect = Bun.serve({
+    hostname: "127.0.0.1",
+    port: 0,
+    fetch() {
+      return Response.redirect(target.url.href, 307);
+    },
+  });
+  try {
+    const { io } = invocation();
+    for (const decompress of [true, false]) {
+      const response = await fetchWithConnectionTimeout(
+        io,
+        redirect.url,
+        {
+          method: "PUT",
+          headers: { authorization: "test-credential" },
+          body: "signed bytes",
+        },
+        1000,
+        new AbortController().signal,
+        decompress,
+      );
+      if (decompress) expect(await response.text()).toBe("object bytes");
+      else expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytes);
+    }
+    expect(requests).toEqual(
+      Array(2).fill({
+        method: "PUT",
+        body: "signed bytes",
+        authorization: null,
+      }),
+    );
+  } finally {
+    redirect.stop(true);
+    target.stop(true);
+  }
 });

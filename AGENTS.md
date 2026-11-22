@@ -31,7 +31,7 @@ Every byte read stays in context and is re-sent on every later turn. Keep contex
 - Treat requests to "resume" or "loop" as "Resume the project ladder": continue from the first unticked item in PLAN.md. Honor an explicit pause or stop request.
 - **One fresh context per item.** As the orchestrator, don't implement items yourself. For each item, start a new subagent with your harness's native subagent tool (same model) and this brief:
 
-  > One boci ladder iteration. Follow AGENTS.md ("Token budget", "One loop iteration") for exactly the next item from `bun run ladder`. Commit it. Reply in ≤5 lines: commit SHA and message, item state (ticked / split / stuck), and anything that needs the user.
+  > One boci ladder iteration. Follow AGENTS.md ("Token budget", "One loop iteration") for exactly the next item from `bun run ladder`. Commit it and push once at the end. Reply in ≤5 lines: commit SHA and message, push result, item state (ticked / split / stuck), and anything that needs the user.
 
   Wait for it. Check `git log -1 --oneline` and `bun run status | head -14`, then start the next subagent. Don't read source, diffs or test output yourself. Never run two item subagents at once: they share the working tree and the Ladder is sequential.
 
@@ -48,11 +48,12 @@ Every byte read stays in context and is re-sent on every later turn. Keep contex
 3. Write the failing test first. For behaviour: add Parity cases to `test/parity/cases/*.json` (key = Leaf command path or Engine feature), run `bun run golden --filter <id-prefix>` to record what the Reference CLI does, then, for a Custom command or Engine feature, add the key to `IMPLEMENTED` in `src/registry.ts` so the case runs (and fails). Generated commands are implemented by rule (`engineSupports`); widen the rule or use `IMPLEMENTED`/`EXCLUDED` for exceptions. For tooling: a unit test.
 4. Implement until it passes, using focused tests (see Token budget). Use `bun run parity:live` only to record or to confirm a feature against the real account, then rely on the Recording.
 5. `bun run verify`: all green.
-6. `bun run ladder tick`, update DIVERGENCES.md if needed, and commit to local `main`: one feature per commit, message `rung N: <item>`. Never push.
+6. `bun run ladder tick`, update DIVERGENCES.md if needed, and commit to `main`: one feature per commit, message `rung N: <item>`. Don't push per commit.
+7. Once the item's commits are done (ticked, split or stuck), push them all with one `git push origin main`. If the push fails, don't force: report it.
 
 ## When stuck
 
-- After 3 honest attempts on one item: add an **unresolved** entry to DIVERGENCES.md (invocation, what differs, what was tried), run `bun run ladder stuck`, commit, and move on.
+- After 3 honest attempts on one item: add an **unresolved** entry to DIVERGENCES.md (invocation, what differs, what was tried), run `bun run ladder stuck`, commit, push (step 7), and move on.
 - Stop the loop and report when:
   - the Ladder is done;
   - something needs the user (credentials, a non-Always-Free resource, a Reference CLI upgrade);

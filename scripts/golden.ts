@@ -4,6 +4,7 @@
 // By default each case runs in a child forked from a pre-imported `oci`
 // (scripts/oci-zygote.ts, ~6x faster); --spawn starts `oci` afresh for every case.
 import { availableParallelism } from "node:os";
+import { dirname } from "node:path";
 import { parseArgs } from "util";
 import { normalizeRun } from "../test/harness/compare.ts";
 import {
@@ -90,3 +91,6 @@ if (todo.length)
   console.log(
     `wrote ${done} goldens${fallbacks ? ` (${fallbacks} spawned: the zygote couldn't run them)` : ""}`,
   );
+// JSON.stringify's layout isn't what `bun fmt --check` (in verify) wants.
+if (done)
+  await Bun.$`${process.execPath} fmt ${dirname(goldenPath("x"))}`.quiet();

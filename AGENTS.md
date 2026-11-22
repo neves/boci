@@ -45,7 +45,7 @@ Every byte read stays in context and is re-sent on every later turn. Keep contex
 
 1. `bun run ladder`. Take the item it prints.
 2. If the item is too big for one commit, split it into smaller unticked items in PLAN.md (edit only that line) and take the first one. Mechanical work across many commands (e.g. generated cases for many services) is one generator pass, not one item per service. Group what fails by cause, one commit per cause.
-3. Write the failing test first. For behaviour: add Parity cases to `test/parity/cases/*.json` (key = Leaf command path or Engine feature), run `bun run golden --filter <id-prefix>` to record what the Reference CLI does, then mark the key implemented in `src/registry.ts` so the case runs (and fails). For tooling: a unit test.
+3. Write the failing test first. For behaviour: add Parity cases to `test/parity/cases/*.json` (key = Leaf command path or Engine feature), run `bun run golden --filter <id-prefix>` to record what the Reference CLI does, then, for a Custom command or Engine feature, add the key to `IMPLEMENTED` in `src/registry.ts` so the case runs (and fails). Generated commands are implemented by rule (`engineSupports`); widen the rule or use `IMPLEMENTED`/`EXCLUDED` for exceptions. For tooling: a unit test.
 4. Implement until it passes, using focused tests (see Token budget). Use `bun run parity:live` only to record or to confirm a feature against the real account, then rely on the Recording.
 5. `bun run verify`: all green.
 6. `bun run ladder tick`, update DIVERGENCES.md if needed, and commit to local `main`: one feature per commit, message `rung N: <item>`. Never push.

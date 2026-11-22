@@ -488,7 +488,7 @@ export async function run(argv: string[]): Promise<void> {
   if (
     specCmd.kind === "generated" &&
     specCmd.operation?.http === "GET" &&
-    isImplemented(`${name} ${key}`)
+    isImplemented(`${name} ${key}`, specCmd)
   ) {
     await runGeneratedGet(
       values,
@@ -504,7 +504,7 @@ export async function run(argv: string[]): Promise<void> {
   if (
     specCmd.kind === "generated" &&
     ["POST", "PUT", "PATCH"].includes(specCmd.operation?.http ?? "") &&
-    isImplemented(`${name} ${key}`)
+    isImplemented(`${name} ${key}`, specCmd)
   ) {
     await runGeneratedWrite(
       values,

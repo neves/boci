@@ -4,7 +4,7 @@
 // Generated cases (test/parity/cases/generated-*.json, thousands of them) run only with
 // BOCI_PARITY_ALL=1, which `bun run verify` sets; the default `bun test` stays fast.
 import { afterAll, describe, expect, test } from "bun:test";
-import { isImplemented } from "../../src/registry.ts";
+import { implementedLookup } from "../../src/registry.ts";
 import {
   caseHash,
   includeGeneratedCases,
@@ -17,6 +17,7 @@ import { createPublicKey } from "node:crypto";
 import { CLIS, runCli } from "../harness/runner.ts";
 
 const cases = await loadCases({ generated: includeGeneratedCases() });
+const isImplemented = await implementedLookup(cases.map((c) => c.key));
 const runnableCases = cases.filter((c) => isImplemented(c.key));
 const missingCases = cases.length - runnableCases.length;
 const missingKeys = new Set(

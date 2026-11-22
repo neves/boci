@@ -1,11 +1,11 @@
-// `bun run verify [--dist]`: every check the loop needs before a commit, with quiet output.
+// `bun run verify`: every check the loop needs before a commit, with quiet output.
 // It keeps a live terminal status showing finished, running, and queued checks. One line per
 // passing step; a failing step prints its (tail-capped) output. All steps run even if one
-// fails, so a single run reports every problem. `--dist` adds the parity suite against the
-// compiled binary (`bun run test:dist`).
+// fails, so a single run reports every problem. Parity always runs against the freshly
+// compiled binary, avoiding one Bun/TypeScript startup for every case.
 const MAX_LINES = 150;
 
-type Step = { name: string; cmd: string[] };
+type Step = { name: string; cmd: string[]; env?: Record<string, string> };
 type Result = {
   step: Step;
   code: number;
@@ -15,10 +15,13 @@ type Result = {
 const steps: Step[] = [
   { name: "fmt", cmd: ["bun", "fmt", "--check"] },
   { name: "check", cmd: ["bun", "check"] },
-  { name: "test", cmd: ["bun", "test", "--only-failures"] },
+  { name: "build", cmd: ["bun", "run", "build"] },
+  {
+    name: "test",
+    cmd: ["bun", "test", "--only-failures"],
+    env: { BOCI_BIN: "dist/boci" },
+  },
 ];
-if (Bun.argv.includes("--dist"))
-  steps.push({ name: "test:dist", cmd: ["bun", "run", "test:dist"] });
 
 const startedAt = performance.now();
 const running = new Map<string, number>();
@@ -116,7 +119,12 @@ async function run(step: Step) {
     cwd: `${import.meta.dir}/..`,
     stdout: liveOutput ? "inherit" : "pipe",
     stderr: liveOutput ? "inherit" : "pipe",
-    env: { ...process.env, NO_COLOR: "1", FORCE_COLOR: "0" },
+    env: {
+      ...process.env,
+      ...step.env,
+      NO_COLOR: "1",
+      FORCE_COLOR: "0",
+    },
   });
   const [out, err, code] = liveOutput
     ? ["", "", await proc.exited]

@@ -589,5 +589,147 @@
     "id": "os-ns-get-generate-param-json-input",
     "key": "generate-param-json-input",
     "argv": ["os", "ns", "get", "--generate-param-json-input", "compartment-id"]
+  },
+  {
+    "id": "generated-request-os-bucket-create-from-json",
+    "key": "os bucket create",
+    "argv": [
+      "os",
+      "bucket",
+      "create",
+      "--name",
+      "cli-name",
+      "--endpoint",
+      "{endpoint}",
+      "--from-json",
+      "file://{home}/input.json"
+    ],
+    "sandbox": {
+      "files": {
+        "input.json": "{\"name\":\"json-name\",\"compartmentId\":\"json-compartment\",\"namespaceName\":\"json-namespace\",\"storageTier\":\"Standard\"}"
+      }
+    },
+    "requestOnly": true,
+    "replies": {
+      "body": {}
+    }
+  },
+  {
+    "id": "generated-request-os-bucket-create-from-json-invalid-json",
+    "key": "os bucket create",
+    "argv": ["os", "bucket", "create", "--from-json", "{bad"]
+  },
+  {
+    "id": "generated-request-os-bucket-create-from-json-non-object",
+    "key": "os bucket create",
+    "argv": ["os", "bucket", "create", "--from-json", "[1, 2]"]
+  },
+  {
+    "id": "generated-request-os-bucket-create-from-json-missing-file",
+    "key": "os bucket create",
+    "argv": [
+      "os",
+      "bucket",
+      "create",
+      "--from-json",
+      "file://~/no-such-from-json.json"
+    ]
+  },
+  {
+    "id": "generated-request-os-bucket-create-complex-invalid-json",
+    "key": "os bucket create",
+    "argv": [
+      "os",
+      "bucket",
+      "create",
+      "--namespace-name",
+      "ns",
+      "--name",
+      "b",
+      "--compartment-id",
+      "c",
+      "--metadata",
+      "{bad"
+    ]
+  },
+  {
+    "id": "generated-request-os-bucket-create-complex-missing-file",
+    "key": "os bucket create",
+    "argv": [
+      "os",
+      "bucket",
+      "create",
+      "--namespace-name",
+      "ns",
+      "--name",
+      "b",
+      "--compartment-id",
+      "c",
+      "--metadata",
+      "file://~/no-such-meta.json"
+    ]
+  },
+  {
+    "id": "generated-request-os-bucket-create-from-json-precedence",
+    "key": "os bucket create",
+    "argv": [
+      "os",
+      "bucket",
+      "create",
+      "--name",
+      "cli-name",
+      "--endpoint",
+      "{endpoint}",
+      "--from-json",
+      "file://~/input.json"
+    ],
+    "sandbox": {
+      "files": {
+        "input.json": "{\"name\":\"json-name\",\"compartment_id\":\"json-compartment\",\"namespace-name\":\"json-namespace\",\"storageTier\":\"archive\",\"metadata\":\"file://~/meta.json\"}",
+        "meta.json": "{\"env\":\"test\"}",
+        ".oci/oci_cli_rc": "[DEFAULT]\nname = rc-name\ncompartment-id = rc-compartment\nstorage-tier = Standard\npublic-access-type = ObjectRead\n"
+      }
+    },
+    "requestOnly": true,
+    "replies": {
+      "body": {}
+    }
+  },
+  {
+    "id": "generated-request-os-bucket-create",
+    "key": "os bucket create",
+    "argv": [
+      "os",
+      "bucket",
+      "create",
+      "--name",
+      "test-value",
+      "--compartment-id",
+      "test-value",
+      "--public-access-type",
+      "NoPublicAccess",
+      "--storage-tier",
+      "Standard",
+      "--object-events-enabled",
+      "true",
+      "--kms-key-id",
+      "test-value",
+      "--is-bucket-key-enabled",
+      "true",
+      "--versioning",
+      "Enabled",
+      "--auto-tiering",
+      "test-value",
+      "--bucket-scope",
+      "test-value",
+      "--namespace-name",
+      "test-value",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "requestOnly": true,
+    "replies": {
+      "body": {}
+    }
   }
 ]

@@ -56,7 +56,7 @@ export type ServiceSpec = {
       operation?: OperationSpec;
     }
   >;
-  clients: Record<string, ClientInfo>;
+  clients: Record<string, ClientInfo & { workRequestGetter?: OperationSpec }>;
 };
 
 export type Index = {

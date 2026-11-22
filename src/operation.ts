@@ -106,7 +106,10 @@ export type ServiceResponse = {
   raw: string;
 };
 
-export type GeneratedCommand = ServiceSpec["commands"][string] & {
+export type GeneratedCommand = Pick<
+  ServiceSpec["commands"][string],
+  "operation" | "otherOperations"
+> & {
   bindings?: Record<string, unknown>[];
 };
 

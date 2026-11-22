@@ -21,16 +21,19 @@ export async function waitForWorkRequest(
     !initial.response.ok ||
     !Array.isArray(states) ||
     !states.length ||
-    initial.operation.workRequestClient ||
-    !call.command.otherOperations?.includes("get_work_request")
+    (!initial.operation.workRequestClient &&
+      !call.command.otherOperations?.includes("get_work_request"))
   )
     return initial;
-  const getter = Object.values(call.spec.commands).find(
-    ({ operation }) =>
-      operation?.client === initial.operation.client &&
-      operation.method === "get_work_request",
-  );
-  if (!getter) {
+  const separateClient = initial.operation.workRequestClient;
+  const getter = separateClient
+    ? { operation: call.spec.clients[separateClient]?.workRequestGetter }
+    : Object.values(call.spec.commands).find(
+        ({ operation }) =>
+          operation?.client === initial.operation.client &&
+          operation.method === "get_work_request",
+      );
+  if (!getter?.operation) {
     io.err(
       "Unable to wait for the work request to enter the specified state\n",
     );

@@ -121,7 +121,7 @@ DIVERGENCES.md             recorded Divergences
 
 - [~] `--wait-for-state`, `--max-wait-seconds`, `--wait-interval-seconds`.
 - [x] Work-request waiters for Generated commands using their own client.
-- [ ] Work-request waiters for Generated commands that use a separate work-request client.
+- [x] Work-request waiters for Generated commands that use a separate work-request client.
 
 ## Rung 6 — Other auth methods
 

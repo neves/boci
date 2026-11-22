@@ -190,6 +190,21 @@ def service_spec(name: str, cmd: click.Command) -> dict:
     root_ctx = click.Context(load_root(), info_name="oci")
     ctx = click.Context(cmd, info_name=name, parent=root_ctx)
     flatten(cmd, [], groups, commands, ctx)
+    # A waiter can call a different SDK client, even when its getter has no CLI leaf.
+    from oci_cli import dynamic_loader
+    from oci_cli.cli_clients import CLIENT_MAP
+
+    waiter_clients = {
+        c["operation"]["workRequestClient"]
+        for c in commands.values()
+        if "workRequestClient" in c.get("operation", {})
+    }
+    for key in sorted(waiter_clients):
+        directory, name = key.split(".", 1)
+        dynamic_loader.load_service_dir(directory)
+        cls = CLIENT_MAP[directory][name]
+        getter = {"client": key, **sdk.sdk_operation(cls, "get_work_request")}
+        CLIENTS[key] = {**sdk.client_info(cls), "workRequestGetter": getter}
     clients, CLIENTS = dict(sorted(CLIENTS.items())), None
     top = {"hidden": bool(getattr(cmd, "hidden", False))}
     if cmd.help:

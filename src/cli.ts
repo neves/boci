@@ -373,9 +373,7 @@ export async function run(argv: string[]): Promise<void> {
         p.name === "help"
       )
         continue;
-      const name = p.name.replace(/_([a-z])/g, (_, letter: string) =>
-        letter.toUpperCase(),
-      );
+      const name = toCamelCase(p.name);
       sample[name] = p.multiple ? ["string"] : "string";
     }
     out(`${JSON.stringify(sample, null, 2)}\n`);
@@ -387,11 +385,7 @@ export async function run(argv: string[]): Promise<void> {
         candidate.name.replaceAll("_", "-") ===
         rootValues.generate_param_json_input,
     );
-    if (
-      param?.typeClass ===
-      "oci_cli.custom_types.cli_complex_type.CliComplexType"
-    )
-      out("{}\n");
+    if (isComplexParam(param)) out("{}\n");
     else
       err(
         `Option ${rootValues.generate_param_json_input} is not a recognized complex type, so no example JSON can be produced. Invoke help for this command (--help/-h/-?) to see available documentation on this option\n`,
@@ -403,11 +397,7 @@ export async function run(argv: string[]): Promise<void> {
     if (parsed.opts[p.name] === undefined) continue;
     try {
       values[p.name] = convert(p, parsed.opts[p.name], index.datetime);
-      if (
-        p.typeClass ===
-          "oci_cli.custom_types.cli_complex_type.CliComplexType" &&
-        typeof values[p.name] === "string"
-      ) {
+      if (isComplexParam(p) && typeof values[p.name] === "string") {
         let raw = values[p.name] as string;
         if (raw.startsWith("file://")) raw = readFileSync(raw.slice(7), "utf8");
         values[p.name] = JSON.parse(raw) as unknown;
@@ -434,9 +424,7 @@ export async function run(argv: string[]): Promise<void> {
         (p) =>
           p.name.replaceAll("_", "-") === key ||
           p.name === key ||
-          p.name.replace(/_([a-z])/g, (_, letter: string) =>
-            letter.toUpperCase(),
-          ) === key,
+          toCamelCase(p.name) === key,
       );
       if (
         !param ||
@@ -483,7 +471,7 @@ export async function run(argv: string[]): Promise<void> {
       spec,
       index,
       rc,
-      specCmd.operation as OperationSpec,
+      specCmd,
     );
     return;
   }
@@ -499,7 +487,7 @@ export async function run(argv: string[]): Promise<void> {
       spec,
       index,
       rc,
-      specCmd.operation,
+      specCmd,
     );
     return;
   }
@@ -508,72 +496,111 @@ export async function run(argv: string[]): Promise<void> {
     ["POST", "PUT", "PATCH"].includes(specCmd.operation?.http ?? "") &&
     isImplemented(`${name} ${key}`)
   ) {
-    await runGeneratedWrite(values, rootValues, settings, spec, index, specCmd);
+    await runGeneratedWrite(
+      values,
+      rootValues,
+      settings,
+      spec,
+      index,
+      rc,
+      specCmd,
+    );
     return;
   }
   await notImplemented(argv, commandPath);
 }
 
-async function runGeneratedWrite(
+const COMPLEX_TYPE_CLASS =
+  "oci_cli.custom_types.cli_complex_type.CliComplexType";
+
+function toCamelCase(name: string): string {
+  return name.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
+}
+
+function isComplexParam(param?: { typeClass?: string }): boolean {
+  return param?.typeClass === COMPLEX_TYPE_CLASS;
+}
+
+type GeneratedCommand = ServiceSpec["commands"][string] & {
+  bindings?: Record<string, unknown>[];
+};
+
+function whenMatches(
+  when: string | undefined,
+  values: Record<string, unknown>,
+): boolean {
+  if (!when) return true;
+  for (const clause of when.split(" and ")) {
+    const notNone = /^([a-z0-9_]+) is not None$/.exec(clause);
+    if (notNone) {
+      const val = values[notNone[1] as string];
+      if (val === undefined || val === null) return false;
+      continue;
+    }
+    const lenCheck = /^len\(([a-z0-9_]+)\) > 0$/.exec(clause);
+    if (lenCheck) {
+      const val = values[lenCheck[1] as string];
+      if ((!Array.isArray(val) && typeof val !== "string") || val.length === 0)
+        return false;
+      continue;
+    }
+    const val = values[clause.trim()];
+    if (val === undefined || val === null || val === false) return false;
+  }
+  return true;
+}
+
+function boundValueFor(
+  command: GeneratedCommand,
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
-  settings: RootSettings,
-  spec: ServiceSpec,
-  index: Index,
-  command: ServiceSpec["commands"][string] & {
-    bindings?: Record<string, unknown>[];
-  },
-): Promise<void> {
-  const operation = command.operation as OperationSpec;
-  const boundValue = (arg: string) => {
-    const binding = command.bindings?.find(
+  arg: string,
+): unknown {
+  const bindings =
+    command.bindings?.filter(
       (item) =>
         item.target === "kwarg" &&
         Array.isArray(item.key) &&
-        item.key[0] === arg &&
-        typeof item.param === "string",
-    );
-    return binding ? values[String(binding.param)] : values[arg];
-  };
-  const config = fromFile(settings.configFile, settings.profile);
-  const client = spec.clients[operation.client] as Record<string, unknown>;
-  const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
-    string | undefined;
-  const region = (rootValues.region ??
-    process.env.OCI_CLI_REGION ??
-    config.region) as string | undefined;
-  const serviceParams: Record<string, string> = {};
-  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = boundValue(arg);
-    if (value !== undefined) serviceParams[name] = String(value);
+        item.key[0] === arg,
+    ) ?? [];
+  if (bindings.length === 0) return values[arg];
+  let result: unknown;
+  for (const item of bindings) {
+    if (
+      !whenMatches(
+        typeof item.when === "string" ? item.when : undefined,
+        values,
+      )
+    )
+      continue;
+    if (item.transform === "use_or_generate_request_id") {
+      if (rootValues.request_id !== undefined) result = rootValues.request_id;
+      continue;
+    }
+    if (typeof item.param === "string") {
+      const candidate = values[item.param];
+      if (candidate !== undefined) result = candidate;
+    } else if (item.value !== undefined) {
+      result = item.value;
+    }
   }
-  const { resolved } = resolveEndpoint(client, index.regions, {
-    region,
-    endpoint: endpointOpt,
-    serviceParams,
-    realmSpecific: configBool(
-      rootValues.realm_specific_endpoint ??
-        config.realm_specific_service_endpoint_template_enabled,
-    ),
-    dualStack: configBool(
-      rootValues.enable_dual_stack ?? config.dual_stack_endpoint_enabled,
-    ),
-  });
-  let path = operation.path;
-  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = boundValue(arg);
-    if (value !== undefined)
-      path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
-  }
-  const url = new URL(`${resolved}${path}`);
-  for (const [name, item] of Object.entries(operation.queryParams ?? {})) {
-    const arg = (item as { arg?: string }).arg;
-    const value = arg ? boundValue(arg) : undefined;
-    if (value !== undefined) url.searchParams.set(name, String(value));
-  }
+  return result !== undefined ? result : values[arg];
+}
+
+function buildRequestBody(
+  command: GeneratedCommand,
+  values: Record<string, unknown>,
+): string {
   const body: Record<string, unknown> = {};
   for (const binding of command.bindings ?? []) {
     if (binding.target !== "body" || !Array.isArray(binding.key)) continue;
+    if (
+      !whenMatches(
+        typeof binding.when === "string" ? binding.when : undefined,
+        values,
+      )
+    )
+      continue;
     const value =
       typeof binding.param === "string" ? values[binding.param] : binding.value;
     if (value === undefined) continue;
@@ -592,47 +619,29 @@ async function runGeneratedWrite(
       target[binding.key.at(-1) as string] = value;
     }
   }
-  const headers: Record<string, string> = {
-    "content-type": "application/json",
-  };
-  if (operation.client.startsWith("log_analytics."))
-    headers.expect = "100-continue";
-  for (const [name, item] of Object.entries(operation.headerParams ?? {})) {
-    const arg = (item as { arg?: string }).arg;
-    const value =
-      (item as { value?: string }).value ?? (arg ? values[arg] : undefined);
-    if (value !== undefined) headers[name] = String(value);
-  }
-  if (
-    operation.headerParams?.["opc-retry-token"] &&
-    headers["opc-retry-token"] === undefined
-  )
-    headers["opc-retry-token"] = randomBytes(22).toString("base64url");
-  const requestBody = Object.keys(body).length ? JSON.stringify(body) : "";
-  if (rootValues.no_retry !== true) headers["opc-client-retries"] = "true";
-  const keyPath = expandUser(String(config.key_file));
-  const pem = readFileSync(keyPath, "utf8");
-  const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
-  const req = {
-    method: operation.http,
-    url: url.toString(),
-    headers,
-    body: requestBody,
-  };
-  prepareContentLength(req);
-  const privateKey = loadPrivateKey(pem, config.pass_phrase as string | null);
-  signRequest(req, { keyId, privateKey });
-  const response = await fetch(req.url, {
-    method: req.method,
-    headers: req.headers,
-    ...(req.body ? { body: req.body } : {}),
-  });
-  const raw = await response.text();
-  if (!response.ok) {
-    err(`ServiceError: ${raw}\n`);
-    throw new Exit(1);
-  }
-  if (raw) out(`${raw}\n`);
+  return Object.keys(body).length ? JSON.stringify(body) : "";
+}
+
+async function runGeneratedWrite(
+  values: Record<string, unknown>,
+  rootValues: Record<string, unknown>,
+  settings: RootSettings,
+  spec: ServiceSpec,
+  index: Index,
+  rc: Rc,
+  command: GeneratedCommand,
+): Promise<void> {
+  const requestBody = buildRequestBody(command, values);
+  await runGeneratedOperation(
+    values,
+    rootValues,
+    settings,
+    spec,
+    index,
+    rc,
+    command,
+    requestBody,
+  );
 }
 
 async function runGeneratedGet(
@@ -642,7 +651,7 @@ async function runGeneratedGet(
   spec: ServiceSpec,
   index: Index,
   rc: Rc,
-  operation: OperationSpec,
+  command: GeneratedCommand,
 ): Promise<void> {
   if (values.all_pages === true && values.limit !== undefined) {
     err(
@@ -650,6 +659,31 @@ async function runGeneratedGet(
     );
     throw new Exit(1);
   }
+  await runGeneratedOperation(
+    values,
+    rootValues,
+    settings,
+    spec,
+    index,
+    rc,
+    command,
+    "",
+  );
+}
+
+async function runGeneratedOperation(
+  values: Record<string, unknown>,
+  rootValues: Record<string, unknown>,
+  settings: RootSettings,
+  spec: ServiceSpec,
+  index: Index,
+  rc: Rc,
+  command: GeneratedCommand,
+  requestBody: string,
+): Promise<void> {
+  const operation = command.operation as OperationSpec;
+  const boundValue = (arg: string) =>
+    boundValueFor(command, values, rootValues, arg);
   let config;
   try {
     config = fromFile(settings.configFile, settings.profile);
@@ -689,11 +723,11 @@ async function runGeneratedGet(
       : undefined;
   const serviceParams: Record<string, string> = {};
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = values[arg];
+    const value = boundValue(arg);
     if (value !== undefined) serviceParams[name] = String(value);
   }
-  for (const [name, { arg }] of Object.entries(operation.queryParams)) {
-    const value = arg ? values[arg] : undefined;
+  for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
+    const value = arg ? boundValue(arg) : undefined;
     if (value !== undefined) serviceParams[name] = String(value);
   }
   const { resolved } = resolveEndpoint(client, index.regions, {
@@ -702,22 +736,25 @@ async function runGeneratedGet(
     regionMetadata,
     serviceParams,
     realmSpecific: configBool(
-      values.realm_specific_endpoint ??
+      rootValues.realm_specific_endpoint ??
+        values.realm_specific_endpoint ??
         config.realm_specific_service_endpoint_template_enabled,
     ),
     dualStack: configBool(
-      values.enable_dual_stack ?? config.dual_stack_endpoint_enabled,
+      rootValues.enable_dual_stack ??
+        values.enable_dual_stack ??
+        config.dual_stack_endpoint_enabled,
     ),
   });
   let path = operation.path;
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
-    const value = values[arg];
+    const value = boundValue(arg);
     if (value !== undefined)
       path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
   }
   const url = new URL(`${resolved}${path}`);
-  for (const [name, { arg }] of Object.entries(operation.queryParams)) {
-    const value = arg ? values[arg] : undefined;
+  for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
+    const value = arg ? boundValue(arg) : undefined;
     if (value !== undefined) url.searchParams.set(name, String(value));
   }
   const allPages = values.all_pages === true;
@@ -726,14 +763,28 @@ async function runGeneratedGet(
   if ((allPages || limit !== undefined) && pageSize !== undefined)
     url.searchParams.set("limit", String(pageSize));
   const baseUrl = new URL(url);
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> =
+    operation.http === "GET" ? {} : { "content-type": "application/json" };
+  if (operation.http !== "GET" && operation.client.startsWith("log_analytics."))
+    headers.expect = "100-continue";
   for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
-    const value = param.value ?? (param.arg ? values[param.arg] : undefined);
+    const value =
+      param.value ?? (param.arg ? boundValue(param.arg) : undefined);
     if (value !== undefined) headers[name] = String(value);
   }
+  if (
+    operation.headerParams?.["opc-retry-token"] &&
+    headers["opc-retry-token"] === undefined
+  )
+    headers["opc-retry-token"] = randomBytes(22).toString("base64url");
   if (rootValues.no_retry !== true) headers["opc-client-retries"] = "true";
-  if (rootValues.request_id !== undefined)
-    headers["opc-client-request-id"] = String(rootValues.request_id);
+  if (rootValues.request_id !== undefined) {
+    const requestIdHeader =
+      operation.headerParams?.["opc-request-id"] !== undefined
+        ? "opc-request-id"
+        : "opc-client-request-id";
+    headers[requestIdHeader] = String(rootValues.request_id);
+  }
   const keyPath = expandUser(String(config.key_file));
   const pem = readFileSync(keyPath, "utf8");
   const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
@@ -741,7 +792,7 @@ async function runGeneratedGet(
     method: operation.http,
     url: url.toString(),
     headers,
-    body: "",
+    body: requestBody,
   };
   prepareContentLength(req);
   let privateKey;
@@ -760,8 +811,10 @@ async function runGeneratedGet(
   const readTimeout = timeoutSecondsFor(
     rootValues.read_timeout ?? config.read_timeout,
   );
+  const hasNoneRetry =
+    command.bindings?.some((b) => b.transform === "NoneRetryStrategy") === true;
   const maxAttempts =
-    rootValues.no_retry === true
+    rootValues.no_retry === true || hasNoneRetry
       ? 1
       : Math.max(1, Number(rootValues.max_retries) || 8);
   let response: Response;
@@ -803,6 +856,7 @@ async function runGeneratedGet(
         response = await fetch(req.url, {
           method: req.method,
           headers: req.headers,
+          ...(req.body ? { body: req.body } : {}),
           ...(connectionTimer === undefined && readTimer === undefined
             ? {}
             : { signal: controller.signal }),
@@ -856,55 +910,88 @@ async function runGeneratedGet(
     page = nextPage;
     if (!allPages || !operation.responseType?.startsWith("list[")) break;
   } while (page !== null);
-  let value: unknown;
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    value =
-      typeof parsed === "string"
-        ? parsed
-        : operation.method === "get_namespace"
-          ? raw
-          : mapResponseKeys(
-              allPages && operation.responseType?.startsWith("list[")
-                ? pageItems
-                : operation.responseType?.startsWith("list[") &&
-                    parsed &&
-                    typeof parsed === "object" &&
-                    "items" in parsed &&
-                    Array.isArray(parsed.items)
-                  ? parsed.items
-                  : parsed,
-            );
-  } catch {
-    value = raw;
-  }
   if (!response.ok) {
-    let details: Record<string, unknown> = {};
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
-        details = parsed as Record<string, unknown>;
-    } catch {
-      // Non-JSON error bodies still produce the standard ServiceError envelope.
-    }
-    const timestamp = new Date().toISOString().replace(/Z$/, "000+00:00");
-    const serviceError = {
-      ...details,
-      client_version: "Oracle-PythonSDK/2.192.0, Oracle-PythonCLI/3.96.3",
-      logging_tips:
-        "Please run the OCI CLI command using --debug flag to find more debug information.",
-      "opc-request-id": response.headers.get("opc-request-id") ?? "",
-      operation_name: operation.method,
-      request_endpoint: `${operation.http} ${url.toString()}`,
-      status: response.status,
-      timestamp,
-      troubleshooting_tips:
-        "See [https://docs.oracle.com/iaas/Content/API/References/apierrors.htm] for more information about resolving this error. If you are unable to resolve this issue, run this CLI command with --debug option and contact Oracle support and provide them the full error message.",
-    };
-    err(`ServiceError:\n${JSON.stringify(sortJson(serviceError), null, 4)}\n`);
+    err(formatServiceError(operation, url, response, raw));
     throw new Exit(1);
   }
-  const output: Record<string, unknown> = { data: value };
+  renderGeneratedResponse(
+    operation,
+    response,
+    raw,
+    pageItems,
+    allPages,
+    rootValues,
+    rc,
+  );
+}
+
+function formatServiceError(
+  operation: OperationSpec,
+  url: URL | string,
+  response: Response,
+  raw: string,
+): string {
+  let details: Record<string, unknown> = {};
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
+      details = parsed as Record<string, unknown>;
+  } catch {
+    // Non-JSON error bodies still produce the standard ServiceError envelope.
+  }
+  const timestamp = new Date().toISOString().replace(/Z$/, "000+00:00");
+  const serviceError = {
+    ...details,
+    client_version: "Oracle-PythonSDK/2.192.0, Oracle-PythonCLI/3.96.3",
+    logging_tips:
+      "Please run the OCI CLI command using --debug flag to find more debug information.",
+    "opc-request-id": response.headers.get("opc-request-id") ?? "",
+    operation_name: operation.method,
+    request_endpoint: `${operation.http} ${url.toString()}`,
+    status: response.status,
+    timestamp,
+    troubleshooting_tips:
+      "See [https://docs.oracle.com/iaas/Content/API/References/apierrors.htm] for more information about resolving this error. If you are unable to resolve this issue, run this CLI command with --debug option and contact Oracle support and provide them the full error message.",
+  };
+  return `ServiceError:\n${JSON.stringify(sortJson(serviceError), null, 4)}\n`;
+}
+
+function renderGeneratedResponse(
+  operation: OperationSpec,
+  response: Response,
+  raw: string,
+  pageItems: unknown[],
+  allPages: boolean,
+  rootValues: Record<string, unknown>,
+  rc: Rc,
+): void {
+  const hasBody = raw.trim().length > 0;
+  let value: unknown;
+  if (hasBody) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      value =
+        typeof parsed === "string"
+          ? parsed
+          : operation.method === "get_namespace"
+            ? raw
+            : mapResponseKeys(
+                allPages && operation.responseType?.startsWith("list[")
+                  ? pageItems
+                  : operation.responseType?.startsWith("list[") &&
+                      parsed &&
+                      typeof parsed === "object" &&
+                      "items" in parsed &&
+                      Array.isArray(parsed.items)
+                    ? parsed.items
+                    : parsed,
+              );
+    } catch {
+      value = raw;
+    }
+  }
+  const output: Record<string, unknown> = {};
+  if (hasBody) output.data = value;
   const etag = response.headers.get("etag");
   const hasNextPage = response.headers.get("opc-next-page");
   if (etag !== null) output.etag = etag;
@@ -914,6 +1001,7 @@ async function runGeneratedGet(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
   }
+  if (Object.keys(output).length === 0) return;
   let query = rootValues.query;
   if (typeof query === "string" && query.startsWith("query://")) {
     const queryName = query.slice("query://".length);

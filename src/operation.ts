@@ -545,7 +545,17 @@ export function buildServiceUrl(
   });
   let path = pathTemplate;
   for (const [name, value] of Object.entries(pathParams)) {
-    path = path.replace(`{${name}}`, encodeURIComponent(value));
+    // The SDK quotes path parameters with urllib.parse.quote. Object Storage
+    // treats slashes as part of a name; other clients preserve them.
+    const encoded = encodeURIComponent(value).replace(
+      /[!'()*]/g,
+      (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+    );
+    const replacement =
+      sc.targetService === "object_storage"
+        ? encoded
+        : encoded.replaceAll("%2F", "/");
+    path = path.replaceAll(`{${name}}`, replacement);
   }
   const url = new URL(`${resolved}${path}`);
   for (const [name, value] of queryParams) {

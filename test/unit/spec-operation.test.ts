@@ -59,6 +59,24 @@ test("clients record endpoint template and base path", () => {
   expect(iam.commands["region list"]?.operation?.path).toBe("/regions");
 });
 
+test("every generated GET path placeholder names an SDK path argument", async () => {
+  const missing: string[] = [];
+  for await (const file of new Bun.Glob("*.json").scan(root)) {
+    if (file === "index.json") continue;
+    const spec = (await Bun.file(`${root}/${file}`).json()) as Spec;
+    for (const [name, cmd] of Object.entries(spec.commands)) {
+      const op = cmd.operation;
+      if (cmd.kind !== "generated" || op?.http !== "GET") continue;
+      for (const [placeholder] of op.path.matchAll(/\{[^{}]+\}/g)) {
+        if (!op.pathParams[placeholder.slice(1, -1)]) {
+          missing.push(`${file} ${name}: ${placeholder}`);
+        }
+      }
+    }
+  }
+  expect(missing).toEqual([]);
+});
+
 test("every generated command has an operation", async () => {
   const missing: string[] = [];
   for await (const file of new Bun.Glob("*.json").scan(root)) {

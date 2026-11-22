@@ -92,7 +92,7 @@ DIVERGENCES.md             recorded Divergences
 - [x] Auto-generate request-only parity cases for all generated GETs in Object Storage and IAM.
 - [x] Finish 3,230 passing generated GET request-only cases across remaining services; 194 cases fail in two causes.
 - [x] Fix generated GET requests missing `opc-retry-token` (request-only parity case setup).
-- [~] Fix generated GET paths that leave operation parameter placeholders literal instead of substituting values.
+- [x] Fix generated GET paths that leave operation parameter placeholders literal instead of substituting values.
 - [x] Response headers surfaced like the Reference CLI (`etag`, `opc-next-page` in output where applicable).
 - [x] HEAD and DELETE without body; `--force` and confirmation prompts.
 

@@ -97,8 +97,15 @@ export async function loadIndex(): Promise<Index> {
   return index;
 }
 
-export async function loadService(name: string): Promise<ServiceSpec> {
-  return (await readSpec(name)) as ServiceSpec;
+/** Parsed once per process: specs are read-only, so in-process runs share them. */
+const services = new Map<string, Promise<ServiceSpec>>();
+export function loadService(name: string): Promise<ServiceSpec> {
+  let spec = services.get(name);
+  if (!spec) {
+    spec = readSpec(name) as Promise<ServiceSpec>;
+    services.set(name, spec);
+  }
+  return spec;
 }
 
 /**

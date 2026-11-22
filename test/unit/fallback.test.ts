@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { CLIS, runCli } from "../harness/runner.ts";
+import { CLIS, runCli, runInProcess } from "../harness/runner.ts";
 
 const fakeOci = `${import.meta.dir}/../fixtures/clis/fake-oci.ts`;
 // A Leaf command that passes validation but isn't implemented yet.
@@ -38,4 +38,13 @@ test("validation still happens before falling back", async () => {
   });
   expect(run.exitCode).toBe(1);
   expect(run.stderr).toContain("Missing option(s) --compartment-id.");
+});
+
+test("in-process, the fallback's stdio is captured into the invocation's sinks", async () => {
+  const run = await runInProcess(argv, {
+    env: { BOCI_FALLBACK: fakeOci },
+    stdin: "piped",
+  });
+  expect(run.exitCode).toBe(7);
+  expect(JSON.parse(run.stdout)).toEqual({ argv, stdin: "piped", depth: "1" });
 });

@@ -1,9 +1,10 @@
 // `bun run verify`: every check the loop needs before a commit, with quiet output.
 // It keeps a live terminal status showing finished, running, and queued checks. One line per
 // passing step; a failing step prints its (tail-capped) output. All steps run even if one
-// fails, so a single run reports every problem. Parity always runs against the freshly
-// compiled binary, avoiding one Bun/TypeScript startup for every case, and includes the
-// generated parity cases that the default `bun test` skips.
+// fails, so a single run reports every problem. Parity runs against the freshly compiled
+// binary (hand-written cases and a sample of generated ones spawn it; the rest run
+// in-process, see test/parity/parity.test.ts) and includes the generated parity cases that
+// the default `bun test` skips.
 const MAX_LINES = 150;
 
 type Step = { name: string; cmd: string[]; env?: Record<string, string> };

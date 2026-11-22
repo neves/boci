@@ -3,6 +3,7 @@
 // once a key is implemented, every case for it must match its golden.
 // Generated cases (test/parity/cases/generated-*.json, thousands of them) run only with
 // BOCI_PARITY_ALL=1, which `bun run verify` sets; the default `bun test` stays fast.
+// Cases run boci in-process (runInProcess) unless they must spawn (spawnsProcess below).
 import { afterAll, describe, expect, test } from "bun:test";
 import { implementedLookup } from "../../src/registry.ts";
 import {
@@ -14,7 +15,8 @@ import {
 } from "../harness/cases.ts";
 import { normalizeRun, remask, signatureValid } from "../harness/compare.ts";
 import { createPublicKey } from "node:crypto";
-import { CLIS, runCli } from "../harness/runner.ts";
+import { CLIS, runCli, runInProcess } from "../harness/runner.ts";
+import { disposeSharedSandboxes } from "../harness/sandbox.ts";
 
 const cases = await loadCases({ generated: includeGeneratedCases() });
 const isImplemented = await implementedLookup(cases.map((c) => c.key));
@@ -29,6 +31,29 @@ const publicKey = createPublicKey(
   .export({ type: "spki", format: "pem" })
   .toString();
 const results: Record<string, { pass: boolean }> = {};
+
+// Spawned vs in-process. From source, everything runs in-process: same argv, env, cwd and
+// sinks as a spawned boci, without a process, module load and spec parse per case.
+// Against a binary (BOCI_BIN: verify, test:dist), the binary itself stays under test: every
+// hand-written case spawns it (real exit codes and stdio), plus the first generated case of
+// each kind per service (its embedded spec); the other generated cases exercise the same
+// code paths in-process. BOCI_PARITY_SPAWN=all spawns every case (test:dist).
+const spawnAll = Bun.env.BOCI_PARITY_SPAWN === "all";
+const spawnSample = new Set<string>();
+if (Bun.env.BOCI_BIN) {
+  const seen = new Set<string>();
+  for (const c of cases) {
+    const kind = /^generated-(get|request)-/.exec(c.id)?.[1];
+    const group = kind ? `${kind} ${c.key.split(" ")[0]}` : c.id;
+    if (!seen.has(group)) spawnSample.add(c.id);
+    seen.add(group);
+  }
+}
+/** A relative path would resolve against the sandbox in both modes, but keep it honest. */
+const relativePath = (c: (typeof cases)[number]) =>
+  c.argv.some((a) => /^file:\/\/(?![/~{$])/i.test(a));
+const spawnsProcess = (c: (typeof cases)[number]) =>
+  spawnAll || spawnSample.has(c.id) || relativePath(c);
 const record = (key: string, pass: boolean) => {
   // A key is verified only if all of its cases pass.
   results[key] = { pass: (results[key]?.pass ?? true) && pass };
@@ -86,7 +111,9 @@ async function runParityCase(c: (typeof cases)[number]) {
       golden?.caseHash,
       `stale golden: run \`bun run golden --filter ${c.id}\``,
     ).toBe(caseHash(c));
-    const run = await runCli(CLIS.boci, c.argv, c);
+    const run = spawnsProcess(c)
+      ? await runCli(CLIS.boci, c.argv, c)
+      : await runInProcess(c.argv, c);
     if (c.id === "os-ns-get-request-id")
       expect(run.requests[0]?.headers["opc-client-request-id"]).toBe(
         "boci-request-123",
@@ -140,8 +167,8 @@ async function runParityCase(c: (typeof cases)[number]) {
   }
 }
 
-// Concurrent: every case runs in its own sandbox against its own fake endpoint, and the
-// suite is dominated by process spawns (~2x faster than serial).
+// Concurrent: every case runs against its own fake endpoint (spawned cases also in their own
+// sandbox), and spawns and HTTP round trips overlap (~2x faster than serial).
 describe.concurrent("parity", () => {
   for (const c of cases) {
     const implemented = isImplemented(c.key);
@@ -161,6 +188,7 @@ afterAll(async () => {
       await Bun.write(RESULTS_FILE, `${JSON.stringify(sorted, null, 2)}\n`);
     }
   } finally {
+    await disposeSharedSandboxes();
     clearInterval(heartbeat);
     clearProgress();
     if (process.stdout.isTTY)

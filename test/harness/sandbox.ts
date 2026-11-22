@@ -28,6 +28,20 @@ export async function fingerprint(keyFile: string): Promise<string> {
   return hex.match(/../g)?.join(":") ?? "";
 }
 
+/**
+ * Safety net: anything that is not the local fake endpoint goes to a dead proxy and fails at
+ * once, so a case that accidentally reaches a real OCI endpoint can't leave the machine.
+ * Both python-requests and Bun's fetch honour these.
+ */
+export const PROXY_ENV = {
+  HTTPS_PROXY: "http://127.0.0.1:9",
+  HTTP_PROXY: "http://127.0.0.1:9",
+  https_proxy: "http://127.0.0.1:9",
+  http_proxy: "http://127.0.0.1:9",
+  NO_PROXY: "127.0.0.1,localhost",
+  no_proxy: "127.0.0.1,localhost",
+} as const;
+
 export type Sandbox = {
   home: string;
   configFile: string;
@@ -46,6 +60,8 @@ export type SandboxOptions = {
   keyMode?: number;
 };
 
+const keyFingerprints = new Map<string, Promise<string>>();
+
 export async function createSandbox(
   extraConfig = "",
   options: SandboxOptions = {},
@@ -62,7 +78,7 @@ export async function createSandbox(
   );
   await Bun.write(
     configFile,
-    `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await fingerprint(keyFile)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
+    `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await keyFingerprint(keyFile, options.keyLabel)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
   );
   await chmod(keyFile, options.keyMode ?? 0o600);
   for (const [rel, content] of Object.entries(options.files ?? {})) {
@@ -81,15 +97,7 @@ export async function createSandbox(
     HOME: home,
     LC_ALL: "C.UTF-8",
     TZ: "UTC",
-    // Safety net: anything that is not the local fake endpoint goes to a dead proxy and
-    // fails at once, so a case that accidentally reaches a real OCI endpoint can't leave
-    // the machine. Both python-requests and Bun's fetch honour these.
-    HTTPS_PROXY: "http://127.0.0.1:9",
-    HTTP_PROXY: "http://127.0.0.1:9",
-    https_proxy: "http://127.0.0.1:9",
-    http_proxy: "http://127.0.0.1:9",
-    NO_PROXY: "127.0.0.1,localhost",
-    no_proxy: "127.0.0.1,localhost",
+    ...PROXY_ENV,
   });
 
   return {
@@ -101,4 +109,40 @@ export async function createSandbox(
       await rm(home, { recursive: true, force: true });
     },
   };
+}
+
+/** The fake key's fingerprint, computed once per key variant (the label doesn't change it). */
+function keyFingerprint(keyFile: string, label = true): Promise<string> {
+  const id = String(label);
+  let fp = keyFingerprints.get(id);
+  if (!fp) {
+    fp = fingerprint(keyFile);
+    keyFingerprints.set(id, fp);
+  }
+  return fp;
+}
+
+const shared = new Map<string, Promise<Sandbox>>();
+
+/**
+ * One sandbox per distinct config and options, reused for the life of the process (for
+ * runs that only read it, like boci's). Removed by disposeSharedSandboxes().
+ */
+export function sharedSandbox(
+  extraConfig = "",
+  options: SandboxOptions = {},
+): Promise<Sandbox> {
+  const id = JSON.stringify([extraConfig, options]);
+  let sb = shared.get(id);
+  if (!sb) {
+    sb = createSandbox(extraConfig, options);
+    shared.set(id, sb);
+  }
+  return sb;
+}
+
+export async function disposeSharedSandboxes(): Promise<void> {
+  const all = [...shared.values()];
+  shared.clear();
+  await Promise.all(all.map(async (sb) => (await sb)[Symbol.asyncDispose]()));
 }

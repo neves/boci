@@ -64,7 +64,11 @@ function call(
     command,
     values,
     rootValues: { endpoint, ...rootValues },
-    settings: { configFile: join(dir, "config"), profile: "DEFAULT" },
+    settings: {
+      configFile: join(dir, "config"),
+      profile: "DEFAULT",
+      auth: null,
+    },
     spec: { clients: { things: { basePath: "/v1" } } },
     index: { regions: {} as RegionsSpec },
   };

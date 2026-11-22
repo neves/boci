@@ -124,7 +124,7 @@ DIVERGENCES.md             recorded Divergences
 
 ## Rung 6 — Other auth methods
 
-- [ ] `--auth security_token` (session token config).
+- [x] `--auth security_token` (session token config).
 - [ ] `--auth instance_principal` (request-only against a fake metadata service).
 - [ ] `--auth resource_principal`.
 - [ ] `--auth api_key` with passphrase-protected keys.

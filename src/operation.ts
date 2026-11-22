@@ -2,7 +2,7 @@
 // out. Config and key loading, endpoint resolution, the request (path, query, headers, body
 // bindings), signing, timeouts, retries and --all pagination all live here, in the order
 // oci's generated command and the Python SDK's base client do them.
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 import { ConfigError, configPath, expandUser, fromFile } from "./config.ts";
@@ -25,7 +25,7 @@ export type OperationCall = {
   /** The root (global) options' converted values. */
   rootValues: Record<string, unknown>;
   /** Where the config comes from (the root callback's settings). */
-  settings: { configFile: string; profile: string };
+  settings: { configFile: string; profile: string; auth: string | null };
   /** The command's Service: its SDK clients name the endpoint templates. */
   spec: Pick<ServiceSpec, "clients">;
   index: Pick<Index, "regions">;
@@ -300,9 +300,27 @@ export async function callOperation(
         : "opc-client-request-id";
     headers[requestIdHeader] = String(rootValues.request_id);
   }
+  let keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
+  if (settings.auth === "security_token") {
+    const tokenFile = config.security_token_file;
+    if (!tokenFile) {
+      io.err(
+        "ERROR: Config value for 'security_token_file' must be specified when using --auth security_token\n",
+      );
+      throw new Exit(1);
+    }
+    const tokenPath = expandUser(String(tokenFile), io.env);
+    if (!existsSync(resolve(io.cwd, tokenPath))) {
+      io.err(
+        `ERROR: File specified by 'security_token_file' does not exist: ${tokenPath}\n`,
+      );
+      throw new Exit(1);
+    }
+    const token = readFileSync(resolve(io.cwd, tokenPath), "utf8");
+    keyId = `ST$${token}`;
+  }
   const keyPath = expandUser(String(config.key_file), io.env);
   const pem = readFileSync(resolve(io.cwd, keyPath), "utf8");
-  const keyId = `${config.tenancy}/${config.user}/${config.fingerprint}`;
   const req = {
     method: operation.http,
     url: url.toString(),

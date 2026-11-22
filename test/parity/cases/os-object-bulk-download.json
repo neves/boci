@@ -1,0 +1,1594 @@
+[
+  {
+    "id": "os-object-bulk-download-basic",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "hello.txt",
+              "size": 12,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain",
+          "etag": "etag-hello"
+        },
+        "body": "hello world\n"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/hello.txt": "hello world\n"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-dest-dir-nested",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dest-dir",
+      "{home}/dl",
+      "--overwrite",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "root.txt",
+              "size": 9,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "sub/child.txt",
+              "size": 10,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "root body"
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "child body"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/root.txt": "root body",
+        "dl/sub/child.txt": "child body"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-auto-namespace",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": "resolvedns"
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "auto.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "auto"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/auto.txt": "auto"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-auto-namespace-error",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 401,
+        "body": {
+          "code": "NotAuthenticated",
+          "message": "The required information to complete authentication was not provided or was incorrect."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-bad-namespace",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "bad ns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-missing-required",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-overwrite-conflict",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite",
+      "--no-overwrite"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-include-exclude-conflict",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--include",
+      "*.txt",
+      "--exclude",
+      "*.log"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-parallel-out-of-range",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--parallel-operations-count",
+      "0"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-part-size-out-of-range",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--part-size",
+      "64"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-threshold-out-of-range",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--multipart-download-threshold",
+      "64"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-bad-encryption-key-file",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--encryption-key-file",
+      "{home}/no-such-key.txt"
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-bucket-not-found",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "missingbucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-list-404"
+        },
+        "body": {
+          "code": "BucketNotFound",
+          "message": "Either the bucket named 'missingbucket' does not exist in the namespace 'myns' or you are not authorized to access it"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-prefix-and-delimiter",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--prefix",
+      "level1/",
+      "--delimiter",
+      "/",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "level1/file.txt",
+              "size": 7,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ],
+          "prefixes": ["level1/level2/"]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "level1!"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/level1/file.txt": "level1!"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-pagination",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--no-overwrite",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/a.txt": "keep-a"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 1,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ],
+          "nextStartWith": "b.txt"
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "b.txt",
+              "size": 1,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "B"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/a.txt": "keep-a",
+        "dl/b.txt": "B"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-pagination-confirm-yes",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/b.txt": "old-b"
+      }
+    },
+    "stdin": "y\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [],
+          "nextStartWith": "b.txt"
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "b.txt",
+              "size": 5,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "new-b"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/b.txt": "new-b"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-dry-run",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--dry-run"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 1,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "sub/b.txt",
+              "size": 2,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-dry-run-no-overwrite",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--dry-run",
+      "--no-overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/existing.txt": "keep"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "existing.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "new.txt",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-include",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--include",
+      "*.txt",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "skip.log",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "keep"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/keep.txt": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-include-with-prefix",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--prefix",
+      "level1/",
+      "--include",
+      "keep.txt",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "level1/keep.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "level1/other.txt",
+              "size": 5,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "keep"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/level1/keep.txt": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-exclude",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--exclude",
+      "*.log",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "skip.log",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-type": "text/plain"
+        },
+        "body": "keep"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/keep.txt": "keep"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-multi-include",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--include",
+      "*.txt",
+      "--include",
+      "*.json",
+      "--overwrite",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 1,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "b.json",
+              "size": 2,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            },
+            {
+              "name": "c.log",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:02.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "A"
+      },
+      {
+        "status": 200,
+        "body": "{}"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/a.txt": "A",
+        "dl/b.json": "{}"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-no-overwrite",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--no-overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/existing.txt": "keep-local"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "existing.txt",
+              "size": 6,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "fresh.txt",
+              "size": 5,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "fresh"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/existing.txt": "keep-local",
+        "dl/fresh.txt": "fresh"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-overwrite-existing",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/existing.txt": "old-content"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "existing.txt",
+              "size": 11,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "new-content"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/existing.txt": "new-content"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-existing-dir-skip",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/folder/inside.txt": "stay"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "folder",
+              "size": 0,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "file.txt",
+              "size": 2,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "ok"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/folder/inside.txt": "stay",
+        "dl/file.txt": "ok"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-prompt-no",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/existing.txt": "keep-local"
+      }
+    },
+    "stdin": "n\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "existing.txt",
+              "size": 7,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/existing.txt": "keep-local"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-prompt-yes",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/existing.txt": "old"
+      }
+    },
+    "stdin": "y\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "existing.txt",
+              "size": 7,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "updated"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/existing.txt": "updated"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-prompt-all",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/one.txt": "old1",
+        "dl/two.txt": "old2"
+      }
+    },
+    "stdin": "a\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "one.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "two.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "new1"
+      },
+      {
+        "status": 200,
+        "body": "new2"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/one.txt": "new1",
+        "dl/two.txt": "new2"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-encryption-key",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--encryption-key-file",
+      "{home}/aes.key",
+      "--overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "aes.key": "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=\n"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "secret.txt",
+              "size": 6,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "secret"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/secret.txt": "secret"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-leading-slash-and-dir-marker",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "/leading.txt",
+              "size": 7,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "marker/",
+              "size": 0,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "leading"
+      },
+      {
+        "status": 200,
+        "body": ""
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/leading.txt": "leading"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-failure",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "ok.txt",
+              "size": 2,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "bad.txt",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "ok"
+      },
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-get-404"
+        },
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "The object 'bad.txt' was not found in the bucket 'mybucket'"
+        }
+      }
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdoutContains": "\"download-failures\"",
+      "stderrContains": "Downloaded bad.txt\n",
+      "requests": 3,
+      "files": {
+        "dl/ok.txt": "ok"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-output-table",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--no-overwrite"
+    ],
+    "sandbox": {
+      "files": {
+        "dl/existing.txt": "stay"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "existing.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            },
+            {
+              "name": "sub/new.txt",
+              "size": 3,
+              "timeModified": "2026-10-21T07:28:01.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "new"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/existing.txt": "stay",
+        "dl/sub/new.txt": "new"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-empty-bucket",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-empty-bucket-table",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-download-long-object-name",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "very/deeply/nested/directory/structure/short.txt",
+              "size": 4,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "long"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/very/deeply/nested/directory/structure/short.txt": "long"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-query-and-from-json",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "\"downloaded-objects\"",
+      "os",
+      "object",
+      "bulk-download",
+      "--from-json",
+      "{\"namespace\":\"myns\",\"bucketName\":\"mybucket\",\"downloadDir\":\"{home}/dl\",\"overwrite\":true}"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "q.txt",
+              "size": 1,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "q"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/q.txt": "q"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-no-multipart",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--no-multipart",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "single.txt",
+              "size": 6,
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": "single"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/single.txt": "single"
+      }
+    }
+  },
+  {
+    "id": "os-object-bulk-download-unknown-size-head",
+    "key": "os object bulk-download",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-download",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--download-dir",
+      "{home}/dl",
+      "--overwrite"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "nosize.txt",
+              "timeModified": "2026-10-21T07:28:00.000Z"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "headers": {
+          "content-length": "6"
+        },
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": "nosize"
+      }
+    ],
+    "expect": {
+      "files": {
+        "dl/nosize.txt": "nosize"
+      }
+    }
+  }
+]

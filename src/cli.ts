@@ -49,6 +49,7 @@ import { callOperation } from "./operation.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
+  runOsObjectBulkDownload,
   runOsObjectBulkUpload,
   runOsObjectGet,
   runOsObjectPut,
@@ -482,7 +483,10 @@ async function main(io: Invocation): Promise<void> {
           if (p.name === "file" && typeof values[p.name] === "string") {
             validateClickFileForRead(io, values[p.name] as string);
           }
-        } else if (name === "os" && key === "object bulk-upload") {
+        } else if (
+          name === "os" &&
+          (key === "object bulk-upload" || key === "object bulk-download")
+        ) {
           if (
             p.name === "encryption_key_file" &&
             typeof values[p.name] === "string"
@@ -587,6 +591,24 @@ async function main(io: Invocation): Promise<void> {
 
     if (name === "os" && key === "object bulk-upload") {
       await runOsObjectBulkUpload(io, {
+        values,
+        rootValues,
+        settings,
+        spec,
+        index,
+        usageText: () => usage(io, commandPath, cmd.helpDoc),
+        outputOptions: {
+          query: rootValues.query,
+          output: rootValues.output,
+          rawOutput: rootValues.raw_output,
+          rc,
+        },
+      });
+      return;
+    }
+
+    if (name === "os" && key === "object bulk-download") {
+      await runOsObjectBulkDownload(io, {
         values,
         rootValues,
         settings,

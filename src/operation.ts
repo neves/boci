@@ -181,6 +181,40 @@ function boundValueFor(
   return result !== undefined ? result : values[arg];
 }
 
+/** Python's json.dumps defaults used by the OCI CLI: ASCII escapes and spaced separators. */
+function serializeRequestJson(value: unknown): string {
+  const compact = JSON.stringify(value);
+  if (compact === undefined) return "";
+  const ascii: string[] = [];
+  for (const char of compact) {
+    const codePoint = char.codePointAt(0)!;
+    if (codePoint <= 0x7f) {
+      ascii.push(char);
+    } else if (codePoint <= 0xffff) {
+      ascii.push(`\\u${codePoint.toString(16).padStart(4, "0")}`);
+    } else {
+      const value = codePoint - 0x10000;
+      const high = 0xd800 + (value >> 10);
+      const low = 0xdc00 + (value & 0x3ff);
+      ascii.push(`\\u${high.toString(16)}\\u${low.toString(16)}`);
+    }
+  }
+
+  const result: string[] = [];
+  let inString = false;
+  let escaped = false;
+  for (const char of ascii) {
+    result.push(char);
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (char === "\\") escaped = true;
+      else if (char === '"') inString = false;
+    } else if (char === '"') inString = true;
+    else if (char === "," || char === ":") result.push(" ");
+  }
+  return result.join("");
+}
+
 function buildRequestBody(
   io: Invocation,
   command: GeneratedCommand,
@@ -237,9 +271,9 @@ function buildRequestBody(
     if (typeof direct === "string") {
       return loadFileContents(io, direct) ?? direct;
     }
-    return JSON.stringify(direct);
+    return serializeRequestJson(direct);
   }
-  return Object.keys(body).length ? JSON.stringify(body) : "";
+  return Object.keys(body).length ? serializeRequestJson(body) : "";
 }
 
 /**

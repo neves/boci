@@ -54,6 +54,32 @@ const listThings = {
   },
 } as unknown as GeneratedCommand;
 
+test("generated PUT signs Python-compatible JSON bytes for nested Unicode bodies", async () => {
+  using fake = startFakeEndpoint();
+  const { io } = invocation();
+  const command = {
+    kind: "generated",
+    operation: {
+      client: "things",
+      method: "update_thing",
+      http: "PUT",
+      path: "/things",
+    },
+    bindings: [{ target: "body", key: ["payload"], param: "payload" }],
+  } as unknown as GeneratedCommand;
+  const payload = { items: [1, true, null], label: "é" };
+  await callOperation(io, call(fake.url, { payload }, {}, command));
+
+  const request = fake.requests[0]!;
+  const expectedBody =
+    '{"payload": {"items": [1, true, null], "label": "\\u00e9"}}';
+  expect(request.body).toBe(expectedBody);
+  expect(request.headers["content-length"]).toBe(String(expectedBody.length));
+  expect(request.headers["x-content-sha256"]).toBe(
+    new Bun.CryptoHasher("sha256").update(expectedBody).digest("base64"),
+  );
+});
+
 function call(
   endpoint: string,
   values: Record<string, unknown>,

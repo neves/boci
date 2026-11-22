@@ -1,0 +1,1201 @@
+[
+  {
+    "id": "os-object-bulk-delete-basic",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "hello.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-multiple",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "root.txt"
+            },
+            {
+              "name": "sub/child.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-auto-namespace",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-bn",
+      "mybucket",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": "resolvedns"
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "auto.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-auto-namespace-error",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-bn",
+      "mybucket",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 401,
+        "body": {
+          "code": "NotAuthenticated",
+          "message": "The required information to complete authentication was not provided or was incorrect."
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-bad-namespace",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "bad ns",
+      "-bn",
+      "mybucket",
+      "--force"
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-missing-required",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns"
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-include-exclude-conflict",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--include",
+      "*.txt",
+      "--exclude",
+      "*.log",
+      "--force"
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-bucket-not-found",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "missing-bucket",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-list-404"
+        },
+        "body": {
+          "code": "BucketNotFound",
+          "message": "Either the bucket named 'missing-bucket' does not exist in the namespace 'myns' or you are not authorized to access it"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-prefix-and-delimiter",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--prefix",
+      "level1/",
+      "--delimiter",
+      "/",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "level1/a.txt"
+            }
+          ],
+          "prefixes": ["level1/sub/"]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-dry-run",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dry-run"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            }
+          ],
+          "nextStartWith": "sub/b.txt"
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "sub/b.txt"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-dry-run-table",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dry-run"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            },
+            {
+              "name": "sub/b.txt"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-dry-run-include",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dry-run",
+      "--include",
+      "*.txt"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt"
+            },
+            {
+              "name": "skip.log"
+            },
+            {
+              "name": "sub/also.txt"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-dry-run-empty",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dry-run"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-dry-run-empty-table",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dry-run"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-empty-bucket-no-force",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-empty-bucket-force",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-empty-bucket-force-table",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-prompt-yes",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "stdin": "y\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            },
+            {
+              "name": "b.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-prompt-no",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket"
+    ],
+    "stdin": "n\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-prompt-eof",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket"
+    ],
+    "stdin": "",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-prompt-filtered-yes",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--include",
+      "*.txt"
+    ],
+    "stdin": "y\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt"
+            },
+            {
+              "name": "skip.log"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-prompt-filtered-empty-no",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--include",
+      "*.txt"
+    ],
+    "stdin": "n\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-include",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--include",
+      "*.txt",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt"
+            },
+            {
+              "name": "skip.log"
+            },
+            {
+              "name": "sub/nested.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-include-with-prefix",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--prefix",
+      "level1/",
+      "--include",
+      "keep.txt",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "level1/keep.txt"
+            },
+            {
+              "name": "level1/other.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-exclude",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--exclude",
+      "*.log",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "keep.txt"
+            },
+            {
+              "name": "skip.log"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-multi-include",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--include",
+      "*.txt",
+      "--include",
+      "*.md",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            },
+            {
+              "name": "b.log"
+            },
+            {
+              "name": "c.md"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-pagination-unfiltered",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "p1.txt"
+            }
+          ],
+          "nextStartWith": "p2.txt"
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "p2.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-pagination-filtered-empty-page",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--include",
+      "*.txt",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "p1.log"
+            }
+          ],
+          "nextStartWith": "p2.txt"
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "p2.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-pagination-no-force",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "stdin": "y\n",
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "p1.txt"
+            }
+          ],
+          "nextStartWith": "p2.txt"
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "p2.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-failure",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "ok.txt"
+            },
+            {
+              "name": "bad.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-del-404"
+        },
+        "body": {
+          "code": "ObjectNotFound",
+          "message": "The object 'bad.txt' was not found in the bucket 'mybucket'"
+        }
+      }
+    ],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stdoutContains": "\"delete-failures\"",
+      "stderrContains": "Deleted object bad.txt\n",
+      "requests": 3
+    }
+  },
+  {
+    "id": "os-object-bulk-delete-output-table",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--output",
+      "table",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            },
+            {
+              "name": "sub/b.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-long-object-name",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "very/deeply/nested/directory/path/short.txt"
+            },
+            {
+              "name": "very/deeply/nested/directory/path/an_extremely_long_object_filename_exceeding_width.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-query-and-from-json",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--query",
+      "\"deleted-objects\"",
+      "os",
+      "object",
+      "bulk-delete",
+      "--from-json",
+      "file://{home}/input.json"
+    ],
+    "sandbox": {
+      "files": {
+        "input.json": "{\"namespace\":\"myns\",\"bucketName\":\"mybucket\",\"prefix\":\"docs/\",\"force\":true}"
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "docs/readme.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-leading-slash",
+    "key": "os object bulk-delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "os",
+      "object",
+      "bulk-delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--include",
+      "*.txt",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "/leading.txt"
+            },
+            {
+              "name": "normal.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  }
+]

@@ -49,6 +49,7 @@ import { callOperation } from "./operation.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
+  runOsObjectBulkDelete,
   runOsObjectBulkDownload,
   runOsObjectBulkUpload,
   runOsObjectGet,
@@ -609,6 +610,24 @@ async function main(io: Invocation): Promise<void> {
 
     if (name === "os" && key === "object bulk-download") {
       await runOsObjectBulkDownload(io, {
+        values,
+        rootValues,
+        settings,
+        spec,
+        index,
+        usageText: () => usage(io, commandPath, cmd.helpDoc),
+        outputOptions: {
+          query: rootValues.query,
+          output: rootValues.output,
+          rawOutput: rootValues.raw_output,
+          rc,
+        },
+      });
+      return;
+    }
+
+    if (name === "os" && key === "object bulk-delete") {
+      await runOsObjectBulkDelete(io, {
         values,
         rootValues,
         settings,

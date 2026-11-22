@@ -140,7 +140,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Object Storage: `os object resume-put`.
 - [x] Object Storage: `os object bulk-upload`.
 - [x] Object Storage: `os object bulk-download`.
-- [ ] Object Storage: `os object bulk-delete`.
+- [x] Object Storage: `os object bulk-delete`.
 - [ ] Object Storage: `os object sync`.
 - [ ] `setup config`, `setup keys`, `setup repair-file-permissions`, `setup autocomplete`.
 - [ ] `session authenticate`/`refresh`/`validate`/`export`/`import`.

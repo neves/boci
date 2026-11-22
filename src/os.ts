@@ -1,16 +1,27 @@
 // Object Storage custom commands (`oci os object ...`), matching
 // services/object_storage/src/oci_cli_object_storage/objectstorage_cli_extended.py.
-import { closeSync, openSync, readFileSync, writeSync } from "node:fs";
-import { resolve } from "node:path";
+import {
+  closeSync,
+  fstatSync,
+  openSync,
+  readFileSync,
+  writeSync,
+} from "node:fs";
+import { basename, resolve } from "node:path";
 import { BadParameter, pyRepr } from "./convert.ts";
 import { Exit, type Invocation } from "./io.ts";
+import { parseJsonParameter } from "./json-input.ts";
 import {
   type ClientSettings,
   type ServiceClient,
   createServiceClient,
   sendServiceRequest,
 } from "./operation.ts";
-import { formatServiceError } from "./output.ts";
+import {
+  type OutputOptions,
+  formatServiceError,
+  renderDocument,
+} from "./output.ts";
 import type { Index, ServiceSpec } from "./spec.ts";
 
 const NAMESPACE_HOST_LABEL_PATTERN = /^[/A-Za-z0-9_.-]+$/;
@@ -18,6 +29,55 @@ const NAMESPACE_VALIDATION_ERROR =
   "must contain only letters, digits, underscores, hyphens, forward slashes and periods";
 const SSE_ALGORITHM = "AES256";
 const OBJECT_STORAGE_CLIENT = "object_storage.object_storage";
+const OBJECT_PUT_DISPLAY_HEADERS = [
+  "etag",
+  "opc-content-md5",
+  "last-modified",
+  "opc-multipart-md5",
+  "opc-content-crc32c",
+  "opc-content-sha256",
+  "opc-content-sha384",
+  "opc-multipart-sha256",
+  "opc-multipart-sha384",
+] as const;
+
+const CRC32C_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let crc = i;
+    for (let j = 0; j < 8; j++) {
+      crc = (crc & 1) !== 0 ? (crc >>> 1) ^ 0x82f63b78 : crc >>> 1;
+    }
+    table[i] = crc >>> 0;
+  }
+  return table;
+})();
+
+export function computeCrc32cBase64(data: Uint8Array): string {
+  let crc = 0xffffffff;
+  for (let i = 0; i < data.length; i++) {
+    crc =
+      (CRC32C_TABLE[(crc ^ (data[i] as number)) & 0xff] as number) ^
+      (crc >>> 8);
+  }
+  const value = (crc ^ 0xffffffff) >>> 0;
+  const out = new Uint8Array(4);
+  out[0] = (value >>> 24) & 0xff;
+  out[1] = (value >>> 16) & 0xff;
+  out[2] = (value >>> 8) & 0xff;
+  out[3] = value & 0xff;
+  return Buffer.from(out).toString("base64");
+}
+
+function guessContentType(filePath: string): string {
+  const mime = Bun.file(filePath).type;
+  if (!mime) return "application/octet-stream";
+  const semi = mime.indexOf(";");
+  return (
+    (semi === -1 ? mime : mime.slice(0, semi)).trim() ||
+    "application/octet-stream"
+  );
+}
 
 export type OutputFileHandle = {
   rawPath: string;
@@ -76,11 +136,23 @@ export function validateClickFileForRead(
   rawPath: string,
 ): void {
   if (rawPath === "-") return;
+  let fd: number | undefined;
   try {
-    const fd = openSync(resolve(io.cwd, rawPath), "r");
-    closeSync(fd);
+    fd = openSync(resolve(io.cwd, rawPath), "r");
+    if (fstatSync(fd).isDirectory()) {
+      throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
+    }
   } catch (e) {
+    if (e instanceof BadParameter) throw e;
     throw new BadParameter(`${pyRepr(rawPath)}: ${osErrorReason(e)}`);
+  } finally {
+    if (fd !== undefined) {
+      try {
+        closeSync(fd);
+      } catch {
+        // Ignore close errors.
+      }
+    }
   }
 }
 
@@ -328,5 +400,359 @@ export async function runOsObjectGet(
         // Ignore close errors during cleanup.
       }
     }
+  }
+}
+
+export type OsObjectPutOptions = {
+  values: Record<string, unknown>;
+  rootValues: Record<string, unknown>;
+  settings: ClientSettings;
+  spec: Pick<ServiceSpec, "clients">;
+  index: Pick<Index, "regions">;
+  usageText: () => string;
+  outputOptions: OutputOptions;
+};
+
+const MEBIBYTE = 1024 * 1024;
+const DEFAULT_PART_SIZE_BYTES = 128 * MEBIBYTE;
+
+async function confirmPrompt(io: Invocation, prompt: string): Promise<boolean> {
+  const stdinLines =
+    io.readLine === undefined && io.stdin !== undefined
+      ? io.stdin.split(/\r?\n/)
+      : null;
+  let lineIndex = 0;
+  while (true) {
+    io.out(`${prompt} [y/N]: `);
+    const line = io.readLine
+      ? await io.readLine()
+      : stdinLines !== null && lineIndex < stdinLines.length
+        ? (stdinLines[lineIndex++] as string)
+        : null;
+    if (line === null) {
+      io.err("Abort: \n");
+      throw new Exit(1);
+    }
+    const normalized = line.trim().toLowerCase();
+    if (normalized === "y" || normalized === "yes" || normalized === "1")
+      return true;
+    if (
+      normalized === "" ||
+      normalized === "n" ||
+      normalized === "no" ||
+      normalized === "0"
+    )
+      return false;
+    io.err("Error: invalid input\n");
+  }
+}
+
+function usageError(io: Invocation, message: string): never {
+  io.err(`UsageError: ${message}\n`);
+  throw new Exit(1);
+}
+
+/** `oci os object put` (single-part). */
+export async function runOsObjectPut(
+  io: Invocation,
+  opts: OsObjectPutOptions,
+): Promise<void> {
+  const {
+    values,
+    rootValues,
+    settings,
+    spec,
+    index,
+    usageText,
+    outputOptions,
+  } = opts;
+  const client = spec.clients[OBJECT_STORAGE_CLIENT] as Record<string, unknown>;
+  const sc = await createServiceClient(io, {
+    client,
+    values,
+    rootValues,
+    settings,
+    index,
+  });
+
+  const namespace =
+    typeof values.namespace === "string" && values.namespace.length > 0
+      ? values.namespace
+      : await resolveOsNamespace(io, sc, usageText, "namespace");
+  const bucketName = String(values.bucket_name);
+  const filePath = String(values.file);
+  const isStdin = filePath === "-";
+  const force = values.force === true;
+  const noOverwrite = values.no_overwrite === true;
+  const noMultipart = values.no_multipart === true;
+  const disableParallelUploads = values.disable_parallel_uploads === true;
+  const parallelUploadCount =
+    typeof values.parallel_upload_count === "number"
+      ? values.parallel_upload_count
+      : undefined;
+  const partSizeMib =
+    typeof values.part_size === "number" ? values.part_size : undefined;
+
+  if (parallelUploadCount !== undefined) {
+    if (disableParallelUploads) {
+      usageError(
+        io,
+        "The option --parallel-upload-count is not applicable when using the --disable-parallel-uploads flag.",
+      );
+    }
+    if (noMultipart) {
+      usageError(
+        io,
+        "The option --parallel-upload-count is not applicable when using the --no-multipart flag.",
+      );
+    }
+  }
+
+  let objectName =
+    typeof values.name === "string" && values.name.length > 0
+      ? values.name
+      : undefined;
+  if (!objectName) {
+    if (isStdin) {
+      usageError(
+        io,
+        'Option "--name" must be provided when reading object from stdin',
+      );
+    }
+    objectName = basename(filePath);
+  }
+
+  if (partSizeMib !== undefined && noMultipart) {
+    usageError(
+      io,
+      "The option --part-size is not applicable when using the --no-multipart flag.",
+    );
+  }
+
+  const pathParams = {
+    namespaceName: namespace,
+    bucketName,
+    objectName,
+  };
+
+  let resolvedIfMatch: string | undefined;
+  let ifNoneMatch: string | undefined;
+
+  if (!force) {
+    const headHeaders: Record<string, string> = {
+      accept: "application/json",
+      "content-type": "application/json",
+    };
+    if (typeof values.if_match === "string") {
+      headHeaders["if-match"] = values.if_match;
+    }
+    const head = await sendServiceRequest(io, sc, {
+      method: "HEAD",
+      pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+      pathParams,
+      headers: headHeaders,
+    });
+    if (head.response.status === 404) {
+      ifNoneMatch = "*";
+    } else if (!head.response.ok) {
+      io.err(
+        formatServiceError(
+          { http: "HEAD", method: "head_object" },
+          head.url,
+          head.response,
+          head.raw,
+          sc.targetService,
+        ),
+      );
+      throw new Exit(1);
+    } else {
+      const etag = head.response.headers.get("etag");
+      if (etag !== null) resolvedIfMatch = etag;
+      if (noOverwrite) {
+        io.err("The object already exists and was not overwritten\n");
+        return;
+      }
+      const confirmed = await confirmPrompt(
+        io,
+        "WARNING: This object already exists. Are you sure you want to overwrite it?",
+      );
+      if (!confirmed) {
+        io.err("Abort: \n");
+        throw new Exit(1);
+      }
+    }
+  }
+
+  const putHeaders: Record<string, string> = {
+    accept: "application/json",
+    expect: "100-continue",
+  };
+
+  const finalIfMatch =
+    typeof values.if_match === "string" ? values.if_match : resolvedIfMatch;
+  if (finalIfMatch !== undefined) putHeaders["if-match"] = finalIfMatch;
+  if (ifNoneMatch !== undefined) putHeaders["if-none-match"] = ifNoneMatch;
+
+  if (typeof values.content_md5 === "string")
+    putHeaders["content-md5"] = values.content_md5;
+  if (typeof values.opc_checksum_algorithm === "string")
+    putHeaders["opc-checksum-algorithm"] = values.opc_checksum_algorithm;
+  if (typeof values.opc_content_crc32c === "string")
+    putHeaders["opc-content-crc32c"] = values.opc_content_crc32c;
+  if (typeof values.opc_content_sha256 === "string")
+    putHeaders["opc-content-sha256"] = values.opc_content_sha256;
+  if (typeof values.opc_content_sha384 === "string")
+    putHeaders["opc-content-sha384"] = values.opc_content_sha384;
+
+  if (values.metadata !== undefined) {
+    const parsedMeta = parseJsonParameter(io, "metadata", values.metadata);
+    if (
+      parsedMeta &&
+      typeof parsedMeta === "object" &&
+      !Array.isArray(parsedMeta)
+    ) {
+      for (const [k, v] of Object.entries(
+        parsedMeta as Record<string, unknown>,
+      )) {
+        putHeaders[`opc-meta-${k}`] = String(v);
+      }
+    }
+  }
+
+  if (typeof values.content_type === "string") {
+    putHeaders["content-type"] =
+      values.content_type === "auto"
+        ? guessContentType(isStdin ? objectName : filePath)
+        : values.content_type;
+  } else {
+    putHeaders["content-type"] = "application/octet-stream";
+  }
+
+  if (typeof values.content_language === "string")
+    putHeaders["content-language"] = values.content_language;
+  if (typeof values.content_encoding === "string")
+    putHeaders["content-encoding"] = values.content_encoding;
+  if (typeof values.content_disposition === "string")
+    putHeaders["content-disposition"] = values.content_disposition;
+  if (typeof values.cache_control === "string")
+    putHeaders["cache-control"] = values.cache_control;
+  if (typeof values.storage_tier === "string")
+    putHeaders["storage-tier"] = values.storage_tier;
+  if (typeof values.opc_sse_kms_key_id === "string")
+    putHeaders["opc-sse-kms-key-id"] = values.opc_sse_kms_key_id;
+
+  if (typeof values.encryption_key_file === "string") {
+    Object.assign(
+      putHeaders,
+      readEncryptionKeyHeaders(io, values.encryption_key_file),
+    );
+  }
+
+  if (isStdin) {
+    if (noMultipart) {
+      usageError(
+        io,
+        "The --no-multipart flag is not valid when taking input from STDIN.",
+      );
+    }
+    io.err(
+      "boci: 'oci os object put' from STDIN (multipart) is not implemented yet.\n",
+    );
+    throw new Exit(3);
+  }
+
+  const fileBytes = new Uint8Array(readFileSync(resolve(io.cwd, filePath)));
+  const totalSize = fileBytes.byteLength;
+  const partSizeBytes =
+    partSizeMib !== undefined
+      ? partSizeMib * MEBIBYTE
+      : DEFAULT_PART_SIZE_BYTES;
+  const sizeQualifiesForMultipart = totalSize > partSizeBytes;
+
+  if (totalSize > 0 && !noMultipart && sizeQualifiesForMultipart) {
+    io.err(
+      "boci: multipart upload for 'oci os object put' is not implemented yet.\n",
+    );
+    throw new Exit(3);
+  }
+
+  if (parallelUploadCount !== undefined) {
+    io.err(
+      "Warning: File is being uploaded as a single part so --parallel-upload-count will be ignored.\n",
+    );
+  }
+
+  const algo =
+    typeof values.opc_checksum_algorithm === "string"
+      ? values.opc_checksum_algorithm.toUpperCase()
+      : undefined;
+  const userProvidedChecksum =
+    values.opc_content_crc32c !== undefined ||
+    values.opc_content_sha256 !== undefined ||
+    values.opc_content_sha384 !== undefined;
+  if (algo && !userProvidedChecksum) {
+    if (totalSize > 0) {
+      io.err(
+        "WARNING:oci.util:Reading the stream to calculate its content-length. Process may freeze for very big streams. Consider passing in content length for big objects\n",
+      );
+    }
+    if (algo === "CRC32C") {
+      putHeaders["opc-content-crc32c"] = computeCrc32cBase64(fileBytes);
+    } else if (algo === "SHA256") {
+      putHeaders["opc-content-sha256"] = new Bun.CryptoHasher("sha256")
+        .update(fileBytes)
+        .digest("base64");
+    } else if (algo === "SHA384") {
+      putHeaders["opc-content-sha384"] = new Bun.CryptoHasher("sha384")
+        .update(fileBytes)
+        .digest("base64");
+    }
+  }
+
+  const put = await sendServiceRequest(io, sc, {
+    method: "PUT",
+    pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+    pathParams,
+    headers: putHeaders,
+    body: fileBytes,
+    enforceContentHeaders: false,
+  });
+
+  if (totalSize > 0) {
+    io.err("Uploading object\n");
+  }
+
+  if (!put.response.ok) {
+    io.err(
+      formatServiceError(
+        { http: "PUT", method: "put_object" },
+        put.url,
+        put.response,
+        put.raw,
+        sc.targetService,
+      ),
+    );
+    throw new Exit(1);
+  }
+
+  const displayHeaders: Record<string, string> = {};
+  for (const name of OBJECT_PUT_DISPLAY_HEADERS) {
+    const val = put.response.headers.get(name);
+    if (val !== null) displayHeaders[name] = val;
+  }
+  renderDocument(io, displayHeaders, outputOptions);
+
+  if (values.verify_checksum === true) {
+    const localMd5 = new Bun.CryptoHasher("md5")
+      .update(fileBytes)
+      .digest("base64");
+    const serverMd5 =
+      put.response.headers.get("opc-content-md5") ??
+      put.response.headers.get("opc-multipart-md5");
+    const match = localMd5 === serverMd5;
+    io.err(
+      `md5 checksum ${match ? "matches" : "does not match"} [Local: ${localMd5}]\n`,
+    );
+    if (!match) throw new Exit(1);
   }
 }

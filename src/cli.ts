@@ -50,6 +50,7 @@ import {
   type OutputFileHandle,
   openClickFileForWrite,
   runOsObjectGet,
+  runOsObjectPut,
   validateClickFileForRead,
   validateOsNamespace,
 } from "./os.ts";
@@ -468,6 +469,13 @@ async function main(io: Invocation): Promise<void> {
           ) {
             validateClickFileForRead(io, values[p.name] as string);
           }
+        } else if (name === "os" && key === "object put") {
+          if (
+            (p.name === "file" || p.name === "encryption_key_file") &&
+            typeof values[p.name] === "string"
+          ) {
+            validateClickFileForRead(io, values[p.name] as string);
+          }
         }
       } catch (e) {
         if (e instanceof BadParameter)
@@ -524,6 +532,24 @@ async function main(io: Invocation): Promise<void> {
         index,
         usageText: () => usage(io, commandPath, cmd.helpDoc),
         outputFile: osObjectGetOutputFile,
+      });
+      return;
+    }
+
+    if (name === "os" && key === "object put") {
+      await runOsObjectPut(io, {
+        values,
+        rootValues,
+        settings,
+        spec,
+        index,
+        usageText: () => usage(io, commandPath, cmd.helpDoc),
+        outputOptions: {
+          query: rootValues.query,
+          output: rootValues.output,
+          rawOutput: rootValues.raw_output,
+          rc,
+        },
       });
       return;
     }

@@ -134,7 +134,7 @@ DIVERGENCES.md             recorded Divergences
 Ordered by the extractor's custom list, simplest first. Expand this rung into one item per Custom command once Extractor v3 exists.
 
 - [x] Object Storage: `os object get` (single-part).
-- [ ] Object Storage: `os object put` (single-part).
+- [x] Object Storage: `os object put` (single-part).
 - [ ] Object Storage: `os object put`/`get` multipart (and `resume-put`).
 - [ ] Object Storage: `os object bulk-upload`, `bulk-download`, `bulk-delete`.
 - [ ] Object Storage: `os object sync`.

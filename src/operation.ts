@@ -89,6 +89,8 @@ export type ServiceRequestOptions = {
   noRetry?: boolean;
   rawResponse?: boolean;
   decompress?: boolean;
+  /** Whether to sign content-length, content-type and x-content-sha256 (default true). */
+  enforceContentHeaders?: boolean;
 };
 
 export type ServiceResponse = {
@@ -479,7 +481,11 @@ export async function sendServiceRequest(
   for (let attempt = 1; ; attempt++) {
     delete req.headers.date;
     delete req.headers.authorization;
-    signRequest(req, { keyId: sc.keyId, privateKey: sc.privateKey });
+    signRequest(
+      req,
+      { keyId: sc.keyId, privateKey: sc.privateKey },
+      opts.enforceContentHeaders ?? true,
+    );
     const controller = new AbortController();
     const connectionTimer =
       sc.connectionTimeout === undefined

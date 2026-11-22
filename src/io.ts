@@ -30,6 +30,8 @@ export type Invocation = {
   stdin?: string;
   /** Read a secret (e.g. private key passphrase), suppressing echo when stdin is a TTY. */
   promptSecret?(prompt: string): Promise<string>;
+  /** Read one line from stdin (null on EOF), flushing queued stdout/stderr first. */
+  readLine?(): Promise<string | null>;
 };
 
 /**
@@ -90,12 +92,21 @@ export function processStdio() {
       await flush();
       return readLineSync(0);
     },
+    async readLine(): Promise<string | null> {
+      await flush();
+      return readLineOrEofSync(0);
+    },
   };
 }
 
 function readLineSync(fd: number): string {
+  return readLineOrEofSync(fd) ?? "";
+}
+
+function readLineOrEofSync(fd: number): string | null {
   const bytes: number[] = [];
   const buf = new Uint8Array(1);
+  let sawAny = false;
   while (true) {
     let n: number;
     try {
@@ -104,10 +115,12 @@ function readLineSync(fd: number): string {
       break;
     }
     if (n === 0) break;
+    sawAny = true;
     const b = buf[0] as number;
     if (b === 0x0a) break;
     bytes.push(b);
   }
+  if (!sawAny) return null;
   if (bytes.length > 0 && bytes[bytes.length - 1] === 0x0d) bytes.pop();
   return new TextDecoder().decode(new Uint8Array(bytes));
 }

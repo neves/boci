@@ -33,6 +33,7 @@ const IMPLEMENTED = new Set<string>([
   "email-data-plane email-raw-submitted-response submit-raw-email",
   // Custom commands.
   "os object get",
+  "os object put",
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

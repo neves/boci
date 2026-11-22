@@ -123,6 +123,16 @@ function renderGeneratedResponse(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
   }
+  renderDocument(io, output, options);
+}
+
+/** Render an already-shaped response document (data and/or headers) with --query/--output/--raw-output. */
+export function renderDocument(
+  io: Invocation,
+  output: Record<string, unknown>,
+  options: OutputOptions,
+): void {
+  const { rc } = options;
   if (Object.keys(output).length === 0) return;
   let query = options.query;
   if (typeof query === "string" && query.startsWith("query://")) {

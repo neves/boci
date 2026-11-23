@@ -264,8 +264,6 @@ const EXCLUDED = new Set<string>([
   // Tier A wrapper the Reference CLI can't run: the delegated generated command rejects
   // the injected `operation` kwarg with a TypeError before any request.
   "resource-manager job create-plan-rollback-job",
-  // Writes the response to `--file` (a lazy click.File); not modeled yet (ticket 22).
-  "log-analytics query export",
 ]);
 
 export type Command = ServiceSpec["commands"][string] & {

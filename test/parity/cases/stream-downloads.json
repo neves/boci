@@ -98,5 +98,72 @@
         "message": "Not found"
       }
     }
+  },
+  {
+    "id": "stream-export-file",
+    "key": "log-analytics query export",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "log-analytics",
+      "query",
+      "export",
+      "--namespace-name",
+      "ns",
+      "--compartment-id",
+      "ocid1.compartment.oc1..c",
+      "--query-string",
+      "* | head 2",
+      "--sub-system",
+      "LOG",
+      "--output-format",
+      "CSV",
+      "--file",
+      "result.csv"
+    ],
+    "replies": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/octet-stream"
+      },
+      "body": "a,b\n1,2\n"
+    },
+    "expect": {
+      "files": {
+        "result.csv": "a,b\n1,2\n"
+      }
+    }
+  },
+  {
+    "id": "stream-export-stdout",
+    "key": "log-analytics query export",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "log-analytics",
+      "query",
+      "export",
+      "--namespace-name",
+      "ns",
+      "--compartment-id",
+      "ocid1.compartment.oc1..c",
+      "--query-string",
+      "* | head 2",
+      "--sub-system",
+      "LOG",
+      "--output-format",
+      "CSV",
+      "--file",
+      "-"
+    ],
+    "replies": {
+      "status": 200,
+      "headers": {
+        "content-type": "application/octet-stream"
+      },
+      "body": "a,b\n1,2\n"
+    }
   }
 ]

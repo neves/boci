@@ -859,12 +859,15 @@ async function runWrapper(
           };
     if (!invoked) return "unsupported";
     // Bytes, or a file opened for reading, go out only as the direct request body; a
-    // file handed on otherwise (an output file) isn't modeled yet.
+    // `--file` opened for writing only as a download's output.
     const directBody = invoked.operation?.body;
+    const output = invoked.bindings?.find((b) => b.target === "output")?.param;
     if (
       Object.entries(kwargs).some(([name, v]) =>
         v instanceof ProgramFile
-          ? name !== directBody || /[wax+]/.test(v.mode)
+          ? /[wax+]/.test(v.mode)
+            ? name !== output || v.name === undefined
+            : name !== directBody
           : v instanceof Uint8Array && name !== directBody,
       )
     )

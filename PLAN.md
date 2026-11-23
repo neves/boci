@@ -762,7 +762,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `log-analytics entity update`
 - [x] `log-analytics entity-type update`
 - [x] `log-analytics log-group update`
-- [ ] `log-analytics lookup update-data`
+- [x] `log-analytics lookup update-data`
 - [x] `log-analytics object-collection-rule update`
 - [x] `logging agent-configuration update`
 - [x] `logging agent-configuration update-log-configuration`
@@ -1002,8 +1002,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `iam tag-namespace reactivate`
 - [ ] `iam tag-namespace retire`
 - [x] `integration integration-instance change-network-endpoint`
-- [ ] `log-analytics lookup append-data`
-- [ ] `log-analytics lookup register-lookup`
+- [x] `log-analytics lookup append-data`
+- [x] `log-analytics lookup register-lookup`
 - [x] `log-analytics parser extract-structured-log-field-paths`
 - [x] `log-analytics parser extract-structured-log-header-paths`
 - [x] `log-analytics parser test-parser`
@@ -1104,14 +1104,14 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-safe registration-policy create`
 - [x] `data-science ds-private-endpoint create`
 - [x] `data-science job create`
-- [ ] `data-science job create-job-artifact`
+- [x] `data-science job create-job-artifact`
 - [x] `data-science job-run create`
 - [x] `data-science ml-app-implementation create`
 - [x] `data-science ml-app-instance create`
 - [x] `data-science ml-app-instance create-with-iam-auth`
-- [ ] `data-science model create-model-artifact`
+- [x] `data-science model create-model-artifact`
 - [x] `data-science notebook-session create`
-- [ ] `data-science pipeline create-step-artifact`
+- [x] `data-science pipeline create-step-artifact`
 - [ ] `database-migration connection create-oracle-connection`
 - [x] `datacc infrastructure create`
 - [x] `db autonomous-database create`
@@ -1451,21 +1451,21 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 
 - [ ] `artifacts container image-signature sign-upload`
 - [x] `artifacts generic artifact download-by-path`
-- [ ] `artifacts generic artifact upload-by-path`
+- [x] `artifacts generic artifact upload-by-path`
 - [x] `data-science ml-app-implementation download-package`
-- [ ] `data-science ml-app-implementation upload-package`
+- [x] `data-science ml-app-implementation upload-package`
 - [x] `data-science ml-app-implementation-version download-package`
 - [ ] `generative-ai-sandbox sandbox-command stream`
 - [ ] `generative-ai-sandbox sandbox-command-event stream`
 - [x] `iam user api-key upload`
 - [ ] `kms management key restore-from-file`
 - [ ] `kms management vault restore-from-file`
-- [ ] `log-analytics content-import import-custom-content`
-- [ ] `log-analytics entity upload-discovery-data`
+- [x] `log-analytics content-import import-custom-content`
+- [x] `log-analytics entity upload-discovery-data`
 - [ ] `log-analytics query export`
-- [ ] `log-analytics upload upload-log-events-file`
-- [ ] `log-analytics upload upload-log-file`
-- [ ] `log-analytics upload upload-otlp-logs`
+- [x] `log-analytics upload upload-log-events-file`
+- [x] `log-analytics upload upload-log-file`
+- [x] `log-analytics upload upload-otlp-logs`
 - [ ] `management-dashboard dashboard export`
 - [ ] `model-deployment inference-result predict-with-response-stream`
 - [x] `mysql db-system import`

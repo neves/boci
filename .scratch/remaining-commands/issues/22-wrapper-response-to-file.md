@@ -4,7 +4,7 @@
 
 **Blocked by:** 12: file content params.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -15,6 +15,13 @@
 
 ## Acceptance criteria
 
-- [ ] The three commands above are verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] The three commands above are verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.
+
+## Outcome
+
+- The Engine now writes a stream response to `--file` for every generated download command (101 commands, Tier A delegates included): previously their requests matched but the body was printed as JSON. Hand-written cases in `test/parity/cases/stream-downloads.json` (file, `-`, empty body, ServiceError).
+- Verified: `log-analytics query export` (the program's write-mode `ProgramFile` carries its path to the output binding); `data-science ml-app-implementation download-package` and `ml-app-implementation-version download-package` (already Tier A delegates; now write the file).
+- The golden zygote no longer reports exit 120 after a command closes stdout (`--file -`).
+- No follow-up tickets.

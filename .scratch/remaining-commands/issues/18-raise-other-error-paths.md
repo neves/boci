@@ -4,7 +4,7 @@
 
 **Blocked by:** 13: argument checks.
 
-**Status:** ready-for-agent
+**Status:** done. Compiled `raise <cls>(<msg>)` statements (`ValueError`, `KeyError`, `Exception`, `RequiredValueNotInDefaultOrUserInputError`) carry their class and message expression; the Engine renders them as `cli_util.wrap_exceptions` does (`raise-other` Parity cases, `test/parity/cases/raise-other.json`): `network-firewall application|decryption-profile|mapped-secret|tunnel-inspection-rule create|update`, `support incident update`, `iam user api-key upload`, and (with `str.format`) `goldengate deployment create`. `data-flow application create|update`, `data-flow run create|submit`: error path with their converters in ticket 20. `database-migration connection create-oracle-connection`: ticket 23. Note: `requestOnly` cases compare only requests, so a raising wrapper with no request passed them while boci exited 3 (the generated `network-firewall mapped-secret create` case does raise).
 
 ## Context for the implementer
 
@@ -16,6 +16,6 @@
 
 ## Acceptance criteria
 
-- [ ] Every `raise-other` command's error path is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every `raise-other` command's error path is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

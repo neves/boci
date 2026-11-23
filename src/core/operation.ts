@@ -259,9 +259,15 @@ function buildRequestBody(
       )
     )
       continue;
-    const value =
+    let value =
       typeof binding.param === "string" ? values[binding.param] : binding.value;
-    if (value === undefined) continue;
+    if (value === undefined) {
+      // An unconditional binding sends the unset option as None, e.g. a param a
+      // Tier A wrapper made optional where its generated command required it.
+      if (typeof binding.param !== "string" || binding.when !== undefined)
+        continue;
+      value = null;
+    }
     let target = body;
     for (const part of binding.key.slice(0, -1) as string[]) {
       const nested = target[part];

@@ -4,7 +4,7 @@
 
 **Blocked by:** 09: Tier A writes, 10: Tier B survey, 11: options into a JSON body, 13: argument validation, 16: del kwargs and blank checks.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -17,8 +17,14 @@
 - Ticket 11 compiles wrapper bodies to programs (`tools/extract/program.py`, run by `src/core/program.ts`), limited to one generated target; `network-firewall application create` (both branches invoke the same callback) is already verified that way. Widening `program`/`generated` to several targets (one operation + bindings per invoked callback) may cover most variant selectors.
 - **Rule:** more than ~3 distinct failure causes → fix the biggest 3, file follow-up tickets (`Blocked by: 14`) for the rest.
 
+## Outcome
+
+- The wrapper compiler takes several `ctx.invoke` targets (`variants` in the spec; each invoke names its target's index). Verified: `autoscaling policy create|update`, `kms management key|vault backup|restore`, `network-firewall application update`, `network-firewall decryption-profile create|update` (`application create` was already verified).
+- `dict(pairs)` and tuples joined the program subset: `data-integration connection|data-asset create|update` verified.
+- `log-analytics upload upload-otlp-logs` (one target; `os.path.exists`, `with open(...)`, a file as the body) moved to ticket 21.
+
 ## Acceptance criteria
 
-- [ ] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

@@ -13,6 +13,7 @@
 - Not compiled (`tools/extract/program.py`), with what stops it:
   - `data-science job create-job-artifact`, `model create-model-artifact`, `pipeline create-step-artifact`, `ml-app-implementation upload-package`: `isinstance(x, six.string_types)` blank checks, `with open(path, 'rb') as file:` around the invoke (the open file is the body).
   - `artifacts generic artifact upload-by-path`, `log-analytics upload upload-log-file|upload-log-events-file`, `log-analytics entity upload-discovery-data`, `generative-ai-sandbox sandbox-file write`: `with open(...)`.
+  - `log-analytics upload upload-otlp-logs` (from ticket 14): `os.path.exists(path)`, then `with open(path, 'r')` (`--content-type application/json`: text body) or `open(path, 'rb')` (the open file is the body); a path that doesn't exist is sent as the body string itself.
   - `opsi awr-hub-objects put`: `hasattr(file, 'name')` / `os.path.basename(file.name)` (stdin needs `--name`).
 - `bun run spec <service> <command…>` prints the survey; read behaviour from goldens.
 - **Rule:** more than ~3 distinct failure causes → fix the biggest 3, file follow-up tickets (`Blocked by: 21`) for the rest.

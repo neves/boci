@@ -237,6 +237,7 @@ def command_operation(callback, client_map) -> tuple:
 def custom_delegate(callback, client_map, custom_params):
     """Describe a Tier A wrapper and its generated command, when it is a pure delegate."""
     fn = _fn_ast(callback)
+    module_globals = vars(importlib.import_module(callback.__module__))
     invokes = [
         n for n in ast.walk(fn)
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
@@ -246,19 +247,56 @@ def custom_delegate(callback, client_map, custom_params):
         return "C", None
     call = invokes[0]
 
-    def rename_pairs(stmts):
+    def rename_pairs(stmts, seen=None):
+        seen = seen or set()
         pairs = {}
+        local_pops = {}
         for st in stmts:
             if isinstance(st, ast.If):
-                pairs.update(rename_pairs(st.body))
-                pairs.update(rename_pairs(st.orelse))
+                pairs.update(rename_pairs(st.body, seen))
+                pairs.update(rename_pairs(st.orelse, seen))
             elif isinstance(st, ast.Assign) and len(st.targets) == 1:
                 target = st.targets[0]
                 value = st.value
-                if (_subscript_chain(target) and _subscript_chain(value)
-                        and _subscript_chain(target)[0] == "kwargs"
-                        and _subscript_chain(value)[0] == "kwargs"):
-                    pairs[_subscript_chain(target)[1][0]] = _subscript_chain(value)[1][0]
+                target_chain = _subscript_chain(target)
+                value_chain = _subscript_chain(value)
+                if target_chain and target_chain[0] == "kwargs":
+                    if value_chain and value_chain[0] == "kwargs":
+                        pairs[target_chain[1][0]] = value_chain[1][0]
+                    elif (
+                        isinstance(value, ast.Call)
+                        and isinstance(value.func, ast.Attribute)
+                        and value.func.attr == "pop"
+                        and isinstance(value.func.value, ast.Name)
+                        and value.func.value.id == "kwargs"
+                        and value.args
+                        and isinstance(value.args[0], ast.Constant)
+                        and isinstance(value.args[0].value, str)
+                    ):
+                        pairs[target_chain[1][0]] = value.args[0].value
+                    elif isinstance(value, ast.Name) and value.id in local_pops:
+                        pairs[target_chain[1][0]] = local_pops[value.id]
+                elif (
+                    isinstance(target, ast.Name)
+                    and isinstance(value, ast.Call)
+                    and isinstance(value.func, ast.Attribute)
+                    and value.func.attr == "pop"
+                    and isinstance(value.func.value, ast.Name)
+                    and value.func.value.id == "kwargs"
+                    and value.args
+                    and isinstance(value.args[0], ast.Constant)
+                    and isinstance(value.args[0].value, str)
+                ):
+                    local_pops[target.id] = value.args[0].value
+                elif (
+                    isinstance(value, ast.Call)
+                    and isinstance(value.func, ast.Name)
+                    and value.func.id not in seen
+                ):
+                    helper = module_globals.get(value.func.id)
+                    helper_fn = _fn_ast(helper) if callable(helper) else None
+                    if helper_fn is not None:
+                        pairs.update(rename_pairs(helper_fn.body, seen | {value.func.id}))
         return pairs
 
     renames = rename_pairs(fn.body)
@@ -268,6 +306,17 @@ def custom_delegate(callback, client_map, custom_params):
     trailing = isinstance(final, ast.Expr) and final.value is call
     if not trailing or len(invokes) != 1:
         return "B", None
+    for kw in call.keywords:
+        if not kw.arg:
+            continue
+        if isinstance(kw.value, ast.Name) and kw.value.id in custom_params:
+            if kw.arg != kw.value.id:
+                renames[kw.arg] = kw.value.id
+            continue
+        chain = _subscript_chain(kw.value)
+        if chain and chain[0] == "kwargs" and chain[1][0] in custom_params:
+            if kw.arg != chain[1][0]:
+                renames[kw.arg] = chain[1][0]
     for st in fn.body[:-1]:
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant) and isinstance(st.value.value, str):
             continue
@@ -292,7 +341,6 @@ def custom_delegate(callback, client_map, custom_params):
     while isinstance(expr, ast.Attribute):
         attrs.insert(0, expr.attr)
         expr = expr.value
-    module_globals = vars(importlib.import_module(callback.__module__))
     obj = module_globals.get(target.id)
     for attr in attrs:
         obj = getattr(obj, attr, None)

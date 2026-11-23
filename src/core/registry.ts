@@ -245,6 +245,8 @@ const ENGINE_FEATURES = [
   "max-retries",
   "work-request-waiter",
   "lifecycle-waiter",
+  // Tier B argument checks (survey.checks) whose happy path is not implemented yet.
+  "usage-checks",
   // Generated commands outside engineSupports, tested by hand-written cases.
   "email-data-plane email-raw-submitted-response submit-raw-email",
 ];

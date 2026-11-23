@@ -93780,6 +93780,7 @@
             "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update"
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "update_details",
@@ -198896,14 +198897,57 @@
           {
             "when": "patch_action and (not patch_id)",
             "options": ["patch_action", "patch_id"],
-            "message": "--patch-id is required if --patch-action is specified"
+            "message": "--patch-id is required if --patch-action is specified",
+            "test": {
+              "and": [
+                {
+                  "truthy": "patch_action"
+                },
+                {
+                  "not": {
+                    "truthy": "patch_id"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "(not (patch_action and (not patch_id))) and (patch_id and (not patch_action))",
             "options": ["patch_action", "patch_id"],
-            "message": "--patch-action is required if --patch-id is specified"
+            "message": "--patch-action is required if --patch-id is specified",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "truthy": "patch_action"
+                      },
+                      {
+                        "not": {
+                          "truthy": "patch_id"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "patch_id"
+                    },
+                    {
+                      "not": {
+                        "truthy": "patch_action"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "version_parameterconflict",
@@ -205859,12 +205903,54 @@
           {
             "when": "patch_action and (not patch_id)",
             "options": ["patch_action", "patch_id"],
-            "message": "--patch-id is required if --patch-action is specified"
+            "message": "--patch-id is required if --patch-action is specified",
+            "test": {
+              "and": [
+                {
+                  "truthy": "patch_action"
+                },
+                {
+                  "not": {
+                    "truthy": "patch_id"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "(not (patch_action and (not patch_id))) and (patch_id and (not patch_action))",
             "options": ["patch_action", "patch_id"],
-            "message": "--patch-action is required if --patch-id is specified"
+            "message": "--patch-action is required if --patch-id is specified",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "truthy": "patch_action"
+                      },
+                      {
+                        "not": {
+                          "truthy": "patch_id"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "patch_id"
+                    },
+                    {
+                      "not": {
+                        "truthy": "patch_action"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "len(provided_update_identifiers) > 1",
@@ -205887,6 +205973,7 @@
             "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update"
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "version_parameterconflict",

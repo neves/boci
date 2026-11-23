@@ -3673,7 +3673,41 @@
               "boot_volume_backup_id",
               "source_volume_replica_id"
             ],
-            "message": "You can only specify one of either --source-boot-volume-id, --boot-volume-backup-id or --source-volume-replica-id option"
+            "message": "You can only specify one of either --source-boot-volume-id, --boot-volume-backup-id or --source-volume-replica-id option",
+            "test": {
+              "or": [
+                {
+                  "and": [
+                    {
+                      "truthy": "source_boot_volume_id"
+                    },
+                    {
+                      "truthy": "boot_volume_backup_id"
+                    }
+                  ]
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "source_boot_volume_id"
+                    },
+                    {
+                      "truthy": "source_volume_replica_id"
+                    }
+                  ]
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "boot_volume_backup_id"
+                    },
+                    {
+                      "truthy": "source_volume_replica_id"
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "not kwargs['source_boot_volume_id'] and (not kwargs['boot_volume_backup_id']) and (not kwargs['source_volume_replica_id'])",
@@ -3682,7 +3716,26 @@
               "boot_volume_backup_id",
               "source_volume_replica_id"
             ],
-            "message": "An empty boot volume cannot be created. Please specify either --boot-volume-backup-id, --source-boot-volume-id or --source-volume-replica-id"
+            "message": "An empty boot volume cannot be created. Please specify either --boot-volume-backup-id, --source-boot-volume-id or --source-volume-replica-id",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "truthy": "source_boot_volume_id"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "boot_volume_backup_id"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "source_volume_replica_id"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "(not kwargs['source_boot_volume_id'] and (not kwargs['source_volume_replica_id'])) and (not kwargs['availability_domain'])",
@@ -3691,9 +3744,33 @@
               "source_volume_replica_id",
               "availability_domain"
             ],
-            "message": "An availability domain must be specified when restoring a boot volume from backup"
+            "message": "An availability domain must be specified when restoring a boot volume from backup",
+            "test": {
+              "and": [
+                {
+                  "and": [
+                    {
+                      "not": {
+                        "truthy": "source_boot_volume_id"
+                      }
+                    },
+                    {
+                      "not": {
+                        "truthy": "source_volume_replica_id"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "not": {
+                    "truthy": "availability_domain"
+                  }
+                }
+              ]
+            }
           }
-        ]
+        ],
+        "wrapExceptions": true
       },
       "params": [
         {
@@ -10215,7 +10292,41 @@
               "volume_backup_id",
               "source_volume_replica_id"
             ],
-            "message": "You can only specify one of either --volume-backup-id, --source-volume-id or --source-volume-replica-id option"
+            "message": "You can only specify one of either --volume-backup-id, --source-volume-id or --source-volume-replica-id option",
+            "test": {
+              "or": [
+                {
+                  "and": [
+                    {
+                      "truthy": "source_volume_id"
+                    },
+                    {
+                      "truthy": "volume_backup_id"
+                    }
+                  ]
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "source_volume_id"
+                    },
+                    {
+                      "truthy": "source_volume_replica_id"
+                    }
+                  ]
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "volume_backup_id"
+                    },
+                    {
+                      "truthy": "source_volume_replica_id"
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "(not kwargs['source_volume_id'] and (not kwargs['source_volume_replica_id'])) and (not kwargs['availability_domain'])",
@@ -10224,7 +10335,30 @@
               "source_volume_replica_id",
               "availability_domain"
             ],
-            "message": "An availability domain must be specified when creating an empty volume or restoring a volume from a backup"
+            "message": "An availability domain must be specified when creating an empty volume or restoring a volume from a backup",
+            "test": {
+              "and": [
+                {
+                  "and": [
+                    {
+                      "not": {
+                        "truthy": "source_volume_id"
+                      }
+                    },
+                    {
+                      "not": {
+                        "truthy": "source_volume_replica_id"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "not": {
+                    "truthy": "availability_domain"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "not kwargs['source_volume_id'] and (not kwargs['volume_backup_id']) and (not kwargs['source_volume_replica_id']) and (not kwargs['compartment_id'])",
@@ -10234,14 +10368,49 @@
               "source_volume_replica_id",
               "compartment_id"
             ],
-            "message": "A compartment ID must be specified when creating an empty volume"
+            "message": "A compartment ID must be specified when creating an empty volume",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "truthy": "source_volume_id"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "volume_backup_id"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "source_volume_replica_id"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "compartment_id"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "kwargs['size_in_mbs'] and kwargs['size_in_gbs']",
             "options": ["size_in_mbs", "size_in_gbs"],
-            "message": "You cannot specify both --size-in-mbs and --size-in-gbs"
+            "message": "You cannot specify both --size-in-mbs and --size-in-gbs",
+            "test": {
+              "and": [
+                {
+                  "truthy": "size_in_mbs"
+                },
+                {
+                  "truthy": "size_in_gbs"
+                }
+              ]
+            }
           }
-        ]
+        ],
+        "wrapExceptions": true
       },
       "params": [
         {

@@ -13,6 +13,8 @@ import importlib
 import inspect
 import textwrap
 
+from checks import aliases, conjunction
+
 # Pattern names, in report order. See .scratch/remaining-commands/tier-b-report.md.
 PATTERNS = (
     "kwargs-del",  # `del kwargs['x']`: a rename/drop Tier A does not accept yet
@@ -140,27 +142,46 @@ def survey(cmd):
         if sources or "value" in fold:
             folds.append(fold)
 
-    def collect_checks(stmts, conds):
+    # Checks compile to a predicate only until the callback does I/O (a request, a file,
+    # a prompt): the Engine evaluates them before anything else.
+    io_seen = [False]
+    io_calls = ("cli_util.build_client", "open", "click.confirm", "click.echo")
+
+    def does_io(st):
+        for n in ast.walk(st):
+            if isinstance(n, ast.Call):
+                d = _dotted(n.func) or ""
+                if d in io_calls or (
+                    isinstance(n.func, ast.Attribute) and n.func.attr in ("invoke", "read")
+                ):
+                    return True
+        return False
+
+    def collect_checks(stmts, conds, local):
         for st in stmts:
             if isinstance(st, ast.If):
-                test = ast.unparse(st.test)
-                collect_checks(st.body, conds + [test])
-                collect_checks(st.orelse, conds + [f"not ({test})"])
+                collect_checks(st.body, conds + [(st.test, False)], local)
+                collect_checks(st.orelse, conds + [(st.test, True)], local)
             elif isinstance(st, (ast.With, ast.For, ast.Try)):
-                collect_checks(st.body, conds)
+                collect_checks(st.body, conds, local)
             elif (
                 isinstance(st, ast.Raise) and isinstance(st.exc, ast.Call)
                 and (_dotted(st.exc.func) or "").endswith("UsageError") and st.exc.args
             ):
                 a = st.exc.args[0]
-                when = " and ".join(f"({c})" if len(conds) > 1 else c for c in conds)
-                checks.append({
+                texts = [f"not ({ast.unparse(t)})" if neg else ast.unparse(t) for t, neg in conds]
+                when = " and ".join(f"({c})" if len(texts) > 1 else c for c in texts)
+                check = {
                     "when": when,
                     "options": list(dict.fromkeys(
-                        o for c in conds for o in _kwarg_refs(ast.parse(c, mode="eval"), params)
+                        o for c in texts for o in _kwarg_refs(ast.parse(c, mode="eval"), params)
                     )),
                     "message": a.value if isinstance(a, ast.Constant) else ast.unparse(a),
-                })
+                }
+                test = conjunction(conds, params, local) if conds else None
+                if test is not None and isinstance(a, ast.Constant) and not io_seen[0]:
+                    check["test"] = test
+                checks.append(check)
 
     def visit(stmts, fn_node, seen):
         for st in stmts:
@@ -217,7 +238,9 @@ def survey(cmd):
                                 helpers.append(n.func.id)
                                 visit(h.body, h, seen | {n.func.id})
             # Usage checks: `raise click.UsageError(<msg>)` under the conjunction of its enclosing ifs.
-            collect_checks([st], [])
+            collect_checks([st], [], aliases(fn_node, params))
+            if does_io(st):
+                io_seen[0] = True
             # Folding: kwargs['t'][...] = v; kwargs['t'] = {..} / json.dumps(local); local[...] = v.
             for n in ast.walk(st):
                 if not (isinstance(n, ast.Assign) and len(n.targets) == 1):
@@ -275,6 +298,9 @@ def survey(cmd):
         details["invokes"] = list(dict.fromkeys(invokes))
     if checks:
         details["checks"] = checks
+        details["wrapExceptions"] = any(
+            ast.unparse(d) == "cli_util.wrap_exceptions" for d in fn.decorator_list
+        )
     if folds:
         details["folds"] = folds
     if files:

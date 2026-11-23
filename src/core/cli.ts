@@ -56,6 +56,7 @@ import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import {
   usageCheckFailure,
+  tierBCheckFailure,
   callOperation,
   confirmUnderWrapExceptions,
 } from "./operation.ts";
@@ -559,10 +560,23 @@ async function main(io: Invocation): Promise<void> {
       (key === "ns get" && name === "os") ||
       (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
         isImplemented(`${name} ${key}`, specCmd));
-    if (!customHandler && engineRoute) {
+    if (!customHandler) {
       // A Tier A wrapper's own checks run before it delegates; the generated callback
-      // then checks its path params first thing (both before JSON parsing).
-      const failure = usageCheckFailure(specCmd, values);
+      // then checks its path params first thing (both before JSON parsing). A Tier B
+      // wrapper's compiled checks run too, though its happy path may not be implemented.
+      // Object Storage looks the namespace up (a request) before any callback runs.
+      const namespaceFirst =
+        name === "os" &&
+        (specCmd.params ?? []).some(
+          (p) =>
+            (p.name === "namespace" || p.name === "namespace_name") &&
+            values[p.name] === undefined,
+        );
+      const failure = engineRoute
+        ? usageCheckFailure(specCmd, values)
+        : namespaceFirst
+          ? undefined
+          : tierBCheckFailure(specCmd, values);
       if (failure?.wrapped === false)
         showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
       if (failure) {

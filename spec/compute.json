@@ -32874,6 +32874,7 @@
             "message": "Cannot specify both a --source-boot-volume-id and a --boot-volume-size-in-gbs to be used to boot the instance"
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "create_vnic_details",
@@ -49697,9 +49698,24 @@
           {
             "when": "not kwargs['compartment_id'] and (not kwargs['instance_id'])",
             "options": ["compartment_id", "instance_id"],
-            "message": "Either --compartment-id or --instance-id has to be provided"
+            "message": "Either --compartment-id or --instance-id has to be provided",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "truthy": "compartment_id"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "instance_id"
+                  }
+                }
+              ]
+            }
           }
-        ]
+        ],
+        "wrapExceptions": true
       },
       "params": [
         {

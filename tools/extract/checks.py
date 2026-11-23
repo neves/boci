@@ -73,8 +73,13 @@ def option_read(node, params, local, allow_pop=False):
         isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
         and isinstance(node.func.value, ast.Name) and node.func.value.id == "kwargs"
         and node.func.attr in (("get", "pop") if allow_pop else ("get",))
-        and len(node.args) == 1 and not node.keywords
-        and isinstance(node.args[0], ast.Constant) and node.args[0].value in params
+        and not node.keywords and node.args and isinstance(node.args[0], ast.Constant)
+        and node.args[0].value in params
+        and (
+            len(node.args) == 1
+            # kwargs.get('x', None) / kwargs.pop('x', None): the same read.
+            or (len(node.args) == 2 and isinstance(node.args[1], ast.Constant) and node.args[1].value is None)
+        )
     ):
         return node.args[0].value
     if isinstance(node, ast.Name):

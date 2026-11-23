@@ -21,7 +21,7 @@ import { resolveInstancePrincipal } from "./instance-principal.ts";
 import { resolveResourcePrincipal } from "./resource-principal.ts";
 import { Exit, type Invocation } from "../lib/io.ts";
 import { pyStrip } from "../lib/configparser.ts";
-import { failingCheck } from "./checks.ts";
+import { failingCheck, type UsageCheck } from "./checks.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
   SecurityTokenDecodeError,
@@ -169,6 +169,27 @@ export function usageCheckFailure(
     };
   }
   return undefined;
+}
+
+/**
+ * The first compiled check of a Tier B wrapper that fires, for commands whose happy path
+ * the Engine does not run yet. Stops at the first check that did not compile: it might
+ * have fired first.
+ */
+export function tierBCheckFailure(
+  command: ServiceSpec["commands"][string],
+  values: Record<string, unknown>,
+): { message: string; wrapped: boolean } | undefined {
+  if (command.tier !== "B") return undefined;
+  const compiled: UsageCheck[] = [];
+  for (const check of command.survey?.checks ?? []) {
+    if (check.test === undefined) break;
+    compiled.push({ test: check.test, message: check.message });
+  }
+  const message = failingCheck(compiled, values, command.params ?? []);
+  return message === undefined
+    ? undefined
+    : { message, wrapped: command.survey?.wrapExceptions === true };
 }
 
 function hasUpdateValue(value: unknown): boolean {

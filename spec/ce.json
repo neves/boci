@@ -1788,19 +1788,59 @@
           {
             "when": "kwargs.get('endpoint_nsg_ids') and (not kwargs.get('endpoint_subnet_id'))",
             "options": ["endpoint_nsg_ids", "endpoint_subnet_id"],
-            "message": "Cannot specify --endpoint-nsg-ids without --endpoint-subnet-id"
+            "message": "Cannot specify --endpoint-nsg-ids without --endpoint-subnet-id",
+            "test": {
+              "and": [
+                {
+                  "truthy": "endpoint_nsg_ids"
+                },
+                {
+                  "not": {
+                    "truthy": "endpoint_subnet_id"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "'endpoint_public_ip_enabled' in kwargs and kwargs['endpoint_public_ip_enabled'] is not None and (not kwargs.get('endpoint_subnet_id'))",
             "options": ["endpoint_public_ip_enabled", "endpoint_subnet_id"],
-            "message": "Cannot specify --endpoint-public-ip-enabled without --endpoint-subnet-id"
+            "message": "Cannot specify --endpoint-public-ip-enabled without --endpoint-subnet-id",
+            "test": {
+              "and": [
+                true,
+                {
+                  "not": {
+                    "none": "endpoint_public_ip_enabled"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "endpoint_subnet_id"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "kwargs.get('endpoint_security_attributes') and (not kwargs.get('endpoint_subnet_id'))",
             "options": ["endpoint_security_attributes", "endpoint_subnet_id"],
-            "message": "Cannot specify --endpoint-security-attributes without --endpoint-subnet-id"
+            "message": "Cannot specify --endpoint-security-attributes without --endpoint-subnet-id",
+            "test": {
+              "and": [
+                {
+                  "truthy": "endpoint_security_attributes"
+                },
+                {
+                  "not": {
+                    "truthy": "endpoint_subnet_id"
+                  }
+                }
+              ]
+            }
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "options",
@@ -8460,17 +8500,65 @@
           {
             "when": "kwargs.get('max_pods_per_node') and (not kwargs.get('pod_subnet_ids'))",
             "options": ["max_pods_per_node", "pod_subnet_ids"],
-            "message": "Cannot specify --max-pods-per-node without --pod-subnet-ids"
+            "message": "Cannot specify --max-pods-per-node without --pod-subnet-ids",
+            "test": {
+              "and": [
+                {
+                  "truthy": "max_pods_per_node"
+                },
+                {
+                  "not": {
+                    "truthy": "pod_subnet_ids"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "kwargs.get('pod_nsg_ids') and (not kwargs.get('pod_subnet_ids'))",
             "options": ["pod_nsg_ids", "pod_subnet_ids"],
-            "message": "Cannot specify --pod-nsg-ids without --pod-subnet-ids"
+            "message": "Cannot specify --pod-nsg-ids without --pod-subnet-ids",
+            "test": {
+              "and": [
+                {
+                  "truthy": "pod_nsg_ids"
+                },
+                {
+                  "not": {
+                    "truthy": "pod_subnet_ids"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "('cni_type' in kwargs and kwargs['cni_type'] is not None) and (kwargs['cni_type'] == 'FLANNEL_OVERLAY' and kwargs.get('pod_subnet_ids'))",
             "options": ["cni_type", "pod_subnet_ids"],
-            "message": "Cannot specify --pod_subnet_ids with --cni-type FLANNEL_OVERLAY"
+            "message": "Cannot specify --pod_subnet_ids with --cni-type FLANNEL_OVERLAY",
+            "test": {
+              "and": [
+                {
+                  "and": [
+                    true,
+                    {
+                      "not": {
+                        "none": "cni_type"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "and": [
+                    {
+                      "eq": ["cni_type", "FLANNEL_OVERLAY"]
+                    },
+                    {
+                      "truthy": "pod_subnet_ids"
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "kwargs.get('node_source_details') and (kwargs.get('node_image_id') or kwargs.get('node_boot_volume_size_in_gbs'))",
@@ -8479,14 +8567,44 @@
               "node_image_id",
               "node_boot_volume_size_in_gbs"
             ],
-            "message": "Cannot specify --node-source-details with any of: --node-image-id or --node-boot-volume-size-in-gbs"
+            "message": "Cannot specify --node-source-details with any of: --node-image-id or --node-boot-volume-size-in-gbs",
+            "test": {
+              "and": [
+                {
+                  "truthy": "node_source_details"
+                },
+                {
+                  "or": [
+                    {
+                      "truthy": "node_image_id"
+                    },
+                    {
+                      "truthy": "node_boot_volume_size_in_gbs"
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "kwargs.get('node_boot_volume_size_in_gbs') and (not kwargs.get('node_image_id'))",
             "options": ["node_boot_volume_size_in_gbs", "node_image_id"],
-            "message": "Cannot specify --node-boot-volume-size-in-gbs without --node-image-id"
+            "message": "Cannot specify --node-boot-volume-size-in-gbs without --node-image-id",
+            "test": {
+              "and": [
+                {
+                  "truthy": "node_boot_volume_size_in_gbs"
+                },
+                {
+                  "not": {
+                    "truthy": "node_image_id"
+                  }
+                }
+              ]
+            }
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "node_config_details",
@@ -10734,14 +10852,39 @@
           {
             "when": "kwargs.get('max_pods_per_node') and (not kwargs.get('pod_subnet_ids'))",
             "options": ["max_pods_per_node", "pod_subnet_ids"],
-            "message": "Cannot specify --max-pods-per-node without --pod-subnet-ids"
+            "message": "Cannot specify --max-pods-per-node without --pod-subnet-ids",
+            "test": {
+              "and": [
+                {
+                  "truthy": "max_pods_per_node"
+                },
+                {
+                  "not": {
+                    "truthy": "pod_subnet_ids"
+                  }
+                }
+              ]
+            }
           },
           {
             "when": "kwargs.get('pod_nsg_ids') and (not kwargs.get('pod_subnet_ids'))",
             "options": ["pod_nsg_ids", "pod_subnet_ids"],
-            "message": "Cannot specify --pod-nsg-ids without --pod-subnet-ids"
+            "message": "Cannot specify --pod-nsg-ids without --pod-subnet-ids",
+            "test": {
+              "and": [
+                {
+                  "truthy": "pod_nsg_ids"
+                },
+                {
+                  "not": {
+                    "truthy": "pod_subnet_ids"
+                  }
+                }
+              ]
+            }
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "node_config_details",

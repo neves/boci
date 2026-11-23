@@ -1152,9 +1152,22 @@
           {
             "when": "dry_run and (not empty)",
             "options": ["dry_run", "empty"],
-            "message": "The option --dry-run is applicable only when the --empty option is specified"
+            "message": "The option --dry-run is applicable only when the --empty option is specified",
+            "test": {
+              "and": [
+                {
+                  "truthy": "dry_run"
+                },
+                {
+                  "not": {
+                    "truthy": "empty"
+                  }
+                }
+              ]
+            }
           }
         ],
+        "wrapExceptions": true,
         "helpers": [
           "_delete_bucket_components",
           "retrying_list_call",
@@ -15277,9 +15290,26 @@
           {
             "when": "(kwargs['time_amount'] is not None) and (not (kwargs['time_unit'] is not None))",
             "options": ["time_amount", "time_unit"],
-            "message": "Parameter --time-unit is required when --time-amount is specified"
+            "message": "Parameter --time-unit is required when --time-amount is specified",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "none": "time_amount"
+                  }
+                },
+                {
+                  "not": {
+                    "not": {
+                      "none": "time_unit"
+                    }
+                  }
+                }
+              ]
+            }
           }
         ],
+        "wrapExceptions": true,
         "folds": [
           {
             "target": "duration",

@@ -414,6 +414,12 @@
           "resource": "4d5723a0edaf802e7504f3c576a2fdbf541a310537b5c96edcef9a7ed7635961"
         }
       },
+      "complexTypes": {
+        "defined-tags": "autoscaling:dict(str, dict(str, object))",
+        "freeform-tags": "autoscaling:dict(str, string)",
+        "policies": "autoscaling:list[CreateAutoScalingPolicyDetails]",
+        "resource": "autoscaling:Resource"
+      },
       "kind": "generated",
       "operation": {
         "client": "autoscaling.auto_scaling",
@@ -1407,6 +1413,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a"
         }
       },
+      "complexTypes": {
+        "defined-tags": "autoscaling:dict(str, dict(str, object))",
+        "freeform-tags": "autoscaling:dict(str, string)"
+      },
       "kind": "generated",
       "operation": {
         "client": "autoscaling.auto_scaling",
@@ -1744,6 +1754,10 @@
           "execution-schedule": "c5df1c3e4e0ce2488ba6b9c17195527220bc87d8fe18ec70a5f9d76b1d975df4"
         }
       },
+      "complexTypes": {
+        "capacity": "autoscaling:Capacity",
+        "execution-schedule": "autoscaling:ExecutionSchedule"
+      },
       "kind": "custom",
       "tier": "B",
       "patterns": ["kwargs-del", "usage-error", "multi-invoke"],
@@ -1834,6 +1848,11 @@
       },
       "generated": {
         "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.create_auto_scaling_policy_create_scheduled_policy_details",
+        "complexTypes": {
+          "capacity": "autoscaling:Capacity",
+          "execution-schedule": "autoscaling:ExecutionSchedule",
+          "resource-action": "autoscaling:ResourceAction"
+        },
         "params": [
           {
             "name": "auto_scaling_configuration_id",
@@ -1969,6 +1988,9 @@
         {
           "generated": {
             "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.create_auto_scaling_policy",
+            "complexTypes": {
+              "capacity": "autoscaling:Capacity"
+            },
             "params": [
               {
                 "name": "auto_scaling_configuration_id",
@@ -2673,6 +2695,10 @@
           "execution-schedule": "c5df1c3e4e0ce2488ba6b9c17195527220bc87d8fe18ec70a5f9d76b1d975df4"
         }
       },
+      "complexTypes": {
+        "capacity": "autoscaling:Capacity",
+        "execution-schedule": "autoscaling:ExecutionSchedule"
+      },
       "kind": "custom",
       "tier": "B",
       "patterns": ["kwargs-del", "usage-error", "multi-invoke"],
@@ -2763,6 +2789,11 @@
       },
       "generated": {
         "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.update_auto_scaling_policy_update_scheduled_policy_details",
+        "complexTypes": {
+          "capacity": "autoscaling:Capacity",
+          "execution-schedule": "autoscaling:ExecutionSchedule",
+          "resource-action": "autoscaling:ResourceAction"
+        },
         "params": [
           {
             "name": "auto_scaling_configuration_id",
@@ -2934,6 +2965,9 @@
         {
           "generated": {
             "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.update_auto_scaling_policy",
+            "complexTypes": {
+              "capacity": "autoscaling:Capacity"
+            },
             "params": [
               {
                 "name": "auto_scaling_configuration_id",
@@ -3398,5 +3432,164 @@
         "type": "cron"
       }
     ]
+  },
+  "models": {
+    "autoscaling": {
+      "Action": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["value", "int", "value"]
+        ]
+      },
+      "Capacity": {
+        "attributes": [
+          ["max", "int", "max"],
+          ["min", "int", "min"],
+          ["initial", "int", "initial"]
+        ]
+      },
+      "CreateAutoScalingPolicyDetails": {
+        "attributes": [
+          ["capacity", "Capacity", "capacity"],
+          ["display_name", "str", "displayName"],
+          ["policy_type", "str", "policyType"],
+          ["is_enabled", "bool", "isEnabled"]
+        ],
+        "discriminator": {
+          "field": "policyType",
+          "values": {
+            "scheduled": "CreateScheduledPolicyDetails",
+            "threshold": "CreateThresholdPolicyDetails"
+          },
+          "fallback": "CreateAutoScalingPolicyDetails"
+        }
+      },
+      "CreateConditionDetails": {
+        "attributes": [
+          ["action", "Action", "action"],
+          ["display_name", "str", "displayName"],
+          ["metric", "MetricBase", "metric"]
+        ]
+      },
+      "CreateScheduledPolicyDetails": {
+        "attributes": [
+          ["capacity", "Capacity", "capacity"],
+          ["display_name", "str", "displayName"],
+          ["policy_type", "str", "policyType"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["execution_schedule", "ExecutionSchedule", "executionSchedule"],
+          ["resource_action", "ResourceAction", "resourceAction"]
+        ],
+        "discriminator": "CreateAutoScalingPolicyDetails"
+      },
+      "CreateThresholdPolicyDetails": {
+        "attributes": [
+          ["capacity", "Capacity", "capacity"],
+          ["display_name", "str", "displayName"],
+          ["policy_type", "str", "policyType"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["rules", "list[CreateConditionDetails]", "rules"]
+        ],
+        "discriminator": "CreateAutoScalingPolicyDetails"
+      },
+      "CronExecutionSchedule": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["timezone", "str", "timezone"],
+          ["expression", "str", "expression"]
+        ],
+        "discriminator": "ExecutionSchedule"
+      },
+      "CustomMetric": {
+        "attributes": [
+          ["pending_duration", "str", "pendingDuration"],
+          ["metric_source", "str", "metricSource"],
+          ["query", "str", "query"],
+          ["namespace", "str", "namespace"],
+          ["resource_group", "str", "resourceGroup"],
+          ["metric_compartment_id", "str", "metricCompartmentId"]
+        ],
+        "discriminator": "MetricBase"
+      },
+      "ExecutionSchedule": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["timezone", "str", "timezone"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "cron": "CronExecutionSchedule"
+          },
+          "fallback": "ExecutionSchedule"
+        }
+      },
+      "InstancePoolResource": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["id", "str", "id"]
+        ],
+        "discriminator": "Resource"
+      },
+      "Metric": {
+        "attributes": [
+          ["pending_duration", "str", "pendingDuration"],
+          ["metric_source", "str", "metricSource"],
+          ["metric_type", "str", "metricType"],
+          ["threshold", "Threshold", "threshold"]
+        ],
+        "discriminator": "MetricBase"
+      },
+      "MetricBase": {
+        "attributes": [
+          ["pending_duration", "str", "pendingDuration"],
+          ["metric_source", "str", "metricSource"]
+        ],
+        "discriminator": {
+          "field": "metricSource",
+          "values": {
+            "CUSTOM_QUERY": "CustomMetric",
+            "COMPUTE_AGENT": "Metric"
+          },
+          "fallback": "MetricBase"
+        }
+      },
+      "Resource": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["id", "str", "id"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "instancePool": "InstancePoolResource"
+          },
+          "fallback": "Resource"
+        }
+      },
+      "ResourceAction": {
+        "attributes": [["action_type", "str", "actionType"]],
+        "discriminator": {
+          "field": "actionType",
+          "values": {
+            "power": "ResourcePowerAction"
+          },
+          "fallback": "ResourceAction"
+        }
+      },
+      "ResourcePowerAction": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["action", "str", "action"]
+        ],
+        "discriminator": "ResourceAction"
+      },
+      "Threshold": {
+        "attributes": [
+          ["operator", "str", "operator"],
+          ["value", "int", "value"]
+        ]
+      }
+    }
   }
 }

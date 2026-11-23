@@ -396,6 +396,12 @@
           "query-options": "61ef8150a8cf16e54ba187f8df99ebc60cd700b33c2dd4ec4d9e2d754e28f1fd"
         }
       },
+      "complexTypes": {
+        "source-endpoint": "vn_monitoring:Endpoint",
+        "destination-endpoint": "vn_monitoring:Endpoint",
+        "protocol-parameters": "vn_monitoring:ProtocolParameters",
+        "query-options": "vn_monitoring:QueryOptions"
+      },
       "kind": "generated",
       "operation": {
         "client": "vn_monitoring.vn_monitoring",
@@ -1260,6 +1266,14 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "source-endpoint": "vn_monitoring:Endpoint",
+        "destination-endpoint": "vn_monitoring:Endpoint",
+        "protocol-parameters": "vn_monitoring:ProtocolParameters",
+        "query-options": "vn_monitoring:QueryOptions",
+        "freeform-tags": "vn_monitoring:dict(str, string)",
+        "defined-tags": "vn_monitoring:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -2488,6 +2502,14 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "source-endpoint": "vn_monitoring:Endpoint",
+        "destination-endpoint": "vn_monitoring:Endpoint",
+        "protocol-parameters": "vn_monitoring:ProtocolParameters",
+        "query-options": "vn_monitoring:QueryOptions",
+        "freeform-tags": "vn_monitoring:dict(str, string)",
+        "defined-tags": "vn_monitoring:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -4438,6 +4460,155 @@
       "tagNamespace2": {
         "tagKey1": "tagValue1",
         "tagKey2": "tagValue2"
+      }
+    }
+  },
+  "models": {
+    "vn_monitoring": {
+      "ComputeInstanceEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["address", "str", "address"],
+          ["instance_id", "str", "instanceId"],
+          ["vnic_id", "str", "vnicId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "Endpoint": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "NETWORK_LOAD_BALANCER_LISTENER": "NetworkLoadBalancerListenerEndpoint",
+            "COMPUTE_INSTANCE": "ComputeInstanceEndpoint",
+            "NETWORK_LOAD_BALANCER": "NetworkLoadBalancerEndpoint",
+            "ON_PREM": "OnPremEndpoint",
+            "PRIVATE_SERVICE_ACCESS": "PrivateServiceAccessEndpoint",
+            "LOAD_BALANCER": "LoadBalancerEndpoint",
+            "VNIC": "VnicEndpoint",
+            "IP_ADDRESS": "IpAddressEndpoint",
+            "VLAN": "VlanEndpoint",
+            "SUBNET": "SubnetEndpoint",
+            "LOAD_BALANCER_LISTENER": "LoadBalancerListenerEndpoint"
+          },
+          "fallback": "Endpoint"
+        }
+      },
+      "IcmpProtocolParameters": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["icmp_code", "int", "icmpCode"],
+          ["icmp_type", "int", "icmpType"]
+        ],
+        "discriminator": "ProtocolParameters"
+      },
+      "IpAddressEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["address", "str", "address"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "LoadBalancerEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["load_balancer_id", "str", "loadBalancerId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "LoadBalancerListenerEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["listener_id", "str", "listenerId"],
+          ["load_balancer_id", "str", "loadBalancerId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "NetworkLoadBalancerEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["network_load_balancer_id", "str", "networkLoadBalancerId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "NetworkLoadBalancerListenerEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["listener_id", "str", "listenerId"],
+          ["network_load_balancer_id", "str", "networkLoadBalancerId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "OnPremEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["address", "str", "address"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "PrivateServiceAccessEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["psa_id", "str", "psaId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "ProtocolParameters": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "UDP": "UdpProtocolParameters",
+            "TCP": "TcpProtocolParameters",
+            "ICMP": "IcmpProtocolParameters"
+          },
+          "fallback": "ProtocolParameters"
+        }
+      },
+      "QueryOptions": {
+        "attributes": [
+          ["is_bi_directional_analysis", "bool", "isBiDirectionalAnalysis"]
+        ]
+      },
+      "SubnetEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["address", "str", "address"],
+          ["subnet_id", "str", "subnetId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "TcpProtocolParameters": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["source_port", "int", "sourcePort"],
+          ["destination_port", "int", "destinationPort"]
+        ],
+        "discriminator": "ProtocolParameters"
+      },
+      "UdpProtocolParameters": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["source_port", "int", "sourcePort"],
+          ["destination_port", "int", "destinationPort"]
+        ],
+        "discriminator": "ProtocolParameters"
+      },
+      "VlanEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["address", "str", "address"],
+          ["vlan_id", "str", "vlanId"]
+        ],
+        "discriminator": "Endpoint"
+      },
+      "VnicEndpoint": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["address", "str", "address"],
+          ["vnic_id", "str", "vnicId"]
+        ],
+        "discriminator": "Endpoint"
       }
     }
   }

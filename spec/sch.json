@@ -1405,6 +1405,13 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "source": "sch:SourceDetails",
+        "tasks": "sch:list[TaskDetails]",
+        "target": "sch:TargetDetails",
+        "freeform-tags": "sch:dict(str, string)",
+        "defined-tags": "sch:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "sch.service_connector",
@@ -2866,6 +2873,13 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "source": "sch:SourceDetails",
+        "tasks": "sch:list[TaskDetails]",
+        "target": "sch:TargetDetails",
+        "freeform-tags": "sch:dict(str, string)",
+        "defined-tags": "sch:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "sch.service_connector",
@@ -4277,6 +4291,257 @@
       "tagNamespace2": {
         "tagKey1": "tagValue1",
         "tagKey2": "tagValue2"
+      }
+    }
+  },
+  "models": {
+    "sch": {
+      "DimensionDetails": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["dimension_value", "DimensionValueDetails", "dimensionValue"]
+        ]
+      },
+      "DimensionValueDetails": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "static": "StaticDimensionValue",
+            "jmesPath": "JmesPathDimensionValue"
+          },
+          "fallback": "DimensionValueDetails"
+        }
+      },
+      "FunctionTaskDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["function_id", "str", "functionId"],
+          ["batch_size_in_kbs", "int", "batchSizeInKbs"],
+          ["batch_time_in_sec", "int", "batchTimeInSec"]
+        ],
+        "discriminator": "TaskDetails"
+      },
+      "FunctionsTargetDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["function_id", "str", "functionId"],
+          ["batch_size_in_kbs", "int", "batchSizeInKbs"],
+          ["batch_size_in_num", "int", "batchSizeInNum"],
+          ["batch_time_in_sec", "int", "batchTimeInSec"]
+        ],
+        "discriminator": "TargetDetails"
+      },
+      "JmesPathDimensionValue": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["path", "str", "path"]
+        ],
+        "discriminator": "DimensionValueDetails"
+      },
+      "LatestStreamingCursor": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": "StreamingCursorDetails"
+      },
+      "LogRuleTaskDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["condition", "str", "condition"]
+        ],
+        "discriminator": "TaskDetails"
+      },
+      "LogSource": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["log_group_id", "str", "logGroupId"],
+          ["log_id", "str", "logId"]
+        ]
+      },
+      "LoggingAnalyticsTargetDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["log_group_id", "str", "logGroupId"],
+          ["log_source_identifier", "str", "logSourceIdentifier"]
+        ],
+        "discriminator": "TargetDetails"
+      },
+      "LoggingSourceDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["log_sources", "list[LogSource]", "logSources"]
+        ],
+        "discriminator": "SourceDetails"
+      },
+      "MonitoringSource": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "namespace_details",
+            "MonitoringSourceNamespaceDetails",
+            "namespaceDetails"
+          ]
+        ]
+      },
+      "MonitoringSourceAllMetrics": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": "MonitoringSourceMetricDetails"
+      },
+      "MonitoringSourceDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["monitoring_sources", "list[MonitoringSource]", "monitoringSources"]
+        ],
+        "discriminator": "SourceDetails"
+      },
+      "MonitoringSourceMetricDetails": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "all": "MonitoringSourceAllMetrics"
+          },
+          "fallback": "MonitoringSourceMetricDetails"
+        }
+      },
+      "MonitoringSourceNamespaceDetails": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "selected": "MonitoringSourceSelectedNamespaceDetails"
+          },
+          "fallback": "MonitoringSourceNamespaceDetails"
+        }
+      },
+      "MonitoringSourceSelectedNamespace": {
+        "attributes": [
+          ["namespace", "str", "namespace"],
+          ["metrics", "MonitoringSourceMetricDetails", "metrics"]
+        ]
+      },
+      "MonitoringSourceSelectedNamespaceDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "namespaces",
+            "list[MonitoringSourceSelectedNamespace]",
+            "namespaces"
+          ]
+        ],
+        "discriminator": "MonitoringSourceNamespaceDetails"
+      },
+      "MonitoringTargetDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["compartment_id", "str", "compartmentId"],
+          ["metric_namespace", "str", "metricNamespace"],
+          ["metric", "str", "metric"],
+          ["dimensions", "list[DimensionDetails]", "dimensions"]
+        ],
+        "discriminator": "TargetDetails"
+      },
+      "NotificationsTargetDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["topic_id", "str", "topicId"],
+          ["enable_formatted_messaging", "bool", "enableFormattedMessaging"]
+        ],
+        "discriminator": "TargetDetails"
+      },
+      "ObjectStorageTargetDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["namespace", "str", "namespace"],
+          ["bucket_name", "str", "bucketName"],
+          ["object_name_prefix", "str", "objectNamePrefix"],
+          ["batch_rollover_size_in_mbs", "int", "batchRolloverSizeInMBs"],
+          ["batch_rollover_time_in_ms", "int", "batchRolloverTimeInMs"]
+        ],
+        "discriminator": "TargetDetails"
+      },
+      "PluginSourceDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["plugin_name", "str", "pluginName"],
+          ["config_map", "object", "configMap"]
+        ],
+        "discriminator": "SourceDetails"
+      },
+      "SourceDetails": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "logging": "LoggingSourceDetails",
+            "monitoring": "MonitoringSourceDetails",
+            "streaming": "StreamingSourceDetails",
+            "plugin": "PluginSourceDetails"
+          },
+          "fallback": "SourceDetails"
+        }
+      },
+      "StaticDimensionValue": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "DimensionValueDetails"
+      },
+      "StreamingCursorDetails": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "TRIM_HORIZON": "TrimHorizonStreamingCursor",
+            "LATEST": "LatestStreamingCursor"
+          },
+          "fallback": "StreamingCursorDetails"
+        }
+      },
+      "StreamingSourceDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["stream_id", "str", "streamId"],
+          ["cursor", "StreamingCursorDetails", "cursor"]
+        ],
+        "discriminator": "SourceDetails"
+      },
+      "StreamingTargetDetails": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["stream_id", "str", "streamId"]
+        ],
+        "discriminator": "TargetDetails"
+      },
+      "TargetDetails": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "notifications": "NotificationsTargetDetails",
+            "objectStorage": "ObjectStorageTargetDetails",
+            "monitoring": "MonitoringTargetDetails",
+            "functions": "FunctionsTargetDetails",
+            "loggingAnalytics": "LoggingAnalyticsTargetDetails",
+            "streaming": "StreamingTargetDetails"
+          },
+          "fallback": "TargetDetails"
+        }
+      },
+      "TaskDetails": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "function": "FunctionTaskDetails",
+            "logRule": "LogRuleTaskDetails"
+          },
+          "fallback": "TaskDetails"
+        }
+      },
+      "TrimHorizonStreamingCursor": {
+        "attributes": [["kind", "str", "kind"]],
+        "discriminator": "StreamingCursorDetails"
       }
     }
   }

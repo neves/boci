@@ -1180,6 +1180,12 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "resource-filters": "resource_scheduler:list[ResourceFilter]",
+        "resources": "resource_scheduler:list[Resource]",
+        "freeform-tags": "resource_scheduler:dict(str, string)",
+        "defined-tags": "resource_scheduler:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "resource_scheduler.schedule",
@@ -2854,6 +2860,12 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "resource-filters": "resource_scheduler:list[ResourceFilter]",
+        "resources": "resource_scheduler:list[Resource]",
+        "freeform-tags": "resource_scheduler:dict(str, string)",
+        "defined-tags": "resource_scheduler:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -4858,6 +4870,120 @@
       "tagNamespace2": {
         "tagKey1": "tagValue1",
         "tagKey2": "tagValue2"
+      }
+    }
+  },
+  "models": {
+    "resource_scheduler": {
+      "BodyParameter": {
+        "attributes": [
+          ["parameter_type", "str", "parameterType"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "Parameter"
+      },
+      "CompartmentIdResourceFilter": {
+        "attributes": [
+          ["attribute", "str", "attribute"],
+          ["value", "str", "value"],
+          [
+            "should_include_child_compartments",
+            "bool",
+            "shouldIncludeChildCompartments"
+          ]
+        ],
+        "discriminator": "ResourceFilter"
+      },
+      "DefinedTagFilterValue": {
+        "attributes": [
+          ["namespace", "str", "namespace"],
+          ["tag_key", "str", "tagKey"],
+          ["value", "str", "value"]
+        ]
+      },
+      "DefinedTagsResourceFilter": {
+        "attributes": [
+          ["attribute", "str", "attribute"],
+          ["value", "list[DefinedTagFilterValue]", "value"]
+        ],
+        "discriminator": "ResourceFilter"
+      },
+      "HeaderParameter": {
+        "attributes": [
+          ["parameter_type", "str", "parameterType"],
+          ["value", "dict(str, str)", "value"]
+        ],
+        "discriminator": "Parameter"
+      },
+      "LifecycleStateResourceFilter": {
+        "attributes": [
+          ["attribute", "str", "attribute"],
+          ["value", "list[str]", "value"]
+        ],
+        "discriminator": "ResourceFilter"
+      },
+      "Parameter": {
+        "attributes": [["parameter_type", "str", "parameterType"]],
+        "discriminator": {
+          "field": "parameterType",
+          "values": {
+            "QUERY": "QueryParameter",
+            "HEADER": "HeaderParameter",
+            "BODY": "BodyParameter",
+            "PATH": "PathParameter"
+          },
+          "fallback": "Parameter"
+        }
+      },
+      "PathParameter": {
+        "attributes": [
+          ["parameter_type", "str", "parameterType"],
+          ["value", "dict(str, str)", "value"]
+        ],
+        "discriminator": "Parameter"
+      },
+      "QueryParameter": {
+        "attributes": [
+          ["parameter_type", "str", "parameterType"],
+          ["value", "dict(str, str)", "value"]
+        ],
+        "discriminator": "Parameter"
+      },
+      "Resource": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["metadata", "dict(str, str)", "metadata"],
+          ["parameters", "list[Parameter]", "parameters"]
+        ]
+      },
+      "ResourceFilter": {
+        "attributes": [["attribute", "str", "attribute"]],
+        "discriminator": {
+          "field": "attribute",
+          "values": {
+            "TIME_CREATED": "TimeCreatedResourceFilter",
+            "RESOURCE_TYPE": "ResourceTypeResourceFilter",
+            "LIFECYCLE_STATE": "LifecycleStateResourceFilter",
+            "COMPARTMENT_ID": "CompartmentIdResourceFilter",
+            "DEFINED_TAGS": "DefinedTagsResourceFilter"
+          },
+          "fallback": "ResourceFilter"
+        }
+      },
+      "ResourceTypeResourceFilter": {
+        "attributes": [
+          ["attribute", "str", "attribute"],
+          ["value", "list[str]", "value"]
+        ],
+        "discriminator": "ResourceFilter"
+      },
+      "TimeCreatedResourceFilter": {
+        "attributes": [
+          ["attribute", "str", "attribute"],
+          ["condition", "str", "condition"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "ResourceFilter"
       }
     }
   }

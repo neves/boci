@@ -1302,6 +1302,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "limits-increase-item-requests": "limits_increase:list[CreateLimitsIncreaseItemRequestDetails]",
+        "freeform-tags": "limits_increase:dict(str, string)",
+        "defined-tags": "limits_increase:dict(str, dict(str, object))"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -2438,6 +2443,9 @@
           "items": "17cd09d1b5c7a47e4b16d3ec4cd822be7fb9fb77edc5ab40bae4ddccdbefbaa1"
         }
       },
+      "complexTypes": {
+        "items": "limits_increase:list[PatchInstruction]"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -2668,6 +2676,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "limits_increase:dict(str, string)",
+        "defined-tags": "limits_increase:dict(str, dict(str, object))"
       },
       "kind": "custom",
       "tier": "A",
@@ -3369,5 +3381,50 @@
       ],
       null
     ]
+  },
+  "models": {
+    "limits_increase": {
+      "CreateLimitsIncreaseItemRequestDetails": {
+        "attributes": [
+          ["service_name", "str", "serviceName"],
+          ["limit_name", "str", "limitName"],
+          ["region", "str", "region"],
+          ["scope", "str", "scope"],
+          ["value", "int", "value"],
+          [
+            "questionnaire_response",
+            "list[LimitsIncreaseItemQuestionRequest]",
+            "questionnaireResponse"
+          ]
+        ]
+      },
+      "LimitsIncreaseItemQuestionRequest": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["question_response", "str", "questionResponse"]
+        ]
+      },
+      "PatchInsertInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"]
+        ],
+        "discriminator": {
+          "field": "operation",
+          "values": {
+            "INSERT": "PatchInsertInstruction"
+          },
+          "fallback": "PatchInstruction"
+        }
+      }
+    }
   }
 }

@@ -3437,6 +3437,9 @@
           "subscription": "fab6731dd4f02810582c18351ac4ecc1d16d7121280e43523b0218791b63968c"
         }
       },
+      "complexTypes": {
+        "subscription": "osp_gateway:Subscription"
+      },
       "kind": "generated",
       "operation": {
         "client": "osp_gateway.subscription_service",
@@ -4297,6 +4300,9 @@
           "subscription": "fab6731dd4f02810582c18351ac4ecc1d16d7121280e43523b0218791b63968c"
         }
       },
+      "complexTypes": {
+        "subscription": "osp_gateway:Subscription"
+      },
       "kind": "generated",
       "operation": {
         "client": "osp_gateway.subscription_service",
@@ -4609,6 +4615,9 @@
         "params": {
           "subscription": "fab6731dd4f02810582c18351ac4ecc1d16d7121280e43523b0218791b63968c"
         }
+      },
+      "complexTypes": {
+        "subscription": "osp_gateway:Subscription"
       },
       "kind": "generated",
       "operation": {
@@ -4946,6 +4955,138 @@
       "timeStart": "2017-01-01T00:00:00+00:00",
       "upgradeState": "string",
       "upgradeStateDetails": "string"
+    }
+  },
+  "models": {
+    "osp_gateway": {
+      "Address": {
+        "attributes": [
+          ["address_key", "str", "addressKey"],
+          ["line1", "str", "line1"],
+          ["line2", "str", "line2"],
+          ["line3", "str", "line3"],
+          ["line4", "str", "line4"],
+          ["street_name", "str", "streetName"],
+          ["street_number", "str", "streetNumber"],
+          ["city", "str", "city"],
+          ["county", "str", "county"],
+          ["country", "str", "country"],
+          ["province", "str", "province"],
+          ["postal_code", "str", "postalCode"],
+          ["state", "str", "state"],
+          ["email_address", "str", "emailAddress"],
+          ["company_name", "str", "companyName"],
+          ["first_name", "str", "firstName"],
+          ["middle_name", "str", "middleName"],
+          ["last_name", "str", "lastName"],
+          ["phone_country_code", "str", "phoneCountryCode"],
+          ["phone_number", "str", "phoneNumber"],
+          ["job_title", "str", "jobTitle"],
+          ["department_name", "str", "departmentName"],
+          ["internal_number", "str", "internalNumber"],
+          ["contributor_class", "str", "contributorClass"],
+          ["state_inscription", "str", "stateInscription"],
+          ["municipal_inscription", "str", "municipalInscription"]
+        ]
+      },
+      "CreditCardPaymentOption": {
+        "attributes": [
+          ["wallet_instrument_id", "str", "walletInstrumentId"],
+          ["wallet_transaction_id", "str", "walletTransactionId"],
+          ["payment_method", "str", "paymentMethod"],
+          ["credit_card_type", "str", "creditCardType"],
+          ["last_digits", "str", "lastDigits"],
+          ["name_on_card", "str", "nameOnCard"],
+          ["time_expiration", "datetime", "timeExpiration"]
+        ],
+        "discriminator": "PaymentOption"
+      },
+      "MerchantDefinedData": {
+        "attributes": [
+          ["promo_type", "str", "promoType"],
+          ["cloud_account_name", "str", "cloudAccountName"]
+        ]
+      },
+      "PaymentGateway": {
+        "attributes": [
+          [
+            "merchant_defined_data",
+            "MerchantDefinedData",
+            "merchantDefinedData"
+          ]
+        ]
+      },
+      "PaymentOption": {
+        "attributes": [
+          ["wallet_instrument_id", "str", "walletInstrumentId"],
+          ["wallet_transaction_id", "str", "walletTransactionId"],
+          ["payment_method", "str", "paymentMethod"]
+        ],
+        "discriminator": {
+          "field": "paymentMethod",
+          "values": {
+            "CREDIT_CARD": "CreditCardPaymentOption",
+            "PAYPAL": "PaypalPaymentOption"
+          },
+          "fallback": "PaymentOption"
+        }
+      },
+      "PaypalPaymentOption": {
+        "attributes": [
+          ["wallet_instrument_id", "str", "walletInstrumentId"],
+          ["wallet_transaction_id", "str", "walletTransactionId"],
+          ["payment_method", "str", "paymentMethod"],
+          ["email_address", "str", "emailAddress"],
+          ["first_name", "str", "firstName"],
+          ["last_name", "str", "lastName"],
+          ["ext_billing_agreement_id", "str", "extBillingAgreementId"]
+        ],
+        "discriminator": "PaymentOption"
+      },
+      "Subscription": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["subscription_plan_number", "str", "subscriptionPlanNumber"],
+          ["plan_type", "str", "planType"],
+          ["time_start", "datetime", "timeStart"],
+          ["ship_to_cust_acct_site_id", "str", "shipToCustAcctSiteId"],
+          ["ship_to_cust_acct_role_id", "str", "shipToCustAcctRoleId"],
+          ["bill_to_cust_account_id", "str", "billToCustAccountId"],
+          ["is_intent_to_pay", "bool", "isIntentToPay"],
+          [
+            "is_corporate_conversion_allowed",
+            "bool",
+            "isCorporateConversionAllowed"
+          ],
+          ["currency_code", "str", "currencyCode"],
+          ["gsi_org_code", "str", "gsiOrgCode"],
+          ["language_code", "str", "languageCode"],
+          ["organization_id", "str", "organizationId"],
+          ["upgrade_state", "str", "upgradeState"],
+          ["upgrade_state_details", "str", "upgradeStateDetails"],
+          ["account_type", "str", "accountType"],
+          ["tax_info", "TaxInfo", "taxInfo"],
+          ["payment_options", "list[PaymentOption]", "paymentOptions"],
+          ["payment_gateway", "PaymentGateway", "paymentGateway"],
+          ["billing_address", "Address", "billingAddress"],
+          ["time_plan_upgrade", "datetime", "timePlanUpgrade"],
+          [
+            "time_personal_to_corporate_conv",
+            "datetime",
+            "timePersonalToCorporateConv"
+          ]
+        ]
+      },
+      "TaxInfo": {
+        "attributes": [
+          ["tax_payer_id", "str", "taxPayerId"],
+          ["tax_reg_number", "str", "taxRegNumber"],
+          ["no_tax_reason_code", "str", "noTaxReasonCode"],
+          ["no_tax_reason_code_details", "str", "noTaxReasonCodeDetails"],
+          ["tax_cnpj", "str", "taxCnpj"],
+          ["giro", "str", "giro"]
+        ]
+      }
     }
   }
 }

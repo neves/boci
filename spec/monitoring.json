@@ -798,6 +798,13 @@
           "overrides": "04afb51688e376209684093539bd5ee40f247f7b7108f542287d1db4ecc9232e"
         }
       },
+      "complexTypes": {
+        "destinations": "monitoring:list[string]",
+        "suppression": "monitoring:Suppression",
+        "freeform-tags": "monitoring:dict(str, string)",
+        "defined-tags": "monitoring:dict(str, dict(str, object))",
+        "overrides": "monitoring:list[AlarmOverride]"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -2534,6 +2541,13 @@
           "overrides": "04afb51688e376209684093539bd5ee40f247f7b7108f542287d1db4ecc9232e"
         }
       },
+      "complexTypes": {
+        "destinations": "monitoring:list[string]",
+        "suppression": "monitoring:Suppression",
+        "freeform-tags": "monitoring:dict(str, string)",
+        "defined-tags": "monitoring:dict(str, dict(str, object))",
+        "overrides": "monitoring:list[AlarmOverride]"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -3425,6 +3439,9 @@
         "params": {
           "dimension-filters": "ae467084d8648c0710ce5012feb3bc1c6e9a355959740afe7c61a1d70f61bf74"
         }
+      },
+      "complexTypes": {
+        "dimension-filters": "monitoring:dict(str, string)"
       },
       "kind": "generated",
       "operation": {
@@ -4538,6 +4555,13 @@
           "suppression-conditions": "a4ab3c5f986d5a4161f73a192f2c36bd26a18dbda4f7aa3e178cb0a5921617f4"
         }
       },
+      "complexTypes": {
+        "alarm-suppression-target": "monitoring:AlarmSuppressionTarget",
+        "dimensions": "monitoring:dict(str, string)",
+        "freeform-tags": "monitoring:dict(str, string)",
+        "defined-tags": "monitoring:dict(str, dict(str, object))",
+        "suppression-conditions": "monitoring:list[SuppressionCondition]"
+      },
       "kind": "generated",
       "operation": {
         "client": "monitoring.monitoring",
@@ -5357,6 +5381,9 @@
         "params": {
           "dimensions": "ae467084d8648c0710ce5012feb3bc1c6e9a355959740afe7c61a1d70f61bf74"
         }
+      },
+      "complexTypes": {
+        "dimensions": "monitoring:dict(str, string)"
       },
       "kind": "generated",
       "operation": {
@@ -6230,6 +6257,10 @@
           "group-by": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
       },
+      "complexTypes": {
+        "dimension-filters": "monitoring:dict(str, string)",
+        "group-by": "monitoring:list[string]"
+      },
       "kind": "generated",
       "operation": {
         "client": "monitoring.monitoring",
@@ -6679,6 +6710,9 @@
         "params": {
           "metric-data": "9a5576550c9fd4d0675d1a9157fb258f871278317574b6653542732c9638c8ed"
         }
+      },
+      "complexTypes": {
+        "metric-data": "monitoring:list[MetricDataDetails]"
       },
       "kind": "generated",
       "operation": {
@@ -7463,5 +7497,87 @@
         "resourceGroup": "string"
       }
     ]
+  },
+  "models": {
+    "monitoring": {
+      "AlarmOverride": {
+        "attributes": [
+          ["pending_duration", "str", "pendingDuration"],
+          ["severity", "str", "severity"],
+          ["body", "str", "body"],
+          ["rule_name", "str", "ruleName"],
+          ["query", "str", "query"]
+        ]
+      },
+      "AlarmSuppressionAlarmTarget": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["alarm_id", "str", "alarmId"]
+        ],
+        "discriminator": "AlarmSuppressionTarget"
+      },
+      "AlarmSuppressionCompartmentTarget": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["compartment_id", "str", "compartmentId"],
+          ["compartment_id_in_subtree", "bool", "compartmentIdInSubtree"]
+        ],
+        "discriminator": "AlarmSuppressionTarget"
+      },
+      "AlarmSuppressionTarget": {
+        "attributes": [["target_type", "str", "targetType"]],
+        "discriminator": {
+          "field": "targetType",
+          "values": {
+            "ALARM": "AlarmSuppressionAlarmTarget",
+            "COMPARTMENT": "AlarmSuppressionCompartmentTarget"
+          },
+          "fallback": "AlarmSuppressionTarget"
+        }
+      },
+      "Datapoint": {
+        "attributes": [
+          ["timestamp", "datetime", "timestamp"],
+          ["value", "float", "value"],
+          ["count", "int", "count"]
+        ]
+      },
+      "MetricDataDetails": {
+        "attributes": [
+          ["namespace", "str", "namespace"],
+          ["resource_group", "str", "resourceGroup"],
+          ["compartment_id", "str", "compartmentId"],
+          ["name", "str", "name"],
+          ["dimensions", "dict(str, str)", "dimensions"],
+          ["metadata", "dict(str, str)", "metadata"],
+          ["datapoints", "list[Datapoint]", "datapoints"]
+        ]
+      },
+      "Recurrence": {
+        "attributes": [
+          ["condition_type", "str", "conditionType"],
+          ["suppression_recurrence", "str", "suppressionRecurrence"],
+          ["suppression_duration", "str", "suppressionDuration"]
+        ],
+        "discriminator": "SuppressionCondition"
+      },
+      "Suppression": {
+        "attributes": [
+          ["description", "str", "description"],
+          ["time_suppress_from", "datetime", "timeSuppressFrom"],
+          ["time_suppress_until", "datetime", "timeSuppressUntil"]
+        ]
+      },
+      "SuppressionCondition": {
+        "attributes": [["condition_type", "str", "conditionType"]],
+        "discriminator": {
+          "field": "conditionType",
+          "values": {
+            "RECURRENCE": "Recurrence"
+          },
+          "fallback": "SuppressionCondition"
+        }
+      }
+    }
   }
 }

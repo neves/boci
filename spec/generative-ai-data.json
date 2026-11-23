@@ -445,12 +445,22 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "configuration": "generative_ai_data:EnrichmentJobConfiguration",
+        "freeform-tags": "generative_ai_data:dict(str, string)",
+        "defined-tags": "generative_ai_data:dict(str, dict(str, object))"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
         "callback": "services.generative_ai_data.src.oci_cli_enrichment_job.generated.enrichmentjob_cli.generate_enrichment_job",
         "renames": {
           "enrichment_job_configuration": "configuration"
+        },
+        "complexTypes": {
+          "enrichment-job-configuration": "generative_ai_data:EnrichmentJobConfiguration",
+          "freeform-tags": "generative_ai_data:dict(str, string)",
+          "defined-tags": "generative_ai_data:dict(str, dict(str, object))"
         }
       },
       "operation": {
@@ -804,12 +814,21 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "freeform-tags": "generative_ai_data:dict(str, string)",
+        "defined-tags": "generative_ai_data:dict(str, dict(str, object))"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
         "callback": "services.generative_ai_data.src.oci_cli_enrichment_job.generated.enrichmentjob_cli.generate_enrichment_job_delta_refresh_enrichment_job_configuration",
         "renames": {
           "enrichment_job_configuration_schema_name": "schema_name"
+        },
+        "complexTypes": {
+          "freeform-tags": "generative_ai_data:dict(str, string)",
+          "defined-tags": "generative_ai_data:dict(str, dict(str, object))",
+          "enrichment-job-configuration-delta-refresh-schedule": "generative_ai_data:object"
         }
       },
       "operation": {
@@ -1146,6 +1165,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "generative_ai_data:dict(str, string)",
+        "defined-tags": "generative_ai_data:dict(str, dict(str, object))"
       },
       "kind": "custom",
       "tier": "A",
@@ -1498,6 +1521,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "database-objects": "generative_ai_data:list[DatabaseObject]",
+        "freeform-tags": "generative_ai_data:dict(str, string)",
+        "defined-tags": "generative_ai_data:dict(str, dict(str, object))"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -1505,6 +1533,11 @@
         "renames": {
           "enrichment_job_configuration_schema_name": "schema_name",
           "enrichment_job_configuration_database_objects": "database_objects"
+        },
+        "complexTypes": {
+          "freeform-tags": "generative_ai_data:dict(str, string)",
+          "defined-tags": "generative_ai_data:dict(str, dict(str, object))",
+          "enrichment-job-configuration-database-objects": "generative_ai_data:list[DatabaseObject]"
         }
       },
       "operation": {
@@ -2451,6 +2484,10 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "freeform-tags": "generative_ai_data:dict(str, string)",
+        "defined-tags": "generative_ai_data:dict(str, dict(str, object))"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -2983,5 +3020,51 @@
         "type": "string"
       }
     ]
+  },
+  "models": {
+    "generative_ai_data": {
+      "DatabaseObject": {
+        "attributes": [
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["name", "str", "name"]
+        ]
+      },
+      "DeltaRefreshEnrichmentJobConfiguration": {
+        "attributes": [
+          ["enrichment_job_type", "str", "enrichmentJobType"],
+          ["schema_name", "str", "schemaName"],
+          ["delta_refresh_schedule", "object", "deltaRefreshSchedule"]
+        ],
+        "discriminator": "EnrichmentJobConfiguration"
+      },
+      "EnrichmentJobConfiguration": {
+        "attributes": [["enrichment_job_type", "str", "enrichmentJobType"]],
+        "discriminator": {
+          "field": "enrichmentJobType",
+          "values": {
+            "DELTA_REFRESH": "DeltaRefreshEnrichmentJobConfiguration",
+            "PARTIAL_BUILD": "PartialBuildEnrichmentJobConfiguration",
+            "FULL_BUILD": "FullBuildEnrichmentJobConfiguration"
+          },
+          "fallback": "EnrichmentJobConfiguration"
+        }
+      },
+      "FullBuildEnrichmentJobConfiguration": {
+        "attributes": [
+          ["enrichment_job_type", "str", "enrichmentJobType"],
+          ["schema_name", "str", "schemaName"]
+        ],
+        "discriminator": "EnrichmentJobConfiguration"
+      },
+      "PartialBuildEnrichmentJobConfiguration": {
+        "attributes": [
+          ["enrichment_job_type", "str", "enrichmentJobType"],
+          ["schema_name", "str", "schemaName"],
+          ["database_objects", "list[DatabaseObject]", "databaseObjects"]
+        ],
+        "discriminator": "EnrichmentJobConfiguration"
+      }
+    }
   }
 }

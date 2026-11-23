@@ -254,6 +254,11 @@
           "performed-actions": "a5196cd0d95b0dddce4281ad51886699040e252aa6d97abaa6b3d8e8b1cd2507"
         }
       },
+      "complexTypes": {
+        "tool-parameters": "generative_ai_agent_runtime:dict(str, string)",
+        "tool-inputs": "generative_ai_agent_runtime:list[ToolInput]",
+        "performed-actions": "generative_ai_agent_runtime:list[PerformedAction]"
+      },
       "kind": "generated",
       "operation": {
         "client": "generative_ai_agent_runtime.generative_ai_agent_runtime",
@@ -578,6 +583,9 @@
         "params": {
           "filters": "e144522b3249a52a5dd70447028b1e5eeaf47064781eb3266de4cac9dc7ffd35"
         }
+      },
+      "complexTypes": {
+        "filters": "generative_ai_agent_runtime:list[MetadataFilter]"
       },
       "kind": "generated",
       "operation": {
@@ -1568,5 +1576,66 @@
         "value": "string"
       }
     ]
+  },
+  "models": {
+    "generative_ai_agent_runtime": {
+      "FunctionCallingPerformedAction": {
+        "attributes": [
+          ["action_id", "str", "actionId"],
+          ["performed_action_type", "str", "performedActionType"],
+          ["function_call_output", "str", "functionCallOutput"]
+        ],
+        "discriminator": "PerformedAction"
+      },
+      "GenericToolInput": {
+        "attributes": [
+          ["tool_id", "str", "toolId"],
+          ["tool_input_type", "str", "toolInputType"],
+          ["input", "object", "input"]
+        ],
+        "discriminator": "ToolInput"
+      },
+      "HumanApprovalPerformedAction": {
+        "attributes": [
+          ["action_id", "str", "actionId"],
+          ["performed_action_type", "str", "performedActionType"],
+          ["chosen_option", "str", "chosenOption"]
+        ],
+        "discriminator": "PerformedAction"
+      },
+      "MetadataFilter": {
+        "attributes": [
+          ["field_name", "str", "fieldName"],
+          ["value", "str", "value"]
+        ]
+      },
+      "PerformedAction": {
+        "attributes": [
+          ["action_id", "str", "actionId"],
+          ["performed_action_type", "str", "performedActionType"]
+        ],
+        "discriminator": {
+          "field": "performedActionType",
+          "values": {
+            "FUNCTION_CALLING_PERFORMED_ACTION": "FunctionCallingPerformedAction",
+            "HUMAN_APPROVAL_PERFORMED_ACTION": "HumanApprovalPerformedAction"
+          },
+          "fallback": "PerformedAction"
+        }
+      },
+      "ToolInput": {
+        "attributes": [
+          ["tool_id", "str", "toolId"],
+          ["tool_input_type", "str", "toolInputType"]
+        ],
+        "discriminator": {
+          "field": "toolInputType",
+          "values": {
+            "GENERIC_TOOL_INPUT": "GenericToolInput"
+          },
+          "fallback": "ToolInput"
+        }
+      }
+    }
   }
 }

@@ -808,11 +808,27 @@
           "secret-generation-context": "60b14ee41c808ae1669f41c1149eb6118f192f19471e5253725eab8e6a44b2a2"
         }
       },
+      "complexTypes": {
+        "defined-tags": "vault:dict(str, dict(str, object))",
+        "freeform-tags": "vault:dict(str, string)",
+        "metadata": "vault:dict(str, object)",
+        "secret-rules": "vault:list[SecretRule]",
+        "secret-generation-context": "vault:SecretGenerationContext"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
         "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.create_secret_base64_secret_content_details",
         "renames": {},
+        "complexTypes": {
+          "defined-tags": "vault:dict(str, dict(str, object))",
+          "freeform-tags": "vault:dict(str, string)",
+          "metadata": "vault:dict(str, object)",
+          "replication-config": "vault:ReplicationConfig",
+          "rotation-config": "vault:RotationConfig",
+          "secret-rules": "vault:list[SecretRule]",
+          "secret-generation-context": "vault:SecretGenerationContext"
+        },
         "checks": [
           {
             "test": {
@@ -2516,6 +2532,16 @@
           "secret-generation-context": "60b14ee41c808ae1669f41c1149eb6118f192f19471e5253725eab8e6a44b2a2"
         }
       },
+      "complexTypes": {
+        "defined-tags": "vault:dict(str, dict(str, object))",
+        "freeform-tags": "vault:dict(str, string)",
+        "metadata": "vault:dict(str, object)",
+        "secret-content": "vault:SecretContentDetails",
+        "replication-config": "vault:ReplicationConfig",
+        "rotation-config": "vault:RotationConfig",
+        "secret-rules": "vault:list[SecretRule]",
+        "secret-generation-context": "vault:SecretGenerationContext"
+      },
       "kind": "generated",
       "operation": {
         "client": "vault.vaults",
@@ -3148,6 +3174,15 @@
           "secret-rules": "102cc0dc695a3b5c70f243f926c8afe8fdcda12de7d262c02c055b0167ce9732",
           "secret-generation-context": "60b14ee41c808ae1669f41c1149eb6118f192f19471e5253725eab8e6a44b2a2"
         }
+      },
+      "complexTypes": {
+        "defined-tags": "vault:dict(str, dict(str, object))",
+        "freeform-tags": "vault:dict(str, string)",
+        "metadata": "vault:dict(str, object)",
+        "replication-config": "vault:ReplicationConfig",
+        "rotation-config": "vault:RotationConfig",
+        "secret-rules": "vault:list[SecretRule]",
+        "secret-generation-context": "vault:SecretGenerationContext"
       },
       "kind": "generated",
       "operation": {
@@ -4671,6 +4706,169 @@
           "targetSystemType": "FUNCTION"
         }
       ]
+    }
+  },
+  "models": {
+    "vault": {
+      "AdbTargetSystemDetails": {
+        "attributes": [
+          ["target_system_type", "str", "targetSystemType"],
+          ["adb_id", "str", "adbId"]
+        ],
+        "discriminator": "TargetSystemDetails"
+      },
+      "Base64SecretContentDetails": {
+        "attributes": [
+          ["content_type", "str", "contentType"],
+          ["name", "str", "name"],
+          ["stage", "str", "stage"],
+          ["content", "str", "content"]
+        ],
+        "discriminator": "SecretContentDetails"
+      },
+      "BytesGenerationContext": {
+        "attributes": [
+          ["generation_type", "str", "generationType"],
+          ["secret_template", "str", "secretTemplate"],
+          ["generation_template", "str", "generationTemplate"]
+        ],
+        "discriminator": "SecretGenerationContext"
+      },
+      "FunctionTargetSystemDetails": {
+        "attributes": [
+          ["target_system_type", "str", "targetSystemType"],
+          ["function_id", "str", "functionId"]
+        ],
+        "discriminator": "TargetSystemDetails"
+      },
+      "PassphraseGenerationContext": {
+        "attributes": [
+          ["generation_type", "str", "generationType"],
+          ["secret_template", "str", "secretTemplate"],
+          ["generation_template", "str", "generationTemplate"],
+          ["passphrase_length", "int", "passphraseLength"]
+        ],
+        "discriminator": "SecretGenerationContext"
+      },
+      "ReplicationConfig": {
+        "attributes": [
+          [
+            "replication_targets",
+            "list[ReplicationTarget]",
+            "replicationTargets"
+          ],
+          ["is_write_forward_enabled", "bool", "isWriteForwardEnabled"]
+        ]
+      },
+      "ReplicationTarget": {
+        "attributes": [
+          ["target_key_id", "str", "targetKeyId"],
+          ["target_region", "str", "targetRegion"],
+          ["target_vault_id", "str", "targetVaultId"]
+        ]
+      },
+      "RotationConfig": {
+        "attributes": [
+          ["rotation_interval", "str", "rotationInterval"],
+          [
+            "target_system_details",
+            "TargetSystemDetails",
+            "targetSystemDetails"
+          ],
+          [
+            "is_scheduled_rotation_enabled",
+            "bool",
+            "isScheduledRotationEnabled"
+          ]
+        ]
+      },
+      "SecretContentDetails": {
+        "attributes": [
+          ["content_type", "str", "contentType"],
+          ["name", "str", "name"],
+          ["stage", "str", "stage"]
+        ],
+        "discriminator": {
+          "field": "contentType",
+          "values": {
+            "BASE64": "Base64SecretContentDetails"
+          },
+          "fallback": "SecretContentDetails"
+        }
+      },
+      "SecretExpiryRule": {
+        "attributes": [
+          ["rule_type", "str", "ruleType"],
+          [
+            "secret_version_expiry_interval",
+            "str",
+            "secretVersionExpiryInterval"
+          ],
+          ["time_of_absolute_expiry", "datetime", "timeOfAbsoluteExpiry"],
+          [
+            "is_secret_content_retrieval_blocked_on_expiry",
+            "bool",
+            "isSecretContentRetrievalBlockedOnExpiry"
+          ]
+        ],
+        "discriminator": "SecretRule"
+      },
+      "SecretGenerationContext": {
+        "attributes": [
+          ["generation_type", "str", "generationType"],
+          ["secret_template", "str", "secretTemplate"]
+        ],
+        "discriminator": {
+          "field": "generationType",
+          "values": {
+            "PASSPHRASE": "PassphraseGenerationContext",
+            "SSH_KEY": "SshKeyGenerationContext",
+            "BYTES": "BytesGenerationContext"
+          },
+          "fallback": "SecretGenerationContext"
+        }
+      },
+      "SecretReuseRule": {
+        "attributes": [
+          ["rule_type", "str", "ruleType"],
+          [
+            "is_enforced_on_deleted_secret_versions",
+            "bool",
+            "isEnforcedOnDeletedSecretVersions"
+          ]
+        ],
+        "discriminator": "SecretRule"
+      },
+      "SecretRule": {
+        "attributes": [["rule_type", "str", "ruleType"]],
+        "discriminator": {
+          "field": "ruleType",
+          "values": {
+            "SECRET_EXPIRY_RULE": "SecretExpiryRule",
+            "SECRET_REUSE_RULE": "SecretReuseRule"
+          },
+          "fallback": "SecretRule"
+        }
+      },
+      "SshKeyGenerationContext": {
+        "attributes": [
+          ["generation_type", "str", "generationType"],
+          ["secret_template", "str", "secretTemplate"],
+          ["generation_template", "str", "generationTemplate"]
+        ],
+        "discriminator": "SecretGenerationContext"
+      },
+      "TargetSystemDetails": {
+        "attributes": [["target_system_type", "str", "targetSystemType"]],
+        "discriminator": {
+          "field": "targetSystemType",
+          "values": {
+            "ADB": "AdbTargetSystemDetails",
+            "FUNCTION": "FunctionTargetSystemDetails"
+          },
+          "fallback": "TargetSystemDetails"
+        }
+      }
     }
   }
 }

@@ -560,6 +560,9 @@
           "network-endpoint-details": "c12322b734cbbb4663829092141bece75fee5edec86dee93cc03935d36085c41"
         }
       },
+      "complexTypes": {
+        "network-endpoint-details": "analytics:NetworkEndpointDetails"
+      },
       "kind": "generated",
       "operation": {
         "client": "analytics.analytics",
@@ -910,6 +913,11 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a"
         }
       },
+      "complexTypes": {
+        "network-endpoint-details": "analytics:NetworkEndpointDetails",
+        "defined-tags": "analytics:dict(str, dict(str, object))",
+        "freeform-tags": "analytics:dict(str, string)"
+      },
       "kind": "custom",
       "tier": "B",
       "patterns": ["kwargs-del", "fold-body", "json-dumps", "file-read"],
@@ -1010,6 +1018,12 @@
       },
       "generated": {
         "callback": "services.analytics.src.oci_cli_analytics.generated.analytics_cli.create_analytics_instance",
+        "complexTypes": {
+          "capacity": "analytics:Capacity",
+          "network-endpoint-details": "analytics:NetworkEndpointDetails",
+          "defined-tags": "analytics:dict(str, dict(str, object))",
+          "freeform-tags": "analytics:dict(str, string)"
+        },
         "params": [
           {
             "name": "name",
@@ -1790,6 +1804,11 @@
           "network-security-group-ids": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
       },
+      "complexTypes": {
+        "private-source-dns-zones": "analytics:list[PrivateSourceDnsZone]",
+        "private-source-scan-hosts": "analytics:list[PrivateSourceScanHost]",
+        "network-security-group-ids": "analytics:list[string]"
+      },
       "kind": "generated",
       "operation": {
         "client": "analytics.analytics",
@@ -2511,6 +2530,9 @@
           "hosts": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
       },
+      "complexTypes": {
+        "hosts": "analytics:list[string]"
+      },
       "kind": "custom",
       "tier": "B",
       "patterns": ["file-read"],
@@ -2589,6 +2611,9 @@
       },
       "generated": {
         "callback": "services.analytics.src.oci_cli_analytics.generated.analytics_cli.create_vanity_url",
+        "complexTypes": {
+          "hosts": "analytics:list[string]"
+        },
         "params": [
           {
             "name": "analytics_instance_id",
@@ -5435,6 +5460,9 @@
           "capacity": "68d8c5ff7710a4c11532e37c70cd604cdafbd00be172a52aa7ec913536ed90b7"
         }
       },
+      "complexTypes": {
+        "capacity": "analytics:Capacity"
+      },
       "kind": "generated",
       "operation": {
         "client": "analytics.analytics",
@@ -6781,6 +6809,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a"
         }
       },
+      "complexTypes": {
+        "defined-tags": "analytics:dict(str, dict(str, object))",
+        "freeform-tags": "analytics:dict(str, string)"
+      },
       "kind": "generated",
       "operation": {
         "client": "analytics.analytics",
@@ -7248,6 +7280,11 @@
           "private-source-scan-hosts": "da12bb2e0156ffabfc2c6fc325fb5a53dcac4d21f56c97d4f1662218c627a2b9",
           "network-security-group-ids": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
+      },
+      "complexTypes": {
+        "private-source-dns-zones": "analytics:list[PrivateSourceDnsZone]",
+        "private-source-scan-hosts": "analytics:list[PrivateSourceScanHost]",
+        "network-security-group-ids": "analytics:list[string]"
       },
       "kind": "generated",
       "operation": {
@@ -8185,6 +8222,7 @@
       },
       "generated": {
         "callback": "services.analytics.src.oci_cli_analytics.generated.analytics_cli.update_vanity_url",
+        "complexTypes": {},
         "params": [
           {
             "name": "analytics_instance_id",
@@ -9863,6 +9901,64 @@
     "68d8c5ff7710a4c11532e37c70cd604cdafbd00be172a52aa7ec913536ed90b7": {
       "capacityType": "string",
       "capacityValue": 0
+    }
+  },
+  "models": {
+    "analytics": {
+      "Capacity": {
+        "attributes": [
+          ["capacity_type", "str", "capacityType"],
+          ["capacity_value", "int", "capacityValue"]
+        ]
+      },
+      "NetworkEndpointDetails": {
+        "attributes": [["network_endpoint_type", "str", "networkEndpointType"]],
+        "discriminator": {
+          "field": "networkEndpointType",
+          "values": {
+            "PRIVATE": "PrivateEndpointDetails",
+            "PUBLIC": "PublicEndpointDetails"
+          },
+          "fallback": "NetworkEndpointDetails"
+        }
+      },
+      "PrivateEndpointDetails": {
+        "attributes": [
+          ["network_endpoint_type", "str", "networkEndpointType"],
+          ["vcn_id", "str", "vcnId"],
+          ["subnet_id", "str", "subnetId"],
+          ["network_security_group_ids", "list[str]", "networkSecurityGroupIds"]
+        ],
+        "discriminator": "NetworkEndpointDetails"
+      },
+      "PrivateSourceDnsZone": {
+        "attributes": [
+          ["dns_zone", "str", "dnsZone"],
+          ["description", "str", "description"]
+        ]
+      },
+      "PrivateSourceScanHost": {
+        "attributes": [
+          ["scan_hostname", "str", "scanHostname"],
+          ["scan_port", "int", "scanPort"],
+          ["description", "str", "description"]
+        ]
+      },
+      "PublicEndpointDetails": {
+        "attributes": [
+          ["network_endpoint_type", "str", "networkEndpointType"],
+          ["whitelisted_ips", "list[str]", "whitelistedIps"],
+          ["whitelisted_vcns", "list[VirtualCloudNetwork]", "whitelistedVcns"],
+          ["whitelisted_services", "list[str]", "whitelistedServices"]
+        ],
+        "discriminator": "NetworkEndpointDetails"
+      },
+      "VirtualCloudNetwork": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["whitelisted_ips", "list[str]", "whitelistedIps"]
+        ]
+      }
     }
   }
 }

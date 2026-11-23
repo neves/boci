@@ -27,9 +27,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sdk  # noqa: E402
 import patterns as tier_b  # noqa: E402
 import program as wrapper_compiler  # noqa: E402
+import models  # noqa: E402
 
 CLIENTS = None  # collects SDK clients used while flattening one service
 JSON_EXAMPLE_POOL = None  # deduplicates exact complex skeletons within one service
+MODELS = None  # SDK models key camelization reaches within one service (ticket 19)
 SPEC_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "spec")
 
 
@@ -176,6 +178,11 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
         examples = json_examples(cmd, ctx)
         if examples is not None:
             entry["jsonExamples"] = examples
+        own_types = models.complex_types(cmd.callback)
+        if own_types:
+            entry["complexTypes"] = models.compact(own_types)
+            if MODELS is not None:
+                models.collect(own_types, MODELS)
         # Generated = callback lives in a services.*.generated module (see GLOSSARY: Generated command).
         entry["kind"] = "generated" if cmd.callback and ".generated." in cmd.callback.__module__ else "custom"
         if entry["kind"] == "generated" and CLIENTS is not None:
@@ -217,6 +224,11 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                     "callback": delegate["callback"],
                     "renames": delegate["renames"],
                 }
+                # The delegated command parses its complex params by its own metadata.
+                delegated_types = models.complex_types(models.callback_named(delegate["callback"]))
+                if delegated_types != own_types:
+                    entry["delegate"]["complexTypes"] = models.compact(delegated_types)
+                    models.collect(delegated_types, MODELS)
                 for field in ("blankChecks", "checks", "wrapExceptions"):
                     if field in delegate:
                         entry["delegate"][field] = delegate[field]
@@ -256,8 +268,12 @@ def generated_target(invoked, client_map) -> dict | None:
     if operation is None:
         return None
     names = {p.name for p in invoked.params}
+    # The invoked command parses its complex params by its own metadata (ticket 19).
+    invoked_types = models.complex_types(invoked.callback)
+    models.collect(invoked_types, MODELS)
     generated = {
         "callback": f"{invoked.callback.__module__}.{invoked.callback.__qualname__}",
+        "complexTypes": models.compact(invoked_types),
         # What the program's kwargs must match, and what the Engine's request code reads.
         "params": [
             {
@@ -278,16 +294,7 @@ def generated_target(invoked, client_map) -> dict | None:
 
 def json_examples(cmd: click.Command, ctx: click.Context) -> dict | None:
     """Capture the pinned CLI's JSON skeletons while its SDK models are loaded."""
-    callback = cmd.callback
-    metadata = None
-    while callback is not None:
-        closure = getattr(callback, "__closure__", None)
-        if closure:
-            values = dict(zip(callback.__code__.co_freevars, (cell.cell_contents for cell in closure)))
-            if "input_params_to_complex_types" in values:
-                metadata = values["input_params_to_complex_types"]
-                break
-        callback = getattr(callback, "__wrapped__", None)
+    metadata = models.complex_types(cmd.callback)
     if metadata is None:
         return None
 
@@ -329,10 +336,11 @@ def json_examples(cmd: click.Command, ctx: click.Context) -> dict | None:
 
 
 def service_spec(name: str, cmd: click.Command) -> dict:
-    global CLIENTS, JSON_EXAMPLE_POOL
+    global CLIENTS, JSON_EXAMPLE_POOL, MODELS
     groups, commands = {}, {}
     CLIENTS = {}
     JSON_EXAMPLE_POOL = {}
+    MODELS = {}
     root_ctx = click.Context(load_root(), info_name="oci")
     ctx = click.Context(cmd, info_name=name, parent=root_ctx)
     flatten(cmd, [], groups, commands, ctx)
@@ -361,7 +369,7 @@ def service_spec(name: str, cmd: click.Command) -> dict:
     if isinstance(cmd, click.Group):
         top["params"] = [param_spec(p) for p in cmd.params]
     top["helpDoc"] = help_doc(cmd, ctx)
-    return {"service": name, "top": top, "clients": clients, "groups": groups, "commands": commands, "jsonExamplePool": JSON_EXAMPLE_POOL}
+    return {"service": name, "top": top, "clients": clients, "groups": groups, "commands": commands, "jsonExamplePool": JSON_EXAMPLE_POOL, "models": {m: dict(sorted(c.items())) for m, c in sorted(MODELS.items())}}
 
 
 def kind_counts(spec: dict) -> dict:

@@ -321,6 +321,10 @@
           "contacts": "eb79b029e91f32b133af5e677c5e0ec48c2c216edc7e07761b6bc3875bd26796"
         }
       },
+      "complexTypes": {
+        "ticket": "cims:CreateTicketDetails",
+        "contacts": "cims:list[Contact]"
+      },
       "kind": "custom",
       "tier": "B",
       "patterns": ["fold-body", "json-dumps"],
@@ -410,6 +414,10 @@
       },
       "generated": {
         "callback": "services.cims.src.oci_cli_incident.generated.incident_cli.create_incident",
+        "complexTypes": {
+          "ticket": "cims:CreateTicketDetails",
+          "contacts": "cims:list[Contact]"
+        },
         "params": [
           {
             "name": "compartment_id",
@@ -2325,6 +2333,9 @@
           "ticket": "aa107223f085a15ca29055717202ff7ead89f22c2920a01195dc86f2c22b4ff5"
         }
       },
+      "complexTypes": {
+        "ticket": "cims:UpdateTicketDetails"
+      },
       "kind": "custom",
       "tier": "B",
       "patterns": ["raise-other", "fold-body", "json-dumps"],
@@ -2545,6 +2556,9 @@
       },
       "generated": {
         "callback": "services.cims.src.oci_cli_incident.generated.incident_cli.update_incident",
+        "complexTypes": {
+          "ticket": "cims:UpdateTicketDetails"
+        },
         "params": [
           {
             "name": "incident_key",
@@ -3610,6 +3624,9 @@
           "ticket": "aa107223f085a15ca29055717202ff7ead89f22c2920a01195dc86f2c22b4ff5"
         }
       },
+      "complexTypes": {
+        "ticket": "cims:UpdateTicketDetails"
+      },
       "kind": "generated",
       "operation": {
         "client": "cims.incident",
@@ -4405,6 +4422,105 @@
       "resource": {
         "string1": "string",
         "string2": "string"
+      }
+    }
+  },
+  "models": {
+    "cims": {
+      "Contact": {
+        "attributes": [
+          ["contact_name", "str", "contactName"],
+          ["contact_email", "str", "contactEmail"],
+          ["email", "str", "email"],
+          ["contact_phone", "str", "contactPhone"],
+          ["contact_type", "str", "contactType"]
+        ]
+      },
+      "ContextualData": {
+        "attributes": [
+          ["client_id", "str", "clientId"],
+          ["schema_name", "str", "schemaName"],
+          ["schema_version", "str", "schemaVersion"],
+          ["payload", "str", "payload"]
+        ]
+      },
+      "CreateAccountItemDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["category", "CreateCategoryDetails", "category"],
+          ["sub_category", "CreateSubCategoryDetails", "subCategory"],
+          ["issue_type", "CreateIssueTypeDetails", "issueType"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": "CreateItemDetails"
+      },
+      "CreateCategoryDetails": {
+        "attributes": [["category_key", "str", "categoryKey"]]
+      },
+      "CreateIssueTypeDetails": {
+        "attributes": [["issue_type_key", "str", "issueTypeKey"]]
+      },
+      "CreateItemDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["category", "CreateCategoryDetails", "category"],
+          ["sub_category", "CreateSubCategoryDetails", "subCategory"],
+          ["issue_type", "CreateIssueTypeDetails", "issueType"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "tech": "CreateTechSupportItemDetails",
+            "limit": "CreateLimitItemDetails",
+            "account": "CreateAccountItemDetails"
+          },
+          "fallback": "CreateItemDetails"
+        }
+      },
+      "CreateLimitItemDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["category", "CreateCategoryDetails", "category"],
+          ["sub_category", "CreateSubCategoryDetails", "subCategory"],
+          ["issue_type", "CreateIssueTypeDetails", "issueType"],
+          ["name", "str", "name"],
+          ["current_limit", "int", "currentLimit"],
+          ["current_usage", "int", "currentUsage"],
+          ["requested_limit", "int", "requestedLimit"]
+        ],
+        "discriminator": "CreateItemDetails"
+      },
+      "CreateResourceDetails": {
+        "attributes": [
+          ["item", "CreateItemDetails", "item"],
+          ["region", "str", "region"]
+        ]
+      },
+      "CreateSubCategoryDetails": {
+        "attributes": [["sub_category_key", "str", "subCategoryKey"]]
+      },
+      "CreateTechSupportItemDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["category", "CreateCategoryDetails", "category"],
+          ["sub_category", "CreateSubCategoryDetails", "subCategory"],
+          ["issue_type", "CreateIssueTypeDetails", "issueType"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": "CreateItemDetails"
+      },
+      "CreateTicketDetails": {
+        "attributes": [
+          ["severity", "str", "severity"],
+          ["resource_list", "list[CreateResourceDetails]", "resourceList"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["contextual_data", "ContextualData", "contextualData"]
+        ]
+      },
+      "UpdateTicketDetails": {
+        "attributes": [["resource", "object", "resource"]]
       }
     }
   }

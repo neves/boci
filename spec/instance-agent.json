@@ -908,6 +908,10 @@
           "content": "a8d521a12f63832ca21c7134ec3ebf036704eaee353ef265c79c5b4836b64d57"
         }
       },
+      "complexTypes": {
+        "target": "compute_instance_agent:InstanceAgentCommandTarget",
+        "content": "compute_instance_agent:InstanceAgentCommandContent"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -2726,6 +2730,88 @@
           "textSha256": "string"
         }
       ]
+    }
+  },
+  "models": {
+    "compute_instance_agent": {
+      "InstanceAgentCommandContent": {
+        "attributes": [
+          ["source", "InstanceAgentCommandSourceDetails", "source"],
+          ["output", "InstanceAgentCommandOutputDetails", "output"],
+          ["command_string", "str", "commandString"]
+        ]
+      },
+      "InstanceAgentCommandOutputDetails": {
+        "attributes": [["output_type", "str", "outputType"]],
+        "discriminator": {
+          "field": "outputType",
+          "values": {
+            "OBJECT_STORAGE_URI": "InstanceAgentCommandOutputViaObjectStorageUriDetails",
+            "OBJECT_STORAGE_TUPLE": "InstanceAgentCommandOutputViaObjectStorageTupleDetails",
+            "TEXT": "InstanceAgentCommandOutputViaTextDetails"
+          },
+          "fallback": "InstanceAgentCommandOutputDetails"
+        }
+      },
+      "InstanceAgentCommandOutputViaObjectStorageTupleDetails": {
+        "attributes": [
+          ["output_type", "str", "outputType"],
+          ["bucket_name", "str", "bucketName"],
+          ["namespace_name", "str", "namespaceName"],
+          ["object_name", "str", "objectName"]
+        ],
+        "discriminator": "InstanceAgentCommandOutputDetails"
+      },
+      "InstanceAgentCommandOutputViaObjectStorageUriDetails": {
+        "attributes": [
+          ["output_type", "str", "outputType"],
+          ["output_uri", "str", "outputUri"]
+        ],
+        "discriminator": "InstanceAgentCommandOutputDetails"
+      },
+      "InstanceAgentCommandOutputViaTextDetails": {
+        "attributes": [["output_type", "str", "outputType"]],
+        "discriminator": "InstanceAgentCommandOutputDetails"
+      },
+      "InstanceAgentCommandSourceDetails": {
+        "attributes": [["source_type", "str", "sourceType"]],
+        "discriminator": {
+          "field": "sourceType",
+          "values": {
+            "OBJECT_STORAGE_TUPLE": "InstanceAgentCommandSourceViaObjectStorageTupleDetails",
+            "OBJECT_STORAGE_URI": "InstanceAgentCommandSourceViaObjectStorageUriDetails",
+            "TEXT": "InstanceAgentCommandSourceViaTextDetails"
+          },
+          "fallback": "InstanceAgentCommandSourceDetails"
+        }
+      },
+      "InstanceAgentCommandSourceViaObjectStorageTupleDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["bucket_name", "str", "bucketName"],
+          ["namespace_name", "str", "namespaceName"],
+          ["object_name", "str", "objectName"]
+        ],
+        "discriminator": "InstanceAgentCommandSourceDetails"
+      },
+      "InstanceAgentCommandSourceViaObjectStorageUriDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["source_uri", "str", "sourceUri"]
+        ],
+        "discriminator": "InstanceAgentCommandSourceDetails"
+      },
+      "InstanceAgentCommandSourceViaTextDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["text", "str", "text"],
+          ["text_sha256", "str", "textSha256"]
+        ],
+        "discriminator": "InstanceAgentCommandSourceDetails"
+      },
+      "InstanceAgentCommandTarget": {
+        "attributes": [["instance_id", "str", "instanceId"]]
+      }
     }
   }
 }

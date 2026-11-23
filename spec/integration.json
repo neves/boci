@@ -886,6 +886,9 @@
           "network-endpoint-details": "4553d540173d5f9f0795cb42a3898d4b1445b7c7dea1616f28b4e346a84fc275"
         }
       },
+      "complexTypes": {
+        "network-endpoint-details": "integration:NetworkEndpointDetails"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -1172,6 +1175,9 @@
         "params": {
           "private-endpoint-outbound-connection": "a11451616877399cef8b794d5c1c9ae454a16ca866931aba42cb4f25bb976089"
         }
+      },
+      "complexTypes": {
+        "private-endpoint-outbound-connection": "integration:OutboundConnection"
       },
       "kind": "generated",
       "operation": {
@@ -1724,6 +1730,9 @@
         "params": {
           "private-endpoint-outbound-connection-nsg-ids": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
+      },
+      "complexTypes": {
+        "private-endpoint-outbound-connection-nsg-ids": "integration:list[string]"
       },
       "kind": "generated",
       "operation": {
@@ -2469,12 +2478,27 @@
           "network-endpoint-details": "4553d540173d5f9f0795cb42a3898d4b1445b7c7dea1616f28b4e346a84fc275"
         }
       },
+      "complexTypes": {
+        "freeform-tags": "integration:dict(str, string)",
+        "defined-tags": "integration:dict(str, dict(str, object))",
+        "custom-endpoint": "integration:CreateCustomEndpointDetails",
+        "alternate-custom-endpoints": "integration:list[CreateCustomEndpointDetails]",
+        "network-endpoint-details": "integration:NetworkEndpointDetails"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
         "callback": "services.integration.src.oci_cli_integration_instance.generated.integrationinstance_cli.create_integration_instance",
         "renames": {
           "integration_instance_type": "type"
+        },
+        "complexTypes": {
+          "freeform-tags": "integration:dict(str, string)",
+          "defined-tags": "integration:dict(str, dict(str, object))",
+          "security-attributes": "integration:dict(str, dict(str, object))",
+          "custom-endpoint": "integration:CreateCustomEndpointDetails",
+          "alternate-custom-endpoints": "integration:list[CreateCustomEndpointDetails]",
+          "network-endpoint-details": "integration:NetworkEndpointDetails"
         }
       },
       "operation": {
@@ -5698,6 +5722,12 @@
           "alternate-custom-endpoints": "bcdedefc5ceaa5f059091fb3a343718b7a56bad344159bc7cf85712c7b2aa485"
         }
       },
+      "complexTypes": {
+        "freeform-tags": "integration:dict(str, string)",
+        "defined-tags": "integration:dict(str, dict(str, object))",
+        "custom-endpoint": "integration:UpdateCustomEndpointDetails",
+        "alternate-custom-endpoints": "integration:list[UpdateCustomEndpointDetails]"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -5705,6 +5735,13 @@
         "renames": {
           "integration_instance_id": "id",
           "integration_instance_type": "type"
+        },
+        "complexTypes": {
+          "freeform-tags": "integration:dict(str, string)",
+          "defined-tags": "integration:dict(str, dict(str, object))",
+          "security-attributes": "integration:dict(str, dict(str, object))",
+          "custom-endpoint": "integration:UpdateCustomEndpointDetails",
+          "alternate-custom-endpoints": "integration:list[UpdateCustomEndpointDetails]"
         }
       },
       "operation": {
@@ -7243,5 +7280,98 @@
         "hostname": "string"
       }
     ]
+  },
+  "models": {
+    "integration": {
+      "ComponentAllowListDetails": {
+        "attributes": [
+          ["allowlisted_http_ips", "list[str]", "allowlistedHttpIps"],
+          [
+            "allowlisted_http_vcns",
+            "list[VirtualCloudNetwork]",
+            "allowlistedHttpVcns"
+          ]
+        ]
+      },
+      "CreateCustomEndpointDetails": {
+        "attributes": [
+          ["hostname", "str", "hostname"],
+          ["certificate_secret_id", "str", "certificateSecretId"]
+        ]
+      },
+      "NetworkEndpointDetails": {
+        "attributes": [["network_endpoint_type", "str", "networkEndpointType"]],
+        "discriminator": {
+          "field": "networkEndpointType",
+          "values": {
+            "PUBLIC": "PublicEndpointDetails"
+          },
+          "fallback": "NetworkEndpointDetails"
+        }
+      },
+      "NoneOutboundConnection": {
+        "attributes": [
+          ["outbound_connection_type", "str", "outboundConnectionType"]
+        ],
+        "discriminator": "OutboundConnection"
+      },
+      "OutboundConnection": {
+        "attributes": [
+          ["outbound_connection_type", "str", "outboundConnectionType"]
+        ],
+        "discriminator": {
+          "field": "outboundConnectionType",
+          "values": {
+            "PRIVATE_ENDPOINT": "PrivateEndpointOutboundConnection",
+            "NONE": "NoneOutboundConnection"
+          },
+          "fallback": "OutboundConnection"
+        }
+      },
+      "PrivateEndpointOutboundConnection": {
+        "attributes": [
+          ["outbound_connection_type", "str", "outboundConnectionType"],
+          ["subnet_id", "str", "subnetId"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          [
+            "is_all_outbound_traffic_private",
+            "bool",
+            "isAllOutboundTrafficPrivate"
+          ]
+        ],
+        "discriminator": "OutboundConnection"
+      },
+      "PublicEndpointDetails": {
+        "attributes": [
+          ["network_endpoint_type", "str", "networkEndpointType"],
+          ["allowlisted_http_ips", "list[str]", "allowlistedHttpIps"],
+          [
+            "allowlisted_http_vcns",
+            "list[VirtualCloudNetwork]",
+            "allowlistedHttpVcns"
+          ],
+          ["runtime", "ComponentAllowListDetails", "runtime"],
+          ["design_time", "ComponentAllowListDetails", "designTime"],
+          [
+            "is_integration_vcn_allowlisted",
+            "bool",
+            "isIntegrationVcnAllowlisted"
+          ]
+        ],
+        "discriminator": "NetworkEndpointDetails"
+      },
+      "UpdateCustomEndpointDetails": {
+        "attributes": [
+          ["hostname", "str", "hostname"],
+          ["certificate_secret_id", "str", "certificateSecretId"]
+        ]
+      },
+      "VirtualCloudNetwork": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["allowlisted_ips", "list[str]", "allowlistedIps"]
+        ]
+      }
+    }
   }
 }

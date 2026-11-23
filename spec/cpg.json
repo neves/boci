@@ -768,6 +768,12 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "placement-instruction": "cluster_placement_groups:PlacementInstructionDetails",
+        "capabilities": "cluster_placement_groups:CapabilitiesCollection",
+        "freeform-tags": "cluster_placement_groups:dict(str, string)",
+        "defined-tags": "cluster_placement_groups:dict(str, dict(str, object))"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -2358,6 +2364,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "cluster_placement_groups:dict(str, string)",
+        "defined-tags": "cluster_placement_groups:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -4032,6 +4042,50 @@
       "tagNamespace2": {
         "tagKey1": "tagValue1",
         "tagKey2": "tagValue2"
+      }
+    }
+  },
+  "models": {
+    "cluster_placement_groups": {
+      "AdditionalCapabilityDetails": {
+        "attributes": [["service_type", "str", "serviceType"]],
+        "discriminator": {
+          "field": "serviceType",
+          "values": {
+            "COMPUTE": "AdditionalComputeCapabilityDetails"
+          },
+          "fallback": "AdditionalCapabilityDetails"
+        }
+      },
+      "AdditionalComputeCapabilityDetails": {
+        "attributes": [
+          ["service_type", "str", "serviceType"],
+          ["memory_in_gbs", "float", "memoryInGBs"],
+          ["ocpus", "float", "ocpus"],
+          ["nvmes", "int", "nvmes"],
+          ["count", "int", "count"]
+        ],
+        "discriminator": "AdditionalCapabilityDetails"
+      },
+      "CapabilitiesCollection": {
+        "attributes": [["items", "list[CapabilityDetails]", "items"]]
+      },
+      "CapabilityDetails": {
+        "attributes": [
+          ["service", "str", "service"],
+          ["name", "str", "name"],
+          [
+            "additional_details",
+            "AdditionalCapabilityDetails",
+            "additionalDetails"
+          ]
+        ]
+      },
+      "PlacementInstructionDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["value", "str", "value"]
+        ]
       }
     }
   }

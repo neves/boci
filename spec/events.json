@@ -382,6 +382,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "actions": "events:ActionDetailsList",
+        "freeform-tags": "events:dict(str, string)",
+        "defined-tags": "events:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "events.events",
@@ -1586,6 +1591,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "actions": "events:ActionDetailsList",
+        "freeform-tags": "events:dict(str, string)",
+        "defined-tags": "events:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "events.events",
@@ -2012,6 +2022,56 @@
       "tagNamespace2": {
         "tagKey1": "tagValue1",
         "tagKey2": "tagValue2"
+      }
+    }
+  },
+  "models": {
+    "events": {
+      "ActionDetails": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"]
+        ],
+        "discriminator": {
+          "field": "actionType",
+          "values": {
+            "OSS": "CreateStreamingServiceActionDetails",
+            "FAAS": "CreateFaaSActionDetails",
+            "ONS": "CreateNotificationServiceActionDetails"
+          },
+          "fallback": "ActionDetails"
+        }
+      },
+      "ActionDetailsList": {
+        "attributes": [["actions", "list[ActionDetails]", "actions"]]
+      },
+      "CreateFaaSActionDetails": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"],
+          ["function_id", "str", "functionId"]
+        ],
+        "discriminator": "ActionDetails"
+      },
+      "CreateNotificationServiceActionDetails": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"],
+          ["topic_id", "str", "topicId"]
+        ],
+        "discriminator": "ActionDetails"
+      },
+      "CreateStreamingServiceActionDetails": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"],
+          ["stream_id", "str", "streamId"]
+        ],
+        "discriminator": "ActionDetails"
       }
     }
   }

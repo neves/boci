@@ -844,6 +844,13 @@
           "network-endpoint-details": "d92af308052ae677d8dcd5078fd5dcff97bb9066f8b1865dd3db5628640ec512"
         }
       },
+      "complexTypes": {
+        "freeform-tags": "visual_builder:dict(str, string)",
+        "defined-tags": "visual_builder:dict(str, dict(str, object))",
+        "custom-endpoint": "visual_builder:CreateCustomEndpointDetails",
+        "alternate-custom-endpoints": "visual_builder:list[CreateCustomEndpointDetails]",
+        "network-endpoint-details": "visual_builder:NetworkEndpointDetails"
+      },
       "kind": "generated",
       "operation": {
         "client": "visual_builder.vb_instance",
@@ -1375,6 +1382,13 @@
           "alternate-custom-endpoints": "bcdedefc5ceaa5f059091fb3a343718b7a56bad344159bc7cf85712c7b2aa485",
           "network-endpoint-details-network-security-group-ids": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "visual_builder:dict(str, string)",
+        "defined-tags": "visual_builder:dict(str, dict(str, object))",
+        "custom-endpoint": "visual_builder:CreateCustomEndpointDetails",
+        "alternate-custom-endpoints": "visual_builder:list[CreateCustomEndpointDetails]",
+        "network-endpoint-details-network-security-group-ids": "visual_builder:list[string]"
       },
       "kind": "generated",
       "operation": {
@@ -1966,6 +1980,14 @@
           "network-endpoint-details-allowlisted-http-ips": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604",
           "network-endpoint-details-allowlisted-http-vcns": "830862d95c5c87ca1337ecd26488feb05ce25b61f9a638486ec95031c4944eb4"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "visual_builder:dict(str, string)",
+        "defined-tags": "visual_builder:dict(str, dict(str, object))",
+        "custom-endpoint": "visual_builder:CreateCustomEndpointDetails",
+        "alternate-custom-endpoints": "visual_builder:list[CreateCustomEndpointDetails]",
+        "network-endpoint-details-allowlisted-http-ips": "visual_builder:list[string]",
+        "network-endpoint-details-allowlisted-http-vcns": "visual_builder:list[VirtualCloudNetwork]"
       },
       "kind": "generated",
       "operation": {
@@ -4038,6 +4060,13 @@
           "network-endpoint-details": "05f6ecf234867d3654f9a8f9b6710376a2bd6f706b6dffc66ed144040f206812"
         }
       },
+      "complexTypes": {
+        "freeform-tags": "visual_builder:dict(str, string)",
+        "defined-tags": "visual_builder:dict(str, dict(str, object))",
+        "custom-endpoint": "visual_builder:UpdateCustomEndpointDetails",
+        "alternate-custom-endpoints": "visual_builder:list[UpdateCustomEndpointDetails]",
+        "network-endpoint-details": "visual_builder:UpdateNetworkEndpointDetails"
+      },
       "kind": "custom",
       "tier": "A",
       "delegate": {
@@ -4594,6 +4623,13 @@
           "alternate-custom-endpoints": "bcdedefc5ceaa5f059091fb3a343718b7a56bad344159bc7cf85712c7b2aa485",
           "network-endpoint-details-network-security-group-ids": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "visual_builder:dict(str, string)",
+        "defined-tags": "visual_builder:dict(str, dict(str, object))",
+        "custom-endpoint": "visual_builder:UpdateCustomEndpointDetails",
+        "alternate-custom-endpoints": "visual_builder:list[UpdateCustomEndpointDetails]",
+        "network-endpoint-details-network-security-group-ids": "visual_builder:list[string]"
       },
       "kind": "generated",
       "operation": {
@@ -5185,6 +5221,14 @@
           "network-endpoint-details-allowlisted-http-ips": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604",
           "network-endpoint-details-allowlisted-http-vcns": "830862d95c5c87ca1337ecd26488feb05ce25b61f9a638486ec95031c4944eb4"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "visual_builder:dict(str, string)",
+        "defined-tags": "visual_builder:dict(str, dict(str, object))",
+        "custom-endpoint": "visual_builder:UpdateCustomEndpointDetails",
+        "alternate-custom-endpoints": "visual_builder:list[UpdateCustomEndpointDetails]",
+        "network-endpoint-details-allowlisted-http-ips": "visual_builder:list[string]",
+        "network-endpoint-details-allowlisted-http-vcns": "visual_builder:list[VirtualCloudNetwork]"
       },
       "kind": "generated",
       "operation": {
@@ -6700,5 +6744,94 @@
         "networkEndpointType": "PUBLIC"
       }
     ]
+  },
+  "models": {
+    "visual_builder": {
+      "CreateCustomEndpointDetails": {
+        "attributes": [
+          ["hostname", "str", "hostname"],
+          ["certificate_secret_id", "str", "certificateSecretId"]
+        ]
+      },
+      "NetworkEndpointDetails": {
+        "attributes": [["network_endpoint_type", "str", "networkEndpointType"]],
+        "discriminator": {
+          "field": "networkEndpointType",
+          "values": {
+            "PRIVATE": "PrivateEndpointDetails",
+            "PUBLIC": "PublicEndpointDetails"
+          },
+          "fallback": "NetworkEndpointDetails"
+        }
+      },
+      "PrivateEndpointDetails": {
+        "attributes": [
+          ["network_endpoint_type", "str", "networkEndpointType"],
+          ["subnet_id", "str", "subnetId"],
+          [
+            "network_security_group_ids",
+            "list[str]",
+            "networkSecurityGroupIds"
+          ],
+          ["private_endpoint_ip", "str", "privateEndpointIp"]
+        ],
+        "discriminator": "NetworkEndpointDetails"
+      },
+      "PublicEndpointDetails": {
+        "attributes": [
+          ["network_endpoint_type", "str", "networkEndpointType"],
+          ["allowlisted_http_ips", "list[str]", "allowlistedHttpIps"],
+          [
+            "allowlisted_http_vcns",
+            "list[VirtualCloudNetwork]",
+            "allowlistedHttpVcns"
+          ]
+        ],
+        "discriminator": "NetworkEndpointDetails"
+      },
+      "UpdateCustomEndpointDetails": {
+        "attributes": [
+          ["hostname", "str", "hostname"],
+          ["certificate_secret_id", "str", "certificateSecretId"]
+        ]
+      },
+      "UpdateNetworkEndpointDetails": {
+        "attributes": [["network_endpoint_type", "str", "networkEndpointType"]],
+        "discriminator": {
+          "field": "networkEndpointType",
+          "values": {
+            "PUBLIC": "UpdatePublicEndpointDetails",
+            "PRIVATE": "UpdatePrivateEndpointDetails"
+          },
+          "fallback": "UpdateNetworkEndpointDetails"
+        }
+      },
+      "UpdatePrivateEndpointDetails": {
+        "attributes": [
+          ["network_endpoint_type", "str", "networkEndpointType"],
+          ["subnet_id", "str", "subnetId"],
+          ["network_security_group_ids", "list[str]", "networkSecurityGroupIds"]
+        ],
+        "discriminator": "UpdateNetworkEndpointDetails"
+      },
+      "UpdatePublicEndpointDetails": {
+        "attributes": [
+          ["network_endpoint_type", "str", "networkEndpointType"],
+          ["allowlisted_http_ips", "list[str]", "allowlistedHttpIps"],
+          [
+            "allowlisted_http_vcns",
+            "list[VirtualCloudNetwork]",
+            "allowlistedHttpVcns"
+          ]
+        ],
+        "discriminator": "UpdateNetworkEndpointDetails"
+      },
+      "VirtualCloudNetwork": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["allowlisted_ip_cidrs", "list[str]", "allowlistedIpCidrs"]
+        ]
+      }
+    }
   }
 }

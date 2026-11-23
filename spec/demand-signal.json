@@ -510,6 +510,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "occ-demand-signals": "demand_signal:list[OccDemandSignalData]",
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "demand_signal.occ_demand_signal",
@@ -1646,6 +1651,9 @@
           "items": "aa42b4912f274d5e8280f9406e22d02e2c403f63e998bc7723dbe76866360af7"
         }
       },
+      "complexTypes": {
+        "items": "demand_signal:list[PatchInstruction]"
+      },
       "kind": "generated",
       "operation": {
         "client": "demand_signal.occ_demand_signal",
@@ -1877,6 +1885,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -2299,6 +2311,12 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "subscribers": "demand_signal:list[string]",
+        "resource-configuration": "demand_signal:BaseResourceConfiguration",
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -2863,6 +2881,11 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "subscribers": "demand_signal:list[string]",
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -3488,6 +3511,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "subscribers": "demand_signal:list[string]",
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "demand_signal.occ_metric_alarm",
@@ -4112,6 +4140,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "subscribers": "demand_signal:list[string]",
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "demand_signal.occ_metric_alarm",
@@ -4730,6 +4763,11 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "subscribers": "demand_signal:list[string]",
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
       },
       "kind": "generated",
       "operation": {
@@ -6081,6 +6119,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
       },
+      "complexTypes": {
+        "subscribers": "demand_signal:list[string]",
+        "freeform-tags": "demand_signal:dict(str, string)",
+        "defined-tags": "demand_signal:dict(str, dict(str, object))"
+      },
       "kind": "generated",
       "operation": {
         "client": "demand_signal.occ_metric_alarm",
@@ -6717,5 +6760,159 @@
         "usageType": "string"
       }
     ]
+  },
+  "models": {
+    "demand_signal": {
+      "BaseResourceConfiguration": {
+        "attributes": [["resource", "str", "resource"]],
+        "discriminator": {
+          "field": "resource",
+          "values": {
+            "EXADATA": "ExadataResourceConfiguration",
+            "NETWORK": "NetworkResourceConfiguration",
+            "STORAGE": "StorageResourceConfiguration",
+            "COMPUTE": "ComputeResourceConfiguration"
+          },
+          "fallback": "BaseResourceConfiguration"
+        }
+      },
+      "ComputeResourceConfiguration": {
+        "attributes": [
+          ["resource", "str", "resource"],
+          ["shape", "str", "shape"],
+          ["compute_hw_generation", "str", "computeHwGeneration"],
+          ["usage_type", "str", "usageType"]
+        ],
+        "discriminator": "BaseResourceConfiguration"
+      },
+      "ExadataResourceConfiguration": {
+        "attributes": [
+          ["resource", "str", "resource"],
+          ["node_type", "str", "nodeType"],
+          ["hw_generation", "str", "hwGeneration"],
+          ["usage_type", "str", "usageType"]
+        ],
+        "discriminator": "BaseResourceConfiguration"
+      },
+      "NetworkResourceConfiguration": {
+        "attributes": [
+          ["resource", "str", "resource"],
+          ["usage_type", "str", "usageType"],
+          ["provider", "str", "provider"],
+          ["link_role", "str", "linkRole"]
+        ],
+        "discriminator": "BaseResourceConfiguration"
+      },
+      "OccDemandSignalData": {
+        "attributes": [
+          ["resource_type", "str", "resourceType"],
+          ["units", "str", "units"],
+          ["values", "list[OccDemandSignalValue]", "values"]
+        ]
+      },
+      "OccDemandSignalValue": {
+        "attributes": [
+          ["time_expected", "datetime", "timeExpected"],
+          ["value", "float", "value"],
+          ["comments", "str", "comments"]
+        ]
+      },
+      "PatchInsertInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["value", "object", "value"],
+          ["selected_item", "str", "selectedItem"],
+          ["position", "str", "position"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchInsertMultipleInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["values", "list[object]", "values"],
+          ["selected_item", "str", "selectedItem"],
+          ["position", "str", "position"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"]
+        ],
+        "discriminator": {
+          "field": "operation",
+          "values": {
+            "MOVE": "PatchMoveInstruction",
+            "REMOVE": "PatchRemoveInstruction",
+            "REPLACE": "PatchReplaceInstruction",
+            "INSERT_MULTIPLE": "PatchInsertMultipleInstruction",
+            "INSERT": "PatchInsertInstruction",
+            "REQUIRE": "PatchRequireInstruction",
+            "MERGE": "PatchMergeInstruction",
+            "PROHIBIT": "PatchProhibitInstruction"
+          },
+          "fallback": "PatchInstruction"
+        }
+      },
+      "PatchMergeInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchMoveInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["_from", "str", "from"],
+          ["position", "str", "position"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchProhibitInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchRemoveInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchReplaceInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "PatchRequireInstruction": {
+        "attributes": [
+          ["operation", "str", "operation"],
+          ["selection", "str", "selection"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "PatchInstruction"
+      },
+      "StorageResourceConfiguration": {
+        "attributes": [
+          ["resource", "str", "resource"],
+          ["storage_type", "str", "storageType"],
+          ["usage_type", "str", "usageType"]
+        ],
+        "discriminator": "BaseResourceConfiguration"
+      }
+    }
   }
 }

@@ -992,6 +992,9 @@
           "entries": "dfc47a21fe8c10e943e9e811407d0b7a1f42267f904530b97730a6b9e7b52b3c"
         }
       },
+      "complexTypes": {
+        "entries": "queue:list[DeleteMessagesDetailsEntry]"
+      },
       "kind": "generated",
       "operation": {
         "client": "queue.queue",
@@ -1650,6 +1653,9 @@
           "messages": "74a80070856386caec027e96dacdb14cc41f960fba692f4e946eda7a9f31c6c8"
         }
       },
+      "complexTypes": {
+        "messages": "queue:list[PutMessagesDetailsEntry]"
+      },
       "kind": "generated",
       "operation": {
         "client": "queue.queue",
@@ -2034,6 +2040,9 @@
           "entries": "2d10d6a271dec7467b38ab72f32022e8b800c823254eb556e16dc4c5393152d3"
         }
       },
+      "complexTypes": {
+        "entries": "queue:list[UpdateMessagesDetailsEntry]"
+      },
       "kind": "generated",
       "operation": {
         "client": "queue.queue",
@@ -2265,6 +2274,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "queue:dict(str, string)",
+        "defined-tags": "queue:dict(str, dict(str, object))"
       },
       "kind": "custom",
       "tier": "A",
@@ -3058,6 +3071,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "freeform-tags": "queue:dict(str, string)",
+        "defined-tags": "queue:dict(str, dict(str, object))"
       },
       "kind": "custom",
       "tier": "A",
@@ -4215,6 +4232,11 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "capabilities": "queue:list[CapabilityDetails]",
+        "freeform-tags": "queue:dict(str, string)",
+        "defined-tags": "queue:dict(str, dict(str, object))"
       },
       "kind": "custom",
       "tier": "A",
@@ -5504,6 +5526,9 @@
           "channel-ids": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
       },
+      "complexTypes": {
+        "channel-ids": "queue:list[string]"
+      },
       "kind": "generated",
       "operation": {
         "client": "queue.queue_admin",
@@ -5870,6 +5895,11 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a",
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a"
         }
+      },
+      "complexTypes": {
+        "capabilities": "queue:list[CapabilityDetails]",
+        "freeform-tags": "queue:dict(str, string)",
+        "defined-tags": "queue:dict(str, dict(str, object))"
       },
       "kind": "custom",
       "tier": "A",
@@ -7283,5 +7313,71 @@
       "string",
       "string"
     ]
+  },
+  "models": {
+    "queue": {
+      "CapabilityDetails": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "LARGE_MESSAGES": "LargeMessagesCapabilityDetails",
+            "CONSUMER_GROUPS": "ConsumerGroupsCapabilityDetails"
+          },
+          "fallback": "CapabilityDetails"
+        }
+      },
+      "ConsumerGroupsCapabilityDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          [
+            "is_primary_consumer_group_enabled",
+            "bool",
+            "isPrimaryConsumerGroupEnabled"
+          ],
+          [
+            "primary_consumer_group_display_name",
+            "str",
+            "primaryConsumerGroupDisplayName"
+          ],
+          [
+            "primary_consumer_group_filter",
+            "str",
+            "primaryConsumerGroupFilter"
+          ],
+          [
+            "primary_consumer_group_dead_letter_queue_delivery_count",
+            "int",
+            "primaryConsumerGroupDeadLetterQueueDeliveryCount"
+          ]
+        ],
+        "discriminator": "CapabilityDetails"
+      },
+      "DeleteMessagesDetailsEntry": {
+        "attributes": [["receipt", "str", "receipt"]]
+      },
+      "LargeMessagesCapabilityDetails": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": "CapabilityDetails"
+      },
+      "MessageMetadata": {
+        "attributes": [
+          ["channel_id", "str", "channelId"],
+          ["custom_properties", "dict(str, str)", "customProperties"]
+        ]
+      },
+      "PutMessagesDetailsEntry": {
+        "attributes": [
+          ["content", "str", "content"],
+          ["metadata", "MessageMetadata", "metadata"]
+        ]
+      },
+      "UpdateMessagesDetailsEntry": {
+        "attributes": [
+          ["receipt", "str", "receipt"],
+          ["visibility_in_seconds", "int", "visibilityInSeconds"]
+        ]
+      }
+    }
   }
 }

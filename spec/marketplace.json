@@ -916,6 +916,10 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a"
         }
       },
+      "complexTypes": {
+        "defined-tags": "marketplace:dict(str, dict(str, object))",
+        "freeform-tags": "marketplace:dict(str, string)"
+      },
       "kind": "generated",
       "operation": {
         "client": "marketplace.marketplace",
@@ -2017,6 +2021,10 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a",
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a"
         }
+      },
+      "complexTypes": {
+        "defined-tags": "marketplace:dict(str, dict(str, object))",
+        "freeform-tags": "marketplace:dict(str, string)"
       },
       "kind": "generated",
       "operation": {
@@ -4021,6 +4029,11 @@
           "category": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604",
           "operating-systems": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
+      },
+      "complexTypes": {
+        "name": "marketplace:list[string]",
+        "category": "marketplace:list[string]",
+        "operating-systems": "marketplace:list[string]"
       },
       "kind": "generated",
       "operation": {
@@ -6468,6 +6481,12 @@
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a"
         }
       },
+      "complexTypes": {
+        "support-contacts": "marketplace:list[SupportContact]",
+        "package-details": "marketplace:CreatePublicationPackage",
+        "defined-tags": "marketplace:dict(str, dict(str, object))",
+        "freeform-tags": "marketplace:dict(str, string)"
+      },
       "kind": "generated",
       "operation": {
         "client": "marketplace.marketplace",
@@ -6971,6 +6990,13 @@
           "package-details-operating-system": "780241400e063320b6fc2af7bfa4e44b50601900613f7508a264bbeb62b81ae3",
           "package-details-eula": "1cdf3410027589d98ed73718a2f4d3a73d02a382e2bebd2cb836f72ffeaeff51"
         }
+      },
+      "complexTypes": {
+        "support-contacts": "marketplace:list[SupportContact]",
+        "defined-tags": "marketplace:dict(str, dict(str, object))",
+        "freeform-tags": "marketplace:dict(str, string)",
+        "package-details-operating-system": "marketplace:OperatingSystem",
+        "package-details-eula": "marketplace:list[Eula]"
       },
       "kind": "generated",
       "operation": {
@@ -7908,6 +7934,11 @@
           "defined-tags": "426f8b30629d06e2a410fff358abc444b29939116dbbdb97e6928794f61da96a",
           "freeform-tags": "4ce3363a1c24fa3d1a817a460cc3ce1389be1a64436a42711fe6d08a659ec77a"
         }
+      },
+      "complexTypes": {
+        "support-contacts": "marketplace:list[SupportContact]",
+        "defined-tags": "marketplace:dict(str, dict(str, object))",
+        "freeform-tags": "marketplace:dict(str, string)"
       },
       "kind": "generated",
       "operation": {
@@ -8880,6 +8911,10 @@
           "name": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604",
           "operating-systems": "96203b32516002aaa620e86fc898de8064ca1f412fd1d281753449879e910604"
         }
+      },
+      "complexTypes": {
+        "name": "marketplace:list[string]",
+        "operating-systems": "marketplace:list[string]"
       },
       "kind": "generated",
       "operation": {
@@ -11323,5 +11358,62 @@
       ],
       null
     ]
+  },
+  "models": {
+    "marketplace": {
+      "CreateImagePublicationPackage": {
+        "attributes": [
+          ["package_version", "str", "packageVersion"],
+          ["package_type", "str", "packageType"],
+          ["operating_system", "OperatingSystem", "operatingSystem"],
+          ["eula", "list[Eula]", "eula"],
+          ["image_id", "str", "imageId"]
+        ],
+        "discriminator": "CreatePublicationPackage"
+      },
+      "CreatePublicationPackage": {
+        "attributes": [
+          ["package_version", "str", "packageVersion"],
+          ["package_type", "str", "packageType"],
+          ["operating_system", "OperatingSystem", "operatingSystem"],
+          ["eula", "list[Eula]", "eula"]
+        ],
+        "discriminator": {
+          "field": "packageType",
+          "values": {
+            "IMAGE": "CreateImagePublicationPackage"
+          },
+          "fallback": "CreatePublicationPackage"
+        }
+      },
+      "Eula": {
+        "attributes": [["eula_type", "str", "eulaType"]],
+        "discriminator": {
+          "field": "eulaType",
+          "values": {
+            "TEXT": "TextBasedEula"
+          },
+          "fallback": "Eula"
+        }
+      },
+      "OperatingSystem": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "SupportContact": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["phone", "str", "phone"],
+          ["email", "str", "email"],
+          ["subject", "str", "subject"]
+        ]
+      },
+      "TextBasedEula": {
+        "attributes": [
+          ["eula_type", "str", "eulaType"],
+          ["license_text", "str", "licenseText"]
+        ],
+        "discriminator": "Eula"
+      }
+    }
   }
 }

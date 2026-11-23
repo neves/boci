@@ -1788,7 +1788,28 @@
           {
             "when": "(kwargs['name'] is None) and (not hasattr(file, 'name') or file.name == '<stdin>')",
             "options": ["name", "file"],
-            "message": "Option \"--name\" must be provided when reading object from stdin"
+            "message": "Option \"--name\" must be provided when reading object from stdin",
+            "test": {
+              "and": [
+                {
+                  "none": "name"
+                },
+                {
+                  "or": [
+                    {
+                      "not": {
+                        "not": {
+                          "none": "file"
+                        }
+                      }
+                    },
+                    {
+                      "eq": ["file", "-"]
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
         "wrapExceptions": true,

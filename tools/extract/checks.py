@@ -17,8 +17,15 @@ with this predicate set; anything else returns None and the check stays uncompil
 import ast
 
 
-def aliases(fn, params):
-    """Locals bound once to an option read at the top of `fn`: `x = kwargs.get('y')` -> {"x": "y"}."""
+class FileOption(str):
+    """An alias of a click.File option: the wrapper sees an open file, the Engine its path."""
+
+
+def aliases(fn, params, files=()):
+    """Locals bound once to an option read at the top of `fn`: `x = kwargs.get('y')` -> {"x": "y"}.
+
+    Aliases of the click.File options in `files` are FileOption.
+    """
     counts = {}
     found = {}
     for node in ast.walk(fn):
@@ -28,7 +35,7 @@ def aliases(fn, params):
         if isinstance(st, ast.Assign) and len(st.targets) == 1 and isinstance(st.targets[0], ast.Name):
             name = option_read(st.value, params, {}, allow_pop=True)
             if name is not None:
-                found[st.targets[0].id] = name
+                found[st.targets[0].id] = FileOption(name) if name in files else name
     for arg in fn.args.args + fn.args.kwonlyargs:
         if arg.arg in params and counts.get(arg.arg, 0) == 0:
             found[arg.arg] = arg.arg
@@ -198,6 +205,14 @@ def compile_test(node, params, local):
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
         inner = compile_test(node.operand, params, local)
         return None if inner is None else {"not": inner}
+    # hasattr(f, 'name'): an open file has one, so the option was given.
+    if (
+        isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "hasattr"
+        and len(node.args) == 2 and isinstance(node.args[0], ast.Name)
+        and isinstance(local.get(node.args[0].id), FileOption)
+        and isinstance(node.args[1], ast.Constant) and node.args[1].value == "name"
+    ):
+        return {"not": {"none": local[node.args[0].id]}}
     if isinstance(node, ast.Name) and isinstance(local.get(node.id), dict):
         return {"countGt": [list(local[node.id].values()), 0]}
     if isinstance(node, ast.Compare) and len(node.ops) == 1:
@@ -223,6 +238,13 @@ def compile_test(node, params, local):
             return {"none": name} if isinstance(op, ast.Is) else {"not": {"none": name}}
         if isinstance(op, ast.In) and isinstance(left, ast.Constant) and isinstance(right, ast.Name) and right.id == "kwargs":
             return left.value in params
+        # f.name == '<stdin>': Click opened `-`.
+        if (
+            isinstance(op, ast.Eq) and isinstance(left, ast.Attribute) and left.attr == "name"
+            and isinstance(left.value, ast.Name) and isinstance(local.get(left.value.id), FileOption)
+            and isinstance(right, ast.Constant) and right.value == "<stdin>"
+        ):
+            return {"eq": [str(local[left.value.id]), "-"]}
         if isinstance(op, ast.Eq) and isinstance(right, ast.Constant) and isinstance(right.value, str):
             name = option_read(left, params, local)
             if name is not None:

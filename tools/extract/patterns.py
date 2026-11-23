@@ -110,6 +110,7 @@ def survey(cmd):
     folds = []
     # click.File options arrive already opened; the wrapper reads them.
     files = [p.name for p in cmd.params if isinstance(p.type, click.File)]
+    click_files = set(files)
     if files:
         found.add("file-read")
     helpers = []
@@ -238,7 +239,7 @@ def survey(cmd):
                                 helpers.append(n.func.id)
                                 visit(h.body, h, seen | {n.func.id})
             # Usage checks: `raise click.UsageError(<msg>)` under the conjunction of its enclosing ifs.
-            collect_checks([st], [], aliases(fn_node, params))
+            collect_checks([st], [], aliases(fn_node, params, click_files))
             if does_io(st):
                 io_seen[0] = True
             # Folding: kwargs['t'][...] = v; kwargs['t'] = {..} / json.dumps(local); local[...] = v.

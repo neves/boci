@@ -22,9 +22,13 @@ Statements (lists):
     ["abort"]                     ctx.abort()
     ["for", name, e, body]        for name in e: body (no break/continue/else)
 
+`with open(path, mode) as name: body` compiles to `["let", name, ["fn", "open", path, mode]]`
+then body (ticket 21): the file stays open for the invoke, which may send it as its body.
+
 Expressions: JSON scalars are constants; lists are operations:
     ["var", name] ["item", obj, key] ["call", method, obj, args...]
-    ["fn", name, args...]  (dumps, parse, str, len, bool, dict, b64encode, removeSkeleton)
+    ["fn", name, args...]  (dumps, parse, str, len, bool, dict, b64encode, removeSkeleton,
+                            open, exists, isstr)
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
     ["map", e, t, elt, conds?]  [elt for t in e if cond...]; t a name or a list of names
@@ -63,6 +67,7 @@ FUNCTIONS = {
     "next": "next",
     "list": "list",
     "click.confirm": "confirm",
+    "open": "open",
 }
 # Module helpers outside the subset (re.split, enumerate, return), hand-coded in the
 # Engine as named functions (src/core/program.ts, ticket 20).
@@ -142,6 +147,19 @@ class Compiler:
                     raise Unsupported("del")
                 out.append(["del", self.expr(t.value, scope), self.expr(t.slice, scope)])
             return out
+        if isinstance(st, ast.With):
+            # `with open(path, mode) as f:` only; closing the file after is invisible here.
+            if len(st.items) != 1:
+                raise Unsupported("with")
+            item = st.items[0]
+            call = item.context_expr
+            if not (
+                isinstance(call, ast.Call) and _dotted(call.func) == "open"
+                and isinstance(item.optional_vars, ast.Name)
+                and len(call.args) == 2 and not call.keywords
+            ):
+                raise Unsupported("with")
+            return [["let", self.name(item.optional_vars.id, scope), self.expr(call, scope)]] + self.stmts(st.body, scope)
         if isinstance(st, ast.If):
             return [["if", self.expr(st.test, scope), self.stmts(st.body, scope), self.stmts(st.orelse, scope)]]
         if isinstance(st, ast.Raise):
@@ -330,6 +348,11 @@ class Compiler:
             ):
                 raise Unsupported("call keywords")
             dotted = _dotted(node.func)
+            if (
+                dotted == "isinstance" and len(node.args) == 2
+                and _dotted(node.args[1]) == "six.string_types"
+            ):
+                return ["fn", "isstr", self.expr(node.args[0], scope)]
             hand = self.hand_coded(node.func)
             if hand:
                 return ["fn", hand, *(self.expr(a, scope) for a in node.args)]

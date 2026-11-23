@@ -258,11 +258,44 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
 
 const GENERATED_FILE = "generated-file.txt";
 
+/**
+ * The kwargs a wrapper program hands to `open(path, mode)` (ticket 21): options naming a
+ * file path, which a case points at the sandbox file. A path is a kwargs item, directly
+ * or through a variable bound to one.
+ */
+function openedOptions(program: unknown): Set<string> {
+  const lets = new Map<string, unknown>();
+  const opened: unknown[] = [];
+  const walk = (node: unknown) => {
+    if (!Array.isArray(node)) return;
+    if (node[0] === "let" && typeof node[1] === "string")
+      lets.set(node[1], node[2]);
+    if (node[0] === "fn" && node[1] === "open") opened.push(node[2]);
+    node.forEach(walk);
+  };
+  walk((program as { body?: unknown } | undefined)?.body);
+  const kwargsKey = (e: unknown): string | undefined => {
+    if (!Array.isArray(e)) return undefined;
+    if (e[0] === "var") return kwargsKey(lets.get(e[1]));
+    const isKwargs = (x: unknown) =>
+      Array.isArray(x) && x[0] === "var" && x[1] === "kwargs";
+    if (e[0] === "item" && isKwargs(e[1]) && typeof e[2] === "string")
+      return e[2];
+    if (e[0] === "call" && e[1] === "pop" && isKwargs(e[2]))
+      return typeof e[3] === "string" ? e[3] : undefined;
+    return undefined;
+  };
+  return new Set(
+    opened.map(kwargsKey).filter((k): k is string => k !== undefined),
+  );
+}
+
 function wrapperArgv(argv: string[], command: Command) {
   const params = command.params ?? [];
   const folded = new Set(
     (command.survey?.folds ?? []).flatMap((fold) => fold.options),
   );
+  const opened = openedOptions(command.program);
   for (const param of params) {
     const name = String(param.name);
     if (name === "from_json") continue;
@@ -271,7 +304,8 @@ function wrapperArgv(argv: string[], command: Command) {
     // Read-mode `click.File` options read a sandbox file (ticket 12).
     const mode = typeof param.fileMode === "string" ? param.fileMode : "";
     const readFile =
-      param.typeClass === "click.types.File" && !/[wa]/.test(mode);
+      (param.typeClass === "click.types.File" && !/[wa]/.test(mode)) ||
+      opened.has(name);
     if (param.required !== true && !folded.has(name) && !namespace && !readFile)
       continue;
     const option = optionOf(param);

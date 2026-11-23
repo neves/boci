@@ -1,7 +1,7 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
-import { closeSync, readFileSync } from "node:fs";
+import { closeSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
 import { parseConfig, sectionItems } from "../lib/configparser.ts";
@@ -57,6 +57,7 @@ import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import {
   ProgramFile,
+  type ProgramFiles,
   ProgramAbort,
   ProgramConfirm,
   ProgramRaise,
@@ -827,6 +828,7 @@ async function runWrapper(
           models,
         }),
       answers,
+      programFiles(io),
     );
     if (!kwargs) return undefined;
     const variant = command.variants?.[target - 1];
@@ -844,14 +846,14 @@ async function runWrapper(
             complexTypes: variant.generated.complexTypes,
           };
     if (!invoked) return "unsupported";
-    // Bytes go out only as the direct request body; a file handed on (an open body
-    // stream or output file) isn't modeled yet.
+    // Bytes, or a file opened for reading, go out only as the direct request body; a
+    // file handed on otherwise (an output file) isn't modeled yet.
     const directBody = invoked.operation?.body;
     if (
-      Object.entries(kwargs).some(
-        ([name, v]) =>
-          v instanceof ProgramFile ||
-          (v instanceof Uint8Array && name !== directBody),
+      Object.entries(kwargs).some(([name, v]) =>
+        v instanceof ProgramFile
+          ? name !== directBody || /[wax+]/.test(v.mode)
+          : v instanceof Uint8Array && name !== directBody,
       )
     )
       return "unsupported";
@@ -897,6 +899,22 @@ async function runWrapper(
     io.err(`UsageError: ${e.message}\n`);
     throw new Exit(1);
   }
+}
+
+/** What a wrapper program's `open()` and `os.path.exists()` see: files under the cwd. */
+function programFiles(io: Invocation): ProgramFiles {
+  return {
+    open(path, mode) {
+      if (/[wax+]/.test(mode)) throw new ProgramUnsupported("open() to write");
+      try {
+        return new ProgramFile(mode, readFileSync(resolve(io.cwd, path)));
+      } catch {
+        // FileNotFoundError and the like: not modeled.
+        throw new ProgramUnsupported("open()");
+      }
+    },
+    exists: (path) => path !== "" && existsSync(resolve(io.cwd, path)),
+  };
 }
 
 /** Exit code for "boci doesn't implement this yet" (oci itself uses 0, 1 and 2). */

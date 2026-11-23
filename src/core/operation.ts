@@ -23,6 +23,7 @@ import { Exit, type Invocation } from "../lib/io.ts";
 import { pyStrip } from "../lib/configparser.ts";
 import { failingCheck, type UsageCheck } from "./checks.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
+import { ProgramFile } from "./program.ts";
 import {
   SecurityTokenDecodeError,
   SecurityTokenKeyError,
@@ -323,7 +324,7 @@ function buildRequestBody(
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   keys: KeyTypes,
-): string | Uint8Array {
+): string | Uint8Array | ProgramFile {
   const body: Record<string, unknown> = {};
   let hasBodyBindings = false;
   for (const binding of command.bindings ?? []) {
@@ -385,8 +386,9 @@ function buildRequestBody(
         ? ""
         : "{}";
     }
-    // A wrapper's `file.read()` bytes: sent as they are.
-    if (direct instanceof Uint8Array) return direct;
+    // A wrapper's `file.read()` bytes, or the open file itself: sent as they are.
+    if (direct instanceof Uint8Array || direct instanceof ProgramFile)
+      return direct;
     if (typeof direct === "string") {
       // The email data-plane command treats raw_message as file content; other
       // generated direct-body parameters are passed through as raw strings.
@@ -840,6 +842,8 @@ export async function callOperation(
   }
   const keys = keyTypes(command, spec.models);
   let requestBody: string | Uint8Array = "";
+  // A file-like body: the SDK signer defaults its content-type to octet-stream.
+  let streamBody = false;
   if (operation.http === "GET") {
     if (values.all_pages === true && values.limit !== undefined) {
       io.err(
@@ -847,7 +851,11 @@ export async function callOperation(
       );
       throw new Exit(1);
     }
-  } else requestBody = buildRequestBody(io, command, values, rootValues, keys);
+  } else {
+    const built = buildRequestBody(io, command, values, rootValues, keys);
+    streamBody = built instanceof ProgramFile;
+    requestBody = built instanceof ProgramFile ? built.read() : built;
+  }
   const boundValue = (arg: string) =>
     boundValueFor(io, command, values, rootValues, arg, keys);
   const client = spec.clients[operation.client] as Record<string, unknown>;
@@ -880,7 +888,13 @@ export async function callOperation(
     else queryParams.push(["limit", String(pageSize)]);
   }
   const baseHeaders: Record<string, string> =
-    operation.http === "GET" ? {} : { "content-type": "application/json" };
+    operation.http === "GET"
+      ? {}
+      : {
+          "content-type": streamBody
+            ? "application/octet-stream"
+            : "application/json",
+        };
   if (
     ["POST", "PUT", "PATCH"].includes(operation.http) &&
     operation.client.startsWith("log_analytics.") &&

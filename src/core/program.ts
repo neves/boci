@@ -228,6 +228,21 @@ export type ProgramResult = {
   target?: number;
 };
 
+/** The filesystem a program's `open(path, mode)` and `os.path.exists(path)` see. */
+export type ProgramFiles = {
+  open(path: string, mode: string): ProgramFile;
+  exists(path: string): boolean;
+};
+
+const NO_FILES: ProgramFiles = {
+  open() {
+    throw new ProgramUnsupported("open()");
+  },
+  exists() {
+    throw new ProgramUnsupported("os.path.exists()");
+  },
+};
+
 /**
  * Runs `program` over the wrapper's converted option values (complex params already
  * parsed). `parse` is cli_util.parse_json_parameter.
@@ -238,6 +253,7 @@ export function runProgram(
   params: TypedParam[],
   parse: (name: string, value: unknown) => unknown,
   answers: boolean[] = [],
+  files: ProgramFiles = NO_FILES,
 ): ProgramResult {
   // Click hands the callback every exposed param, unset ones at their default.
   const kwargs: Dict = {};
@@ -430,6 +446,17 @@ export function runProgram(
         if (i < answers.length) return answers[i];
         throw new ProgramConfirm(pyStr(a));
       }
+      case "isstr":
+        // isinstance(a, six.string_types)
+        return typeof a === "string";
+      case "open":
+        if (typeof a !== "string" || typeof b !== "string")
+          throw new ProgramUnsupported("open()");
+        return files.open(a, b);
+      case "exists":
+        if (typeof a !== "string")
+          throw new ProgramUnsupported("os.path.exists()");
+        return files.exists(a);
       case "items":
         if (isDict(a)) return Object.entries(a);
         throw new ProgramUnsupported("iteritems()");

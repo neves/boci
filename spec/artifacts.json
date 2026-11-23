@@ -8784,6 +8784,148 @@
           "services.generic_artifacts_content.src.oci_cli_generic_artifacts_content.generated.genericartifactscontent_cli.put_generic_artifact_content_by_path"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "artifact_version", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "version_parameterconflict",
+                ["item", ["var", "kwargs"], "artifact_version"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "artifact_version"]]
+            ],
+            []
+          ],
+          ["let", "upload_file", ["item", ["var", "kwargs"], "content_body"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "content_body"]],
+          ["let", "ufile", ["fn", "open", ["var", "upload_file"], "rb"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "generic_artifact_content_body",
+            ["var", "ufile"]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.generic_artifacts_content.src.oci_cli_generic_artifacts_content.generated.genericartifactscontent_cli.put_generic_artifact_content_by_path",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "repository_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "artifact_path",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "version_parameterconflict",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "generic_artifact_content_body",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "generic_artifacts_content.generic_artifacts_content",
+        "method": "put_generic_artifact_content_by_path",
+        "http": "PUT",
+        "path": "/generic/repositories/{repositoryId}/artifactPaths/{artifactPath}/versions/{version}/content",
+        "positionalArgs": [
+          "repository_id",
+          "artifact_path",
+          "version",
+          "generic_artifact_content_body"
+        ],
+        "pathParams": {
+          "repositoryId": "repository_id",
+          "artifactPath": "artifact_path",
+          "version": "version"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "generic_artifact_content_body",
+        "responseType": "GenericArtifact",
+        "enforce_content_headers": false,
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["repository_id"],
+          "param": "repository_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["artifact_path"],
+          "param": "artifact_path"
+        },
+        {
+          "target": "kwarg",
+          "key": ["version"],
+          "param": "version_parameterconflict"
+        },
+        {
+          "target": "kwarg",
+          "key": ["generic_artifact_content_body"],
+          "param": "generic_artifact_content_body"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["retry_strategy"],
+          "transform": "NoneRetryStrategy"
+        }
+      ],
       "params": [
         {
           "kind": "option",

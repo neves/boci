@@ -78,3 +78,205 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --provenance --access public
+
+  update-repo-manifests:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download SHA256SUMS
+        run: |
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/SHA256SUMS" \
+            -o SHA256SUMS
+
+      - name: Update flake.nix and AUR manifests
+        run: |
+          bun scripts/update-package-managers.ts \
+            --version "${{ github.ref_name }}" \
+            --sums SHA256SUMS \
+            --flake flake.nix \
+            --aur-dir aur
+
+      - name: Commit and push updated manifests
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.nix aur/PKGBUILD aur/.SRCINFO
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): update flake.nix and AUR for ${{ github.ref_name }}"
+            git push origin main
+          fi
+
+  update-homebrew:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Require HOMEBREW_TAP_TOKEN
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "${HOMEBREW_TAP_TOKEN}" ]; then
+            echo "::error::Missing required secret HOMEBREW_TAP_TOKEN"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          path: boci
+
+      - uses: actions/checkout@v4
+        with:
+          repository: neves/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download SHA256SUMS
+        run: |
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/SHA256SUMS" \
+            -o SHA256SUMS
+
+      - name: Update Homebrew formula
+        run: |
+          bun boci/scripts/update-package-managers.ts \
+            --version "${{ github.ref_name }}" \
+            --sums SHA256SUMS \
+            --homebrew-out tap/Formula/boci.rb
+
+      - name: Commit and push Homebrew tap
+        working-directory: tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/boci.rb
+          if ! git diff --cached --quiet; then
+            git commit -m "boci ${{ github.ref_name }}"
+            git push
+          fi
+
+  update-scoop:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Require SCOOP_BUCKET_TOKEN
+        env:
+          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+        run: |
+          if [ -z "${SCOOP_BUCKET_TOKEN}" ]; then
+            echo "::error::Missing required secret SCOOP_BUCKET_TOKEN"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          path: boci
+
+      - uses: actions/checkout@v4
+        with:
+          repository: neves/scoop-bucket
+          token: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          path: scoop-bucket
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download SHA256SUMS
+        run: |
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/SHA256SUMS" \
+            -o SHA256SUMS
+
+      - name: Update Scoop manifest
+        run: |
+          if [ -f scoop-bucket/boci.json ] && [ ! -d scoop-bucket/bucket ]; then
+            SCOOP_OUT="scoop-bucket/boci.json"
+          else
+            SCOOP_OUT="scoop-bucket/bucket/boci.json"
+          fi
+          bun boci/scripts/update-package-managers.ts \
+            --version "${{ github.ref_name }}" \
+            --sums SHA256SUMS \
+            --scoop-out "${SCOOP_OUT}"
+
+      - name: Commit and push Scoop bucket
+        working-directory: scoop-bucket
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "boci: update to ${{ github.ref_name }}"
+            git push
+          fi
+
+  update-aur:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Require AUR_SSH_PRIVATE_KEY
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "${AUR_SSH_PRIVATE_KEY}" ]; then
+            echo "::error::Missing required secret AUR_SSH_PRIVATE_KEY"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          path: boci
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download SHA256SUMS
+        run: |
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/SHA256SUMS" \
+            -o SHA256SUMS
+
+      - name: Update and push AUR package
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${AUR_SSH_PRIVATE_KEY}" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur -o IdentitiesOnly=yes"
+          git clone ssh://aur@aur.archlinux.org/boci-bin.git aur-repo
+          cp boci/aur/PKGBUILD boci/aur/.SRCINFO aur-repo/
+          bun boci/scripts/update-package-managers.ts \
+            --version "${{ github.ref_name }}" \
+            --sums SHA256SUMS \
+            --aur-dir aur-repo
+          cd aur-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add PKGBUILD .SRCINFO
+          if ! git diff --cached --quiet; then
+            git commit -m "Update boci-bin to ${{ github.ref_name }}"
+            git push
+          fi

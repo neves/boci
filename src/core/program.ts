@@ -18,8 +18,69 @@ export class ProgramUnsupported extends Error {}
 
 type Dict = Record<string, unknown>;
 
+/**
+ * An option typed `click.File`, as the wrapper sees it: opened during option conversion
+ * (`data` holds what a read-mode file contains). Text mode decodes UTF-8 with universal
+ * newlines, like Python's `open(path, "r")`; a second read returns "" (the file is
+ * consumed). Write modes are only passed through to the generated command.
+ */
+export class ProgramFile {
+  private consumed = false;
+  constructor(
+    readonly mode: string,
+    private readonly data?: Uint8Array,
+  ) {}
+
+  get binary(): boolean {
+    return this.mode.includes("b");
+  }
+
+  read(): string | Uint8Array {
+    if (this.data === undefined || /[wax+]/.test(this.mode))
+      throw new ProgramUnsupported("io.UnsupportedOperation: not readable");
+    const data = this.consumed ? new Uint8Array() : this.data;
+    this.consumed = true;
+    if (this.binary) return data;
+    let text: string;
+    try {
+      text = new TextDecoder("utf-8", { fatal: true }).decode(data);
+    } catch {
+      throw new ProgramUnsupported("UnicodeDecodeError");
+    }
+    return text.replace(/\r\n?/g, "\n");
+  }
+
+  /** `for line in file`: text lines, each with its newline. */
+  lines(): string[] {
+    if (this.binary) throw new ProgramUnsupported("iterating a binary file");
+    return (this.read() as string).match(/[^\n]*\n|[^\n]+$/g) ?? [];
+  }
+}
+
 const isDict = (v: unknown): v is Dict =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
+  typeof v === "object" &&
+  v !== null &&
+  !Array.isArray(v) &&
+  !(v instanceof ProgramFile) &&
+  !(v instanceof Uint8Array);
+
+/** Python iteration: a list's items, a dict's keys, a str's characters, a file's lines. */
+function iterate(v: unknown): unknown[] {
+  if (Array.isArray(v)) return v;
+  if (isDict(v)) return Object.keys(v);
+  if (typeof v === "string") return [...v];
+  if (v instanceof ProgramFile) return v.lines();
+  throw new ProgramUnsupported("not iterable");
+}
+
+/** Python `str.rstrip(chars)` / `str.strip(chars)`. */
+function stripChars(s: string, chars: string, left: boolean): string {
+  let end = s.length;
+  while (end > 0 && chars.includes(s[end - 1] as string)) end--;
+  let start = 0;
+  if (left) while (start < end && chars.includes(s[start] as string)) start++;
+  return s.slice(start, end);
+}
 
 function pyEq(a: unknown, b: unknown): boolean {
   if (a === b) return true;
@@ -120,6 +181,9 @@ export function runProgram(
           if (!isDict(args[0])) throw new ProgramUnsupported("update");
           Object.assign(obj, args[0]);
           return null;
+        case "keys":
+          if (args.length === 0) return Object.keys(obj);
+          break;
       }
     } else if (Array.isArray(obj) && method === "append") {
       obj.push(args[0]);
@@ -132,6 +196,20 @@ export function runProgram(
           return obj.toLowerCase();
         case "strip":
           if (args.length === 0) return obj.trim();
+          if (typeof args[0] === "string")
+            return stripChars(obj, args[0], true);
+          break;
+        case "rstrip":
+          if (args.length === 0) return obj.trimEnd();
+          if (typeof args[0] === "string")
+            return stripChars(obj, args[0], false);
+          break;
+        case "join":
+          if (
+            Array.isArray(args[0]) &&
+            args[0].every((x) => typeof x === "string")
+          )
+            return args[0].join(obj);
           break;
         case "split":
           if (typeof args[0] === "string" && args[0] !== "")
@@ -139,6 +217,15 @@ export function runProgram(
           if (args.length === 0) return obj.split(/\s+/).filter(Boolean);
           break;
       }
+    } else if (obj instanceof ProgramFile && method === "read") {
+      if (args.length === 0) return obj.read();
+    } else if (obj instanceof Uint8Array && method === "decode") {
+      if (args.length === 0 || /^utf-?8$/i.test(String(args[0])))
+        try {
+          return new TextDecoder("utf-8", { fatal: true }).decode(obj);
+        } catch {
+          throw new ProgramUnsupported("UnicodeDecodeError");
+        }
     }
     throw new ProgramUnsupported(`${method}()`);
   };
@@ -190,6 +277,18 @@ export function runProgram(
         return pyStr(a);
       case "bool":
         return truthy(a);
+      case "b64encode":
+        if (!(a instanceof Uint8Array))
+          throw new ProgramUnsupported("b64encode() of a str");
+        return new TextEncoder().encode(Buffer.from(a).toString("base64"));
+      case "removeSkeleton":
+        // json_skeleton_utils.remove_json_skeleton_params_from_dict
+        if (isDict(a)) {
+          delete a.generate_param_json_input;
+          delete a.generate_full_command_json_input;
+          delete a.from_json;
+        }
+        return null;
       case "len":
         if (typeof a === "string" || Array.isArray(a)) return a.length;
         if (isDict(a)) return Object.keys(a).length;
@@ -228,6 +327,13 @@ export function runProgram(
       }
       case "list":
         return rest.map(evaluate);
+      case "map": {
+        const name = rest[1] as string;
+        return iterate(evaluate(rest[0] as Expr)).map((x) => {
+          env[name] = x;
+          return evaluate(rest[2] as Expr);
+        });
+      }
       case "not":
         return !truthy(evaluate(rest[0] as Expr));
       case "and": {
@@ -294,6 +400,12 @@ export function runProgram(
               ? rest[1]
               : rest[2]) as Statement[],
           );
+          break;
+        case "for":
+          for (const x of iterate(evaluate(rest[1] as Expr))) {
+            env[rest[0] as string] = x;
+            execute(rest[2] as Statement[]);
+          }
           break;
         case "usage":
           throw new ProgramUsageError(rest[0] as string);

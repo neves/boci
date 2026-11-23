@@ -256,6 +256,8 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
   return true;
 }
 
+const GENERATED_FILE = "generated-file.txt";
+
 function wrapperArgv(argv: string[], command: Command) {
   const params = command.params ?? [];
   const folded = new Set(
@@ -266,10 +268,19 @@ function wrapperArgv(argv: string[], command: Command) {
     if (name === "from_json") continue;
     // Object Storage looks an omitted namespace up first; name it.
     const namespace = name === "namespace" || name === "namespace_name";
-    if (param.required !== true && !folded.has(name) && !namespace) continue;
+    // Read-mode `click.File` options read a sandbox file (ticket 12).
+    const mode = typeof param.fileMode === "string" ? param.fileMode : "";
+    const readFile =
+      param.typeClass === "click.types.File" && !/[wa]/.test(mode);
+    if (param.required !== true && !folded.has(name) && !namespace && !readFile)
+      continue;
     const option = optionOf(param);
     if (!option) continue;
     argv.push(option);
+    if (readFile) {
+      argv.push(GENERATED_FILE);
+      continue;
+    }
     if (param.isFlag === true) continue;
     argv.push(
       param.type === "datetime" ? "2024-01-02T03:04:05.000Z" : sample(param),
@@ -321,9 +332,7 @@ for (const service of services) {
       const programmed =
         node.kind === "custom" &&
         node.tier === "B" &&
-        node.program !== undefined &&
-        !node.patterns?.includes("file-read") &&
-        !node.patterns?.includes("base64");
+        node.program !== undefined;
       if (
         (kind.file === "generated-wrapper") !== programmed ||
         (node.kind !== "generated" &&
@@ -341,6 +350,13 @@ for (const service of services) {
         id: `${kind.file}-${service}-${command.replaceAll(" ", "-")}`,
         key,
         argv,
+        ...(argv.includes(GENERATED_FILE)
+          ? {
+              sandbox: {
+                files: { [GENERATED_FILE]: "boci generated file\r\nline 2\n" },
+              },
+            }
+          : {}),
         requestOnly: true,
         replies: kind.replies(operation),
         ...(operation.http === "DELETE" ? { stdin: "y\n" } : {}),

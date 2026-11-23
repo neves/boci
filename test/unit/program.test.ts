@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { TypedParam } from "../../src/core/convert.ts";
 import {
+  ProgramFile,
   ProgramUnsupported,
   ProgramUsageError,
   runProgram,
@@ -88,5 +89,58 @@ describe("runProgram", () => {
 
   test("no invoke: no request", () => {
     expect(runProgram([], {}, params, parse).kwargs).toBeUndefined();
+  });
+
+  test("reads click.File options: text with universal newlines, once", () => {
+    const enc = (t: string) => new TextEncoder().encode(t);
+    const file = new ProgramFile("r", enc("a\r\nb\rc"));
+    expect(file.read()).toBe("a\nb\nc");
+    expect(file.read()).toBe("");
+    expect(new ProgramFile("r", enc("k1\nk2")).lines()).toEqual(["k1\n", "k2"]);
+    expect(new ProgramFile("rb", enc("x\r\n")).read()).toEqual(enc("x\r\n"));
+    expect(() => new ProgramFile("wb").read()).toThrow(ProgramUnsupported);
+  });
+
+  test("for loops, comprehensions over file lines, b64encode", () => {
+    const enc = (t: string) => new TextEncoder().encode(t);
+    const values = {
+      a: new ProgramFile("r", enc("x\ny\n")),
+      b: new ProgramFile("rb", enc("hi")),
+    };
+    const program: Statement[] = [
+      ["let", "out", ["dict"]],
+      [
+        "for",
+        "k",
+        ["call", "keys", ["dict", ["one", 1], ["two", 2]]],
+        [["set", ["var", "out"], ["var", "k"], ["var", "k"]]],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "lines",
+        ["map", kw("a"), "line", ["call", "rstrip", ["var", "line"], "\n"]],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "b64",
+        [
+          "call",
+          "decode",
+          ["fn", "b64encode", ["call", "read", kw("b")]],
+          "utf-8",
+        ],
+      ],
+      ["invoke", [["a", ["fn", "dumps", ["var", "out"]]]], null],
+    ];
+    expect(runProgram(program, values, params, parse).kwargs).toEqual({
+      a: JSON.stringify({
+        one: "one",
+        two: "two",
+        lines: ["x", "y"],
+        b64: "aGk=",
+      }),
+    });
   });
 });

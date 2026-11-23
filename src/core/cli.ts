@@ -48,6 +48,7 @@ import { CUSTOM_HANDLERS, isImplemented } from "./registry.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
+  openClickFileForProgram,
   validateClickFileForRead,
   validateOsNamespace,
 } from "./click-file.ts";
@@ -55,6 +56,7 @@ import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import {
+  ProgramFile,
   ProgramUnsupported,
   ProgramUsageError,
   runProgram,
@@ -471,6 +473,17 @@ async function main(io: Invocation): Promise<void> {
       try {
         values[p.name] = convert(p, rawVal, index.datetime);
         if (
+          specCmd.program &&
+          p.typeClass === "click.types.File" &&
+          typeof values[p.name] === "string"
+        ) {
+          values[p.name] = await openClickFileForProgram(
+            io,
+            values[p.name] as string,
+            (p as { fileMode?: string }).fileMode ?? "r",
+          );
+        }
+        if (
           name === "os" &&
           (p.name === "namespace" || p.name === "namespace_name")
         ) {
@@ -578,14 +591,15 @@ async function main(io: Invocation): Promise<void> {
             (p.name === "namespace" || p.name === "namespace_name") &&
             values[p.name] === undefined,
         );
-      // A programmed wrapper raises its own checks as it runs (below).
-      const failure = specCmd.program
-        ? undefined
-        : engineRoute
-          ? usageCheckFailure(specCmd, values)
-          : namespaceFirst
-            ? undefined
-            : tierBCheckFailure(specCmd, values);
+      // A programmed wrapper the Engine runs raises its own checks as it runs (below).
+      const failure =
+        specCmd.program && engineRoute
+          ? undefined
+          : engineRoute
+            ? usageCheckFailure(specCmd, values)
+            : namespaceFirst
+              ? undefined
+              : tierBCheckFailure(specCmd, values);
       if (failure?.wrapped === false)
         showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
       if (failure) {
@@ -784,6 +798,13 @@ function runWrapper(
       (name, value) => parseJsonParameter(io, name, value),
     );
     if (!kwargs) return undefined;
+    // A file (or its bytes) handed on as a request body or output file: not modeled yet.
+    if (
+      Object.values(kwargs).some(
+        (v) => v instanceof ProgramFile || v instanceof Uint8Array,
+      )
+    )
+      return "unsupported";
     const accepted = new Set(command.generated?.params.map((p) => p.name));
     if (names?.some((name) => !accepted.has(name))) return "unsupported";
     return kwargs;

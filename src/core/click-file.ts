@@ -1,7 +1,8 @@
-import { closeSync, fstatSync, openSync } from "node:fs";
+import { closeSync, fstatSync, openSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Invocation } from "../lib/io.ts";
 import { BadParameter, pyRepr } from "./convert.ts";
+import { ProgramFile } from "./program.ts";
 
 const NAMESPACE_HOST_LABEL_PATTERN = /^[/A-Za-z0-9_.-]+$/;
 const NAMESPACE_VALIDATION_ERROR =
@@ -82,4 +83,26 @@ export function validateClickFileForRead(
       }
     }
   }
+}
+
+async function readStdinBytes(io: Invocation): Promise<Uint8Array> {
+  if (!io.stdinBytes) return new TextEncoder().encode(io.stdin ?? "");
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of io.stdinBytes()) chunks.push(chunk);
+  return Buffer.concat(chunks);
+}
+
+/**
+ * A `click.File(mode)` option for a programmed Tier B wrapper: read modes open (and here
+ * read) the file during option conversion, `-` being stdin; write modes stay lazy.
+ */
+export async function openClickFileForProgram(
+  io: Invocation,
+  rawPath: string,
+  mode: string,
+): Promise<ProgramFile> {
+  if (/[wa]/.test(mode)) return new ProgramFile(mode);
+  if (rawPath === "-") return new ProgramFile(mode, await readStdinBytes(io));
+  validateClickFileForRead(io, rawPath);
+  return new ProgramFile(mode, readFileSync(resolve(io.cwd, rawPath)));
 }

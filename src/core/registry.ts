@@ -272,6 +272,17 @@ const EXCLUDED = new Set<string>([
   "db exascale-db-storage-vault update",
   "db system launch-from-database",
   "db system launch-from-db-system",
+  "db system launch",
+  "db system launch-from-backup",
+  "db system update",
+  // Tier B wrappers that hand a binary file's bytes to the generated command as the raw
+  // request body; the Engine doesn't send binary bodies yet (ticket 21).
+  "log-analytics content-import import-custom-content",
+  "log-analytics lookup append-data",
+  "log-analytics lookup register-lookup",
+  "log-analytics lookup update-data",
+  // Writes the response to `--file` (a lazy click.File); not modeled yet (ticket 22).
+  "log-analytics query export",
 ]);
 
 export type Command = ServiceSpec["commands"][string] & {
@@ -281,14 +292,11 @@ export type Command = ServiceSpec["commands"][string] & {
 const WRITE_METHODS = ["POST", "PUT", "PATCH"];
 
 /**
- * A Tier B wrapper compiled to a program (ticket 11). Wrappers that read files are
- * ticket 12's.
+ * A Tier B wrapper compiled to a program (tickets 11 and 12; `click.File` options reach
+ * it as open files).
  */
 function programmed(command: Command): boolean {
-  if (command.kind !== "custom" || command.tier !== "B" || !command.program)
-    return false;
-  const patterns = (command as { patterns?: string[] }).patterns ?? [];
-  return !patterns.includes("file-read") && !patterns.includes("base64");
+  return command.kind === "custom" && command.tier === "B" && !!command.program;
 }
 
 /**

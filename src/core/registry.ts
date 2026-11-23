@@ -264,17 +264,6 @@ const EXCLUDED = new Set<string>([
   // Tier A wrapper the Reference CLI can't run: the delegated generated command rejects
   // the injected `operation` kwarg with a TypeError before any request.
   "resource-manager job create-plan-rollback-job",
-  // Tier B wrappers that fold options into snake_case keys (e.g. `total_size_in_gbs`);
-  // the generated command's parse_json_parameter camelizes them by the SDK model
-  // (cli_util.make_dict_keys_camel_case), which the Engine doesn't model yet (ticket 19).
-  "db database update",
-  "db exascale-db-storage-vault create",
-  "db exascale-db-storage-vault update",
-  "db system launch-from-database",
-  "db system launch-from-db-system",
-  "db system launch",
-  "db system launch-from-backup",
-  "db system update",
   // Tier B wrappers that hand a binary file's bytes to the generated command as the raw
   // request body; the Engine doesn't send binary bodies yet (ticket 21).
   "log-analytics content-import import-custom-content",

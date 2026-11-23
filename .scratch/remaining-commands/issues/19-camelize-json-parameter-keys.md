@@ -4,7 +4,7 @@
 
 **Blocked by:** 11: options into a JSON body, 12: file content params.
 
-**Status:** ready-for-agent
+**Status:** done (8 db wrappers verified; generated, Tier A, Tier B, --from-json and program-side parses camelize by the parsing command's complex types; missing discriminator → `KeyError`)
 
 ## Context for the implementer
 
@@ -15,6 +15,6 @@
 
 ## Acceptance criteria
 
-- [ ] The eight commands above are verified (removed from `EXCLUDED`), plus hand-written camelization cases.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] The eight commands above are verified (removed from `EXCLUDED`), plus hand-written camelization cases.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

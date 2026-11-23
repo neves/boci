@@ -38,6 +38,7 @@ import {
   signRequest,
 } from "./signer.ts";
 import type { Index, OperationSpec, ServiceSpec } from "./spec.ts";
+import type { KeyTypes, Models } from "./camelize.ts";
 
 export type OperationCall = {
   /** A Generated command whose operation is supported by the generic engine. */
@@ -49,7 +50,7 @@ export type OperationCall = {
   /** Where the config comes from (the root callback's settings). */
   settings: { configFile: string; profile: string; auth: string | null };
   /** The command's Service: its SDK clients name the endpoint templates. */
-  spec: Pick<ServiceSpec, "clients">;
+  spec: Pick<ServiceSpec, "clients" | "models">;
   index: Pick<Index, "regions">;
 };
 
@@ -112,9 +113,20 @@ export type ServiceResponse = {
   raw: string;
 };
 
+/** How the command that parses complex params camelizes their keys (ticket 19). */
+export function keyTypes(
+  command: GeneratedCommand,
+  models: Models | undefined,
+): KeyTypes {
+  return {
+    complexTypes: command.delegate?.complexTypes ?? command.complexTypes,
+    models,
+  };
+}
+
 export type GeneratedCommand = Pick<
   ServiceSpec["commands"][string],
-  "operation" | "otherOperations" | "params"
+  "operation" | "otherOperations" | "params" | "complexTypes" | "delegate"
 > & {
   bindings?: Record<string, unknown>[];
 };
@@ -233,6 +245,7 @@ function boundValueFor(
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   arg: string,
+  keys: KeyTypes,
 ): unknown {
   const bindings =
     command.bindings?.filter(
@@ -259,7 +272,7 @@ function boundValueFor(
       let candidate = values[item.param];
       if (candidate !== undefined) {
         if (item.transform === "parse_json_parameter") {
-          candidate = parseJsonParameter(io, item.param, candidate);
+          candidate = parseJsonParameter(io, item.param, candidate, keys);
         }
         result = candidate;
       }
@@ -309,6 +322,7 @@ function buildRequestBody(
   command: GeneratedCommand,
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
+  keys: KeyTypes,
 ): string {
   const body: Record<string, unknown> = {};
   let hasBodyBindings = false;
@@ -344,6 +358,7 @@ function buildRequestBody(
           ? binding.param
           : (binding.key.at(-1) as string),
         value,
+        keys,
       );
     } else if (
       typeof value === "string" &&
@@ -361,6 +376,7 @@ function buildRequestBody(
       values,
       rootValues,
       command.operation.body,
+      keys,
     );
     if (direct === undefined || direct === null) {
       return command.params?.some(
@@ -820,6 +836,7 @@ export async function callOperation(
       }
     }
   }
+  const keys = keyTypes(command, spec.models);
   let requestBody = "";
   if (operation.http === "GET") {
     if (values.all_pages === true && values.limit !== undefined) {
@@ -828,9 +845,9 @@ export async function callOperation(
       );
       throw new Exit(1);
     }
-  } else requestBody = buildRequestBody(io, command, values, rootValues);
+  } else requestBody = buildRequestBody(io, command, values, rootValues, keys);
   const boundValue = (arg: string) =>
-    boundValueFor(io, command, values, rootValues, arg);
+    boundValueFor(io, command, values, rootValues, arg, keys);
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const hasNoneRetry =
     command.bindings?.some((b) => b.transform === "NoneRetryStrategy") === true;

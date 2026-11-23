@@ -672,16 +672,16 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db cloud-exa-infra update`
 - [ ] `db cloud-vm-cluster update`
 - [ ] `db data-guard-association update`
-- [ ] `db database update`
+- [x] `db database update`
 - [x] `db exadb-vm-cluster update`
-- [ ] `db exascale-db-storage-vault update`
+- [x] `db exascale-db-storage-vault update`
 - [x] `db external-cdb update`
 - [x] `db external-db-connector update`
 - [x] `db external-db-connector update-macs-connector`
 - [x] `db external-non-cdb update`
 - [x] `db external-pdb update`
 - [x] `db key-store update-oracle-key-vault-details`
-- [ ] `db system update`
+- [x] `db system update`
 - [ ] `db vm-cluster update`
 - [x] `dbtools connection update-generic-jdbc`
 - [x] `dbtools connection update-mysql-database`
@@ -941,9 +941,9 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db node start`
 - [x] `db node stop`
 - [x] `db pluggable-database enable-pluggable-database-management`
-- [ ] `db system launch`
-- [ ] `db system launch-from-database`
-- [ ] `db system launch-from-db-system`
+- [x] `db system launch`
+- [x] `db system launch-from-database`
+- [x] `db system launch-from-db-system`
 - [ ] `generative-ai-data enrichment-jobs cancel`
 - [x] `instance-agent command cancel`
 - [x] `integration integration-instance start`
@@ -1124,7 +1124,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `db database create-standby-database`
 - [ ] `db db-home create`
 - [x] `db exadb-vm-cluster create`
-- [ ] `db exascale-db-storage-vault create`
+- [x] `db exascale-db-storage-vault create`
 - [x] `db external-pdb create`
 - [x] `db key-store create-oracle-key-vault-details`
 - [x] `db pluggable-database create`
@@ -1400,7 +1400,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db pluggable-database create-remote-clone`
 - [x] `db pluggable-database local-clone`
 - [x] `db pluggable-database remote-clone`
-- [ ] `db system launch-from-backup`
+- [x] `db system launch-from-backup`
 - [x] `db system upgrade`
 - [x] `disaster-recovery dr-plan-execution create-failover`
 - [x] `disaster-recovery dr-plan-execution create-failover-precheck`

@@ -68,6 +68,7 @@ import {
   tierBCheckFailure,
   callOperation,
   confirmUnderWrapExceptions,
+  keyTypes,
 } from "./operation.ts";
 import { printResult } from "./output.ts";
 
@@ -438,7 +439,11 @@ async function main(io: Invocation): Promise<void> {
   const fromJson = parsed.opts.from_json;
   const fromJsonDefaults: Record<string, unknown> = {};
   if (typeof fromJson === "string") {
-    const input = parseJsonParameter(io, "from-json", fromJson);
+    // Its keys camelize by the command's complex types, matched by key name.
+    const input = parseJsonParameter(io, "from-json", fromJson, {
+      complexTypes: specCmd.complexTypes,
+      models: spec.models,
+    });
     if (typeof input !== "object" || input === null || Array.isArray(input)) {
       io.err("We expect a JSON object to be provided to --from-json\n");
       throw new Exit(1);
@@ -611,9 +616,16 @@ async function main(io: Invocation): Promise<void> {
     // A programmed wrapper sees complex options as the strings Click gives it (an
     // empty "{}" is truthy); it and the generated command parse them where oci does.
     const parseFirst = !(engineRoute && specCmd.program);
+    // The command oci runs (a Tier A wrapper's delegate) camelizes keys by its types.
+    const keys = customHandler ? undefined : keyTypes(specCmd, spec.models);
+    const renames = specCmd.delegate?.renames ?? {};
     for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
       if (parseFirst && values[p.name] !== undefined && isComplexParam(p)) {
-        values[p.name] = parseJsonParameter(io, p.name, values[p.name]);
+        const parsedAs =
+          Object.entries(renames).find(
+            ([, custom]) => custom === p.name,
+          )?.[0] ?? p.name;
+        values[p.name] = parseJsonParameter(io, parsedAs, values[p.name], keys);
       }
     }
 
@@ -638,8 +650,12 @@ async function main(io: Invocation): Promise<void> {
       let command: GeneratedCommand = specCmd;
       let callValues = values;
       if (specCmd.program && specCmd.generated) {
-        const generated = runWrapper(io, specCmd, values, () =>
-          usage(io, commandPath, cmd.helpDoc),
+        const generated = runWrapper(
+          io,
+          specCmd,
+          values,
+          () => usage(io, commandPath, cmd.helpDoc),
+          spec.models,
         );
         if (generated === "unsupported") {
           await notImplemented(io, argv, commandPath);
@@ -786,6 +802,7 @@ function runWrapper(
   command: ServiceSpec["commands"][string],
   values: Record<string, unknown>,
   usageText: () => string,
+  models: ServiceSpec["models"],
 ):
   | { command: GeneratedCommand; kwargs: Record<string, unknown> }
   | undefined
@@ -797,7 +814,10 @@ function runWrapper(
       names,
       target = 0,
     } = runProgram(program.body, values, command.params ?? [], (name, value) =>
-      parseJsonParameter(io, name, value),
+      parseJsonParameter(io, name, value, {
+        complexTypes: command.complexTypes,
+        models,
+      }),
     );
     if (!kwargs) return undefined;
     // A file (or its bytes) handed on as a request body or output file: not modeled yet.
@@ -814,8 +834,13 @@ function runWrapper(
             operation: command.operation,
             bindings: (command as GeneratedCommand).bindings,
             params: command.generated?.params ?? [],
+            complexTypes: command.generated?.complexTypes,
           }
-        : variant && { ...variant, params: variant.generated.params };
+        : variant && {
+            ...variant,
+            params: variant.generated.params,
+            complexTypes: variant.generated.complexTypes,
+          };
     if (!invoked) return "unsupported";
     const accepted = new Set(invoked.params.map((p) => p.name));
     if (names?.some((name) => !accepted.has(name))) return "unsupported";
@@ -824,6 +849,7 @@ function runWrapper(
         operation: invoked.operation,
         bindings: invoked.bindings,
         params: invoked.params,
+        complexTypes: invoked.complexTypes ?? {},
       },
       kwargs,
     };

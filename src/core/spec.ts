@@ -3,6 +3,7 @@
 import { join } from "node:path";
 
 import type { DatetimeSpec, TypedParam } from "./convert.ts";
+import type { Models } from "./camelize.ts";
 import type { ParseSettings } from "./parser.ts";
 import type { RegionsSpec, ClientInfo } from "./endpoint.ts";
 import type { Predicate, UsageCheck } from "./checks.ts";
@@ -72,7 +73,11 @@ export type ServiceSpec = {
         checks?: UsageCheck[];
         /** The wrapper is decorated with cli_util.wrap_exceptions. */
         wrapExceptions?: boolean;
+        /** The delegated command's complex types, when not the wrapper's. */
+        complexTypes?: Record<string, string>;
       };
+      /** input_params_to_complex_types, as `{param: "module:class"}`. */
+      complexTypes?: Record<string, string>;
       /** Tier B survey (tools/extract/patterns.py); only what the Engine reads. */
       survey?: {
         /** `test` is present when the check compiles and precedes any I/O. */
@@ -82,7 +87,7 @@ export type ServiceSpec = {
       /** A Tier B wrapper's body compiled to a program (tools/extract/program.py). */
       program?: { body: Statement[]; wrapExceptions: boolean };
       /** The generated command a programmed wrapper invokes; operation and bindings are its. */
-      generated?: { callback: string; params: TypedParam[] };
+      generated?: GeneratedTarget;
       operation?: OperationSpec;
       /**
        * The other generated commands a programmed wrapper invokes, one per variant
@@ -99,11 +104,19 @@ export type ServiceSpec = {
     }
   >;
   jsonExamplePool: Record<string, unknown>;
+  /** SDK models complex params' key camelization reaches (ticket 19). */
+  models?: Models;
 };
 
 /** A generated command a programmed Tier B wrapper invokes. */
+export type GeneratedTarget = {
+  callback: string;
+  params: TypedParam[];
+  complexTypes?: Record<string, string>;
+};
+
 export type WrapperTarget = {
-  generated: { callback: string; params: TypedParam[] };
+  generated: GeneratedTarget;
   operation: OperationSpec;
   bindings: Record<string, unknown>[];
 };

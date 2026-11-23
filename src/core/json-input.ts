@@ -5,6 +5,11 @@ import { resolve } from "node:path";
 import { expandUser } from "./config.ts";
 import { Exit, type Invocation } from "../lib/io.ts";
 import { expandVars } from "./rc.ts";
+import {
+  camelizeKeys,
+  type KeyTypes,
+  MissingDiscriminator,
+} from "./camelize.ts";
 
 /** Python's repr() of a str, as Click and oci quote names in messages. */
 export const repr = (s: string) =>
@@ -30,22 +35,36 @@ export function loadFileContents(io: Invocation, path: string): string | null {
   return null;
 }
 
-/** A string (or `file://` reference) parsed as JSON; anything else passes through. */
+/**
+ * A string (or `file://` reference) parsed as JSON; anything else passes through. Given
+ * the parsing command's `keys`, its keys are camelized as oci does (ticket 19).
+ */
 export function parseJsonParameter(
   io: Invocation,
   parameterName: string,
   parameterValue: unknown,
+  keys?: KeyTypes,
 ): unknown {
   if (parameterValue === undefined || parameterValue === null)
     return parameterValue;
   if (typeof parameterValue !== "string") return parameterValue;
   const jsonToParse = loadFileContents(io, parameterValue) ?? parameterValue;
+  let parsed: unknown;
   try {
-    return JSON.parse(jsonToParse) as unknown;
+    parsed = JSON.parse(jsonToParse) as unknown;
   } catch {
     io.err(
       `Parameter ${repr(parameterName)} must be in JSON format.\nFor help with formatting JSON input see our documentation here: https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/cliusing.htm#ManagingCLIInputandOutput\n`,
     );
+    throw new Exit(1);
+  }
+  if (!keys) return parsed;
+  try {
+    return camelizeKeys(keys, parsed, parameterName);
+  } catch (e) {
+    // get_subtype reads its discriminator; the json_skeleton handler reports the KeyError.
+    if (!(e instanceof MissingDiscriminator)) throw e;
+    io.err(`KeyError: ${repr(e.field)}\n`);
     throw new Exit(1);
   }
 }

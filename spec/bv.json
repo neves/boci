@@ -3660,6 +3660,41 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "json-dumps", "direct-client"],
+      "survey": {
+        "invokes": [
+          "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_boot_volume"
+        ],
+        "checks": [
+          {
+            "when": "kwargs['source_boot_volume_id'] and kwargs['boot_volume_backup_id'] or (kwargs['source_boot_volume_id'] and kwargs['source_volume_replica_id']) or (kwargs['boot_volume_backup_id'] and kwargs['source_volume_replica_id'])",
+            "options": [
+              "source_boot_volume_id",
+              "boot_volume_backup_id",
+              "source_volume_replica_id"
+            ],
+            "message": "You can only specify one of either --source-boot-volume-id, --boot-volume-backup-id or --source-volume-replica-id option"
+          },
+          {
+            "when": "not kwargs['source_boot_volume_id'] and (not kwargs['boot_volume_backup_id']) and (not kwargs['source_volume_replica_id'])",
+            "options": [
+              "source_boot_volume_id",
+              "boot_volume_backup_id",
+              "source_volume_replica_id"
+            ],
+            "message": "An empty boot volume cannot be created. Please specify either --boot-volume-backup-id, --source-boot-volume-id or --source-volume-replica-id"
+          },
+          {
+            "when": "(not kwargs['source_boot_volume_id'] and (not kwargs['source_volume_replica_id'])) and (not kwargs['availability_domain'])",
+            "options": [
+              "source_boot_volume_id",
+              "source_volume_replica_id",
+              "availability_domain"
+            ],
+            "message": "An availability domain must be specified when restoring a boot volume from backup"
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -10167,6 +10202,47 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "json-dumps", "direct-client"],
+      "survey": {
+        "invokes": [
+          "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume"
+        ],
+        "checks": [
+          {
+            "when": "kwargs['source_volume_id'] and kwargs['volume_backup_id'] or (kwargs['source_volume_id'] and kwargs['source_volume_replica_id']) or (kwargs['volume_backup_id'] and kwargs['source_volume_replica_id'])",
+            "options": [
+              "source_volume_id",
+              "volume_backup_id",
+              "source_volume_replica_id"
+            ],
+            "message": "You can only specify one of either --volume-backup-id, --source-volume-id or --source-volume-replica-id option"
+          },
+          {
+            "when": "(not kwargs['source_volume_id'] and (not kwargs['source_volume_replica_id'])) and (not kwargs['availability_domain'])",
+            "options": [
+              "source_volume_id",
+              "source_volume_replica_id",
+              "availability_domain"
+            ],
+            "message": "An availability domain must be specified when creating an empty volume or restoring a volume from a backup"
+          },
+          {
+            "when": "not kwargs['source_volume_id'] and (not kwargs['volume_backup_id']) and (not kwargs['source_volume_replica_id']) and (not kwargs['compartment_id'])",
+            "options": [
+              "source_volume_id",
+              "volume_backup_id",
+              "source_volume_replica_id",
+              "compartment_id"
+            ],
+            "message": "A compartment ID must be specified when creating an empty volume"
+          },
+          {
+            "when": "kwargs['size_in_mbs'] and kwargs['size_in_gbs']",
+            "options": ["size_in_mbs", "size_in_gbs"],
+            "message": "You cannot specify both --size-in-mbs and --size-in-gbs"
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",

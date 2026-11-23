@@ -1778,6 +1778,20 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "usage-error", "file-read"],
+      "survey": {
+        "invokes": [
+          "services.opsi.src.oci_cli_operations_insights.generated.operationsinsights_cli.put_awr_hub_object"
+        ],
+        "checks": [
+          {
+            "when": "(kwargs['name'] is None) and (not hasattr(file, 'name') or file.name == '<stdin>')",
+            "options": ["name", "file"],
+            "message": "Option \"--name\" must be provided when reading object from stdin"
+          }
+        ],
+        "files": ["file"]
+      },
       "params": [
         {
           "kind": "option",

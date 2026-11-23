@@ -74058,6 +74058,54 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": [
+        "kwargs-del",
+        "usage-error",
+        "raise-other",
+        "fold-body",
+        "json-dumps",
+        "file-read"
+      ],
+      "survey": {
+        "invokes": [
+          "services.golden_gate.src.oci_cli_golden_gate.generated.goldengate_cli.create_deployment"
+        ],
+        "checks": [
+          {
+            "when": "(kwargs.get('ogg_data') is None) and (kwargs.get('credential_store') == 'IAM') and (kwargs.get('identity_domain_id') is None)",
+            "options": ["credential_store", "identity_domain_id"],
+            "message": "--identity-domain-id is required if using IAM credential store."
+          },
+          {
+            "when": "(kwargs.get('ogg_data') is None) and (not (kwargs.get('credential_store') == 'IAM')) and (kwargs.get('admin_username') is None)",
+            "options": ["credential_store", "admin_username"],
+            "message": "--admin-username is required if using GOLDENGATE credential store."
+          },
+          {
+            "when": "(kwargs.get('ogg_data') is None) and (not (kwargs.get('credential_store') == 'IAM')) and (not (kwargs.get('admin_username') is None)) and (kwargs.get('admin_password') is None and kwargs.get('password_secret_id') is None)",
+            "options": [
+              "credential_store",
+              "admin_username",
+              "admin_password",
+              "password_secret_id"
+            ],
+            "message": "Either --password-secret-id or --admin-password is required if using GOLDENGATE credential store."
+          }
+        ],
+        "folds": [
+          {
+            "target": "maintenance_window",
+            "path": ["day"],
+            "options": ["maintenance_window_day"]
+          },
+          {
+            "target": "maintenance_window",
+            "path": ["startHour"],
+            "options": ["maintenance_window_start_hour"]
+          }
+        ],
+        "files": ["certificate_file", "private_key_file"]
+      },
       "params": [
         {
           "kind": "option",
@@ -79342,6 +79390,64 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": [
+        "kwargs-del",
+        "usage-error",
+        "fold-body",
+        "json-dumps",
+        "file-read"
+      ],
+      "survey": {
+        "invokes": [
+          "services.golden_gate.src.oci_cli_golden_gate.generated.goldengate_cli.update_deployment"
+        ],
+        "checks": [
+          {
+            "when": "(kwargs.get('ogg_data') is None) and (kwargs.get('credential_store') is None) and (kwargs.get('admin_username') is not None or kwargs.get('password_secret_id') is not None or kwargs.get('admin_password') is not None or (kwargs.get('identity_domain_id') is not None))",
+            "options": [
+              "credential_store",
+              "admin_username",
+              "password_secret_id",
+              "admin_password",
+              "identity_domain_id"
+            ],
+            "message": "--credential-store is required if changing admin username, password secret ID, admin password or identity domain ID."
+          },
+          {
+            "when": "(kwargs.get('ogg_data') is None) and (not (kwargs.get('credential_store') is None)) and (kwargs.get('credential_store') == 'GOLDENGATE') and (kwargs.get('admin_username') is None)",
+            "options": ["credential_store", "admin_username"],
+            "message": "--admin-username is required if using GOLDENGATE credential store."
+          },
+          {
+            "when": "(kwargs.get('ogg_data') is None) and (not (kwargs.get('credential_store') is None)) and (kwargs.get('credential_store') == 'GOLDENGATE') and (not (kwargs.get('admin_username') is None)) and (kwargs.get('admin_password') is None and kwargs.get('password_secret_id') is None)",
+            "options": [
+              "credential_store",
+              "admin_username",
+              "admin_password",
+              "password_secret_id"
+            ],
+            "message": "Either --password-secret-id or --admin-password is required if using GOLDENGATE credential store."
+          },
+          {
+            "when": "(kwargs.get('ogg_data') is None) and (not (kwargs.get('credential_store') is None)) and (not (kwargs.get('credential_store') == 'GOLDENGATE')) and (kwargs.get('credential_store') == 'IAM') and (kwargs.get('identity_domain_id') is None)",
+            "options": ["credential_store", "identity_domain_id"],
+            "message": "--identity-domain-id is required if using IAM credential store."
+          }
+        ],
+        "folds": [
+          {
+            "target": "maintenance_window",
+            "path": ["day"],
+            "options": ["maintenance_window_day"]
+          },
+          {
+            "target": "maintenance_window",
+            "path": ["startHour"],
+            "options": ["maintenance_window_start_hour"]
+          }
+        ],
+        "files": ["certificate_file", "private_key_file"]
+      },
       "params": [
         {
           "kind": "option",

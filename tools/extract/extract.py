@@ -24,6 +24,7 @@ import click
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sdk  # noqa: E402
+import patterns as tier_b  # noqa: E402
 
 CLIENTS = None  # collects SDK clients used while flattening one service
 JSON_EXAMPLE_POOL = None  # deduplicates exact complex skeletons within one service
@@ -191,6 +192,10 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                 cmd.callback, CLIENT_MAP, {p.name for p in cmd.params}
             )
             entry["tier"] = tier
+            if tier == "B":
+                entry["patterns"], survey = tier_b.survey(cmd)
+                if survey:
+                    entry["survey"] = survey
             if delegate:
                 entry["delegate"] = {
                     "callback": delegate["callback"],

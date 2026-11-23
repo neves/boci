@@ -32825,6 +32825,126 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": [
+        "kwargs-del",
+        "usage-error",
+        "fold-body",
+        "parse-json",
+        "json-dumps",
+        "file-read"
+      ],
+      "survey": {
+        "invokes": [
+          "services.core.src.oci_cli_compute.generated.compute_cli.launch_instance"
+        ],
+        "checks": [
+          {
+            "when": "(user_data_file) and ('user_data' in metadata)",
+            "options": ["user_data_file", "metadata"],
+            "message": "Cannot specify CloudInit user-data as part of both --user-data-file and --metadata."
+          },
+          {
+            "when": "(ssh_authorized_keys_file) and ('ssh_authorized_keys' in metadata)",
+            "options": ["ssh_authorized_keys_file", "metadata"],
+            "message": "Cannot specify ssh-authorized-keys as part of both --ssh-authorized-keys-file and --metadata."
+          },
+          {
+            "when": "not (kwargs.get('source_details') or kwargs.get('image_id') or kwargs.get('source_boot_volume_id'))",
+            "options": ["source_details", "image_id", "source_boot_volume_id"],
+            "message": "Must specify --source-details or --image-id or --source-boot-volume-id"
+          },
+          {
+            "when": "kwargs.get('source_details') and (kwargs.get('image_id') or kwargs.get('source_boot_volume_id') or kwargs.get('boot_volume_size_in_gbs'))",
+            "options": [
+              "source_details",
+              "image_id",
+              "source_boot_volume_id",
+              "boot_volume_size_in_gbs"
+            ],
+            "message": "Cannot specify --source-details with any of: --image-id, --source-boot-volume-id, or --boot-volume-size-in-gbs"
+          },
+          {
+            "when": "kwargs.get('image_id') and kwargs.get('source_boot_volume_id')",
+            "options": ["image_id", "source_boot_volume_id"],
+            "message": "Cannot specify both an --image-id and a --source-boot-volume-id to be used to boot the instance"
+          },
+          {
+            "when": "kwargs.get('boot_volume_size_in_gbs') and kwargs.get('source_boot_volume_id')",
+            "options": ["boot_volume_size_in_gbs", "source_boot_volume_id"],
+            "message": "Cannot specify both a --source-boot-volume-id and a --boot-volume-size-in-gbs to be used to boot the instance"
+          }
+        ],
+        "folds": [
+          {
+            "target": "create_vnic_details",
+            "path": ["assignPublicIp"],
+            "options": ["assign_public_ip"]
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["assignIpv6Ip"],
+            "options": ["assign_ipv6_ip"]
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["ipv6AddressIpv6SubnetCidrPairDetails"],
+            "options": ["ipv6_address_subnet_cidr_pairs"],
+            "json": true
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["skipSourceDestCheck"],
+            "options": ["skip_source_dest_check"]
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["assignPrivateDnsRecord"],
+            "options": ["assign_private_dns_record"]
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["hostnameLabel"],
+            "options": ["hostname_label"]
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["privateIp"],
+            "options": ["private_ip"]
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["subnetId"],
+            "options": ["subnet_id"]
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["nsg_ids"],
+            "options": ["nsg_ids"],
+            "json": true
+          },
+          {
+            "target": "create_vnic_details",
+            "path": ["displayName"],
+            "options": ["vnic_display_name"]
+          },
+          {
+            "target": "source_details",
+            "path": ["sourceType"],
+            "options": [],
+            "value": "image"
+          },
+          {
+            "target": "source_details",
+            "path": ["imageId"],
+            "options": ["image_id"]
+          }
+        ],
+        "files": [
+          "ipxe_script_file",
+          "user_data_file",
+          "ssh_authorized_keys_file"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -42191,6 +42311,13 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["file-read"],
+      "survey": {
+        "invokes": [
+          "services.core.src.oci_cli_compute.generated.compute_cli.create_instance_console_connection"
+        ],
+        "files": ["ssh_public_key_file"]
+      },
       "params": [
         {
           "kind": "option",
@@ -49561,6 +49688,19 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "direct-client"],
+      "survey": {
+        "invokes": [
+          "services.core.src.oci_cli_compute.generated.compute_cli.list_volume_attachments"
+        ],
+        "checks": [
+          {
+            "when": "not kwargs['compartment_id'] and (not kwargs['instance_id'])",
+            "options": ["compartment_id", "instance_id"],
+            "message": "Either --compartment-id or --instance-id has to be provided"
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",

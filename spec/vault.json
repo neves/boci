@@ -810,6 +810,29 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error"],
+      "survey": {
+        "invokes": [
+          "services.vault.src.oci_cli_vaults.generated.vaults_cli.create_secret_base64_secret_content_details"
+        ],
+        "checks": [
+          {
+            "when": "(not kwargs.get('enable_auto_generation')) and (not kwargs.get('secret_content_content'))",
+            "options": ["enable_auto_generation", "secret_content_content"],
+            "message": "Must specify either --secret-content-content or set --enable-auto-generation to true."
+          },
+          {
+            "when": "(not (not kwargs.get('enable_auto_generation'))) and (kwargs.get('secret_content_content'))",
+            "options": ["enable_auto_generation", "secret_content_content"],
+            "message": "Cannot specify both --secret-content-content and set --enable-auto-generation to true at the same time"
+          },
+          {
+            "when": "(not (not kwargs.get('enable_auto_generation'))) and (not kwargs.get('secret_generation_context'))",
+            "options": ["enable_auto_generation", "secret_generation_context"],
+            "message": "Must specify --secret-generation-context with --enable-auto-generation set to true."
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",

@@ -1779,6 +1779,189 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "fold-body", "parse-json"],
+      "survey": {
+        "invokes": [
+          "services.container_engine.src.oci_cli_container_engine.generated.containerengine_cli.create_cluster"
+        ],
+        "checks": [
+          {
+            "when": "kwargs.get('endpoint_nsg_ids') and (not kwargs.get('endpoint_subnet_id'))",
+            "options": ["endpoint_nsg_ids", "endpoint_subnet_id"],
+            "message": "Cannot specify --endpoint-nsg-ids without --endpoint-subnet-id"
+          },
+          {
+            "when": "'endpoint_public_ip_enabled' in kwargs and kwargs['endpoint_public_ip_enabled'] is not None and (not kwargs.get('endpoint_subnet_id'))",
+            "options": ["endpoint_public_ip_enabled", "endpoint_subnet_id"],
+            "message": "Cannot specify --endpoint-public-ip-enabled without --endpoint-subnet-id"
+          },
+          {
+            "when": "kwargs.get('endpoint_security_attributes') and (not kwargs.get('endpoint_subnet_id'))",
+            "options": ["endpoint_security_attributes", "endpoint_subnet_id"],
+            "message": "Cannot specify --endpoint-security-attributes without --endpoint-subnet-id"
+          }
+        ],
+        "folds": [
+          {
+            "target": "options",
+            "path": ["serviceLbSubnetIds"],
+            "options": ["service_lb_subnet_ids"],
+            "json": true
+          },
+          {
+            "target": "options",
+            "path": ["ipFamilies"],
+            "options": ["ip_families"],
+            "json": true
+          },
+          {
+            "target": "options",
+            "path": ["addOns", "isKubernetesDashboardEnabled"],
+            "options": ["dashboard_enabled"]
+          },
+          {
+            "target": "options",
+            "path": ["addOns", "isTillerEnabled"],
+            "options": ["tiller_enabled"]
+          },
+          {
+            "target": "options",
+            "path": ["openIdConnectTokenAuthenticationConfig", "issuerUrl"],
+            "options": ["oidc_issuer_url"]
+          },
+          {
+            "target": "options",
+            "path": ["openIdConnectTokenAuthenticationConfig", "clientId"],
+            "options": ["oidc_client_id"]
+          },
+          {
+            "target": "options",
+            "path": ["openIdConnectTokenAuthenticationConfig", "usernameClaim"],
+            "options": ["oidc_username_claim"]
+          },
+          {
+            "target": "options",
+            "path": [
+              "openIdConnectTokenAuthenticationConfig",
+              "usernamePrefix"
+            ],
+            "options": ["oidc_username_prefix"]
+          },
+          {
+            "target": "options",
+            "path": ["openIdConnectTokenAuthenticationConfig", "groupsClaim"],
+            "options": ["oidc_groups_claim"]
+          },
+          {
+            "target": "options",
+            "path": ["openIdConnectTokenAuthenticationConfig", "groupsPrefix"],
+            "options": ["oidc_groups_prefix"]
+          },
+          {
+            "target": "options",
+            "path": [
+              "openIdConnectTokenAuthenticationConfig",
+              "requiredClaims"
+            ],
+            "options": ["oidc_required_claims"],
+            "json": true
+          },
+          {
+            "target": "options",
+            "path": ["openIdConnectTokenAuthenticationConfig", "caCertificate"],
+            "options": ["oidc_ca_certificate"]
+          },
+          {
+            "target": "options",
+            "path": [
+              "openIdConnectTokenAuthenticationConfig",
+              "configurationFile"
+            ],
+            "options": ["oidc_configuration_file"]
+          },
+          {
+            "target": "options",
+            "path": [
+              "openIdConnectTokenAuthenticationConfig",
+              "signingAlgorithms"
+            ],
+            "options": ["oidc_signing_algorithms"],
+            "json": true
+          },
+          {
+            "target": "options",
+            "path": [
+              "openIdConnectTokenAuthenticationConfig",
+              "isOpenIdConnectAuthEnabled"
+            ],
+            "options": ["open_id_connect_auth_enabled"]
+          },
+          {
+            "target": "options",
+            "path": [
+              "openIdConnectDiscovery",
+              "isOpenIdConnectDiscoveryEnabled"
+            ],
+            "options": ["open_id_connect_discovery_enabled"]
+          },
+          {
+            "target": "options",
+            "path": ["kubernetesNetworkConfig", "podsCidr"],
+            "options": ["pods_cidr"]
+          },
+          {
+            "target": "options",
+            "path": ["kubernetesNetworkConfig", "servicesCidr"],
+            "options": ["services_cidr"]
+          },
+          {
+            "target": "options",
+            "path": ["persistentVolumeConfig", "freeformTags"],
+            "options": ["persistent_volume_freeform_tags"],
+            "json": true
+          },
+          {
+            "target": "options",
+            "path": ["persistentVolumeConfig", "definedTags"],
+            "options": ["persistent_volume_defined_tags"],
+            "json": true
+          },
+          {
+            "target": "options",
+            "path": ["serviceLbConfig", "freeformTags"],
+            "options": ["service_lb_freeform_tags"],
+            "json": true
+          },
+          {
+            "target": "options",
+            "path": ["serviceLbConfig", "definedTags"],
+            "options": ["service_lb_defined_tags"],
+            "json": true
+          },
+          {
+            "target": "endpoint_config",
+            "path": ["subnetId"],
+            "options": ["endpoint_subnet_id"]
+          },
+          {
+            "target": "endpoint_config",
+            "path": ["nsgIds"],
+            "options": ["endpoint_nsg_ids"],
+            "json": true
+          },
+          {
+            "target": "endpoint_config",
+            "path": ["isPublicIpEnabled"],
+            "options": ["endpoint_public_ip_enabled"]
+          },
+          {
+            "target": "endpoint_config",
+            "path": ["securityAttributes"],
+            "options": ["endpoint_security_attributes"],
+            "json": true
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -8268,6 +8451,95 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "fold-body", "parse-json", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.container_engine.src.oci_cli_container_engine.generated.containerengine_cli.create_node_pool"
+        ],
+        "checks": [
+          {
+            "when": "kwargs.get('max_pods_per_node') and (not kwargs.get('pod_subnet_ids'))",
+            "options": ["max_pods_per_node", "pod_subnet_ids"],
+            "message": "Cannot specify --max-pods-per-node without --pod-subnet-ids"
+          },
+          {
+            "when": "kwargs.get('pod_nsg_ids') and (not kwargs.get('pod_subnet_ids'))",
+            "options": ["pod_nsg_ids", "pod_subnet_ids"],
+            "message": "Cannot specify --pod-nsg-ids without --pod-subnet-ids"
+          },
+          {
+            "when": "('cni_type' in kwargs and kwargs['cni_type'] is not None) and (kwargs['cni_type'] == 'FLANNEL_OVERLAY' and kwargs.get('pod_subnet_ids'))",
+            "options": ["cni_type", "pod_subnet_ids"],
+            "message": "Cannot specify --pod_subnet_ids with --cni-type FLANNEL_OVERLAY"
+          },
+          {
+            "when": "kwargs.get('node_source_details') and (kwargs.get('node_image_id') or kwargs.get('node_boot_volume_size_in_gbs'))",
+            "options": [
+              "node_source_details",
+              "node_image_id",
+              "node_boot_volume_size_in_gbs"
+            ],
+            "message": "Cannot specify --node-source-details with any of: --node-image-id or --node-boot-volume-size-in-gbs"
+          },
+          {
+            "when": "kwargs.get('node_boot_volume_size_in_gbs') and (not kwargs.get('node_image_id'))",
+            "options": ["node_boot_volume_size_in_gbs", "node_image_id"],
+            "message": "Cannot specify --node-boot-volume-size-in-gbs without --node-image-id"
+          }
+        ],
+        "folds": [
+          {
+            "target": "node_config_details",
+            "path": ["size"],
+            "options": ["size"]
+          },
+          {
+            "target": "node_config_details",
+            "path": ["nsgIds"],
+            "options": ["nsg_ids"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["placementConfigs"],
+            "options": ["placement_configs"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["definedTags"],
+            "options": ["node_defined_tags"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["freeformTags"],
+            "options": ["node_freeform_tags"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["kmsKeyId"],
+            "options": ["kms_key_id"]
+          },
+          {
+            "target": "node_config_details",
+            "path": ["isPvEncryptionInTransitEnabled"],
+            "options": ["is_pv_encryption_in_transit_enabled"]
+          },
+          {
+            "target": "node_source_details",
+            "path": ["sourceType"],
+            "options": [],
+            "value": "IMAGE"
+          },
+          {
+            "target": "node_source_details",
+            "path": ["imageId"],
+            "options": ["node_image_id"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -10453,6 +10725,65 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "fold-body", "parse-json"],
+      "survey": {
+        "invokes": [
+          "services.container_engine.src.oci_cli_container_engine.generated.containerengine_cli.update_node_pool"
+        ],
+        "checks": [
+          {
+            "when": "kwargs.get('max_pods_per_node') and (not kwargs.get('pod_subnet_ids'))",
+            "options": ["max_pods_per_node", "pod_subnet_ids"],
+            "message": "Cannot specify --max-pods-per-node without --pod-subnet-ids"
+          },
+          {
+            "when": "kwargs.get('pod_nsg_ids') and (not kwargs.get('pod_subnet_ids'))",
+            "options": ["pod_nsg_ids", "pod_subnet_ids"],
+            "message": "Cannot specify --pod-nsg-ids without --pod-subnet-ids"
+          }
+        ],
+        "folds": [
+          {
+            "target": "node_config_details",
+            "path": ["size"],
+            "options": ["size"]
+          },
+          {
+            "target": "node_config_details",
+            "path": ["nsgIds"],
+            "options": ["nsg_ids"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["placementConfigs"],
+            "options": ["placement_configs"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["definedTags"],
+            "options": ["node_defined_tags"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["freeformTags"],
+            "options": ["node_freeform_tags"],
+            "json": true
+          },
+          {
+            "target": "node_config_details",
+            "path": ["kmsKeyId"],
+            "options": ["kms_key_id"]
+          },
+          {
+            "target": "node_config_details",
+            "path": ["isPvEncryptionInTransitEnabled"],
+            "options": ["is_pv_encryption_in_transit_enabled"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",

@@ -50414,6 +50414,22 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error"],
+      "survey": {
+        "invokes": ["func_call_dict[func_call_key]"],
+        "checks": [
+          {
+            "when": "len(command_args) == 0",
+            "options": [],
+            "message": "At least one of the options (--public-ip-id or --public-ip-address or --private-ip-id) MUST be specified"
+          },
+          {
+            "when": "len(command_args) > 1",
+            "options": [],
+            "message": "This command accepts ONLY one option : EITHER --public-ip-id OR --public-ip_address OR --private-ip-id"
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -53542,6 +53558,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "direct-client", "output"],
+      "survey": {
+        "invokes": [
+          "services.core.src.oci_cli_virtual_network.generated.virtualnetwork_cli.connect_remote_peering_connections"
+        ]
+      },
       "params": [
         {
           "kind": "option",

@@ -4419,6 +4419,52 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": [
+        "blank-check",
+        "usage-error",
+        "direct-client",
+        "output",
+        "helper"
+      ],
+      "survey": {
+        "invokes": [
+          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.update_rover_node"
+        ],
+        "checks": [
+          {
+            "when": "'image_id' in kwargs and (not kwargs['image_id'])",
+            "options": ["image_id"],
+            "message": "Parameter image-id cannot be whitespace or empty string"
+          },
+          {
+            "when": "compute_image_obj is None or compute_image_obj.data is None",
+            "options": [],
+            "message": "Image not authorized or not found"
+          },
+          {
+            "when": "(kwargs['type'].lower() == 'bucket') and (not ('bucket_name' in kwargs and kwargs['bucket_name']))",
+            "options": ["type", "bucket_name"],
+            "message": "Parameter bucket-name cannot be whitespace or empty string"
+          },
+          {
+            "when": "result.data.node_workloads and len(result.data.node_workloads) > 0 and any((existing_workload.id == workload_id for existing_workload in result.data.node_workloads))",
+            "options": [],
+            "message": "'Workload with {} is already attached'.format(workload_id)"
+          },
+          {
+            "when": "isinstance(image_id, six.string_types) and len(image_id.strip()) == 0",
+            "options": ["image_id"],
+            "message": "Parameter --image-id cannot be whitespace or empty string"
+          }
+        ],
+        "helpers": [
+          "get_rover_node_helper",
+          "prepare_bucket_workload_data",
+          "validate_get_image",
+          "prepare_image_workload_data",
+          "export_compute_image_helper"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -5677,6 +5723,19 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["blank-check"],
+      "survey": {
+        "invokes": [
+          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.change_rover_node_compartment"
+        ],
+        "checks": [
+          {
+            "when": "isinstance(kwargs['node_id'], six.string_types) and len(kwargs['node_id'].strip()) == 0",
+            "options": ["node_id"],
+            "message": "Parameter --node-id cannot be whitespace or empty string"
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -7049,6 +7108,30 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "direct-client", "output", "helper"],
+      "survey": {
+        "invokes": [
+          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.update_rover_node"
+        ],
+        "checks": [
+          {
+            "when": "(workload_data) and (len(workload_data) > 1) and (workload_index > len(workload_data) or workload_index < 1)",
+            "options": [],
+            "message": "Please try again with valid selection"
+          },
+          {
+            "when": "(workload_data) and (not kwargs['force']) and (not click.confirm(click.style(confirm_prompt, fg='yellow')))",
+            "options": ["force"],
+            "message": "Aborting workload deletion from Rover Cluster"
+          },
+          {
+            "when": "not (workload_data)",
+            "options": [],
+            "message": "Node has no associated workloads."
+          }
+        ],
+        "helpers": ["get_rover_node_helper", "prompt_for_workload_delete"]
+      },
       "params": [
         {
           "kind": "option",
@@ -7270,6 +7353,19 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["blank-check"],
+      "survey": {
+        "invokes": [
+          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.get_rover_node_encryption_key"
+        ],
+        "checks": [
+          {
+            "when": "isinstance(kwargs['node_id'], six.string_types) and len(kwargs['node_id'].strip()) == 0",
+            "options": ["node_id"],
+            "message": "Parameter --node-id cannot be whitespace or empty string"
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -7919,6 +8015,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["output"],
+      "survey": {
+        "invokes": [
+          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.update_rover_node"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -8925,6 +9027,25 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["blank-check", "helper"],
+      "survey": {
+        "invokes": [
+          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.update_rover_node"
+        ],
+        "checks": [
+          {
+            "when": "(kwargs['super_user_password'] or (not kwargs['super_user_password'] and (not kwargs['unlock_passphrase']))) and (not super_user_password)",
+            "options": ["super_user_password", "unlock_passphrase"],
+            "message": "Super user password cannot be whitespace or empty string"
+          },
+          {
+            "when": "(kwargs['unlock_passphrase'] or (not kwargs['super_user_password'] and (not kwargs['unlock_passphrase']))) and (not unlock_passphrase)",
+            "options": ["unlock_passphrase", "super_user_password"],
+            "message": "Unlock passphrase cannot be whitespace or empty string"
+          }
+        ],
+        "helpers": ["prompt_for_secrets"]
+      },
       "params": [
         {
           "kind": "option",
@@ -9384,6 +9505,13 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["direct-client", "output", "helper"],
+      "survey": {
+        "invokes": [
+          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.update_rover_node"
+        ],
+        "helpers": ["complex_shipping_address_param"]
+      },
       "params": [
         {
           "kind": "option",

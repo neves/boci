@@ -29083,6 +29083,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_autonomous_database_create_autonomous_database_details"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -44966,6 +44972,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_autonomous_database_create_autonomous_database_clone_details"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -56714,6 +56726,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_autonomous_database"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -62517,6 +62535,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_autonomous_database_wallet"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -62735,6 +62759,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_autonomous_database_wallet"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -72240,6 +72270,24 @@
       "callback": "services.database.src.oci_cli_database.database_cli_extended.list_backups_extended",
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.list_backups"
+        ],
+        "checks": [
+          {
+            "when": "not compartment_id and (not database_id)",
+            "options": ["compartment_id", "database_id"],
+            "message": "--compartment-id or --database-id must be provided"
+          },
+          {
+            "when": "compartment_id and database_id",
+            "options": ["compartment_id", "database_id"],
+            "message": "You can only specify one of either --compartment-id or --database-id option"
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -91980,6 +92028,58 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": [
+        "kwargs-del",
+        "usage-error",
+        "fold-body",
+        "json-dumps",
+        "file-read"
+      ],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_cloud_vm_cluster"
+        ],
+        "checks": [
+          {
+            "when": "len(provided_update_identifiers) > 1",
+            "options": [],
+            "message": "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home"
+          },
+          {
+            "when": "(not (len(provided_update_identifiers) > 1)) and (update_action and (not provided_update_identifiers))",
+            "options": ["update_action"],
+            "message": "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified"
+          },
+          {
+            "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (provided_update_identifiers and (not update_action))",
+            "options": ["update_action"],
+            "message": "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified"
+          },
+          {
+            "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (not (provided_update_identifiers and (not update_action))) and (update_mode is not None and 'updateId' not in provided_update_identifiers)",
+            "options": ["update_action", "update_mode"],
+            "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update"
+          }
+        ],
+        "folds": [
+          {
+            "target": "update_details",
+            "path": ["updateAction"],
+            "options": ["update_action"]
+          },
+          {
+            "target": "update_details",
+            "path": ["updateMode"],
+            "options": ["update_mode"]
+          },
+          {
+            "target": "update_details",
+            "path": ["isOlderVersionAcknowledged"],
+            "options": ["is_older_version_acknowledged"]
+          }
+        ],
+        "files": ["ssh_authorized_keys_file"]
+      },
       "params": [
         {
           "kind": "option",
@@ -110838,6 +110938,24 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.enable_database_management"
+        ],
+        "folds": [
+          {
+            "target": "credential_details",
+            "path": ["userName"],
+            "options": ["user_name"]
+          },
+          {
+            "target": "credential_details",
+            "path": ["passwordSecretId"],
+            "options": ["password_secret_id"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -113654,6 +113772,24 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.modify_database_management"
+        ],
+        "folds": [
+          {
+            "target": "credential_details",
+            "path": ["userName"],
+            "options": ["user_name"]
+          },
+          {
+            "target": "credential_details",
+            "path": ["passwordSecretId"],
+            "options": ["password_secret_id"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -116613,6 +116749,24 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "fold-body", "parse-json", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_database"
+        ],
+        "folds": [
+          {
+            "target": "auto_failover_configuration",
+            "path": ["managed_auto_failover"],
+            "options": ["manage_auto_failover"]
+          },
+          {
+            "target": "auto_failover_configuration",
+            "path": ["failover_targets"],
+            "options": ["auto_failover_targets"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -118541,6 +118695,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_database_software_image_details"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -118827,6 +118987,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_db_home_details"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -119116,6 +119282,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_db_version_details"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -125640,6 +125812,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_db_system_upgrade_history_entry"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -138611,6 +138789,19 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_exascale_db_storage_vault"
+        ],
+        "folds": [
+          {
+            "target": "high_capacity_database_storage",
+            "path": ["total_size_in_gbs"],
+            "options": ["high_capacity_storage_gb"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -140030,6 +140221,19 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_exascale_db_storage_vault"
+        ],
+        "folds": [
+          {
+            "target": "high_capacity_database_storage",
+            "path": ["total_size_in_gbs"],
+            "options": ["high_capacity_storage_gb"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -161191,6 +161395,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "parse-json"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_key_store_key_store_type_from_oracle_key_vault_details"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -162134,6 +162344,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "parse-json"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_key_store_key_store_type_from_oracle_key_vault_details"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -169000,6 +169216,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "direct-client"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_db_home_patch"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -169549,6 +169771,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "direct-client"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.list_db_home_patches"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -170410,6 +170638,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "direct-client"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_db_home_patch_history_entry"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -170968,6 +171202,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "direct-client"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.list_db_home_patch_history_entries"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -172441,6 +172681,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_pluggable_database"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -173417,6 +173663,19 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_pluggable_database_create_pluggable_database_from_remote_clone_details"
+        ],
+        "folds": [
+          {
+            "target": "pdb_creation_type_details_refreshable_clone_details",
+            "path": ["isRefreshableClone"],
+            "options": ["is_refreshable_clone"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -174967,6 +175226,24 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.enable_pluggable_database_management"
+        ],
+        "folds": [
+          {
+            "target": "credential_details",
+            "path": ["userName"],
+            "options": ["user_name"]
+          },
+          {
+            "target": "credential_details",
+            "path": ["passwordSecretId"],
+            "options": ["password_secret_id"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -176438,6 +176715,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.local_clone_pluggable_database"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -176746,6 +177029,24 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.modify_pluggable_database_management"
+        ],
+        "folds": [
+          {
+            "target": "credential_details",
+            "path": ["userName"],
+            "options": ["user_name"]
+          },
+          {
+            "target": "credential_details",
+            "path": ["passwordSecretId"],
+            "options": ["password_secret_id"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -177980,6 +178281,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.remote_clone_pluggable_database"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -188519,6 +188826,50 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "fold-body", "json-dumps", "file-read"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.launch_db_system_launch_db_system_details"
+        ],
+        "folds": [
+          {
+            "target": "db_home",
+            "path": ["dbVersion"],
+            "options": ["db_version"]
+          },
+          {
+            "target": "db_home",
+            "path": ["databaseSoftwareImageId"],
+            "options": ["database_software_image_id"]
+          },
+          {
+            "target": "db_home",
+            "path": ["is_unified_auditing_enabled"],
+            "options": ["is_unified_auditing_enabled"]
+          },
+          {
+            "target": "db_system_options",
+            "path": ["storage_management"],
+            "options": ["storage_management"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_diagnostics_events_enabled"],
+            "options": ["is_diagnostics_events_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_health_monitoring_enabled"],
+            "options": ["is_health_monitoring_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_incident_logs_enabled"],
+            "options": ["is_incident_logs_enabled"]
+          }
+        ],
+        "files": ["ssh_authorized_keys_file"]
+      },
       "params": [
         {
           "kind": "option",
@@ -191373,6 +191724,45 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "fold-body", "json-dumps", "file-read"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.launch_db_system_launch_db_system_from_backup_details"
+        ],
+        "folds": [
+          {
+            "target": "db_home",
+            "path": ["databaseSoftwareImageId"],
+            "options": ["database_software_image_id"]
+          },
+          {
+            "target": "db_home",
+            "path": ["is_unified_auditing_enabled"],
+            "options": ["is_unified_auditing_enabled"]
+          },
+          {
+            "target": "db_system_options",
+            "path": ["storage_management"],
+            "options": ["storage_management"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_diagnostics_events_enabled"],
+            "options": ["is_diagnostics_events_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_health_monitoring_enabled"],
+            "options": ["is_health_monitoring_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_incident_logs_enabled"],
+            "options": ["is_incident_logs_enabled"]
+          }
+        ],
+        "files": ["ssh_authorized_keys_file"]
+      },
       "params": [
         {
           "kind": "option",
@@ -192619,6 +193009,29 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.launch_db_system_launch_db_system_from_database_details"
+        ],
+        "folds": [
+          {
+            "target": "data_collection_options",
+            "path": ["is_diagnostics_events_enabled"],
+            "options": ["is_diagnostics_events_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_health_monitoring_enabled"],
+            "options": ["is_health_monitoring_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_incident_logs_enabled"],
+            "options": ["is_incident_logs_enabled"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -193750,6 +194163,29 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.launch_db_system_launch_db_system_from_db_system_details"
+        ],
+        "folds": [
+          {
+            "target": "data_collection_options",
+            "path": ["is_diagnostics_events_enabled"],
+            "options": ["is_diagnostics_events_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_health_monitoring_enabled"],
+            "options": ["is_health_monitoring_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_incident_logs_enabled"],
+            "options": ["is_incident_logs_enabled"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -196152,6 +196588,58 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": [
+        "kwargs-del",
+        "usage-error",
+        "fold-body",
+        "json-dumps",
+        "file-read"
+      ],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_db_system"
+        ],
+        "checks": [
+          {
+            "when": "patch_action and (not patch_id)",
+            "options": ["patch_action", "patch_id"],
+            "message": "--patch-id is required if --patch-action is specified"
+          },
+          {
+            "when": "(not (patch_action and (not patch_id))) and (patch_id and (not patch_action))",
+            "options": ["patch_action", "patch_id"],
+            "message": "--patch-action is required if --patch-id is specified"
+          }
+        ],
+        "folds": [
+          {
+            "target": "version_parameterconflict",
+            "path": ["action"],
+            "options": ["patch_action"]
+          },
+          {
+            "target": "version_parameterconflict",
+            "path": ["patchId"],
+            "options": ["patch_id"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_diagnostics_events_enabled"],
+            "options": ["is_diagnostics_events_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_health_monitoring_enabled"],
+            "options": ["is_health_monitoring_enabled"]
+          },
+          {
+            "target": "data_collection_options",
+            "path": ["is_incident_logs_enabled"],
+            "options": ["is_incident_logs_enabled"]
+          }
+        ],
+        "files": ["ssh_authorized_keys_file"]
+      },
       "params": [
         {
           "kind": "option",
@@ -197096,6 +197584,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_db_system"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -198514,6 +199008,12 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_database_upgrade_history_entry"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -202923,6 +203423,71 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "usage-error", "fold-body"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_vm_cluster"
+        ],
+        "checks": [
+          {
+            "when": "patch_action and (not patch_id)",
+            "options": ["patch_action", "patch_id"],
+            "message": "--patch-id is required if --patch-action is specified"
+          },
+          {
+            "when": "(not (patch_action and (not patch_id))) and (patch_id and (not patch_action))",
+            "options": ["patch_action", "patch_id"],
+            "message": "--patch-action is required if --patch-id is specified"
+          },
+          {
+            "when": "len(provided_update_identifiers) > 1",
+            "options": [],
+            "message": "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home"
+          },
+          {
+            "when": "(not (len(provided_update_identifiers) > 1)) and (update_action and (not provided_update_identifiers))",
+            "options": ["update_action"],
+            "message": "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified"
+          },
+          {
+            "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (provided_update_identifiers and (not update_action))",
+            "options": ["update_action"],
+            "message": "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified"
+          },
+          {
+            "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (not (provided_update_identifiers and (not update_action))) and (update_mode is not None and 'updateId' not in provided_update_identifiers)",
+            "options": ["update_action", "update_mode"],
+            "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update"
+          }
+        ],
+        "folds": [
+          {
+            "target": "version_parameterconflict",
+            "path": ["action"],
+            "options": ["patch_action"]
+          },
+          {
+            "target": "version_parameterconflict",
+            "path": ["patchId"],
+            "options": ["patch_id"]
+          },
+          {
+            "target": "update_details",
+            "path": ["updateAction"],
+            "options": ["update_action"]
+          },
+          {
+            "target": "update_details",
+            "path": ["updateMode"],
+            "options": ["update_mode"]
+          },
+          {
+            "target": "update_details",
+            "path": ["isOlderVersionAcknowledged"],
+            "options": ["is_older_version_acknowledged"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",

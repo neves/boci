@@ -1143,6 +1143,30 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["usage-error", "direct-client", "output", "wait", "helper"],
+      "survey": {
+        "invokes": [
+          "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.delete_bucket"
+        ],
+        "checks": [
+          {
+            "when": "dry_run and (not empty)",
+            "options": ["dry_run", "empty"],
+            "message": "The option --dry-run is applicable only when the --empty option is specified"
+          }
+        ],
+        "helpers": [
+          "_delete_bucket_components",
+          "retrying_list_call",
+          "retrying_list_call_single_page",
+          "retrying_list_objects",
+          "retrying_list_object_versions",
+          "_add_to_delete_pool",
+          "_get_progress_bar_label",
+          "_bulk_delete_objects_using_pool",
+          "_combine_output"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -5603,6 +5627,18 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "file-read", "base64", "helper"],
+      "survey": {
+        "invokes": [
+          "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.copy_object"
+        ],
+        "files": ["encryption_key_file", "source_encryption_key_file"],
+        "helpers": [
+          "_get_encryption_key_params",
+          "_get_sse_params",
+          "_get_source_encryption_key_params"
+        ]
+      },
       "params": [
         {
           "kind": "option",
@@ -8408,6 +8444,14 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "file-read", "base64", "helper"],
+      "survey": {
+        "invokes": [
+          "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.reencrypt_object"
+        ],
+        "files": ["encryption_key_file", "source_encryption_key_file"],
+        "helpers": ["_get_sse_customer_key_details"]
+      },
       "params": [
         {
           "kind": "option",
@@ -15224,6 +15268,31 @@
       },
       "kind": "custom",
       "tier": "B",
+      "patterns": ["kwargs-del", "usage-error", "fold-body"],
+      "survey": {
+        "invokes": [
+          "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.create_retention_rule"
+        ],
+        "checks": [
+          {
+            "when": "(kwargs['time_amount'] is not None) and (not (kwargs['time_unit'] is not None))",
+            "options": ["time_amount", "time_unit"],
+            "message": "Parameter --time-unit is required when --time-amount is specified"
+          }
+        ],
+        "folds": [
+          {
+            "target": "duration",
+            "path": ["timeAmount"],
+            "options": ["time_amount"]
+          },
+          {
+            "target": "duration",
+            "path": ["timeUnit"],
+            "options": ["time_unit"]
+          }
+        ]
+      },
       "params": [
         {
           "kind": "option",

@@ -24,6 +24,20 @@ type Command = ServiceSpec["commands"][string] & {
   bindings?: { target: string; key: string[]; param: string; when?: string }[];
   tier?: "A" | "B" | "C";
   delegate?: { callback: string; renames: Record<string, string> };
+  patterns?: string[];
+  survey?: {
+    invokes?: string[];
+    checks?: { when: string; options: string[]; message: string }[];
+    folds?: {
+      target: string;
+      path: (string | number)[];
+      options: string[];
+      json?: boolean;
+      value?: unknown;
+    }[];
+    files?: string[];
+    helpers?: string[];
+  };
 };
 const cmd = spec.commands[key] as Command | undefined;
 
@@ -54,6 +68,17 @@ if (cmd.tier)
   console.log(
     `tier: ${cmd.tier}${cmd.delegate ? ` → ${cmd.delegate.callback}` : ""}`,
   );
+if (cmd.patterns) console.log(`patterns: ${cmd.patterns.join(" ")}`);
+const sv = cmd.survey;
+for (const i of sv?.invokes ?? []) console.log(`invokes: ${i}`);
+for (const c of sv?.checks ?? [])
+  console.log(`check: ${c.message}\n  when ${c.when}`);
+for (const f of sv?.folds ?? [])
+  console.log(
+    `fold: ${f.options.join(",") || JSON.stringify(f.value)} → ${[f.target, ...f.path].join(".")}${f.json ? " (json)" : ""}`,
+  );
+if (sv?.files?.length) console.log(`files: ${sv.files.join(" ")}`);
+if (sv?.helpers?.length) console.log(`helpers: ${sv.helpers.join(" ")}`);
 const op = cmd.operation as
   | (NonNullable<Command["operation"]> & {
       paginated?: boolean;

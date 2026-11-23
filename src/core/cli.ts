@@ -829,13 +829,6 @@ async function runWrapper(
       answers,
     );
     if (!kwargs) return undefined;
-    // A file (or its bytes) handed on as a request body or output file: not modeled yet.
-    if (
-      Object.values(kwargs).some(
-        (v) => v instanceof ProgramFile || v instanceof Uint8Array,
-      )
-    )
-      return "unsupported";
     const variant = command.variants?.[target - 1];
     const invoked =
       target === 0
@@ -851,6 +844,17 @@ async function runWrapper(
             complexTypes: variant.generated.complexTypes,
           };
     if (!invoked) return "unsupported";
+    // Bytes go out only as the direct request body; a file handed on (an open body
+    // stream or output file) isn't modeled yet.
+    const directBody = invoked.operation?.body;
+    if (
+      Object.entries(kwargs).some(
+        ([name, v]) =>
+          v instanceof ProgramFile ||
+          (v instanceof Uint8Array && name !== directBody),
+      )
+    )
+      return "unsupported";
     const accepted = new Set(invoked.params.map((p) => p.name));
     if (names?.some((name) => !accepted.has(name))) return "unsupported";
     return {

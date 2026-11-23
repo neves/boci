@@ -323,7 +323,7 @@ function buildRequestBody(
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   keys: KeyTypes,
-): string {
+): string | Uint8Array {
   const body: Record<string, unknown> = {};
   let hasBodyBindings = false;
   for (const binding of command.bindings ?? []) {
@@ -385,6 +385,8 @@ function buildRequestBody(
         ? ""
         : "{}";
     }
+    // A wrapper's `file.read()` bytes: sent as they are.
+    if (direct instanceof Uint8Array) return direct;
     if (typeof direct === "string") {
       // The email data-plane command treats raw_message as file content; other
       // generated direct-body parameters are passed through as raw strings.
@@ -837,7 +839,7 @@ export async function callOperation(
     }
   }
   const keys = keyTypes(command, spec.models);
-  let requestBody = "";
+  let requestBody: string | Uint8Array = "";
   if (operation.http === "GET") {
     if (values.all_pages === true && values.limit !== undefined) {
       io.err(

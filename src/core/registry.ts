@@ -264,12 +264,6 @@ const EXCLUDED = new Set<string>([
   // Tier A wrapper the Reference CLI can't run: the delegated generated command rejects
   // the injected `operation` kwarg with a TypeError before any request.
   "resource-manager job create-plan-rollback-job",
-  // Tier B wrappers that hand a binary file's bytes to the generated command as the raw
-  // request body; the Engine doesn't send binary bodies yet (ticket 21).
-  "log-analytics content-import import-custom-content",
-  "log-analytics lookup append-data",
-  "log-analytics lookup register-lookup",
-  "log-analytics lookup update-data",
   // Writes the response to `--file` (a lazy click.File); not modeled yet (ticket 22).
   "log-analytics query export",
 ]);

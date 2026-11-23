@@ -1,0 +1,162 @@
+[
+  {
+    "id": "sse-os-object-reencrypt",
+    "key": "os object reencrypt",
+    "argv": [
+      "os",
+      "object",
+      "reencrypt",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--name",
+      "o1",
+      "--encryption-key-file",
+      "k1.txt",
+      "--source-encryption-key-file",
+      "k2.txt",
+      "--kms-key-id",
+      "ocid1.key.oc1..k",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
+        "k2.txt": "  ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8=  \r\n"
+      }
+    },
+    "requestOnly": true,
+    "replies": {
+      "status": 200
+    }
+  },
+  {
+    "id": "sse-os-object-reencrypt-one-key",
+    "key": "os object reencrypt",
+    "argv": [
+      "os",
+      "object",
+      "reencrypt",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--name",
+      "o1",
+      "--source-encryption-key-file",
+      "-",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {}
+    },
+    "stdin": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
+    "requestOnly": true,
+    "replies": {
+      "status": 200
+    }
+  },
+  {
+    "id": "sse-os-object-reencrypt-bad-padding",
+    "key": "os object reencrypt",
+    "argv": [
+      "os",
+      "object",
+      "reencrypt",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--name",
+      "o1",
+      "--encryption-key-file",
+      "k1.txt",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "boci generated file\r\nline 2\n"
+      }
+    }
+  },
+  {
+    "id": "sse-os-object-reencrypt-one-more",
+    "key": "os object reencrypt",
+    "argv": [
+      "os",
+      "object",
+      "reencrypt",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--name",
+      "o1",
+      "--encryption-key-file",
+      "k1.txt",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "abcde\n"
+      }
+    }
+  },
+  {
+    "id": "sse-os-object-reencrypt-padded-early",
+    "key": "os object reencrypt",
+    "argv": [
+      "os",
+      "object",
+      "reencrypt",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--name",
+      "o1",
+      "--encryption-key-file",
+      "k1.txt",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "YQ==trailing junk"
+      }
+    },
+    "requestOnly": true,
+    "replies": {
+      "status": 200
+    }
+  },
+  {
+    "id": "sse-os-object-reencrypt-non-ascii",
+    "key": "os object reencrypt",
+    "argv": [
+      "os",
+      "object",
+      "reencrypt",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--name",
+      "o1",
+      "--encryption-key-file",
+      "k1.txt",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "YWJjé\n"
+      }
+    }
+  }
+]

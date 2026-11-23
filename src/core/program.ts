@@ -211,6 +211,77 @@ const HAND_CODED: Record<string, (s: string) => unknown> = {
     Object.fromEntries(dataflowPairs(s, DATAFLOW_CONFIGURATION_ERROR, false)),
 };
 
+const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+/**
+ * Python's `base64.b64decode(s)` (binascii.a2b_base64, not strict): characters outside
+ * the alphabet are skipped, a complete pad ends the input; errors raise like CPython.
+ */
+export function pyB64decode(s: string): Uint8Array {
+  if (/[^\x00-\x7f]/.test(s))
+    throw new ProgramRaise(
+      "ValueError",
+      "string argument should contain only ASCII characters",
+    );
+  const out: number[] = [];
+  let quad = 0;
+  let left = 0;
+  let pads = 0;
+  for (const ch of s) {
+    if (ch === "=") {
+      if (quad >= 2 && quad + ++pads >= 4) return Uint8Array.from(out);
+      continue;
+    }
+    const v = B64.indexOf(ch);
+    if (v < 0) continue;
+    pads = 0;
+    if (quad === 0) left = v;
+    else if (quad === 1) {
+      out.push(((left << 2) | (v >> 4)) & 0xff);
+      left = v & 0x0f;
+    } else if (quad === 2) {
+      out.push(((left << 4) | (v >> 2)) & 0xff);
+      left = v & 0x03;
+    } else out.push(((left << 6) | v) & 0xff);
+    quad = (quad + 1) % 4;
+  }
+  if (quad === 1)
+    throw new ProgramRaise(
+      "Error",
+      `Invalid base64-encoded string: number of data characters (${Math.floor(out.length / 3) * 4 + 1}) cannot be 1 more than a multiple of 4`,
+    );
+  if (quad !== 0) throw new ProgramRaise("Error", "Incorrect padding");
+  return Uint8Array.from(out);
+}
+
+/**
+ * objectstorage_cli_extended's `_get_sse_customer_key_details` / `_get_sse_params`: the
+ * key file's stripped base64 text and the base64 SHA-256 of the key it decodes to.
+ */
+function sseKey(file: unknown): { key: string; sha256: string } | null {
+  if (file === null || file === undefined) return null;
+  if (!(file instanceof ProgramFile))
+    throw new ProgramUnsupported("SSE key from a non-file");
+  const key = pyStrip(String(file.read()));
+  const sha256 = new Bun.CryptoHasher("sha256")
+    .update(pyB64decode(key))
+    .digest("base64");
+  return { key, sha256 };
+}
+
+const SSE_ALGORITHM = "AES256";
+
+function sseParams(file: unknown, prefix: string): Dict | null {
+  const k = sseKey(file);
+  return (
+    k && {
+      [`${prefix}_algorithm`]: SSE_ALGORITHM,
+      [`${prefix}_key`]: k.key,
+      [`${prefix}_key_sha256`]: k.sha256,
+    }
+  );
+}
+
 function sortKeys(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(sortKeys);
   if (!isDict(v)) return v;
@@ -443,6 +514,16 @@ export function runProgram(
       case "dataflowConfiguration":
         // json.dumps(..., sort_keys=True): the generated command parses it back.
         return JSON.stringify(sortKeys(HAND_CODED[name]?.(pyStr(a))));
+      case "sseParams":
+        return sseParams(a, "opc_sse_customer");
+      case "sourceSseParams":
+        return sseParams(a, "opc_source_sse_customer");
+      case "sseCustomerKey": {
+        const k = sseKey(a);
+        return (
+          k && { algorithm: SSE_ALGORITHM, key: k.key, keySha256: k.sha256 }
+        );
+      }
       case "confirm": {
         const i = confirms++;
         if (i < answers.length) return answers[i];

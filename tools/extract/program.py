@@ -76,6 +76,10 @@ HAND_CODED = {
     "services.data_flow.src.oci_cli_data_flow.dataflow_cli_extended.convertArgumentStringToJson": "dataflowArguments",
     "services.data_flow.src.oci_cli_data_flow.dataflow_cli_extended.convertParameterStringToJson": "dataflowParameters",
     "services.data_flow.src.oci_cli_data_flow.dataflow_cli_extended.convertConfigurationStringToJson": "dataflowConfiguration",
+    # SSE-C key files: base64 key + its SHA-256, as headers or a body (ticket 23).
+    "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_encryption_key_params": "sseParams",
+    "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_source_encryption_key_params": "sourceSseParams",
+    "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_sse_customer_key_details": "sseCustomerKey",
 }
 BINOP = {ast.Add: "+", ast.Sub: "-"}
 # Exceptions a wrapper raises that cli_util.wrap_exceptions renders (ticket 18).

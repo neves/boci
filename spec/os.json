@@ -8496,6 +8496,221 @@
         "files": ["encryption_key_file", "source_encryption_key_file"],
         "helpers": ["_get_sse_customer_key_details"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "encryption_key_file", ["var", "kwargs"]],
+            [
+              [
+                "let",
+                "sse_json",
+                [
+                  "fn",
+                  "sseCustomerKey",
+                  ["item", ["var", "kwargs"], "encryption_key_file"]
+                ]
+              ],
+              [
+                "if",
+                ["var", "sse_json"],
+                [
+                  [
+                    "do",
+                    [
+                      "call",
+                      "update",
+                      ["var", "kwargs"],
+                      ["dict", ["sse_customer_key", ["var", "sse_json"]]]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "encryption_key_file"]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "source_encryption_key_file", ["var", "kwargs"]],
+            [
+              [
+                "let",
+                "sse_json",
+                [
+                  "fn",
+                  "sseCustomerKey",
+                  ["item", ["var", "kwargs"], "source_encryption_key_file"]
+                ]
+              ],
+              [
+                "if",
+                ["var", "sse_json"],
+                [
+                  [
+                    "do",
+                    [
+                      "call",
+                      "update",
+                      ["var", "kwargs"],
+                      ["dict", ["source_sse_customer_key", ["var", "sse_json"]]]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "source_encryption_key_file"]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.reencrypt_object",
+        "complexTypes": {
+          "sse-customer-key": "object_storage:SSECustomerKeyDetails",
+          "source-sse-customer-key": "object_storage:SSECustomerKeyDetails"
+        },
+        "params": [
+          {
+            "name": "namespace_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "bucket_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "object_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sse_customer_key",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_sse_customer_key",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "version_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "reencrypt_object",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/actions/reencrypt/{objectName}",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "object_name",
+          "reencrypt_object_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name",
+          "objectName": "object_name"
+        },
+        "queryParams": {
+          "versionId": {
+            "arg": "version_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "reencrypt_object_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["namespace_name"],
+          "param": "namespace_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["bucket_name"],
+          "param": "bucket_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["object_name"],
+          "param": "object_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["version_id"],
+          "param": "version_id",
+          "when": "version_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_client_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "reencrypt_object_details",
+          "key": ["kmsKeyId"],
+          "param": "kms_key_id",
+          "when": "kms_key_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "reencrypt_object_details",
+          "key": ["sseCustomerKey"],
+          "transform": "parse_json_parameter",
+          "param": "sse_customer_key",
+          "when": "sse_customer_key is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "reencrypt_object_details",
+          "key": ["sourceSseCustomerKey"],
+          "transform": "parse_json_parameter",
+          "param": "source_sse_customer_key",
+          "when": "source_sse_customer_key is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17757,6 +17972,13 @@
           ["inclusion_prefixes", "list[str]", "inclusionPrefixes"],
           ["inclusion_patterns", "list[str]", "inclusionPatterns"],
           ["exclusion_patterns", "list[str]", "exclusionPatterns"]
+        ]
+      },
+      "SSECustomerKeyDetails": {
+        "attributes": [
+          ["algorithm", "str", "algorithm"],
+          ["key", "str", "key"],
+          ["key_sha256", "str", "keySha256"]
         ]
       }
     }

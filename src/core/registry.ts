@@ -269,8 +269,7 @@ const WRITE_METHODS = ["POST", "PUT", "PATCH"];
 
 /**
  * Whether the generic engine runs this Generated command: every GET/HEAD, bodyless DELETE,
- * and POST/PUT/PATCH whose request body is built from at least one body option.
- * Bodyless writes and writes with direct bodies aren't supported yet.
+ * and POST/PUT/PATCH with either body options, a direct body parameter, or no body.
  */
 export function engineSupports(command: Command): boolean {
   if (command.kind !== "generated") return false;
@@ -281,8 +280,11 @@ export function engineSupports(command: Command): boolean {
   const bodyBindings = (command.bindings ?? []).filter(
     (binding) => binding.target === "body",
   );
-  if (command.operation?.body === undefined && bodyBindings.length === 0)
+  if (bodyBindings.length === 0) {
+    // Operations with no body options are either bodyless actions or pass a
+    // direct body parameter through operation.body.
     return true;
+  }
   return (command.bindings ?? []).some((b) => {
     if (b.target !== "body") return false;
     if (typeof b.value === "string" || typeof b.value === "boolean")

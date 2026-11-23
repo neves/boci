@@ -148,9 +148,22 @@ function getArgv(argv: string[], command: Command, operation: Operation) {
 // aren't generated here.
 function writeArgv(argv: string[], command: Command, operation: Operation) {
   const params = command.params ?? [];
+  const bodyBindings = (command.bindings ?? []).filter(
+    (b) => b.target === "body",
+  );
+  const directBodyParam =
+    operation.body && bodyBindings.length === 0
+      ? params.find((param) => param.name === operation.body)
+      : undefined;
+  if (directBodyParam) {
+    const option = (directBodyParam.opts as string[] | undefined)?.find((o) =>
+      o.startsWith("--"),
+    );
+    if (!option) return false;
+    argv.push(option, "file://test/fixtures/generated-body.txt");
+  }
   const pathArgs = new Set(Object.values(operation.pathParams ?? {}));
   const bindings = command.bindings ?? [];
-  const bodyBindings = bindings.filter((b) => b.target === "body");
   const simpleBindings = bodyBindings.filter((b) => {
     const param = params.find((p) => p.name === b.param);
     return (
@@ -159,12 +172,6 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
       (param !== undefined && !isComplex(param))
     );
   });
-  if (
-    bodyBindings.length === 0 &&
-    (operation.body !== undefined ||
-      bindings.some((binding) => binding.target === "body"))
-  )
-    return false;
   const complexOnly = simpleBindings.length === 0;
   for (const param of params) {
     const name = String(param.name);
@@ -196,8 +203,9 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
       param.required === true ||
       pathArgs.has(String(param.name)) ||
       hasRequestBinding
-    )
-      pushParam(argv, param);
+    ) {
+      if (param !== directBodyParam) pushParam(argv, param);
+    }
   }
   if (
     complexOnly &&

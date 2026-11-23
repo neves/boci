@@ -293,9 +293,19 @@ function buildRequestBody(
       rootValues,
       command.operation.body,
     );
-    if (direct === undefined || direct === null) return "";
+    if (direct === undefined || direct === null) {
+      return command.params?.some(
+        (param) => param.name === command.operation?.body,
+      )
+        ? ""
+        : "{}";
+    }
     if (typeof direct === "string") {
-      return loadFileContents(io, direct) ?? direct;
+      // The email data-plane command treats raw_message as file content; other
+      // generated direct-body parameters are passed through as raw strings.
+      return command.operation?.body === "raw_message"
+        ? (loadFileContents(io, direct) ?? direct)
+        : direct;
     }
     return serializeRequestJson(direct);
   }

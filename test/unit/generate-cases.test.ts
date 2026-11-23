@@ -16,6 +16,40 @@ describe("parity case generator", () => {
     expect(stop?.argv).toContain("--audit-trail-id");
   });
 
+  test("generates file input for direct body parameters", async () => {
+    const result = Bun.spawnSync(
+      ["bun", "scripts/generate-cases.ts", "--service", "data-science"],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const cases = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-request-data-science.json`,
+    ).json()) as { key: string; argv: string[] }[];
+    const upload = cases.find(
+      (c) =>
+        c.key === "data-science model update-model-custom-metadatum-artifact",
+    );
+    expect(upload?.argv).toContain("--model-custom-metadatum-artifact");
+    expect(upload?.argv).toContain("file://test/fixtures/generated-body.txt");
+  });
+
+  test("generates bodyless requests when an SDK body argument has no CLI option", async () => {
+    const result = Bun.spawnSync(
+      ["bun", "scripts/generate-cases.ts", "--service", "batch"],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const cases = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-request-batch.json`,
+    ).json()) as { key: string; argv: string[] }[];
+    const start = cases.find((c) => c.key === "batch batch-context start");
+    expect(start).toBeDefined();
+    expect(start?.argv).toContain("--batch-context-id");
+    expect(start?.argv).not.toContain(
+      "file://test/fixtures/generated-body.txt",
+    );
+  });
+
   test("generates bodyless HEAD and DELETE cases, including force bypasses", async () => {
     const result = Bun.spawnSync(
       [

@@ -31,6 +31,23 @@ test("engine supports generated actions without request bodies", async () => {
   expect(engineSupports(stop!)).toBe(true);
 });
 
+test("engine supports generated commands with a direct body parameter", async () => {
+  const { commands } = await loadService("data-science");
+  const upload = commands["model update-model-custom-metadatum-artifact"];
+  expect(upload?.operation?.body).toBe("model_custom_metadatum_artifact");
+  expect(engineSupports(upload!)).toBe(true);
+});
+
+test("engine supports bodyless actions with an unexposed SDK body argument", async () => {
+  const { commands } = await loadService("batch");
+  const start = commands["batch-context start"];
+  expect(start?.operation?.body).toBeDefined();
+  expect(
+    start?.params?.some((param) => param.name === start.operation?.body),
+  ).toBe(false);
+  expect(engineSupports(start!)).toBe(true);
+});
+
 test("loading cli and registry does not eagerly load command modules", () => {
   const res = Bun.spawnSync(
     [

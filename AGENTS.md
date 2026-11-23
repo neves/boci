@@ -18,7 +18,7 @@ A Bun drop-in for Oracle's `oci` CLI. Read [GLOSSARY.md](GLOSSARY.md) for vocabu
 
 Every byte read stays in context and is re-sent on every later turn. Keep context small.
 
-- **Ladder:** `bun run ladder` prints the current rung and the next item. Don't read PLAN.md in full. `bun run ladder tick` / `bun run ladder stuck` mark the item.
+- **Ladder:** `bun run ladder` prints the current rung and the next item. Don't read PLAN.md in full. `bun run ladder tick` / `bun run ladder stuck` mark the item; `bun run ladder sync` ticks every verified command item.
 - **Spec:** never `cat`/`grep` `spec/*.json` (up to 2 MB each). Use `bun run spec <service> <command…>` for one Leaf command, or `bun run spec <service> [group]` to list commands. Help text comes from `bun src/main.ts <command> --help`.
 - **Reference CLI behavior:** read the golden (`test/parity/golden/<id>.json`). Don't run `oci` by hand when a case can capture the behavior.
 - **Tests while iterating:** run only what you touch: `bun test test/parity -t '<id or key>'` (prefix `BOCI_PARITY_ALL=1` for a `generated-*` case) or `bun test test/unit/<file>.test.ts`. Run the full `bun run verify` once, before the commit. Fix every error it reports before you re-run it.

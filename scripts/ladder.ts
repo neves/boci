@@ -1,9 +1,11 @@
 // `bun run ladder`        print the rung holding the next Ladder item, and that item
 // `bun run ladder tick`   mark the next item done   (`- [x]`)
 // `bun run ladder stuck`  mark the next item stuck  (`- [~]`, see AGENTS.md "When stuck")
-import { currentItem, markCurrent } from "./ladder-lib.ts";
+// `bun run ladder sync`   mark every verified command item done (`- [x]`)
+import { currentItem, markCurrent, syncItems } from "./ladder-lib.ts";
 
-const file = Bun.file(`${import.meta.dir}/../PLAN.md`);
+const root = `${import.meta.dir}/..`;
+const file = Bun.file(`${root}/PLAN.md`);
 const plan = await file.text();
 const action = Bun.argv[2] ?? "next";
 
@@ -23,7 +25,20 @@ if (action === "next") {
   }
   await Bun.write(file, res.markdown);
   console.log(res.item);
+} else if (action === "sync") {
+  const resultsFile = Bun.file(`${root}/test/parity/results.json`);
+  const results: Record<string, { pass: boolean }> =
+    (await resultsFile.exists()) ? await resultsFile.json() : {};
+  const res = syncItems(plan, (key) => Boolean(results[key]?.pass));
+  if (res.total > 0) await Bun.write(file, res.markdown);
+  if (res.counts.length === 0) {
+    console.log("0 items ticked.");
+  } else {
+    for (const { rung, ticked } of res.counts) {
+      console.log(`${rung}: ${ticked} ticked`);
+    }
+  }
 } else {
-  console.error("usage: bun run ladder [next|tick|stuck]");
+  console.error("usage: bun run ladder [next|tick|stuck|sync]");
   process.exit(2);
 }

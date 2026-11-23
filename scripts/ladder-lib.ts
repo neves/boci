@@ -39,3 +39,44 @@ export function markCurrent(
   lines[at] = item;
   return { markdown: lines.join("\n"), item };
 }
+
+const SYNCABLE = /^- \[[ ~]\] `([^`]+)`(?:\s*$|[.:]\s|[.:]$)/;
+
+export type SyncResult = {
+  markdown: string;
+  counts: { rung: string; ticked: number }[];
+  total: number;
+};
+
+/** Marks `[x]` every `[ ]` or `[~]` command item whose key passes `isVerified`. */
+export function syncItems(
+  markdown: string,
+  isVerified: (key: string) => boolean,
+): SyncResult {
+  const lines = markdown.split("\n");
+  const byRung = new Map<string, number>();
+  let currentRung = "";
+  let total = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+    const heading = /^## (.+)$/.exec(line);
+    if (heading?.[1]) {
+      currentRung = heading[1].trim();
+      continue;
+    }
+    const match = SYNCABLE.exec(line);
+    const key = match?.[1];
+    if (key && isVerified(key)) {
+      lines[i] = line.replace(/^- \[[ ~]\] /, "- [x] ");
+      byRung.set(currentRung, (byRung.get(currentRung) ?? 0) + 1);
+      total++;
+    }
+  }
+
+  return {
+    markdown: lines.join("\n"),
+    counts: [...byRung.entries()].map(([rung, ticked]) => ({ rung, ticked })),
+    total,
+  };
+}

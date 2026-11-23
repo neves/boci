@@ -2,6 +2,12 @@
 #MISE description="Run macOS install + --version test on GitHub Actions"
 set -euo pipefail
 
-gh workflow run test-windows.yml -f platform=macos
-sleep 3
-gh run watch --exit-status
+OUT=$(gh workflow run test-windows.yml -f platform=macos)
+echo "$OUT"
+RUN_ID=$(echo "$OUT" | grep -oE '[0-9]+$' || true)
+if [ -z "$RUN_ID" ]; then
+  sleep 3
+  RUN_ID=$(gh run list --workflow=test-windows.yml -L 1 --json databaseId -q '.[0].databaseId')
+fi
+gh run watch "$RUN_ID" --exit-status
+gh run view "$RUN_ID" --log

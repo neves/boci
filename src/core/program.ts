@@ -119,6 +119,23 @@ function pyStr(v: unknown): string {
   throw new ProgramUnsupported("str() of a container");
 }
 
+/** Python `str.format` with positional fields only (`{}`, `{0}`), no format specs. */
+function pyFormat(template: string, args: unknown[]): string {
+  let next = 0;
+  return template.replace(/\{\{|\}\}|\{([^{}]*)\}|[{}]/g, (m, field) => {
+    if (m === "{{") return "{";
+    if (m === "}}") return "}";
+    if (field === undefined || !/^\d*$/.test(field))
+      throw new ProgramUnsupported(`format field ${m}`);
+    // Python refuses to mix automatic and manual numbering (a ValueError).
+    if ((field === "") !== next >= 0 && next !== 0)
+      throw new ProgramUnsupported("format numbering");
+    const i = field === "" ? next++ : ((next = -1), Number(field));
+    if (i >= args.length) throw new ProgramUnsupported("IndexError");
+    return pyStr(args[i]);
+  });
+}
+
 function sortKeys(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(sortKeys);
   if (!isDict(v)) return v;
@@ -228,6 +245,8 @@ export function runProgram(
           )
             return args[0].join(obj);
           break;
+        case "format":
+          return pyFormat(obj, args);
         case "split":
           if (typeof args[0] === "string" && args[0] !== "")
             return obj.split(args[0]);

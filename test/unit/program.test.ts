@@ -90,6 +90,29 @@ describe("runProgram", () => {
     ]);
   });
 
+  test("formats strings with positional fields, like str.format", () => {
+    const program: Statement[] = [
+      [
+        "set",
+        ["var", "kwargs"],
+        "m",
+        ["call", "format", "--{} and {}{{}}", "x", 1],
+      ],
+      invoke,
+    ];
+    expect(runProgram(program, {}, params, parse).kwargs).toEqual({
+      m: "--x and 1{}",
+    });
+    expect(() =>
+      runProgram(
+        [["do", ["call", "format", "{} {0}", "x"]]],
+        {},
+        params,
+        parse,
+      ),
+    ).toThrow(ProgramUnsupported);
+  });
+
   test("raises usage errors, and stops on paths it does not model", () => {
     expect(() => runProgram([["usage", "nope"]], {}, params, parse)).toThrow(
       ProgramUsageError,

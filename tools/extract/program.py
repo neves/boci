@@ -41,7 +41,7 @@ import textwrap
 
 METHODS = {
     "get", "pop", "append", "setdefault", "split", "upper", "lower", "strip", "update",
-    "read", "rstrip", "decode", "keys", "join",
+    "read", "rstrip", "decode", "keys", "join", "format",
 }
 FUNCTIONS = {
     "json.dumps": "dumps",

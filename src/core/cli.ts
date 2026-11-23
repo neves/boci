@@ -861,8 +861,8 @@ type WrapperLookups = {
 /**
  * Runs a programmed Tier B wrapper: the generated command it invokes (one per variant)
  * and that command's kwargs, undefined when it returns without invoking, "unsupported"
- * for a path the Engine doesn't model (another exception, or keywords the generated
- * callback doesn't take: a TypeError).
+ * for a path the Engine doesn't model (another exception, or a wrapper without
+ * wrap_exceptions that passes a keyword the generated callback doesn't take).
  */
 async function runWrapper(
   io: Invocation,
@@ -908,13 +908,26 @@ async function runWrapper(
             bindings: (command as GeneratedCommand).bindings,
             params: command.generated?.params ?? [],
             complexTypes: command.generated?.complexTypes,
+            callback: command.generated?.callback,
           }
         : variant && {
             ...variant,
             params: variant.generated.params,
             complexTypes: variant.generated.complexTypes,
+            callback: variant.generated.callback,
           };
     if (!invoked) return "unsupported";
+    // A keyword the generated callback doesn't take: Python raises a TypeError at the call.
+    const accepted = new Set(invoked.params.map((p) => p.name));
+    const unexpected = names?.find((name) => !accepted.has(name));
+    if (unexpected !== undefined) {
+      if (!program.wrapExceptions || !invoked.callback) return "unsupported";
+      const fn = invoked.callback.slice(invoked.callback.lastIndexOf(".") + 1);
+      io.err(
+        `TypeError: ${fn}() got an unexpected keyword argument ${pyRepr(unexpected)}\n`,
+      );
+      throw new Exit(1);
+    }
     // Bytes, or a file opened for reading, go out only as the direct request body; a
     // `--file` opened for writing only as a download's output.
     const directBody = invoked.operation?.body;
@@ -929,8 +942,6 @@ async function runWrapper(
       )
     )
       return "unsupported";
-    const accepted = new Set(invoked.params.map((p) => p.name));
-    if (names?.some((name) => !accepted.has(name))) return "unsupported";
     return {
       command: {
         operation: invoked.operation,

@@ -26,7 +26,7 @@ fi
 URL="https://github.com/${REPO}/releases/latest/download/${ASSET}"
 
 mkdir -p "$INSTALL_DIR"
-curl -fsSL "$URL" -o "${INSTALL_DIR}/boci"
+curl -fsSL --retry 3 --retry-delay 2 "$URL" -o "${INSTALL_DIR}/boci"
 chmod +x "${INSTALL_DIR}/boci"
 
 echo "Installed boci to ${INSTALL_DIR}/boci"

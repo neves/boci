@@ -113,9 +113,12 @@ def exit_code(e):
 def finish(code):
     threading._shutdown()
     atexit._run_exitfuncs()
+    # Like CPython's flush_std_files: a stream the CLI closed (a generated download's
+    # `--file -` closes stdout) isn't flushed.
     for stream in (sys.stdout, sys.stderr):
         try:
-            stream.flush()
+            if stream is not None and not stream.closed:
+                stream.flush()
         except Exception:
             code = 120
     os._exit(code)

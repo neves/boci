@@ -7234,6 +7234,222 @@
           "public_certificate_file"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "let",
+            "ca_certificate_file",
+            ["call", "get", ["var", "kwargs"], "ca_certificate_file"]
+          ],
+          [
+            "if",
+            ["var", "ca_certificate_file"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "ca_certificate",
+                ["call", "read", ["var", "ca_certificate_file"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "private_key_file",
+            ["call", "get", ["var", "kwargs"], "private_key_file"]
+          ],
+          [
+            "if",
+            ["var", "private_key_file"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "private_key",
+                ["call", "read", ["var", "private_key_file"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "public_certificate_file",
+            ["call", "get", ["var", "kwargs"], "public_certificate_file"]
+          ],
+          [
+            "if",
+            ["var", "public_certificate_file"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "public_certificate",
+                ["call", "read", ["var", "public_certificate_file"]]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "ca_certificate_file"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "private_key_file"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "public_certificate_file"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.load_balancer.src.oci_cli_load_balancer.generated.loadbalancer_cli.create_certificate",
+        "params": [
+          {
+            "name": "certificate_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "load_balancer_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "public_certificate",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ca_certificate",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "load_balancer.load_balancer",
+        "method": "create_certificate",
+        "http": "POST",
+        "path": "/loadBalancers/{loadBalancerId}/certificates",
+        "positionalArgs": ["create_certificate_details", "load_balancer_id"],
+        "pathParams": {
+          "loadBalancerId": "load_balancer_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "create_certificate_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["load_balancer_id"],
+          "param": "load_balancer_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["certificateName"],
+          "param": "certificate_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["passphrase"],
+          "param": "passphrase",
+          "when": "passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["privateKey"],
+          "param": "private_key",
+          "when": "private_key is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["publicCertificate"],
+          "param": "public_certificate",
+          "when": "public_certificate is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["caCertificate"],
+          "param": "ca_certificate",
+          "when": "ca_certificate is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7378,6 +7594,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -7396,6 +7613,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -7414,6 +7632,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },

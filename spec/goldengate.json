@@ -74107,6 +74107,840 @@
         ],
         "files": ["certificate_file", "private_key_file"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "is", ["call", "get", ["var", "kwargs"], "ogg_data"], null],
+            [
+              ["let", "_ogg_details", ["dict"]],
+              ["let", "_missing_params", ["list"]],
+              [
+                "if",
+                [
+                  "cmp",
+                  "is",
+                  ["call", "get", ["var", "kwargs"], "deployment_name"],
+                  null
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "call",
+                      "append",
+                      ["var", "_missing_params"],
+                      "deployment-name"
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_ogg_details"],
+                    "deploymentName",
+                    ["call", "get", ["var", "kwargs"], "deployment_name"]
+                  ]
+                ]
+              ],
+              ["del", ["var", "kwargs"], "deployment_name"],
+              [
+                "if",
+                ["cmp", "!=", ["fn", "len", ["var", "_missing_params"]], 0],
+                [
+                  [
+                    "raise",
+                    "raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('Missing option(s) --{}.'.format(', --'.join(_missing_params)))"
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "credential_store"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_ogg_details"],
+                    "credentialStore",
+                    ["call", "get", ["var", "kwargs"], "credential_store"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["call", "get", ["var", "kwargs"], "credential_store"],
+                  "IAM"
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "is",
+                      ["call", "get", ["var", "kwargs"], "identity_domain_id"],
+                      null
+                    ],
+                    [
+                      [
+                        "usage",
+                        "--identity-domain-id is required if using IAM credential store."
+                      ]
+                    ],
+                    [
+                      [
+                        "set",
+                        ["var", "_ogg_details"],
+                        "identityDomainId",
+                        ["call", "get", ["var", "kwargs"], "identity_domain_id"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "is",
+                      ["call", "get", ["var", "kwargs"], "admin_username"],
+                      null
+                    ],
+                    [
+                      [
+                        "usage",
+                        "--admin-username is required if using GOLDENGATE credential store."
+                      ]
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "call",
+                              "get",
+                              ["var", "kwargs"],
+                              "admin_password"
+                            ],
+                            null
+                          ],
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "call",
+                              "get",
+                              ["var", "kwargs"],
+                              "password_secret_id"
+                            ],
+                            null
+                          ]
+                        ],
+                        [
+                          [
+                            "usage",
+                            "Either --password-secret-id or --admin-password is required if using GOLDENGATE credential store."
+                          ]
+                        ],
+                        [
+                          [
+                            "set",
+                            ["var", "_ogg_details"],
+                            "adminUsername",
+                            ["call", "get", ["var", "kwargs"], "admin_username"]
+                          ],
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "isnot",
+                              [
+                                "call",
+                                "get",
+                                ["var", "kwargs"],
+                                "password_secret_id"
+                              ],
+                              null
+                            ],
+                            [
+                              [
+                                "set",
+                                ["var", "_ogg_details"],
+                                "passwordSecretId",
+                                [
+                                  "call",
+                                  "get",
+                                  ["var", "kwargs"],
+                                  "password_secret_id"
+                                ]
+                              ]
+                            ],
+                            [
+                              [
+                                "set",
+                                ["var", "_ogg_details"],
+                                "adminPassword",
+                                [
+                                  "call",
+                                  "get",
+                                  ["var", "kwargs"],
+                                  "admin_password"
+                                ]
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              ["del", ["var", "kwargs"], "admin_username"],
+              ["del", ["var", "kwargs"], "password_secret_id"],
+              ["del", ["var", "kwargs"], "admin_password"],
+              ["del", ["var", "kwargs"], "identity_domain_id"],
+              ["del", ["var", "kwargs"], "credential_store"],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "certificate_file"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_ogg_details"],
+                    "certificate",
+                    [
+                      "call",
+                      "read",
+                      ["call", "get", ["var", "kwargs"], "certificate_file"]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "certificate_file"],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "private_key_file"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_ogg_details"],
+                    "key",
+                    [
+                      "call",
+                      "read",
+                      ["call", "get", ["var", "kwargs"], "private_key_file"]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "private_key_file"],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "ogg_version"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_ogg_details"],
+                    "oggVersion",
+                    ["call", "get", ["var", "kwargs"], "ogg_version"]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "ogg_version"],
+              [
+                "set",
+                ["var", "kwargs"],
+                "ogg_data",
+                ["fn", "dumps", ["var", "_ogg_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "is",
+              ["call", "get", ["var", "kwargs"], "maintenance_window"],
+              null
+            ],
+            [
+              ["let", "_maintenance_window", ["dict"]],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "maintenance_window_day"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_maintenance_window"],
+                    "day",
+                    ["call", "get", ["var", "kwargs"], "maintenance_window_day"]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "maintenance_window_day"],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "kwargs"],
+                    "maintenance_window_start_hour"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_maintenance_window"],
+                    "startHour",
+                    [
+                      "call",
+                      "get",
+                      ["var", "kwargs"],
+                      "maintenance_window_start_hour"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "maintenance_window_start_hour"],
+              [
+                "if",
+                [
+                  "or",
+                  ["cmp", "in", "day", ["var", "_maintenance_window"]],
+                  ["cmp", "in", "startHour", ["var", "_maintenance_window"]]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "maintenance_window",
+                    ["fn", "dumps", ["var", "_maintenance_window"]]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.golden_gate.src.oci_cli_golden_gate.generated.goldengate_cli.create_deployment",
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_byol_cpu_core_count_limit_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "byol_cpu_core_count_limit",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "environment_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_deployment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "fault_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "placements",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "locks",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "deployment_backup_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "load_balancer_subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "fqdn",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_public",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "deployment_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_placement_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "disaster_recovery_status",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ogg_data",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "maintenance_window",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "maintenance_configuration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_schedule",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "golden_gate.golden_gate",
+        "method": "create_deployment",
+        "http": "POST",
+        "path": "/deployments",
+        "positionalArgs": ["create_deployment_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_deployment_details",
+        "responseType": "Deployment",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["subnetId"],
+          "param": "subnet_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["licenseModel"],
+          "param": "license_model",
+          "when": "license_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["isByolCpuCoreCountLimitEnabled"],
+          "param": "is_byol_cpu_core_count_limit_enabled",
+          "when": "is_byol_cpu_core_count_limit_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["byolCpuCoreCountLimit"],
+          "param": "byol_cpu_core_count_limit",
+          "when": "byol_cpu_core_count_limit is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["environmentType"],
+          "param": "environment_type",
+          "when": "environment_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["sourceDeploymentId"],
+          "param": "source_deployment_id",
+          "when": "source_deployment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["availabilityDomain"],
+          "param": "availability_domain",
+          "when": "availability_domain is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["faultDomain"],
+          "param": "fault_domain",
+          "when": "fault_domain is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["placements"],
+          "transform": "parse_json_parameter",
+          "param": "placements",
+          "when": "placements is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["deploymentBackupId"],
+          "param": "deployment_backup_id",
+          "when": "deployment_backup_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["loadBalancerSubnetId"],
+          "param": "load_balancer_subnet_id",
+          "when": "load_balancer_subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["fqdn"],
+          "param": "fqdn",
+          "when": "fqdn is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["nsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "nsg_ids",
+          "when": "nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["isPublic"],
+          "param": "is_public",
+          "when": "is_public is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["cpuCoreCount"],
+          "param": "cpu_core_count",
+          "when": "cpu_core_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["isAutoScalingEnabled"],
+          "param": "is_auto_scaling_enabled",
+          "when": "is_auto_scaling_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["deploymentType"],
+          "param": "deployment_type",
+          "when": "deployment_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["clusterPlacementGroupId"],
+          "param": "cluster_placement_group_id",
+          "when": "cluster_placement_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["securityAttributes"],
+          "transform": "parse_json_parameter",
+          "param": "security_attributes",
+          "when": "security_attributes is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["disasterRecoveryStatus"],
+          "param": "disaster_recovery_status",
+          "when": "disaster_recovery_status is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["oggData"],
+          "transform": "parse_json_parameter",
+          "param": "ogg_data",
+          "when": "ogg_data is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["maintenanceWindow"],
+          "transform": "parse_json_parameter",
+          "param": "maintenance_window",
+          "when": "maintenance_window is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["maintenanceConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "maintenance_configuration",
+          "when": "maintenance_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_deployment_details",
+          "key": ["backupSchedule"],
+          "transform": "parse_json_parameter",
+          "param": "backup_schedule",
+          "when": "backup_schedule is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -74838,6 +75672,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -74856,6 +75691,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -79450,6 +80286,773 @@
         ],
         "files": ["certificate_file", "private_key_file"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "is", ["call", "get", ["var", "kwargs"], "ogg_data"], null],
+            [
+              ["let", "_ogg_details", ["dict"]],
+              [
+                "if",
+                [
+                  "cmp",
+                  "is",
+                  ["call", "get", ["var", "kwargs"], "credential_store"],
+                  null
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "or",
+                      [
+                        "cmp",
+                        "isnot",
+                        ["call", "get", ["var", "kwargs"], "admin_username"],
+                        null
+                      ],
+                      [
+                        "cmp",
+                        "isnot",
+                        [
+                          "call",
+                          "get",
+                          ["var", "kwargs"],
+                          "password_secret_id"
+                        ],
+                        null
+                      ],
+                      [
+                        "cmp",
+                        "isnot",
+                        ["call", "get", ["var", "kwargs"], "admin_password"],
+                        null
+                      ],
+                      [
+                        "cmp",
+                        "isnot",
+                        [
+                          "call",
+                          "get",
+                          ["var", "kwargs"],
+                          "identity_domain_id"
+                        ],
+                        null
+                      ]
+                    ],
+                    [
+                      [
+                        "usage",
+                        "--credential-store is required if changing admin username, password secret ID, admin password or identity domain ID."
+                      ]
+                    ],
+                    []
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "==",
+                      ["call", "get", ["var", "kwargs"], "credential_store"],
+                      "GOLDENGATE"
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "is",
+                          ["call", "get", ["var", "kwargs"], "admin_username"],
+                          null
+                        ],
+                        [
+                          [
+                            "usage",
+                            "--admin-username is required if using GOLDENGATE credential store."
+                          ]
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "and",
+                              [
+                                "cmp",
+                                "is",
+                                [
+                                  "call",
+                                  "get",
+                                  ["var", "kwargs"],
+                                  "admin_password"
+                                ],
+                                null
+                              ],
+                              [
+                                "cmp",
+                                "is",
+                                [
+                                  "call",
+                                  "get",
+                                  ["var", "kwargs"],
+                                  "password_secret_id"
+                                ],
+                                null
+                              ]
+                            ],
+                            [
+                              [
+                                "usage",
+                                "Either --password-secret-id or --admin-password is required if using GOLDENGATE credential store."
+                              ]
+                            ],
+                            [
+                              [
+                                "set",
+                                ["var", "_ogg_details"],
+                                "adminUsername",
+                                [
+                                  "call",
+                                  "get",
+                                  ["var", "kwargs"],
+                                  "admin_username"
+                                ]
+                              ],
+                              [
+                                "if",
+                                [
+                                  "cmp",
+                                  "isnot",
+                                  [
+                                    "call",
+                                    "get",
+                                    ["var", "kwargs"],
+                                    "password_secret_id"
+                                  ],
+                                  null
+                                ],
+                                [
+                                  [
+                                    "set",
+                                    ["var", "_ogg_details"],
+                                    "passwordSecretId",
+                                    [
+                                      "call",
+                                      "get",
+                                      ["var", "kwargs"],
+                                      "password_secret_id"
+                                    ]
+                                  ]
+                                ],
+                                [
+                                  [
+                                    "set",
+                                    ["var", "_ogg_details"],
+                                    "adminPassword",
+                                    [
+                                      "call",
+                                      "get",
+                                      ["var", "kwargs"],
+                                      "admin_password"
+                                    ]
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "==",
+                          [
+                            "call",
+                            "get",
+                            ["var", "kwargs"],
+                            "credential_store"
+                          ],
+                          "IAM"
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "is",
+                              [
+                                "call",
+                                "get",
+                                ["var", "kwargs"],
+                                "identity_domain_id"
+                              ],
+                              null
+                            ],
+                            [
+                              [
+                                "usage",
+                                "--identity-domain-id is required if using IAM credential store."
+                              ]
+                            ],
+                            [
+                              [
+                                "set",
+                                ["var", "_ogg_details"],
+                                "identityDomainId",
+                                [
+                                  "call",
+                                  "get",
+                                  ["var", "kwargs"],
+                                  "identity_domain_id"
+                                ]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              ["del", ["var", "kwargs"], "credential_store"],
+              ["del", ["var", "kwargs"], "admin_username"],
+              ["del", ["var", "kwargs"], "admin_password"],
+              ["del", ["var", "kwargs"], "password_secret_id"],
+              ["del", ["var", "kwargs"], "identity_domain_id"],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "certificate_file"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_ogg_details"],
+                    "certificate",
+                    [
+                      "call",
+                      "read",
+                      ["call", "get", ["var", "kwargs"], "certificate_file"]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "certificate_file"],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "private_key_file"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_ogg_details"],
+                    "key",
+                    [
+                      "call",
+                      "read",
+                      ["call", "get", ["var", "kwargs"], "private_key_file"]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "private_key_file"],
+              [
+                "set",
+                ["var", "kwargs"],
+                "ogg_data",
+                ["fn", "dumps", ["var", "_ogg_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "is",
+              ["call", "get", ["var", "kwargs"], "maintenance_window"],
+              null
+            ],
+            [
+              ["let", "_maintenance_window", ["dict"]],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["call", "get", ["var", "kwargs"], "maintenance_window_day"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_maintenance_window"],
+                    "day",
+                    ["call", "get", ["var", "kwargs"], "maintenance_window_day"]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "maintenance_window_day"],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "kwargs"],
+                    "maintenance_window_start_hour"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "_maintenance_window"],
+                    "startHour",
+                    [
+                      "call",
+                      "get",
+                      ["var", "kwargs"],
+                      "maintenance_window_start_hour"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "maintenance_window_start_hour"],
+              [
+                "if",
+                [
+                  "or",
+                  ["cmp", "in", "day", ["var", "_maintenance_window"]],
+                  ["cmp", "in", "startHour", ["var", "_maintenance_window"]]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "maintenance_window",
+                    ["fn", "dumps", ["var", "_maintenance_window"]]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.golden_gate.src.oci_cli_golden_gate.generated.goldengate_cli.update_deployment",
+        "params": [
+          {
+            "name": "deployment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_byol_cpu_core_count_limit_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "byol_cpu_core_count_limit",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "environment_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "load_balancer_subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_public",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "fqdn",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "placements",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ogg_data",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "maintenance_window",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "maintenance_configuration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_schedule",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_lock_override",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "golden_gate.golden_gate",
+        "method": "update_deployment",
+        "http": "PUT",
+        "path": "/deployments/{deploymentId}",
+        "positionalArgs": ["deployment_id", "update_deployment_details"],
+        "pathParams": {
+          "deploymentId": "deployment_id"
+        },
+        "queryParams": {
+          "isLockOverride": {
+            "arg": "is_lock_override"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_deployment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["deployment_id"],
+          "param": "deployment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_lock_override"],
+          "param": "is_lock_override",
+          "when": "is_lock_override is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["licenseModel"],
+          "param": "license_model",
+          "when": "license_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["isByolCpuCoreCountLimitEnabled"],
+          "param": "is_byol_cpu_core_count_limit_enabled",
+          "when": "is_byol_cpu_core_count_limit_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["byolCpuCoreCountLimit"],
+          "param": "byol_cpu_core_count_limit",
+          "when": "byol_cpu_core_count_limit is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["environmentType"],
+          "param": "environment_type",
+          "when": "environment_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["nsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "nsg_ids",
+          "when": "nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["subnetId"],
+          "param": "subnet_id",
+          "when": "subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["loadBalancerSubnetId"],
+          "param": "load_balancer_subnet_id",
+          "when": "load_balancer_subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["isPublic"],
+          "param": "is_public",
+          "when": "is_public is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["fqdn"],
+          "param": "fqdn",
+          "when": "fqdn is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["cpuCoreCount"],
+          "param": "cpu_core_count",
+          "when": "cpu_core_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["isAutoScalingEnabled"],
+          "param": "is_auto_scaling_enabled",
+          "when": "is_auto_scaling_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["placements"],
+          "transform": "parse_json_parameter",
+          "param": "placements",
+          "when": "placements is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["securityAttributes"],
+          "transform": "parse_json_parameter",
+          "param": "security_attributes",
+          "when": "security_attributes is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["oggData"],
+          "transform": "parse_json_parameter",
+          "param": "ogg_data",
+          "when": "ogg_data is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["maintenanceWindow"],
+          "transform": "parse_json_parameter",
+          "param": "maintenance_window",
+          "when": "maintenance_window is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["maintenanceConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "maintenance_configuration",
+          "when": "maintenance_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_deployment_details",
+          "key": ["backupSchedule"],
+          "transform": "parse_json_parameter",
+          "param": "backup_schedule",
+          "when": "backup_schedule is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -80040,6 +81643,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -80058,6 +81662,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },

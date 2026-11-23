@@ -2388,6 +2388,192 @@
         ],
         "files": ["ssh_public_key_file"]
       },
+      "program": {
+        "body": [
+          ["let", "key_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ssh_public_key_file", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "ssh_public_key_file"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "key_details"],
+                "publicKeyContent",
+                [
+                  "call",
+                  "read",
+                  ["item", ["var", "kwargs"], "ssh_public_key_file"]
+                ]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "ssh_public_key_file"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "key_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "key_details",
+                ["fn", "dumps", ["var", "key_details"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.bastion.src.oci_cli_bastion.generated.bastion_cli.create_session",
+        "params": [
+          {
+            "name": "bastion_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "session_ttl_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "bastion.bastion",
+        "method": "create_session",
+        "http": "POST",
+        "path": "/sessions",
+        "positionalArgs": ["create_session_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_session_details",
+        "responseType": "Session",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["bastionId"],
+          "param": "bastion_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "target_resource_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["keyDetails"],
+          "transform": "parse_json_parameter",
+          "param": "key_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["keyType"],
+          "param": "key_type",
+          "when": "key_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["sessionTtlInSeconds"],
+          "param": "session_ttl_in_seconds",
+          "when": "session_ttl_in_seconds is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2559,6 +2745,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -2703,6 +2890,314 @@
         ],
         "files": ["ssh_public_key_file"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "session_ttl", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "session_ttl_in_seconds",
+                ["item", ["var", "kwargs"], "session_ttl"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "session_ttl"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "target_resource_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target_resource_details_target_resource_id",
+                ["item", ["var", "kwargs"], "target_resource_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "target_resource_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "target_os_username", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target_resource_details_target_resource_operating_system_user_name",
+                ["item", ["var", "kwargs"], "target_os_username"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "target_os_username"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "target_port", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target_resource_details_target_resource_port",
+                ["item", ["var", "kwargs"], "target_port"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "target_port"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "target_private_ip", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target_resource_details_target_resource_private_ip_address",
+                ["item", ["var", "kwargs"], "target_private_ip"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "target_private_ip"]]
+            ],
+            []
+          ],
+          ["let", "key_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ssh_public_key_file", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "ssh_public_key_file"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "key_details"],
+                "publicKeyContent",
+                [
+                  "call",
+                  "read",
+                  ["item", ["var", "kwargs"], "ssh_public_key_file"]
+                ]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "ssh_public_key_file"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "key_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "key_details",
+                ["fn", "dumps", ["var", "key_details"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.bastion.src.oci_cli_bastion.generated.bastion_cli.create_session_create_managed_ssh_session_target_resource_details",
+        "params": [
+          {
+            "name": "bastion_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_operating_system_user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "session_ttl_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_private_ip_address",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_port",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "bastion.bastion",
+        "method": "create_session",
+        "http": "POST",
+        "path": "/sessions",
+        "positionalArgs": ["create_session_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_session_details",
+        "responseType": "Session",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["bastionId"],
+          "param": "bastion_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["keyDetails"],
+          "transform": "parse_json_parameter",
+          "param": "key_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": [
+            "targetResourceDetails",
+            "targetResourceOperatingSystemUserName"
+          ],
+          "param": "target_resource_details_target_resource_operating_system_user_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "targetResourceId"],
+          "param": "target_resource_details_target_resource_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["keyType"],
+          "param": "key_type",
+          "when": "key_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["sessionTtlInSeconds"],
+          "param": "session_ttl_in_seconds",
+          "when": "session_ttl_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "targetResourcePrivateIpAddress"],
+          "param": "target_resource_details_target_resource_private_ip_address",
+          "when": "target_resource_details_target_resource_private_ip_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "targetResourcePort"],
+          "param": "target_resource_details_target_resource_port",
+          "when": "target_resource_details_target_resource_port is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "sessionType"],
+          "value": "MANAGED_SSH"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2838,6 +3333,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -3072,6 +3568,299 @@
         ],
         "files": ["ssh_public_key_file"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "session_ttl", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "session_ttl_in_seconds",
+                ["item", ["var", "kwargs"], "session_ttl"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "session_ttl"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "target_resource_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target_resource_details_target_resource_id",
+                ["item", ["var", "kwargs"], "target_resource_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "target_resource_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "target_port", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target_resource_details_target_resource_port",
+                ["item", ["var", "kwargs"], "target_port"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "target_port"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "target_private_ip", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target_resource_details_target_resource_private_ip_address",
+                ["item", ["var", "kwargs"], "target_private_ip"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "target_private_ip"]]
+            ],
+            []
+          ],
+          ["let", "key_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ssh_public_key_file", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "ssh_public_key_file"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "key_details"],
+                "publicKeyContent",
+                [
+                  "call",
+                  "read",
+                  ["item", ["var", "kwargs"], "ssh_public_key_file"]
+                ]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "ssh_public_key_file"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "key_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "key_details",
+                ["fn", "dumps", ["var", "key_details"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.bastion.src.oci_cli_bastion.generated.bastion_cli.create_session_create_port_forwarding_session_target_resource_details",
+        "params": [
+          {
+            "name": "bastion_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "session_ttl_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_private_ip_address",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_fqdn",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_resource_details_target_resource_port",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "bastion.bastion",
+        "method": "create_session",
+        "http": "POST",
+        "path": "/sessions",
+        "positionalArgs": ["create_session_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_session_details",
+        "responseType": "Session",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["bastionId"],
+          "param": "bastion_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["keyDetails"],
+          "transform": "parse_json_parameter",
+          "param": "key_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["keyType"],
+          "param": "key_type",
+          "when": "key_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["sessionTtlInSeconds"],
+          "param": "session_ttl_in_seconds",
+          "when": "session_ttl_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "targetResourceId"],
+          "param": "target_resource_details_target_resource_id",
+          "when": "target_resource_details_target_resource_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "targetResourcePrivateIpAddress"],
+          "param": "target_resource_details_target_resource_private_ip_address",
+          "when": "target_resource_details_target_resource_private_ip_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "targetResourceFqdn"],
+          "param": "target_resource_details_target_resource_fqdn",
+          "when": "target_resource_details_target_resource_fqdn is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "targetResourcePort"],
+          "param": "target_resource_details_target_resource_port",
+          "when": "target_resource_details_target_resource_port is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_session_details",
+          "key": ["targetResourceDetails", "sessionType"],
+          "value": "PORT_FORWARDING"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3225,6 +4014,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },

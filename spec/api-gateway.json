@@ -1435,6 +1435,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "wb",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -4303,6 +4304,225 @@
           "intermediate_certificates_file"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "for",
+            "key",
+            [
+              "call",
+              "keys",
+              [
+                "dict",
+                ["private_key_file", "private_key"],
+                ["certificate_file", "certificate"],
+                ["intermediate_certificates_file", "intermediate_certificates"]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["call", "get", ["var", "kwargs"], ["var", "key"]],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    [
+                      "item",
+                      [
+                        "dict",
+                        ["private_key_file", "private_key"],
+                        ["certificate_file", "certificate"],
+                        [
+                          "intermediate_certificates_file",
+                          "intermediate_certificates"
+                        ]
+                      ],
+                      ["var", "key"]
+                    ],
+                    [
+                      "call",
+                      "read",
+                      ["call", "get", ["var", "kwargs"], ["var", "key"]]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], ["var", "key"]]
+            ]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.apigateway.src.oci_cli_api_gateway.generated.apigateway_cli.create_certificate",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "certificate",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "intermediate_certificates",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "locks",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "apigateway.api_gateway",
+        "method": "create_certificate",
+        "http": "POST",
+        "path": "/certificates",
+        "positionalArgs": ["create_certificate_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_certificate_details",
+        "responseType": "Certificate",
+        "paginated": false,
+        "workRequestClient": "apigateway.work_requests"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["privateKey"],
+          "param": "private_key"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["certificate"],
+          "param": "certificate"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["intermediateCertificates"],
+          "param": "intermediate_certificates",
+          "when": "intermediate_certificates is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_certificate_details",
+          "key": ["locks"],
+          "transform": "parse_json_parameter",
+          "param": "locks",
+          "when": "locks is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4472,6 +4692,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -4490,6 +4711,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -4508,6 +4730,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },

@@ -16,12 +16,18 @@ Statements (lists):
     ["usage", message]            raise click.UsageError(message)
     ["raise", source]             any other raise (the Engine stops: ticket 18)
     ["invoke", [[name, e]...], e] ctx.invoke(<the generated command>, name=e..., **e)
+    ["for", name, e, body]        for name in e: body (no break/continue/else)
 
 Expressions: JSON scalars are constants; lists are operations:
     ["var", name] ["item", obj, key] ["call", method, obj, args...]
-    ["fn", name, args...]  (dumps, parse, str, len, bool)
+    ["fn", name, args...]  (dumps, parse, str, len, bool, b64encode, removeSkeleton)
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
+    ["map", e, name, elt]  [elt for name in e]
+
+Options typed `click.File` reach the program as open files (ticket 12): `read()`,
+iterating their lines. Module-level constants (dicts, lists, strings) inline as values,
+and named callback parameters are popped from kwargs first, as Click binds them.
 """
 
 import ast
@@ -29,13 +35,19 @@ import importlib
 import inspect
 import textwrap
 
-METHODS = {"get", "pop", "append", "setdefault", "split", "upper", "lower", "strip", "update"}
+METHODS = {
+    "get", "pop", "append", "setdefault", "split", "upper", "lower", "strip", "update",
+    "read", "rstrip", "decode", "keys", "join",
+}
 FUNCTIONS = {
     "json.dumps": "dumps",
     "cli_util.parse_json_parameter": "parse",
     "str": "str",
     "len": "len",
     "bool": "bool",
+    "b64encode": "b64encode",
+    "base64.b64encode": "b64encode",
+    "json_skeleton_utils.remove_json_skeleton_params_from_dict": "removeSkeleton",
 }
 CMP = {
     ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=",
@@ -68,8 +80,9 @@ def _dotted(node):
 
 
 class Compiler:
-    def __init__(self, module_globals):
+    def __init__(self, module_globals, local_names=()):
         self.globals = module_globals
+        self.locals = set(local_names)  # names the callback binds; never module constants
         self.invoked = None  # the generated command object ctx.invoke targets
 
     def stmts(self, body, scope):
@@ -87,7 +100,16 @@ class Compiler:
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant):
             return []  # docstring / string comment
         if isinstance(st, ast.Assign) and len(st.targets) == 1:
+            if isinstance(st.targets[0], ast.Attribute):
+                # `some_dict.attr = x`: an AttributeError in the Reference CLI.
+                return [["raise", ast.unparse(st)]]
             return [self.assign(st.targets[0], self.expr(st.value, scope), scope)]
+        if isinstance(st, ast.For):
+            if st.orelse or not isinstance(st.target, ast.Name):
+                raise Unsupported("for")
+            if any(isinstance(n, (ast.Break, ast.Continue)) for b in st.body for n in ast.walk(b)):
+                raise Unsupported("for break")
+            return [["for", self.name(st.target.id, scope), self.expr(st.iter, scope), self.stmts(st.body, scope)]]
         if isinstance(st, ast.Delete):
             out = []
             for t in st.targets:
@@ -158,6 +180,17 @@ class Compiler:
                 keywords.append([kw.arg, self.expr(kw.value, scope)])
         return ["invoke", keywords, star]
 
+    def constant(self, value):
+        """A module-level constant as an expression; anything else (a module, a function)
+        is out of the subset."""
+        if value is None or isinstance(value, (str, bool, int, float)):
+            return value
+        if isinstance(value, dict) and all(isinstance(k, str) for k in value):
+            return ["dict", *([k, self.constant(v)] for k, v in value.items())]
+        if isinstance(value, (list, tuple)):
+            return ["list", *(self.constant(v) for v in value)]
+        raise Unsupported("global")
+
     def resolve(self, expr):
         attrs = []
         while isinstance(expr, ast.Attribute):
@@ -178,6 +211,11 @@ class Compiler:
         if isinstance(node, ast.Name):
             if node.id in ("True", "False", "None"):
                 return {"True": True, "False": False, "None": None}[node.id]
+            if node.id not in scope and node.id not in self.locals and node.id in self.globals:
+                try:
+                    return self.constant(self.globals[node.id])
+                except Unsupported:
+                    pass  # a module or function: a NameError if the program reads it
             return ["var", self.name(node.id, scope)]
         if isinstance(node, ast.Subscript):
             return ["item", self.expr(node.value, scope), self.expr(node.slice, scope)]
@@ -202,6 +240,14 @@ class Compiler:
             return ["dict", *([self.expr(k, scope), self.expr(v, scope)] for k, v in zip(node.keys, node.values))]
         if isinstance(node, ast.List):
             return ["list", *(self.expr(e, scope) for e in node.elts)]
+        if isinstance(node, ast.ListComp):
+            if len(node.generators) != 1:
+                raise Unsupported("listcomp")
+            gen = node.generators[0]
+            if gen.ifs or gen.is_async or not isinstance(gen.target, ast.Name):
+                raise Unsupported("listcomp")
+            # Comprehension variables don't leak (Python 3), but names are unique enough.
+            return ["map", self.expr(gen.iter, scope), self.name(gen.target.id, scope), self.expr(node.elt, scope)]
         if isinstance(node, ast.Call):
             if node.keywords and not (
                 _dotted(node.func) == "json.dumps"
@@ -230,13 +276,20 @@ def compile_wrapper(callback):
         return None, None
     module_globals = vars(importlib.import_module(callback.__module__))
     args = fn.args
-    if args.vararg or not args.kwarg or args.kwarg.arg != "kwargs":
+    # Either **kwargs, or every option named (the body may then build its own kwargs).
+    if args.vararg or (args.kwarg is not None and args.kwarg.arg != "kwargs"):
         return None, None
-    if [a.arg for a in args.args] != ["ctx"] or args.kwonlyargs:
+    named = [a.arg for a in args.args]
+    if named[:1] != ["ctx"] or args.kwonlyargs or args.defaults:
         return None, None
-    compiler = Compiler(module_globals)
+    local_names = set(named) | {"kwargs"} | {
+        n.id for n in ast.walk(fn) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
+    }
+    compiler = Compiler(module_globals, local_names)
+    # Click binds named parameters by name; the rest stay in **kwargs.
+    prelude = [["let", a, ["call", "pop", ["var", "kwargs"], a]] for a in named[1:]]
     try:
-        program = compiler.stmts(fn.body, {})
+        program = prelude + compiler.stmts(fn.body, {})
     except Unsupported:
         return None, None
     if compiler.invoked is None:

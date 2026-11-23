@@ -18962,6 +18962,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "wb",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -32946,6 +32947,963 @@
           "ssh_authorized_keys_file"
         ]
       },
+      "program": {
+        "body": [
+          ["let", "metadata", ["dict"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "metadata"],
+            [
+              [
+                "let",
+                "metadata",
+                [
+                  "fn",
+                  "parse",
+                  "metadata",
+                  ["item", ["var", "kwargs"], "metadata"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "user_data_file",
+            ["item", ["var", "kwargs"], "user_data_file"]
+          ],
+          [
+            "if",
+            ["var", "user_data_file"],
+            [
+              [
+                "if",
+                ["cmp", "in", "user_data", ["var", "metadata"]],
+                [
+                  [
+                    "usage",
+                    "Cannot specify CloudInit user-data as part of both --user-data-file and --metadata."
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "content",
+                    [
+                      "call",
+                      "decode",
+                      [
+                        "fn",
+                        "b64encode",
+                        ["call", "read", ["var", "user_data_file"]]
+                      ],
+                      "utf-8"
+                    ]
+                  ],
+                  ["set", ["var", "metadata"], "user_data", ["var", "content"]]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "ssh_authorized_keys_file",
+            ["item", ["var", "kwargs"], "ssh_authorized_keys_file"]
+          ],
+          [
+            "if",
+            ["var", "ssh_authorized_keys_file"],
+            [
+              [
+                "if",
+                ["cmp", "in", "ssh_authorized_keys", ["var", "metadata"]],
+                [
+                  [
+                    "usage",
+                    "Cannot specify ssh-authorized-keys as part of both --ssh-authorized-keys-file and --metadata."
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "metadata"],
+                    "ssh_authorized_keys",
+                    ["call", "read", ["var", "ssh_authorized_keys_file"]]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "or",
+                ["call", "get", ["var", "kwargs"], "source_details"],
+                ["call", "get", ["var", "kwargs"], "image_id"],
+                ["call", "get", ["var", "kwargs"], "source_boot_volume_id"]
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Must specify --source-details or --image-id or --source-boot-volume-id"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "source_details"],
+              [
+                "or",
+                ["call", "get", ["var", "kwargs"], "image_id"],
+                ["call", "get", ["var", "kwargs"], "source_boot_volume_id"],
+                ["call", "get", ["var", "kwargs"], "boot_volume_size_in_gbs"]
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --source-details with any of: --image-id, --source-boot-volume-id, or --boot-volume-size-in-gbs"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "image_id"],
+              ["call", "get", ["var", "kwargs"], "source_boot_volume_id"]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify both an --image-id and a --source-boot-volume-id to be used to boot the instance"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "boot_volume_size_in_gbs"],
+              ["call", "get", ["var", "kwargs"], "source_boot_volume_id"]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify both a --source-boot-volume-id and a --boot-volume-size-in-gbs to be used to boot the instance"
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "metadata",
+            ["fn", "dumps", ["var", "metadata"]]
+          ],
+          ["let", "create_vnic_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "assign_public_ip", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "assign_public_ip"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "assignPublicIp",
+                ["item", ["var", "kwargs"], "assign_public_ip"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "assign_ipv6_ip", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "assign_ipv6_ip"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "assignIpv6Ip",
+                ["item", ["var", "kwargs"], "assign_ipv6_ip"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "ipv6_address_subnet_cidr_pairs",
+                ["var", "kwargs"]
+              ],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "ipv6_address_subnet_cidr_pairs"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "ipv6AddressIpv6SubnetCidrPairDetails",
+                [
+                  "fn",
+                  "parse",
+                  "ipv6_address_subnet_cidr_pairs",
+                  ["item", ["var", "kwargs"], "ipv6_address_subnet_cidr_pairs"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "skip_source_dest_check", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "skip_source_dest_check"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "skipSourceDestCheck",
+                ["item", ["var", "kwargs"], "skip_source_dest_check"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "assign_private_dns_record", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "assign_private_dns_record"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "assignPrivateDnsRecord",
+                ["item", ["var", "kwargs"], "assign_private_dns_record"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "hostname_label"],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "hostnameLabel",
+                ["item", ["var", "kwargs"], "hostname_label"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "private_ip"],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "privateIp",
+                ["item", ["var", "kwargs"], "private_ip"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "subnet_id"],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "subnetId",
+                ["item", ["var", "kwargs"], "subnet_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "nsg_ids"],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "nsg_ids",
+                [
+                  "fn",
+                  "parse",
+                  "nsg_ids",
+                  ["item", ["var", "kwargs"], "nsg_ids"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "vnic_display_name"],
+            [
+              [
+                "set",
+                ["var", "create_vnic_details"],
+                "displayName",
+                ["item", ["var", "kwargs"], "vnic_display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "create_vnic_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "create_vnic_details",
+                ["fn", "dumps", ["var", "create_vnic_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["call", "get", ["var", "kwargs"], "image_id"],
+            [
+              [
+                "let",
+                "source_details",
+                [
+                  "dict",
+                  ["sourceType", "image"],
+                  ["imageId", ["item", ["var", "kwargs"], "image_id"]]
+                ]
+              ],
+              [
+                "if",
+                ["call", "get", ["var", "kwargs"], "boot_volume_size_in_gbs"],
+                [
+                  [
+                    "set",
+                    ["var", "source_details"],
+                    "bootVolumeSizeInGBs",
+                    [
+                      "call",
+                      "get",
+                      ["var", "kwargs"],
+                      "boot_volume_size_in_gbs"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "source_details",
+                ["fn", "dumps", ["var", "source_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["call", "get", ["var", "kwargs"], "source_boot_volume_id"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "source_details",
+                [
+                  "fn",
+                  "dumps",
+                  [
+                    "dict",
+                    ["sourceType", "bootVolume"],
+                    [
+                      "bootVolumeId",
+                      ["item", ["var", "kwargs"], "source_boot_volume_id"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "assign_public_ip"],
+          ["del", ["var", "kwargs"], "hostname_label"],
+          ["del", ["var", "kwargs"], "private_ip"],
+          ["del", ["var", "kwargs"], "ssh_authorized_keys_file"],
+          ["del", ["var", "kwargs"], "subnet_id"],
+          ["del", ["var", "kwargs"], "user_data_file"],
+          ["del", ["var", "kwargs"], "vnic_display_name"],
+          ["del", ["var", "kwargs"], "skip_source_dest_check"],
+          ["del", ["var", "kwargs"], "assign_private_dns_record"],
+          ["del", ["var", "kwargs"], "nsg_ids"],
+          ["del", ["var", "kwargs"], "assign_ipv6_ip"],
+          ["del", ["var", "kwargs"], "ipv6_address_subnet_cidr_pairs"],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "boot_volume_size_in_gbs", null]
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "source_boot_volume_id", null]
+          ],
+          ["do", ["fn", "removeSkeleton", ["var", "kwargs"]]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.core.src.oci_cli_compute.generated.compute_cli.launch_instance",
+        "params": [
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "capacity_reservation_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "create_vnic_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "dedicated_vm_host_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "extended_metadata",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "fault_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_placement_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "hostname_label",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "image_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ipxe_script_file",
+            "typeClass": "click.types.File",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "launch_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "instance_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "preemptible_instance_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "metadata",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "agent_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shape",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shape_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "launch_volume_attachments",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_pv_encryption_in_transit_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "platform_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "placement_constraint_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_ai_enterprise_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "instance_configuration_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "licensing_configs",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "core.compute",
+        "method": "launch_instance",
+        "http": "POST",
+        "path": "/instances",
+        "positionalArgs": ["launch_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "launch_instance_details",
+        "responseType": "Instance",
+        "paginated": false,
+        "lifecycleGetter": "get_instance"
+      },
+      "bindings": [
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["availabilityDomain"],
+          "param": "availability_domain"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["capacityReservationId"],
+          "param": "capacity_reservation_id",
+          "when": "capacity_reservation_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["createVnicDetails"],
+          "transform": "parse_json_parameter",
+          "param": "create_vnic_details",
+          "when": "create_vnic_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["dedicatedVmHostId"],
+          "param": "dedicated_vm_host_id",
+          "when": "dedicated_vm_host_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["securityAttributes"],
+          "transform": "parse_json_parameter",
+          "param": "security_attributes",
+          "when": "security_attributes is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["extendedMetadata"],
+          "transform": "parse_json_parameter",
+          "param": "extended_metadata",
+          "when": "extended_metadata is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["faultDomain"],
+          "param": "fault_domain",
+          "when": "fault_domain is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["clusterPlacementGroupId"],
+          "param": "cluster_placement_group_id",
+          "when": "cluster_placement_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["computeClusterId"],
+          "param": "compute_cluster_id",
+          "when": "compute_cluster_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["hostnameLabel"],
+          "param": "hostname_label",
+          "when": "hostname_label is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["imageId"],
+          "param": "image_id",
+          "when": "image_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["ipxeScript"],
+          "transform": "read",
+          "param": "ipxe_script_file",
+          "when": "ipxe_script_file is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["launchOptions"],
+          "transform": "parse_json_parameter",
+          "param": "launch_options",
+          "when": "launch_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["instanceOptions"],
+          "transform": "parse_json_parameter",
+          "param": "instance_options",
+          "when": "instance_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["availabilityConfig"],
+          "transform": "parse_json_parameter",
+          "param": "availability_config",
+          "when": "availability_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["preemptibleInstanceConfig"],
+          "transform": "parse_json_parameter",
+          "param": "preemptible_instance_config",
+          "when": "preemptible_instance_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["metadata"],
+          "transform": "parse_json_parameter",
+          "param": "metadata",
+          "when": "metadata is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["agentConfig"],
+          "transform": "parse_json_parameter",
+          "param": "agent_config",
+          "when": "agent_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["shape"],
+          "param": "shape",
+          "when": "shape is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["shapeConfig"],
+          "transform": "parse_json_parameter",
+          "param": "shape_config",
+          "when": "shape_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details",
+          "when": "source_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["subnetId"],
+          "param": "subnet_id",
+          "when": "subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["launchVolumeAttachments"],
+          "transform": "parse_json_parameter",
+          "param": "launch_volume_attachments",
+          "when": "launch_volume_attachments is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["isPvEncryptionInTransitEnabled"],
+          "param": "is_pv_encryption_in_transit_enabled",
+          "when": "is_pv_encryption_in_transit_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["platformConfig"],
+          "transform": "parse_json_parameter",
+          "param": "platform_config",
+          "when": "platform_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["placementConstraintDetails"],
+          "transform": "parse_json_parameter",
+          "param": "placement_constraint_details",
+          "when": "placement_constraint_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["isAIEnterpriseEnabled"],
+          "param": "is_ai_enterprise_enabled",
+          "when": "is_ai_enterprise_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["instanceConfigurationId"],
+          "param": "instance_configuration_id",
+          "when": "instance_configuration_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_instance_details",
+          "key": ["licensingConfigs"],
+          "transform": "parse_json_parameter",
+          "param": "licensing_configs",
+          "when": "licensing_configs is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -33214,6 +34172,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -33730,6 +34689,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "rb",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -33748,6 +34708,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -34691,6 +35652,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -35934,6 +36896,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },
@@ -42319,6 +43282,170 @@
         ],
         "files": ["ssh_public_key_file"]
       },
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "instance_id",
+            ["call", "pop", ["var", "kwargs"], "instance_id"]
+          ],
+          [
+            "let",
+            "ssh_public_key_file",
+            ["call", "pop", ["var", "kwargs"], "ssh_public_key_file"]
+          ],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "kwargs",
+            [
+              "dict",
+              ["instance_id", ["var", "instance_id"]],
+              ["public_key", ["call", "read", ["var", "ssh_public_key_file"]]],
+              ["wait_for_state", ["var", "wait_for_state"]],
+              ["max_wait_seconds", ["var", "max_wait_seconds"]],
+              ["wait_interval_seconds", ["var", "wait_interval_seconds"]],
+              ["defined_tags", ["var", "defined_tags"]],
+              ["freeform_tags", ["var", "freeform_tags"]]
+            ]
+          ],
+          ["do", ["fn", "removeSkeleton", ["var", "kwargs"]]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.core.src.oci_cli_compute.generated.compute_cli.create_instance_console_connection",
+        "params": [
+          {
+            "name": "instance_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "public_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "core.compute",
+        "method": "create_instance_console_connection",
+        "http": "POST",
+        "path": "/instanceConsoleConnections",
+        "positionalArgs": ["create_instance_console_connection_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_instance_console_connection_details",
+        "responseType": "InstanceConsoleConnection",
+        "paginated": false,
+        "lifecycleGetter": "get_instance_console_connection"
+      },
+      "bindings": [
+        {
+          "target": "body",
+          "bodyArg": "create_instance_console_connection_details",
+          "key": ["instanceId"],
+          "param": "instance_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_instance_console_connection_details",
+          "key": ["publicKey"],
+          "param": "public_key"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_instance_console_connection_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_instance_console_connection_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -42445,6 +43572,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },

@@ -30805,6 +30805,118 @@
         ],
         "files": ["key_file"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["not", ["call", "get", ["var", "kwargs"], "key"]],
+              ["not", ["call", "get", ["var", "kwargs"], "key_file"]]
+            ],
+            [
+              [
+                "raise",
+                "raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('Must specify either --key or --key-file.')"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "key"],
+              ["call", "get", ["var", "kwargs"], "key_file"]
+            ],
+            [
+              [
+                "raise",
+                "raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('Cannot specify both --key and --key-file.')"
+              ]
+            ],
+            []
+          ],
+          ["let", "key_file", ["call", "get", ["var", "kwargs"], "key_file"]],
+          [
+            "if",
+            ["var", "key_file"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "key",
+                ["call", "read", ["var", "key_file"]]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "key_file"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.identity.src.oci_cli_identity.generated.identity_cli.upload_api_key",
+        "params": [
+          {
+            "name": "user_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "identity.identity",
+        "method": "upload_api_key",
+        "http": "POST",
+        "path": "/users/{userId}/apiKeys",
+        "positionalArgs": ["user_id", "create_api_key_details"],
+        "pathParams": {
+          "userId": "user_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_api_key_details",
+        "responseType": "ApiKey",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["user_id"],
+          "param": "user_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_api_key_details",
+          "key": ["key"],
+          "param": "key"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -30857,6 +30969,7 @@
           "hidden": false,
           "expose": true,
           "eager": false,
+          "fileMode": "r",
           "clickRequired": false,
           "callback": "oci-default"
         },

@@ -83,6 +83,8 @@ def param_spec(p: click.Parameter) -> dict:
         out["flagNeedsValue"] = True
     if isinstance(t, click.types._NumberRangeBase):
         out["range"] = {"min": t.min, "max": t.max, "minOpen": bool(t.min_open), "maxOpen": bool(t.max_open), "clamp": bool(t.clamp)}
+    if isinstance(t, click.File):
+        out["fileMode"] = t.mode  # read as text, bytes, or written (ticket 12)
     if type(t).__name__ == "CliDatetime":
         out["datetimeRounding"] = t.apply_rounding
     if isinstance(t, click.Choice):

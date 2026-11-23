@@ -51,32 +51,7 @@
       "endpointTemplate": "https://ccc.{region}.oci.{secondLevelDomain}",
       "endpointTemplatePerRealm": {},
       "dualStackByDefault": false,
-      "serviceName": "compute_cloud_at_customer",
-      "lifecycleGetters": {
-        "get_ccc_upgrade_schedule": {
-          "client": "compute_cloud_at_customer.compute_cloud_at_customer",
-          "method": "get_ccc_upgrade_schedule",
-          "http": "GET",
-          "path": "/cccUpgradeSchedules/{cccUpgradeScheduleId}",
-          "positionalArgs": ["ccc_upgrade_schedule_id"],
-          "pathParams": {
-            "cccUpgradeScheduleId": "ccc_upgrade_schedule_id"
-          },
-          "queryParams": {},
-          "headerParams": {
-            "accept": {
-              "value": "application/json"
-            },
-            "content-type": {
-              "value": "application/json"
-            },
-            "opc-request-id": {
-              "arg": "opc_request_id"
-            }
-          },
-          "responseType": "CccUpgradeSchedule"
-        }
-      }
+      "serviceName": "compute_cloud_at_customer"
     }
   },
   "groups": {
@@ -212,6 +187,70 @@
         "params": {}
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.change_ccc_infrastructure_compartment",
+        "renames": {
+          "ccc_infrastructure_id": "infrastructure_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "change_ccc_infrastructure_compartment",
+        "http": "POST",
+        "path": "/cccInfrastructures/{cccInfrastructureId}/actions/changeCompartment",
+        "positionalArgs": [
+          "ccc_infrastructure_id",
+          "change_ccc_infrastructure_compartment_details"
+        ],
+        "pathParams": {
+          "cccInfrastructureId": "infrastructure_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_ccc_infrastructure_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_infrastructure_id"],
+          "param": "infrastructure_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_ccc_infrastructure_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -422,6 +461,109 @@
         }
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.create_ccc_infrastructure",
+        "renames": {
+          "ccc_upgrade_schedule_id": "upgrade_schedule_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "create_ccc_infrastructure",
+        "http": "POST",
+        "path": "/cccInfrastructures",
+        "positionalArgs": ["create_ccc_infrastructure_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_ccc_infrastructure_details",
+        "responseType": "CccInfrastructure",
+        "paginated": false,
+        "lifecycleGetter": "get_ccc_infrastructure"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["subnetId"],
+          "param": "subnet_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["connectionState"],
+          "param": "connection_state",
+          "when": "connection_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["connectionDetails"],
+          "param": "connection_details",
+          "when": "connection_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["cccUpgradeScheduleId"],
+          "param": "upgrade_schedule_id",
+          "when": "ccc_upgrade_schedule_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ccc_infrastructure_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -755,6 +897,57 @@
         "params": {}
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.delete_ccc_infrastructure",
+        "renames": {
+          "ccc_infrastructure_id": "infrastructure_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "delete_ccc_infrastructure",
+        "http": "DELETE",
+        "path": "/cccInfrastructures/{cccInfrastructureId}",
+        "positionalArgs": ["ccc_infrastructure_id"],
+        "pathParams": {
+          "cccInfrastructureId": "infrastructure_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_infrastructure_id"],
+          "param": "infrastructure_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -960,6 +1153,49 @@
         "params": {}
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.get_ccc_infrastructure",
+        "renames": {
+          "ccc_infrastructure_id": "infrastructure_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "get_ccc_infrastructure",
+        "http": "GET",
+        "path": "/cccInfrastructures/{cccInfrastructureId}",
+        "positionalArgs": ["ccc_infrastructure_id"],
+        "pathParams": {
+          "cccInfrastructureId": "infrastructure_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CccInfrastructure",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_infrastructure_id"],
+          "param": "infrastructure_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1137,6 +1373,148 @@
         }
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.list_ccc_infrastructures",
+        "renames": {
+          "ccc_infrastructure_id": "infrastructure_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "list_ccc_infrastructures",
+        "http": "GET",
+        "path": "/cccInfrastructures",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          },
+          "accessLevel": {
+            "arg": "access_level"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "displayNameContains": {
+            "arg": "display_name_contains"
+          },
+          "cccInfrastructureId": {
+            "arg": "infrastructure_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CccInfrastructureCollection",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id",
+          "when": "compartment_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["compartment_id_in_subtree"],
+          "param": "compartment_id_in_subtree",
+          "when": "compartment_id_in_subtree is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["access_level"],
+          "param": "access_level",
+          "when": "access_level is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name_contains"],
+          "param": "display_name_contains",
+          "when": "display_name_contains is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ccc_infrastructure_id"],
+          "param": "infrastructure_id",
+          "when": "ccc_infrastructure_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1543,6 +1921,122 @@
         }
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.update_ccc_infrastructure",
+        "renames": {
+          "ccc_infrastructure_id": "infrastructure_id",
+          "ccc_upgrade_schedule_id": "upgrade_schedule_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "update_ccc_infrastructure",
+        "http": "PUT",
+        "path": "/cccInfrastructures/{cccInfrastructureId}",
+        "positionalArgs": [
+          "ccc_infrastructure_id",
+          "update_ccc_infrastructure_details"
+        ],
+        "pathParams": {
+          "cccInfrastructureId": "infrastructure_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_ccc_infrastructure_details",
+        "responseType": "CccInfrastructure",
+        "paginated": false,
+        "lifecycleGetter": "get_ccc_infrastructure"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_infrastructure_id"],
+          "param": "infrastructure_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["subnetId"],
+          "param": "subnet_id",
+          "when": "subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["connectionState"],
+          "param": "connection_state",
+          "when": "connection_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["connectionDetails"],
+          "param": "connection_details",
+          "when": "connection_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["cccUpgradeScheduleId"],
+          "param": "upgrade_schedule_id",
+          "when": "ccc_upgrade_schedule_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_infrastructure_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1903,6 +2397,70 @@
         "params": {}
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.change_ccc_upgrade_schedule_compartment",
+        "renames": {
+          "ccc_upgrade_schedule_id": "upgrade_schedule_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "change_ccc_upgrade_schedule_compartment",
+        "http": "POST",
+        "path": "/cccUpgradeSchedules/{cccUpgradeScheduleId}/actions/changeCompartment",
+        "positionalArgs": [
+          "ccc_upgrade_schedule_id",
+          "change_ccc_upgrade_schedule_compartment_details"
+        ],
+        "pathParams": {
+          "cccUpgradeScheduleId": "upgrade_schedule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "change_ccc_upgrade_schedule_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_upgrade_schedule_id"],
+          "param": "upgrade_schedule_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_ccc_upgrade_schedule_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2436,6 +2994,57 @@
         "params": {}
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.delete_ccc_upgrade_schedule",
+        "renames": {
+          "ccc_upgrade_schedule_id": "upgrade_schedule_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "delete_ccc_upgrade_schedule",
+        "http": "DELETE",
+        "path": "/cccUpgradeSchedules/{cccUpgradeScheduleId}",
+        "positionalArgs": ["ccc_upgrade_schedule_id"],
+        "pathParams": {
+          "cccUpgradeScheduleId": "upgrade_schedule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_upgrade_schedule_id"],
+          "param": "upgrade_schedule_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2641,6 +3250,49 @@
         "params": {}
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.get_ccc_upgrade_schedule",
+        "renames": {
+          "ccc_upgrade_schedule_id": "upgrade_schedule_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "get_ccc_upgrade_schedule",
+        "http": "GET",
+        "path": "/cccUpgradeSchedules/{cccUpgradeScheduleId}",
+        "positionalArgs": ["ccc_upgrade_schedule_id"],
+        "pathParams": {
+          "cccUpgradeScheduleId": "upgrade_schedule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CccUpgradeSchedule",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_upgrade_schedule_id"],
+          "param": "upgrade_schedule_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2809,6 +3461,148 @@
         "params": {}
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.list_ccc_upgrade_schedules",
+        "renames": {
+          "ccc_upgrade_schedule_id": "upgrade_schedule_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "list_ccc_upgrade_schedules",
+        "http": "GET",
+        "path": "/cccUpgradeSchedules",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "cccUpgradeScheduleId": {
+            "arg": "upgrade_schedule_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          },
+          "accessLevel": {
+            "arg": "access_level"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "displayNameContains": {
+            "arg": "display_name_contains"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "CccUpgradeScheduleCollection",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_upgrade_schedule_id"],
+          "param": "upgrade_schedule_id",
+          "when": "ccc_upgrade_schedule_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id",
+          "when": "compartment_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["compartment_id_in_subtree"],
+          "param": "compartment_id_in_subtree",
+          "when": "compartment_id_in_subtree is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["access_level"],
+          "param": "access_level",
+          "when": "access_level is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name_contains"],
+          "param": "display_name_contains",
+          "when": "display_name_contains is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3203,6 +3997,101 @@
         }
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.compute_cloud_at_customer.src.oci_cli_compute_cloud_at_customer.generated.computecloudatcustomer_cli.update_ccc_upgrade_schedule",
+        "renames": {
+          "ccc_upgrade_schedule_id": "upgrade_schedule_id"
+        }
+      },
+      "operation": {
+        "client": "compute_cloud_at_customer.compute_cloud_at_customer",
+        "method": "update_ccc_upgrade_schedule",
+        "http": "PUT",
+        "path": "/cccUpgradeSchedules/{cccUpgradeScheduleId}",
+        "positionalArgs": [
+          "ccc_upgrade_schedule_id",
+          "update_ccc_upgrade_schedule_details"
+        ],
+        "pathParams": {
+          "cccUpgradeScheduleId": "upgrade_schedule_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_ccc_upgrade_schedule_details",
+        "responseType": "CccUpgradeSchedule",
+        "paginated": false,
+        "lifecycleGetter": "get_ccc_upgrade_schedule"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ccc_upgrade_schedule_id"],
+          "param": "upgrade_schedule_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_upgrade_schedule_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_upgrade_schedule_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_upgrade_schedule_details",
+          "key": ["events"],
+          "transform": "parse_json_parameter",
+          "param": "events",
+          "when": "events is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_upgrade_schedule_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ccc_upgrade_schedule_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -1,6 +1,20 @@
 import { describe, expect, test } from "bun:test";
 
 describe("parity case generator", () => {
+  test("generates the Tier A tracer bullet request case with renamed options", async () => {
+    const result = Bun.spawnSync(
+      ["bun", "scripts/generate-cases.ts", "--service", "apm-traces"],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const cases = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-get-apm-traces.json`,
+    ).json()) as { key: string; argv: string[]; requestOnly: boolean }[];
+    const span = cases.find((c) => c.key === "apm-traces trace span get");
+    expect(span?.requestOnly).toBe(true);
+    expect(span?.argv).toContain("--time-span-started-gte");
+  });
+
   test("generates request cases for bodyless POST actions", async () => {
     const result = Bun.spawnSync(
       ["bun", "scripts/generate-cases.ts", "--service", "data-safe"],

@@ -272,7 +272,11 @@ const WRITE_METHODS = ["POST", "PUT", "PATCH"];
  * and POST/PUT/PATCH with either body options, a direct body parameter, or no body.
  */
 export function engineSupports(command: Command): boolean {
-  if (command.kind !== "generated") return false;
+  if (
+    command.kind !== "generated" &&
+    !(command.kind === "custom" && command.tier === "A")
+  )
+    return false;
   const http = command.operation?.http ?? "";
   if (http === "GET" || http === "HEAD") return true;
   if (http === "DELETE") return command.operation?.body === undefined;
@@ -296,6 +300,12 @@ export function engineSupports(command: Command): boolean {
 /** `command` is the Leaf command's spec entry, when `key` names one. */
 export function isImplemented(key: string, command?: Command): boolean {
   if (IMPLEMENTED.has(key)) return true;
+  if (command?.kind === "custom" && command.tier === "A")
+    return (
+      key === "apm-traces trace span get" &&
+      engineSupports(command) &&
+      !EXCLUDED.has(key)
+    );
   return command !== undefined && engineSupports(command) && !EXCLUDED.has(key);
 }
 

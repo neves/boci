@@ -48,6 +48,17 @@ test("engine supports bodyless actions with an unexposed SDK body argument", asy
   expect(engineSupports(start!)).toBe(true);
 });
 
+test("engine supports only the Tier A tracer bullet custom command", async () => {
+  const { commands } = await loadService("apm-traces");
+  const span = commands["trace span get"];
+  expect(span?.tier).toBe("A");
+  expect(engineSupports(span!)).toBe(true);
+  expect(isImplemented("apm-traces trace span get", span)).toBe(true);
+  expect(
+    isImplemented("apm-traces trace trace get", { ...span!, kind: "custom" }),
+  ).toBe(false);
+});
+
 test("loading cli and registry does not eagerly load command modules", () => {
   const res = Bun.spawnSync(
     [

@@ -576,8 +576,7 @@ async function main(io: Invocation): Promise<void> {
     const http = specCmd.operation?.http ?? "";
     if (
       (key === "ns get" && name === "os") ||
-      (specCmd.kind === "generated" &&
-        ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
+      (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
         isImplemented(`${name} ${key}`, specCmd))
     ) {
       const call = {

@@ -184,6 +184,23 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                     entry["otherOperations"] = others
                 spec_name, service_name = client_key.split(".", 1)
                 CLIENTS[client_key] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
+        elif entry["kind"] == "custom" and CLIENTS is not None:
+            from oci_cli.cli_clients import CLIENT_MAP
+
+            tier, delegate = sdk.custom_delegate(
+                cmd.callback, CLIENT_MAP, {p.name for p in cmd.params}
+            )
+            entry["tier"] = tier
+            if delegate:
+                entry["delegate"] = {
+                    "callback": delegate["callback"],
+                    "renames": delegate["renames"],
+                }
+                entry["operation"] = delegate["operation"]
+                entry["bindings"] = delegate["bindings"]
+                client = delegate["operation"]["client"]
+                spec_name, service_name = client.split(".", 1)
+                CLIENTS[client] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
         entry["params"] = [param_spec(p) for p in cmd.params]
         commands[key] = entry
 

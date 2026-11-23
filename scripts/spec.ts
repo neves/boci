@@ -22,6 +22,8 @@ const spec = (await file.json()) as ServiceSpec;
 const key = words.join(" ");
 type Command = ServiceSpec["commands"][string] & {
   bindings?: { target: string; key: string[]; param: string; when?: string }[];
+  tier?: "A" | "B" | "C";
+  delegate?: { callback: string; renames: Record<string, string> };
 };
 const cmd = spec.commands[key] as Command | undefined;
 
@@ -48,6 +50,10 @@ if (full) {
 }
 
 console.log(`${service} ${key}  [${cmd.kind}]${cmd.hidden ? " hidden" : ""}`);
+if (cmd.tier)
+  console.log(
+    `tier: ${cmd.tier}${cmd.delegate ? ` → ${cmd.delegate.callback}` : ""}`,
+  );
 const op = cmd.operation as
   | (NonNullable<Command["operation"]> & {
       paginated?: boolean;

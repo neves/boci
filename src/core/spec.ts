@@ -60,6 +60,8 @@ export type ServiceSpec = {
     SpecNode & {
       otherOperations?: string[];
       kind: "generated" | "custom";
+      tier?: "A" | "B" | "C";
+      delegate?: { callback: string; renames: Record<string, string> };
       operation?: OperationSpec;
     }
   >;

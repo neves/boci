@@ -43,7 +43,17 @@
       "shortHelp": "Logging Ingestion"
     }
   },
-  "clients": {},
+  "clients": {
+    "loggingingestion.logging": {
+      "class": "oci.loggingingestion.logging_client.LoggingClient",
+      "regionalClient": true,
+      "basePath": "/20200831",
+      "endpointTemplate": "https://ingestion.logging.{region}.{dualStack?ds.:}oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "dualStackByDefault": false,
+      "serviceName": "logging"
+    }
+  },
   "groups": {},
   "commands": {
     "put-logs": {
@@ -101,6 +111,80 @@
         }
       },
       "kind": "custom",
+      "tier": "A",
+      "delegate": {
+        "callback": "services.loggingingestion.src.oci_cli_logging.generated.logging_cli.put_logs",
+        "renames": {
+          "timestamp_opc_agent_processing": "agent_timestamp"
+        }
+      },
+      "operation": {
+        "client": "loggingingestion.logging",
+        "method": "put_logs",
+        "http": "POST",
+        "path": "/logs/{logId}/actions/push",
+        "positionalArgs": ["log_id", "put_logs_details"],
+        "pathParams": {
+          "logId": "log_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "timestamp-opc-agent-processing": {
+            "arg": "agent_timestamp"
+          },
+          "opc-agent-version": {
+            "arg": "opc_agent_version"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "put_logs_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["log_id"],
+          "param": "log_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["timestamp_opc_agent_processing"],
+          "param": "agent_timestamp",
+          "when": "timestamp_opc_agent_processing is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_agent_version"],
+          "param": "opc_agent_version",
+          "when": "opc_agent_version is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "put_logs_details",
+          "key": ["specversion"],
+          "param": "specversion"
+        },
+        {
+          "target": "body",
+          "bodyArg": "put_logs_details",
+          "key": ["logEntryBatches"],
+          "transform": "parse_json_parameter",
+          "param": "log_entry_batches"
+        }
+      ],
       "params": [
         {
           "kind": "option",

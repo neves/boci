@@ -35,11 +35,13 @@ type Operation = {
   http?: string;
   responseType?: string;
   pathParams?: Record<string, string>;
-  headerParams?: Record<string, unknown>;
+  queryParams?: Record<string, { arg?: string }>;
+  headerParams?: Record<string, { arg?: string }>;
   body?: string;
 };
 type Command = {
   kind: string;
+  tier?: "A" | "B" | "C";
   operation?: Operation;
   params?: Param[];
   bindings?: Binding[];
@@ -135,9 +137,24 @@ function pushParam(argv: string[], param: Param) {
 function getArgv(argv: string[], command: Command, operation: Operation) {
   const params = command.params ?? [];
   const pathArgs = new Set(Object.values(operation.pathParams ?? {}));
-  for (const param of params)
-    if (param.required === true || pathArgs.has(String(param.name)))
+  for (const param of params) {
+    const name = String(param.name);
+    const hasRequestBinding = [
+      ...Object.values(operation.pathParams ?? {}),
+      ...Object.values(operation.queryParams ?? {}).map(
+        (binding) => binding.arg,
+      ),
+      ...Object.values(operation.headerParams ?? {}).map(
+        (binding) => binding.arg,
+      ),
+    ].includes(name);
+    if (
+      param.required === true ||
+      pathArgs.has(name) ||
+      (command.kind === "custom" && command.tier === "A" && hasRequestBinding)
+    )
       pushParam(argv, param);
+  }
   argv.push("--endpoint", "{endpoint}");
   if (hasRetryToken(params))
     argv.push("--opc-retry-token", "{opc-retry-token}");
@@ -262,7 +279,13 @@ for (const service of services) {
       const key = `${service} ${command}`;
       const operation = node.operation;
       if (
-        node.kind !== "generated" ||
+        (node.kind !== "generated" &&
+          !(
+            service === "apm-traces" &&
+            key === "apm-traces trace span get" &&
+            node.kind === "custom" &&
+            node.tier === "A"
+          )) ||
         !operation ||
         !kind.methods.includes(operation.http ?? "") ||
         !methods.has(operation.http ?? "") ||

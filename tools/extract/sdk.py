@@ -234,6 +234,96 @@ def command_operation(callback, client_map) -> tuple:
     return key, op, ops[1:]
 
 
+def custom_delegate(callback, client_map, custom_params):
+    """Describe a Tier A wrapper and its generated command, when it is a pure delegate."""
+    fn = _fn_ast(callback)
+    invokes = [
+        n for n in ast.walk(fn)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+        and n.func.attr == "invoke"
+    ]
+    if not invokes:
+        return "C", None
+    call = invokes[0]
+
+    def rename_pairs(stmts):
+        pairs = {}
+        for st in stmts:
+            if isinstance(st, ast.If):
+                pairs.update(rename_pairs(st.body))
+                pairs.update(rename_pairs(st.orelse))
+            elif isinstance(st, ast.Assign) and len(st.targets) == 1:
+                target = st.targets[0]
+                value = st.value
+                if (_subscript_chain(target) and _subscript_chain(value)
+                        and _subscript_chain(target)[0] == "kwargs"
+                        and _subscript_chain(value)[0] == "kwargs"):
+                    pairs[_subscript_chain(target)[1][0]] = _subscript_chain(value)[1][0]
+        return pairs
+
+    renames = rename_pairs(fn.body)
+    # A valid Tier A wrapper ends in exactly one ctx.invoke and preceding statements
+    # only rename or drop keyword arguments.
+    final = fn.body[-1] if fn.body else None
+    trailing = isinstance(final, ast.Expr) and final.value is call
+    if not trailing or len(invokes) != 1:
+        return "B", None
+    for st in fn.body[:-1]:
+        if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant) and isinstance(st.value.value, str):
+            continue
+        if isinstance(st, ast.If):
+            # The callback body is deliberately kept conservative: only recognized
+            # kwargs renames and pop calls are accepted.
+            if not all(isinstance(child, (ast.Assign, ast.Expr)) for child in st.body + st.orelse):
+                return "B", None
+            continue
+        if isinstance(st, ast.Assign) and len(st.targets) == 1 and _subscript_chain(st.targets[0]):
+            continue
+        if isinstance(st, ast.Expr) and isinstance(st.value, ast.Call) and isinstance(st.value.func, ast.Attribute) and st.value.func.attr == "pop":
+            continue
+        return "B", None
+    target = call.args[0] if call.args else None
+    while isinstance(target, ast.Attribute):
+        target = target.value
+    if not isinstance(target, ast.Name):
+        return "B", None
+    expr = call.args[0]
+    attrs = []
+    while isinstance(expr, ast.Attribute):
+        attrs.insert(0, expr.attr)
+        expr = expr.value
+    module_globals = vars(importlib.import_module(callback.__module__))
+    obj = module_globals.get(target.id)
+    for attr in attrs:
+        obj = getattr(obj, attr, None)
+    delegated_callback = getattr(obj, "callback", None)
+    if delegated_callback is None:
+        return "B", None
+    _, operation, _ = command_operation(delegated_callback, client_map)
+    if operation is None:
+        return "B", None
+    for section in ("queryParams", "headerParams"):
+        for binding in operation.get(section, {}).values():
+            if binding.get("arg") in renames:
+                binding["arg"] = renames[binding["arg"]]
+    for key, value in operation.get("pathParams", {}).items():
+        if value in renames:
+            operation["pathParams"][key] = renames[value]
+    generated_params = {p.name for p in getattr(obj, "params", [])}
+    bindings = command_bindings(delegated_callback, operation["method"], generated_params)
+    for binding in bindings:
+        name = binding.get("param")
+        if name in renames:
+            binding["param"] = renames[name]
+    bindings = [b for b in bindings if "param" not in b or b["param"] in custom_params]
+    return "A", {
+        "callback": f"{delegated_callback.__module__}.{delegated_callback.__qualname__}",
+        "renames": renames,
+        "operation": operation,
+        "bindings": bindings,
+    }
+
+
 def _subscript_chain(node):
     """_details['a']['b'] -> ("_details", ["a", "b"]); None if not constant keys on a Name."""
     keys = []

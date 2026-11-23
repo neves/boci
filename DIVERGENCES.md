@@ -20,8 +20,8 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 
 ### Any command with a duplicated parameter: Python UserWarnings on stderr
 
-- **Invocation:** `oci cloud-guard data-mask-rule create-for-services --help` (and the few other commands that register `--from-json` twice)
-- **Reference CLI:** prints Click's `UserWarning: The parameter --from-json is used more than once…` to stderr, several times, each prefixed with the local site-packages path of the Python install
+- **Invocation:** `oci cloud-guard data-mask-rule create-for-services --help` (and the few other commands that register `--from-json` twice); also `oci db pdb-conversion-history get`, which registers `-?`/`-h`/`--help` twice
+- **Reference CLI:** prints Click's `UserWarning: The parameter <name> is used more than once…` to stderr, several times, each prefixed with the local site-packages path of the Python install
 - **boci:** prints nothing extra
 - **Why:** it reports a bug in oci's own command definitions and embeds a machine-specific path; no script can rely on it. Masked in `test/harness/masks.ts`.
 - **State:** accepted

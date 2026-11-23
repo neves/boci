@@ -1018,8 +1018,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `ocvs sddc vmware-versions`
 - [x] `optimizer resource-action-summary filter-resource-actions`
 - [ ] `os multipart abort`
-- [ ] `os object copy`
-- [ ] `os object reencrypt`
+- [x] `os object copy`
+- [x] `os object reencrypt`
 - [ ] `raw-request `
 - [ ] `resource-manager stack copy`
 - [x] `search resource structured-search`
@@ -1112,7 +1112,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-science model create-model-artifact`
 - [x] `data-science notebook-session create`
 - [x] `data-science pipeline create-step-artifact`
-- [ ] `database-migration connection create-oracle-connection`
+- [x] `database-migration connection create-oracle-connection`
 - [x] `datacc infrastructure create`
 - [x] `db autonomous-database create`
 - [x] `db autonomous-database create-adb-cross-region-data-guard-details`
@@ -1462,7 +1462,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `kms management vault restore-from-file`
 - [x] `log-analytics content-import import-custom-content`
 - [x] `log-analytics entity upload-discovery-data`
-- [ ] `log-analytics query export`
+- [x] `log-analytics query export`
 - [x] `log-analytics upload upload-log-events-file`
 - [x] `log-analytics upload upload-log-file`
 - [x] `log-analytics upload upload-otlp-logs`

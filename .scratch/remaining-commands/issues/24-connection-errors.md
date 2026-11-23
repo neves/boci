@@ -4,7 +4,7 @@
 
 **Blocked by:** none.
 
-**Status:** ready-for-agent
+**Status:** done (refused, proxy and other transport failures print the Reference CLI's RequestException and exit 1; the complex-json cases now hit the fake endpoint and compare the full run; follow-ups: 27 response model rendering, 28 SSLException)
 
 ## Context for the implementer
 

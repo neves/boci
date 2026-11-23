@@ -36,6 +36,57 @@ const invocationAgents = new WeakMap<
   ReturnType<typeof proxyAgents>
 >();
 
+/**
+ * The Reference CLI's report of a request that never got a response: oci.exceptions
+ * RequestException (refused, reset, DNS, proxy and TLS-handshake failures) or ConnectTimeout.
+ */
+export function connectionErrorReport(
+  kind: "RequestException" | "ConnectTimeout",
+  method: string,
+  url: URL,
+): string {
+  const handshake = kind === "RequestException";
+  // cli_util.get_request_endpoint_from_exception_string splits at the last "/n".
+  const endpoint = url.href.split("?")[0]!;
+  const cut = endpoint.lastIndexOf("/n");
+  const curl = handshake && cut >= 0 ? endpoint.slice(0, cut) : undefined;
+  const tips = handshake
+    ? curl
+      ? `Try running curl ${curl}. If the curl doesn't work, check your network setting or contact your network administrator. If it does work, verify the resource state before retrying.`
+      : "Verify the resource state before retrying."
+    : "It looks like a connection timeout. Verify the resource state before retrying, then check your network setting or contact your network administrator.";
+  const details = {
+    client_version: `Oracle-PythonCLI/${REFERENCE_VERSION}`,
+    logging_tips:
+      "Please run the OCI CLI command using --debug flag to find more debug information.",
+    message: `The request timed out${curl ? ` while trying to reach ${curl}` : ""}. The request may have reached the service and the operation may have completed. Verify the resource state before retrying.`,
+    ...(handshake
+      ? { request_endpoint: curl ? ` ${method} ${curl}` : null }
+      : {}),
+    target_service: "CLI",
+    timestamp: new Date().toISOString().replace("Z", "000"),
+    troubleshooting_tips:
+      tips +
+      " See [https://docs.oracle.com/iaas/Content/API/SDKDocs/clitroubleshooting.htm] for more information about resolving this error. If you are unable to resolve this issue, run this CLI command with --debug option and contact Oracle support and provide them the full error message.",
+  };
+  return `${kind}:\n${JSON.stringify(details, null, 4)}\n`;
+}
+
+/**
+ * A transport failure python-requests reports as a ConnectionError (or another
+ * RequestException): the socket, DNS or proxy failed before a response arrived. Bun's fetch
+ * and node:http both tag these with a string `code`. Certificate failures are left out: the
+ * Reference CLI reports those as an SSLException.
+ */
+export function isConnectionError(e: unknown): e is Error {
+  if (!(e instanceof Error) || e instanceof DOMException) return false;
+  const code = (e as { code?: unknown }).code;
+  return (
+    typeof code === "string" &&
+    !/CERT|SSL|TLS|SELF_SIGNED|UNABLE_TO_VERIFY|ABORT/i.test(code)
+  );
+}
+
 export class ConnectionPhaseTimeout extends Error {
   constructor(
     readonly handshake: boolean,
@@ -46,31 +97,11 @@ export class ConnectionPhaseTimeout extends Error {
   }
 
   report(): string {
-    // cli_util.get_request_endpoint_from_exception_string splits at the last "/n".
-    const endpoint = this.url.href.split("?")[0]!;
-    const cut = endpoint.lastIndexOf("/n");
-    const curl =
-      this.handshake && cut >= 0 ? endpoint.slice(0, cut) : undefined;
-    const tips = this.handshake
-      ? curl
-        ? `Try running curl ${curl}. If the curl doesn't work, check your network setting or contact your network administrator. If it does work, verify the resource state before retrying.`
-        : "Verify the resource state before retrying."
-      : "It looks like a connection timeout. Verify the resource state before retrying, then check your network setting or contact your network administrator.";
-    const details = {
-      client_version: `Oracle-PythonCLI/${REFERENCE_VERSION}`,
-      logging_tips:
-        "Please run the OCI CLI command using --debug flag to find more debug information.",
-      message: `The request timed out${curl ? ` while trying to reach ${curl}` : ""}. The request may have reached the service and the operation may have completed. Verify the resource state before retrying.`,
-      ...(this.handshake
-        ? { request_endpoint: curl ? ` ${this.method} ${curl}` : null }
-        : {}),
-      target_service: "CLI",
-      timestamp: new Date().toISOString().replace("Z", "000"),
-      troubleshooting_tips:
-        tips +
-        " See [https://docs.oracle.com/iaas/Content/API/SDKDocs/clitroubleshooting.htm] for more information about resolving this error. If you are unable to resolve this issue, run this CLI command with --debug option and contact Oracle support and provide them the full error message.",
-    };
-    return `${this.handshake ? "RequestException" : "ConnectTimeout"}:\n${JSON.stringify(details, null, 4)}\n`;
+    return connectionErrorReport(
+      this.handshake ? "RequestException" : "ConnectTimeout",
+      this.method,
+      this.url,
+    );
   }
 }
 

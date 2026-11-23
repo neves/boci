@@ -242,6 +242,7 @@ const ENGINE_FEATURES = [
   "debug",
   "read-timeout",
   "no-retry",
+  "connection-error",
   "max-retries",
   "work-request-waiter",
   "lifecycle-waiter",

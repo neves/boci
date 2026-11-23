@@ -4,6 +4,8 @@
 // oci's generated command and the Python SDK's base client do them.
 import {
   ConnectionPhaseTimeout,
+  connectionErrorReport,
+  isConnectionError,
   fetchWithConnectionTimeout,
 } from "./connection-timeout.ts";
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -770,12 +772,15 @@ export async function sendServiceRequest(
     } catch (e) {
       if (readTimer !== undefined) clearTimeout(readTimer);
       if (attempt >= maxAttempts) {
-        if (
-          e instanceof ConnectionPhaseTimeout &&
-          sc.rootValues.debug !== true
-        ) {
-          io.err(e.report());
-          throw new Exit(1);
+        if (sc.rootValues.debug !== true) {
+          if (e instanceof ConnectionPhaseTimeout) {
+            io.err(e.report());
+            throw new Exit(1);
+          }
+          if (isConnectionError(e)) {
+            io.err(connectionErrorReport("RequestException", req.method, url));
+            throw new Exit(1);
+          }
         }
         throw e;
       }

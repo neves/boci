@@ -32,6 +32,11 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "ServiceError timestamp is generated at response time",
   ],
   [
+    /"timestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?"/g,
+    '"timestamp": "<timestamp>"',
+    "ClientException (RequestException, ConnectTimeout) timestamp is utcnow() at failure time",
+  ],
+  [
     /File (\\?)"[^"\\]+\/site-packages\/([^"\\]+)\1"/g,
     'File $1"<site-packages>/$2$1"',
     "Python tracebacks from oci worker pools carry the local site-packages install path",

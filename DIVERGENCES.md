@@ -98,3 +98,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** exits 1 with the standard `ServiceError:\n{...}\n` JSON envelope on stderr (no Python stack trace)
 - **Why:** reproducing an interpreter traceback with `<exception str() failed>` and local site-packages paths is meaningless; both fail with exit 1 after sending the same `POST /v1/token/upst/actions/GenerateUpst` request and report the service error details.
 - **State:** accepted
+
+### Root `--help`: trailing `boci Extensions` section
+
+- **Invocation:** `oci --help` (and `-h`, `-?`, or no arguments)
+- **Reference CLI:** ends with the `Storage` service category
+- **boci:** appends a trailing `boci Extensions` section listing boci-only commands (`update`)
+- **Why:** per [ADR 0005](docs/adr/0005-boci-extension-commands.md), Extension commands must be discoverable in root `--help` without altering the Reference CLI's alphabetical `Commands:` list. Trimmed in `test/harness/masks.ts` so the Reference CLI portion of root `--help` remains verified byte-for-byte.
+- **State:** accepted

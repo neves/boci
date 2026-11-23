@@ -77,6 +77,7 @@ import {
   runSetupKeys,
   runSetupRepairFilePermissions,
 } from "../commands/setup.ts";
+import { runUpdate } from "../commands/update.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -242,6 +243,11 @@ async function main(io: Invocation): Promise<void> {
   if (rest.length === 0) {
     await printRootHelp(io, index, rootHelpDoc);
     throw new Exit(0);
+  }
+
+  // boci-only Extension commands (ADR 0005): handled before OCI config/key checks.
+  if (rest[0] === "update") {
+    await runUpdate(io, rest.slice(1), root.opts.help === true);
   }
 
   // 3. Resolve the service. Only the core commands and the first service named anywhere

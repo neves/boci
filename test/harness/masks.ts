@@ -66,4 +66,9 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "Fingerprint: <fingerprint>",
     "setup config generates a random RSA key pair per invocation",
   ],
+  [
+    /\nboci Extensions\n\n[\s\S]*$/,
+    "\n",
+    "boci-only Extension commands appended to root --help; see ADR 0005 and DIVERGENCES.md",
+  ],
 ];

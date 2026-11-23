@@ -6,11 +6,12 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { Exit, type Invocation } from "../lib/io.ts";
 import { helpWidth } from "../core/help/formatter.ts";
 import { commandHelp } from "../core/help/render.ts";
 import type { HelpDoc } from "../core/spec.ts";
+import { parseSha256Sums } from "../core/checksums.ts";
 import { BOCI_VERSION } from "../core/version.ts";
 
 const REPO = "neves/boci";
@@ -50,11 +51,15 @@ const UPDATE_HELP_DOC: HelpDoc = {
   parse: { interspersed: false, ignoreUnknown: false, allowExtra: false },
 };
 
+/** Strip optional leading `v`/`V` and surrounding whitespace. */
+export function normalizeVersion(version: string): string {
+  return version.trim().replace(/^v/i, "");
+}
+
 /** Compare two semver strings (with optional leading `v`). Returns -1, 0, or 1. */
 export function compareSemver(a: string, b: string): number {
   const parse = (v: string) =>
-    v
-      .replace(/^v/i, "")
+    normalizeVersion(v)
       .split("-")[0]!
       .split(".")
       .map((n) => Number.parseInt(n, 10) || 0);
@@ -171,15 +176,28 @@ export function detectPackageManager(
   return null;
 }
 
-export function parseSha256Sums(
-  text: string,
-  assetName: string,
-): string | null {
-  for (const line of text.split(/\r?\n/)) {
-    const m = /^([0-9a-fA-F]{64})\s+\*?(.+)$/.exec(line.trim());
-    if (m && m[2]!.trim() === assetName) return m[1]!.toLowerCase();
+async function fetchOrExit<T>(
+  io: Invocation,
+  fetchFn: NonNullable<UpdateDeps["fetch"]>,
+  url: string,
+  init: RequestInit,
+  action: string,
+  parse: (res: Response) => Promise<T>,
+): Promise<T> {
+  try {
+    const res = await fetchFn(url, init);
+    if (!res.ok) {
+      io.err(`Failed to ${action}: HTTP ${res.status}\n`);
+      throw new Exit(1);
+    }
+    return await parse(res);
+  } catch (e) {
+    if (e instanceof Exit) throw e;
+    io.err(
+      `Failed to ${action}: ${e instanceof Error ? e.message : String(e)}\n`,
+    );
+    throw new Exit(1);
   }
-  return null;
 }
 
 export function replaceBinary(
@@ -251,10 +269,7 @@ export async function runUpdate(
     throw new Exit(2);
   }
 
-  const currentVersion = (deps.currentVersion ?? BOCI_VERSION).replace(
-    /^v/i,
-    "",
-  );
+  const currentVersion = normalizeVersion(deps.currentVersion ?? BOCI_VERSION);
   const platform = deps.platform ?? process.platform;
   const arch = deps.arch ?? process.arch;
   const checkExists = deps.existsSync ?? existsSync;
@@ -275,30 +290,28 @@ export async function runUpdate(
       );
       throw new Exit(1);
     }
+    const execBase = basename(execPath.replace(/\\/g, "/")).toLowerCase();
+    if (execBase === "bun" || execBase === "bun.exe") {
+      io.err("boci update only supports standalone compiled binaries.\n");
+      throw new Exit(1);
+    }
   }
 
-  let release: ReleaseInfo;
-  try {
-    const res = await fetchFn(LATEST_RELEASE_URL, {
+  const release = await fetchOrExit(
+    io,
+    fetchFn,
+    LATEST_RELEASE_URL,
+    {
       headers: {
         Accept: "application/vnd.github+json",
         "User-Agent": `boci/${currentVersion}`,
       },
-    });
-    if (!res.ok) {
-      io.err(`Failed to check latest release: HTTP ${res.status}\n`);
-      throw new Exit(1);
-    }
-    release = (await res.json()) as ReleaseInfo;
-  } catch (e) {
-    if (e instanceof Exit) throw e;
-    io.err(
-      `Failed to check latest release: ${e instanceof Error ? e.message : String(e)}\n`,
-    );
-    throw new Exit(1);
-  }
+    },
+    "check latest release",
+    (res) => res.json() as Promise<ReleaseInfo>,
+  );
 
-  const latestVersion = release.tag_name.replace(/^v/i, "");
+  const latestVersion = normalizeVersion(release.tag_name);
   if (compareSemver(currentVersion, latestVersion) >= 0) {
     io.out(`boci is already up to date (v${currentVersion}).\n`);
     throw new Exit(0);
@@ -328,20 +341,20 @@ export async function runUpdate(
     throw new Exit(1);
   }
 
+  const sumsText = await fetchOrExit(
+    io,
+    fetchFn,
+    sumsAsset.browser_download_url,
+    { headers: { "User-Agent": `boci/${currentVersion}` } },
+    "download SHA256SUMS",
+    (res) => res.text(),
+  );
   let expectedDigest: string | null = null;
   try {
-    const sumsRes = await fetchFn(sumsAsset.browser_download_url, {
-      headers: { "User-Agent": `boci/${currentVersion}` },
-    });
-    if (!sumsRes.ok) {
-      io.err(`Failed to download SHA256SUMS: HTTP ${sumsRes.status}\n`);
-      throw new Exit(1);
-    }
-    expectedDigest = parseSha256Sums(await sumsRes.text(), assetName);
+    expectedDigest = parseSha256Sums(sumsText)[assetName] ?? null;
   } catch (e) {
-    if (e instanceof Exit) throw e;
     io.err(
-      `Failed to download SHA256SUMS: ${e instanceof Error ? e.message : String(e)}\n`,
+      `Failed to parse SHA256SUMS: ${e instanceof Error ? e.message : String(e)}\n`,
     );
     throw new Exit(1);
   }
@@ -350,23 +363,14 @@ export async function runUpdate(
     throw new Exit(1);
   }
 
-  let binaryBytes: Uint8Array;
-  try {
-    const binRes = await fetchFn(binaryAsset.browser_download_url, {
-      headers: { "User-Agent": `boci/${currentVersion}` },
-    });
-    if (!binRes.ok) {
-      io.err(`Failed to download ${assetName}: HTTP ${binRes.status}\n`);
-      throw new Exit(1);
-    }
-    binaryBytes = new Uint8Array(await binRes.arrayBuffer());
-  } catch (e) {
-    if (e instanceof Exit) throw e;
-    io.err(
-      `Failed to download ${assetName}: ${e instanceof Error ? e.message : String(e)}\n`,
-    );
-    throw new Exit(1);
-  }
+  const binaryBytes = await fetchOrExit(
+    io,
+    fetchFn,
+    binaryAsset.browser_download_url,
+    { headers: { "User-Agent": `boci/${currentVersion}` } },
+    `download ${assetName}`,
+    async (res) => new Uint8Array(await res.arrayBuffer()),
+  );
 
   const actualDigest = new Bun.CryptoHasher("sha256")
     .update(binaryBytes)

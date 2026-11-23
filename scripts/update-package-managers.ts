@@ -1,25 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
+import { type Checksums, parseSha256Sums } from "../src/core/checksums.ts";
+
+export { type Checksums, parseSha256Sums };
 
 const REPO_URL = "https://github.com/neves/boci";
-
-export type Checksums = Record<string, string>;
-
-export function parseSha256Sums(content: string): Checksums {
-  const sums: Checksums = {};
-  for (const rawLine of content.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line) continue;
-    const match = /^([0-9a-fA-F]{64})\s+\*?(.+)$/.exec(line);
-    if (!match) {
-      throw new Error(`Invalid SHA256SUMS line: ${line}`);
-    }
-    const digest = match[1]!.toLowerCase();
-    const asset = basename(match[2]!.trim());
-    sums[asset] = digest;
-  }
-  return sums;
-}
 
 export function requireSum(sums: Checksums, asset: string): string {
   const digest = sums[asset];
@@ -125,14 +110,61 @@ export function renderAurSrcinfo(version: string, sums: Checksums): string {
   ].join("\n");
 }
 
+function renderHomebrewArchBlock(
+  archMethod: "on_arm" | "on_intel",
+  asset: string,
+  version: string,
+  sha256: string,
+): string {
+  return `    ${archMethod} do
+      url "${REPO_URL}/releases/download/v${version}/${asset}"
+      sha256 "${sha256}"
+
+      def install
+        bin.install "${asset}" => "boci"
+      end
+    end`;
+}
+
 export function renderHomebrewFormula(
   version: string,
   sums: Checksums,
 ): string {
-  const darwinArm64 = requireSum(sums, "boci-darwin-arm64");
-  const darwinX64 = requireSum(sums, "boci-darwin-x64");
-  const linuxArm64 = requireSum(sums, "boci-linux-arm64");
-  const linuxX64 = requireSum(sums, "boci-linux-x64");
+  const groups: Array<{
+    osMethod: "on_macos" | "on_linux";
+    targets: Array<{ archMethod: "on_arm" | "on_intel"; asset: string }>;
+  }> = [
+    {
+      osMethod: "on_macos",
+      targets: [
+        { archMethod: "on_arm", asset: "boci-darwin-arm64" },
+        { archMethod: "on_intel", asset: "boci-darwin-x64" },
+      ],
+    },
+    {
+      osMethod: "on_linux",
+      targets: [
+        { archMethod: "on_arm", asset: "boci-linux-arm64" },
+        { archMethod: "on_intel", asset: "boci-linux-x64" },
+      ],
+    },
+  ];
+
+  const osBlocks = groups
+    .map(({ osMethod, targets }) => {
+      const archBlocks = targets
+        .map(({ archMethod, asset }) =>
+          renderHomebrewArchBlock(
+            archMethod,
+            asset,
+            version,
+            requireSum(sums, asset),
+          ),
+        )
+        .join("\n\n");
+      return `  ${osMethod} do\n${archBlocks}\n  end`;
+    })
+    .join("\n\n");
 
   return `class Boci < Formula
   desc "Fast Bun drop-in replacement for the OCI CLI"
@@ -140,45 +172,7 @@ export function renderHomebrewFormula(
   version "${version}"
   license "MIT"
 
-  on_macos do
-    on_arm do
-      url "${REPO_URL}/releases/download/v${version}/boci-darwin-arm64"
-      sha256 "${darwinArm64}"
-
-      def install
-        bin.install "boci-darwin-arm64" => "boci"
-      end
-    end
-
-    on_intel do
-      url "${REPO_URL}/releases/download/v${version}/boci-darwin-x64"
-      sha256 "${darwinX64}"
-
-      def install
-        bin.install "boci-darwin-x64" => "boci"
-      end
-    end
-  end
-
-  on_linux do
-    on_arm do
-      url "${REPO_URL}/releases/download/v${version}/boci-linux-arm64"
-      sha256 "${linuxArm64}"
-
-      def install
-        bin.install "boci-linux-arm64" => "boci"
-      end
-    end
-
-    on_intel do
-      url "${REPO_URL}/releases/download/v${version}/boci-linux-x64"
-      sha256 "${linuxX64}"
-
-      def install
-        bin.install "boci-linux-x64" => "boci"
-      end
-    end
-  end
+${osBlocks}
 
   test do
     system bin/"boci", "--version"

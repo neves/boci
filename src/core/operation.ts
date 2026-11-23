@@ -820,8 +820,15 @@ export async function callOperation(
   let nextPage: string | null = null;
   let page = queryParams.find(([k]) => k === "page")?.[1] ?? null;
   do {
-    const pageQuery = queryParams.filter(([k]) => k !== "page");
-    if (page !== null) pageQuery.push(["page", page]);
+    const pageIndex = queryParams.findIndex(([k]) => k === "page");
+    const pageQuery = queryParams.map(
+      ([name, value]) =>
+        (name === "page" && page !== null ? [name, page] : [name, value]) as [
+          string,
+          string,
+        ],
+    );
+    if (page !== null && pageIndex < 0) pageQuery.push(["page", page]);
     const sent = await sendServiceRequest(io, sc, {
       method: operation.http,
       pathTemplate: operation.path,

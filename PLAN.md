@@ -642,8 +642,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `compute capacity-topology update`
 - [x] `compute image-capability-schema update`
 - [ ] `data-flow application update`
-- [ ] `data-integration connection update`
-- [ ] `data-integration data-asset update`
+- [x] `data-integration connection update`
+- [x] `data-integration data-asset update`
 - [x] `data-integration schedule update`
 - [x] `data-integration schedule update-custom-frequency`
 - [x] `data-integration schedule update-daily-frequency`
@@ -1087,8 +1087,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `cpg cluster-placement-group create`
 - [ ] `data-flow application create`
 - [ ] `data-flow run create`
-- [ ] `data-integration connection create`
-- [ ] `data-integration data-asset create`
+- [x] `data-integration connection create`
+- [x] `data-integration data-asset create`
 - [x] `data-integration schedule create`
 - [x] `data-integration schedule create-custom-frequency`
 - [x] `data-integration schedule create-daily-frequency`

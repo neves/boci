@@ -20,7 +20,7 @@ Statements (lists):
 
 Expressions: JSON scalars are constants; lists are operations:
     ["var", name] ["item", obj, key] ["call", method, obj, args...]
-    ["fn", name, args...]  (dumps, parse, str, len, bool, b64encode, removeSkeleton)
+    ["fn", name, args...]  (dumps, parse, str, len, bool, dict, b64encode, removeSkeleton)
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
     ["map", e, name, elt]  [elt for name in e]
@@ -47,6 +47,7 @@ FUNCTIONS = {
     "cli_util.parse_json_parameter": "parse",
     "str": "str",
     "len": "len",
+    "dict": "dict",
     "bool": "bool",
     "b64encode": "b64encode",
     "base64.b64encode": "b64encode",
@@ -244,7 +245,8 @@ class Compiler:
             if any(k is None for k in node.keys):
                 raise Unsupported("dict **")
             return ["dict", *([self.expr(k, scope), self.expr(v, scope)] for k, v in zip(node.keys, node.values))]
-        if isinstance(node, ast.List):
+        if isinstance(node, (ast.List, ast.Tuple)):
+            # A tuple only builds dict() pairs here; a list stands in for it.
             return ["list", *(self.expr(e, scope) for e in node.elts)]
         if isinstance(node, ast.ListComp):
             if len(node.generators) != 1:

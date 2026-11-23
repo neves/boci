@@ -5,6 +5,7 @@ import {
   ProgramUnsupported,
   ProgramUsageError,
   runProgram,
+  type Expr,
   type Statement,
 } from "../../src/core/program.ts";
 
@@ -89,6 +90,25 @@ describe("runProgram", () => {
 
   test("no invoke: no request", () => {
     expect(runProgram([], {}, params, parse).kwargs).toBeUndefined();
+  });
+
+  test("dict() builds a dict from key/value pairs", () => {
+    const pair: Expr = [
+      "list",
+      ["var", "k"],
+      ["item", ["var", "kwargs"], ["var", "k"]],
+    ];
+    const program: Statement[] = [
+      ["let", "common", ["fn", "dict", ["map", ["list", "a", "b"], "k", pair]]],
+      ["invoke", [], ["var", "common"]],
+    ];
+    expect(runProgram(program, { a: 1, b: 2 }, params, parse).kwargs).toEqual({
+      a: 1,
+      b: 2,
+    });
+    expect(
+      runProgram([["invoke", [], ["fn", "dict"]]], {}, params, parse).kwargs,
+    ).toEqual({});
   });
 
   test("reports which generated command a variant selector invoked", () => {

@@ -292,6 +292,22 @@ export function runProgram(
           delete a.from_json;
         }
         return null;
+      case "dict": {
+        // dict() / dict(pairs) / dict(a_dict): a new dict.
+        if (args.length === 0) return {};
+        if (isDict(a)) return { ...a };
+        const out: Dict = {};
+        for (const pair of iterate(a)) {
+          if (
+            !Array.isArray(pair) ||
+            pair.length !== 2 ||
+            typeof pair[0] !== "string"
+          )
+            throw new ProgramUnsupported("dict() pair");
+          out[pair[0]] = pair[1];
+        }
+        return out;
+      }
       case "len":
         if (typeof a === "string" || Array.isArray(a)) return a.length;
         if (isDict(a)) return Object.keys(a).length;

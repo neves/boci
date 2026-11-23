@@ -10,6 +10,7 @@ with this predicate set; anything else returns None and the check stays uncompil
     {"lowerEq": ["x", c]}     str(x).lower() == c
     {"not": p} / {"and": [p...]} / {"or": [p...]}
     {"same": [p, q]}          bool(p) == bool(q)
+    {"countGt": [[x...], n]}  more than n of the options x... are not None
     true / false              constants (`'x' in kwargs` for a declared option)
 """
 
@@ -31,7 +32,106 @@ def aliases(fn, params):
     for arg in fn.args.args + fn.args.kwonlyargs:
         if arg.arg in params and counts.get(arg.arg, 0) == 0:
             found[arg.arg] = arg.arg
-    return {k: v for k, v in found.items() if counts.get(k, 0) <= 1}
+    found = {k: v for k, v in found.items() if counts.get(k, 0) <= 1}
+    found.update(provided_sets(fn, params, counts))
+    return found
+
+
+def provided_sets(fn, params, counts):
+    """Locals holding the options given, keyed by name: `{"k": "option"}` per local.
+
+    `d = {'k': kwargs.get('x'), ...}` then `s = {k: v for k, v in six.iteritems(d) if v is not None}`,
+    or `s = dict([(k, v) for k, v in kwargs.items() if v is not None])`, each optionally
+    followed right away by `s.pop('k', None)`.
+    """
+    literals = {}
+    sets = {}
+    body = fn.body
+    for i, st in enumerate(body):
+        if not (isinstance(st, ast.Assign) and len(st.targets) == 1 and isinstance(st.targets[0], ast.Name)):
+            continue
+        name = st.targets[0].id
+        if counts.get(name, 0) != 1:
+            continue
+        v = st.value
+        if isinstance(v, ast.Dict) and v.keys and all(
+            isinstance(k, ast.Constant) and isinstance(k.value, str) for k in v.keys
+        ):
+            reads = [option_read(x, params, {}) for x in v.values]
+            if all(r is not None for r in reads):
+                literals[name] = {k.value: r for k, r in zip(v.keys, reads)}
+            continue
+        source = _not_none_filter(v)
+        if source is None:
+            continue
+        if source == "kwargs":
+            chosen = {p: p for p in sorted(params)}
+        elif source in literals:
+            chosen = dict(literals[source])
+        else:
+            continue
+        for nxt in body[i + 1:]:
+            if not (
+                isinstance(nxt, ast.Expr) and isinstance(nxt.value, ast.Call)
+                and isinstance(nxt.value.func, ast.Attribute) and nxt.value.func.attr == "pop"
+                and isinstance(nxt.value.func.value, ast.Name) and nxt.value.func.value.id == name
+                and nxt.value.args and isinstance(nxt.value.args[0], ast.Constant)
+            ):
+                break
+            chosen.pop(nxt.value.args[0].value, None)
+        sets[name] = chosen
+    return sets
+
+
+def _not_none_filter(node):
+    """The dict a `{k: v for k, v in <src> if v is not None}` (or `dict([(k, v) ...])`) filters."""
+    if (
+        isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "dict"
+        and len(node.args) == 1 and not node.keywords and isinstance(node.args[0], ast.ListComp)
+    ):
+        comp = node.args[0]
+        elt = comp.elt
+        if not (isinstance(elt, ast.Tuple) and len(elt.elts) == 2):
+            return None
+        key, value = elt.elts
+    elif isinstance(node, ast.DictComp):
+        comp, key, value = node, node.key, node.value
+    else:
+        return None
+    if not (isinstance(key, ast.Name) and isinstance(value, ast.Name) and len(comp.generators) == 1):
+        return None
+    gen = comp.generators[0]
+    if not (
+        isinstance(gen.target, ast.Tuple) and [ast.unparse(e) for e in gen.target.elts] == [key.id, value.id]
+        and len(gen.ifs) == 1 and ast.unparse(gen.ifs[0]) == f"{value.id} is not None"
+    ):
+        return None
+    it = gen.iter
+    if isinstance(it, ast.Call) and ast.unparse(it.func) == "six.iteritems" and len(it.args) == 1:
+        src = it.args[0]
+    elif isinstance(it, ast.Call) and isinstance(it.func, ast.Attribute) and it.func.attr == "items" and not it.args:
+        src = it.func.value
+    else:
+        return None
+    return src.id if isinstance(src, ast.Name) else None
+
+
+def _count(options, op, n):
+    """`len(<options given>) <op> n` as countGt predicates."""
+    gt = lambda k: {"countGt": [options, k]}  # noqa: E731
+    if isinstance(op, ast.Gt):
+        return gt(n)
+    if isinstance(op, ast.GtE):
+        return gt(n - 1)
+    if isinstance(op, ast.Lt):
+        return {"not": gt(n - 1)}
+    if isinstance(op, ast.LtE):
+        return {"not": gt(n)}
+    if isinstance(op, ast.Eq):
+        return {"not": gt(0)} if n == 0 else {"and": [gt(n - 1), {"not": gt(n)}]}
+    if isinstance(op, ast.NotEq):
+        return gt(0) if n == 0 else {"or": [{"not": gt(n - 1)}, gt(n)]}
+    return None
 
 
 def raise_tree(stmts, conds, params, local, out):
@@ -83,7 +183,7 @@ def option_read(node, params, local, allow_pop=False):
     ):
         return node.args[0].value
     if isinstance(node, ast.Name):
-        if node.id in local:
+        if isinstance(local.get(node.id), str):
             return local[node.id]
     return None
 
@@ -98,8 +198,24 @@ def compile_test(node, params, local):
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
         inner = compile_test(node.operand, params, local)
         return None if inner is None else {"not": inner}
+    if isinstance(node, ast.Name) and isinstance(local.get(node.id), dict):
+        return {"countGt": [list(local[node.id].values()), 0]}
     if isinstance(node, ast.Compare) and len(node.ops) == 1:
         left, op, right = node.left, node.ops[0], node.comparators[0]
+        if (
+            isinstance(left, ast.Call) and isinstance(left.func, ast.Name) and left.func.id == "len"
+            and len(left.args) == 1 and isinstance(left.args[0], ast.Name)
+            and isinstance(local.get(left.args[0].id), dict)
+            and isinstance(right, ast.Constant) and type(right.value) is int
+        ):
+            return _count(list(local[left.args[0].id].values()), op, right.value)
+        if (
+            isinstance(op, (ast.In, ast.NotIn)) and isinstance(left, ast.Constant)
+            and isinstance(right, ast.Name) and isinstance(local.get(right.id), dict)
+        ):
+            option = local[right.id].get(left.value)
+            given = False if option is None else {"not": {"none": option}}
+            return given if isinstance(op, ast.In) else (True if option is None else {"none": option})
         if isinstance(op, (ast.Is, ast.IsNot)) and isinstance(right, ast.Constant) and right.value is None:
             name = option_read(left, params, local)
             if name is None:

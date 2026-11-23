@@ -93764,22 +93764,142 @@
           {
             "when": "len(provided_update_identifiers) > 1",
             "options": [],
-            "message": "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home"
+            "message": "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home",
+            "test": {
+              "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+            }
           },
           {
             "when": "(not (len(provided_update_identifiers) > 1)) and (update_action and (not provided_update_identifiers))",
             "options": ["update_action"],
-            "message": "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified"
+            "message": "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "update_action"
+                    },
+                    {
+                      "not": {
+                        "countGt": [
+                          ["update_id", "gi_image_id", "gi_home_id"],
+                          0
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (provided_update_identifiers and (not update_action))",
             "options": ["update_action"],
-            "message": "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified"
+            "message": "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+                  }
+                },
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "truthy": "update_action"
+                      },
+                      {
+                        "not": {
+                          "countGt": [
+                            ["update_id", "gi_image_id", "gi_home_id"],
+                            0
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "countGt": [["update_id", "gi_image_id", "gi_home_id"], 0]
+                    },
+                    {
+                      "not": {
+                        "truthy": "update_action"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (not (provided_update_identifiers and (not update_action))) and (update_mode is not None and 'updateId' not in provided_update_identifiers)",
             "options": ["update_action", "update_mode"],
-            "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update"
+            "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+                  }
+                },
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "truthy": "update_action"
+                      },
+                      {
+                        "not": {
+                          "countGt": [
+                            ["update_id", "gi_image_id", "gi_home_id"],
+                            0
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "countGt": [
+                          ["update_id", "gi_image_id", "gi_home_id"],
+                          0
+                        ]
+                      },
+                      {
+                        "not": {
+                          "truthy": "update_action"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "not": {
+                        "none": "update_mode"
+                      }
+                    },
+                    {
+                      "none": "update_id"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
         "wrapExceptions": true,
@@ -213064,22 +213184,142 @@
           {
             "when": "len(provided_update_identifiers) > 1",
             "options": [],
-            "message": "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home"
+            "message": "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home",
+            "test": {
+              "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+            }
           },
           {
             "when": "(not (len(provided_update_identifiers) > 1)) and (update_action and (not provided_update_identifiers))",
             "options": ["update_action"],
-            "message": "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified"
+            "message": "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "truthy": "update_action"
+                    },
+                    {
+                      "not": {
+                        "countGt": [
+                          ["update_id", "gi_image_id", "gi_home_id"],
+                          0
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (provided_update_identifiers and (not update_action))",
             "options": ["update_action"],
-            "message": "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified"
+            "message": "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+                  }
+                },
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "truthy": "update_action"
+                      },
+                      {
+                        "not": {
+                          "countGt": [
+                            ["update_id", "gi_image_id", "gi_home_id"],
+                            0
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "countGt": [["update_id", "gi_image_id", "gi_home_id"], 0]
+                    },
+                    {
+                      "not": {
+                        "truthy": "update_action"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "when": "(not (len(provided_update_identifiers) > 1)) and (not (update_action and (not provided_update_identifiers))) and (not (provided_update_identifiers and (not update_action))) and (update_mode is not None and 'updateId' not in provided_update_identifiers)",
             "options": ["update_action", "update_mode"],
-            "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update"
+            "message": "--update-mode is only required if --update-id is specified to perform DomU OS Update",
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "countGt": [["update_id", "gi_image_id", "gi_home_id"], 1]
+                  }
+                },
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "truthy": "update_action"
+                      },
+                      {
+                        "not": {
+                          "countGt": [
+                            ["update_id", "gi_image_id", "gi_home_id"],
+                            0
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "not": {
+                    "and": [
+                      {
+                        "countGt": [
+                          ["update_id", "gi_image_id", "gi_home_id"],
+                          0
+                        ]
+                      },
+                      {
+                        "not": {
+                          "truthy": "update_action"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "and": [
+                    {
+                      "not": {
+                        "none": "update_mode"
+                      }
+                    },
+                    {
+                      "none": "update_id"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ],
         "wrapExceptions": true,

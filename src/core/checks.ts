@@ -14,7 +14,8 @@ export type Predicate =
   | { not: Predicate }
   | { and: Predicate[] }
   | { or: Predicate[] }
-  | { same: [Predicate, Predicate] };
+  | { same: [Predicate, Predicate] }
+  | { countGt: [string[], number] };
 
 export type UsageCheck = { test: Predicate; message: string };
 
@@ -64,6 +65,10 @@ export function holds(
   if ("not" in test) return !holds(test.not, values, params);
   if ("and" in test) return test.and.every((p) => holds(p, values, params));
   if ("or" in test) return test.or.some((p) => holds(p, values, params));
+  if ("countGt" in test) {
+    const [names, n] = test.countGt;
+    return names.filter((name) => read(name) !== null).length > n;
+  }
   return (
     holds(test.same[0], values, params) === holds(test.same[1], values, params)
   );

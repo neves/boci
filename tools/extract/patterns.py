@@ -98,7 +98,7 @@ def survey(cmd):
     import click
 
     callback = cmd.callback
-    params = {p.name for p in cmd.params}
+    params = {p.name for p in cmd.params if p.expose_value}
     fn = _callback_ast(callback)
     if fn is None:
         return [], {}

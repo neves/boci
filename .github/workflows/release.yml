@@ -11,6 +11,10 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
 
@@ -29,6 +33,11 @@ jobs:
           bun run build --outfile dist/boci-darwin-x64 --target bun-darwin-x64
           bun run build --outfile dist/boci-darwin-arm64 --target bun-darwin-arm64
           bun run build --outfile dist/boci-windows-x64.exe --target bun-windows-x64
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/boci-*
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2

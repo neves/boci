@@ -11,6 +11,10 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v7
 
@@ -30,9 +34,21 @@ jobs:
           bun run build --outfile dist/boci-darwin-arm64 --target bun-darwin-arm64
           bun run build --outfile dist/boci-windows-x64.exe --target bun-windows-x64
 
+      - name: Generate SHA256SUMS
+        run: |
+          cd dist
+          sha256sum boci-linux-x64 boci-linux-arm64 boci-linux-x64-musl boci-linux-arm64-musl boci-darwin-x64 boci-darwin-arm64 boci-windows-x64.exe > SHA256SUMS
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/boci-*
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v3
         with:
+          generate_release_notes: true
+          body: "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for curated release notes."
           files: |
             dist/boci-linux-x64
             dist/boci-linux-arm64
@@ -41,6 +57,7 @@ jobs:
             dist/boci-darwin-x64
             dist/boci-darwin-arm64
             dist/boci-windows-x64.exe
+            dist/SHA256SUMS
 
   publish-npm:
     runs-on: ubuntu-latest

@@ -155,7 +155,200 @@
     ],
     "sandbox": {
       "files": {
-        "k1.txt": "YWJjé\n"
+        "k1.txt": "YWJj\u00e9\n"
+      }
+    }
+  },
+  {
+    "id": "sse-os-object-copy",
+    "key": "os object copy",
+    "argv": [
+      "os",
+      "object",
+      "copy",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--source-object-name",
+      "src.txt",
+      "--destination-bucket",
+      "b2",
+      "--destination-namespace",
+      "ns2",
+      "--destination-region",
+      "us-phoenix-1",
+      "--destination-object-name",
+      "dst.txt",
+      "--encryption-key-file",
+      "k1.txt",
+      "--source-encryption-key-file",
+      "k2.txt",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
+        "k2.txt": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8=",
+        "bad.txt": "abc"
+      }
+    },
+    "requestOnly": true,
+    "replies": {
+      "status": 202,
+      "headers": {
+        "opc-work-request-id": "wr1"
+      }
+    }
+  },
+  {
+    "id": "sse-os-object-copy-lookups",
+    "key": "os object copy",
+    "argv": [
+      "os",
+      "object",
+      "copy",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--source-object-name",
+      "src.txt",
+      "--destination-bucket",
+      "b2",
+      "--encryption-key-file",
+      "k1.txt",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
+        "k2.txt": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8=",
+        "bad.txt": "abc"
+      }
+    },
+    "requestOnly": true,
+    "replies": [
+      {
+        "body": "\"looked-up-ns\""
+      },
+      {
+        "status": 202,
+        "headers": {
+          "opc-work-request-id": "wr1"
+        }
+      }
+    ]
+  },
+  {
+    "id": "sse-os-object-copy-region-option",
+    "key": "os object copy",
+    "argv": [
+      "os",
+      "object",
+      "copy",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--source-object-name",
+      "src.txt",
+      "--destination-bucket",
+      "b2",
+      "--region",
+      "eu-frankfurt-1",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
+        "k2.txt": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8=",
+        "bad.txt": "abc"
+      }
+    },
+    "requestOnly": true,
+    "replies": [
+      {
+        "body": "\"looked-up-ns\""
+      },
+      {
+        "status": 202,
+        "headers": {
+          "opc-work-request-id": "wr1"
+        }
+      }
+    ]
+  },
+  {
+    "id": "sse-os-object-copy-bad-key",
+    "key": "os object copy",
+    "argv": [
+      "os",
+      "object",
+      "copy",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--source-object-name",
+      "src.txt",
+      "--destination-bucket",
+      "b2",
+      "--destination-namespace",
+      "ns2",
+      "--source-encryption-key-file",
+      "bad.txt",
+      "--destination-region",
+      "us-phoenix-1",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
+        "k2.txt": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8=",
+        "bad.txt": "abc"
+      }
+    },
+    "requestOnly": true
+  },
+  {
+    "id": "sse-os-object-copy-lookup-fails",
+    "key": "os object copy",
+    "argv": [
+      "os",
+      "object",
+      "copy",
+      "-ns",
+      "ns1",
+      "-bn",
+      "b1",
+      "--source-object-name",
+      "src.txt",
+      "--destination-bucket",
+      "b2",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "sandbox": {
+      "files": {
+        "k1.txt": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=\n",
+        "k2.txt": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8=",
+        "bad.txt": "abc"
+      }
+    },
+    "replies": {
+      "status": 404,
+      "body": {
+        "code": "NotAuthorizedOrNotFound",
+        "message": "nope"
+      },
+      "headers": {
+        "opc-request-id": "fake-request-id"
       }
     }
   }

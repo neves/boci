@@ -5673,6 +5673,477 @@
           "_get_source_encryption_key_params"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "source_object_name", ["var", "kwargs"]],
+              [
+                "or",
+                ["cmp", "notin", "destination_object_name", ["var", "kwargs"]],
+                [
+                  "cmp",
+                  "is",
+                  ["item", ["var", "kwargs"], "destination_object_name"],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "destination_object_name",
+                ["item", ["var", "kwargs"], "source_object_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              ["cmp", "notin", "destination_namespace", ["var", "kwargs"]],
+              [
+                "cmp",
+                "is",
+                ["item", ["var", "kwargs"], "destination_namespace"],
+                null
+              ]
+            ],
+            [
+              [
+                "let",
+                "client",
+                ["fn", "client", "object_storage", "object_storage"]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "destination_namespace",
+                ["fn", "namespace", ["var", "client"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              ["cmp", "notin", "destination_region", ["var", "kwargs"]],
+              [
+                "cmp",
+                "is",
+                ["item", ["var", "kwargs"], "destination_region"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "destination_region",
+                ["item", ["item", ["fn", "ctxObj"], "config"], "region"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "encryption_key_file", ["var", "kwargs"]],
+            [
+              [
+                "let",
+                "sse_args",
+                [
+                  "fn",
+                  "sseParams",
+                  ["item", ["var", "kwargs"], "encryption_key_file"]
+                ]
+              ],
+              [
+                "if",
+                ["var", "sse_args"],
+                [
+                  [
+                    "do",
+                    ["call", "update", ["var", "kwargs"], ["var", "sse_args"]]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "encryption_key_file"]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "source_encryption_key_file", ["var", "kwargs"]],
+            [
+              [
+                "let",
+                "sse_args",
+                [
+                  "fn",
+                  "sourceSseParams",
+                  ["item", ["var", "kwargs"], "source_encryption_key_file"]
+                ]
+              ],
+              [
+                "if",
+                ["var", "sse_args"],
+                [
+                  [
+                    "do",
+                    ["call", "update", ["var", "kwargs"], ["var", "sse_args"]]
+                  ]
+                ],
+                []
+              ],
+              ["del", ["var", "kwargs"], "source_encryption_key_file"]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.copy_object",
+        "complexTypes": {
+          "destination-object-metadata": "object_storage:dict(str, string)"
+        },
+        "params": [
+          {
+            "name": "namespace_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "bucket_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_object_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_region",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_namespace",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_object_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_object_if_match_e_tag",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_version_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_object_if_match_e_tag",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_object_if_none_match_e_tag",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_object_metadata",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "destination_object_storage_tier",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_sse_customer_algorithm",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_sse_customer_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_sse_customer_key_sha256",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_source_sse_customer_algorithm",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_source_sse_customer_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_source_sse_customer_key_sha256",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_sse_kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "copy_object",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/actions/copyObject",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "copy_object_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          },
+          "opc-sse-customer-algorithm": {
+            "arg": "opc_sse_customer_algorithm"
+          },
+          "opc-sse-customer-key": {
+            "arg": "opc_sse_customer_key"
+          },
+          "opc-sse-customer-key-sha256": {
+            "arg": "opc_sse_customer_key_sha256"
+          },
+          "opc-source-sse-customer-algorithm": {
+            "arg": "opc_source_sse_customer_algorithm"
+          },
+          "opc-source-sse-customer-key": {
+            "arg": "opc_source_sse_customer_key"
+          },
+          "opc-source-sse-customer-key-sha256": {
+            "arg": "opc_source_sse_customer_key_sha256"
+          },
+          "opc-sse-kms-key-id": {
+            "arg": "opc_sse_kms_key_id"
+          }
+        },
+        "body": "copy_object_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["namespace_name"],
+          "param": "namespace_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["bucket_name"],
+          "param": "bucket_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_sse_customer_algorithm"],
+          "param": "opc_sse_customer_algorithm",
+          "when": "opc_sse_customer_algorithm is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_sse_customer_key"],
+          "param": "opc_sse_customer_key",
+          "when": "opc_sse_customer_key is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_sse_customer_key_sha256"],
+          "param": "opc_sse_customer_key_sha256",
+          "when": "opc_sse_customer_key_sha256 is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_source_sse_customer_algorithm"],
+          "param": "opc_source_sse_customer_algorithm",
+          "when": "opc_source_sse_customer_algorithm is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_source_sse_customer_key"],
+          "param": "opc_source_sse_customer_key",
+          "when": "opc_source_sse_customer_key is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_source_sse_customer_key_sha256"],
+          "param": "opc_source_sse_customer_key_sha256",
+          "when": "opc_source_sse_customer_key_sha256 is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_sse_kms_key_id"],
+          "param": "opc_sse_kms_key_id",
+          "when": "opc_sse_kms_key_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_client_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["sourceObjectName"],
+          "param": "source_object_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationRegion"],
+          "param": "destination_region"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationNamespace"],
+          "param": "destination_namespace"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationBucket"],
+          "param": "destination_bucket"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationObjectName"],
+          "param": "destination_object_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["sourceObjectIfMatchETag"],
+          "param": "source_object_if_match_e_tag",
+          "when": "source_object_if_match_e_tag is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["sourceVersionId"],
+          "param": "source_version_id",
+          "when": "source_version_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationObjectIfMatchETag"],
+          "param": "destination_object_if_match_e_tag",
+          "when": "destination_object_if_match_e_tag is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationObjectIfNoneMatchETag"],
+          "param": "destination_object_if_none_match_e_tag",
+          "when": "destination_object_if_none_match_e_tag is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationObjectMetadata"],
+          "transform": "parse_json_parameter",
+          "param": "destination_object_metadata",
+          "when": "destination_object_metadata is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "copy_object_details",
+          "key": ["destinationObjectStorageTier"],
+          "param": "destination_object_storage_tier",
+          "when": "destination_object_storage_tier is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

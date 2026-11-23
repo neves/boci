@@ -3,7 +3,12 @@
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { closeSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { DEFAULT_LOCATION, DEFAULT_PROFILE, expandUser } from "./config.ts";
+import {
+  DEFAULT_LOCATION,
+  DEFAULT_PROFILE,
+  expandUser,
+  fromFile,
+} from "./config.ts";
 import { parseConfig, sectionItems } from "../lib/configparser.ts";
 import {
   type Rc,
@@ -60,8 +65,10 @@ import {
   type ProgramFiles,
   ProgramAbort,
   ProgramConfirm,
+  ProgramLookup,
   ProgramRaise,
   ProgramUnsupported,
+  type ProgramContext,
   ProgramUsageError,
   runProgram,
 } from "./program.ts";
@@ -661,6 +668,38 @@ async function main(io: Invocation): Promise<void> {
           values,
           () => usage(io, commandPath, cmd.helpDoc),
           spec.models,
+          {
+            region: () => {
+              try {
+                const region =
+                  rootValues.region ??
+                  io.env.OCI_CLI_REGION ??
+                  fromFile(
+                    settings.configFile,
+                    settings.profile,
+                    io.env,
+                    io.cwd,
+                  ).region;
+                return typeof region === "string" ? region : undefined;
+              } catch {
+                return undefined; // no config: not modeled
+              }
+            },
+            namespace: async () => {
+              // client.get_namespace(): `os ns get`, its ServiceError and all.
+              const nsCall = {
+                command: spec.commands["ns get"] as GeneratedCommand,
+                values: {},
+                rootValues,
+                settings,
+                spec,
+                index,
+              };
+              const result = await callOperation(io, nsCall);
+              printResult(io, result, { rc });
+              return String(JSON.parse(result.raw));
+            },
+          },
         );
         if (generated === "unsupported") {
           await notImplemented(io, argv, commandPath);
@@ -806,6 +845,12 @@ function convertDefaultValue(
   return convertSingle(expanded);
 }
 
+/** What a wrapper program looks up outside its kwargs (ProgramContext), on demand. */
+type WrapperLookups = {
+  region: () => string | undefined;
+  namespace: () => Promise<string>;
+};
+
 /**
  * Runs a programmed Tier B wrapper: the generated command it invokes (one per variant)
  * and that command's kwargs, undefined when it returns without invoking, "unsupported"
@@ -818,7 +863,9 @@ async function runWrapper(
   values: Record<string, unknown>,
   usageText: () => string,
   models: ServiceSpec["models"],
+  lookups: WrapperLookups,
   answers: boolean[] = [],
+  context: ProgramContext = { region: lookups.region },
 ): Promise<
   | { command: GeneratedCommand; kwargs: Record<string, unknown> }
   | undefined
@@ -841,6 +888,7 @@ async function runWrapper(
         }),
       answers,
       programFiles(io),
+      context,
     );
     if (!kwargs) return undefined;
     const variant = command.variants?.[target - 1];
@@ -889,10 +937,32 @@ async function runWrapper(
       // click.confirm under wrap_exceptions; then the program runs again, answered.
       if (!program.wrapExceptions) return "unsupported";
       const yes = await confirmUnderWrapExceptions(io, e.message, false);
-      return runWrapper(io, command, values, usageText, models, [
-        ...answers,
-        yes,
-      ]);
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        [...answers, yes],
+        context,
+      );
+    }
+    if (e instanceof ProgramLookup) {
+      const namespace = await lookups.namespace();
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...context,
+          namespace,
+        },
+      );
     }
     if (e instanceof ProgramAbort) {
       if (!program.wrapExceptions) return "unsupported";

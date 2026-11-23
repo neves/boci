@@ -28,7 +28,7 @@ then body (ticket 21): the file stays open for the invoke, which may send it as 
 Expressions: JSON scalars are constants; lists are operations:
     ["var", name] ["item", obj, key] ["call", method, obj, args...]
     ["fn", name, args...]  (dumps, parse, str, len, bool, dict, b64encode, removeSkeleton,
-                            open, exists, isstr)
+                            open, exists, isstr, client, namespace, ctxObj)
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
     ["map", e, t, elt, conds?]  [elt for t in e if cond...]; t a name or a list of names
@@ -313,6 +313,19 @@ class Compiler:
             return ["var", self.name(node.id, scope)]
         if isinstance(node, ast.Subscript):
             return ["item", self.expr(node.value, scope), self.expr(node.slice, scope)]
+        if isinstance(node, ast.Attribute):
+            # ctx.obj (its 'config' set by build_client) and `client.get_namespace().data`
+            # (a request the Engine makes, then runs the program again): ticket 23.
+            if _dotted(node) == "ctx.obj":
+                return ["fn", "ctxObj"]
+            call = node.value
+            if (
+                node.attr == "data" and isinstance(call, ast.Call)
+                and isinstance(call.func, ast.Attribute) and call.func.attr == "get_namespace"
+                and not call.args and not call.keywords
+            ):
+                return ["fn", "namespace", self.expr(call.func.value, scope)]
+            raise Unsupported("attribute")
         if isinstance(node, ast.UnaryOp):
             if isinstance(node.op, ast.Not):
                 return ["not", self.expr(node.operand, scope)]
@@ -358,6 +371,11 @@ class Compiler:
                 and _dotted(node.args[1]) == "six.string_types"
             ):
                 return ["fn", "isstr", self.expr(node.args[0], scope)]
+            if dotted in ("build_client", "cli_util.build_client"):
+                # build_client(service, client, ctx): only which client it builds matters.
+                if len(node.args) != 3 or not all(isinstance(a, ast.Constant) for a in node.args[:2]):
+                    raise Unsupported("build_client")
+                return ["fn", "client", node.args[0].value, node.args[1].value]
             hand = self.hand_coded(node.func)
             if hand:
                 return ["fn", hand, *(self.expr(a, scope) for a in node.args)]

@@ -41,6 +41,32 @@ export class ProgramUnsupported extends Error {}
 
 type Dict = Record<string, unknown>;
 
+/**
+ * `client.get_namespace().data` before the Engine has looked the namespace up: it makes
+ * the request, then runs the program again with the answer (ticket 23).
+ */
+export class ProgramLookup extends Error {}
+
+/**
+ * What a program reads outside its kwargs: the config region `build_client` puts in
+ * `ctx.obj['config']`, and the namespace `get_namespace()` returned.
+ */
+export type ProgramContext = {
+  region?: () => string | undefined;
+  namespace?: string;
+};
+
+/**
+ * An object only some keys of which a program reads: `ctx.obj` (its 'config', a KeyError
+ * until build_client runs), that config, or an SDK client.
+ */
+class ProgramObject {
+  constructor(
+    readonly kind: string,
+    readonly fields: Dict = {},
+  ) {}
+}
+
 /** A generated command as a value: `{'k': generated_cli.get_x}[key]` picks what to invoke. */
 class ProgramTarget {
   constructor(readonly index: number) {}
@@ -98,6 +124,7 @@ const isDict = (v: unknown): v is Dict =>
   !Array.isArray(v) &&
   !(v instanceof ProgramFile) &&
   !(v instanceof ProgramTarget) &&
+  !(v instanceof ProgramObject) &&
   !(v instanceof Uint8Array);
 
 /** Python iteration: a list's items, a dict's keys, a str's characters, a file's lines. */
@@ -327,6 +354,7 @@ export function runProgram(
   parse: (name: string, value: unknown) => unknown,
   answers: boolean[] = [],
   files: ProgramFiles = NO_FILES,
+  context: ProgramContext = {},
 ): ProgramResult {
   // Click hands the callback every exposed param, unset ones at their default.
   const kwargs: Dict = {};
@@ -342,8 +370,15 @@ export function runProgram(
   let invoked: Dict | undefined;
   let target = 0;
   let confirms = 0;
+  const ctxObj = new ProgramObject("ctx.obj");
 
   const item = (obj: unknown, key: unknown): unknown => {
+    if (obj instanceof ProgramObject && typeof key === "string") {
+      if (key in obj.fields) return obj.fields[key];
+      if (obj === ctxObj && key === "config")
+        throw new ProgramRaise("KeyError", pyRepr(key));
+      throw new ProgramUnsupported(`${obj.kind}[${key}]`);
+    }
     if (isDict(obj) && typeof key === "string") {
       if (!(key in obj)) throw new ProgramUnsupported(`KeyError: ${key}`);
       return obj[key];
@@ -524,6 +559,24 @@ export function runProgram(
           k && { algorithm: SSE_ALGORITHM, key: k.key, keySha256: k.sha256 }
         );
       }
+      case "ctxObj":
+        return ctxObj;
+      case "client": {
+        // cli_util.build_client: ctx.obj['config'] is the config it built from.
+        const region = context.region?.();
+        if (region === undefined)
+          throw new ProgramUnsupported("build_client without a region");
+        ctxObj.fields.config = new ProgramObject("config", { region });
+        return new ProgramObject(`${String(a)}.${String(b)}`);
+      }
+      case "namespace":
+        if (
+          !(a instanceof ProgramObject) ||
+          a.kind !== "object_storage.object_storage"
+        )
+          throw new ProgramUnsupported("get_namespace()");
+        if (context.namespace === undefined) throw new ProgramLookup();
+        return context.namespace;
       case "confirm": {
         const i = confirms++;
         if (i < answers.length) return answers[i];

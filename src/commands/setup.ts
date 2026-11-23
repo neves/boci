@@ -29,7 +29,7 @@ import {
   type RegionsSpec,
 } from "../core/endpoint.ts";
 import { Exit, type Invocation } from "../lib/io.ts";
-import { validateClickFileForRead } from "./os.ts";
+import { validateClickFileForRead } from "../core/click-file.ts";
 import { loadPrivateKey, MissingPrivateKeyPassphrase } from "../core/signer.ts";
 
 export const DEFAULT_KEY_NAME = "oci_api_key";
@@ -64,64 +64,9 @@ const UPLOAD_PUBLIC_KEY_INSTRUCTIONS =
   "    'How to upload the public key':\n\n" +
   "        https://docs.cloud.oracle.com/Content/API/Concepts/apisigningkey.htm#How2\n\n\n";
 
-export type StdinReader = {
-  readLine(): Promise<string | null>;
-  consumeAll(): Promise<string>;
-  isExhausted(): boolean;
-};
+import { type StdinReader, createStdinReader } from "../core/stdin.ts";
 
-export function createStdinReader(io: Invocation): StdinReader {
-  if (io.readLine) {
-    const readLineFn = io.readLine.bind(io);
-    let exhausted = false;
-    return {
-      async readLine() {
-        if (exhausted) return null;
-        const line = await readLineFn();
-        if (line === null) exhausted = true;
-        return line;
-      },
-      async consumeAll() {
-        if (exhausted) return "";
-        if (io.isTTY(0)) {
-          const line = await readLineFn();
-          if (line === null) {
-            exhausted = true;
-            return "";
-          }
-          return `${line}\n`;
-        }
-        exhausted = true;
-        try {
-          return readFileSync(0, "utf8");
-        } catch {
-          return "";
-        }
-      },
-      isExhausted: () => exhausted,
-    };
-  }
-  const raw = io.stdin ?? "";
-  let exhausted = raw.length === 0;
-  const lines = exhausted ? [] : raw.split(/\r?\n/);
-  if (!exhausted && raw.endsWith("\n")) lines.pop();
-  let idx = 0;
-  return {
-    async readLine() {
-      if (exhausted || idx >= lines.length) {
-        exhausted = true;
-        return null;
-      }
-      return lines[idx++] as string;
-    },
-    async consumeAll() {
-      if (exhausted) return "";
-      exhausted = true;
-      return raw ?? "";
-    },
-    isExhausted: () => exhausted,
-  };
-}
+export { type StdinReader, createStdinReader };
 
 /**
  * cli_util.apply_user_only_access_permissions (Unix): 0o600 for files, 0o700 for directories.

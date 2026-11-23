@@ -44,40 +44,18 @@ import {
   serviceTree,
 } from "./spec.ts";
 import { REFERENCE_VERSION } from "./version.ts";
-import { isImplemented } from "./registry.ts";
+import { CUSTOM_HANDLERS, isImplemented } from "./registry.ts";
+import {
+  type OutputFileHandle,
+  openClickFileForWrite,
+  validateClickFileForRead,
+  validateOsNamespace,
+} from "./click-file.ts";
 import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import { callOperation, confirmUnderWrapExceptions } from "./operation.ts";
-import {
-  type OutputFileHandle,
-  openClickFileForWrite,
-  runOsObjectBulkDelete,
-  runOsObjectBulkDownload,
-  runOsObjectBulkUpload,
-  runOsObjectGet,
-  runOsObjectPut,
-  runOsObjectResumePut,
-  runOsObjectSync,
-  validateClickFileForRead,
-  validateOsNamespace,
-} from "../commands/os.ts";
 import { printResult } from "./output.ts";
-import {
-  runSessionAuthenticate,
-  runSessionExport,
-  runSessionImport,
-  runSessionRefresh,
-  runSessionValidate,
-} from "../commands/session.ts";
-import { runProfileCurrent } from "../commands/profile.ts";
-import {
-  runSetupAutocomplete,
-  runSetupConfig,
-  runSetupKeys,
-  runSetupRepairFilePermissions,
-} from "../commands/setup.ts";
-import { runUpdate } from "../commands/update.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -247,6 +225,7 @@ async function main(io: Invocation): Promise<void> {
 
   // boci-only Extension commands (ADR 0005): handled before OCI config/key checks.
   if (rest[0] === "update") {
+    const { runUpdate } = await import("../commands/update.ts");
     await runUpdate(io, rest.slice(1), root.opts.help === true);
   }
 
@@ -576,207 +555,20 @@ async function main(io: Invocation): Promise<void> {
       }
     }
 
-    if (name === "os" && key === "object get") {
-      await runOsObjectGet(io, {
-        values,
-        rootValues,
-        settings,
-        spec,
-        index,
-        usageText: () => usage(io, commandPath, cmd.helpDoc),
-        outputFile: osObjectGetOutputFile,
-      });
-      return;
-    }
-
-    if (name === "os" && key === "object put") {
-      await runOsObjectPut(io, {
-        values,
-        rootValues,
-        settings,
-        spec,
-        index,
-        usageText: () => usage(io, commandPath, cmd.helpDoc),
-        outputOptions: {
-          query: rootValues.query,
-          output: rootValues.output,
-          rawOutput: rootValues.raw_output,
-          rc,
-        },
-      });
-      return;
-    }
-
-    if (name === "os" && key === "object resume-put") {
-      await runOsObjectResumePut(io, {
-        values,
-        rootValues,
-        settings,
-        spec,
-        index,
-        usageText: () => usage(io, commandPath, cmd.helpDoc),
-        outputOptions: {
-          query: rootValues.query,
-          output: rootValues.output,
-          rawOutput: rootValues.raw_output,
-          rc,
-        },
-      });
-      return;
-    }
-
-    if (name === "os" && key === "object bulk-upload") {
-      await runOsObjectBulkUpload(io, {
-        values,
-        rootValues,
-        settings,
-        spec,
-        index,
-        usageText: () => usage(io, commandPath, cmd.helpDoc),
-        outputOptions: {
-          query: rootValues.query,
-          output: rootValues.output,
-          rawOutput: rootValues.raw_output,
-          rc,
-        },
-      });
-      return;
-    }
-
-    if (name === "os" && key === "object bulk-download") {
-      await runOsObjectBulkDownload(io, {
-        values,
-        rootValues,
-        settings,
-        spec,
-        index,
-        usageText: () => usage(io, commandPath, cmd.helpDoc),
-        outputOptions: {
-          query: rootValues.query,
-          output: rootValues.output,
-          rawOutput: rootValues.raw_output,
-          rc,
-        },
-      });
-      return;
-    }
-
-    if (name === "os" && key === "object bulk-delete") {
-      await runOsObjectBulkDelete(io, {
-        values,
-        rootValues,
-        settings,
-        spec,
-        index,
-        usageText: () => usage(io, commandPath, cmd.helpDoc),
-        outputOptions: {
-          query: rootValues.query,
-          output: rootValues.output,
-          rawOutput: rootValues.raw_output,
-          rc,
-        },
-      });
-      return;
-    }
-
-    if (name === "os" && key === "object sync") {
-      await runOsObjectSync(io, {
-        values,
-        rootValues,
-        settings,
-        spec,
-        index,
-        usageText: () => usage(io, commandPath, cmd.helpDoc),
-        outputOptions: {
-          query: rootValues.query,
-          output: rootValues.output,
-          rawOutput: rootValues.raw_output,
-          rc,
-        },
-      });
-      return;
-    }
-
-    if (name === "setup" && key === "repair-file-permissions") {
-      runSetupRepairFilePermissions(io, {
-        values,
-        usageError: (message) =>
-          showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
-      });
-      return;
-    }
-
-    if (name === "setup" && key === "keys") {
-      await runSetupKeys(io, {
-        values,
-        usageError: (message) =>
-          showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
-      });
-      return;
-    }
-
-    if (name === "setup" && key === "config") {
-      await runSetupConfig(io, {
-        regions: index.regions,
-        usageError: (message) =>
-          showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
-      });
-      return;
-    }
-
-    if (name === "setup" && key === "autocomplete") {
-      await runSetupAutocomplete(io);
-      return;
-    }
-
-    if (name === "session" && key === "validate") {
-      await runSessionValidate(io, {
-        values,
-        rootValues,
-        settings,
-        index,
-      });
-      return;
-    }
-
-    if (name === "session" && key === "refresh") {
-      await runSessionRefresh(io, {
-        rootValues,
-        settings,
-        index,
-      });
-      return;
-    }
-
-    if (name === "session" && key === "export") {
-      await runSessionExport(io, {
-        values,
-        settings,
-      });
-      return;
-    }
-
-    if (name === "session" && key === "import") {
-      await runSessionImport(io, {
-        values,
-        settings,
-      });
-      return;
-    }
-
-    if (name === "profile" && key === "current") {
-      runProfileCurrent(io, { settings });
-      return;
-    }
-
-    if (name === "session" && key === "authenticate") {
-      await runSessionAuthenticate(io, {
+    const customHandler = CUSTOM_HANDLERS.get(canon.join(" "));
+    if (customHandler) {
+      await customHandler({
+        io,
         values,
         rootValues,
         settings,
         rc,
         index,
         spec,
+        usageText: () => usage(io, commandPath, cmd.helpDoc),
+        usageError: (message) =>
+          showPatched(io, usage(io, commandPath, cmd.helpDoc), message),
+        outputFile: osObjectGetOutputFile,
       });
       return;
     }

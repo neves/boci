@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The release workflow has `attestations: write` and `id-token: write` permissions on the build job.
-- [ ] Build provenance attestations are generated for all compiled release binaries.
-- [ ] Attestations can be verified against the repository and workflow using the GitHub CLI (`gh attestation verify`).
+- [x] The release workflow has `attestations: write` and `id-token: write` permissions on the build job.
+- [x] Build provenance attestations are generated for all compiled release binaries.
+- [x] Attestations can be verified against the repository and workflow using the GitHub CLI (`gh attestation verify`).

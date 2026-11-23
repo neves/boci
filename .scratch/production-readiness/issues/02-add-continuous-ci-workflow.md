@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] A CI workflow runs on `push` to `main` and on `pull_request` across Ubuntu, macOS, and Windows runners.
-- [ ] Each OS job installs dependencies and passes the full `verify` check (formatting, type-checking, build, and parity tests).
-- [ ] Deprecated Node 20 GitHub Actions across existing workflows are updated to current major versions so no Node 20 deprecation annotations appear.
+- [x] A CI workflow runs on `push` to `main` and on `pull_request` across Ubuntu, macOS, and Windows runners.
+- [x] Each OS job installs dependencies and passes the full `verify` check (formatting, type-checking, build, and parity tests).
+- [x] Deprecated Node 20 GitHub Actions across existing workflows are updated to current major versions so no Node 20 deprecation annotations appear.

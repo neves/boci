@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Dispatching the install-test workflow waits or retries briefly until GitHub registers the new run ID before watching it.
-- [ ] Running `mise run ci-installs` no longer exits with `HTTP 404: Not Found` immediately after printing the workflow run URL.
+- [x] Dispatching the install-test workflow waits or retries briefly until GitHub registers the new run ID before watching it.
+- [x] Running `mise run ci-installs` no longer exits with `HTTP 404: Not Found` immediately after printing the workflow run URL.

@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The release workflow generates and uploads a `SHA256SUMS` file containing SHA-256 digests for all release binaries.
-- [ ] The shell installer downloads `SHA256SUMS`, verifies the matching binary's digest, and aborts without installing if verification fails.
-- [ ] The PowerShell installer downloads `SHA256SUMS`, verifies the matching binary's digest, and aborts without installing if verification fails.
+- [x] The release workflow generates and uploads a `SHA256SUMS` file containing SHA-256 digests for all release binaries.
+- [x] The shell installer downloads `SHA256SUMS`, verifies the matching binary's digest, and aborts without installing if verification fails.
+- [x] The PowerShell installer downloads `SHA256SUMS`, verifies the matching binary's digest, and aborts without installing if verification fails.

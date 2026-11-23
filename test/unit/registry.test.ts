@@ -48,14 +48,31 @@ test("engine supports bodyless actions with an unexposed SDK body argument", asy
   expect(engineSupports(start!)).toBe(true);
 });
 
-test("engine supports only the Tier A tracer bullet custom command", async () => {
-  const { commands } = await loadService("apm-traces");
-  const span = commands["trace span get"];
+test("engine supports Tier A reads and bodyless deletes", async () => {
+  const apm = await loadService("apm-traces");
+  const span = apm.commands["trace span get"];
   expect(span?.tier).toBe("A");
   expect(engineSupports(span!)).toBe(true);
   expect(isImplemented("apm-traces trace span get", span)).toBe(true);
+
+  const safe = await loadService("data-safe");
+  const get = safe.commands["private-endpoint get"];
+  const remove = safe.commands["private-endpoint delete"];
+  expect(get?.tier).toBe("A");
+  expect(remove?.tier).toBe("A");
+  expect(isImplemented("data-safe private-endpoint get", get)).toBe(true);
+  expect(isImplemented("data-safe private-endpoint delete", remove)).toBe(true);
   expect(
-    isImplemented("apm-traces trace trace get", { ...span!, kind: "custom" }),
+    isImplemented("data-safe private-endpoint delete", {
+      ...remove!,
+      operation: { ...remove!.operation!, body: "requestBody" },
+    }),
+  ).toBe(false);
+  expect(
+    isImplemented("data-safe private-endpoint create", {
+      ...get!,
+      operation: { ...get!.operation!, http: "POST" },
+    }),
   ).toBe(false);
 });
 

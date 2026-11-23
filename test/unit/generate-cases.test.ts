@@ -15,6 +15,47 @@ describe("parity case generator", () => {
     expect(span?.argv).toContain("--time-span-started-gte");
   });
 
+  test("generates cases for Tier A reads and deletes across services", async () => {
+    const result = Bun.spawnSync(
+      [
+        "bun",
+        "scripts/generate-cases.ts",
+        "--service",
+        "data-safe",
+        "--method",
+        "GET,HEAD,DELETE",
+      ],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const gets = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-get-data-safe.json`,
+    ).json()) as { key: string; requestOnly?: boolean }[];
+    const deletes = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-bodyless-data-safe.json`,
+    ).json()) as { key: string; requestOnly?: boolean; stdin?: string }[];
+    expect(
+      gets.find((c) => c.key === "data-safe private-endpoint get")?.requestOnly,
+    ).toBe(true);
+    expect(
+      deletes.find((c) => c.key === "data-safe private-endpoint delete")?.stdin,
+    ).toBe("y\n");
+  });
+
+  test("does not generate Tier A write cases before write support", async () => {
+    const result = Bun.spawnSync(
+      ["bun", "scripts/generate-cases.ts", "--service", "data-safe"],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const cases = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-request-data-safe.json`,
+    ).json()) as { key: string }[];
+    expect(
+      cases.some((c) => c.key === "data-safe registration-policy create"),
+    ).toBe(false);
+  });
+
   test("generates request cases for bodyless POST actions", async () => {
     const result = Bun.spawnSync(
       ["bun", "scripts/generate-cases.ts", "--service", "data-safe"],

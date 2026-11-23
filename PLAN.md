@@ -172,94 +172,94 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <details>
 <summary>88 commands</summary>
 
-- [ ] `apm-traces scheduled-query get`
-- [ ] `apm-traces trace log get`
-- [ ] `apm-traces trace span get`
-- [ ] `apm-traces trace trace get`
-- [ ] `ccc infrastructure get`
-- [ ] `ccc upgrade-schedule get`
-- [ ] `certificates certificate-authority-bundle get`
-- [ ] `certificates certificate-bundle get`
-- [ ] `certs-mgmt certificate-authority-version get`
-- [ ] `certs-mgmt certificate-version get`
-- [ ] `compute capacity-topology get`
-- [ ] `compute global-image-capability-schema get`
-- [ ] `compute global-image-capability-schema-version get`
-- [ ] `compute image-capability-schema get`
-- [ ] `compute pic agreements get`
+- [x] `apm-traces scheduled-query get`
+- [x] `apm-traces trace log get`
+- [x] `apm-traces trace span get`
+- [x] `apm-traces trace trace get`
+- [x] `ccc infrastructure get`
+- [x] `ccc upgrade-schedule get`
+- [x] `certificates certificate-authority-bundle get`
+- [x] `certificates certificate-bundle get`
+- [x] `certs-mgmt certificate-authority-version get`
+- [x] `certs-mgmt certificate-version get`
+- [x] `compute capacity-topology get`
+- [x] `compute global-image-capability-schema get`
+- [x] `compute global-image-capability-schema-version get`
+- [x] `compute image-capability-schema get`
+- [x] `compute pic agreements get`
 - [ ] `compute-management instance-pool lb-attachment get`
-- [ ] `data-integration connection-validation get`
-- [ ] `data-integration data-flow-validation get`
-- [ ] `data-safe private-endpoint get`
-- [ ] `data-science ds-private-endpoint get`
+- [x] `data-integration connection-validation get`
+- [x] `data-integration data-flow-validation get`
+- [x] `data-safe private-endpoint get`
+- [x] `data-science ds-private-endpoint get`
 - [ ] `data-science ml-app get`
 - [ ] `data-science ml-app-implementation get`
 - [ ] `data-science ml-app-implementation-version get`
 - [ ] `data-science ml-app-instance get`
 - [ ] `data-science ml-app-instance-view get`
-- [ ] `database-management private-endpoint get`
-- [ ] `db cloud-exa-infra get`
+- [x] `database-management private-endpoint get`
+- [x] `db cloud-exa-infra get`
 - [ ] `db db-system-upgrade-history get`
-- [ ] `db external-cdb get`
-- [ ] `db external-db-connector get`
-- [ ] `db external-non-cdb get`
-- [ ] `db external-pdb get`
-- [ ] `db pdb-conversion-history get`
+- [x] `db external-cdb get`
+- [x] `db external-db-connector get`
+- [x] `db external-non-cdb get`
+- [x] `db external-pdb get`
+- [x] `db pdb-conversion-history get`
 - [ ] `db upgrade-history get`
-- [ ] `dbtools connection get`
-- [ ] `dbtools endpoint-service get`
-- [ ] `dbtools identity get`
-- [ ] `dbtools private-endpoint get`
+- [x] `dbtools connection get`
+- [x] `dbtools endpoint-service get`
+- [x] `dbtools identity get`
+- [x] `dbtools private-endpoint get`
 - [ ] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec create default`
 - [ ] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec update default`
-- [ ] `devops build-pipeline-stage get`
-- [ ] `devops deploy-artifact get`
-- [ ] `devops deploy-environment get`
-- [ ] `devops deploy-pipeline get`
-- [ ] `devops deploy-stage get`
-- [ ] `generative-ai-data enrichment-jobs get`
-- [ ] `generative-ai-data generate-sql-jobs get`
+- [x] `devops build-pipeline-stage get`
+- [x] `devops deploy-artifact get`
+- [x] `devops deploy-environment get`
+- [x] `devops deploy-pipeline get`
+- [x] `devops deploy-stage get`
+- [x] `generative-ai-data enrichment-jobs get`
+- [x] `generative-ai-data generate-sql-jobs get`
 - [ ] `iam db-token get`
 - [ ] `instance-agent command get`
 - [ ] `instance-agent command-execution get`
-- [ ] `integration integration-instance get`
-- [ ] `limits-increase item get`
-- [ ] `limits-increase limits-increase-request get`
-- [ ] `log-analytics em-bridge get`
-- [ ] `log-analytics entity get`
-- [ ] `log-analytics entity-type get`
-- [ ] `log-analytics log-group get`
-- [ ] `log-analytics object-collection-rule get`
-- [ ] `logging agent-configuration get`
-- [ ] `management-agent agent get`
-- [ ] `management-agent install-key get`
-- [ ] `media-services media-asset-distribution-channel-attachment get`
-- [ ] `network drg-route-distribution get`
-- [ ] `network nsg get`
+- [x] `integration integration-instance get`
+- [x] `limits-increase item get`
+- [x] `limits-increase limits-increase-request get`
+- [x] `log-analytics em-bridge get`
+- [x] `log-analytics entity get`
+- [x] `log-analytics entity-type get`
+- [x] `log-analytics log-group get`
+- [x] `log-analytics object-collection-rule get`
+- [x] `logging agent-configuration get`
+- [x] `management-agent agent get`
+- [x] `management-agent install-key get`
+- [x] `media-services media-asset-distribution-channel-attachment get`
+- [x] `network drg-route-distribution get`
+- [x] `network nsg get`
 - [ ] `network public-ip get`
-- [ ] `ocvs esxi-host get`
-- [ ] `opsi awr-hub-objects get`
-- [ ] `opsi awr-hub-objects head`
-- [ ] `opsi opsi-private-endpoint get`
+- [x] `ocvs esxi-host get`
+- [x] `opsi awr-hub-objects get`
+- [x] `opsi awr-hub-objects head`
+- [x] `opsi opsi-private-endpoint get`
 - [ ] `os object head`
-- [ ] `os-management-hub lifecycle-environment get`
-- [ ] `os-management-hub lifecycle-stage get`
-- [ ] `os-management-hub managed-instance-group get`
+- [x] `os-management-hub lifecycle-environment get`
+- [x] `os-management-hub lifecycle-stage get`
+- [x] `os-management-hub managed-instance-group get`
 - [ ] `rover device data-sync task get`
 - [ ] `rover device data-sync task-definition get`
 - [ ] `rover device diagnostics bundle get`
 - [ ] `rover node show`
 - [ ] `rover standalone-cluster show`
 - [ ] `rover station-cluster show`
-- [ ] `service-catalog private-application-package get`
-- [ ] `service-catalog service-catalog-association get`
-- [ ] `stack-monitoring baselineable-metric get`
-- [ ] `stack-monitoring metric-extension get`
-- [ ] `stack-monitoring resource get`
-- [ ] `stack-monitoring resource-task get`
-- [ ] `stack-monitoring resource-type get`
-- [ ] `vbstudio instance get`
-- [ ] `visual-builder vb-instance get`
+- [x] `service-catalog private-application-package get`
+- [x] `service-catalog service-catalog-association get`
+- [x] `stack-monitoring baselineable-metric get`
+- [x] `stack-monitoring metric-extension get`
+- [x] `stack-monitoring resource get`
+- [x] `stack-monitoring resource-task get`
+- [x] `stack-monitoring resource-type get`
+- [x] `vbstudio instance get`
+- [x] `visual-builder vb-instance get`
 
 </details>
 
@@ -268,22 +268,22 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <details>
 <summary>79 commands</summary>
 
-- [ ] `apm-traces scheduled-query list`
+- [x] `apm-traces scheduled-query list`
 - [ ] `artifacts container image list`
 - [ ] `artifacts container image-signature list`
 - [ ] `artifacts container repository list`
 - [ ] `artifacts generic artifact list`
 - [ ] `artifacts repository list`
 - [ ] `audit event list`
-- [ ] `ccc infrastructure list`
-- [ ] `ccc upgrade-schedule list`
-- [ ] `cloud-guard problem list`
-- [ ] `compute capacity-topology bare-metal-host list`
-- [ ] `compute capacity-topology hpc-island list`
-- [ ] `compute capacity-topology network-block list`
-- [ ] `compute global-image-capability-schema-version list`
+- [x] `ccc infrastructure list`
+- [x] `ccc upgrade-schedule list`
+- [x] `cloud-guard problem list`
+- [x] `compute capacity-topology bare-metal-host list`
+- [x] `compute capacity-topology hpc-island list`
+- [x] `compute capacity-topology network-block list`
+- [x] `compute global-image-capability-schema-version list`
 - [ ] `compute volume-attachment list`
-- [ ] `data-science ds-private-endpoint list`
+- [x] `data-science ds-private-endpoint list`
 - [ ] `data-science ml-app list`
 - [ ] `data-science ml-app-implementation list`
 - [ ] `data-science ml-app-implementation-version list`
@@ -292,61 +292,61 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `data-science pipeline list`
 - [ ] `data-science pipeline-run list`
 - [ ] `db backup list`
-- [ ] `db cloud-vm-cluster list`
+- [x] `db cloud-vm-cluster list`
 - [ ] `db database list`
-- [ ] `db exadb-vm-cluster list`
-- [ ] `db exascale-db-storage-vault list`
-- [ ] `db gi-minor-version-summary list`
-- [ ] `dbtools identity list`
-- [ ] `dbtools-runtime credential list`
-- [ ] `devops deploy-stage list`
-- [ ] `devops deployment list`
-- [ ] `goldengate ai-model list`
+- [x] `db exadb-vm-cluster list`
+- [x] `db exascale-db-storage-vault list`
+- [x] `db gi-minor-version-summary list`
+- [x] `dbtools identity list`
+- [x] `dbtools-runtime credential list`
+- [x] `devops deploy-stage list`
+- [x] `devops deployment list`
+- [x] `goldengate ai-model list`
 - [ ] `iam compartment list`
 - [ ] `identity-domains apps list`
 - [ ] `identity-domains groups list`
 - [ ] `identity-domains users list`
-- [ ] `integration work-request list`
-- [ ] `log-analytics entity list`
-- [ ] `log-analytics entity-topology list`
-- [ ] `logging agent-configuration list`
-- [ ] `logging log-group list`
-- [ ] `management-agent agent list`
-- [ ] `media-services media-workflow-task-declaration list`
-- [ ] `mysql db-system list`
-- [ ] `network drg-route-distribution-statement list`
-- [ ] `network drg-route-table list`
-- [ ] `network nsg rules list`
-- [ ] `network nsg vnics list`
-- [ ] `oce oce-instance list`
-- [ ] `oce work-request list`
-- [ ] `oce work-request-error list`
-- [ ] `oce work-request-log-entry list`
-- [ ] `ocvs esxi-host list`
-- [ ] `opsi database-insights list`
-- [ ] `opsi exadata-insights list`
-- [ ] `opsi host-insights list`
+- [x] `integration work-request list`
+- [x] `log-analytics entity list`
+- [x] `log-analytics entity-topology list`
+- [x] `logging agent-configuration list`
+- [x] `logging log-group list`
+- [x] `management-agent agent list`
+- [x] `media-services media-workflow-task-declaration list`
+- [x] `mysql db-system list`
+- [x] `network drg-route-distribution-statement list`
+- [x] `network drg-route-table list`
+- [x] `network nsg rules list`
+- [x] `network nsg vnics list`
+- [x] `oce oce-instance list`
+- [x] `oce work-request list`
+- [x] `oce work-request-error list`
+- [x] `oce work-request-log-entry list`
+- [x] `ocvs esxi-host list`
+- [x] `opsi database-insights list`
+- [x] `opsi exadata-insights list`
+- [x] `opsi host-insights list`
 - [ ] `os object list`
-- [ ] `os-management-hub event list`
-- [ ] `os-management-hub lifecycle-environment list`
-- [ ] `os-management-hub lifecycle-stage list`
-- [ ] `os-management-hub managed-instance list`
-- [ ] `os-management-hub managed-instance-group list`
-- [ ] `os-management-hub management-station list`
-- [ ] `os-management-hub profile list`
-- [ ] `os-management-hub scheduled-job list`
-- [ ] `os-management-hub software-source list`
-- [ ] `os-management-hub work-request list`
+- [x] `os-management-hub event list`
+- [x] `os-management-hub lifecycle-environment list`
+- [x] `os-management-hub lifecycle-stage list`
+- [x] `os-management-hub managed-instance list`
+- [x] `os-management-hub managed-instance-group list`
+- [x] `os-management-hub management-station list`
+- [x] `os-management-hub profile list`
+- [x] `os-management-hub scheduled-job list`
+- [x] `os-management-hub software-source list`
+- [x] `os-management-hub work-request list`
 - [ ] `rover device data-sync task list`
 - [ ] `rover device data-sync task-definition list`
 - [ ] `rover device diagnostics bundle list`
-- [ ] `service-catalog private-application-package list`
-- [ ] `service-catalog service-catalog-association list`
-- [ ] `stack-monitoring baselineable-metric list`
-- [ ] `stack-monitoring metric-extension list`
-- [ ] `support incident list`
+- [x] `service-catalog private-application-package list`
+- [x] `service-catalog service-catalog-association list`
+- [x] `stack-monitoring baselineable-metric list`
+- [x] `stack-monitoring metric-extension list`
+- [x] `support incident list`
 - [ ] `visual-builder application list`
-- [ ] `visual-builder work-request list`
+- [x] `visual-builder work-request list`
 
 </details>
 
@@ -401,45 +401,45 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <summary>55 commands</summary>
 
 - [ ] `artifacts container image-signature get-verify`
-- [ ] `artifacts generic artifact get-by-path`
+- [x] `artifacts generic artifact get-by-path`
 - [ ] `compute instance list-vnics`
 - [ ] `compute instance-console-connection get-plink-connection-string`
-- [ ] `data-flow run list-logs`
-- [ ] `data-integration task-run-lineage list-task-run-lineages`
-- [ ] `data-science work-request list-work-request-logs`
-- [ ] `database-management associated-database-summary list-associated-databases`
+- [x] `data-flow run list-logs`
+- [x] `data-integration task-run-lineage list-task-run-lineages`
+- [x] `data-science work-request list-work-request-logs`
+- [x] `database-management associated-database-summary list-associated-databases`
 - [ ] `database-management managed-database get-awr-db-report`
 - [ ] `db autonomous-database-wallet get-metadata`
-- [ ] `db external-cdb list-external-pdbs`
-- [ ] `db pluggable-database get-snapshot`
+- [x] `db external-cdb list-external-pdbs`
+- [x] `db pluggable-database get-snapshot`
 - [ ] `devops project summarize-project-analytics`
 - [ ] `devops repository summarize-repository-analytics`
 - [ ] `iam group list-users`
 - [ ] `iam user list-groups`
-- [ ] `log-analytics assoc list-associated-entities`
-- [ ] `log-analytics assoc list-entity-source-assocs`
-- [ ] `log-analytics entity list-associations`
+- [x] `log-analytics assoc list-associated-entities`
+- [x] `log-analytics assoc list-entity-source-assocs`
+- [x] `log-analytics entity list-associations`
 - [ ] `log-analytics query search`
-- [ ] `management-agent agent summarize-plugin-counts`
+- [x] `management-agent agent summarize-plugin-counts`
 - [ ] `marketplace listing-summary search-listings-free-text`
 - [ ] `marketplace listing-summary search-listings-structured`
 - [ ] `monitoring metric-data summarize-metrics-data`
-- [ ] `opsi database-insights list-database-configurations`
-- [ ] `opsi enterprise-manager-bridges list-importable-enterprise-manager-entities`
-- [ ] `opsi host-insights list-host-configurations`
+- [x] `opsi database-insights list-database-configurations`
+- [x] `opsi enterprise-manager-bridges list-importable-enterprise-manager-entities`
+- [x] `opsi host-insights list-host-configurations`
 - [ ] `os object list-object-versions`
-- [ ] `os-management-hub lifecycle-stage list-installed-packages`
-- [ ] `os-management-hub managed-instance get-analytic-content`
-- [ ] `os-management-hub managed-instance list-modules`
-- [ ] `os-management-hub managed-instance summarize-analytics`
-- [ ] `os-management-hub managed-instance-group list-available-modules`
-- [ ] `os-management-hub managed-instance-group list-available-packages`
-- [ ] `os-management-hub managed-instance-group list-available-software-sources`
-- [ ] `os-management-hub managed-instance-group list-installed-packages`
-- [ ] `os-management-hub managed-instance-group list-managed-instances`
-- [ ] `os-management-hub managed-instance-group list-modules`
-- [ ] `os-management-hub software-source list-all-software-packages`
-- [ ] `os-management-hub software-source list-module-profiles`
+- [x] `os-management-hub lifecycle-stage list-installed-packages`
+- [x] `os-management-hub managed-instance get-analytic-content`
+- [x] `os-management-hub managed-instance list-modules`
+- [x] `os-management-hub managed-instance summarize-analytics`
+- [x] `os-management-hub managed-instance-group list-available-modules`
+- [x] `os-management-hub managed-instance-group list-available-packages`
+- [x] `os-management-hub managed-instance-group list-available-software-sources`
+- [x] `os-management-hub managed-instance-group list-installed-packages`
+- [x] `os-management-hub managed-instance-group list-managed-instances`
+- [x] `os-management-hub managed-instance-group list-modules`
+- [x] `os-management-hub software-source list-all-software-packages`
+- [x] `os-management-hub software-source list-module-profiles`
 - [ ] `os-management-hub software-source search-modules`
 - [ ] `resource-manager job get-job-logs`
 - [ ] `rover device data-sync task get-snapshot`
@@ -454,7 +454,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `stack-monitoring metric-extension summarize-resources`
 - [ ] `stack-monitoring resource search-members`
 - [ ] `threat-intelligence indicator summarize`
-- [ ] `threat-intelligence indicator-summaries list-indicators`
+- [x] `threat-intelligence indicator-summaries list-indicators`
 
 </details>
 
@@ -463,58 +463,58 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <details>
 <summary>66 commands</summary>
 
-- [ ] `apm-traces scheduled-query delete`
-- [ ] `artifacts generic artifact delete-by-path`
-- [ ] `ccc infrastructure delete`
-- [ ] `ccc upgrade-schedule delete`
-- [ ] `compute capacity-topology delete`
-- [ ] `compute image-capability-schema delete`
-- [ ] `data-integration connection-validation delete`
-- [ ] `data-integration data-flow-validation delete`
-- [ ] `data-safe private-endpoint delete`
-- [ ] `data-science ds-private-endpoint delete`
+- [x] `apm-traces scheduled-query delete`
+- [x] `artifacts generic artifact delete-by-path`
+- [x] `ccc infrastructure delete`
+- [x] `ccc upgrade-schedule delete`
+- [x] `compute capacity-topology delete`
+- [x] `compute image-capability-schema delete`
+- [x] `data-integration connection-validation delete`
+- [x] `data-integration data-flow-validation delete`
+- [x] `data-safe private-endpoint delete`
+- [x] `data-science ds-private-endpoint delete`
 - [ ] `data-science ml-app delete`
 - [ ] `data-science ml-app-implementation delete`
 - [ ] `data-science ml-app-instance delete`
-- [ ] `database-management private-endpoint delete`
+- [x] `database-management private-endpoint delete`
 - [ ] `db autonomous-database delete`
-- [ ] `db cloud-exa-infra delete`
+- [x] `db cloud-exa-infra delete`
 - [ ] `db database delete`
-- [ ] `db external-cdb delete`
-- [ ] `db external-db-connector delete`
-- [ ] `db external-non-cdb delete`
-- [ ] `db external-pdb delete`
-- [ ] `db pluggable-database delete-snapshot`
-- [ ] `dbtools connection delete`
-- [ ] `dbtools identity delete`
-- [ ] `dbtools private-endpoint delete`
-- [ ] `devops build-pipeline-stage delete`
-- [ ] `devops deploy-artifact delete`
-- [ ] `devops deploy-environment delete`
-- [ ] `devops deploy-pipeline delete`
-- [ ] `devops deploy-stage delete`
-- [ ] `devops repository delete-ref`
+- [x] `db external-cdb delete`
+- [x] `db external-db-connector delete`
+- [x] `db external-non-cdb delete`
+- [x] `db external-pdb delete`
+- [x] `db pluggable-database delete-snapshot`
+- [x] `dbtools connection delete`
+- [x] `dbtools identity delete`
+- [x] `dbtools private-endpoint delete`
+- [x] `devops build-pipeline-stage delete`
+- [x] `devops deploy-artifact delete`
+- [x] `devops deploy-environment delete`
+- [x] `devops deploy-pipeline delete`
+- [x] `devops deploy-stage delete`
+- [x] `devops repository delete-ref`
 - [ ] `fn function delete`
-- [ ] `integration integration-instance delete`
-- [ ] `limits-increase limits-increase-request delete`
-- [ ] `log-analytics em-bridge delete`
-- [ ] `log-analytics entity delete`
-- [ ] `log-analytics entity-type delete`
-- [ ] `log-analytics log-group delete`
-- [ ] `log-analytics object-collection-rule delete`
-- [ ] `logging agent-configuration delete`
-- [ ] `management-agent agent delete`
-- [ ] `management-agent install-key delete`
-- [ ] `media-services media-asset-distribution-channel-attachment delete`
-- [ ] `network drg-route-distribution delete`
-- [ ] `network nsg delete`
-- [ ] `nosql table delete-replica`
-- [ ] `ocvs esxi-host delete`
-- [ ] `opsi awr-hub-objects delete`
-- [ ] `opsi opsi-private-endpoint delete`
+- [x] `integration integration-instance delete`
+- [x] `limits-increase limits-increase-request delete`
+- [x] `log-analytics em-bridge delete`
+- [x] `log-analytics entity delete`
+- [x] `log-analytics entity-type delete`
+- [x] `log-analytics log-group delete`
+- [x] `log-analytics object-collection-rule delete`
+- [x] `logging agent-configuration delete`
+- [x] `management-agent agent delete`
+- [x] `management-agent install-key delete`
+- [x] `media-services media-asset-distribution-channel-attachment delete`
+- [x] `network drg-route-distribution delete`
+- [x] `network nsg delete`
+- [x] `nosql table delete-replica`
+- [x] `ocvs esxi-host delete`
+- [x] `opsi awr-hub-objects delete`
+- [x] `opsi opsi-private-endpoint delete`
 - [ ] `os bucket delete`
-- [ ] `os-management-hub lifecycle-environment delete`
-- [ ] `os-management-hub managed-instance-group delete`
+- [x] `os-management-hub lifecycle-environment delete`
+- [x] `os-management-hub managed-instance-group delete`
 - [ ] `rover device data-sync task-definition delete`
 - [ ] `rover node delete`
 - [ ] `rover node delete-workload`
@@ -522,13 +522,13 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `rover standalone-cluster delete-workload`
 - [ ] `rover station-cluster delete`
 - [ ] `rover station-cluster delete-workload`
-- [ ] `service-catalog service-catalog-association delete`
-- [ ] `stack-monitoring baselineable-metric delete`
-- [ ] `stack-monitoring metric-extension delete`
-- [ ] `stack-monitoring resource delete`
-- [ ] `stack-monitoring resource-type delete`
-- [ ] `vbstudio instance delete`
-- [ ] `visual-builder vb-instance delete`
+- [x] `service-catalog service-catalog-association delete`
+- [x] `stack-monitoring baselineable-metric delete`
+- [x] `stack-monitoring metric-extension delete`
+- [x] `stack-monitoring resource delete`
+- [x] `stack-monitoring resource-type delete`
+- [x] `vbstudio instance delete`
+- [x] `visual-builder vb-instance delete`
 
 </details>
 
@@ -1015,7 +1015,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `model-deployment inference-result predict`
 - [ ] `network remote-peering-connection connect`
 - [ ] `ocvs esxi-host replace-host`
-- [ ] `ocvs sddc vmware-versions`
+- [x] `ocvs sddc vmware-versions`
 - [ ] `optimizer resource-action-summary filter-resource-actions`
 - [ ] `os multipart abort`
 - [ ] `os object copy`
@@ -1330,7 +1330,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <details>
 <summary>17 commands</summary>
 
-- [ ] `data-integration task-run-lineage list_taskrun_lineages`
+- [x] `data-integration task-run-lineage list_taskrun_lineages`
 - [ ] `data-science job head-job-artifact`
 - [ ] `data-science ml-app-instance trigger`
 - [ ] `data-science ml-app-instance-view trigger`
@@ -1450,7 +1450,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <summary>29 commands</summary>
 
 - [ ] `artifacts container image-signature sign-upload`
-- [ ] `artifacts generic artifact download-by-path`
+- [x] `artifacts generic artifact download-by-path`
 - [ ] `artifacts generic artifact upload-by-path`
 - [ ] `data-science ml-app-implementation download-package`
 - [ ] `data-science ml-app-implementation upload-package`
@@ -1472,10 +1472,10 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `os-management-hub managed-instance-group disable-module-stream`
 - [ ] `os-management-hub managed-instance-group enable-module-stream`
 - [ ] `os-management-hub managed-instance-group switch-module-stream`
-- [ ] `os-management-hub software-source list-module-streams`
+- [x] `os-management-hub software-source list-module-streams`
 - [ ] `rover device system-upgrade import-bundle`
 - [ ] `rover device system-upgrade upload-bundle`
-- [ ] `service-catalog private-application-package download-config`
+- [x] `service-catalog private-application-package download-config`
 - [ ] `stack-monitoring metric-extension export`
 - [ ] `stack-monitoring resource-task import-telemetry-resources`
 

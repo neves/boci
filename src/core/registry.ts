@@ -300,12 +300,16 @@ export function engineSupports(command: Command): boolean {
 /** `command` is the Leaf command's spec entry, when `key` names one. */
 export function isImplemented(key: string, command?: Command): boolean {
   if (IMPLEMENTED.has(key)) return true;
-  if (command?.kind === "custom" && command.tier === "A")
+  if (command?.kind === "custom" && command.tier === "A") {
+    const http = command.operation?.http;
     return (
-      key === "apm-traces trace span get" &&
+      (http === "GET" ||
+        http === "HEAD" ||
+        (http === "DELETE" && command.operation?.body === undefined)) &&
       engineSupports(command) &&
       !EXCLUDED.has(key)
     );
+  }
   return command !== undefined && engineSupports(command) && !EXCLUDED.has(key);
 }
 

@@ -281,10 +281,9 @@ for (const service of services) {
       if (
         (node.kind !== "generated" &&
           !(
-            service === "apm-traces" &&
-            key === "apm-traces trace span get" &&
             node.kind === "custom" &&
-            node.tier === "A"
+            node.tier === "A" &&
+            ["GET", "HEAD", "DELETE"].includes(operation?.http ?? "")
           )) ||
         !operation ||
         !kind.methods.includes(operation.http ?? "") ||

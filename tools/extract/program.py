@@ -68,6 +68,7 @@ FUNCTIONS = {
     "list": "list",
     "click.confirm": "confirm",
     "open": "open",
+    "os.path.exists": "exists",
 }
 # Module helpers outside the subset (re.split, enumerate, return), hand-coded in the
 # Engine as named functions (src/core/program.ts, ticket 20).

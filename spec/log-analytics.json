@@ -67302,6 +67302,211 @@
           "services.log_analytics.src.oci_cli_log_analytics.generated.loganalytics_cli.upload_otlp_logs"
         ]
       },
+      "program": {
+        "body": [
+          ["let", "upload_file", ["item", ["var", "kwargs"], "file"]],
+          ["del", ["var", "kwargs"], "file"],
+          [
+            "if",
+            ["fn", "exists", ["var", "upload_file"]],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["item", ["var", "kwargs"], "content_type"],
+                  "application/json"
+                ],
+                [
+                  ["let", "ufile", ["fn", "open", ["var", "upload_file"], "r"]],
+                  ["let", "file_content", ["call", "read", ["var", "ufile"]]],
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "upload_otlp_logs_details",
+                    ["var", "file_content"]
+                  ],
+                  ["invoke", [], ["var", "kwargs"]]
+                ],
+                [
+                  [
+                    "let",
+                    "ufile",
+                    ["fn", "open", ["var", "upload_file"], "rb"]
+                  ],
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "upload_otlp_logs_details",
+                    ["var", "ufile"]
+                  ],
+                  ["invoke", [], ["var", "kwargs"]]
+                ]
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "upload_otlp_logs_details",
+                ["var", "upload_file"]
+              ],
+              ["invoke", [], ["var", "kwargs"]]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.log_analytics.src.oci_cli_log_analytics.generated.loganalytics_cli.upload_otlp_logs",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "namespace_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_meta_loggrpid",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "upload_otlp_logs_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "log_set",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "content_type",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_meta_properties",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "expect",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "log_analytics.log_analytics",
+        "method": "upload_otlp_logs",
+        "http": "POST",
+        "path": "/namespaces/{namespaceName}/actions/otlp/v1/logs",
+        "positionalArgs": [
+          "namespace_name",
+          "opc_meta_loggrpid",
+          "upload_otlp_logs_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-meta-loggrpid": {
+            "arg": "opc_meta_loggrpid"
+          },
+          "log-set": {
+            "arg": "log_set"
+          },
+          "content-type": {
+            "arg": "content_type"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-meta-properties": {
+            "arg": "opc_meta_properties"
+          },
+          "expect": {
+            "arg": "expect"
+          }
+        },
+        "body": "upload_otlp_logs_details",
+        "enforce_content_headers": false,
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["namespace_name"],
+          "param": "namespace_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_meta_loggrpid"],
+          "param": "opc_meta_loggrpid"
+        },
+        {
+          "target": "kwarg",
+          "key": ["upload_otlp_logs_details"],
+          "param": "upload_otlp_logs_details"
+        },
+        {
+          "target": "kwarg",
+          "key": ["log_set"],
+          "param": "log_set",
+          "when": "log_set is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["content_type"],
+          "param": "content_type",
+          "when": "content_type is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_meta_properties"],
+          "param": "opc_meta_properties",
+          "when": "opc_meta_properties is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["expect"],
+          "param": "expect",
+          "when": "expect is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["retry_strategy"],
+          "transform": "NoneRetryStrategy"
+        }
+      ],
       "params": [
         {
           "kind": "option",

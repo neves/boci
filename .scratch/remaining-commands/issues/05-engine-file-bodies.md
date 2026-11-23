@@ -7,12 +7,14 @@
 **Status:** ready-for-agent
 
 ## Context for the implementer
+
 - Look at a golden to learn how the Reference CLI reads the file option (path vs `file://`), which content-type and content-length it sends, and whether it streams.
 - `os object put` already sends raw file bodies; reuse its upload helpers where they fit rather than writing a second implementation.
 - `bulk-create` may be a JSON array body rather than binary — check each subgroup before generalizing.
 - Cases for file bodies need a fixture file; keep fixtures tiny under `test/fixtures`.
 
 ## Acceptance criteria
+
 - [ ] All 41 commands verified or in `EXCLUDED` with a reason.
 - [ ] Test runs stay offline and don't read real `~/.oci`.
 - [ ] `bun run verify` green.

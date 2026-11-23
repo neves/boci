@@ -7,12 +7,14 @@
 **Status:** ready-for-agent
 
 ## Context for the implementer
+
 - Purely mechanical moves. Do not edit logic while moving; if you spot a bug, note it in the commit body instead.
 - Read the file in ranges (it is huge); first list its top-level functions with `rg -n "^export (async )?function|^function|^const" ` capped with `| head -80`, then plan the cut lines.
 - Shared helpers (multipart math, transfer manager, etc.) go in one shared module inside the directory.
 - The hand-written cases `os-object-*.json` are the safety net: run `bun test test/parity -t 'os object'` after each move.
 
 ## Acceptance criteria
+
 - [ ] No module in the new directory exceeds ~1,200 lines.
 - [ ] All `os object *` Parity cases pass unchanged.
 - [ ] `bun run verify` green. Commit message: `refactor: split os commands by feature`.

@@ -30,6 +30,11 @@ jobs:
           bun run build --outfile dist/boci-darwin-arm64 --target bun-darwin-arm64
           bun run build --outfile dist/boci-windows-x64.exe --target bun-windows-x64
 
+      - name: Generate SHA256SUMS
+        run: |
+          cd dist
+          sha256sum boci-linux-x64 boci-linux-arm64 boci-linux-x64-musl boci-linux-arm64-musl boci-darwin-x64 boci-darwin-arm64 boci-windows-x64.exe > SHA256SUMS
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -41,6 +46,7 @@ jobs:
             dist/boci-darwin-x64
             dist/boci-darwin-arm64
             dist/boci-windows-x64.exe
+            dist/SHA256SUMS
 
   publish-npm:
     runs-on: ubuntu-latest

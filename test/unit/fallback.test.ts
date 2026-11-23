@@ -2,20 +2,23 @@ import { expect, test } from "bun:test";
 import { CLIS, runCli, runInProcess } from "../harness/runner.ts";
 
 const fakeOci = `${import.meta.dir}/../fixtures/clis/fake-oci.ts`;
-// A Leaf command that passes validation but isn't implemented yet.
+// A Leaf command that passes validation but isn't implemented: it's in
+// EXCLUDED (src/core/registry.ts), so it stays unimplemented as the engine grows.
 const argv = [
-  "compute",
-  "capacity-topology",
-  "get",
-  "--capacity-topology-id",
+  "ocvs",
+  "sddc",
+  "retrieve-sddc-operation-status",
+  "--sddc-id",
   "x",
+  "--operation-name",
+  "y",
 ];
 
 test("an unimplemented command fails with a clear message and exit code 3", async () => {
   const run = await runCli(CLIS.boci, argv);
   expect(run.exitCode).toBe(3);
   expect(run.stdout).toBe("");
-  expect(run.stderr).toContain("oci compute capacity-topology get");
+  expect(run.stderr).toContain("oci ocvs sddc retrieve-sddc-operation-status");
   expect(run.stderr).toContain("not implemented");
   expect(run.stderr).toContain("BOCI_FALLBACK=oci");
   expect(run.requests).toEqual([]);

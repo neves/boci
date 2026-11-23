@@ -7720,6 +7720,356 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "uri"],
+            [
+              [
+                "let",
+                "key_backup_location_uri_kwargs",
+                [
+                  "dict",
+                  [
+                    "wait_for_state",
+                    ["item", ["var", "kwargs"], "wait_for_state"]
+                  ],
+                  [
+                    "max_wait_seconds",
+                    ["item", ["var", "kwargs"], "max_wait_seconds"]
+                  ],
+                  [
+                    "wait_interval_seconds",
+                    ["item", ["var", "kwargs"], "wait_interval_seconds"]
+                  ],
+                  ["key_id", ["item", ["var", "kwargs"], "key_id"]],
+                  ["backup_location_uri", ["item", ["var", "kwargs"], "uri"]],
+                  ["if_match", ["item", ["var", "kwargs"], "if_match"]]
+                ]
+              ],
+              ["invoke", [], ["var", "key_backup_location_uri_kwargs"]]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["item", ["var", "kwargs"], "bucket_name"],
+                  ["item", ["var", "kwargs"], "namespace"],
+                  ["item", ["var", "kwargs"], "object_name"]
+                ],
+                [
+                  [
+                    "let",
+                    "key_backup_location_bucket_kwargs",
+                    [
+                      "dict",
+                      [
+                        "wait_for_state",
+                        ["item", ["var", "kwargs"], "wait_for_state"]
+                      ],
+                      [
+                        "max_wait_seconds",
+                        ["item", ["var", "kwargs"], "max_wait_seconds"]
+                      ],
+                      [
+                        "wait_interval_seconds",
+                        ["item", ["var", "kwargs"], "wait_interval_seconds"]
+                      ],
+                      ["key_id", ["item", ["var", "kwargs"], "key_id"]],
+                      [
+                        "backup_location_namespace",
+                        ["item", ["var", "kwargs"], "namespace"]
+                      ],
+                      [
+                        "backup_location_bucket_name",
+                        ["item", ["var", "kwargs"], "bucket_name"]
+                      ],
+                      ["if_match", ["item", ["var", "kwargs"], "if_match"]],
+                      [
+                        "backup_location_object_name",
+                        ["item", ["var", "kwargs"], "object_name"]
+                      ]
+                    ]
+                  ],
+                  [
+                    "invoke",
+                    [],
+                    ["var", "key_backup_location_bucket_kwargs"],
+                    1
+                  ]
+                ],
+                [
+                  [
+                    "usage",
+                    "either --uri or all of (--bucket-name, --object-name and --namespace) must be provided."
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.key_management.src.oci_cli_kms_management.generated.kmsmanagement_cli.backup_key_backup_location_uri",
+        "params": [
+          {
+            "name": "key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_location_uri",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "key_management.kms_management",
+        "method": "backup_key",
+        "http": "POST",
+        "path": "/20180608/keys/{keyId}/actions/backup",
+        "positionalArgs": ["key_id"],
+        "pathParams": {
+          "keyId": "key_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "backup_key_details",
+        "responseType": "Key",
+        "paginated": false,
+        "lifecycleGetter": "get_key"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["key_id"],
+          "param": "key_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "backup_key_details",
+          "key": ["backupLocation"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "backup_key_details",
+          "key": ["backupLocation", "uri"],
+          "param": "backup_location_uri"
+        },
+        {
+          "target": "body",
+          "bodyArg": "backup_key_details",
+          "key": ["backupLocation", "destination"],
+          "value": "PRE_AUTHENTICATED_REQUEST_URI"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.key_management.src.oci_cli_kms_management.generated.kmsmanagement_cli.backup_key_backup_location_bucket",
+            "params": [
+              {
+                "name": "key_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_namespace",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_bucket_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_object_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "wait_for_state",
+                "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+                "multiple": true,
+                "isFlag": false
+              },
+              {
+                "name": "max_wait_seconds",
+                "typeClass": "click.types.IntParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "wait_interval_seconds",
+                "typeClass": "click.types.IntParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "key_management.kms_management",
+            "method": "backup_key",
+            "http": "POST",
+            "path": "/20180608/keys/{keyId}/actions/backup",
+            "positionalArgs": ["key_id"],
+            "pathParams": {
+              "keyId": "key_id"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              }
+            },
+            "body": "backup_key_details",
+            "responseType": "Key",
+            "paginated": false,
+            "lifecycleGetter": "get_key"
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["key_id"],
+              "param": "key_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_key_details",
+              "key": ["backupLocation"],
+              "expr": "{}"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_key_details",
+              "key": ["backupLocation", "namespace"],
+              "param": "backup_location_namespace"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_key_details",
+              "key": ["backupLocation", "bucketName"],
+              "param": "backup_location_bucket_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_key_details",
+              "key": ["backupLocation", "objectName"],
+              "param": "backup_location_object_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_key_details",
+              "key": ["backupLocation", "destination"],
+              "value": "BUCKET"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10393,6 +10743,266 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "uri"],
+            [
+              [
+                "let",
+                "key_restore_location_uri_kwargs",
+                [
+                  "dict",
+                  ["backup_location_uri", ["item", ["var", "kwargs"], "uri"]],
+                  ["if_match", ["item", ["var", "kwargs"], "if_match"]]
+                ]
+              ],
+              ["invoke", [], ["var", "key_restore_location_uri_kwargs"]]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["item", ["var", "kwargs"], "bucket_name"],
+                  ["item", ["var", "kwargs"], "namespace"],
+                  ["item", ["var", "kwargs"], "object_name"]
+                ],
+                [
+                  [
+                    "let",
+                    "key_restore_location_bucket_kwargs",
+                    [
+                      "dict",
+                      [
+                        "backup_location_namespace",
+                        ["item", ["var", "kwargs"], "namespace"]
+                      ],
+                      [
+                        "backup_location_bucket_name",
+                        ["item", ["var", "kwargs"], "bucket_name"]
+                      ],
+                      ["if_match", ["item", ["var", "kwargs"], "if_match"]],
+                      [
+                        "backup_location_object_name",
+                        ["item", ["var", "kwargs"], "object_name"]
+                      ]
+                    ]
+                  ],
+                  [
+                    "invoke",
+                    [],
+                    ["var", "key_restore_location_bucket_kwargs"],
+                    1
+                  ]
+                ],
+                [
+                  [
+                    "usage",
+                    "either --uri or all of (--bucket-name, --object-name and --namespace) must be provided."
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.key_management.src.oci_cli_kms_management.generated.kmsmanagement_cli.restore_key_from_object_store_backup_location_uri",
+        "params": [
+          {
+            "name": "backup_location_uri",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "key_management.kms_management",
+        "method": "restore_key_from_object_store",
+        "http": "POST",
+        "path": "/20180608/keys/actions/restoreFromObjectStore",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "restore_key_from_object_store_details",
+        "responseType": "Key",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "restore_key_from_object_store_details",
+          "key": ["backupLocation"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "restore_key_from_object_store_details",
+          "key": ["backupLocation", "uri"],
+          "param": "backup_location_uri"
+        },
+        {
+          "target": "body",
+          "bodyArg": "restore_key_from_object_store_details",
+          "key": ["backupLocation", "destination"],
+          "value": "PRE_AUTHENTICATED_REQUEST_URI"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.key_management.src.oci_cli_kms_management.generated.kmsmanagement_cli.restore_key_from_object_store_backup_location_bucket",
+            "params": [
+              {
+                "name": "backup_location_namespace",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_bucket_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_object_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "key_management.kms_management",
+            "method": "restore_key_from_object_store",
+            "http": "POST",
+            "path": "/20180608/keys/actions/restoreFromObjectStore",
+            "positionalArgs": [],
+            "pathParams": {},
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              }
+            },
+            "body": "restore_key_from_object_store_details",
+            "responseType": "Key",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_key_from_object_store_details",
+              "key": ["backupLocation"],
+              "expr": "{}"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_key_from_object_store_details",
+              "key": ["backupLocation", "namespace"],
+              "param": "backup_location_namespace"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_key_from_object_store_details",
+              "key": ["backupLocation", "bucketName"],
+              "param": "backup_location_bucket_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_key_from_object_store_details",
+              "key": ["backupLocation", "objectName"],
+              "param": "backup_location_object_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_key_from_object_store_details",
+              "key": ["backupLocation", "destination"],
+              "value": "BUCKET"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12971,6 +13581,390 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "uri"],
+            [
+              [
+                "let",
+                "vault_backup_location_uri_kwargs",
+                [
+                  "dict",
+                  [
+                    "wait_for_state",
+                    ["item", ["var", "kwargs"], "wait_for_state"]
+                  ],
+                  [
+                    "max_wait_seconds",
+                    ["item", ["var", "kwargs"], "max_wait_seconds"]
+                  ],
+                  [
+                    "wait_interval_seconds",
+                    ["item", ["var", "kwargs"], "wait_interval_seconds"]
+                  ],
+                  ["vault_id", ["item", ["var", "kwargs"], "vault_id"]],
+                  ["backup_location_uri", ["item", ["var", "kwargs"], "uri"]],
+                  ["if_match", ["item", ["var", "kwargs"], "if_match"]],
+                  [
+                    "is_include_keys",
+                    ["item", ["var", "kwargs"], "is_include_keys"]
+                  ]
+                ]
+              ],
+              ["invoke", [], ["var", "vault_backup_location_uri_kwargs"]]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["item", ["var", "kwargs"], "bucket_name"],
+                  ["item", ["var", "kwargs"], "namespace"],
+                  ["item", ["var", "kwargs"], "object_name"]
+                ],
+                [
+                  [
+                    "let",
+                    "vault_backup_location_bucket_kwargs",
+                    [
+                      "dict",
+                      [
+                        "wait_for_state",
+                        ["item", ["var", "kwargs"], "wait_for_state"]
+                      ],
+                      [
+                        "max_wait_seconds",
+                        ["item", ["var", "kwargs"], "max_wait_seconds"]
+                      ],
+                      [
+                        "wait_interval_seconds",
+                        ["item", ["var", "kwargs"], "wait_interval_seconds"]
+                      ],
+                      ["vault_id", ["item", ["var", "kwargs"], "vault_id"]],
+                      [
+                        "backup_location_namespace",
+                        ["item", ["var", "kwargs"], "namespace"]
+                      ],
+                      [
+                        "backup_location_bucket_name",
+                        ["item", ["var", "kwargs"], "bucket_name"]
+                      ],
+                      ["if_match", ["item", ["var", "kwargs"], "if_match"]],
+                      [
+                        "backup_location_object_name",
+                        ["item", ["var", "kwargs"], "object_name"]
+                      ],
+                      [
+                        "is_include_keys",
+                        ["item", ["var", "kwargs"], "is_include_keys"]
+                      ]
+                    ]
+                  ],
+                  [
+                    "invoke",
+                    [],
+                    ["var", "vault_backup_location_bucket_kwargs"],
+                    1
+                  ]
+                ],
+                [
+                  [
+                    "usage",
+                    "either --uri or all of (--bucket-name, --object-name and --namespace) must be provided."
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.key_management.src.oci_cli_kms_vault.generated.kmsvault_cli.backup_vault_backup_location_uri",
+        "params": [
+          {
+            "name": "vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_location_uri",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_include_keys",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "key_management.kms_vault",
+        "method": "backup_vault",
+        "http": "POST",
+        "path": "/20180608/vaults/{vaultId}/actions/backup",
+        "positionalArgs": ["vault_id"],
+        "pathParams": {
+          "vaultId": "vault_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "backup_vault_details",
+        "responseType": "Vault",
+        "paginated": false,
+        "lifecycleGetter": "get_vault"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["vault_id"],
+          "param": "vault_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "backup_vault_details",
+          "key": ["backupLocation"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "backup_vault_details",
+          "key": ["backupLocation", "uri"],
+          "param": "backup_location_uri"
+        },
+        {
+          "target": "body",
+          "bodyArg": "backup_vault_details",
+          "key": ["isIncludeKeys"],
+          "param": "is_include_keys",
+          "when": "is_include_keys is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "backup_vault_details",
+          "key": ["backupLocation", "destination"],
+          "value": "PRE_AUTHENTICATED_REQUEST_URI"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.key_management.src.oci_cli_kms_vault.generated.kmsvault_cli.backup_vault_backup_location_bucket",
+            "params": [
+              {
+                "name": "vault_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_namespace",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_bucket_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_object_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_include_keys",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "wait_for_state",
+                "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+                "multiple": true,
+                "isFlag": false
+              },
+              {
+                "name": "max_wait_seconds",
+                "typeClass": "click.types.IntParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "wait_interval_seconds",
+                "typeClass": "click.types.IntParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "key_management.kms_vault",
+            "method": "backup_vault",
+            "http": "POST",
+            "path": "/20180608/vaults/{vaultId}/actions/backup",
+            "positionalArgs": ["vault_id"],
+            "pathParams": {
+              "vaultId": "vault_id"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              }
+            },
+            "body": "backup_vault_details",
+            "responseType": "Vault",
+            "paginated": false,
+            "lifecycleGetter": "get_vault"
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["vault_id"],
+              "param": "vault_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_vault_details",
+              "key": ["backupLocation"],
+              "expr": "{}"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_vault_details",
+              "key": ["backupLocation", "namespace"],
+              "param": "backup_location_namespace"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_vault_details",
+              "key": ["backupLocation", "bucketName"],
+              "param": "backup_location_bucket_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_vault_details",
+              "key": ["backupLocation", "objectName"],
+              "param": "backup_location_object_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_vault_details",
+              "key": ["isIncludeKeys"],
+              "param": "is_include_keys",
+              "when": "is_include_keys is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "backup_vault_details",
+              "key": ["backupLocation", "destination"],
+              "value": "BUCKET"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15296,6 +16290,304 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "uri"],
+            [
+              [
+                "let",
+                "vault_restore_location_uri_kwargs",
+                [
+                  "dict",
+                  [
+                    "compartment_id",
+                    ["item", ["var", "kwargs"], "compartment_id"]
+                  ],
+                  ["backup_location_uri", ["item", ["var", "kwargs"], "uri"]],
+                  ["if_match", ["item", ["var", "kwargs"], "if_match"]]
+                ]
+              ],
+              ["invoke", [], ["var", "vault_restore_location_uri_kwargs"]]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["item", ["var", "kwargs"], "bucket_name"],
+                  ["item", ["var", "kwargs"], "namespace"],
+                  ["item", ["var", "kwargs"], "object_name"]
+                ],
+                [
+                  [
+                    "let",
+                    "vault_restore_location_bucket_kwargs",
+                    [
+                      "dict",
+                      [
+                        "compartment_id",
+                        ["item", ["var", "kwargs"], "compartment_id"]
+                      ],
+                      [
+                        "backup_location_namespace",
+                        ["item", ["var", "kwargs"], "namespace"]
+                      ],
+                      [
+                        "backup_location_bucket_name",
+                        ["item", ["var", "kwargs"], "bucket_name"]
+                      ],
+                      ["if_match", ["item", ["var", "kwargs"], "if_match"]],
+                      [
+                        "backup_location_object_name",
+                        ["item", ["var", "kwargs"], "object_name"]
+                      ]
+                    ]
+                  ],
+                  [
+                    "invoke",
+                    [],
+                    ["var", "vault_restore_location_bucket_kwargs"],
+                    1
+                  ]
+                ],
+                [
+                  [
+                    "usage",
+                    "either --uri or all of (--bucket-name, --object-name and --namespace) must be provided."
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.key_management.src.oci_cli_kms_vault.generated.kmsvault_cli.restore_vault_from_object_store_backup_location_uri",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_location_uri",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "key_management.kms_vault",
+        "method": "restore_vault_from_object_store",
+        "http": "POST",
+        "path": "/20180608/vaults/actions/restoreFromObjectStore",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "restore_vault_from_object_store_details",
+        "responseType": "Vault",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "restore_vault_from_object_store_details",
+          "key": ["backupLocation"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "restore_vault_from_object_store_details",
+          "key": ["backupLocation", "uri"],
+          "param": "backup_location_uri"
+        },
+        {
+          "target": "body",
+          "bodyArg": "restore_vault_from_object_store_details",
+          "key": ["backupLocation", "destination"],
+          "value": "PRE_AUTHENTICATED_REQUEST_URI"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.key_management.src.oci_cli_kms_vault.generated.kmsvault_cli.restore_vault_from_object_store_backup_location_bucket",
+            "params": [
+              {
+                "name": "compartment_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_namespace",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_bucket_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "backup_location_object_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "key_management.kms_vault",
+            "method": "restore_vault_from_object_store",
+            "http": "POST",
+            "path": "/20180608/vaults/actions/restoreFromObjectStore",
+            "positionalArgs": ["compartment_id"],
+            "pathParams": {},
+            "queryParams": {
+              "compartmentId": {
+                "arg": "compartment_id"
+              }
+            },
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              }
+            },
+            "body": "restore_vault_from_object_store_details",
+            "responseType": "Vault",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["compartment_id"],
+              "param": "compartment_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_vault_from_object_store_details",
+              "key": ["backupLocation"],
+              "expr": "{}"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_vault_from_object_store_details",
+              "key": ["backupLocation", "namespace"],
+              "param": "backup_location_namespace"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_vault_from_object_store_details",
+              "key": ["backupLocation", "bucketName"],
+              "param": "backup_location_bucket_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_vault_from_object_store_details",
+              "key": ["backupLocation", "objectName"],
+              "param": "backup_location_object_name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "restore_vault_from_object_store_details",
+              "key": ["backupLocation", "destination"],
+              "value": "BUCKET"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",

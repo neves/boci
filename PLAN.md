@@ -621,7 +621,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `artifacts container repository update`
 - [x] `artifacts generic artifact update-by-path`
 - [x] `audit config update`
-- [ ] `autoscaling policy update`
+- [x] `autoscaling policy update`
 - [x] `bastion bastion update`
 - [x] `capacity-management demand-signal occm-demand-signal-item update`
 - [x] `ccc infrastructure update`
@@ -779,8 +779,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `network nsg rules update`
 - [x] `network nsg update`
 - [x] `network private-ip update`
-- [ ] `network-firewall application update`
-- [ ] `network-firewall decryption-profile update`
+- [x] `network-firewall application update`
+- [x] `network-firewall decryption-profile update`
 - [x] `network-firewall mapped-secret update`
 - [x] `network-firewall nat-rule update`
 - [ ] `network-firewall service update`
@@ -1055,7 +1055,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `apm-synthetics monitor create-sql-monitor`
 - [x] `apm-synthetics worker create`
 - [x] `apm-traces scheduled-query create`
-- [ ] `autoscaling policy create`
+- [x] `autoscaling policy create`
 - [x] `bastion bastion create`
 - [x] `bastion session create`
 - [x] `bastion session create-managed-ssh`
@@ -1226,7 +1226,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `network drg-route-table create`
 - [x] `network virtual-circuit create`
 - [x] `network-firewall application create`
-- [ ] `network-firewall decryption-profile create`
+- [x] `network-firewall decryption-profile create`
 - [x] `network-firewall mapped-secret create`
 - [x] `network-firewall nat-rule create`
 - [ ] `network-firewall service create`
@@ -1407,10 +1407,10 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `disaster-recovery dr-plan-execution create-switchover`
 - [x] `disaster-recovery dr-plan-execution create-switchover-precheck`
 - [x] `dns zone migrate-from-dynect`
-- [ ] `kms management key backup`
-- [ ] `kms management key restore`
-- [ ] `kms management vault backup`
-- [ ] `kms management vault restore`
+- [x] `kms management key backup`
+- [x] `kms management key restore`
+- [x] `kms management vault backup`
+- [x] `kms management vault restore`
 - [x] `mysql db-system clone`
 - [x] `ocvs esxi-host inplace-upgrade`
 - [ ] `os object restore`

@@ -1780,6 +1780,307 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "policy_type"],
+                null
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "call",
+                  "lower",
+                  ["fn", "str", ["item", ["var", "kwargs"], "policy_type"]]
+                ],
+                "scheduled"
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "is",
+                  ["item", ["var", "kwargs"], "execution_schedule"],
+                  null
+                ],
+                [
+                  [
+                    "usage",
+                    "If Parameter --policy-type is scheduled, then Parameter --execution-schedule must be provided"
+                  ]
+                ],
+                [
+                  ["del", ["var", "kwargs"], "policy_type"],
+                  ["invoke", [], ["var", "kwargs"]]
+                ]
+              ]
+            ],
+            [
+              ["del", ["var", "kwargs"], "execution_schedule"],
+              ["invoke", [], ["var", "kwargs"], 1]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.create_auto_scaling_policy_create_scheduled_policy_details",
+        "params": [
+          {
+            "name": "auto_scaling_configuration_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "execution_schedule",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "capacity",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_action",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "autoscaling.auto_scaling",
+        "method": "create_auto_scaling_policy",
+        "http": "POST",
+        "path": "/autoScalingConfigurations/{autoScalingConfigurationId}/policies",
+        "positionalArgs": [
+          "auto_scaling_configuration_id",
+          "create_auto_scaling_policy_details"
+        ],
+        "pathParams": {
+          "autoScalingConfigurationId": "auto_scaling_configuration_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_auto_scaling_policy_details",
+        "responseType": "AutoScalingPolicy",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["auto_scaling_configuration_id"],
+          "param": "auto_scaling_configuration_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_auto_scaling_policy_details",
+          "key": ["executionSchedule"],
+          "transform": "parse_json_parameter",
+          "param": "execution_schedule"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_auto_scaling_policy_details",
+          "key": ["capacity"],
+          "transform": "parse_json_parameter",
+          "param": "capacity",
+          "when": "capacity is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_auto_scaling_policy_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_auto_scaling_policy_details",
+          "key": ["isEnabled"],
+          "param": "is_enabled",
+          "when": "is_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_auto_scaling_policy_details",
+          "key": ["resourceAction"],
+          "transform": "parse_json_parameter",
+          "param": "resource_action",
+          "when": "resource_action is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_auto_scaling_policy_details",
+          "key": ["policyType"],
+          "value": "scheduled"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.create_auto_scaling_policy",
+            "params": [
+              {
+                "name": "auto_scaling_configuration_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "policy_type",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "capacity",
+                "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "display_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_enabled",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "autoscaling.auto_scaling",
+            "method": "create_auto_scaling_policy",
+            "http": "POST",
+            "path": "/autoScalingConfigurations/{autoScalingConfigurationId}/policies",
+            "positionalArgs": [
+              "auto_scaling_configuration_id",
+              "create_auto_scaling_policy_details"
+            ],
+            "pathParams": {
+              "autoScalingConfigurationId": "auto_scaling_configuration_id"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              }
+            },
+            "body": "create_auto_scaling_policy_details",
+            "responseType": "AutoScalingPolicy",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["auto_scaling_configuration_id"],
+              "param": "auto_scaling_configuration_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_auto_scaling_policy_details",
+              "key": ["policyType"],
+              "param": "policy_type"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_auto_scaling_policy_details",
+              "key": ["capacity"],
+              "transform": "parse_json_parameter",
+              "param": "capacity",
+              "when": "capacity is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_auto_scaling_policy_details",
+              "key": ["displayName"],
+              "param": "display_name",
+              "when": "display_name is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_auto_scaling_policy_details",
+              "key": ["isEnabled"],
+              "param": "is_enabled",
+              "when": "is_enabled is not None"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2408,6 +2709,378 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "policy_type"],
+                null
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "call",
+                  "lower",
+                  ["fn", "str", ["item", ["var", "kwargs"], "policy_type"]]
+                ],
+                "scheduled"
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "is",
+                  ["item", ["var", "kwargs"], "execution_schedule"],
+                  null
+                ],
+                [
+                  [
+                    "usage",
+                    "If Parameter --policy-type is scheduled, then Parameter --execution-schedule must be provided"
+                  ]
+                ],
+                [
+                  ["del", ["var", "kwargs"], "policy_type"],
+                  ["invoke", [], ["var", "kwargs"]]
+                ]
+              ]
+            ],
+            [
+              ["del", ["var", "kwargs"], "execution_schedule"],
+              ["invoke", [], ["var", "kwargs"], 1]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.update_auto_scaling_policy_update_scheduled_policy_details",
+        "params": [
+          {
+            "name": "auto_scaling_configuration_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "auto_scaling_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "capacity",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "execution_schedule",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_action",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "autoscaling.auto_scaling",
+        "method": "update_auto_scaling_policy",
+        "http": "PUT",
+        "path": "/autoScalingConfigurations/{autoScalingConfigurationId}/policies/{autoScalingPolicyId}",
+        "positionalArgs": [
+          "auto_scaling_configuration_id",
+          "auto_scaling_policy_id",
+          "update_auto_scaling_policy_details"
+        ],
+        "pathParams": {
+          "autoScalingConfigurationId": "auto_scaling_configuration_id",
+          "autoScalingPolicyId": "auto_scaling_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_auto_scaling_policy_details",
+        "responseType": "AutoScalingPolicy",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["auto_scaling_configuration_id"],
+          "param": "auto_scaling_configuration_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["auto_scaling_policy_id"],
+          "param": "auto_scaling_policy_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_auto_scaling_policy_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_auto_scaling_policy_details",
+          "key": ["capacity"],
+          "transform": "parse_json_parameter",
+          "param": "capacity",
+          "when": "capacity is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_auto_scaling_policy_details",
+          "key": ["isEnabled"],
+          "param": "is_enabled",
+          "when": "is_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_auto_scaling_policy_details",
+          "key": ["executionSchedule"],
+          "transform": "parse_json_parameter",
+          "param": "execution_schedule",
+          "when": "execution_schedule is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_auto_scaling_policy_details",
+          "key": ["resourceAction"],
+          "transform": "parse_json_parameter",
+          "param": "resource_action",
+          "when": "resource_action is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_auto_scaling_policy_details",
+          "key": ["policyType"],
+          "value": "scheduled"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.autoscaling.src.oci_cli_auto_scaling.generated.autoscaling_cli.update_auto_scaling_policy",
+            "params": [
+              {
+                "name": "auto_scaling_configuration_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "auto_scaling_policy_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "policy_type",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "display_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "capacity",
+                "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_enabled",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "force",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": true,
+                "default": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "autoscaling.auto_scaling",
+            "method": "update_auto_scaling_policy",
+            "http": "PUT",
+            "path": "/autoScalingConfigurations/{autoScalingConfigurationId}/policies/{autoScalingPolicyId}",
+            "positionalArgs": [
+              "auto_scaling_configuration_id",
+              "auto_scaling_policy_id",
+              "update_auto_scaling_policy_details"
+            ],
+            "pathParams": {
+              "autoScalingConfigurationId": "auto_scaling_configuration_id",
+              "autoScalingPolicyId": "auto_scaling_policy_id"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              }
+            },
+            "body": "update_auto_scaling_policy_details",
+            "responseType": "AutoScalingPolicy",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["auto_scaling_configuration_id"],
+              "param": "auto_scaling_configuration_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["auto_scaling_policy_id"],
+              "param": "auto_scaling_policy_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_auto_scaling_policy_details",
+              "key": ["policyType"],
+              "param": "policy_type"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_auto_scaling_policy_details",
+              "key": ["displayName"],
+              "param": "display_name",
+              "when": "display_name is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_auto_scaling_policy_details",
+              "key": ["capacity"],
+              "transform": "parse_json_parameter",
+              "param": "capacity",
+              "when": "capacity is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_auto_scaling_policy_details",
+              "key": ["isEnabled"],
+              "param": "is_enabled",
+              "when": "is_enabled is not None"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -84,6 +84,11 @@ export type ServiceSpec = {
       /** The generated command a programmed wrapper invokes; operation and bindings are its. */
       generated?: { callback: string; params: TypedParam[] };
       operation?: OperationSpec;
+      /**
+       * The other generated commands a programmed wrapper invokes, one per variant
+       * (ticket 14); an invoke's target index `i` names `variants[i - 1]`.
+       */
+      variants?: WrapperTarget[];
     }
   >;
   clients: Record<
@@ -94,6 +99,13 @@ export type ServiceSpec = {
     }
   >;
   jsonExamplePool: Record<string, unknown>;
+};
+
+/** A generated command a programmed Tier B wrapper invokes. */
+export type WrapperTarget = {
+  generated: { callback: string; params: TypedParam[] };
+  operation: OperationSpec;
+  bindings: Record<string, unknown>[];
 };
 
 export type Index = {

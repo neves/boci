@@ -91,6 +91,19 @@ describe("runProgram", () => {
     expect(runProgram([], {}, params, parse).kwargs).toBeUndefined();
   });
 
+  test("reports which generated command a variant selector invoked", () => {
+    const program: Statement[] = [
+      [
+        "if",
+        ["cmp", "==", kw("a"), "x"],
+        [["invoke", [], ["var", "kwargs"], 2]],
+        [invoke],
+      ],
+    ];
+    expect(runProgram(program, { a: "x" }, params, parse).target).toBe(2);
+    expect(runProgram(program, { a: "y" }, params, parse).target).toBe(0);
+  });
+
   test("reads click.File options: text with universal newlines, once", () => {
     const enc = (t: string) => new TextEncoder().encode(t);
     const file = new ProgramFile("r", enc("a\r\nb\rc"));

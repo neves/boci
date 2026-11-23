@@ -646,12 +646,8 @@ async function main(io: Invocation): Promise<void> {
         }
         // The wrapper returned without invoking anything: no request, no output.
         if (generated === undefined) return;
-        command = {
-          operation: specCmd.operation,
-          bindings: (specCmd as GeneratedCommand).bindings,
-          params: specCmd.generated.params,
-        };
-        callValues = generated;
+        command = generated.command;
+        callValues = generated.kwargs;
         const failure = usageCheckFailure(command, callValues);
         if (failure) {
           io.err(`UsageError: ${failure.message}\n`);
@@ -779,23 +775,28 @@ function convertDefaultValue(
 }
 
 /**
- * Runs a programmed Tier B wrapper: the generated command's kwargs it invokes, undefined
- * when it returns without invoking, "unsupported" for a path the Engine doesn't model
- * (another exception, or keywords the generated callback doesn't take: a TypeError).
+ * Runs a programmed Tier B wrapper: the generated command it invokes (one per variant)
+ * and that command's kwargs, undefined when it returns without invoking, "unsupported"
+ * for a path the Engine doesn't model (another exception, or keywords the generated
+ * callback doesn't take: a TypeError).
  */
 function runWrapper(
   io: Invocation,
   command: ServiceSpec["commands"][string],
   values: Record<string, unknown>,
   usageText: () => string,
-): Record<string, unknown> | undefined | "unsupported" {
+):
+  | { command: GeneratedCommand; kwargs: Record<string, unknown> }
+  | undefined
+  | "unsupported" {
   const program = command.program as NonNullable<typeof command.program>;
   try {
-    const { kwargs, names } = runProgram(
-      program.body,
-      values,
-      command.params ?? [],
-      (name, value) => parseJsonParameter(io, name, value),
+    const {
+      kwargs,
+      names,
+      target = 0,
+    } = runProgram(program.body, values, command.params ?? [], (name, value) =>
+      parseJsonParameter(io, name, value),
     );
     if (!kwargs) return undefined;
     // A file (or its bytes) handed on as a request body or output file: not modeled yet.
@@ -805,9 +806,26 @@ function runWrapper(
       )
     )
       return "unsupported";
-    const accepted = new Set(command.generated?.params.map((p) => p.name));
+    const variant = command.variants?.[target - 1];
+    const invoked =
+      target === 0
+        ? {
+            operation: command.operation,
+            bindings: (command as GeneratedCommand).bindings,
+            params: command.generated?.params ?? [],
+          }
+        : variant && { ...variant, params: variant.generated.params };
+    if (!invoked) return "unsupported";
+    const accepted = new Set(invoked.params.map((p) => p.name));
     if (names?.some((name) => !accepted.has(name))) return "unsupported";
-    return kwargs;
+    return {
+      command: {
+        operation: invoked.operation,
+        bindings: invoked.bindings,
+        params: invoked.params,
+      },
+      kwargs,
+    };
   } catch (e) {
     if (e instanceof ProgramUnsupported) return "unsupported";
     if (!(e instanceof ProgramUsageError)) throw e;

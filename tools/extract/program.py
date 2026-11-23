@@ -15,7 +15,7 @@ Statements (lists):
     ["if", test, then, else]
     ["usage", message]            raise click.UsageError(message)
     ["raise", source]             any other raise (the Engine stops: ticket 18)
-    ["invoke", [[name, e]...], e] ctx.invoke(<the generated command>, name=e..., **e)
+    ["invoke", [[name, e]...], e, i?] ctx.invoke(<generated command i>, name=e..., **e)
     ["for", name, e, body]        for name in e: body (no break/continue/else)
 
 Expressions: JSON scalars are constants; lists are operations:
@@ -24,6 +24,9 @@ Expressions: JSON scalars are constants; lists are operations:
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
     ["map", e, name, elt]  [elt for name in e]
+
+A wrapper may invoke several generated commands, one per variant (ticket 14): `i`
+indexes the targets compile_wrapper returns, and is left out for the first.
 
 Options typed `click.File` reach the program as open files (ticket 12): `read()`,
 iterating their lines. Module-level constants (dicts, lists, strings) inline as values,
@@ -83,7 +86,7 @@ class Compiler:
     def __init__(self, module_globals, local_names=()):
         self.globals = module_globals
         self.locals = set(local_names)  # names the callback binds; never module constants
-        self.invoked = None  # the generated command object ctx.invoke targets
+        self.targets = []  # the generated command objects ctx.invoke targets, in order
 
     def stmts(self, body, scope):
         out = []
@@ -166,9 +169,12 @@ class Compiler:
         if len(call.args) != 1:
             raise Unsupported("invoke args")
         target = self.resolve(call.args[0])
-        if target is None or (self.invoked is not None and target is not self.invoked):
+        if target is None:
             raise Unsupported("invoke target")
-        self.invoked = target
+        index = next((i for i, t in enumerate(self.targets) if t is target), None)
+        if index is None:
+            index = len(self.targets)
+            self.targets.append(target)
         keywords = []
         star = None
         for kw in call.keywords:
@@ -178,7 +184,7 @@ class Compiler:
                 star = self.expr(kw.value, scope)
             else:
                 keywords.append([kw.arg, self.expr(kw.value, scope)])
-        return ["invoke", keywords, star]
+        return ["invoke", keywords, star] + ([index] if index else [])
 
     def constant(self, value):
         """A module-level constant as an expression; anything else (a module, a function)
@@ -270,7 +276,7 @@ class Compiler:
 
 
 def compile_wrapper(callback):
-    """(program, invoked generated command) for a Tier B wrapper, or (None, None)."""
+    """(program, the generated commands it invokes) for a Tier B wrapper, or (None, None)."""
     fn = _fn_ast(callback)
     if fn is None:
         return None, None
@@ -292,6 +298,6 @@ def compile_wrapper(callback):
         program = prelude + compiler.stmts(fn.body, {})
     except Unsupported:
         return None, None
-    if compiler.invoked is None:
+    if not compiler.targets:
         return None, None
-    return program, compiler.invoked
+    return program, compiler.targets

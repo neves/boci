@@ -206,9 +206,12 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                     entry["generated"] = compiled["generated"]
                     entry["operation"] = compiled["operation"]
                     entry["bindings"] = compiled["bindings"]
-                    client = compiled["operation"]["client"]
-                    spec_name, service_name = client.split(".", 1)
-                    CLIENTS[client] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
+                    if compiled["variants"]:
+                        entry["variants"] = compiled["variants"]
+                    for target in [compiled, *compiled["variants"]]:
+                        client = target["operation"]["client"]
+                        spec_name, service_name = client.split(".", 1)
+                        CLIENTS[client] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
             if delegate:
                 entry["delegate"] = {
                     "callback": delegate["callback"],
@@ -227,11 +230,28 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
 
 
 def wrapper_program(callback, client_map) -> dict | None:
-    """A Tier B wrapper compiled to a program over kwargs, with the generated command it
-    invokes: that command's operation, bindings and params, all in its own param names."""
-    program, invoked = wrapper_compiler.compile_wrapper(callback)
+    """A Tier B wrapper compiled to a program over kwargs, with the generated commands it
+    invokes: each one's operation, bindings and params, all in its own param names. The
+    first target's are top-level; any others (one per variant, ticket 14) are `variants`,
+    in the order the program's invokes index them."""
+    program, targets = wrapper_compiler.compile_wrapper(callback)
     if program is None:
         return None
+    compiled = [generated_target(t, client_map) for t in targets]
+    if any(c is None for c in compiled):
+        return None
+    wrapped = any(
+        ast.unparse(d) == "cli_util.wrap_exceptions"
+        for d in wrapper_compiler._fn_ast(callback).decorator_list
+    )
+    return {
+        "program": {"body": program, "wrapExceptions": wrapped},
+        **compiled[0],
+        "variants": compiled[1:],
+    }
+
+
+def generated_target(invoked, client_map) -> dict | None:
     _, operation, _ = sdk.command_operation(invoked.callback, client_map)
     if operation is None:
         return None
@@ -249,12 +269,7 @@ def wrapper_program(callback, client_map) -> dict | None:
             if p.expose_value
         ],
     }
-    wrapped = any(
-        ast.unparse(d) == "cli_util.wrap_exceptions"
-        for d in wrapper_compiler._fn_ast(callback).decorator_list
-    )
     return {
-        "program": {"body": program, "wrapExceptions": wrapped},
         "generated": generated,
         "operation": operation,
         "bindings": sdk.command_bindings(invoked.callback, operation["method"], names),

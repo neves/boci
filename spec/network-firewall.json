@@ -4605,6 +4605,365 @@
           "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_application_update_icmp6_application_details"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "let",
+            "application_details",
+            [
+              "fn",
+              "parse",
+              "application_details",
+              ["item", ["var", "kwargs"], "application_details"]
+            ]
+          ],
+          ["del", ["var", "kwargs"], "application_details"],
+          ["let", "application_type", ["item", ["var", "kwargs"], "type"]],
+          ["del", ["var", "kwargs"], "type"],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "application_details"], "icmpType"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "icmp_type",
+                ["item", ["var", "application_details"], "icmpType"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "application_details"], "icmpCode"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "icmp_code",
+                ["item", ["var", "application_details"], "icmpCode"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "application_details"], "type"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "!=",
+                  ["var", "application_type"],
+                  ["call", "get", ["var", "application_details"], "type"]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise ValueError(\"type from application-details doesn't match with type provided as parameter\")"
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "==", ["var", "application_type"], "ICMP"],
+            [["invoke", [], ["var", "kwargs"]]],
+            [["invoke", [], ["var", "kwargs"], 1]]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_application_update_icmp_application_details",
+        "params": [
+          {
+            "name": "network_firewall_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "application_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "icmp_type",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "icmp_code",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "network_firewall.network_firewall",
+        "method": "update_application",
+        "http": "PUT",
+        "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/applications/{applicationName}",
+        "positionalArgs": [
+          "network_firewall_policy_id",
+          "application_name",
+          "update_application_details"
+        ],
+        "pathParams": {
+          "networkFirewallPolicyId": "network_firewall_policy_id",
+          "applicationName": "application_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_application_details",
+        "responseType": "Application",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["network_firewall_policy_id"],
+          "param": "network_firewall_policy_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["application_name"],
+          "param": "application_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_application_details",
+          "key": ["icmpType"],
+          "param": "icmp_type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_application_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_application_details",
+          "key": ["icmpCode"],
+          "param": "icmp_code",
+          "when": "icmp_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_application_details",
+          "key": ["type"],
+          "value": "ICMP"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_application_update_icmp6_application_details",
+            "params": [
+              {
+                "name": "network_firewall_policy_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "application_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "icmp_type",
+                "typeClass": "click.types.IntParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "description",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "icmp_code",
+                "typeClass": "click.types.IntParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "network_firewall.network_firewall",
+            "method": "update_application",
+            "http": "PUT",
+            "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/applications/{applicationName}",
+            "positionalArgs": [
+              "network_firewall_policy_id",
+              "application_name",
+              "update_application_details"
+            ],
+            "pathParams": {
+              "networkFirewallPolicyId": "network_firewall_policy_id",
+              "applicationName": "application_name"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              }
+            },
+            "body": "update_application_details",
+            "responseType": "Application",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["network_firewall_policy_id"],
+              "param": "network_firewall_policy_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["application_name"],
+              "param": "application_name"
+            },
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_application_details",
+              "key": ["icmpType"],
+              "param": "icmp_type"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_application_details",
+              "key": ["description"],
+              "param": "description",
+              "when": "description is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_application_details",
+              "key": ["icmpCode"],
+              "param": "icmp_code",
+              "when": "icmp_code is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_application_details",
+              "key": ["type"],
+              "value": "ICMP_V6"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6817,6 +7176,679 @@
           "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.create_decryption_profile_create_ssl_inbound_inspection_profile_details"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "let",
+            "decryption_profile_details",
+            [
+              "fn",
+              "parse",
+              "decryption_profile_details",
+              ["item", ["var", "kwargs"], "decryption_profile_details"]
+            ]
+          ],
+          ["del", ["var", "kwargs"], "decryption_profile_details"],
+          ["let", "profile_type", ["item", ["var", "kwargs"], "type"]],
+          ["del", ["var", "kwargs"], "type"],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "decryption_profile_details"], "name"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "name",
+                ["item", ["var", "decryption_profile_details"], "name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "decryption_profile_details"], "type"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "!=",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "type"
+                  ],
+                  ["var", "profile_type"]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise ValueError(\"type from decryption-profile-details doesn't match with type provided as parameter\")"
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "==", ["var", "profile_type"], "SSL_FORWARD_PROXY"],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isExpiredCertificateBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_expired_certificate_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isExpiredCertificateBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isUntrustedIssuerBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_untrusted_issuer_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isUntrustedIssuerBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isRevocationStatusTimeoutBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_revocation_status_timeout_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isRevocationStatusTimeoutBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isUnknownRevocationStatusBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_unknown_revocation_status_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isUnknownRevocationStatusBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "areCertificateExtensionsRestricted"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "are_certificate_extensions_restricted",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "areCertificateExtensionsRestricted"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isAutoIncludeAltName"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_auto_include_alt_name",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isAutoIncludeAltName"
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              [
+                "call",
+                "get",
+                ["var", "decryption_profile_details"],
+                "isUnsupportedVersionBlocked"
+              ],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_unsupported_version_blocked",
+                [
+                  "item",
+                  ["var", "decryption_profile_details"],
+                  "isUnsupportedVersionBlocked"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              [
+                "call",
+                "get",
+                ["var", "decryption_profile_details"],
+                "isUnsupportedCipherBlocked"
+              ],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_unsupported_cipher_blocked",
+                [
+                  "item",
+                  ["var", "decryption_profile_details"],
+                  "isUnsupportedCipherBlocked"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              [
+                "call",
+                "get",
+                ["var", "decryption_profile_details"],
+                "isOutOfCapacityBlocked"
+              ],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_out_of_capacity_blocked",
+                [
+                  "item",
+                  ["var", "decryption_profile_details"],
+                  "isOutOfCapacityBlocked"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "==", ["var", "profile_type"], "SSL_FORWARD_PROXY"],
+            [["invoke", [], ["var", "kwargs"]]],
+            [["invoke", [], ["var", "kwargs"], 1]]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.create_decryption_profile_create_ssl_forward_proxy_profile_details",
+        "params": [
+          {
+            "name": "network_firewall_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_expired_certificate_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_untrusted_issuer_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_revocation_status_timeout_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_unsupported_version_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_unsupported_cipher_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_unknown_revocation_status_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "are_certificate_extensions_restricted",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_include_alt_name",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_out_of_capacity_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "network_firewall.network_firewall",
+        "method": "create_decryption_profile",
+        "http": "POST",
+        "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/decryptionProfiles",
+        "positionalArgs": [
+          "network_firewall_policy_id",
+          "create_decryption_profile_details"
+        ],
+        "pathParams": {
+          "networkFirewallPolicyId": "network_firewall_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_decryption_profile_details",
+        "responseType": "DecryptionProfile",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["network_firewall_policy_id"],
+          "param": "network_firewall_policy_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["name"],
+          "param": "name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isExpiredCertificateBlocked"],
+          "param": "is_expired_certificate_blocked",
+          "when": "is_expired_certificate_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isUntrustedIssuerBlocked"],
+          "param": "is_untrusted_issuer_blocked",
+          "when": "is_untrusted_issuer_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isRevocationStatusTimeoutBlocked"],
+          "param": "is_revocation_status_timeout_blocked",
+          "when": "is_revocation_status_timeout_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isUnsupportedVersionBlocked"],
+          "param": "is_unsupported_version_blocked",
+          "when": "is_unsupported_version_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isUnsupportedCipherBlocked"],
+          "param": "is_unsupported_cipher_blocked",
+          "when": "is_unsupported_cipher_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isUnknownRevocationStatusBlocked"],
+          "param": "is_unknown_revocation_status_blocked",
+          "when": "is_unknown_revocation_status_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["areCertificateExtensionsRestricted"],
+          "param": "are_certificate_extensions_restricted",
+          "when": "are_certificate_extensions_restricted is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isAutoIncludeAltName"],
+          "param": "is_auto_include_alt_name",
+          "when": "is_auto_include_alt_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["isOutOfCapacityBlocked"],
+          "param": "is_out_of_capacity_blocked",
+          "when": "is_out_of_capacity_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_decryption_profile_details",
+          "key": ["type"],
+          "value": "SSL_FORWARD_PROXY"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.create_decryption_profile_create_ssl_inbound_inspection_profile_details",
+            "params": [
+              {
+                "name": "network_firewall_policy_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "description",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_unsupported_version_blocked",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_unsupported_cipher_blocked",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_out_of_capacity_blocked",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "network_firewall.network_firewall",
+            "method": "create_decryption_profile",
+            "http": "POST",
+            "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/decryptionProfiles",
+            "positionalArgs": [
+              "network_firewall_policy_id",
+              "create_decryption_profile_details"
+            ],
+            "pathParams": {
+              "networkFirewallPolicyId": "network_firewall_policy_id"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              }
+            },
+            "body": "create_decryption_profile_details",
+            "responseType": "DecryptionProfile",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["network_firewall_policy_id"],
+              "param": "network_firewall_policy_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_decryption_profile_details",
+              "key": ["name"],
+              "param": "name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_decryption_profile_details",
+              "key": ["description"],
+              "param": "description",
+              "when": "description is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_decryption_profile_details",
+              "key": ["isUnsupportedVersionBlocked"],
+              "param": "is_unsupported_version_blocked",
+              "when": "is_unsupported_version_blocked is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_decryption_profile_details",
+              "key": ["isUnsupportedCipherBlocked"],
+              "param": "is_unsupported_cipher_blocked",
+              "when": "is_unsupported_cipher_blocked is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_decryption_profile_details",
+              "key": ["isOutOfCapacityBlocked"],
+              "param": "is_out_of_capacity_blocked",
+              "when": "is_out_of_capacity_blocked is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_decryption_profile_details",
+              "key": ["type"],
+              "value": "SSL_INBOUND_INSPECTION"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7733,6 +8765,684 @@
           "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_decryption_profile_update_ssl_inbound_inspection_profile_details"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "let",
+            "decryption_profile_details",
+            [
+              "fn",
+              "parse",
+              "decryption_profile_details",
+              ["item", ["var", "kwargs"], "decryption_profile_details"]
+            ]
+          ],
+          ["del", ["var", "kwargs"], "decryption_profile_details"],
+          ["let", "profile_type", ["item", ["var", "kwargs"], "type"]],
+          ["del", ["var", "kwargs"], "type"],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "decryption_profile_details"], "type"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "!=",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "type"
+                  ],
+                  ["var", "profile_type"]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise ValueError(\"type from decryption-profile-details doesn't match with type provided as parameter\")"
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "==", ["var", "profile_type"], "SSL_FORWARD_PROXY"],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isExpiredCertificateBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_expired_certificate_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isExpiredCertificateBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isUntrustedIssuerBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_untrusted_issuer_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isUntrustedIssuerBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isRevocationStatusTimeoutBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_revocation_status_timeout_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isRevocationStatusTimeoutBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isUnknownRevocationStatusBlocked"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_unknown_revocation_status_blocked",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isUnknownRevocationStatusBlocked"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "areCertificateExtensionsRestricted"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "are_certificate_extensions_restricted",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "areCertificateExtensionsRestricted"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  [
+                    "call",
+                    "get",
+                    ["var", "decryption_profile_details"],
+                    "isAutoIncludeAltName"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "is_auto_include_alt_name",
+                    [
+                      "item",
+                      ["var", "decryption_profile_details"],
+                      "isAutoIncludeAltName"
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              [
+                "call",
+                "get",
+                ["var", "decryption_profile_details"],
+                "isUnsupportedVersionBlocked"
+              ],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_unsupported_version_blocked",
+                [
+                  "item",
+                  ["var", "decryption_profile_details"],
+                  "isUnsupportedVersionBlocked"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              [
+                "call",
+                "get",
+                ["var", "decryption_profile_details"],
+                "isUnsupportedCipherBlocked"
+              ],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_unsupported_cipher_blocked",
+                [
+                  "item",
+                  ["var", "decryption_profile_details"],
+                  "isUnsupportedCipherBlocked"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              [
+                "call",
+                "get",
+                ["var", "decryption_profile_details"],
+                "isOutOfCapacityBlocked"
+              ],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_out_of_capacity_blocked",
+                [
+                  "item",
+                  ["var", "decryption_profile_details"],
+                  "isOutOfCapacityBlocked"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "==", ["var", "profile_type"], "SSL_FORWARD_PROXY"],
+            [["invoke", [], ["var", "kwargs"]]],
+            [["invoke", [], ["var", "kwargs"], 1]]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_decryption_profile_update_ssl_forward_proxy_profile_details",
+        "params": [
+          {
+            "name": "network_firewall_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "decryption_profile_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_expired_certificate_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_untrusted_issuer_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_revocation_status_timeout_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_unsupported_version_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_unsupported_cipher_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_unknown_revocation_status_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "are_certificate_extensions_restricted",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_include_alt_name",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_out_of_capacity_blocked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "network_firewall.network_firewall",
+        "method": "update_decryption_profile",
+        "http": "PUT",
+        "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/decryptionProfiles/{decryptionProfileName}",
+        "positionalArgs": [
+          "network_firewall_policy_id",
+          "decryption_profile_name",
+          "update_decryption_profile_details"
+        ],
+        "pathParams": {
+          "networkFirewallPolicyId": "network_firewall_policy_id",
+          "decryptionProfileName": "decryption_profile_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_decryption_profile_details",
+        "responseType": "DecryptionProfile",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["network_firewall_policy_id"],
+          "param": "network_firewall_policy_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["decryption_profile_name"],
+          "param": "decryption_profile_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isExpiredCertificateBlocked"],
+          "param": "is_expired_certificate_blocked",
+          "when": "is_expired_certificate_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isUntrustedIssuerBlocked"],
+          "param": "is_untrusted_issuer_blocked",
+          "when": "is_untrusted_issuer_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isRevocationStatusTimeoutBlocked"],
+          "param": "is_revocation_status_timeout_blocked",
+          "when": "is_revocation_status_timeout_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isUnsupportedVersionBlocked"],
+          "param": "is_unsupported_version_blocked",
+          "when": "is_unsupported_version_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isUnsupportedCipherBlocked"],
+          "param": "is_unsupported_cipher_blocked",
+          "when": "is_unsupported_cipher_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isUnknownRevocationStatusBlocked"],
+          "param": "is_unknown_revocation_status_blocked",
+          "when": "is_unknown_revocation_status_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["areCertificateExtensionsRestricted"],
+          "param": "are_certificate_extensions_restricted",
+          "when": "are_certificate_extensions_restricted is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isAutoIncludeAltName"],
+          "param": "is_auto_include_alt_name",
+          "when": "is_auto_include_alt_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["isOutOfCapacityBlocked"],
+          "param": "is_out_of_capacity_blocked",
+          "when": "is_out_of_capacity_blocked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_decryption_profile_details",
+          "key": ["type"],
+          "value": "SSL_FORWARD_PROXY"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_decryption_profile_update_ssl_inbound_inspection_profile_details",
+            "params": [
+              {
+                "name": "network_firewall_policy_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "decryption_profile_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "description",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_unsupported_version_blocked",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_unsupported_cipher_blocked",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "is_out_of_capacity_blocked",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "network_firewall.network_firewall",
+            "method": "update_decryption_profile",
+            "http": "PUT",
+            "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/decryptionProfiles/{decryptionProfileName}",
+            "positionalArgs": [
+              "network_firewall_policy_id",
+              "decryption_profile_name",
+              "update_decryption_profile_details"
+            ],
+            "pathParams": {
+              "networkFirewallPolicyId": "network_firewall_policy_id",
+              "decryptionProfileName": "decryption_profile_name"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              }
+            },
+            "body": "update_decryption_profile_details",
+            "responseType": "DecryptionProfile",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["network_firewall_policy_id"],
+              "param": "network_firewall_policy_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["decryption_profile_name"],
+              "param": "decryption_profile_name"
+            },
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_decryption_profile_details",
+              "key": ["description"],
+              "param": "description",
+              "when": "description is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_decryption_profile_details",
+              "key": ["isUnsupportedVersionBlocked"],
+              "param": "is_unsupported_version_blocked",
+              "when": "is_unsupported_version_blocked is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_decryption_profile_details",
+              "key": ["isUnsupportedCipherBlocked"],
+              "param": "is_unsupported_cipher_blocked",
+              "when": "is_unsupported_cipher_blocked is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_decryption_profile_details",
+              "key": ["isOutOfCapacityBlocked"],
+              "param": "is_out_of_capacity_blocked",
+              "when": "is_out_of_capacity_blocked is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_decryption_profile_details",
+              "key": ["type"],
+              "value": "SSL_INBOUND_INSPECTION"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",

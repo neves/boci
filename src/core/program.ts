@@ -120,6 +120,8 @@ export type ProgramResult = {
   kwargs?: Dict;
   /** Every keyword the wrapper passed, None-valued ones included. */
   names?: string[];
+  /** Which generated command it invoked: 0 is the first, i is `variants[i - 1]`. */
+  target?: number;
 };
 
 /**
@@ -143,6 +145,7 @@ export function runProgram(
   }
   const env: Dict = { kwargs };
   let invoked: Dict | undefined;
+  let target = 0;
 
   const item = (obj: unknown, key: unknown): unknown => {
     if (isDict(obj) && typeof key === "string") {
@@ -416,6 +419,7 @@ export function runProgram(
           const star = rest[1] === null ? {} : evaluate(rest[1] as Expr);
           if (!isDict(star)) throw new ProgramUnsupported("** of a non-dict");
           invoked = { ...star };
+          target = (rest[2] as number | undefined) ?? 0;
           for (const [name, e] of rest[0] as [string, Expr][])
             invoked[name] = evaluate(e);
           break;
@@ -437,5 +441,5 @@ export function runProgram(
     if (filled.has(name) && filled.get(name) === value) continue;
     result[name] = value;
   }
-  return { kwargs: result, names: Object.keys(invoked) };
+  return { kwargs: result, names: Object.keys(invoked), target };
 }

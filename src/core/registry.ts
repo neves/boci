@@ -310,23 +310,36 @@ export function engineSupports(command: Command): boolean {
     !programmed(command)
   )
     return false;
-  const http = command.operation?.http ?? "";
-  if (http === "GET" || http === "HEAD") return true;
-  if (http === "DELETE") return command.operation?.body === undefined;
-  if (!WRITE_METHODS.includes(http)) return false;
-  const bodyBindings = (command.bindings ?? []).filter(
-    (binding) => binding.target === "body",
+  // A programmed wrapper that picks among several generated commands (ticket 14) runs
+  // only when the Engine can send every one of them.
+  return (
+    requestSupported(command.operation, command.bindings, command.params) &&
+    (command.variants ?? []).every((v) =>
+      requestSupported(v.operation, v.bindings, v.generated.params),
+    )
   );
+}
+
+function requestSupported(
+  operation: Command["operation"],
+  bindings: Record<string, unknown>[] = [],
+  params: { name: string }[] = [],
+): boolean {
+  const http = operation?.http ?? "";
+  if (http === "GET" || http === "HEAD") return true;
+  if (http === "DELETE") return operation?.body === undefined;
+  if (!WRITE_METHODS.includes(http)) return false;
+  const bodyBindings = bindings.filter((binding) => binding.target === "body");
   if (bodyBindings.length === 0) {
     // Operations with no body options are either bodyless actions or pass a
     // direct body parameter through operation.body.
     return true;
   }
-  return (command.bindings ?? []).some((b) => {
+  return bindings.some((b) => {
     if (b.target !== "body") return false;
     if (typeof b.value === "string" || typeof b.value === "boolean")
       return true;
-    return command.params?.some((p) => p.name === b.param) ?? false;
+    return params.some((p) => p.name === b.param);
   });
 }
 

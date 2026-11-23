@@ -55,7 +55,7 @@ import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import {
-  blankCheckFailure,
+  usageCheckFailure,
   callOperation,
   confirmUnderWrapExceptions,
 } from "./operation.ts";
@@ -560,13 +560,13 @@ async function main(io: Invocation): Promise<void> {
       (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
         isImplemented(`${name} ${key}`, specCmd));
     if (!customHandler && engineRoute) {
-      // A Tier A wrapper's own blank checks run before it delegates; the generated
-      // callback then checks its path params first thing (both before JSON parsing).
-      const blank = blankCheckFailure(specCmd, values);
-      if (blank?.wrapped === false)
-        showPatched(io, usage(io, commandPath, cmd.helpDoc), blank.message);
-      if (blank) {
-        io.err(`UsageError: ${blank.message}\n`);
+      // A Tier A wrapper's own checks run before it delegates; the generated callback
+      // then checks its path params first thing (both before JSON parsing).
+      const failure = usageCheckFailure(specCmd, values);
+      if (failure?.wrapped === false)
+        showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
+      if (failure) {
+        io.err(`UsageError: ${failure.message}\n`);
         throw new Exit(1);
       }
     }

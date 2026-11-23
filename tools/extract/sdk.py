@@ -12,6 +12,8 @@ import inspect
 import re
 import textwrap
 
+import checks as checks_mod
+
 
 def _fn_ast(fn) -> ast.FunctionDef:
     src = textwrap.dedent(inspect.getsource(inspect.unwrap(fn)))
@@ -340,12 +342,21 @@ def custom_delegate(callback, client_map, custom_params):
         if isinstance(st, ast.Assign) and isinstance(st.value, computed):
             return "B", None
     blank_checks = []
+    usage_checks = []
+    local = checks_mod.aliases(fn, custom_params)
     for st in fn.body[:-1]:
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant) and isinstance(st.value.value, str):
             continue
         check = _blank_check(st)
         if check is not None:
             blank_checks.append(check)
+            continue
+        if isinstance(st, ast.If) and checks_mod.raise_tree([st], [], custom_params, local, usage_checks):
+            continue
+        if (
+            isinstance(st, ast.Assign) and len(st.targets) == 1
+            and isinstance(st.targets[0], ast.Name) and st.targets[0].id in local
+        ):
             continue
         if isinstance(st, ast.If):
             # The callback body is deliberately kept conservative: only recognized
@@ -434,6 +445,9 @@ def custom_delegate(callback, client_map, custom_params):
     }
     if blank_checks:
         delegate["blankChecks"] = blank_checks
+    if usage_checks:
+        delegate["checks"] = usage_checks
+    if blank_checks or usage_checks:
         delegate["wrapExceptions"] = any(
             ast.unparse(d) == "cli_util.wrap_exceptions" for d in fn.decorator_list
         )
@@ -453,7 +467,7 @@ def _rename_stmt(st) -> bool:
     for node in ast.walk(st):
         if (
             isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-            and node.func.attr in ("read", "parse_json_parameter")
+            and node.func.attr in ("read", "parse_json_parameter", "build_client")
         ):
             return False
     return True

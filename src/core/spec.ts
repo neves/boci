@@ -5,6 +5,7 @@ import { join } from "node:path";
 import type { DatetimeSpec, TypedParam } from "./convert.ts";
 import type { ParseSettings } from "./parser.ts";
 import type { RegionsSpec, ClientInfo } from "./endpoint.ts";
+import type { Predicate, UsageCheck } from "./checks.ts";
 
 export type OperationSpec = {
   client: string;
@@ -66,7 +67,15 @@ export type ServiceSpec = {
         renames: Record<string, string>;
         /** The wrapper's own `Parameter --x cannot be whitespace or empty string` checks. */
         blankChecks?: { param: string; message: string }[];
+        /** The wrapper's other UsageError checks, compiled to predicates. */
+        checks?: UsageCheck[];
         /** The wrapper is decorated with cli_util.wrap_exceptions. */
+        wrapExceptions?: boolean;
+      };
+      /** Tier B survey (tools/extract/patterns.py); only what the Engine reads. */
+      survey?: {
+        /** `test` is present when the check compiles and precedes any I/O. */
+        checks?: { message: string; test?: Predicate }[];
         wrapExceptions?: boolean;
       };
       operation?: OperationSpec;

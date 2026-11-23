@@ -72,7 +72,11 @@ if (cmd.patterns) console.log(`patterns: ${cmd.patterns.join(" ")}`);
 const sv = cmd.survey;
 for (const i of sv?.invokes ?? []) console.log(`invokes: ${i}`);
 for (const c of sv?.checks ?? [])
-  console.log(`check: ${c.message}\n  when ${c.when}`);
+  console.log(
+    `check${c.test ? "" : " (not compiled)"}: ${c.message}\n  when ${c.when}`,
+  );
+for (const c of cmd.delegate?.checks ?? [])
+  console.log(`check: ${c.message}\n  test ${JSON.stringify(c.test)}`);
 for (const f of sv?.folds ?? [])
   console.log(
     `fold: ${f.options.join(",") || JSON.stringify(f.value)} → ${[f.target, ...f.path].join(".")}${f.json ? " (json)" : ""}`,

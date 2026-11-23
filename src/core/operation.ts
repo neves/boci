@@ -21,6 +21,7 @@ import { resolveInstancePrincipal } from "./instance-principal.ts";
 import { resolveResourcePrincipal } from "./resource-principal.ts";
 import { Exit, type Invocation } from "../lib/io.ts";
 import { pyStrip } from "../lib/configparser.ts";
+import { failingCheck } from "./checks.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
   SecurityTokenDecodeError,
@@ -137,12 +138,12 @@ const isBlank = (value: unknown) =>
   typeof value === "string" && pyStrip(value) === "";
 
 /**
- * The first `Parameter --x cannot be whitespace or empty string` UsageError the command
- * raises: a Tier A wrapper's own checks (`wrapped` says whether the wrapper has
- * wrap_exceptions), then the generated callback's check of each path param, named by the
- * generated option (always under wrap_exceptions).
+ * The first UsageError the command raises before any request: a Tier A wrapper's own
+ * blank checks, then its other argument checks (`wrapped` says whether the wrapper has
+ * wrap_exceptions), then the generated callback's blank check of each path param, named
+ * by the generated option (always under wrap_exceptions).
  */
-export function blankCheckFailure(
+export function usageCheckFailure(
   command: ServiceSpec["commands"][string],
   values: Record<string, unknown>,
 ): { message: string; wrapped: boolean } | undefined {
@@ -154,6 +155,9 @@ export function blankCheckFailure(
         wrapped: delegate?.wrapExceptions === true,
       };
   }
+  const failed = failingCheck(delegate?.checks, values, command.params ?? []);
+  if (failed !== undefined)
+    return { message: failed, wrapped: delegate?.wrapExceptions === true };
   const renames = delegate?.renames ?? {};
   for (const arg of Object.values(command.operation?.pathParams ?? {})) {
     if (!isBlank(values[arg])) continue;

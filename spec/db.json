@@ -73838,25 +73838,175 @@
       "help": "Gets a list of backups based on the `databaseId` or `compartmentId` specified. Either one of these query parameters must be provided. \n[Command Reference](listBackups)",
       "callback": "services.database.src.oci_cli_database.database_cli_extended.list_backups_extended",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["usage-error"],
-      "survey": {
-        "invokes": [
-          "services.database.src.oci_cli_database.generated.database_cli.list_backups"
-        ],
+      "tier": "A",
+      "delegate": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.list_backups",
+        "renames": {
+          "time_expiry_scheduled_greater_than_or_equal_to": "time_expiry_start",
+          "time_expiry_scheduled_less_than": "time_expiry_end",
+          "version_parameterconflict": "db_version"
+        },
         "checks": [
           {
-            "when": "not compartment_id and (not database_id)",
-            "options": ["compartment_id", "database_id"],
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "truthy": "compartment_id"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "database_id"
+                  }
+                }
+              ]
+            },
             "message": "--compartment-id or --database-id must be provided"
           },
           {
-            "when": "compartment_id and database_id",
-            "options": ["compartment_id", "database_id"],
+            "test": {
+              "and": [
+                {
+                  "truthy": "compartment_id"
+                },
+                {
+                  "truthy": "database_id"
+                }
+              ]
+            },
             "message": "You can only specify one of either --compartment-id or --database-id option"
           }
-        ]
+        ],
+        "wrapExceptions": true
       },
+      "operation": {
+        "client": "database.database",
+        "method": "list_backups",
+        "http": "GET",
+        "path": "/backups",
+        "positionalArgs": [],
+        "pathParams": {},
+        "queryParams": {
+          "databaseId": {
+            "arg": "database_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "shapeFamily": {
+            "arg": "shape_family"
+          },
+          "version": {
+            "arg": "version"
+          },
+          "type": {
+            "arg": "type"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "timeExpiryScheduledGreaterThanOrEqualTo": {
+            "arg": "time_expiry_start"
+          },
+          "timeExpiryScheduledLessThan": {
+            "arg": "time_expiry_end"
+          },
+          "backupDestinationType": {
+            "arg": "backup_destination_type"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[BackupSummary]",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["database_id"],
+          "param": "database_id",
+          "when": "database_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id",
+          "when": "compartment_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["shape_family"],
+          "param": "shape_family",
+          "when": "shape_family is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["version"],
+          "param": "db_version",
+          "when": "db_version is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["type"],
+          "param": "type",
+          "when": "type is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["time_expiry_scheduled_greater_than_or_equal_to"],
+          "param": "time_expiry_start",
+          "when": "time_expiry_start is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["time_expiry_scheduled_less_than"],
+          "param": "time_expiry_end",
+          "when": "time_expiry_end is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["backup_destination_type"],
+          "param": "backup_destination_type",
+          "when": "backup_destination_type is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",

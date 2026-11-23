@@ -809,30 +809,228 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["usage-error"],
-      "survey": {
-        "invokes": [
-          "services.vault.src.oci_cli_vaults.generated.vaults_cli.create_secret_base64_secret_content_details"
-        ],
+      "tier": "A",
+      "delegate": {
+        "callback": "services.vault.src.oci_cli_vaults.generated.vaults_cli.create_secret_base64_secret_content_details",
+        "renames": {},
         "checks": [
           {
-            "when": "(not kwargs.get('enable_auto_generation')) and (not kwargs.get('secret_content_content'))",
-            "options": ["enable_auto_generation", "secret_content_content"],
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "truthy": "enable_auto_generation"
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "secret_content_content"
+                  }
+                }
+              ]
+            },
             "message": "Must specify either --secret-content-content or set --enable-auto-generation to true."
           },
           {
-            "when": "(not (not kwargs.get('enable_auto_generation'))) and (kwargs.get('secret_content_content'))",
-            "options": ["enable_auto_generation", "secret_content_content"],
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "not": {
+                      "truthy": "enable_auto_generation"
+                    }
+                  }
+                },
+                {
+                  "truthy": "secret_content_content"
+                }
+              ]
+            },
             "message": "Cannot specify both --secret-content-content and set --enable-auto-generation to true at the same time"
           },
           {
-            "when": "(not (not kwargs.get('enable_auto_generation'))) and (not kwargs.get('secret_generation_context'))",
-            "options": ["enable_auto_generation", "secret_generation_context"],
+            "test": {
+              "and": [
+                {
+                  "not": {
+                    "not": {
+                      "truthy": "enable_auto_generation"
+                    }
+                  }
+                },
+                {
+                  "not": {
+                    "truthy": "secret_generation_context"
+                  }
+                }
+              ]
+            },
             "message": "Must specify --secret-generation-context with --enable-auto-generation set to true."
           }
-        ]
+        ],
+        "wrapExceptions": true
       },
+      "operation": {
+        "client": "vault.vaults",
+        "method": "create_secret",
+        "http": "POST",
+        "path": "/secrets",
+        "positionalArgs": ["create_secret_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_secret_details",
+        "responseType": "Secret",
+        "paginated": false,
+        "lifecycleGetter": "get_secret"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretContent"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["keyId"],
+          "param": "key_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretName"],
+          "param": "secret_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["vaultId"],
+          "param": "vault_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["metadata"],
+          "transform": "parse_json_parameter",
+          "param": "metadata",
+          "when": "metadata is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["replicationConfig"],
+          "transform": "parse_json_parameter",
+          "param": "replication_config",
+          "when": "replication_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["rotationConfig"],
+          "transform": "parse_json_parameter",
+          "param": "rotation_config",
+          "when": "rotation_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretRules"],
+          "transform": "parse_json_parameter",
+          "param": "secret_rules",
+          "when": "secret_rules is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretGenerationContext"],
+          "transform": "parse_json_parameter",
+          "param": "secret_generation_context",
+          "when": "secret_generation_context is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["enableAutoGeneration"],
+          "param": "enable_auto_generation",
+          "when": "enable_auto_generation is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretContent", "name"],
+          "param": "secret_content_name",
+          "when": "secret_content_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretContent", "stage"],
+          "param": "secret_content_stage",
+          "when": "secret_content_stage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretContent", "content"],
+          "param": "secret_content_content",
+          "when": "secret_content_content is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_secret_details",
+          "key": ["secretContent", "contentType"],
+          "value": "BASE64"
+        }
+      ],
       "params": [
         {
           "kind": "option",

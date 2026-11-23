@@ -103,6 +103,35 @@ $ mise use -g github:neves/boci
 $ mise use -g npm:boci-cli
 ```
 
+With **Homebrew** (macOS & Linux):
+
+```console
+$ brew install neves/tap/boci
+```
+
+With **Scoop** (Windows):
+
+```console
+$ scoop bucket add neves https://github.com/neves/scoop-bucket
+$ scoop install boci
+```
+
+With **Nix**:
+
+```console
+$ nix run github:neves/boci
+```
+
+With **curl / PowerShell**:
+
+```console
+$ curl -fsSL https://raw.githubusercontent.com/neves/boci/main/site/install.sh | sh
+```
+
+```powershell
+irm https://raw.githubusercontent.com/neves/boci/main/site/install.ps1 | iex
+```
+
 Or build from source with [Bun](https://bun.sh) 1.4.5 or newer:
 
 ```console

@@ -136,6 +136,59 @@ function pyFormat(template: string, args: unknown[]): string {
   });
 }
 
+/**
+ * data_flow's converters (dataflow_cli_extended.py) from the plain-text forms of
+ * `--arguments` / `--parameters` / `--configuration` to JSON: tokens split by spaces
+ * (and `=`), quoted substrings kept whole, as `re.split` with one capturing group does.
+ * Bad input raises `Exception(message)`.
+ */
+const DATAFLOW_PARAMETERS_ERROR =
+  'Incorrect \'parameters\' value, cannot proceed. Parameters should be either in a plain text format of \'param_name_1=value_1 param_name_2=value_2 ...\' or a json format of \'[ { "name": "param_name_1", "value": "value_1"}, { "name": "param_name_2", "value": "value_2"}, ...]\'';
+const DATAFLOW_CONFIGURATION_ERROR =
+  'Incorrect \'configuration\' value, cannot proceed. Configuration should be either in a plain text format of \'param_name_1=value_1 param_name_2=value_2 ...\' or a json format of \'{ "param_name_1": "value_1", "param_name_2": "value_2", }, ...\'';
+
+/** Python `str.strip()`: ASCII and Unicode whitespace (not U+FEFF, which JS trims). */
+const pyStrip = (s: string): string =>
+  s.replace(/^[^\S\uFEFF]+|[^\S\uFEFF]+$/g, "");
+
+function dataflowTokens(s: string, equals: boolean): string[] {
+  // A capturing group: the separators (quoted substrings among them) stay in.
+  const split = s.split(equals ? /( |=|".*?"|'.*?')/ : /( |".*?"|'.*?')/);
+  return split.filter((t) => pyStrip(t) !== "");
+}
+
+const unquote = (t: string): string =>
+  stripChars(stripChars(t, "'", true), '"', true);
+
+function dataflowPairs(
+  s: string,
+  message: string,
+  strip: boolean,
+): [string, string][] {
+  const args = dataflowTokens(s, true).map((t) =>
+    unquote(strip ? pyStrip(t) : t),
+  );
+  if (args.length % 3 !== 0) throw new ProgramRaise("Exception", message);
+  const pairs: [string, string][] = [];
+  for (let i = 0; i < args.length; i += 3) {
+    if (args[i + 1] !== "=") throw new ProgramRaise("Exception", message);
+    pairs.push([args[i] as string, args[i + 2] as string]);
+  }
+  return pairs;
+}
+
+const HAND_CODED: Record<string, (s: string) => unknown> = {
+  dataflowArguments: (s) => dataflowTokens(s, false).map(unquote),
+  dataflowParameters: (s) =>
+    // Only the parameters converter strips whitespace before the quotes.
+    dataflowPairs(s, DATAFLOW_PARAMETERS_ERROR, true).map(([name, value]) => ({
+      name,
+      value,
+    })),
+  dataflowConfiguration: (s) =>
+    Object.fromEntries(dataflowPairs(s, DATAFLOW_CONFIGURATION_ERROR, false)),
+};
+
 function sortKeys(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(sortKeys);
   if (!isDict(v)) return v;
@@ -341,6 +394,11 @@ export function runProgram(
         }
         return out;
       }
+      case "dataflowArguments":
+      case "dataflowParameters":
+      case "dataflowConfiguration":
+        // json.dumps(..., sort_keys=True): the generated command parses it back.
+        return JSON.stringify(sortKeys(HAND_CODED[name]?.(pyStr(a))));
       case "len":
         if (typeof a === "string" || Array.isArray(a)) return a.length;
         if (isDict(a)) return Object.keys(a).length;
@@ -410,6 +468,15 @@ export function runProgram(
           evaluate(rest[1] as Expr),
           evaluate(rest[2] as Expr),
         );
+      case "bin": {
+        const a = evaluate(rest[1] as Expr);
+        const b = evaluate(rest[2] as Expr);
+        if (typeof a === "number" && typeof b === "number")
+          return rest[0] === "+" ? a + b : a - b;
+        if (rest[0] === "+" && typeof a === "string" && typeof b === "string")
+          return a + b;
+        throw new ProgramUnsupported(`TypeError: ${String(rest[0])}`);
+      }
       case "ifexp":
         return truthy(evaluate(rest[0] as Expr))
           ? evaluate(rest[1] as Expr)

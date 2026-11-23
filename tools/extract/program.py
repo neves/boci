@@ -25,6 +25,7 @@ Expressions: JSON scalars are constants; lists are operations:
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
     ["map", e, name, elt]  [elt for name in e]
+    ["bin", op, a, b]  (+ -)
 
 A wrapper may invoke several generated commands, one per variant (ticket 14): `i`
 indexes the targets compile_wrapper returns, and is left out for the first.
@@ -54,6 +55,14 @@ FUNCTIONS = {
     "base64.b64encode": "b64encode",
     "json_skeleton_utils.remove_json_skeleton_params_from_dict": "removeSkeleton",
 }
+# Module helpers outside the subset (re.split, enumerate, return), hand-coded in the
+# Engine as named functions (src/core/program.ts, ticket 20).
+HAND_CODED = {
+    "services.data_flow.src.oci_cli_data_flow.dataflow_cli_extended.convertArgumentStringToJson": "dataflowArguments",
+    "services.data_flow.src.oci_cli_data_flow.dataflow_cli_extended.convertParameterStringToJson": "dataflowParameters",
+    "services.data_flow.src.oci_cli_data_flow.dataflow_cli_extended.convertConfigurationStringToJson": "dataflowConfiguration",
+}
+BINOP = {ast.Add: "+", ast.Sub: "-"}
 # Exceptions a wrapper raises that cli_util.wrap_exceptions renders (ticket 18).
 RAISABLE = {"ValueError", "KeyError", "Exception", "RequiredValueNotInDefaultOrUserInputError"}
 CMP = {
@@ -207,6 +216,15 @@ class Compiler:
             return ["list", *(self.constant(v) for v in value)]
         raise Unsupported("global")
 
+    def hand_coded(self, func):
+        """The Engine's name for a module helper it hand-codes, else None."""
+        if not isinstance(func, ast.Name) or func.id in self.locals:
+            return None
+        fn = self.globals.get(func.id)
+        if not inspect.isfunction(fn):
+            return None
+        return HAND_CODED.get(f"{fn.__module__}.{fn.__qualname__}")
+
     def resolve(self, expr):
         attrs = []
         while isinstance(expr, ast.Attribute):
@@ -248,6 +266,10 @@ class Compiler:
             if len(node.ops) != 1 or type(node.ops[0]) not in CMP:
                 raise Unsupported("compare")
             return ["cmp", CMP[type(node.ops[0])], self.expr(node.left, scope), self.expr(node.comparators[0], scope)]
+        if isinstance(node, ast.BinOp):
+            if type(node.op) not in BINOP:
+                raise Unsupported("binop")
+            return ["bin", BINOP[type(node.op)], self.expr(node.left, scope), self.expr(node.right, scope)]
         if isinstance(node, ast.IfExp):
             return ["ifexp", self.expr(node.test, scope), self.expr(node.body, scope), self.expr(node.orelse, scope)]
         if isinstance(node, ast.Dict):
@@ -272,6 +294,9 @@ class Compiler:
             ):
                 raise Unsupported("call keywords")
             dotted = _dotted(node.func)
+            hand = self.hand_coded(node.func)
+            if hand:
+                return ["fn", hand, *(self.expr(a, scope) for a in node.args)]
             if dotted in FUNCTIONS:
                 args = [self.expr(a, scope) for a in node.args]
                 if dotted == "json.dumps" and node.keywords:

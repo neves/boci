@@ -157,6 +157,22 @@ export function rootHelp(
     );
     out += `${f.getvalue()}\n`;
   }
+  // ADR 0005: append boci-only Extension commands in a separate trailing section.
+  {
+    const f = new HelpFormatter(width);
+    f.write("boci Extensions");
+    f.write("\n\n");
+    f.indent();
+    f.indentation(() =>
+      f.writeDl(
+        [["update", "Update boci to the latest release."]],
+        30,
+        2,
+        false,
+      ),
+    );
+    out += `${f.getvalue()}\n`;
+  }
   return out.replace(/\n$/, "");
 }
 

@@ -1,10 +1,197 @@
 // Which Leaf commands and Engine features boci implements. Parity cases for a key
 // only run once it is implemented (test/parity/parity.test.ts). Grows rung by rung.
-// Generated commands are implemented by rule (engineSupports); Custom commands and
-// Engine features are listed by hand.
-import { loadIndex, loadService, type ServiceSpec } from "./spec.ts";
+// Generated commands are implemented by rule (engineSupports); Custom commands are
+// derived from CUSTOM_HANDLERS and Engine features are listed by hand.
+import type { Invocation } from "../lib/io.ts";
+import type { OutputFileHandle } from "./click-file.ts";
+import type { Rc } from "./rc.ts";
+import {
+  loadIndex,
+  loadService,
+  type Index,
+  type ServiceSpec,
+} from "./spec.ts";
 
-const IMPLEMENTED = new Set<string>([
+export type CustomCommandContext = {
+  io: Invocation;
+  values: Record<string, unknown>;
+  rootValues: Record<string, unknown>;
+  settings: { configFile: string; profile: string; auth: string | null };
+  rc: Rc;
+  index: Index;
+  spec: ServiceSpec;
+  usageText: () => string;
+  usageError: (message: string) => never;
+  outputFile?: OutputFileHandle;
+};
+
+export type CustomCommandHandler = (
+  ctx: CustomCommandContext,
+) => Promise<void> | void;
+
+const outputOptions = (ctx: CustomCommandContext) => ({
+  query: ctx.rootValues.query,
+  output: ctx.rootValues.output,
+  rawOutput: ctx.rootValues.raw_output,
+  rc: ctx.rc,
+});
+
+function lazyOsOutput(
+  pick: (m: typeof import("../commands/os.ts")) => (
+    io: Invocation,
+    opts: {
+      values: Record<string, unknown>;
+      rootValues: Record<string, unknown>;
+      settings: CustomCommandContext["settings"];
+      spec: ServiceSpec;
+      index: Index;
+      usageText: () => string;
+      outputOptions: ReturnType<typeof outputOptions>;
+    },
+  ) => Promise<void>,
+): CustomCommandHandler {
+  return async (ctx) => {
+    const mod = await import("../commands/os.ts");
+    await pick(mod)(ctx.io, {
+      values: ctx.values,
+      rootValues: ctx.rootValues,
+      settings: ctx.settings,
+      spec: ctx.spec,
+      index: ctx.index,
+      usageText: ctx.usageText,
+      outputOptions: outputOptions(ctx),
+    });
+  };
+}
+
+/** Single source of truth for Custom OCI Leaf command handlers, loaded lazily on dispatch. */
+export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
+  [
+    "profile current",
+    async (ctx) => {
+      const { runProfileCurrent } = await import("../commands/profile.ts");
+      runProfileCurrent(ctx.io, { settings: ctx.settings });
+    },
+  ],
+  [
+    "os object get",
+    async (ctx) => {
+      const { runOsObjectGet } = await import("../commands/os.ts");
+      await runOsObjectGet(ctx.io, {
+        values: ctx.values,
+        rootValues: ctx.rootValues,
+        settings: ctx.settings,
+        spec: ctx.spec,
+        index: ctx.index,
+        usageText: ctx.usageText,
+        outputFile: ctx.outputFile,
+      });
+    },
+  ],
+  ["os object put", lazyOsOutput((m) => m.runOsObjectPut)],
+  ["os object resume-put", lazyOsOutput((m) => m.runOsObjectResumePut)],
+  ["os object bulk-upload", lazyOsOutput((m) => m.runOsObjectBulkUpload)],
+  ["os object bulk-download", lazyOsOutput((m) => m.runOsObjectBulkDownload)],
+  ["os object bulk-delete", lazyOsOutput((m) => m.runOsObjectBulkDelete)],
+  ["os object sync", lazyOsOutput((m) => m.runOsObjectSync)],
+  [
+    "setup repair-file-permissions",
+    async (ctx) => {
+      const { runSetupRepairFilePermissions } =
+        await import("../commands/setup.ts");
+      runSetupRepairFilePermissions(ctx.io, {
+        values: ctx.values,
+        usageError: ctx.usageError,
+      });
+    },
+  ],
+  [
+    "setup keys",
+    async (ctx) => {
+      const { runSetupKeys } = await import("../commands/setup.ts");
+      await runSetupKeys(ctx.io, {
+        values: ctx.values,
+        usageError: ctx.usageError,
+      });
+    },
+  ],
+  [
+    "setup config",
+    async (ctx) => {
+      const { runSetupConfig } = await import("../commands/setup.ts");
+      await runSetupConfig(ctx.io, {
+        regions: ctx.index.regions,
+        usageError: ctx.usageError,
+      });
+    },
+  ],
+  [
+    "setup autocomplete",
+    async (ctx) => {
+      const { runSetupAutocomplete } = await import("../commands/setup.ts");
+      await runSetupAutocomplete(ctx.io);
+    },
+  ],
+  [
+    "session validate",
+    async (ctx) => {
+      const { runSessionValidate } = await import("../commands/session.ts");
+      await runSessionValidate(ctx.io, {
+        values: ctx.values,
+        rootValues: ctx.rootValues,
+        settings: ctx.settings,
+        index: ctx.index,
+      });
+    },
+  ],
+  [
+    "session refresh",
+    async (ctx) => {
+      const { runSessionRefresh } = await import("../commands/session.ts");
+      await runSessionRefresh(ctx.io, {
+        rootValues: ctx.rootValues,
+        settings: ctx.settings,
+        index: ctx.index,
+      });
+    },
+  ],
+  [
+    "session export",
+    async (ctx) => {
+      const { runSessionExport } = await import("../commands/session.ts");
+      await runSessionExport(ctx.io, {
+        values: ctx.values,
+        settings: ctx.settings,
+      });
+    },
+  ],
+  [
+    "session import",
+    async (ctx) => {
+      const { runSessionImport } = await import("../commands/session.ts");
+      await runSessionImport(ctx.io, {
+        values: ctx.values,
+        settings: ctx.settings,
+      });
+    },
+  ],
+  [
+    "session authenticate",
+    async (ctx) => {
+      const { runSessionAuthenticate } = await import("../commands/session.ts");
+      await runSessionAuthenticate(ctx.io, {
+        values: ctx.values,
+        rootValues: ctx.rootValues,
+        settings: ctx.settings,
+        rc: ctx.rc,
+        index: ctx.index,
+        spec: ctx.spec,
+      });
+    },
+  ],
+]);
+
+const ENGINE_FEATURES = [
   "--version",
   "generate-full-command-json-input",
   "generate-param-json-input",
@@ -28,29 +215,16 @@ const IMPLEMENTED = new Set<string>([
   "debug",
   "read-timeout",
   "no-retry",
-  "profile current",
   "max-retries",
   "work-request-waiter",
   "lifecycle-waiter",
   // Generated commands outside engineSupports, tested by hand-written cases.
   "email-data-plane email-raw-submitted-response submit-raw-email",
-  // Custom commands.
-  "os object get",
-  "os object put",
-  "os object resume-put",
-  "os object bulk-upload",
-  "os object bulk-download",
-  "os object bulk-delete",
-  "os object sync",
-  "setup repair-file-permissions",
-  "setup keys",
-  "setup config",
-  "setup autocomplete",
-  "session validate",
-  "session refresh",
-  "session export",
-  "session import",
-  "session authenticate",
+];
+
+const IMPLEMENTED = new Set<string>([
+  ...ENGINE_FEATURES,
+  ...CUSTOM_HANDLERS.keys(),
 ]);
 
 // Generated commands the engine would accept by rule but that don't behave like the

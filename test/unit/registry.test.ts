@@ -1,0 +1,49 @@
+import { expect, test } from "bun:test";
+import { CUSTOM_HANDLERS, isImplemented } from "../../src/core/registry.ts";
+import { loadIndex, loadService } from "../../src/core/spec.ts";
+
+test("every key in CUSTOM_HANDLERS is a real custom Leaf command in the spec", async () => {
+  expect(CUSTOM_HANDLERS.size).toBeGreaterThan(0);
+  const index = await loadIndex();
+
+  for (const key of CUSTOM_HANDLERS.keys()) {
+    const [service = "", ...rest] = key.split(" ");
+    expect(
+      index.services[service] ?? index.nonServiceCommands.includes(service),
+    ).toBeTruthy();
+    const spec = await loadService(service);
+    const cmd = spec.commands[rest.join(" ")];
+    expect(cmd).toBeDefined();
+    expect(cmd?.kind).toBe("custom");
+    expect(isImplemented(key, cmd)).toBe(true);
+  }
+});
+
+test("loading cli and registry does not eagerly load command modules", () => {
+  const res = Bun.spawnSync(
+    [
+      "bun",
+      "-e",
+      [
+        'import { run } from "./src/core/cli.ts";',
+        'import "./src/core/registry.ts";',
+        'import { Exit } from "./src/lib/io.ts";',
+        'const code = await run({ argv: ["--version"], env: {}, cwd: process.cwd(), out: () => {}, err: () => {}, isTTY: () => false });',
+        'const loaded = Object.keys(require.cache).filter((k) => k.includes("/src/commands/"));',
+        "console.log(JSON.stringify({ code, loaded }));",
+      ].join("\n"),
+    ],
+    {
+      cwd: `${import.meta.dir}/../..`,
+      stdout: "pipe",
+      stderr: "pipe",
+    },
+  );
+  expect(res.exitCode).toBe(0);
+  const parsed = JSON.parse(new TextDecoder().decode(res.stdout)) as {
+    code: number;
+    loaded: string[];
+  };
+  expect(parsed.code).toBe(0);
+  expect(parsed.loaded).toEqual([]);
+});

@@ -5,7 +5,6 @@ import {
   closeSync,
   constants as fsConstants,
   existsSync,
-  fstatSync,
   lstatSync,
   mkdirSync,
   openSync,
@@ -20,7 +19,10 @@ import {
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../core/config.ts";
-import { BadParameter, pyRepr } from "../core/convert.ts";
+import {
+  type OutputFileHandle,
+  openClickFileForWrite,
+} from "../core/click-file.ts";
 import { Exit, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter } from "../core/json-input.ts";
 import {
@@ -37,9 +39,6 @@ import {
 import { expandVars } from "../core/rc.ts";
 import type { Index, ServiceSpec } from "../core/spec.ts";
 
-const NAMESPACE_HOST_LABEL_PATTERN = /^[/A-Za-z0-9_.-]+$/;
-const NAMESPACE_VALIDATION_ERROR =
-  "must contain only letters, digits, underscores, hyphens, forward slashes and periods";
 const SSE_ALGORITHM = "AES256";
 const OBJECT_STORAGE_CLIENT = "object_storage.object_storage";
 const OBJECT_PUT_DISPLAY_HEADERS = [
@@ -129,82 +128,12 @@ function guessContentType(filePath: string): string {
   return guessContentTypeOptional(filePath) ?? "application/octet-stream";
 }
 
-export type OutputFileHandle = {
-  rawPath: string;
-  isStdout: boolean;
-  fd?: number;
-};
-
-const ERRNO_MESSAGES: Record<string, string> = {
-  ENOENT: "No such file or directory",
-  EISDIR: "Is a directory",
-  EACCES: "Permission denied",
-  ENOTDIR: "Not a directory",
-  EROFS: "Read-only file system",
-  EMFILE: "Too many open files",
-  ENAMETOOLONG: "File name too long",
-};
-
-function osErrorReason(err: unknown): string {
-  const e = err as NodeJS.ErrnoException | null;
-  if (e?.code && ERRNO_MESSAGES[e.code])
-    return ERRNO_MESSAGES[e.code] as string;
-  const msg = e?.message ?? String(err);
-  const stripped = msg.replace(/^[A-Z]+:\s*/, "").replace(/,\s*open\s+.*$/, "");
-  return stripped || msg;
-}
-
-/** `validate_namespace_name` in objectstorage_cli_extended.py. */
-export function validateOsNamespace(value: unknown): void {
-  if (typeof value !== "string") return;
-  if (
-    !value ||
-    value !== value.trim() ||
-    !NAMESPACE_HOST_LABEL_PATTERN.test(value)
-  ) {
-    throw new BadParameter(NAMESPACE_VALIDATION_ERROR);
-  }
-}
-
-/** Eager `click.File(mode='wb', lazy=False)`: opens the file during option conversion. */
-export function openClickFileForWrite(
-  io: Invocation,
-  rawPath: string,
-): OutputFileHandle {
-  if (rawPath === "-") return { rawPath, isStdout: true };
-  try {
-    const fd = openSync(resolve(io.cwd, rawPath), "w");
-    return { rawPath, isStdout: false, fd };
-  } catch (e) {
-    throw new BadParameter(`${pyRepr(rawPath)}: ${osErrorReason(e)}`);
-  }
-}
-
-/** Eager `click.File(mode='r')`: checks the file can be opened during option conversion. */
-export function validateClickFileForRead(
-  io: Invocation,
-  rawPath: string,
-): void {
-  if (rawPath === "-") return;
-  let fd: number | undefined;
-  try {
-    fd = openSync(resolve(io.cwd, rawPath), "r");
-    if (fstatSync(fd).isDirectory()) {
-      throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
-    }
-  } catch (e) {
-    if (e instanceof BadParameter) throw e;
-    throw new BadParameter(`${pyRepr(rawPath)}: ${osErrorReason(e)}`);
-  } finally {
-    if (fd !== undefined) {
-      try {
-        closeSync(fd);
-      } catch {
-        // Ignore close errors.
-      }
-    }
-  }
-}
+export {
+  type OutputFileHandle,
+  openClickFileForWrite,
+  validateClickFileForRead,
+  validateOsNamespace,
+} from "../core/click-file.ts";
 
 /** `_get_encryption_key_params`: read base64 AES-256 key and compute its SHA-256 header. */
 export function readEncryptionKeyHeaders(

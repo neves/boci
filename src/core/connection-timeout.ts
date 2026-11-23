@@ -4,7 +4,7 @@ import * as http from "node:http";
 import * as https from "node:https";
 import { Readable } from "node:stream";
 import type { Invocation } from "../lib/io.ts";
-import { fetchTransportFromEnv } from "../commands/session.ts";
+import { fetchTransportFromEnv } from "./transport.ts";
 import { REFERENCE_VERSION } from "./version.ts";
 
 type Request = {

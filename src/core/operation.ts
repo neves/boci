@@ -26,8 +26,8 @@ import {
   SecurityTokenKeyError,
   decodeSecurityToken,
   isSecurityTokenValid,
-} from "../commands/session.ts";
-import { createStdinReader } from "../commands/setup.ts";
+} from "./security-token.ts";
+import { createStdinReader } from "./stdin.ts";
 import {
   InvalidPrivateKey,
   MissingPrivateKeyPassphrase,

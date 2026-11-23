@@ -102,7 +102,8 @@ export async function openClickFileForProgram(
   mode: string,
 ): Promise<ProgramFile> {
   if (/[wa]/.test(mode)) return new ProgramFile(mode, undefined, rawPath);
-  if (rawPath === "-") return new ProgramFile(mode, await readStdinBytes(io));
+  if (rawPath === "-")
+    return new ProgramFile(mode, await readStdinBytes(io), rawPath);
   validateClickFileForRead(io, rawPath);
-  return new ProgramFile(mode, readFileSync(resolve(io.cwd, rawPath)));
+  return new ProgramFile(mode, readFileSync(resolve(io.cwd, rawPath)), rawPath);
 }

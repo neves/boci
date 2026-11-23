@@ -4,6 +4,7 @@
  * into the complex params of the generated command it invokes; the result is that
  * command's kwargs, which the Engine then binds to the request like any Generated command.
  */
+import { basename } from "node:path";
 import type { TypedParam } from "./convert.ts";
 import { kwarg, truthy } from "./checks.ts";
 import { pyRepr } from "./convert.ts";
@@ -607,6 +608,16 @@ export function runProgram(
         if (i < answers.length) return answers[i];
         throw new ProgramSecret(`Enter ${pyStr(a)} (minimum 8 characters)`);
       }
+      case "hasName":
+        return a instanceof ProgramFile && a.name !== undefined;
+      case "fileName":
+        if (!(a instanceof ProgramFile) || a.name === undefined)
+          throw new ProgramUnsupported("file.name");
+        return a.name === "-" ? "<stdin>" : a.name;
+      case "basename":
+        if (typeof a !== "string")
+          throw new ProgramUnsupported("os.path.basename()");
+        return basename(a);
       case "isstr":
         // isinstance(a, six.string_types)
         return typeof a === "string";

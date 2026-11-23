@@ -1815,6 +1815,177 @@
         "wrapExceptions": true,
         "files": ["file"]
       },
+      "program": {
+        "body": [
+          ["let", "file", ["item", ["var", "kwargs"], "file"]],
+          [
+            "if",
+            ["cmp", "is", ["item", ["var", "kwargs"], "name"], null],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["not", ["fn", "hasName", ["var", "file"]]],
+                  ["cmp", "==", ["fn", "fileName", ["var", "file"]], "<stdin>"]
+                ],
+                [
+                  [
+                    "usage",
+                    "Option \"--name\" must be provided when reading object from stdin"
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "object_name",
+                ["fn", "basename", ["fn", "fileName", ["var", "file"]]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "object_name",
+                ["item", ["var", "kwargs"], "name"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "name"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "file", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "file"]
+            ],
+            [
+              [
+                "let",
+                "content",
+                ["call", "read", ["item", ["var", "kwargs"], "file"]]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "put_awr_hub_object_body",
+                ["var", "content"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "file"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.opsi.src.oci_cli_operations_insights.generated.operationsinsights_cli.put_awr_hub_object",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "put_awr_hub_object_body",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "awr_hub_source_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "object_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "opsi.operations_insights",
+        "method": "put_awr_hub_object",
+        "http": "PUT",
+        "path": "/awrHubObjects/awrHubSources/{awrHubSourceId}/o/{objectName}",
+        "positionalArgs": [
+          "put_awr_hub_object_body",
+          "awr_hub_source_id",
+          "object_name"
+        ],
+        "pathParams": {
+          "awrHubSourceId": "awr_hub_source_id",
+          "objectName": "object_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "put_awr_hub_object_body",
+        "enforce_content_headers": false,
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["put_awr_hub_object_body"],
+          "param": "put_awr_hub_object_body"
+        },
+        {
+          "target": "kwarg",
+          "key": ["awr_hub_source_id"],
+          "param": "awr_hub_source_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["object_name"],
+          "param": "object_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["retry_strategy"],
+          "transform": "NoneRetryStrategy"
+        }
+      ],
       "params": [
         {
           "kind": "option",

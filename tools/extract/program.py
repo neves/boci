@@ -332,6 +332,8 @@ class Compiler:
         if isinstance(node, ast.Attribute):
             # ctx.obj (its 'config' set by build_client) and `client.get_namespace().data`
             # (a request the Engine makes, then runs the program again): ticket 23.
+            if _dotted(node) == "file.name":
+                return ["fn", "fileName", self.expr(node.value, scope)]
             if _dotted(node) == "ctx.obj":
                 return ["fn", "ctxObj"]
             call = node.value
@@ -387,6 +389,10 @@ class Compiler:
                 and _dotted(node.args[1]) == "six.string_types"
             ):
                 return ["fn", "isstr", self.expr(node.args[0], scope)]
+            if dotted == "hasattr" and len(node.args) == 2 and ast.unparse(node.args[1]) == "'name'":
+                return ["fn", "hasName", self.expr(node.args[0], scope)]
+            if dotted == "os.path.basename" and len(node.args) == 1:
+                return ["fn", "basename", self.expr(node.args[0], scope)]
             if dotted in ("build_client", "cli_util.build_client"):
                 # build_client(service, client, ctx): only which client it builds matters.
                 if len(node.args) != 3 or not all(isinstance(a, ast.Constant) for a in node.args[:2]):

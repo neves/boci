@@ -346,6 +346,276 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "ticket", ["dict"]],
+          [
+            "if",
+            ["cmp", "in", "severity", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "ticket"],
+                "severity",
+                ["item", ["var", "kwargs"], "severity"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "severity"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "title", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "ticket"],
+                "title",
+                ["item", ["var", "kwargs"], "title"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "title"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "description", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "ticket"],
+                "description",
+                ["item", ["var", "kwargs"], "description"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "description"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "ticket"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "ticket",
+                ["fn", "dumps", ["var", "ticket"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.cims.src.oci_cli_incident.generated.incident_cli.create_incident",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ticket",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "problem_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "contacts",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "referrer",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocid",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "homeregion",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "bearertokentype",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "bearertoken",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "idtoken",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "domainid",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "cims.incident",
+        "method": "create_incident",
+        "http": "POST",
+        "path": "/v2/incidents",
+        "positionalArgs": ["create_incident_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "ocid": {
+            "arg": "ocid"
+          },
+          "homeregion": {
+            "arg": "homeregion"
+          },
+          "bearertokentype": {
+            "arg": "bearertokentype"
+          },
+          "bearertoken": {
+            "arg": "bearertoken"
+          },
+          "idtoken": {
+            "arg": "idtoken"
+          },
+          "domainid": {
+            "arg": "domainid"
+          }
+        },
+        "body": "create_incident_details",
+        "responseType": "Incident",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ocid"],
+          "param": "ocid",
+          "when": "ocid is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["homeregion"],
+          "param": "homeregion",
+          "when": "homeregion is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["bearertokentype"],
+          "param": "bearertokentype",
+          "when": "bearertokentype is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["bearertoken"],
+          "param": "bearertoken",
+          "when": "bearertoken is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["idtoken"],
+          "param": "idtoken",
+          "when": "idtoken is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["domainid"],
+          "param": "domainid",
+          "when": "domainid is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_incident_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_incident_details",
+          "key": ["ticket"],
+          "transform": "parse_json_parameter",
+          "param": "ticket"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_incident_details",
+          "key": ["problemType"],
+          "param": "problem_type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_incident_details",
+          "key": ["userGroupId"],
+          "param": "user_group_id",
+          "when": "user_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_incident_details",
+          "key": ["contacts"],
+          "transform": "parse_json_parameter",
+          "param": "contacts",
+          "when": "contacts is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_incident_details",
+          "key": ["referrer"],
+          "param": "referrer",
+          "when": "referrer is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -2094,6 +2364,389 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["item", ["var", "kwargs"], "comments"],
+              ["item", ["var", "kwargs"], "contact"]
+            ],
+            [
+              [
+                "raise",
+                "raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('Cannot specify both --comments and --contact')"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "comments"]],
+              ["not", ["item", ["var", "kwargs"], "contact"]]
+            ],
+            [
+              [
+                "raise",
+                "raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('Must specify either --comments or --contacts')"
+              ]
+            ],
+            []
+          ],
+          ["let", "ticket", ["dict"]],
+          [
+            "if",
+            ["cmp", "in", "activity_type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "ticket"],
+                "acitivityType",
+                ["item", ["var", "kwargs"], "activity_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "comments", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "ticket"],
+                "comments",
+                ["item", ["var", "kwargs"], "comments"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "ticket"],
+                "type",
+                ["item", ["var", "kwargs"], "type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "contact", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "ticket"],
+                "contact",
+                ["item", ["var", "kwargs"], "contact"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "==", ["item", ["var", "kwargs"], "type"], "contact"],
+            [
+              [
+                "let",
+                "ticket",
+                [
+                  "dict",
+                  [
+                    "resource",
+                    [
+                      "dict",
+                      [
+                        "item",
+                        [
+                          "dict",
+                          [
+                            "activityType",
+                            ["item", ["var", "kwargs"], "activity_type"]
+                          ],
+                          ["contact", ["item", ["var", "kwargs"], "contact"]],
+                          ["type", ["item", ["var", "kwargs"], "type"]]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "==", ["item", ["var", "kwargs"], "type"], "activity"],
+                [
+                  [
+                    "let",
+                    "ticket",
+                    [
+                      "dict",
+                      [
+                        "resource",
+                        [
+                          "dict",
+                          [
+                            "item",
+                            [
+                              "dict",
+                              [
+                                "activityType",
+                                ["item", ["var", "kwargs"], "activity_type"]
+                              ],
+                              [
+                                "comments",
+                                ["item", ["var", "kwargs"], "comments"]
+                              ],
+                              ["type", ["item", ["var", "kwargs"], "type"]]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('--type must be either activity or contact')"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "ticket",
+            ["fn", "dumps", ["var", "ticket"]]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "activity_type"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "type"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "comments"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "contact"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.cims.src.oci_cli_incident.generated.incident_cli.update_incident",
+        "params": [
+          {
+            "name": "incident_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ticket",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "problem_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocid",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "homeregion",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "bearertokentype",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "bearertoken",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "idtoken",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "domainid",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "cims.incident",
+        "method": "update_incident",
+        "http": "PUT",
+        "path": "/v2/incidents/{incidentKey}",
+        "positionalArgs": [
+          "incident_key",
+          "update_incident_details",
+          "compartment_id"
+        ],
+        "pathParams": {
+          "incidentKey": "incident_key"
+        },
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "ocid": {
+            "arg": "ocid"
+          },
+          "homeregion": {
+            "arg": "homeregion"
+          },
+          "bearertokentype": {
+            "arg": "bearertokentype"
+          },
+          "bearertoken": {
+            "arg": "bearertoken"
+          },
+          "idtoken": {
+            "arg": "idtoken"
+          },
+          "domainid": {
+            "arg": "domainid"
+          }
+        },
+        "body": "update_incident_details",
+        "responseType": "Incident",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["incident_key"],
+          "param": "incident_key"
+        },
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ocid"],
+          "param": "ocid",
+          "when": "ocid is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["homeregion"],
+          "param": "homeregion",
+          "when": "homeregion is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["bearertokentype"],
+          "param": "bearertokentype",
+          "when": "bearertokentype is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["bearertoken"],
+          "param": "bearertoken",
+          "when": "bearertoken is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["idtoken"],
+          "param": "idtoken",
+          "when": "idtoken is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["domainid"],
+          "param": "domainid",
+          "when": "domainid is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_incident_details",
+          "key": ["ticket"],
+          "transform": "parse_json_parameter",
+          "param": "ticket"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_incident_details",
+          "key": ["problemType"],
+          "param": "problem_type",
+          "when": "problem_type is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

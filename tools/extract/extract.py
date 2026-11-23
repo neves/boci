@@ -13,6 +13,7 @@ Usage:
   uv run --python 3.12 tools/extract/extract.py --service os  # dump one subtree (internal)
 """
 
+import ast
 import json
 import hashlib
 import os
@@ -25,6 +26,7 @@ import click
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sdk  # noqa: E402
 import patterns as tier_b  # noqa: E402
+import program as wrapper_compiler  # noqa: E402
 
 CLIENTS = None  # collects SDK clients used while flattening one service
 JSON_EXAMPLE_POOL = None  # deduplicates exact complex skeletons within one service
@@ -196,6 +198,15 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                 entry["patterns"], survey = tier_b.survey(cmd)
                 if survey:
                     entry["survey"] = survey
+                compiled = wrapper_program(cmd.callback, CLIENT_MAP)
+                if compiled:
+                    entry["program"] = compiled["program"]
+                    entry["generated"] = compiled["generated"]
+                    entry["operation"] = compiled["operation"]
+                    entry["bindings"] = compiled["bindings"]
+                    client = compiled["operation"]["client"]
+                    spec_name, service_name = client.split(".", 1)
+                    CLIENTS[client] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
             if delegate:
                 entry["delegate"] = {
                     "callback": delegate["callback"],
@@ -211,6 +222,41 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                 CLIENTS[client] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
         entry["params"] = [param_spec(p) for p in cmd.params]
         commands[key] = entry
+
+
+def wrapper_program(callback, client_map) -> dict | None:
+    """A Tier B wrapper compiled to a program over kwargs, with the generated command it
+    invokes: that command's operation, bindings and params, all in its own param names."""
+    program, invoked = wrapper_compiler.compile_wrapper(callback)
+    if program is None:
+        return None
+    _, operation, _ = sdk.command_operation(invoked.callback, client_map)
+    if operation is None:
+        return None
+    names = {p.name for p in invoked.params}
+    generated = {
+        "callback": f"{invoked.callback.__module__}.{invoked.callback.__qualname__}",
+        # What the program's kwargs must match, and what the Engine's request code reads.
+        "params": [
+            {
+                k: v
+                for k, v in param_spec(p).items()
+                if k in ("name", "typeClass", "multiple", "isFlag", "default")
+            }
+            for p in invoked.params
+            if p.expose_value
+        ],
+    }
+    wrapped = any(
+        ast.unparse(d) == "cli_util.wrap_exceptions"
+        for d in wrapper_compiler._fn_ast(callback).decorator_list
+    )
+    return {
+        "program": {"body": program, "wrapExceptions": wrapped},
+        "generated": generated,
+        "operation": operation,
+        "bindings": sdk.command_bindings(invoked.callback, operation["method"], names),
+    }
 
 
 def json_examples(cmd: click.Command, ctx: click.Context) -> dict | None:

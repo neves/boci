@@ -15323,6 +15323,167 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "time_amount"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "duration",
+                [
+                  "dict",
+                  ["timeAmount", ["item", ["var", "kwargs"], "time_amount"]]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "time_unit"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "duration"],
+                    "timeUnit",
+                    [
+                      "call",
+                      "upper",
+                      ["fn", "str", ["item", ["var", "kwargs"], "time_unit"]]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "usage",
+                    "Parameter --time-unit is required when --time-amount is specified"
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "time_amount"],
+          ["del", ["var", "kwargs"], "time_unit"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.object_storage.src.oci_cli_object_storage.generated.objectstorage_cli.create_retention_rule",
+        "params": [
+          {
+            "name": "namespace_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "bucket_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "duration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_rule_locked",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "object_storage.object_storage",
+        "method": "create_retention_rule",
+        "http": "POST",
+        "path": "/n/{namespaceName}/b/{bucketName}/retentionRules",
+        "positionalArgs": [
+          "namespace_name",
+          "bucket_name",
+          "create_retention_rule_details"
+        ],
+        "pathParams": {
+          "namespaceName": "namespace_name",
+          "bucketName": "bucket_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-client-request-id": {
+            "arg": "opc_client_request_id"
+          }
+        },
+        "body": "create_retention_rule_details",
+        "responseType": "RetentionRule",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["namespace_name"],
+          "param": "namespace_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["bucket_name"],
+          "param": "bucket_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_client_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_retention_rule_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_retention_rule_details",
+          "key": ["duration"],
+          "transform": "parse_json_parameter",
+          "param": "duration",
+          "when": "duration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_retention_rule_details",
+          "key": ["timeRuleLocked"],
+          "param": "time_rule_locked",
+          "when": "time_rule_locked is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

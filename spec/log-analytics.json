@@ -37593,6 +37593,288 @@
         ],
         "files": ["file"]
       },
+      "program": {
+        "body": [
+          ["let", "time_filter", ["dict"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "time_start"],
+            [
+              [
+                "set",
+                ["var", "time_filter"],
+                "timeStart",
+                ["item", ["var", "kwargs"], "time_start"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "time_start"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "time_end"],
+            [
+              [
+                "set",
+                ["var", "time_filter"],
+                "timeEnd",
+                ["item", ["var", "kwargs"], "time_end"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "time_end"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "timezone"],
+            [
+              [
+                "set",
+                ["var", "time_filter"],
+                "timeZone",
+                ["item", ["var", "kwargs"], "timezone"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "timezone"]],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "time_filter"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "time_filter",
+                ["fn", "dumps", ["var", "time_filter"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.log_analytics.src.oci_cli_log_analytics.generated.loganalytics_cli.export_query_result",
+        "params": [
+          {
+            "name": "namespace_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "query_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sub_system",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "file",
+            "typeClass": "click.types.File",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id_in_subtree",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scope_filters",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "max_total_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_filter",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "query_timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_include_columns",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "output_format",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_localize",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_use_acceleration",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "log_analytics.log_analytics",
+        "method": "export_query_result",
+        "http": "POST",
+        "path": "/namespaces/{namespaceName}/search/actions/export",
+        "positionalArgs": ["namespace_name", "export_details"],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/octet-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "export_details",
+        "responseType": "stream",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["namespace_name"],
+          "param": "namespace_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["queryString"],
+          "param": "query_string"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["subSystem"],
+          "param": "sub_system"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["compartmentIdInSubtree"],
+          "param": "compartment_id_in_subtree",
+          "when": "compartment_id_in_subtree is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["scopeFilters"],
+          "transform": "parse_json_parameter",
+          "param": "scope_filters",
+          "when": "scope_filters is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["maxTotalCount"],
+          "param": "max_total_count",
+          "when": "max_total_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["timeFilter"],
+          "transform": "parse_json_parameter",
+          "param": "time_filter",
+          "when": "time_filter is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["queryTimeoutInSeconds"],
+          "param": "query_timeout_in_seconds",
+          "when": "query_timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["shouldIncludeColumns"],
+          "param": "should_include_columns",
+          "when": "should_include_columns is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["outputFormat"],
+          "param": "output_format",
+          "when": "output_format is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["shouldLocalize"],
+          "param": "should_localize",
+          "when": "should_localize is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "export_details",
+          "key": ["shouldUseAcceleration"],
+          "param": "should_use_acceleration",
+          "when": "should_use_acceleration is not None"
+        },
+        {
+          "target": "output",
+          "key": [],
+          "param": "file"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -38817,6 +39099,379 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "time_filter", ["dict"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "time_start"],
+            [
+              [
+                "set",
+                ["var", "time_filter"],
+                "timeStart",
+                ["item", ["var", "kwargs"], "time_start"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "time_start"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "time_end"],
+            [
+              [
+                "set",
+                ["var", "time_filter"],
+                "timeEnd",
+                ["item", ["var", "kwargs"], "time_end"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "time_end"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "timezone"],
+            [
+              [
+                "set",
+                ["var", "time_filter"],
+                "timeZone",
+                ["item", ["var", "kwargs"], "timezone"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "timezone"]],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "time_filter"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "time_filter",
+                ["fn", "dumps", ["var", "time_filter"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.log_analytics.src.oci_cli_log_analytics.generated.loganalytics_cli.query",
+        "params": [
+          {
+            "name": "namespace_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "query_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sub_system",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id_in_subtree",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "saved_search_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "max_total_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_filter",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scope_filters",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "variables",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "query_timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_run_async",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "async_mode",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_include_total_count",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_include_columns",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_include_fields",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_use_acceleration",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "page",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "limit",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "log_analytics.log_analytics",
+        "method": "query",
+        "http": "POST",
+        "path": "/namespaces/{namespaceName}/search/actions/query",
+        "positionalArgs": ["namespace_name", "query_details"],
+        "pathParams": {
+          "namespaceName": "namespace_name"
+        },
+        "queryParams": {
+          "page": {
+            "arg": "page"
+          },
+          "limit": {
+            "arg": "limit"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "query_details",
+        "responseType": "QueryAggregation",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["namespace_name"],
+          "param": "namespace_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["queryString"],
+          "param": "query_string"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["subSystem"],
+          "param": "sub_system"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["compartmentIdInSubtree"],
+          "param": "compartment_id_in_subtree",
+          "when": "compartment_id_in_subtree is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["savedSearchId"],
+          "param": "saved_search_id",
+          "when": "saved_search_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["maxTotalCount"],
+          "param": "max_total_count",
+          "when": "max_total_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["timeFilter"],
+          "transform": "parse_json_parameter",
+          "param": "time_filter",
+          "when": "time_filter is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["scopeFilters"],
+          "transform": "parse_json_parameter",
+          "param": "scope_filters",
+          "when": "scope_filters is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["variables"],
+          "transform": "parse_json_parameter",
+          "param": "variables",
+          "when": "variables is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["queryTimeoutInSeconds"],
+          "param": "query_timeout_in_seconds",
+          "when": "query_timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["shouldRunAsync"],
+          "param": "should_run_async",
+          "when": "should_run_async is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["asyncMode"],
+          "param": "async_mode",
+          "when": "async_mode is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["shouldIncludeTotalCount"],
+          "param": "should_include_total_count",
+          "when": "should_include_total_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["shouldIncludeColumns"],
+          "param": "should_include_columns",
+          "when": "should_include_columns is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["shouldIncludeFields"],
+          "param": "should_include_fields",
+          "when": "should_include_fields is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "query_details",
+          "key": ["shouldUseAcceleration"],
+          "param": "should_use_acceleration",
+          "when": "should_use_acceleration is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

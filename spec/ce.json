@@ -2002,6 +2002,1431 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["set", ["var", "kwargs"], "options", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "service_lb_subnet_ids", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "service_lb_subnet_ids"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "options"],
+                "serviceLbSubnetIds",
+                [
+                  "fn",
+                  "parse",
+                  "service_lb_subnet_ids",
+                  ["item", ["var", "kwargs"], "service_lb_subnet_ids"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "service_lb_subnet_ids", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ip_families", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "ip_families"], null]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "options"],
+                "ipFamilies",
+                [
+                  "fn",
+                  "parse",
+                  "ip_families",
+                  ["item", ["var", "kwargs"], "ip_families"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "ip_families", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "dashboard_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "dashboard_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "options"],
+                "addOns",
+                ["dict"]
+              ],
+              [
+                "set",
+                ["item", ["item", ["var", "kwargs"], "options"], "addOns"],
+                "isKubernetesDashboardEnabled",
+                ["item", ["var", "kwargs"], "dashboard_enabled"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "dashboard_enabled", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "tiller_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "tiller_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "addOns",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "addOns",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["item", ["item", ["var", "kwargs"], "options"], "addOns"],
+                "isTillerEnabled",
+                ["item", ["var", "kwargs"], "tiller_enabled"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "tiller_enabled", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_issuer_url", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_issuer_url"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "issuerUrl",
+                ["item", ["var", "kwargs"], "oidc_issuer_url"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "oidc_issuer_url", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_client_id", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_client_id"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "clientId",
+                ["item", ["var", "kwargs"], "oidc_client_id"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "oidc_client_id", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_username_claim", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_username_claim"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "usernameClaim",
+                ["item", ["var", "kwargs"], "oidc_username_claim"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "oidc_username_claim", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_username_prefix", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_username_prefix"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "usernamePrefix",
+                ["item", ["var", "kwargs"], "oidc_username_prefix"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "oidc_username_prefix", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_groups_claim", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_groups_claim"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "groupsClaim",
+                ["item", ["var", "kwargs"], "oidc_groups_claim"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "oidc_groups_claim", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_groups_prefix", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_groups_prefix"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "groupsPrefix",
+                ["item", ["var", "kwargs"], "oidc_groups_prefix"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "oidc_groups_prefix", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_required_claims", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_required_claims"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "requiredClaims",
+                [
+                  "fn",
+                  "parse",
+                  "oidc_required_claims",
+                  ["item", ["var", "kwargs"], "oidc_required_claims"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "oidc_required_claims", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_ca_certificate", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_ca_certificate"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "caCertificate",
+                ["item", ["var", "kwargs"], "oidc_ca_certificate"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "oidc_ca_certificate", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_configuration_file", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_configuration_file"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "configurationFile",
+                ["item", ["var", "kwargs"], "oidc_configuration_file"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "oidc_configuration_file", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "oidc_signing_algorithms", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "oidc_signing_algorithms"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "signingAlgorithms",
+                [
+                  "fn",
+                  "parse",
+                  "oidc_signing_algorithms",
+                  ["item", ["var", "kwargs"], "oidc_signing_algorithms"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "oidc_signing_algorithms", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "open_id_connect_auth_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "open_id_connect_auth_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectTokenAuthenticationConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectTokenAuthenticationConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectTokenAuthenticationConfig"
+                ],
+                "isOpenIdConnectAuthEnabled",
+                ["item", ["var", "kwargs"], "open_id_connect_auth_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "open_id_connect_auth_enabled",
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "open_id_connect_discovery_enabled",
+                ["var", "kwargs"]
+              ],
+              [
+                "cmp",
+                "isnot",
+                [
+                  "item",
+                  ["var", "kwargs"],
+                  "open_id_connect_discovery_enabled"
+                ],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "openIdConnectDiscovery",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "openIdConnectDiscovery",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "openIdConnectDiscovery"
+                ],
+                "isOpenIdConnectDiscoveryEnabled",
+                ["item", ["var", "kwargs"], "open_id_connect_discovery_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "open_id_connect_discovery_enabled",
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pods_cidr", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "pods_cidr"], null]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "options"],
+                "kubernetesNetworkConfig",
+                ["dict"]
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "kubernetesNetworkConfig"
+                ],
+                "podsCidr",
+                ["item", ["var", "kwargs"], "pods_cidr"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "pods_cidr", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "services_cidr", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "services_cidr"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "kubernetesNetworkConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "kubernetesNetworkConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "kubernetesNetworkConfig"
+                ],
+                "servicesCidr",
+                ["item", ["var", "kwargs"], "services_cidr"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "services_cidr", null]],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "persistent_volume_freeform_tags",
+                ["var", "kwargs"]
+              ],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "persistent_volume_freeform_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "options"],
+                "persistentVolumeConfig",
+                ["dict"]
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "persistentVolumeConfig"
+                ],
+                "freeformTags",
+                [
+                  "fn",
+                  "parse",
+                  "persistent_volume_freeform_tags",
+                  ["item", ["var", "kwargs"], "persistent_volume_freeform_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "persistent_volume_freeform_tags",
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "persistent_volume_defined_tags",
+                ["var", "kwargs"]
+              ],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "persistent_volume_defined_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "persistentVolumeConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "persistentVolumeConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "persistentVolumeConfig"
+                ],
+                "definedTags",
+                [
+                  "fn",
+                  "parse",
+                  "persistent_volume_defined_tags",
+                  ["item", ["var", "kwargs"], "persistent_volume_defined_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "persistent_volume_defined_tags",
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "service_lb_freeform_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "service_lb_freeform_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "options"],
+                "serviceLbConfig",
+                ["dict"]
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "serviceLbConfig"
+                ],
+                "freeformTags",
+                [
+                  "fn",
+                  "parse",
+                  "service_lb_freeform_tags",
+                  ["item", ["var", "kwargs"], "service_lb_freeform_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "service_lb_freeform_tags", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "service_lb_defined_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "service_lb_defined_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  "serviceLbConfig",
+                  ["item", ["var", "kwargs"], "options"]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "options"],
+                    "serviceLbConfig",
+                    ["dict"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                [
+                  "item",
+                  ["item", ["var", "kwargs"], "options"],
+                  "serviceLbConfig"
+                ],
+                "definedTags",
+                [
+                  "fn",
+                  "parse",
+                  "service_lb_defined_tags",
+                  ["item", ["var", "kwargs"], "service_lb_defined_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "service_lb_defined_tags", null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "endpoint_nsg_ids"],
+              ["not", ["call", "get", ["var", "kwargs"], "endpoint_subnet_id"]]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --endpoint-nsg-ids without --endpoint-subnet-id"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "endpoint_public_ip_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "endpoint_public_ip_enabled"],
+                null
+              ],
+              ["not", ["call", "get", ["var", "kwargs"], "endpoint_subnet_id"]]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --endpoint-public-ip-enabled without --endpoint-subnet-id"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "call",
+                "get",
+                ["var", "kwargs"],
+                "endpoint_security_attributes"
+              ],
+              ["not", ["call", "get", ["var", "kwargs"], "endpoint_subnet_id"]]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --endpoint-security-attributes without --endpoint-subnet-id"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "endpoint_subnet_id", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "endpoint_subnet_id"],
+                null
+              ]
+            ],
+            [
+              ["set", ["var", "kwargs"], "endpoint_config", ["dict"]],
+              [
+                "set",
+                ["item", ["var", "kwargs"], "endpoint_config"],
+                "subnetId",
+                ["item", ["var", "kwargs"], "endpoint_subnet_id"]
+              ],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "endpoint_nsg_ids", ["var", "kwargs"]],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "endpoint_nsg_ids"],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "endpoint_config"],
+                    "nsgIds",
+                    [
+                      "fn",
+                      "parse",
+                      "endpoint_nsg_ids",
+                      ["item", ["var", "kwargs"], "endpoint_nsg_ids"]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "and",
+                  [
+                    "cmp",
+                    "in",
+                    "endpoint_public_ip_enabled",
+                    ["var", "kwargs"]
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "endpoint_public_ip_enabled"],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "endpoint_config"],
+                    "isPublicIpEnabled",
+                    ["item", ["var", "kwargs"], "endpoint_public_ip_enabled"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "and",
+                  [
+                    "cmp",
+                    "in",
+                    "endpoint_security_attributes",
+                    ["var", "kwargs"]
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "endpoint_security_attributes"],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["item", ["var", "kwargs"], "endpoint_config"],
+                    "securityAttributes",
+                    [
+                      "fn",
+                      "parse",
+                      "endpoint_security_attributes",
+                      [
+                        "item",
+                        ["var", "kwargs"],
+                        "endpoint_security_attributes"
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "endpoint_subnet_id", null]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "endpoint_nsg_ids", null]],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "endpoint_public_ip_enabled",
+              null
+            ]
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "endpoint_security_attributes",
+              null
+            ]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.container_engine.src.oci_cli_container_engine.generated.containerengine_cli.create_cluster",
+        "params": [
+          {
+            "name": "name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vcn_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kubernetes_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "endpoint_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "image_policy_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_pod_network_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "container_engine.container_engine",
+        "method": "create_cluster",
+        "http": "POST",
+        "path": "/clusters",
+        "positionalArgs": ["create_cluster_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_cluster_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["name"],
+          "param": "name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["vcnId"],
+          "param": "vcn_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["kubernetesVersion"],
+          "param": "kubernetes_version"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["endpointConfig"],
+          "transform": "parse_json_parameter",
+          "param": "endpoint_config",
+          "when": "endpoint_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["kmsKeyId"],
+          "param": "kms_key_id",
+          "when": "kms_key_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["options"],
+          "transform": "parse_json_parameter",
+          "param": "options",
+          "when": "options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["imagePolicyConfig"],
+          "transform": "parse_json_parameter",
+          "param": "image_policy_config",
+          "when": "image_policy_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["clusterPodNetworkOptions"],
+          "transform": "parse_json_parameter",
+          "param": "cluster_pod_network_options",
+          "when": "cluster_pod_network_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_cluster_details",
+          "key": ["type"],
+          "param": "type",
+          "when": "type is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8658,6 +10083,810 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["set", ["var", "kwargs"], "node_config_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "max_pods_per_node"],
+              ["not", ["call", "get", ["var", "kwargs"], "pod_subnet_ids"]]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --max-pods-per-node without --pod-subnet-ids"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "pod_nsg_ids"],
+              ["not", ["call", "get", ["var", "kwargs"], "pod_subnet_ids"]]
+            ],
+            [
+              ["usage", "Cannot specify --pod-nsg-ids without --pod-subnet-ids"]
+            ],
+            []
+          ],
+          ["let", "nodePoolPodNetworkOptionDetails", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "cni_type", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "cni_type"], null]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  [
+                    "cmp",
+                    "==",
+                    ["item", ["var", "kwargs"], "cni_type"],
+                    "FLANNEL_OVERLAY"
+                  ],
+                  ["call", "get", ["var", "kwargs"], "pod_subnet_ids"]
+                ],
+                [
+                  [
+                    "usage",
+                    "Cannot specify --pod_subnet_ids with --cni-type FLANNEL_OVERLAY"
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "cniType",
+                ["item", ["var", "kwargs"], "cni_type"]
+              ],
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "nodePoolPodNetworkOptionDetails",
+                ["var", "nodePoolPodNetworkOptionDetails"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "cni_type", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "max_pods_per_node", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "max_pods_per_node"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "maxPodsPerNode",
+                [
+                  "fn",
+                  "parse",
+                  "max_pods_per_node",
+                  ["item", ["var", "kwargs"], "max_pods_per_node"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "max_pods_per_node", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pod_nsg_ids", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "pod_nsg_ids"], null]
+            ],
+            [
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "podNsgIds",
+                [
+                  "fn",
+                  "parse",
+                  "pod_nsg_ids",
+                  ["item", ["var", "kwargs"], "pod_nsg_ids"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "pod_nsg_ids", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pod_subnet_ids", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "pod_subnet_ids"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "is",
+                  [
+                    "call",
+                    "get",
+                    ["var", "nodePoolPodNetworkOptionDetails"],
+                    "cni_type"
+                  ],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "nodePoolPodNetworkOptionDetails"],
+                    "cniType",
+                    "OCI_VCN_IP_NATIVE"
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "podSubnetIds",
+                [
+                  "fn",
+                  "parse",
+                  "pod_subnet_ids",
+                  ["item", ["var", "kwargs"], "pod_subnet_ids"]
+                ]
+              ],
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "nodePoolPodNetworkOptionDetails",
+                ["var", "nodePoolPodNetworkOptionDetails"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "pod_subnet_ids", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "size", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "size"], null]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "size",
+                ["item", ["var", "kwargs"], "size"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "size", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "nsg_ids", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "nsg_ids"], null]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "nsgIds",
+                [
+                  "fn",
+                  "parse",
+                  "nsg_ids",
+                  ["item", ["var", "kwargs"], "nsg_ids"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "nsg_ids", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "placement_configs", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "placement_configs"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "placementConfigs",
+                [
+                  "fn",
+                  "parse",
+                  "placement_configs",
+                  ["item", ["var", "kwargs"], "placement_configs"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "placement_configs", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "node_defined_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "node_defined_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "definedTags",
+                [
+                  "fn",
+                  "parse",
+                  "node_defined_tags",
+                  ["item", ["var", "kwargs"], "node_defined_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "node_defined_tags", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "node_freeform_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "node_freeform_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "freeformTags",
+                [
+                  "fn",
+                  "parse",
+                  "node_freeform_tags",
+                  ["item", ["var", "kwargs"], "node_freeform_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "node_freeform_tags", null]
+          ],
+          [
+            "if",
+            ["call", "get", ["var", "kwargs"], "kms_key_id"],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "kmsKeyId",
+                ["call", "get", ["var", "kwargs"], "kms_key_id"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "kms_key_id", null]],
+          [
+            "if",
+            [
+              "call",
+              "get",
+              ["var", "kwargs"],
+              "is_pv_encryption_in_transit_enabled"
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "isPvEncryptionInTransitEnabled",
+                [
+                  "call",
+                  "get",
+                  ["var", "kwargs"],
+                  "is_pv_encryption_in_transit_enabled"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "is_pv_encryption_in_transit_enabled",
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "node_source_details"],
+              [
+                "or",
+                ["call", "get", ["var", "kwargs"], "node_image_id"],
+                [
+                  "call",
+                  "get",
+                  ["var", "kwargs"],
+                  "node_boot_volume_size_in_gbs"
+                ]
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --node-source-details with any of: --node-image-id or --node-boot-volume-size-in-gbs"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "call",
+                "get",
+                ["var", "kwargs"],
+                "node_boot_volume_size_in_gbs"
+              ],
+              ["not", ["call", "get", ["var", "kwargs"], "node_image_id"]]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --node-boot-volume-size-in-gbs without --node-image-id"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["call", "get", ["var", "kwargs"], "node_image_id"],
+            [
+              [
+                "let",
+                "source_details",
+                [
+                  "dict",
+                  ["sourceType", "IMAGE"],
+                  ["imageId", ["item", ["var", "kwargs"], "node_image_id"]]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "call",
+                  "get",
+                  ["var", "kwargs"],
+                  "node_boot_volume_size_in_gbs"
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "source_details"],
+                    "bootVolumeSizeInGBs",
+                    [
+                      "call",
+                      "get",
+                      ["var", "kwargs"],
+                      "node_boot_volume_size_in_gbs"
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "node_source_details",
+                ["fn", "dumps", ["var", "source_details"]]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "node_image_id", null]],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "node_boot_volume_size_in_gbs",
+              null
+            ]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.container_engine.src.oci_cli_container_engine.generated.containerengine_cli.create_node_pool",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_shape",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kubernetes_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_metadata",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_image_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_shape_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "initial_node_labels",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "quantity_per_subnet",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_config_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_eviction_node_pool_settings",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_pool_cycling_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secondary_vnics",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "network_launch_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "primary_vnic",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "container_engine.container_engine",
+        "method": "create_node_pool",
+        "http": "POST",
+        "path": "/nodePools",
+        "positionalArgs": ["create_node_pool_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_node_pool_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["clusterId"],
+          "param": "cluster_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["name"],
+          "param": "name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodeShape"],
+          "param": "node_shape"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["kubernetesVersion"],
+          "param": "kubernetes_version",
+          "when": "kubernetes_version is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodeMetadata"],
+          "transform": "parse_json_parameter",
+          "param": "node_metadata",
+          "when": "node_metadata is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodeImageName"],
+          "param": "node_image_name",
+          "when": "node_image_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodeSourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "node_source_details",
+          "when": "node_source_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodeShapeConfig"],
+          "transform": "parse_json_parameter",
+          "param": "node_shape_config",
+          "when": "node_shape_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["initialNodeLabels"],
+          "transform": "parse_json_parameter",
+          "param": "initial_node_labels",
+          "when": "initial_node_labels is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["sshPublicKey"],
+          "param": "ssh_public_key",
+          "when": "ssh_public_key is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["quantityPerSubnet"],
+          "param": "quantity_per_subnet",
+          "when": "quantity_per_subnet is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["subnetIds"],
+          "transform": "parse_json_parameter",
+          "param": "subnet_ids",
+          "when": "subnet_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodeConfigDetails"],
+          "transform": "parse_json_parameter",
+          "param": "node_config_details",
+          "when": "node_config_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodeEvictionNodePoolSettings"],
+          "transform": "parse_json_parameter",
+          "param": "node_eviction_node_pool_settings",
+          "when": "node_eviction_node_pool_settings is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["nodePoolCyclingDetails"],
+          "transform": "parse_json_parameter",
+          "param": "node_pool_cycling_details",
+          "when": "node_pool_cycling_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["secondaryVnics"],
+          "transform": "parse_json_parameter",
+          "param": "secondary_vnics",
+          "when": "secondary_vnics is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["networkLaunchType"],
+          "param": "network_launch_type",
+          "when": "network_launch_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_node_pool_details",
+          "key": ["primaryVnic"],
+          "transform": "parse_json_parameter",
+          "param": "primary_vnic",
+          "when": "primary_vnic is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10927,6 +13156,693 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["set", ["var", "kwargs"], "node_config_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "max_pods_per_node"],
+              ["not", ["call", "get", ["var", "kwargs"], "pod_subnet_ids"]]
+            ],
+            [
+              [
+                "usage",
+                "Cannot specify --max-pods-per-node without --pod-subnet-ids"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["call", "get", ["var", "kwargs"], "pod_nsg_ids"],
+              ["not", ["call", "get", ["var", "kwargs"], "pod_subnet_ids"]]
+            ],
+            [
+              ["usage", "Cannot specify --pod-nsg-ids without --pod-subnet-ids"]
+            ],
+            []
+          ],
+          ["let", "nodePoolPodNetworkOptionDetails", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "max_pods_per_node", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "max_pods_per_node"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "maxPodsPerNode",
+                [
+                  "fn",
+                  "parse",
+                  "max_pods_per_node",
+                  ["item", ["var", "kwargs"], "max_pods_per_node"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "max_pods_per_node", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pod_nsg_ids", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "pod_nsg_ids"], null]
+            ],
+            [
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "podNsgIds",
+                [
+                  "fn",
+                  "parse",
+                  "pod_nsg_ids",
+                  ["item", ["var", "kwargs"], "pod_nsg_ids"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "pod_nsg_ids", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pod_subnet_ids", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "pod_subnet_ids"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "cniType",
+                "OCI_VCN_IP_NATIVE"
+              ],
+              [
+                "set",
+                ["var", "nodePoolPodNetworkOptionDetails"],
+                "podSubnetIds",
+                [
+                  "fn",
+                  "parse",
+                  "pod_subnet_ids",
+                  ["item", ["var", "kwargs"], "pod_subnet_ids"]
+                ]
+              ],
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "nodePoolPodNetworkOptionDetails",
+                ["var", "nodePoolPodNetworkOptionDetails"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "pod_subnet_ids", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "size", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "size"], null]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "size",
+                ["item", ["var", "kwargs"], "size"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "size", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "nsg_ids", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "nsg_ids"], null]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "nsgIds",
+                [
+                  "fn",
+                  "parse",
+                  "nsg_ids",
+                  ["item", ["var", "kwargs"], "nsg_ids"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "nsg_ids", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "placement_configs", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "placement_configs"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "notin", "node_config_details", ["var", "kwargs"]],
+                [["set", ["var", "kwargs"], "node_config_details", ["dict"]]],
+                []
+              ],
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "placementConfigs",
+                [
+                  "fn",
+                  "parse",
+                  "placement_configs",
+                  ["item", ["var", "kwargs"], "placement_configs"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "placement_configs", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "node_defined_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "node_defined_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "definedTags",
+                [
+                  "fn",
+                  "parse",
+                  "node_defined_tags",
+                  ["item", ["var", "kwargs"], "node_defined_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "node_defined_tags", null]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "node_freeform_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "node_freeform_tags"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "freeformTags",
+                [
+                  "fn",
+                  "parse",
+                  "node_freeform_tags",
+                  ["item", ["var", "kwargs"], "node_freeform_tags"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "node_freeform_tags", null]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "kms_key_id"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "kmsKeyId",
+                ["call", "get", ["var", "kwargs"], "kms_key_id"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "kms_key_id", null]],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              [
+                "call",
+                "get",
+                ["var", "kwargs"],
+                "is_pv_encryption_in_transit_enabled"
+              ],
+              null
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "node_config_details"],
+                "isPvEncryptionInTransitEnabled",
+                [
+                  "call",
+                  "get",
+                  ["var", "kwargs"],
+                  "is_pv_encryption_in_transit_enabled"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "is_pv_encryption_in_transit_enabled",
+              null
+            ]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.container_engine.src.oci_cli_container_engine.generated.containerengine_cli.update_node_pool",
+        "params": [
+          {
+            "name": "node_pool_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kubernetes_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "initial_node_labels",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "quantity_per_subnet",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_config_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_metadata",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_shape",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_shape_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_eviction_node_pool_settings",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_pool_cycling_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secondary_vnics",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "network_launch_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "primary_vnic",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "override_eviction_grace_duration",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_force_deletion_after_override_grace_duration",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "container_engine.container_engine",
+        "method": "update_node_pool",
+        "http": "PUT",
+        "path": "/nodePools/{nodePoolId}",
+        "positionalArgs": ["node_pool_id", "update_node_pool_details"],
+        "pathParams": {
+          "nodePoolId": "node_pool_id"
+        },
+        "queryParams": {
+          "overrideEvictionGraceDuration": {
+            "arg": "override_eviction_grace_duration"
+          },
+          "isForceDeletionAfterOverrideGraceDuration": {
+            "arg": "is_force_deletion_after_override_grace_duration"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_node_pool_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["node_pool_id"],
+          "param": "node_pool_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["override_eviction_grace_duration"],
+          "param": "override_eviction_grace_duration",
+          "when": "override_eviction_grace_duration is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["is_force_deletion_after_override_grace_duration"],
+          "param": "is_force_deletion_after_override_grace_duration",
+          "when": "is_force_deletion_after_override_grace_duration is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["name"],
+          "param": "name",
+          "when": "name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["kubernetesVersion"],
+          "param": "kubernetes_version",
+          "when": "kubernetes_version is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["initialNodeLabels"],
+          "transform": "parse_json_parameter",
+          "param": "initial_node_labels",
+          "when": "initial_node_labels is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["quantityPerSubnet"],
+          "param": "quantity_per_subnet",
+          "when": "quantity_per_subnet is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["subnetIds"],
+          "transform": "parse_json_parameter",
+          "param": "subnet_ids",
+          "when": "subnet_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["nodeConfigDetails"],
+          "transform": "parse_json_parameter",
+          "param": "node_config_details",
+          "when": "node_config_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["nodeMetadata"],
+          "transform": "parse_json_parameter",
+          "param": "node_metadata",
+          "when": "node_metadata is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["nodeSourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "node_source_details",
+          "when": "node_source_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["sshPublicKey"],
+          "param": "ssh_public_key",
+          "when": "ssh_public_key is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["nodeShape"],
+          "param": "node_shape",
+          "when": "node_shape is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["nodeShapeConfig"],
+          "transform": "parse_json_parameter",
+          "param": "node_shape_config",
+          "when": "node_shape_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["nodeEvictionNodePoolSettings"],
+          "transform": "parse_json_parameter",
+          "param": "node_eviction_node_pool_settings",
+          "when": "node_eviction_node_pool_settings is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["nodePoolCyclingDetails"],
+          "transform": "parse_json_parameter",
+          "param": "node_pool_cycling_details",
+          "when": "node_pool_cycling_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["secondaryVnics"],
+          "transform": "parse_json_parameter",
+          "param": "secondary_vnics",
+          "when": "secondary_vnics is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["networkLaunchType"],
+          "param": "network_launch_type",
+          "when": "network_launch_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_node_pool_details",
+          "key": ["primaryVnic"],
+          "transform": "parse_json_parameter",
+          "param": "primary_vnic",
+          "when": "primary_vnic is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

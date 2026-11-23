@@ -112676,6 +112676,260 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "credential_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "user_name", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "user_name"], null]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "userName",
+                ["item", ["var", "kwargs"], "user_name"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "user_name"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "password_secret_id", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "password_secret_id"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "passwordSecretId",
+                ["item", ["var", "kwargs"], "password_secret_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "password_secret_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "credential_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "credential_details",
+                ["fn", "dumps", ["var", "credential_details"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.enable_database_management",
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "credential_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_end_point_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "service_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "management_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "protocol",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "port",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssl_secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "role",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "enable_database_management",
+        "http": "POST",
+        "path": "/databases/{databaseId}/actions/enableDatabaseManagement",
+        "positionalArgs": ["database_id", "enable_database_management_details"],
+        "pathParams": {
+          "databaseId": "database_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "enable_database_management_details",
+        "responseType": "Database",
+        "paginated": false,
+        "lifecycleGetter": "get_database"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["database_id"],
+          "param": "database_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["credentialDetails"],
+          "transform": "parse_json_parameter",
+          "param": "credential_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["privateEndPointId"],
+          "param": "private_end_point_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["serviceName"],
+          "param": "service_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["managementType"],
+          "param": "management_type",
+          "when": "management_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["protocol"],
+          "param": "protocol",
+          "when": "protocol is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["port"],
+          "param": "port",
+          "when": "port is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["sslSecretId"],
+          "param": "ssl_secret_id",
+          "when": "ssl_secret_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_database_management_details",
+          "key": ["role"],
+          "param": "role",
+          "when": "role is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -115510,6 +115764,263 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "credential_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "user_name", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "user_name"], null]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "userName",
+                ["item", ["var", "kwargs"], "user_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "password_secret_id", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "password_secret_id"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "passwordSecretId",
+                ["item", ["var", "kwargs"], "password_secret_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "credential_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "credential_details",
+                ["fn", "dumps", ["var", "credential_details"]]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "user_name"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "password_secret_id"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.modify_database_management",
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "credential_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_end_point_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "management_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "service_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "protocol",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "port",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssl_secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "role",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "modify_database_management",
+        "http": "POST",
+        "path": "/databases/{databaseId}/actions/modifyDatabaseManagement",
+        "positionalArgs": ["database_id", "modify_database_management_details"],
+        "pathParams": {
+          "databaseId": "database_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "modify_database_management_details",
+        "responseType": "Database",
+        "paginated": false,
+        "lifecycleGetter": "get_database"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["database_id"],
+          "param": "database_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["credentialDetails"],
+          "transform": "parse_json_parameter",
+          "param": "credential_details",
+          "when": "credential_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["privateEndPointId"],
+          "param": "private_end_point_id",
+          "when": "private_end_point_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["managementType"],
+          "param": "management_type",
+          "when": "management_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["serviceName"],
+          "param": "service_name",
+          "when": "service_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["protocol"],
+          "param": "protocol",
+          "when": "protocol is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["port"],
+          "param": "port",
+          "when": "port is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["sslSecretId"],
+          "param": "ssl_secret_id",
+          "when": "ssl_secret_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_database_management_details",
+          "key": ["role"],
+          "param": "role",
+          "when": "role is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -118487,6 +118998,648 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "msu_details", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "managed_software_update_details",
+                ["item", ["var", "kwargs"], "msu_details"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "msu_details"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "datasafe_registration_details", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "data_safe_registration_details",
+                ["item", ["var", "kwargs"], "datasafe_registration_details"]
+              ],
+              [
+                "do",
+                [
+                  "call",
+                  "pop",
+                  ["var", "kwargs"],
+                  "datasafe_registration_details"
+                ]
+              ]
+            ],
+            []
+          ],
+          ["let", "database_auto_failover_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "manage_auto_failover", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "manage_auto_failover"]
+            ],
+            [
+              [
+                "set",
+                ["var", "database_auto_failover_details"],
+                "managed_auto_failover",
+                ["item", ["var", "kwargs"], "manage_auto_failover"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "auto_failover_targets", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "auto_failover_targets"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                ["item", ["var", "kwargs"], "auto_failover_targets"],
+                [
+                  [
+                    "set",
+                    ["var", "database_auto_failover_details"],
+                    "failover_targets",
+                    [
+                      "call",
+                      "split",
+                      ["item", ["var", "kwargs"], "auto_failover_targets"],
+                      ","
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "database_auto_failover_details"],
+                    "failover_targets",
+                    ["list"]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "database_auto_failover_details"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "auto_failover_configuration",
+                ["fn", "dumps", ["var", "database_auto_failover_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                null
+              ],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "recovery_window_in_days"],
+                null
+              ]
+            ],
+            [
+              ["let", "db_backup_config", ["dict"]],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "auto_backup_window", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "auto_backup_window"],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "autoBackupEnabled",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"]
+                  ],
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "autoBackupWindow",
+                    ["item", ["var", "kwargs"], "auto_backup_window"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "auto_full_backup_day", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "auto_full_backup_day"],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "autoBackupEnabled",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"]
+                  ],
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "autoFullBackupDay",
+                    ["item", ["var", "kwargs"], "auto_full_backup_day"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "auto_full_backup_window", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "auto_full_backup_window"],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "autoBackupEnabled",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"]
+                  ],
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "autoFullBackupWindow",
+                    ["item", ["var", "kwargs"], "auto_full_backup_window"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "autoBackupEnabled",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "recovery_window_in_days"],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "recoveryWindowInDays",
+                    ["item", ["var", "kwargs"], "recovery_window_in_days"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "backup_destination", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "backup_destination"]
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "db_backup_config"],
+                    "backupDestinationDetails",
+                    [
+                      "fn",
+                      "parse",
+                      "backup_destination_details",
+                      ["item", ["var", "kwargs"], "backup_destination"]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "db_backup_config",
+                ["fn", "dumps", ["var", "db_backup_config"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "zero_data_loss_enabled"],
+              null
+            ],
+            [
+              [
+                "let",
+                "backup_details_list",
+                [
+                  "call",
+                  "setdefault",
+                  ["var", "db_backup_config"],
+                  "backupDestinationDetails",
+                  ["list"]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["var", "backup_details_list"]],
+                [
+                  [
+                    "do",
+                    ["call", "append", ["var", "backup_details_list"], ["dict"]]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["item", ["var", "backup_details_list"], 0],
+                "isZeroDataLossEnabled",
+                ["item", ["var", "kwargs"], "zero_data_loss_enabled"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "auto_backup_enabled"],
+          ["del", ["var", "kwargs"], "recovery_window_in_days"],
+          ["del", ["var", "kwargs"], "auto_backup_window"],
+          ["del", ["var", "kwargs"], "auto_full_backup_day"],
+          ["del", ["var", "kwargs"], "auto_full_backup_window"],
+          ["del", ["var", "kwargs"], "backup_destination"],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "zero_data_loss_enabled", null]
+          ],
+          ["del", ["var", "kwargs"], "manage_auto_failover"],
+          ["del", ["var", "kwargs"], "auto_failover_targets"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.update_database",
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_backup_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_home_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "new_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "old_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "new_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "storage_size_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "managed_software_update_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "patch_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "protection_mode",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "transport_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_active_data_guard_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "auto_failover_configuration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_safe_registration_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "update_database",
+        "http": "PUT",
+        "path": "/databases/{databaseId}",
+        "positionalArgs": ["database_id", "update_database_details"],
+        "pathParams": {
+          "databaseId": "database_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_database_details",
+        "responseType": "Database",
+        "paginated": false,
+        "lifecycleGetter": "get_database"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["database_id"],
+          "param": "database_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["dbBackupConfig"],
+          "transform": "parse_json_parameter",
+          "param": "db_backup_config",
+          "when": "db_backup_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["dbHomeId"],
+          "param": "db_home_id",
+          "when": "db_home_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["newAdminPassword"],
+          "param": "new_admin_password",
+          "when": "new_admin_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["oldTdeWalletPassword"],
+          "param": "old_tde_wallet_password",
+          "when": "old_tde_wallet_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["newTdeWalletPassword"],
+          "param": "new_tde_wallet_password",
+          "when": "new_tde_wallet_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["storageSizeDetails"],
+          "transform": "parse_json_parameter",
+          "param": "storage_size_details",
+          "when": "storage_size_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["managedSoftwareUpdateDetails"],
+          "transform": "parse_json_parameter",
+          "param": "managed_software_update_details",
+          "when": "managed_software_update_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["patchOptions"],
+          "transform": "parse_json_parameter",
+          "param": "patch_options",
+          "when": "patch_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["databaseAdminPassword"],
+          "param": "database_admin_password",
+          "when": "database_admin_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["protectionMode"],
+          "param": "protection_mode",
+          "when": "protection_mode is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["transportType"],
+          "param": "transport_type",
+          "when": "transport_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["isActiveDataGuardEnabled"],
+          "param": "is_active_data_guard_enabled",
+          "when": "is_active_data_guard_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["autoFailoverConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "auto_failover_configuration",
+          "when": "auto_failover_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_details",
+          "key": ["dataSafeRegistrationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "data_safe_registration_details",
+          "when": "data_safe_registration_details is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -140825,6 +141978,329 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "high_capacity_database_storage", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "high_capacity_storage_gb", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "high_capacity_storage_gb"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "high_capacity_database_storage"],
+                "total_size_in_gbs",
+                ["item", ["var", "kwargs"], "high_capacity_storage_gb"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              ">",
+              ["fn", "len", ["var", "high_capacity_database_storage"]],
+              0
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "high_capacity_database_storage",
+                ["fn", "dumps", ["var", "high_capacity_database_storage"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "flash_cache_in_percent", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "additional_flash_cache_in_percent",
+                ["item", ["var", "kwargs"], "flash_cache_in_percent"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "exa_infra_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "exadata_infrastructure_id",
+                ["item", ["var", "kwargs"], "exa_infra_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "high_capacity_storage_gb"]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "flash_cache_in_percent"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "exa_infra_id"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.create_exascale_db_storage_vault",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "high_capacity_database_storage",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_zone",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "additional_flash_cache_in_percent",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "exadata_infrastructure_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_placement_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_autoscale_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autoscale_limit_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "create_exascale_db_storage_vault",
+        "http": "POST",
+        "path": "/exascaleDbStorageVaults",
+        "positionalArgs": ["create_exascale_db_storage_vault_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_exascale_db_storage_vault_details",
+        "responseType": "ExascaleDbStorageVault",
+        "paginated": false,
+        "lifecycleGetter": "get_exascale_db_storage_vault"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["availabilityDomain"],
+          "param": "availability_domain"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["highCapacityDatabaseStorage"],
+          "transform": "parse_json_parameter",
+          "param": "high_capacity_database_storage"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["timeZone"],
+          "param": "time_zone",
+          "when": "time_zone is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["additionalFlashCacheInPercent"],
+          "param": "additional_flash_cache_in_percent",
+          "when": "additional_flash_cache_in_percent is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["exadataInfrastructureId"],
+          "param": "exadata_infrastructure_id",
+          "when": "exadata_infrastructure_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["clusterPlacementGroupId"],
+          "param": "cluster_placement_group_id",
+          "when": "cluster_placement_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["isAutoscaleEnabled"],
+          "param": "is_autoscale_enabled",
+          "when": "is_autoscale_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_exascale_db_storage_vault_details",
+          "key": ["autoscaleLimitInGBs"],
+          "param": "autoscale_limit_in_gbs",
+          "when": "autoscale_limit_in_gbs is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -142257,6 +143733,276 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "high_capacity_database_storage", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "high_capacity_storage_gb", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "high_capacity_storage_gb"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "high_capacity_database_storage"],
+                "total_size_in_gbs",
+                ["item", ["var", "kwargs"], "high_capacity_storage_gb"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              ">",
+              ["fn", "len", ["var", "high_capacity_database_storage"]],
+              0
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "high_capacity_database_storage",
+                ["fn", "dumps", ["var", "high_capacity_database_storage"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "flash_cache_in_percent", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "additional_flash_cache_in_percent",
+                ["item", ["var", "kwargs"], "flash_cache_in_percent"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "high_capacity_storage_gb"]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "flash_cache_in_percent"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.update_exascale_db_storage_vault",
+        "params": [
+          {
+            "name": "exascale_db_storage_vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "high_capacity_database_storage",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "additional_flash_cache_in_percent",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_autoscale_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autoscale_limit_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "update_exascale_db_storage_vault",
+        "http": "PUT",
+        "path": "/exascaleDbStorageVaults/{exascaleDbStorageVaultId}",
+        "positionalArgs": [
+          "exascale_db_storage_vault_id",
+          "update_exascale_db_storage_vault_details"
+        ],
+        "pathParams": {
+          "exascaleDbStorageVaultId": "exascale_db_storage_vault_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_exascale_db_storage_vault_details",
+        "responseType": "ExascaleDbStorageVault",
+        "paginated": false,
+        "lifecycleGetter": "get_exascale_db_storage_vault"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["exascale_db_storage_vault_id"],
+          "param": "exascale_db_storage_vault_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["highCapacityDatabaseStorage"],
+          "transform": "parse_json_parameter",
+          "param": "high_capacity_database_storage",
+          "when": "high_capacity_database_storage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["additionalFlashCacheInPercent"],
+          "param": "additional_flash_cache_in_percent",
+          "when": "additional_flash_cache_in_percent is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["isAutoscaleEnabled"],
+          "param": "is_autoscale_enabled",
+          "when": "is_autoscale_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exascale_db_storage_vault_details",
+          "key": ["autoscaleLimitInGBs"],
+          "param": "autoscale_limit_in_gbs",
+          "when": "autoscale_limit_in_gbs is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -163424,6 +165170,265 @@
           "services.database.src.oci_cli_database.generated.database_cli.create_key_store_key_store_type_from_oracle_key_vault_details"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "connection_ips", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "connection_ips"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_connection_ips",
+                [
+                  "fn",
+                  "parse",
+                  "connection_ips",
+                  ["item", ["var", "kwargs"], "connection_ips"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "connection_ips"],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "admin_username", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "admin_username"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_admin_username",
+                ["item", ["var", "kwargs"], "admin_username"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "admin_username"],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "vault_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "vault_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_vault_id",
+                ["item", ["var", "kwargs"], "vault_id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "vault_id"],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "secret_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "secret_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_secret_id",
+                ["item", ["var", "kwargs"], "secret_id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "secret_id"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.create_key_store_key_store_type_from_oracle_key_vault_details",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_connection_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_admin_username",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "create_key_store",
+        "http": "POST",
+        "path": "/keyStores",
+        "positionalArgs": ["create_key_store_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_key_store_details",
+        "responseType": "KeyStore",
+        "paginated": false,
+        "lifecycleGetter": "get_key_store"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["typeDetails"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["typeDetails", "connectionIps"],
+          "transform": "parse_json_parameter",
+          "param": "type_details_connection_ips"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["typeDetails", "adminUsername"],
+          "param": "type_details_admin_username"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["typeDetails", "vaultId"],
+          "param": "type_details_vault_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["typeDetails", "secretId"],
+          "param": "type_details_secret_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_key_store_details",
+          "key": ["typeDetails", "type"],
+          "value": "ORACLE_KEY_VAULT"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -164373,6 +166378,273 @@
           "services.database.src.oci_cli_database.generated.database_cli.update_key_store_key_store_type_from_oracle_key_vault_details"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "connection_ips", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "connection_ips"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_connection_ips",
+                [
+                  "fn",
+                  "parse",
+                  "connection_ips",
+                  ["item", ["var", "kwargs"], "connection_ips"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "connection_ips"],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "admin_username", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "admin_username"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_admin_username",
+                ["item", ["var", "kwargs"], "admin_username"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "admin_username"],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "vault_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "vault_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_vault_id",
+                ["item", ["var", "kwargs"], "vault_id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "vault_id"],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "secret_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "secret_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "type_details_secret_id",
+                ["item", ["var", "kwargs"], "secret_id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "secret_id"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.update_key_store_key_store_type_from_oracle_key_vault_details",
+        "params": [
+          {
+            "name": "key_store_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_connection_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_admin_username",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "type_details_secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "update_key_store",
+        "http": "PUT",
+        "path": "/keyStores/{keyStoreId}",
+        "positionalArgs": ["key_store_id", "update_key_store_details"],
+        "pathParams": {
+          "keyStoreId": "key_store_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_key_store_details",
+        "responseType": "KeyStore",
+        "paginated": false,
+        "lifecycleGetter": "get_key_store"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["key_store_id"],
+          "param": "key_store_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["typeDetails"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["typeDetails", "connectionIps"],
+          "transform": "parse_json_parameter",
+          "param": "type_details_connection_ips"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["typeDetails", "adminUsername"],
+          "param": "type_details_admin_username"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["typeDetails", "vaultId"],
+          "param": "type_details_vault_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["typeDetails", "secretId"],
+          "param": "type_details_secret_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_key_store_details",
+          "key": ["typeDetails", "type"],
+          "value": "ORACLE_KEY_VAULT"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -175798,6 +178070,494 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "cdb_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "container_database_id",
+                ["item", ["var", "kwargs"], "cdb_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "cdb_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "source_cdb_admin_password", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "pdb_creation_type_details_source_container_database_admin_password",
+                ["item", ["var", "kwargs"], "source_cdb_admin_password"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "source_cdb_admin_password"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "source_pdb_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "pdb_creation_type_details_source_pluggable_database_id",
+                ["item", ["var", "kwargs"], "source_pdb_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "source_pdb_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "dblink_user_password", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "pdb_creation_type_details_dblink_user_password",
+                ["item", ["var", "kwargs"], "dblink_user_password"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "dblink_user_password"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "dblink_username", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "pdb_creation_type_details_dblink_username",
+                ["item", ["var", "kwargs"], "dblink_username"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "dblink_username"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "create_pdb_backup", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "should_create_pdb_backup",
+                ["item", ["var", "kwargs"], "create_pdb_backup"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "create_pdb_backup"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "lock_pdb_admin_account", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "should_pdb_admin_account_be_locked",
+                ["item", ["var", "kwargs"], "lock_pdb_admin_account"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "lock_pdb_admin_account"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "cdb_admin_password", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "container_database_admin_password",
+                ["item", ["var", "kwargs"], "cdb_admin_password"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "cdb_admin_password"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "is_thin_clone", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "pdb_creation_type_details_is_thin_clone",
+                ["item", ["var", "kwargs"], "is_thin_clone"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "is_thin_clone"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "source_pdb_snapshot_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "pdb_creation_type_details_source_pluggable_database_snapshot_id",
+                ["item", ["var", "kwargs"], "source_pdb_snapshot_id"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "source_pdb_snapshot_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "pdb_creation_type_details_refreshable_clone_details",
+            ["dict"]
+          ],
+          [
+            "if",
+            ["cmp", "in", "is_refreshable_clone", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "pdb_creation_type_details_refreshable_clone_details"],
+                "isRefreshableClone",
+                ["item", ["var", "kwargs"], "is_refreshable_clone"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "is_refreshable_clone"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              ">",
+              [
+                "fn",
+                "len",
+                ["var", "pdb_creation_type_details_refreshable_clone_details"]
+              ],
+              0
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "pdb_creation_type_details_refreshable_clone_details",
+                [
+                  "fn",
+                  "dumps",
+                  ["var", "pdb_creation_type_details_refreshable_clone_details"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.create_pluggable_database_create_pluggable_database_from_remote_clone_details",
+        "params": [
+          {
+            "name": "pdb_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "container_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details_source_pluggable_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details_source_container_database_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_pdb_admin_account_be_locked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "container_database_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_create_pdb_backup",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details_dblink_username",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details_dblink_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details_refreshable_clone_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details_is_thin_clone",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details_source_pluggable_database_snapshot_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "create_pluggable_database",
+        "http": "POST",
+        "path": "/pluggableDatabases",
+        "positionalArgs": ["create_pluggable_database_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_pluggable_database_details",
+        "responseType": "PluggableDatabase",
+        "paginated": false,
+        "lifecycleGetter": "get_pluggable_database"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbName"],
+          "param": "pdb_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["containerDatabaseId"],
+          "param": "container_database_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails", "sourcePluggableDatabaseId"],
+          "param": "pdb_creation_type_details_source_pluggable_database_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": [
+            "pdbCreationTypeDetails",
+            "sourceContainerDatabaseAdminPassword"
+          ],
+          "param": "pdb_creation_type_details_source_container_database_admin_password"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbAdminPassword"],
+          "param": "pdb_admin_password",
+          "when": "pdb_admin_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["tdeWalletPassword"],
+          "param": "tde_wallet_password",
+          "when": "tde_wallet_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["shouldPdbAdminAccountBeLocked"],
+          "param": "should_pdb_admin_account_be_locked",
+          "when": "should_pdb_admin_account_be_locked is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["containerDatabaseAdminPassword"],
+          "param": "container_database_admin_password",
+          "when": "container_database_admin_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["shouldCreatePdbBackup"],
+          "param": "should_create_pdb_backup",
+          "when": "should_create_pdb_backup is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails", "dblinkUsername"],
+          "param": "pdb_creation_type_details_dblink_username",
+          "when": "pdb_creation_type_details_dblink_username is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails", "dblinkUserPassword"],
+          "param": "pdb_creation_type_details_dblink_user_password",
+          "when": "pdb_creation_type_details_dblink_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails", "refreshableCloneDetails"],
+          "transform": "parse_json_parameter",
+          "param": "pdb_creation_type_details_refreshable_clone_details",
+          "when": "pdb_creation_type_details_refreshable_clone_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails", "isThinClone"],
+          "param": "pdb_creation_type_details_is_thin_clone",
+          "when": "pdb_creation_type_details_is_thin_clone is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": [
+            "pdbCreationTypeDetails",
+            "sourcePluggableDatabaseSnapshotId"
+          ],
+          "param": "pdb_creation_type_details_source_pluggable_database_snapshot_id",
+          "when": "pdb_creation_type_details_source_pluggable_database_snapshot_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails", "creationType"],
+          "value": "REMOTE_CLONE_PDB"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -177366,6 +180126,250 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "credential_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "user_name", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "user_name"], null]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "userName",
+                ["item", ["var", "kwargs"], "user_name"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "user_name"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "password_secret_id", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "password_secret_id"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "passwordSecretId",
+                ["item", ["var", "kwargs"], "password_secret_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "password_secret_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "credential_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "credential_details",
+                ["fn", "dumps", ["var", "credential_details"]]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.enable_pluggable_database_management",
+        "params": [
+          {
+            "name": "pluggable_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "credential_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_end_point_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "service_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "protocol",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "port",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssl_secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "role",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "enable_pluggable_database_management",
+        "http": "POST",
+        "path": "/pluggableDatabases/{pluggableDatabaseId}/actions/enablePluggableDatabaseManagement",
+        "positionalArgs": [
+          "pluggable_database_id",
+          "enable_pluggable_database_management_details"
+        ],
+        "pathParams": {
+          "pluggableDatabaseId": "pluggable_database_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "enable_pluggable_database_management_details",
+        "responseType": "PluggableDatabase",
+        "paginated": false,
+        "lifecycleGetter": "get_pluggable_database"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["pluggable_database_id"],
+          "param": "pluggable_database_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_pluggable_database_management_details",
+          "key": ["credentialDetails"],
+          "transform": "parse_json_parameter",
+          "param": "credential_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_pluggable_database_management_details",
+          "key": ["privateEndPointId"],
+          "param": "private_end_point_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_pluggable_database_management_details",
+          "key": ["serviceName"],
+          "param": "service_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_pluggable_database_management_details",
+          "key": ["protocol"],
+          "param": "protocol",
+          "when": "protocol is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_pluggable_database_management_details",
+          "key": ["port"],
+          "param": "port",
+          "when": "port is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_pluggable_database_management_details",
+          "key": ["sslSecretId"],
+          "param": "ssl_secret_id",
+          "when": "ssl_secret_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_pluggable_database_management_details",
+          "key": ["role"],
+          "param": "role",
+          "when": "role is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -179249,6 +182253,253 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          ["let", "credential_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "user_name", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "user_name"], null]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "userName",
+                ["item", ["var", "kwargs"], "user_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "password_secret_id", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "password_secret_id"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "credential_details"],
+                "passwordSecretId",
+                ["item", ["var", "kwargs"], "password_secret_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "credential_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "credential_details",
+                ["fn", "dumps", ["var", "credential_details"]]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "user_name"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "password_secret_id"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.modify_pluggable_database_management",
+        "params": [
+          {
+            "name": "pluggable_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "credential_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_end_point_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "service_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "protocol",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "port",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssl_secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "role",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "modify_pluggable_database_management",
+        "http": "POST",
+        "path": "/pluggableDatabases/{pluggableDatabaseId}/actions/modifyPluggableDatabaseManagement",
+        "positionalArgs": [
+          "pluggable_database_id",
+          "modify_pluggable_database_management_details"
+        ],
+        "pathParams": {
+          "pluggableDatabaseId": "pluggable_database_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "modify_pluggable_database_management_details",
+        "responseType": "PluggableDatabase",
+        "paginated": false,
+        "lifecycleGetter": "get_pluggable_database"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["pluggable_database_id"],
+          "param": "pluggable_database_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_pluggable_database_management_details",
+          "key": ["credentialDetails"],
+          "transform": "parse_json_parameter",
+          "param": "credential_details",
+          "when": "credential_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_pluggable_database_management_details",
+          "key": ["privateEndPointId"],
+          "param": "private_end_point_id",
+          "when": "private_end_point_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_pluggable_database_management_details",
+          "key": ["serviceName"],
+          "param": "service_name",
+          "when": "service_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_pluggable_database_management_details",
+          "key": ["protocol"],
+          "param": "protocol",
+          "when": "protocol is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_pluggable_database_management_details",
+          "key": ["port"],
+          "param": "port",
+          "when": "port is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_pluggable_database_management_details",
+          "key": ["sslSecretId"],
+          "param": "ssl_secret_id",
+          "when": "ssl_secret_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "modify_pluggable_database_management_details",
+          "key": ["role"],
+          "param": "role",
+          "when": "role is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -195326,6 +198577,682 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "storage_performance", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "storage_volume_performance_mode",
+                ["item", ["var", "kwargs"], "storage_performance"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "storage_performance"]]
+            ],
+            []
+          ],
+          ["let", "data_collection_options", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_diagnostics_events_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "is_diagnostics_events_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "data_collection_options"],
+                "is_diagnostics_events_enabled",
+                ["item", ["var", "kwargs"], "is_diagnostics_events_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_health_monitoring_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "is_health_monitoring_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "data_collection_options"],
+                "is_health_monitoring_enabled",
+                ["item", ["var", "kwargs"], "is_health_monitoring_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_incident_logs_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "is_incident_logs_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "data_collection_options"],
+                "is_incident_logs_enabled",
+                ["item", ["var", "kwargs"], "is_incident_logs_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "data_collection_options"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "data_collection_options",
+                ["fn", "dumps", ["var", "data_collection_options"]]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_diagnostics_events_enabled"],
+          ["del", ["var", "kwargs"], "is_health_monitoring_enabled"],
+          ["del", ["var", "kwargs"], "is_incident_logs_enabled"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.launch_db_system_launch_db_system_from_database_details",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shape",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "hostname",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_home",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_edition",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "fault_domains",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_network_nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_zone",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_system_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "storage_volume_performance_mode",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sparse_diskgroup",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_keys",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "initial_data_storage_size_in_gb",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_version_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_ip",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_ip_v6",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_placement_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_collection_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "disk_redundancy",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_dry_run",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "launch_db_system",
+        "http": "POST",
+        "path": "/dbSystems",
+        "positionalArgs": ["launch_db_system_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-dry-run": {
+            "arg": "opc_dry_run"
+          }
+        },
+        "body": "launch_db_system_details",
+        "responseType": "DbSystem",
+        "paginated": false,
+        "lifecycleGetter": "get_db_system"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_dry_run"],
+          "param": "opc_dry_run",
+          "when": "opc_dry_run is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["availabilityDomain"],
+          "param": "availability_domain"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["subnetId"],
+          "param": "subnet_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["shape"],
+          "param": "shape"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["hostname"],
+          "param": "hostname"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dbHome"],
+          "transform": "parse_json_parameter",
+          "param": "db_home"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["databaseEdition"],
+          "param": "database_edition"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["faultDomains"],
+          "transform": "parse_json_parameter",
+          "param": "fault_domains",
+          "when": "fault_domains is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["backupSubnetId"],
+          "param": "backup_subnet_id",
+          "when": "backup_subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["nsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "nsg_ids",
+          "when": "nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["backupNetworkNsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "backup_network_nsg_ids",
+          "when": "backup_network_nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["timeZone"],
+          "param": "time_zone",
+          "when": "time_zone is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dbSystemOptions"],
+          "transform": "parse_json_parameter",
+          "param": "db_system_options",
+          "when": "db_system_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["storageVolumePerformanceMode"],
+          "param": "storage_volume_performance_mode",
+          "when": "storage_volume_performance_mode is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["sparseDiskgroup"],
+          "param": "sparse_diskgroup",
+          "when": "sparse_diskgroup is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["sshPublicKeys"],
+          "transform": "parse_json_parameter",
+          "param": "ssh_public_keys",
+          "when": "ssh_public_keys is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["domain"],
+          "param": "domain",
+          "when": "domain is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["cpuCoreCount"],
+          "param": "cpu_core_count",
+          "when": "cpu_core_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["clusterName"],
+          "param": "cluster_name",
+          "when": "cluster_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dataStoragePercentage"],
+          "param": "data_storage_percentage",
+          "when": "data_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["initialDataStorageSizeInGB"],
+          "param": "initial_data_storage_size_in_gb",
+          "when": "initial_data_storage_size_in_gb is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["kmsKeyId"],
+          "param": "kms_key_id",
+          "when": "kms_key_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["kmsKeyVersionId"],
+          "param": "kms_key_version_id",
+          "when": "kms_key_version_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["nodeCount"],
+          "param": "node_count",
+          "when": "node_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["securityAttributes"],
+          "transform": "parse_json_parameter",
+          "param": "security_attributes",
+          "when": "security_attributes is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["privateIp"],
+          "param": "private_ip",
+          "when": "private_ip is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["privateIpV6"],
+          "param": "private_ip_v6",
+          "when": "private_ip_v6 is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["clusterPlacementGroupId"],
+          "param": "cluster_placement_group_id",
+          "when": "cluster_placement_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dataCollectionOptions"],
+          "transform": "parse_json_parameter",
+          "param": "data_collection_options",
+          "when": "data_collection_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["computeModel"],
+          "param": "compute_model",
+          "when": "compute_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["computeCount"],
+          "param": "compute_count",
+          "when": "compute_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["isOlderVersionAcknowledged"],
+          "param": "is_older_version_acknowledged",
+          "when": "is_older_version_acknowledged is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["diskRedundancy"],
+          "param": "disk_redundancy",
+          "when": "disk_redundancy is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["licenseModel"],
+          "param": "license_model",
+          "when": "license_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["source"],
+          "value": "DATABASE"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -196480,6 +200407,669 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "storage_performance", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "storage_volume_performance_mode",
+                ["item", ["var", "kwargs"], "storage_performance"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "storage_performance"]]
+            ],
+            []
+          ],
+          ["let", "data_collection_options", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_diagnostics_events_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "is_diagnostics_events_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "data_collection_options"],
+                "is_diagnostics_events_enabled",
+                ["item", ["var", "kwargs"], "is_diagnostics_events_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_health_monitoring_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "is_health_monitoring_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "data_collection_options"],
+                "is_health_monitoring_enabled",
+                ["item", ["var", "kwargs"], "is_health_monitoring_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_incident_logs_enabled", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "is_incident_logs_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "data_collection_options"],
+                "is_incident_logs_enabled",
+                ["item", ["var", "kwargs"], "is_incident_logs_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "data_collection_options"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "data_collection_options",
+                ["fn", "dumps", ["var", "data_collection_options"]]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_diagnostics_events_enabled"],
+          ["del", ["var", "kwargs"], "is_health_monitoring_enabled"],
+          ["del", ["var", "kwargs"], "is_incident_logs_enabled"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.launch_db_system_launch_db_system_from_db_system_details",
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shape",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "hostname",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_db_system_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_home",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "fault_domains",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_network_nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_zone",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_system_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "storage_volume_performance_mode",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sparse_diskgroup",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_keys",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "initial_data_storage_size_in_gb",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_version_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_ip",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_ip_v6",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_placement_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_collection_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_dry_run",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "launch_db_system",
+        "http": "POST",
+        "path": "/dbSystems",
+        "positionalArgs": ["launch_db_system_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-dry-run": {
+            "arg": "opc_dry_run"
+          }
+        },
+        "body": "launch_db_system_details",
+        "responseType": "DbSystem",
+        "paginated": false,
+        "lifecycleGetter": "get_db_system"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_dry_run"],
+          "param": "opc_dry_run",
+          "when": "opc_dry_run is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["availabilityDomain"],
+          "param": "availability_domain"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["subnetId"],
+          "param": "subnet_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["shape"],
+          "param": "shape"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["hostname"],
+          "param": "hostname"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["sourceDbSystemId"],
+          "param": "source_db_system_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dbHome"],
+          "transform": "parse_json_parameter",
+          "param": "db_home"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["faultDomains"],
+          "transform": "parse_json_parameter",
+          "param": "fault_domains",
+          "when": "fault_domains is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["backupSubnetId"],
+          "param": "backup_subnet_id",
+          "when": "backup_subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["nsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "nsg_ids",
+          "when": "nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["backupNetworkNsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "backup_network_nsg_ids",
+          "when": "backup_network_nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["timeZone"],
+          "param": "time_zone",
+          "when": "time_zone is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dbSystemOptions"],
+          "transform": "parse_json_parameter",
+          "param": "db_system_options",
+          "when": "db_system_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["storageVolumePerformanceMode"],
+          "param": "storage_volume_performance_mode",
+          "when": "storage_volume_performance_mode is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["sparseDiskgroup"],
+          "param": "sparse_diskgroup",
+          "when": "sparse_diskgroup is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["sshPublicKeys"],
+          "transform": "parse_json_parameter",
+          "param": "ssh_public_keys",
+          "when": "ssh_public_keys is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["domain"],
+          "param": "domain",
+          "when": "domain is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["cpuCoreCount"],
+          "param": "cpu_core_count",
+          "when": "cpu_core_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["clusterName"],
+          "param": "cluster_name",
+          "when": "cluster_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dataStoragePercentage"],
+          "param": "data_storage_percentage",
+          "when": "data_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["initialDataStorageSizeInGB"],
+          "param": "initial_data_storage_size_in_gb",
+          "when": "initial_data_storage_size_in_gb is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["kmsKeyId"],
+          "param": "kms_key_id",
+          "when": "kms_key_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["kmsKeyVersionId"],
+          "param": "kms_key_version_id",
+          "when": "kms_key_version_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["nodeCount"],
+          "param": "node_count",
+          "when": "node_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["securityAttributes"],
+          "transform": "parse_json_parameter",
+          "param": "security_attributes",
+          "when": "security_attributes is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["privateIp"],
+          "param": "private_ip",
+          "when": "private_ip is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["privateIpV6"],
+          "param": "private_ip_v6",
+          "when": "private_ip_v6 is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["clusterPlacementGroupId"],
+          "param": "cluster_placement_group_id",
+          "when": "cluster_placement_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["dataCollectionOptions"],
+          "transform": "parse_json_parameter",
+          "param": "data_collection_options",
+          "when": "data_collection_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["computeModel"],
+          "param": "compute_model",
+          "when": "compute_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["computeCount"],
+          "param": "compute_count",
+          "when": "compute_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["isOlderVersionAcknowledged"],
+          "param": "is_older_version_acknowledged",
+          "when": "is_older_version_acknowledged is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["licenseModel"],
+          "param": "license_model",
+          "when": "license_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "launch_db_system_details",
+          "key": ["source"],
+          "value": "DB_SYSTEM"
+        }
+      ],
       "params": [
         {
           "kind": "option",

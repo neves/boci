@@ -15814,6 +15814,472 @@
         ],
         "files": ["sshkey_file", "wallet"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "sshkey_file", ["var", "kwargs"]],
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "sshkey_file"], null]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["call", "get", ["var", "kwargs"], "ssh_key"],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["call", "get", ["var", "kwargs"], "sshkey_file"],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise cli_exceptions.RequiredValueNotInDefaultOrUserInputError('Cannot specify both --sshkey-file and --ssh-key.')",
+                    "RequiredValueNotInDefaultOrUserInputError",
+                    "Cannot specify both --sshkey-file and --ssh-key."
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "sshkey_file",
+                ["call", "get", ["var", "kwargs"], "sshkey_file"]
+              ],
+              [
+                "if",
+                ["var", "sshkey_file"],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "ssh_key",
+                    ["call", "read", ["var", "sshkey_file"]]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "sshkey_file"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "wallet", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["call", "get", ["var", "kwargs"], "wallet"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["fn", "exists", ["item", ["var", "kwargs"], "wallet"]],
+                  ["fn", "isfile", ["item", ["var", "kwargs"], "wallet"]]
+                ],
+                [
+                  [
+                    "try",
+                    [
+                      [
+                        "let",
+                        "binary_wallet_file",
+                        [
+                          "fn",
+                          "open",
+                          ["item", ["var", "kwargs"], "wallet"],
+                          "rb"
+                        ]
+                      ],
+                      [
+                        "set",
+                        ["var", "kwargs"],
+                        "wallet",
+                        [
+                          "call",
+                          "decode",
+                          [
+                            "fn",
+                            "b64encode",
+                            ["call", "read", ["var", "binary_wallet_file"]]
+                          ],
+                          "utf-8"
+                        ]
+                      ]
+                    ],
+                    "e",
+                    [
+                      [
+                        "raise",
+                        "raise click.ClickException(str(e))",
+                        "ClickException",
+                        ["fn", "str", ["var", "e"]]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database_migration.src.oci_cli_database_migration.generated.databasemigration_cli.create_connection_create_oracle_connection_details",
+        "complexTypes": {
+          "freeform-tags": "database_migration:dict(str, string)",
+          "defined-tags": "database_migration:dict(str, dict(str, object))",
+          "nsg-ids": "database_migration:list[string]"
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "username",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "technology_type",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "replication_username",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "replication_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wallet",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_host",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_user",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_sudo_location",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database_migration.database_migration",
+        "method": "create_connection",
+        "http": "POST",
+        "path": "/connections",
+        "positionalArgs": ["create_connection_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_connection_details",
+        "responseType": "Connection",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["vaultId"],
+          "param": "vault_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["keyId"],
+          "param": "key_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["username"],
+          "param": "username"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["password"],
+          "param": "password"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["technologyType"],
+          "param": "technology_type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["subnetId"],
+          "param": "subnet_id",
+          "when": "subnet_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["nsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "nsg_ids",
+          "when": "nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["replicationUsername"],
+          "param": "replication_username",
+          "when": "replication_username is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["replicationPassword"],
+          "param": "replication_password",
+          "when": "replication_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["connectionString"],
+          "param": "connection_string",
+          "when": "connection_string is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["wallet"],
+          "param": "wallet",
+          "when": "wallet is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["databaseId"],
+          "param": "database_id",
+          "when": "database_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["sshHost"],
+          "param": "ssh_host",
+          "when": "ssh_host is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["sshKey"],
+          "param": "ssh_key",
+          "when": "ssh_key is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["sshUser"],
+          "param": "ssh_user",
+          "when": "ssh_user is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["sshSudoLocation"],
+          "param": "ssh_sudo_location",
+          "when": "ssh_sudo_location is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_connection_details",
+          "key": ["connectionType"],
+          "value": "ORACLE"
+        }
+      ],
       "params": [
         {
           "kind": "option",

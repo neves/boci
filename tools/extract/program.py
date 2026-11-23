@@ -21,6 +21,7 @@ Statements (lists):
     ["unpack", [name...], e]      a, b = e
     ["abort"]                     ctx.abort()
     ["for", name, e, body]        for name in e: body (no break/continue/else)
+    ["try", body, name, handler]  try: body / except Exception as name: handler (ticket 23)
 
 `with open(path, mode) as name: body` compiles to `["let", name, ["fn", "open", path, mode]]`
 then body (ticket 21): the file stays open for the invoke, which may send it as its body.
@@ -28,7 +29,7 @@ then body (ticket 21): the file stays open for the invoke, which may send it as 
 Expressions: JSON scalars are constants; lists are operations:
     ["var", name] ["item", obj, key] ["call", method, obj, args...]
     ["fn", name, args...]  (dumps, parse, str, len, bool, dict, b64encode, removeSkeleton,
-                            open, exists, isstr, client, namespace, ctxObj)
+                            open, exists, isfile, isstr, client, namespace, ctxObj)
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
     ["map", e, t, elt, conds?]  [elt for t in e if cond...]; t a name or a list of names
@@ -69,6 +70,7 @@ FUNCTIONS = {
     "click.confirm": "confirm",
     "open": "open",
     "os.path.exists": "exists",
+    "os.path.isfile": "isfile",
 }
 # Module helpers outside the subset (re.split, enumerate, return), hand-coded in the
 # Engine as named functions (src/core/program.ts, ticket 20).
@@ -83,7 +85,10 @@ HAND_CODED = {
 }
 BINOP = {ast.Add: "+", ast.Sub: "-"}
 # Exceptions a wrapper raises that cli_util.wrap_exceptions renders (ticket 18).
-RAISABLE = {"ValueError", "KeyError", "Exception", "RequiredValueNotInDefaultOrUserInputError"}
+RAISABLE = {
+    "ValueError", "KeyError", "Exception", "RequiredValueNotInDefaultOrUserInputError",
+    "ClickException",
+}
 CMP = {
     ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=",
     ast.Is: "is", ast.IsNot: "isnot", ast.In: "in", ast.NotIn: "notin",
@@ -165,6 +170,15 @@ class Compiler:
             ):
                 raise Unsupported("with")
             return [["let", self.name(item.optional_vars.id, scope), self.expr(call, scope)]] + self.stmts(st.body, scope)
+        if isinstance(st, ast.Try):
+            # `try: body except Exception as e: handler` only (ticket 23).
+            if st.orelse or st.finalbody or len(st.handlers) != 1:
+                raise Unsupported("try")
+            handler = st.handlers[0]
+            if _dotted(handler.type) != "Exception":
+                raise Unsupported("except")
+            name = self.name(handler.name, scope) if handler.name else None
+            return [["try", self.stmts(st.body, scope), name, self.stmts(handler.body, scope)]]
         if isinstance(st, ast.If):
             return [["if", self.expr(st.test, scope), self.stmts(st.body, scope), self.stmts(st.orelse, scope)]]
         if isinstance(st, ast.Raise):
@@ -408,7 +422,7 @@ def compile_wrapper(callback):
         return None, None
     local_names = set(named) | {"kwargs"} | {
         n.id for n in ast.walk(fn) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
-    }
+    } | {h.name for h in ast.walk(fn) if isinstance(h, ast.ExceptHandler) and h.name}
     compiler = Compiler(module_globals, local_names)
     # Click binds named parameters by name; the rest stay in **kwargs.
     prelude = [["let", a, ["call", "pop", ["var", "kwargs"], a]] for a in named[1:]]

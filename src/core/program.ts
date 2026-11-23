@@ -125,6 +125,7 @@ const isDict = (v: unknown): v is Dict =>
   !(v instanceof ProgramFile) &&
   !(v instanceof ProgramTarget) &&
   !(v instanceof ProgramObject) &&
+  !(v instanceof Error) &&
   !(v instanceof Uint8Array);
 
 /** Python iteration: a list's items, a dict's keys, a str's characters, a file's lines. */
@@ -165,6 +166,8 @@ function pyStr(v: unknown): string {
   if (v === true) return "True";
   if (v === false) return "False";
   if (typeof v === "string" || typeof v === "number") return String(v);
+  // `except Exception as e: ... str(e)`
+  if (v instanceof ProgramRaise) return v.message;
   throw new ProgramUnsupported("str() of a container");
 }
 
@@ -328,10 +331,14 @@ export type ProgramResult = {
   target?: number;
 };
 
-/** The filesystem a program's `open(path, mode)` and `os.path.exists(path)` see. */
+/**
+ * The filesystem a program's `open(path, mode)`, `os.path.exists(path)` and
+ * `os.path.isfile(path)` see. `open` raises an OSError it models as a ProgramRaise.
+ */
 export type ProgramFiles = {
   open(path: string, mode: string): ProgramFile;
   exists(path: string): boolean;
+  isfile(path: string): boolean;
 };
 
 const NO_FILES: ProgramFiles = {
@@ -340,6 +347,9 @@ const NO_FILES: ProgramFiles = {
   },
   exists() {
     throw new ProgramUnsupported("os.path.exists()");
+  },
+  isfile() {
+    throw new ProgramUnsupported("os.path.isfile()");
   },
 };
 
@@ -593,6 +603,10 @@ export function runProgram(
         if (typeof a !== "string")
           throw new ProgramUnsupported("os.path.exists()");
         return files.exists(a);
+      case "isfile":
+        if (typeof a !== "string")
+          throw new ProgramUnsupported("os.path.isfile()");
+        return files.isfile(a);
       case "items":
         if (isDict(a)) return Object.entries(a);
         throw new ProgramUnsupported("iteritems()");
@@ -763,6 +777,16 @@ export function runProgram(
         case "for":
           for (const x of iterate(evaluate(rest[1] as Expr))) {
             env[rest[0] as string] = x;
+            execute(rest[2] as Statement[]);
+          }
+          break;
+        case "try":
+          try {
+            execute(rest[0] as Statement[]);
+          } catch (e) {
+            // `except Exception`: what the Engine models as raised Python exceptions.
+            if (!(e instanceof ProgramRaise)) throw e;
+            if (rest[1] !== null) env[rest[1] as string] = e;
             execute(rest[2] as Statement[]);
           }
           break;

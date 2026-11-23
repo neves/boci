@@ -1,7 +1,7 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
-import { closeSync, existsSync, readFileSync } from "node:fs";
+import { closeSync, existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   DEFAULT_LOCATION,
@@ -993,12 +993,24 @@ function programFiles(io: Invocation): ProgramFiles {
       if (/[wax+]/.test(mode)) throw new ProgramUnsupported("open() to write");
       try {
         return new ProgramFile(mode, readFileSync(resolve(io.cwd, path)));
-      } catch {
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code === "EACCES")
+          throw new ProgramRaise(
+            "PermissionError",
+            `[Errno 13] Permission denied: ${pyRepr(path)}`,
+          );
         // FileNotFoundError and the like: not modeled.
         throw new ProgramUnsupported("open()");
       }
     },
     exists: (path) => path !== "" && existsSync(resolve(io.cwd, path)),
+    isfile: (path) => {
+      try {
+        return path !== "" && statSync(resolve(io.cwd, path)).isFile();
+      } catch {
+        return false;
+      }
+    },
   };
 }
 

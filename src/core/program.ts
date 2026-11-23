@@ -27,6 +27,15 @@ export class ProgramRaise extends Error {
   }
 }
 
+/**
+ * `click.confirm(text)` with no answer yet: the caller asks, then runs the program again
+ * with the answers so far (a program is a pure function of its kwargs and answers).
+ */
+export class ProgramConfirm extends Error {}
+
+/** `ctx.abort()` in the wrapper. */
+export class ProgramAbort extends Error {}
+
 /** The wrapper took a path the Engine does not model (another exception, a TypeError). */
 export class ProgramUnsupported extends Error {}
 
@@ -49,6 +58,11 @@ export class ProgramFile {
     readonly mode: string,
     private readonly data?: Uint8Array,
   ) {}
+
+  /** The same file, unread: each run of a program opens its files afresh. */
+  reopen(): ProgramFile {
+    return new ProgramFile(this.mode, this.data);
+  }
 
   get binary(): boolean {
     return this.mode.includes("b");
@@ -223,19 +237,22 @@ export function runProgram(
   values: Dict,
   params: TypedParam[],
   parse: (name: string, value: unknown) => unknown,
+  answers: boolean[] = [],
 ): ProgramResult {
   // Click hands the callback every exposed param, unset ones at their default.
   const kwargs: Dict = {};
   const filled = new Map<string, unknown>();
   for (const p of params) {
     if ((p as { expose?: boolean }).expose === false) continue;
-    const v = kwarg(p.name, values, params);
+    const given = kwarg(p.name, values, params);
+    const v = given instanceof ProgramFile ? given.reopen() : given;
     kwargs[p.name] = v;
     if (values[p.name] === undefined) filled.set(p.name, v);
   }
   const env: Dict = { kwargs };
   let invoked: Dict | undefined;
   let target = 0;
+  let confirms = 0;
 
   const item = (obj: unknown, key: unknown): unknown => {
     if (isDict(obj) && typeof key === "string") {
@@ -408,6 +425,11 @@ export function runProgram(
       case "dataflowConfiguration":
         // json.dumps(..., sort_keys=True): the generated command parses it back.
         return JSON.stringify(sortKeys(HAND_CODED[name]?.(pyStr(a))));
+      case "confirm": {
+        const i = confirms++;
+        if (i < answers.length) return answers[i];
+        throw new ProgramConfirm(pyStr(a));
+      }
       case "items":
         if (isDict(a)) return Object.entries(a);
         throw new ProgramUnsupported("iteritems()");
@@ -581,6 +603,8 @@ export function runProgram(
             execute(rest[2] as Statement[]);
           }
           break;
+        case "abort":
+          throw new ProgramAbort();
         case "usage":
           throw new ProgramUsageError(rest[0] as string);
         case "raise": {

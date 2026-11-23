@@ -9420,6 +9420,545 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "use_ipv6_on_dual_stack", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "source_must_use_ipv6_on_dual_stack",
+                ["item", ["var", "kwargs"], "use_ipv6_on_dual_stack"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "use_ipv6_on_dual_stack"]
+              ]
+            ],
+            []
+          ],
+          ["let", "target_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "target_applier_username", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "target_applier_username"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "target_details"],
+                "applierUsername",
+                ["item", ["var", "kwargs"], "target_applier_username"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "target_applier_username"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "target_channel_name", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "target_channel_name"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "target_details"],
+                "channelName",
+                ["item", ["var", "kwargs"], "target_channel_name"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "target_channel_name"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "target_filters", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "target_filters"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "target_details"],
+                "filters",
+                [
+                  "fn",
+                  "parse",
+                  "target_filters",
+                  ["item", ["var", "kwargs"], "target_filters"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "target_filters"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "target_delay_in_seconds", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "target_delay_in_seconds"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "target_details"],
+                "delayInSeconds",
+                ["item", ["var", "kwargs"], "target_delay_in_seconds"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "target_delay_in_seconds"]],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "target_tables_without_primary_key_handling",
+                ["var", "kwargs"]
+              ],
+              [
+                "cmp",
+                "isnot",
+                [
+                  "item",
+                  ["var", "kwargs"],
+                  "target_tables_without_primary_key_handling"
+                ],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "target_details"],
+                "tablesWithoutPrimaryKeyHandling",
+                [
+                  "item",
+                  ["var", "kwargs"],
+                  "target_tables_without_primary_key_handling"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "target_tables_without_primary_key_handling"
+            ]
+          ],
+          ["set", ["var", "target_details"], "targetType", "DBSYSTEM"],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "target_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "target",
+                ["fn", "dumps", ["var", "target_details"]]
+              ]
+            ],
+            []
+          ],
+          ["let", "freeform_tags", false],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "freeform_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "freeform_tags"],
+                null
+              ]
+            ],
+            [["let", "freeform_tags", true]],
+            []
+          ],
+          ["let", "defined_tags", false],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "defined_tags", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "defined_tags"],
+                null
+              ]
+            ],
+            [["let", "freeform_tags", true]],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "force"]],
+              ["or", ["var", "freeform_tags"], ["var", "defined_tags"]]
+            ],
+            [
+              [
+                "if",
+                [
+                  "not",
+                  [
+                    "fn",
+                    "confirm",
+                    "WARNING: Updates to freeform-tags and defined-tags will replace any existing values. Are you sure you want to continue?"
+                  ]
+                ],
+                [["abort"]],
+                []
+              ]
+            ],
+            []
+          ],
+          ["set", ["var", "kwargs"], "force", true],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.mysql.src.oci_cli_channels.generated.channels_cli.update_channel_update_channel_source_from_mysql_details",
+        "complexTypes": {
+          "target": "mysql:UpdateChannelTargetDetails",
+          "freeform-tags": "mysql:dict(str, string)",
+          "defined-tags": "mysql:dict(str, dict(str, object))",
+          "source-ssl-ca-certificate": "mysql:CaCertificate",
+          "source-anonymous-transactions-handling": "mysql:AnonymousTransactionsHandling"
+        },
+        "params": [
+          {
+            "name": "channel_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_hostname",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_port",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_username",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_ssl_mode",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_ssl_ca_certificate",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_anonymous_transactions_handling",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_must_use_ipv6_on_dual_stack",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "mysql.channels",
+        "method": "update_channel",
+        "http": "PUT",
+        "path": "/channels/{channelId}",
+        "positionalArgs": ["channel_id", "update_channel_details"],
+        "pathParams": {
+          "channelId": "channel_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "update_channel_details",
+        "paginated": false,
+        "workRequestClient": "mysql.work_requests"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["channel_id"],
+          "param": "channel_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["target"],
+          "transform": "parse_json_parameter",
+          "param": "target",
+          "when": "target is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["isEnabled"],
+          "param": "is_enabled",
+          "when": "is_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "hostname"],
+          "param": "source_hostname",
+          "when": "source_hostname is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "port"],
+          "param": "source_port",
+          "when": "source_port is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "username"],
+          "param": "source_username",
+          "when": "source_username is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "password"],
+          "param": "source_password",
+          "when": "source_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "sslMode"],
+          "param": "source_ssl_mode",
+          "when": "source_ssl_mode is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "sslCaCertificate"],
+          "transform": "parse_json_parameter",
+          "param": "source_ssl_ca_certificate",
+          "when": "source_ssl_ca_certificate is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "anonymousTransactionsHandling"],
+          "transform": "parse_json_parameter",
+          "param": "source_anonymous_transactions_handling",
+          "when": "source_anonymous_transactions_handling is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "mustUseIpv6OnDualStack"],
+          "param": "source_must_use_ipv6_on_dual_stack",
+          "when": "source_must_use_ipv6_on_dual_stack is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_channel_details",
+          "key": ["source", "sourceType"],
+          "value": "MYSQL"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -28270,6 +28809,31 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["pitr_policy", "PitrPolicy", "pitrPolicy"]
         ]
+      },
+      "UpdateChannelTargetDetails": {
+        "attributes": [["target_type", "str", "targetType"]],
+        "discriminator": {
+          "field": "targetType",
+          "values": {
+            "DBSYSTEM": "UpdateChannelTargetFromDbSystemDetails"
+          },
+          "fallback": "UpdateChannelTargetDetails"
+        }
+      },
+      "UpdateChannelTargetFromDbSystemDetails": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["channel_name", "str", "channelName"],
+          ["applier_username", "str", "applierUsername"],
+          ["filters", "list[ChannelFilter]", "filters"],
+          [
+            "tables_without_primary_key_handling",
+            "str",
+            "tablesWithoutPrimaryKeyHandling"
+          ],
+          ["delay_in_seconds", "int", "delayInSeconds"]
+        ],
+        "discriminator": "UpdateChannelTargetDetails"
       },
       "UpdateDatabaseConsoleDetails": {
         "attributes": [

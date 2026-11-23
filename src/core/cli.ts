@@ -57,6 +57,8 @@ import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import {
   ProgramFile,
+  ProgramAbort,
+  ProgramConfirm,
   ProgramRaise,
   ProgramUnsupported,
   ProgramUsageError,
@@ -650,7 +652,7 @@ async function main(io: Invocation): Promise<void> {
       let command: GeneratedCommand = specCmd;
       let callValues = values;
       if (specCmd.program && specCmd.generated) {
-        const generated = runWrapper(
+        const generated = await runWrapper(
           io,
           specCmd,
           values,
@@ -797,27 +799,34 @@ function convertDefaultValue(
  * for a path the Engine doesn't model (another exception, or keywords the generated
  * callback doesn't take: a TypeError).
  */
-function runWrapper(
+async function runWrapper(
   io: Invocation,
   command: ServiceSpec["commands"][string],
   values: Record<string, unknown>,
   usageText: () => string,
   models: ServiceSpec["models"],
-):
+  answers: boolean[] = [],
+): Promise<
   | { command: GeneratedCommand; kwargs: Record<string, unknown> }
   | undefined
-  | "unsupported" {
+  | "unsupported"
+> {
   const program = command.program as NonNullable<typeof command.program>;
   try {
     const {
       kwargs,
       names,
       target = 0,
-    } = runProgram(program.body, values, command.params ?? [], (name, value) =>
-      parseJsonParameter(io, name, value, {
-        complexTypes: command.complexTypes,
-        models,
-      }),
+    } = runProgram(
+      program.body,
+      values,
+      command.params ?? [],
+      (name, value) =>
+        parseJsonParameter(io, name, value, {
+          complexTypes: command.complexTypes,
+          models,
+        }),
+      answers,
     );
     if (!kwargs) return undefined;
     // A file (or its bytes) handed on as a request body or output file: not modeled yet.
@@ -855,6 +864,20 @@ function runWrapper(
     };
   } catch (e) {
     if (e instanceof ProgramUnsupported) return "unsupported";
+    if (e instanceof ProgramConfirm) {
+      // click.confirm under wrap_exceptions; then the program runs again, answered.
+      if (!program.wrapExceptions) return "unsupported";
+      const yes = await confirmUnderWrapExceptions(io, e.message, false);
+      return runWrapper(io, command, values, usageText, models, [
+        ...answers,
+        yes,
+      ]);
+    }
+    if (e instanceof ProgramAbort) {
+      if (!program.wrapExceptions) return "unsupported";
+      io.err("Abort: \n");
+      throw new Exit(1);
+    }
     if (e instanceof ProgramRaise) {
       // cli_util.wrap_exceptions: sys.exit(...) → stderr, exit 1.
       if (!program.wrapExceptions) return "unsupported";

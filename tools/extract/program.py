@@ -19,6 +19,7 @@ Statements (lists):
     ["invoke", [[name, e]...], e, i?] ctx.invoke(<generated command i>, name=e..., **e);
                                   i is an expression when the command is picked at run time
     ["unpack", [name...], e]      a, b = e
+    ["abort"]                     ctx.abort()
     ["for", name, e, body]        for name in e: body (no break/continue/else)
 
 Expressions: JSON scalars are constants; lists are operations:
@@ -61,6 +62,7 @@ FUNCTIONS = {
     "six.iteritems": "items",
     "next": "next",
     "list": "list",
+    "click.confirm": "confirm",
 }
 # Module helpers outside the subset (re.split, enumerate, return), hand-coded in the
 # Engine as named functions (src/core/program.ts, ticket 20).
@@ -161,6 +163,8 @@ class Compiler:
             call = st.value
             if isinstance(call.func, ast.Attribute) and call.func.attr == "invoke" and _dotted(call.func.value) == "ctx":
                 return [self.invoke(call, scope)]
+            if _dotted(call.func) == "ctx.abort" and not call.args:
+                return [["abort"]]
             if isinstance(call.func, ast.Name) and call.func.id in self.globals:
                 return self.inline(call, scope)
             return [["do", self.expr(call, scope)]]

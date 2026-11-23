@@ -1,6 +1,6 @@
 // Generate request-only parity cases for Generated commands: GETs into
-// test/parity/cases/generated-get-<service>.json, POST/PUT/PATCH into generated-request-<service>.json,
-// and bodyless HEAD/DELETE into generated-bodyless-<service>.json.
+// generated-get, POST/PUT/PATCH (including bodyless actions) into generated-request,
+// and bodyless HEAD/DELETE into generated-bodyless.
 // `bun run parity:cases --service <name>[,<name>…] | --all [--method GET,POST,PUT,PATCH,HEAD,DELETE]`
 import { parseArgs } from "util";
 
@@ -159,7 +159,12 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
       (param !== undefined && !isComplex(param))
     );
   });
-  if (bodyBindings.length === 0) return false;
+  if (
+    bodyBindings.length === 0 &&
+    (operation.body !== undefined ||
+      bindings.some((binding) => binding.target === "body"))
+  )
+    return false;
   const complexOnly = simpleBindings.length === 0;
   for (const param of params) {
     const name = String(param.name);

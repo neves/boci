@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test";
-import { CUSTOM_HANDLERS, isImplemented } from "../../src/core/registry.ts";
+import {
+  CUSTOM_HANDLERS,
+  engineSupports,
+  isImplemented,
+} from "../../src/core/registry.ts";
 import { loadIndex, loadService } from "../../src/core/spec.ts";
 
 test("every key in CUSTOM_HANDLERS is a real custom Leaf command in the spec", async () => {
@@ -17,6 +21,14 @@ test("every key in CUSTOM_HANDLERS is a real custom Leaf command in the spec", a
     expect(cmd?.kind).toBe("custom");
     expect(isImplemented(key, cmd)).toBe(true);
   }
+});
+
+test("engine supports generated actions without request bodies", async () => {
+  const { commands } = await loadService("data-safe");
+  const stop = commands["audit-trail stop"];
+  expect(stop?.operation?.http).toBe("POST");
+  expect(stop?.operation?.body).toBeUndefined();
+  expect(engineSupports(stop!)).toBe(true);
 });
 
 test("loading cli and registry does not eagerly load command modules", () => {

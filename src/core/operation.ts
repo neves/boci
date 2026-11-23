@@ -785,7 +785,8 @@ export async function callOperation(
     operation.http === "GET" ? {} : { "content-type": "application/json" };
   if (
     ["POST", "PUT", "PATCH"].includes(operation.http) &&
-    operation.client.startsWith("log_analytics.")
+    operation.client.startsWith("log_analytics.") &&
+    requestBody !== ""
   )
     baseHeaders.expect = "100-continue";
   for (const [name, param] of Object.entries(operation.headerParams ?? {})) {

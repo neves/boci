@@ -254,9 +254,12 @@ const IMPLEMENTED = new Set<string>([
   ...CUSTOM_HANDLERS.keys(),
 ]);
 
-// Generated commands the engine would accept by rule but that don't behave like the
-// Reference CLI yet. Keep each with a reason.
-const EXCLUDED = new Set<string>([]);
+// Generated commands that don't match the Reference CLI; each entry includes its reason.
+const EXCLUDED = new Set<string>([
+  // Reference CLI ignores --operation-name and sends the fixed SDK operation name;
+  // the generated path binding cannot represent that command-specific behavior.
+  "ocvs sddc retrieve-sddc-operation-status",
+]);
 
 export type Command = ServiceSpec["commands"][string] & {
   bindings?: Record<string, unknown>[];
@@ -275,6 +278,11 @@ export function engineSupports(command: Command): boolean {
   if (http === "GET" || http === "HEAD") return true;
   if (http === "DELETE") return command.operation?.body === undefined;
   if (!WRITE_METHODS.includes(http)) return false;
+  const bodyBindings = (command.bindings ?? []).filter(
+    (binding) => binding.target === "body",
+  );
+  if (command.operation?.body === undefined && bodyBindings.length === 0)
+    return true;
   return (command.bindings ?? []).some((b) => {
     if (b.target !== "body") return false;
     if (typeof b.value === "string" || typeof b.value === "boolean")

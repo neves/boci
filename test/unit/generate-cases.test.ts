@@ -1,6 +1,21 @@
 import { describe, expect, test } from "bun:test";
 
 describe("parity case generator", () => {
+  test("generates request cases for bodyless POST actions", async () => {
+    const result = Bun.spawnSync(
+      ["bun", "scripts/generate-cases.ts", "--service", "data-safe"],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const cases = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-request-data-safe.json`,
+    ).json()) as { key: string; argv: string[]; requestOnly: boolean }[];
+    const stop = cases.find((c) => c.key === "data-safe audit-trail stop");
+    expect(stop).toBeDefined();
+    expect(stop?.requestOnly).toBe(true);
+    expect(stop?.argv).toContain("--audit-trail-id");
+  });
+
   test("generates bodyless HEAD and DELETE cases, including force bypasses", async () => {
     const result = Bun.spawnSync(
       [

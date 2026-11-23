@@ -6,8 +6,23 @@ OUT=$(gh workflow run test-installs.yml)
 echo "$OUT"
 RUN_ID=$(echo "$OUT" | grep -oE '[0-9]+$' || true)
 if [ -z "$RUN_ID" ]; then
-  sleep 3
-  RUN_ID=$(gh run list --workflow=test-installs.yml -L 1 --json databaseId -q '.[0].databaseId')
+  for _ in $(seq 1 15); do
+    sleep 2
+    RUN_ID=$(gh run list --workflow=test-installs.yml -L 1 --json databaseId -q '.[0].databaseId' || true)
+    if [ -n "$RUN_ID" ]; then
+      break
+    fi
+  done
 fi
+if [ -z "$RUN_ID" ]; then
+  echo "Failed to determine workflow run ID" >&2
+  exit 1
+fi
+for _ in $(seq 1 15); do
+  if gh run view "$RUN_ID" --json databaseId >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
 gh run watch "$RUN_ID" --exit-status
 gh run view "$RUN_ID" --log

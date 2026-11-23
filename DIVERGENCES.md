@@ -106,3 +106,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** appends a trailing `boci Extensions` section listing boci-only commands (`update`)
 - **Why:** per [ADR 0005](docs/adr/0005-boci-extension-commands.md), Extension commands must be discoverable in root `--help` without altering the Reference CLI's alphabetical `Commands:` list. Trimmed in `test/harness/masks.ts` so the Reference CLI portion of root `--help` remains verified byte-for-byte.
 - **State:** accepted
+
+### Generated download commands (`--file`): no progress bar on a terminal
+
+- **Invocation:** `oci data-science ml-app-implementation download-package --ml-app-implementation-id <id> --file package.zip` (any generated command whose operation returns a stream, and `log-analytics query export`), stdout a terminal
+- **Reference CLI:** on a terminal, click's progress bar redraws `Downloading file  [####…]  100%` on stdout; when stdout isn't a terminal it prints only the label, `Downloading file`
+- **boci:** always prints the label line, as when stdout isn't a terminal
+- **Why:** the bar's redraws are cosmetic, timing-dependent and never seen by scripts; the non-terminal output (what Parity records) matches.
+- **State:** accepted

@@ -802,6 +802,12 @@ export async function sendServiceRequest(
   return { url, response, raw };
 }
 
+/** The parameter a download command streams the response body into (its `--file`). */
+export function outputBinding(command: GeneratedCommand): string | undefined {
+  const binding = command.bindings?.find((b) => b.target === "output");
+  return typeof binding?.param === "string" ? binding.param : undefined;
+}
+
 /**
  * Send the command's request and return the response (any status). Usage, config, key and
  * file:// problems are reported on the invocation's sinks and end it with Exit(1); a network
@@ -941,6 +947,8 @@ export async function callOperation(
       requestIdHeader,
       noRetry: hasNoneRetry,
       enforceContentHeaders: operation.enforce_content_headers,
+      // A download (`--file` bound to the output) streams a successful body to the file.
+      rawResponse: outputBinding(command) !== undefined,
     });
     firstUrl ??= sent.url;
     response = sent.response;

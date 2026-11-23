@@ -57,11 +57,13 @@ export class ProgramFile {
   constructor(
     readonly mode: string,
     private readonly data?: Uint8Array,
+    /** The path given on the command line (`-` for stdio), when the file came from one. */
+    readonly name?: string,
   ) {}
 
   /** The same file, unread: each run of a program opens its files afresh. */
   reopen(): ProgramFile {
-    return new ProgramFile(this.mode, this.data);
+    return new ProgramFile(this.mode, this.data, this.name);
   }
 
   get binary(): boolean {

@@ -72,8 +72,10 @@ import {
   callOperation,
   confirmUnderWrapExceptions,
   keyTypes,
+  outputBinding,
 } from "./operation.ts";
 import { printResult } from "./output.ts";
+import { writeDownload } from "./download.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
 const PROG = "oci";
@@ -683,6 +685,16 @@ async function main(io: Invocation): Promise<void> {
         index,
       };
       const result = await callOperation(io, call);
+      const downloadTo = outputBinding(command);
+      if (downloadTo !== undefined && result.response.ok) {
+        const file = callValues[downloadTo];
+        await writeDownload(
+          io,
+          result.response,
+          file instanceof ProgramFile ? (file.name ?? "") : String(file),
+        );
+        return;
+      }
       const output = {
         query: rootValues.query,
         output: rootValues.output,

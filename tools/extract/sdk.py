@@ -9,6 +9,7 @@ import copy
 import functools
 import importlib
 import inspect
+import re
 import textwrap
 
 
@@ -278,6 +279,8 @@ def custom_delegate(callback, client_map, custom_params):
                         pairs[target_chain[1][0]] = value.args[0].value
                     elif isinstance(value, ast.Name) and value.id in local_pops:
                         pairs[target_chain[1][0]] = local_pops[value.id]
+                    elif isinstance(value, ast.Name) and value.id in custom_params:
+                        pairs[target_chain[1][0]] = value.id
                 elif (
                     isinstance(target, ast.Name)
                     and isinstance(value, ast.Call)
@@ -302,6 +305,16 @@ def custom_delegate(callback, client_map, custom_params):
         return pairs
 
     renames = rename_pairs(fn.body)
+    # Unconditional `kwargs['x'] = <constant>`: the wrapper fixes that generated param.
+    constants = {}
+    for st in fn.body:
+        if (
+            isinstance(st, ast.Assign) and len(st.targets) == 1
+            and isinstance(st.value, ast.Constant)
+        ):
+            chain = _subscript_chain(st.targets[0])
+            if chain and chain[0] == "kwargs" and len(chain[1]) == 1:
+                constants[chain[1][0]] = st.value.value
     # A valid Tier A wrapper ends in exactly one ctx.invoke and preceding statements
     # only rename or drop keyword arguments.
     final = fn.body[-1] if fn.body else None
@@ -319,6 +332,11 @@ def custom_delegate(callback, client_map, custom_params):
         if chain and chain[0] == "kwargs" and chain[1][0] in custom_params:
             if kw.arg != chain[1][0]:
                 renames[kw.arg] = chain[1][0]
+    computed = (ast.UnaryOp, ast.BinOp, ast.BoolOp, ast.Compare, ast.IfExp)
+    for st in ast.walk(ast.Module(body=fn.body[:-1], type_ignores=[])):
+        # A computed value (e.g. `not kwargs['no_hooks']`) is logic, not a rename.
+        if isinstance(st, ast.Assign) and isinstance(st.value, computed):
+            return "B", None
     for st in fn.body[:-1]:
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant) and isinstance(st.value.value, str):
             continue
@@ -365,7 +383,40 @@ def custom_delegate(callback, client_map, custom_params):
         name = binding.get("param")
         if name in renames:
             binding["param"] = renames[name]
+        if isinstance(binding.get("when"), str):
+            # Conditions name the generated command's params; follow the wrapper's renames.
+            binding["when"] = re.sub(
+                r"[A-Za-z_][A-Za-z0-9_]*",
+                lambda m: renames.get(m.group(0), m.group(0)),
+                binding["when"],
+            )
+    for binding in bindings:
+        name = binding.get("param")
+        if name in constants and name not in custom_params:
+            del binding["param"]
+            binding["value"] = constants[name]
+            if isinstance(binding.get("when"), str):
+                kept = [
+                    clause for clause in binding["when"].split(" and ")
+                    if name not in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", clause)
+                ]
+                if kept:
+                    binding["when"] = " and ".join(kept)
+                else:
+                    del binding["when"]
+        elif (
+            name is not None and name not in custom_params
+            and binding.get("target") == "body" and "when" not in binding
+        ):
+            # The wrapper dropped this option; the generated command still sends None.
+            del binding["param"]
+            binding["value"] = None
     bindings = [b for b in bindings if "param" not in b or b["param"] in custom_params]
+    # Constants for request args (path/query/header) the generated command passes straight through.
+    bound = {b["key"][0] for b in bindings if b.get("target") == "kwarg" and b.get("key")}
+    for name, value in constants.items():
+        if name not in custom_params and name not in bound and value is not None:
+            bindings.append({"target": "kwarg", "key": [name], "value": value})
     return "A", {
         "callback": f"{delegated_callback.__module__}.{delegated_callback.__qualname__}",
         "renames": renames,

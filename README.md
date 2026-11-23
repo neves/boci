@@ -95,7 +95,15 @@ Snapshot: **0 of 9,372 commands verified.**
 
 ## Install
 
-There's no release yet. Once commands work, boci will ship as a single binary for Linux and macOS (x64 and arm64). Until then, build it from source with [Bun](https://bun.sh) 1.4.5 or newer:
+With [mise](https://mise.jdx.dev) (binary from GitHub Releases or npm):
+
+```console
+$ mise use -g github:neves/boci
+# or
+$ mise use -g npm:boci-cli
+```
+
+Or build from source with [Bun](https://bun.sh) 1.4.5 or newer:
 
 ```console
 $ git clone https://github.com/neves/boci

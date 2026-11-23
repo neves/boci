@@ -5,6 +5,7 @@ uniform, so their source is parsed with `ast` rather than executed.
 """
 
 import ast
+import copy
 import functools
 import importlib
 import inspect
@@ -224,7 +225,8 @@ def command_operation(callback, client_map) -> tuple:
     if not ops:
         return None, None, []
     key = f"{spec_name}.{service_name}"  # spec names never contain dots
-    op = dict(sdk_operation(cls, ops[0]))
+    # Deep copy: sdk_operation is cached and Tier A delegates rename nested params in place.
+    op = copy.deepcopy(sdk_operation(cls, ops[0]))
     op = {"client": key, **op, "paginated": paginated}
     if "work_request_client" in clients:
         op["workRequestClient"] = ".".join(clients["work_request_client"])

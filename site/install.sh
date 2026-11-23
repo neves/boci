@@ -23,10 +23,38 @@ ASSET="boci-${OS}-${ARCH}"
 if [ "$OS" = "linux" ] && { [ -f /etc/alpine-release ] || ldd --version 2>&1 | grep -qi musl; }; then
   ASSET="${ASSET}-musl"
 fi
-URL="https://github.com/${REPO}/releases/latest/download/${ASSET}"
+BASE_URL="${BOCI_RELEASE_BASE_URL:-https://github.com/${REPO}/releases/latest/download}"
+URL="${BASE_URL}/${ASSET}"
+SUMS_URL="${BASE_URL}/SHA256SUMS"
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+curl -fsSL --retry 3 --retry-delay 2 "$URL" -o "${TMP_DIR}/${ASSET}"
+curl -fsSL --retry 3 --retry-delay 2 "$SUMS_URL" -o "${TMP_DIR}/SHA256SUMS"
+
+EXPECTED="$(awk -v asset="$ASSET" '{ f = $2; sub(/^\*/, "", f); if (f == asset) { print $1; exit } }' "${TMP_DIR}/SHA256SUMS")"
+if [ -z "$EXPECTED" ]; then
+  echo "Checksum for ${ASSET} not found in SHA256SUMS" >&2
+  exit 1
+fi
+
+if command -v sha256sum >/dev/null 2>&1; then
+  ACTUAL="$(sha256sum "${TMP_DIR}/${ASSET}" | awk '{ print $1 }')"
+elif command -v shasum >/dev/null 2>&1; then
+  ACTUAL="$(shasum -a 256 "${TMP_DIR}/${ASSET}" | awk '{ print $1 }')"
+else
+  echo "No sha256sum or shasum found to verify checksum" >&2
+  exit 1
+fi
+
+if [ "$ACTUAL" != "$EXPECTED" ]; then
+  echo "Checksum verification failed for ${ASSET}: expected ${EXPECTED}, got ${ACTUAL}" >&2
+  exit 1
+fi
 
 mkdir -p "$INSTALL_DIR"
-curl -fsSL --retry 3 --retry-delay 2 "$URL" -o "${INSTALL_DIR}/boci"
+mv "${TMP_DIR}/${ASSET}" "${INSTALL_DIR}/boci"
 chmod +x "${INSTALL_DIR}/boci"
 
 echo "Installed boci to ${INSTALL_DIR}/boci"

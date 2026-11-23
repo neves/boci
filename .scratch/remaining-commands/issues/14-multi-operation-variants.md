@@ -14,6 +14,7 @@
 - These are few but high value (db). If a command can't be expressed as data (variant selector → delegate), write a hand handler in the per-service directory layout from ticket 02 and register it.
 - Write cases first: add hand-written Parity cases for 2–3 example commands, record goldens with `bun run golden --filter <id-prefix>`, see them fail, then implement, then widen to every command tagged with this pattern.
 - Look up commands with `bun run spec <service> <command…>`; read the Reference CLI behaviour from goldens, not by running `oci` by hand.
+- Ticket 11 compiles wrapper bodies to programs (`tools/extract/program.py`, run by `src/core/program.ts`), limited to one generated target; `network-firewall application create` (both branches invoke the same callback) is already verified that way. Widening `program`/`generated` to several targets (one operation + bindings per invoked callback) may cover most variant selectors.
 - **Rule:** more than ~3 distinct failure causes → fix the biggest 3, file follow-up tickets (`Blocked by: 14`) for the rest.
 
 ## Acceptance criteria

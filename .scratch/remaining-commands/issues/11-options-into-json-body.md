@@ -4,7 +4,7 @@
 
 **Blocked by:** 09: Tier A writes, 10: Tier B survey, 13: argument validation, 16: del kwargs and blank checks.
 
-**Status:** ready-for-agent
+**Status:** done (45 of 57 verified, plus ticket 14's `network-firewall application create`; 5 excluded for key camelization → 19; 7 uncompiled → 20; raise-other paths → 18)
 
 ## Context for the implementer
 
@@ -18,6 +18,6 @@
 
 ## Acceptance criteria
 
-- [ ] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

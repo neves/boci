@@ -374,4 +374,30 @@ describe("boci update package-manager detection", () => {
       expect(fetchCalled).toBe(false);
     });
   }
+
+  for (const bunExec of [
+    "/usr/local/bin/bun",
+    "C:\\Users\\user\\.bun\\bin\\bun.exe",
+  ]) {
+    test(`refuses to overwrite ${bunExec} when running uncompiled via bun`, async () => {
+      let fetchCalled = false;
+      const res = await runUpdateCatchingExit([], {
+        currentVersion: "0.0.1",
+        execPath: bunExec,
+        scriptPath: "/repo/src/main.ts",
+        platform: bunExec.endsWith(".exe") ? "win32" : "linux",
+        arch: "x64",
+        existsSync: () => false,
+        fetch: async () => {
+          fetchCalled = true;
+          return new Response("unexpected", { status: 500 });
+        },
+      });
+      expect(res.code).toBe(1);
+      expect(res.err).toBe(
+        "boci update only supports standalone compiled binaries.\n",
+      );
+      expect(fetchCalled).toBe(false);
+    });
+  }
 });

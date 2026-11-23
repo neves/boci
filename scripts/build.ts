@@ -4,6 +4,8 @@
 import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { parseArgs } from "util";
+import pkg from "../package.json" with { type: "json" };
+import { resolveBociVersion } from "../src/core/version.ts";
 
 const ROOT = join(import.meta.dir, "..");
 const BUILD = join(ROOT, ".build");
@@ -55,11 +57,15 @@ await import("../src/main.ts");
 `,
 );
 
+const bociVersion = resolveBociVersion(process.env.BOCI_VERSION, pkg.version);
 const result = await Bun.build({
   entrypoints: [join(BUILD, "entry.ts")],
   compile: {
     outfile: join(ROOT, values.outfile),
     ...(values.target ? { target: values.target as never } : {}),
+  },
+  define: {
+    "process.env.BOCI_VERSION": JSON.stringify(bociVersion),
   },
   minify: true,
 });

@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import type { Invocation } from "../lib/io.ts";
+import { Exit, type Invocation } from "../lib/io.ts";
 
 export type StdinReader = {
   readLine(): Promise<string | null>;
@@ -58,4 +58,58 @@ export function createStdinReader(io: Invocation): StdinReader {
     },
     isExhausted: () => exhausted,
   };
+}
+
+/** One hidden-input read (getpass): stderr warning without a terminal; end of input aborts. */
+export async function readHiddenLine(
+  io: Invocation,
+  stdin: StdinReader,
+  prompt: string,
+  wrapExceptions = false,
+): Promise<string> {
+  if (io.promptSecret) {
+    const line = await io.promptSecret(prompt);
+    if (line === null) {
+      io.out("\n");
+      io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
+      throw new Exit(1);
+    }
+    return line;
+  }
+  io.err(`Warning: Password input may be echoed.\n${prompt}`);
+  const line = await stdin.readLine();
+  if (line === null) {
+    io.out("\n");
+    io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
+    throw new Exit(1);
+  }
+  io.err("\n");
+  return line;
+}
+
+/**
+ * `click.prompt(text, hide_input=True, confirmation_prompt=True)` with no default: empty
+ * input asks again, a mismatched confirmation starts over. `prompt` includes its ": ".
+ */
+export async function promptHiddenConfirmed(
+  io: Invocation,
+  stdin: StdinReader,
+  prompt: string,
+  wrapExceptions = false,
+): Promise<string> {
+  while (true) {
+    let value = "";
+    while (!value)
+      value = await readHiddenLine(io, stdin, prompt, wrapExceptions);
+    let again = "";
+    while (!again)
+      again = await readHiddenLine(
+        io,
+        stdin,
+        "Repeat for confirmation: ",
+        wrapExceptions,
+      );
+    if (value === again) return value;
+    io.out("Error: The two entered values do not match.\n");
+  }
 }

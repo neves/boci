@@ -33,6 +33,15 @@ export class ProgramRaise extends Error {
  */
 export class ProgramConfirm extends Error {}
 
+/**
+ * `click.prompt(text, hide_input=True, confirmation_prompt=True)` with no answer yet:
+ * answered like ProgramConfirm, with the string entered.
+ */
+export class ProgramSecret extends Error {}
+
+/** What a program has been answered so far: click.confirm's booleans, prompts' strings. */
+export type ProgramAnswer = boolean | string;
+
 /** `ctx.abort()` in the wrapper. */
 export class ProgramAbort extends Error {}
 
@@ -362,7 +371,7 @@ export function runProgram(
   values: Dict,
   params: TypedParam[],
   parse: (name: string, value: unknown) => unknown,
-  answers: boolean[] = [],
+  answers: ProgramAnswer[] = [],
   files: ProgramFiles = NO_FILES,
   context: ProgramContext = {},
 ): ProgramResult {
@@ -379,7 +388,7 @@ export function runProgram(
   const env: Dict = { kwargs };
   let invoked: Dict | undefined;
   let target = 0;
-  let confirms = 0;
+  let asked = 0;
   const ctxObj = new ProgramObject("ctx.obj");
 
   const item = (obj: unknown, key: unknown): unknown => {
@@ -588,9 +597,15 @@ export function runProgram(
         if (context.namespace === undefined) throw new ProgramLookup();
         return context.namespace;
       case "confirm": {
-        const i = confirms++;
+        const i = asked++;
         if (i < answers.length) return answers[i];
         throw new ProgramConfirm(pyStr(a));
+      }
+      case "roverSecret": {
+        // rover_utils.prompt_for_secrets(secret_type)
+        const i = asked++;
+        if (i < answers.length) return answers[i];
+        throw new ProgramSecret(`Enter ${pyStr(a)} (minimum 8 characters)`);
       }
       case "isstr":
         // isinstance(a, six.string_types)

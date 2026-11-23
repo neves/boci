@@ -64,7 +64,12 @@ const UPLOAD_PUBLIC_KEY_INSTRUCTIONS =
   "    'How to upload the public key':\n\n" +
   "        https://docs.cloud.oracle.com/Content/API/Concepts/apisigningkey.htm#How2\n\n\n";
 
-import { type StdinReader, createStdinReader } from "../core/stdin.ts";
+import {
+  type StdinReader,
+  createStdinReader,
+  promptHiddenConfirmed,
+  readHiddenLine,
+} from "../core/stdin.ts";
 
 export { type StdinReader, createStdinReader };
 
@@ -174,32 +179,6 @@ function maskHiddenInput(message: string, value: string): string {
   return out;
 }
 
-async function readHiddenLine(
-  io: Invocation,
-  stdin: StdinReader,
-  prompt: string,
-  wrapExceptions = false,
-): Promise<string> {
-  if (io.promptSecret) {
-    const line = await io.promptSecret(prompt);
-    if (line === null) {
-      io.out("\n");
-      io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
-      throw new Exit(1);
-    }
-    return line;
-  }
-  io.err(`Warning: Password input may be echoed.\n${prompt}`);
-  const line = await stdin.readLine();
-  if (line === null) {
-    io.out("\n");
-    io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
-    throw new Exit(1);
-  }
-  io.err("\n");
-  return line;
-}
-
 /** Click `click.prompt` subset used by `cli_setup`. */
 async function promptClick<T = string>(
   io: Invocation,
@@ -260,24 +239,13 @@ export async function promptForPassphrase(
   wrapExceptions = false,
 ): Promise<string | null> {
   const promptText = `Enter a passphrase for your private key ("${NO_PASSPHRASE}" for no passphrase): `;
-  const confirmText = "Repeat for confirmation: ";
-
-  while (true) {
-    let value = "";
-    while (true) {
-      value = await readHiddenLine(io, stdin, promptText, wrapExceptions);
-      if (value) break;
-    }
-    let value2 = "";
-    while (true) {
-      value2 = await readHiddenLine(io, stdin, confirmText, wrapExceptions);
-      if (value2 || (!value && !value2)) break;
-    }
-    if (value === value2) {
-      return value === NO_PASSPHRASE ? null : value;
-    }
-    io.out("Error: The two entered values do not match.\n");
-  }
+  const value = await promptHiddenConfirmed(
+    io,
+    stdin,
+    promptText,
+    wrapExceptions,
+  );
+  return value === NO_PASSPHRASE ? null : value;
 }
 
 async function writePublicKeyToFile(

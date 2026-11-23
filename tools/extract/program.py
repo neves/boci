@@ -82,6 +82,8 @@ HAND_CODED = {
     "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_encryption_key_params": "sseParams",
     "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_source_encryption_key_params": "sourceSseParams",
     "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_sse_customer_key_details": "sseCustomerKey",
+    # click.prompt(hide_input=True, confirmation_prompt=True) for a Rover secret (ticket 25).
+    "services.rover.src.oci_cli_rover.rover_utils.prompt_for_secrets": "roverSecret",
 }
 BINOP = {ast.Add: "+", ast.Sub: "-"}
 # Exceptions a wrapper raises that cli_util.wrap_exceptions renders (ticket 18).

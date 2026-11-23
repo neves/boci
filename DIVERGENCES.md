@@ -26,6 +26,14 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **Why:** it reports a bug in oci's own command definitions and embeds a machine-specific path; no script can rely on it. Masked in `test/harness/masks.ts`.
 - **State:** accepted
 
+### Hidden prompts without a terminal: Python's GetPassWarning on stderr
+
+- **Invocation:** `oci rover node set-secrets --node-id <id> < secrets.txt` (any hidden `click.prompt` when no terminal can be opened)
+- **Reference CLI:** before its first hidden prompt, Python's `getpass` prints `<python install>/getpass.py:91: GetPassWarning: Can not control echo on the terminal.` and the source line to stderr, then `Warning: Password input may be echoed.` before each prompt
+- **boci:** prints the `Warning: Password input may be echoed.` lines, not the GetPassWarning
+- **Why:** the warning embeds a machine-specific Python install path; no script can rely on it. Masked in `test/harness/masks.ts`.
+- **State:** accepted
+
 ### Datetime options: Unix timestamps beyond year 9999
 
 - **Invocation:** `oci database-management diagnosability managed-database list-alert-logs --time-less-than-or-equal-to 99999999999999999999 ...`

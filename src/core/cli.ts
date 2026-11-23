@@ -65,6 +65,8 @@ import {
   type ProgramFiles,
   ProgramAbort,
   ProgramConfirm,
+  ProgramSecret,
+  type ProgramAnswer,
   ProgramLookup,
   ProgramRaise,
   ProgramUnsupported,
@@ -82,6 +84,11 @@ import {
   outputBinding,
 } from "./operation.ts";
 import { printResult } from "./output.ts";
+import {
+  type StdinReader,
+  createStdinReader,
+  promptHiddenConfirmed,
+} from "./stdin.ts";
 import { writeDownload } from "./download.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
@@ -864,8 +871,10 @@ async function runWrapper(
   usageText: () => string,
   models: ServiceSpec["models"],
   lookups: WrapperLookups,
-  answers: boolean[] = [],
+  answers: ProgramAnswer[] = [],
   context: ProgramContext = { region: lookups.region },
+  // One reader for every prompt: the program runs again after each answer.
+  stdin: StdinReader = createStdinReader(io),
 ): Promise<
   | { command: GeneratedCommand; kwargs: Record<string, unknown> }
   | undefined
@@ -936,7 +945,7 @@ async function runWrapper(
     if (e instanceof ProgramConfirm) {
       // click.confirm under wrap_exceptions; then the program runs again, answered.
       if (!program.wrapExceptions) return "unsupported";
-      const yes = await confirmUnderWrapExceptions(io, e.message, false);
+      const yes = await confirmUnderWrapExceptions(io, e.message, false, stdin);
       return runWrapper(
         io,
         command,
@@ -946,6 +955,28 @@ async function runWrapper(
         lookups,
         [...answers, yes],
         context,
+        stdin,
+      );
+    }
+    if (e instanceof ProgramSecret) {
+      if (!program.wrapExceptions) return "unsupported";
+      // click.prompt(hide_input=True, confirmation_prompt=True) under wrap_exceptions.
+      const secret = await promptHiddenConfirmed(
+        io,
+        stdin,
+        `${e.message}: `,
+        true,
+      );
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        [...answers, secret],
+        context,
+        stdin,
       );
     }
     if (e instanceof ProgramLookup) {
@@ -962,6 +993,7 @@ async function runWrapper(
           ...context,
           namespace,
         },
+        stdin,
       );
     }
     if (e instanceof ProgramAbort) {

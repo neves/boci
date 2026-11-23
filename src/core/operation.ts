@@ -32,7 +32,7 @@ import {
   decodeSecurityToken,
   isSecurityTokenValid,
 } from "./security-token.ts";
-import { createStdinReader } from "./stdin.ts";
+import { type StdinReader, createStdinReader } from "./stdin.ts";
 import {
   InvalidPrivateKey,
   MissingPrivateKeyPassphrase,
@@ -1061,8 +1061,8 @@ export async function confirmUnderWrapExceptions(
   io: Invocation,
   text: string,
   defaultValue: boolean,
+  stdin: StdinReader = createStdinReader(io),
 ): Promise<boolean> {
-  const stdin = createStdinReader(io);
   const suffix = defaultValue ? "[Y/n]: " : "[y/N]: ";
   const prompt = `${text} ${suffix}`;
   while (true) {

@@ -27,6 +27,11 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "Click's duplicate-parameter warning (e.g. --from-json, -h) carries a local install path; see DIVERGENCES.md",
   ],
   [
+    /^\S+\/getpass\.py:\d+: GetPassWarning: Can not control echo on the terminal\.\n {2}[^\n]*\n/gm,
+    "",
+    "Python's GetPassWarning (a hidden prompt with no terminal) carries the local Python install path; see DIVERGENCES.md",
+  ],
+  [
     /"timestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}\+00:00"/g,
     '"timestamp": "<timestamp>"',
     "ServiceError timestamp is generated at response time",

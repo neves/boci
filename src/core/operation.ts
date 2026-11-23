@@ -144,7 +144,10 @@ const isBlank = (value: unknown) =>
  * by the generated option (always under wrap_exceptions).
  */
 export function usageCheckFailure(
-  command: ServiceSpec["commands"][string],
+  command: Pick<
+    ServiceSpec["commands"][string],
+    "delegate" | "operation" | "params"
+  >,
   values: Record<string, unknown>,
 ): { message: string; wrapped: boolean } | undefined {
   const delegate = command.delegate;

@@ -42,6 +42,9 @@ type Operation = {
 type Command = {
   kind: string;
   tier?: "A" | "B" | "C";
+  program?: unknown;
+  patterns?: string[];
+  survey?: { folds?: { options: string[] }[] };
   operation?: Operation;
   params?: Param[];
   bindings?: Binding[];
@@ -69,6 +72,16 @@ const kinds = (
       methods: ["POST", "PUT", "PATCH"],
       build: writeArgv,
       replies: () => ({ body: {} }),
+    },
+    {
+      // Tier B wrappers compiled to a program (ticket 11): required options plus every
+      // option the wrapper folds into a complex param.
+      file: "generated-wrapper",
+      methods: ["GET", "POST", "PUT", "PATCH"],
+      build: wrapperArgv,
+      replies: (operation) => ({
+        body: operation.responseType?.startsWith("list[") ? [] : {},
+      }),
     },
     {
       file: "generated-bodyless",
@@ -243,6 +256,33 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
   return true;
 }
 
+function wrapperArgv(argv: string[], command: Command) {
+  const params = command.params ?? [];
+  const folded = new Set(
+    (command.survey?.folds ?? []).flatMap((fold) => fold.options),
+  );
+  for (const param of params) {
+    const name = String(param.name);
+    if (name === "from_json") continue;
+    // Object Storage looks an omitted namespace up first; name it.
+    const namespace = name === "namespace" || name === "namespace_name";
+    if (param.required !== true && !folded.has(name) && !namespace) continue;
+    const option = optionOf(param);
+    if (!option) continue;
+    argv.push(option);
+    if (param.isFlag === true) continue;
+    argv.push(
+      param.type === "datetime" ? "2024-01-02T03:04:05.000Z" : sample(param),
+    );
+  }
+  if (params.some((p) => (p.opts as string[] | undefined)?.includes("--force")))
+    argv.push("--force");
+  argv.push("--endpoint", "{endpoint}");
+  if (hasRetryToken(params))
+    argv.push("--opc-retry-token", "{opc-retry-token}");
+  return true;
+}
+
 // HEAD and DELETE have no modeled request body. Supply path and required values,
 // plus bound query/header values, so each generated case reaches the fake endpoint.
 function bodylessArgv(argv: string[], command: Command, operation: Operation) {
@@ -278,9 +318,17 @@ for (const service of services) {
     for (const [command, node] of Object.entries(spec.commands)) {
       const key = `${service} ${command}`;
       const operation = node.operation;
+      const programmed =
+        node.kind === "custom" &&
+        node.tier === "B" &&
+        node.program !== undefined &&
+        !node.patterns?.includes("file-read") &&
+        !node.patterns?.includes("base64");
       if (
+        (kind.file === "generated-wrapper") !== programmed ||
         (node.kind !== "generated" &&
-          !(node.kind === "custom" && node.tier === "A")) ||
+          !(node.kind === "custom" && node.tier === "A") &&
+          !programmed) ||
         !operation ||
         !kind.methods.includes(operation.http ?? "") ||
         !methods.has(operation.http ?? "") ||

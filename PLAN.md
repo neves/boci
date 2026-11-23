@@ -419,7 +419,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `log-analytics assoc list-associated-entities`
 - [x] `log-analytics assoc list-entity-source-assocs`
 - [x] `log-analytics entity list-associations`
-- [ ] `log-analytics query search`
+- [x] `log-analytics query search`
 - [x] `management-agent agent summarize-plugin-counts`
 - [x] `marketplace listing-summary search-listings-free-text`
 - [x] `marketplace listing-summary search-listings-structured`
@@ -626,7 +626,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `capacity-management demand-signal occm-demand-signal-item update`
 - [x] `ccc infrastructure update`
 - [x] `ccc upgrade-schedule update`
-- [ ] `ce node-pool update`
+- [x] `ce node-pool update`
 - [x] `certs-mgmt certificate update`
 - [x] `certs-mgmt certificate-authority update-root-ca-by-generating-config-details`
 - [x] `certs-mgmt certificate-authority update-root-ca-managed-externally`
@@ -680,7 +680,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db external-db-connector update-macs-connector`
 - [x] `db external-non-cdb update`
 - [x] `db external-pdb update`
-- [ ] `db key-store update-oracle-key-vault-details`
+- [x] `db key-store update-oracle-key-vault-details`
 - [ ] `db system update`
 - [ ] `db vm-cluster update`
 - [x] `dbtools connection update-generic-jdbc`
@@ -726,7 +726,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `devops deploy-stage update-oke-blue-green-traffic-shift-stage`
 - [x] `devops deploy-stage update-oke-canary-approval-stage`
 - [x] `devops deploy-stage update-oke-canary-traffic-shift-stage`
-- [ ] `devops deploy-stage update-oke-helm-chart-stage`
+- [x] `devops deploy-stage update-oke-helm-chart-stage`
 - [x] `devops deploy-stage update-shell-stage`
 - [x] `devops deploy-stage update-wait-stage`
 - [x] `devops deployment update`
@@ -754,8 +754,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `integration integration-instance update`
 - [ ] `iot digital-twin-instance update`
 - [x] `jms fleet-agent-configuration update`
-- [ ] `lb backend-set update`
-- [ ] `lb listener update`
+- [x] `lb backend-set update`
+- [x] `lb listener update`
 - [x] `lb nsg update`
 - [x] `limits-increase limits-increase-request update`
 - [x] `log-analytics em-bridge update`
@@ -772,7 +772,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `management-agent install-key update`
 - [x] `monitoring alarm update`
 - [ ] `mysql channel update-from-mysql`
-- [ ] `mysql db-system update`
+- [x] `mysql db-system update`
 - [x] `network drg-route-distribution update`
 - [x] `network drg-route-distribution-statement update`
 - [x] `network drg-route-table update`
@@ -781,10 +781,10 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `network private-ip update`
 - [ ] `network-firewall application update`
 - [ ] `network-firewall decryption-profile update`
-- [ ] `network-firewall mapped-secret update`
-- [ ] `network-firewall nat-rule update`
+- [x] `network-firewall mapped-secret update`
+- [x] `network-firewall nat-rule update`
 - [ ] `network-firewall service update`
-- [ ] `network-firewall tunnel-inspection-rule update`
+- [x] `network-firewall tunnel-inspection-rule update`
 - [x] `nosql row update`
 - [x] `ocvs esxi-host update`
 - [x] `ocvs sddc update`
@@ -826,7 +826,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `stack-monitoring resource-task update-resource-type-configs`
 - [x] `stack-monitoring resource-type update`
 - [x] `stack-monitoring resource-type update-system-format-resource-type`
-- [ ] `support incident update`
+- [x] `support incident update`
 - [x] `vbstudio instance update`
 - [x] `visual-builder vb-instance update`
 - [x] `waas certificate update-address-list`
@@ -927,7 +927,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `compute instance launch`
 - [x] `data-science ml-app-instance-view disable-trigger`
 - [x] `data-science ml-app-instance-view enable-trigger`
-- [ ] `db database enable-database-management`
+- [x] `db database enable-database-management`
 - [x] `db external-cdb disable-db-management`
 - [x] `db external-cdb enable-db-management`
 - [x] `db external-non-cdb disable-db-management`
@@ -940,7 +940,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db external-pdb enable-operations-insights`
 - [x] `db node start`
 - [x] `db node stop`
-- [ ] `db pluggable-database enable-pluggable-database-management`
+- [x] `db pluggable-database enable-pluggable-database-management`
 - [ ] `db system launch`
 - [ ] `db system launch-from-database`
 - [ ] `db system launch-from-db-system`
@@ -1066,9 +1066,9 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `capacity-management demand-signal occm-demand-signal-item create`
 - [x] `capacity-management occ-capacity-request create`
 - [x] `ccc infrastructure create`
-- [ ] `ce cluster create`
+- [x] `ce cluster create`
 - [ ] `ce cluster create-kubeconfig`
-- [ ] `ce node-pool create`
+- [x] `ce node-pool create`
 - [x] `certs-mgmt certificate create-by-importing-config`
 - [x] `certs-mgmt certificate-authority create-root-ca-by-generating-config-details`
 - [x] `certs-mgmt certificate-authority create-root-ca-managed-externally`
@@ -1126,7 +1126,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db exadb-vm-cluster create`
 - [ ] `db exascale-db-storage-vault create`
 - [x] `db external-pdb create`
-- [ ] `db key-store create-oracle-key-vault-details`
+- [x] `db key-store create-oracle-key-vault-details`
 - [x] `db pluggable-database create`
 - [x] `db vm-cluster create`
 - [x] `dbtools connection create-generic-jdbc`
@@ -1165,12 +1165,12 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `devops deploy-stage create-oke-blue-green-traffic-shift-stage`
 - [x] `devops deploy-stage create-oke-canary-approval-stage`
 - [x] `devops deploy-stage create-oke-canary-traffic-shift-stage`
-- [ ] `devops deploy-stage create-oke-helm-chart-stage`
+- [x] `devops deploy-stage create-oke-helm-chart-stage`
 - [x] `devops deploy-stage create-shell-stage`
 - [x] `devops deploy-stage create-wait-stage`
-- [ ] `devops deployment create-pipeline-deployment`
+- [x] `devops deployment create-pipeline-deployment`
 - [x] `devops deployment create-pipeline-redeployment`
-- [ ] `devops deployment create-single-stage-deployment`
+- [x] `devops deployment create-single-stage-deployment`
 - [x] `devops deployment create-single-stage-redeployment`
 - [x] `dif stack create`
 - [x] `disaster-recovery dr-plan-execution create-start-drill`
@@ -1211,9 +1211,9 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `instance-agent command create`
 - [x] `integration integration-instance create`
 - [ ] `kms management key-version create`
-- [ ] `lb backend-set create`
+- [x] `lb backend-set create`
 - [ ] `lb certificate create`
-- [ ] `lb listener create`
+- [x] `lb listener create`
 - [x] `lb load-balancer create`
 - [x] `limits-increase limits-increase-request create`
 - [x] `log-analytics entity create`
@@ -1221,16 +1221,16 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `logging log-saved-search create`
 - [x] `management-agent agent create-prometheus-datasource`
 - [x] `monitoring alarm create`
-- [ ] `mysql channel create-from-mysql`
-- [ ] `mysql db-system create`
+- [x] `mysql channel create-from-mysql`
+- [x] `mysql db-system create`
 - [x] `network drg-route-table create`
 - [x] `network virtual-circuit create`
-- [ ] `network-firewall application create`
+- [x] `network-firewall application create`
 - [ ] `network-firewall decryption-profile create`
-- [ ] `network-firewall mapped-secret create`
-- [ ] `network-firewall nat-rule create`
+- [x] `network-firewall mapped-secret create`
+- [x] `network-firewall nat-rule create`
 - [ ] `network-firewall service create`
-- [ ] `network-firewall tunnel-inspection-rule create`
+- [x] `network-firewall tunnel-inspection-rule create`
 - [x] `nosql index create`
 - [x] `nosql table create-replica`
 - [x] `ocvs esxi-host create`
@@ -1242,7 +1242,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `opsi host-insights create-em-external-host`
 - [x] `opsi host-insights create-macs-external-host`
 - [x] `os replication create-replication-policy`
-- [ ] `os retention-rule create`
+- [x] `os retention-rule create`
 - [x] `os-management-hub management-station create`
 - [x] `os-management-hub profile create-group-profile`
 - [x] `os-management-hub profile create-lifecycle-profile`
@@ -1277,7 +1277,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `stack-monitoring monitoring-template create`
 - [x] `stack-monitoring resource create`
 - [x] `stack-monitoring resource-type create-system-format-resource-type`
-- [ ] `support incident create`
+- [x] `support incident create`
 - [x] `vault secret create-base64`
 - [x] `vbstudio instance create`
 
@@ -1300,7 +1300,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db database convert-to-new-pdb-precheck`
 - [x] `db database convert-to-pdb-sync`
 - [x] `db database convert-to-pdb-sync-rollback`
-- [ ] `db database modify-database-management`
+- [x] `db database modify-database-management`
 - [x] `db external-cdb scan-pluggable-databases`
 - [x] `db external-db-connector check-connection-status`
 - [x] `db node force-reset`
@@ -1312,7 +1312,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `db patch-history get by-database`
 - [ ] `db patch-history list by-database`
 - [x] `db pluggable-database convert-to-regular`
-- [ ] `db pluggable-database modify-pluggable-database-management`
+- [x] `db pluggable-database modify-pluggable-database-management`
 - [x] `db pluggable-database refresh`
 - [x] `db pluggable-database relocate-pdb`
 - [x] `dbtools connection validate-mysql-database`
@@ -1397,7 +1397,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db database upgrade-with-db-home`
 - [x] `db database upgrade-with-db-version`
 - [x] `db pluggable-database create-local-clone`
-- [ ] `db pluggable-database create-remote-clone`
+- [x] `db pluggable-database create-remote-clone`
 - [x] `db pluggable-database local-clone`
 - [x] `db pluggable-database remote-clone`
 - [ ] `db system launch-from-backup`
@@ -1411,7 +1411,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `kms management key restore`
 - [ ] `kms management vault backup`
 - [ ] `kms management vault restore`
-- [ ] `mysql db-system clone`
+- [x] `mysql db-system clone`
 - [x] `ocvs esxi-host inplace-upgrade`
 - [ ] `os object restore`
 - [ ] `os object restore-status`
@@ -1428,18 +1428,18 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `fleet-software-update fsu-cycle update-fifty-batch`
 - [x] `fleet-software-update fsu-cycle update-saf-batch`
 - [x] `fleet-software-update fsu-cycle update-sequential-batch`
-- [ ] `network-firewall address-list bulk-upload`
-- [ ] `network-firewall application bulk-upload`
-- [ ] `network-firewall application-group bulk-upload`
-- [ ] `network-firewall decryption-profile bulk-upload`
-- [ ] `network-firewall decryption-rule bulk-upload`
-- [ ] `network-firewall mapped-secret bulk-upload`
-- [ ] `network-firewall nat-rule bulk-upload`
-- [ ] `network-firewall security-rule bulk-upload`
-- [ ] `network-firewall service bulk-upload`
-- [ ] `network-firewall service-list bulk-upload`
-- [ ] `network-firewall tunnel-inspection-rule bulk-upload`
-- [ ] `network-firewall url-list bulk-upload`
+- [x] `network-firewall address-list bulk-upload`
+- [x] `network-firewall application bulk-upload`
+- [x] `network-firewall application-group bulk-upload`
+- [x] `network-firewall decryption-profile bulk-upload`
+- [x] `network-firewall decryption-rule bulk-upload`
+- [x] `network-firewall mapped-secret bulk-upload`
+- [x] `network-firewall nat-rule bulk-upload`
+- [x] `network-firewall security-rule bulk-upload`
+- [x] `network-firewall service bulk-upload`
+- [x] `network-firewall service-list bulk-upload`
+- [x] `network-firewall tunnel-inspection-rule bulk-upload`
+- [x] `network-firewall url-list bulk-upload`
 - [ ] `os object bulk-delete-versions`
 
 </details>
@@ -1468,7 +1468,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `log-analytics upload upload-otlp-logs`
 - [ ] `management-dashboard dashboard export`
 - [ ] `model-deployment inference-result predict-with-response-stream`
-- [ ] `mysql db-system import`
+- [x] `mysql db-system import`
 - [x] `os-management-hub managed-instance-group disable-module-stream`
 - [x] `os-management-hub managed-instance-group enable-module-stream`
 - [x] `os-management-hub managed-instance-group switch-module-stream`

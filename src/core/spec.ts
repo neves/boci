@@ -6,6 +6,7 @@ import type { DatetimeSpec, TypedParam } from "./convert.ts";
 import type { ParseSettings } from "./parser.ts";
 import type { RegionsSpec, ClientInfo } from "./endpoint.ts";
 import type { Predicate, UsageCheck } from "./checks.ts";
+import type { Statement } from "./program.ts";
 
 export type OperationSpec = {
   client: string;
@@ -78,6 +79,10 @@ export type ServiceSpec = {
         checks?: { message: string; test?: Predicate }[];
         wrapExceptions?: boolean;
       };
+      /** A Tier B wrapper's body compiled to a program (tools/extract/program.py). */
+      program?: { body: Statement[]; wrapExceptions: boolean };
+      /** The generated command a programmed wrapper invokes; operation and bindings are its. */
+      generated?: { callback: string; params: TypedParam[] };
       operation?: OperationSpec;
     }
   >;

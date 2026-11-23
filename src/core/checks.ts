@@ -19,7 +19,7 @@ export type Predicate =
 export type UsageCheck = { test: Predicate; message: string };
 
 /** What Click hands the callback for an option the command line left out. */
-function kwarg(
+export function kwarg(
   name: string,
   values: Record<string, unknown>,
   params: TypedParam[],
@@ -33,7 +33,7 @@ function kwarg(
 }
 
 /** Python truthiness. */
-function truthy(value: unknown): boolean {
+export function truthy(value: unknown): boolean {
   if (value === null || value === undefined || value === false) return false;
   if (value === 0 || value === "") return false;
   if (Array.isArray(value)) return value.length > 0;

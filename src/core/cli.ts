@@ -55,6 +55,12 @@ import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import {
+  ProgramUnsupported,
+  ProgramUsageError,
+  runProgram,
+} from "./program.ts";
+import {
+  type GeneratedCommand,
   usageCheckFailure,
   tierBCheckFailure,
   callOperation,
@@ -572,11 +578,14 @@ async function main(io: Invocation): Promise<void> {
             (p.name === "namespace" || p.name === "namespace_name") &&
             values[p.name] === undefined,
         );
-      const failure = engineRoute
-        ? usageCheckFailure(specCmd, values)
-        : namespaceFirst
-          ? undefined
-          : tierBCheckFailure(specCmd, values);
+      // A programmed wrapper raises its own checks as it runs (below).
+      const failure = specCmd.program
+        ? undefined
+        : engineRoute
+          ? usageCheckFailure(specCmd, values)
+          : namespaceFirst
+            ? undefined
+            : tierBCheckFailure(specCmd, values);
       if (failure?.wrapped === false)
         showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
       if (failure) {
@@ -584,8 +593,11 @@ async function main(io: Invocation): Promise<void> {
         throw new Exit(1);
       }
     }
+    // A programmed wrapper sees complex options as the strings Click gives it (an
+    // empty "{}" is truthy); it and the generated command parse them where oci does.
+    const parseFirst = !(engineRoute && specCmd.program);
     for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
-      if (values[p.name] !== undefined && isComplexParam(p)) {
+      if (parseFirst && values[p.name] !== undefined && isComplexParam(p)) {
         values[p.name] = parseJsonParameter(io, p.name, values[p.name]);
       }
     }
@@ -608,9 +620,33 @@ async function main(io: Invocation): Promise<void> {
     }
 
     if (engineRoute) {
+      let command: GeneratedCommand = specCmd;
+      let callValues = values;
+      if (specCmd.program && specCmd.generated) {
+        const generated = runWrapper(io, specCmd, values, () =>
+          usage(io, commandPath, cmd.helpDoc),
+        );
+        if (generated === "unsupported") {
+          await notImplemented(io, argv, commandPath);
+          return;
+        }
+        // The wrapper returned without invoking anything: no request, no output.
+        if (generated === undefined) return;
+        command = {
+          operation: specCmd.operation,
+          bindings: (specCmd as GeneratedCommand).bindings,
+          params: specCmd.generated.params,
+        };
+        callValues = generated;
+        const failure = usageCheckFailure(command, callValues);
+        if (failure) {
+          io.err(`UsageError: ${failure.message}\n`);
+          throw new Exit(1);
+        }
+      }
       const call = {
-        command: specCmd,
-        values,
+        command,
+        values: callValues,
         rootValues,
         settings,
         spec,
@@ -726,6 +762,38 @@ function convertDefaultValue(
       .map(convertSingle);
   }
   return convertSingle(expanded);
+}
+
+/**
+ * Runs a programmed Tier B wrapper: the generated command's kwargs it invokes, undefined
+ * when it returns without invoking, "unsupported" for a path the Engine doesn't model
+ * (another exception, or keywords the generated callback doesn't take: a TypeError).
+ */
+function runWrapper(
+  io: Invocation,
+  command: ServiceSpec["commands"][string],
+  values: Record<string, unknown>,
+  usageText: () => string,
+): Record<string, unknown> | undefined | "unsupported" {
+  const program = command.program as NonNullable<typeof command.program>;
+  try {
+    const { kwargs, names } = runProgram(
+      program.body,
+      values,
+      command.params ?? [],
+      (name, value) => parseJsonParameter(io, name, value),
+    );
+    if (!kwargs) return undefined;
+    const accepted = new Set(command.generated?.params.map((p) => p.name));
+    if (names?.some((name) => !accepted.has(name))) return "unsupported";
+    return kwargs;
+  } catch (e) {
+    if (e instanceof ProgramUnsupported) return "unsupported";
+    if (!(e instanceof ProgramUsageError)) throw e;
+    if (!program.wrapExceptions) showPatched(io, usageText(), e.message);
+    io.err(`UsageError: ${e.message}\n`);
+    throw new Exit(1);
+  }
 }
 
 /** Exit code for "boci doesn't implement this yet" (oci itself uses 0, 1 and 2). */

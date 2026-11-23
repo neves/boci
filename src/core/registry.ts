@@ -264,6 +264,14 @@ const EXCLUDED = new Set<string>([
   // Tier A wrapper the Reference CLI can't run: the delegated generated command rejects
   // the injected `operation` kwarg with a TypeError before any request.
   "resource-manager job create-plan-rollback-job",
+  // Tier B wrappers that fold options into snake_case keys (e.g. `total_size_in_gbs`);
+  // the generated command's parse_json_parameter camelizes them by the SDK model
+  // (cli_util.make_dict_keys_camel_case), which the Engine doesn't model yet (ticket 19).
+  "db database update",
+  "db exascale-db-storage-vault create",
+  "db exascale-db-storage-vault update",
+  "db system launch-from-database",
+  "db system launch-from-db-system",
 ]);
 
 export type Command = ServiceSpec["commands"][string] & {
@@ -273,13 +281,25 @@ export type Command = ServiceSpec["commands"][string] & {
 const WRITE_METHODS = ["POST", "PUT", "PATCH"];
 
 /**
+ * A Tier B wrapper compiled to a program (ticket 11). Wrappers that read files are
+ * ticket 12's.
+ */
+function programmed(command: Command): boolean {
+  if (command.kind !== "custom" || command.tier !== "B" || !command.program)
+    return false;
+  const patterns = (command as { patterns?: string[] }).patterns ?? [];
+  return !patterns.includes("file-read") && !patterns.includes("base64");
+}
+
+/**
  * Whether the generic engine runs this Generated command: every GET/HEAD, bodyless DELETE,
  * and POST/PUT/PATCH with either body options, a direct body parameter, or no body.
  */
 export function engineSupports(command: Command): boolean {
   if (
     command.kind !== "generated" &&
-    !(command.kind === "custom" && command.tier === "A")
+    !(command.kind === "custom" && command.tier === "A") &&
+    !programmed(command)
   )
     return false;
   const http = command.operation?.http ?? "";

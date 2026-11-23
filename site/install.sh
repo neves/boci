@@ -20,6 +20,9 @@ case "$ARCH" in
 esac
 
 ASSET="boci-${OS}-${ARCH}"
+if [ "$OS" = "linux" ] && { [ -f /etc/alpine-release ] || ldd --version 2>&1 | grep -qi musl; }; then
+  ASSET="${ASSET}-musl"
+fi
 URL="https://github.com/${REPO}/releases/latest/download/${ASSET}"
 
 mkdir -p "$INSTALL_DIR"

@@ -2,12 +2,13 @@
 
 **What to build:** After automatic tiers land, the remaining unticked Rung 8 items (hand-written Tier C commands plus anything excluded along the way) are reordered by user importance instead of guessed difficulty, so the normal one-item-per-subagent Ladder loop works on the most useful commands first. The Ladder-pause note in CLAUDE.md is removed.
 
-**Blocked by:** 06: ladder sync, 11, 12, 13, 14.
+**Blocked by:** 06: ladder sync, 11, 12, 13, 14, 16.
 
 **Status:** ready-for-agent
 
 ## Context for the implementer
 
+- Ticket 10's report (`.scratch/remaining-commands/tier-b-report.md`) lists 22 Tier B commands with own logic (SDK lookups, printing, waiting) and all 202 Tier C commands per service; they stay hand-written Rung 8 items and are ordered here like Tier C.
 - Run `bun run ladder sync` first, then count what's left per service (`bun run status`).
 - Order: (1) compute (`compute instance launch`, `compute instance list-vnics`, `compute instance attach-vnic`), ce (`ce cluster create-kubeconfig`), iam, bv, network; (2) db, fn (`fn function invoke`), resource-manager, kms/vault, artifacts, logging, monitoring; (3) remaining services alphabetically; (4) file transfers, streaming and bulk commands last.
 - Keep difficulty as a tag in each group heading if useful, but the order is by importance.

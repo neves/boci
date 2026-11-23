@@ -4,7 +4,7 @@
 
 **Blocked by:** 07: Tier A tracer bullet.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -21,6 +21,6 @@ Detect patterns statically (AST); for each, also record what the extractor can l
 
 ## Acceptance criteria
 
-- [ ] Spec entries for Tier B commands carry a `patterns` list; `bun run spec` prints it.
-- [ ] Report written; each of tickets 11–14 updated in place (scope, counts, examples) or marked obsolete; new tickets filed for any pattern with ≥10 commands not covered.
-- [ ] `bun run verify` green.
+- [x] Spec entries for Tier B commands carry a `patterns` list; `bun run spec` prints it.
+- [x] Report written; each of tickets 11–14 updated in place (scope, counts, examples) or marked obsolete; new tickets filed for any pattern with ≥10 commands not covered.
+- [x] `bun run verify` green.

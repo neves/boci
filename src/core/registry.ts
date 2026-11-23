@@ -254,11 +254,17 @@ const IMPLEMENTED = new Set<string>([
   ...CUSTOM_HANDLERS.keys(),
 ]);
 
-// Generated commands that don't match the Reference CLI; each entry includes its reason.
+// Generated and Tier A commands that don't match the Reference CLI; each entry includes its reason.
 const EXCLUDED = new Set<string>([
   // Reference CLI ignores --operation-name and sends the fixed SDK operation name;
   // the generated path binding cannot represent that command-specific behavior.
   "ocvs sddc retrieve-sddc-operation-status",
+  // Tier A wrapper the Reference CLI can't run: the delegated generated command rejects
+  // the injected `operation` kwarg with a TypeError before any request.
+  "resource-manager job create-plan-rollback-job",
+  // --file is a click.File the Reference CLI opens (and validates) before delegating;
+  // file-content params are ticket 12.
+  "support incident put-attachment",
 ]);
 
 export type Command = ServiceSpec["commands"][string] & {
@@ -300,16 +306,6 @@ export function engineSupports(command: Command): boolean {
 /** `command` is the Leaf command's spec entry, when `key` names one. */
 export function isImplemented(key: string, command?: Command): boolean {
   if (IMPLEMENTED.has(key)) return true;
-  if (command?.kind === "custom" && command.tier === "A") {
-    const http = command.operation?.http;
-    return (
-      (http === "GET" ||
-        http === "HEAD" ||
-        (http === "DELETE" && command.operation?.body === undefined)) &&
-      engineSupports(command) &&
-      !EXCLUDED.has(key)
-    );
-  }
   return command !== undefined && engineSupports(command) && !EXCLUDED.has(key);
 }
 

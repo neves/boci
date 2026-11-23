@@ -4,7 +4,7 @@
 
 **Blocked by:** 03: bodyless actions, 04: complex-only bodies, 08: Tier A reads and deletes.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -14,6 +14,6 @@
 
 ## Acceptance criteria
 
-- [ ] Every Tier A write is verified, excluded with reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every Tier A write is verified, excluded with reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

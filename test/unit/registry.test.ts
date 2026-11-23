@@ -48,7 +48,7 @@ test("engine supports bodyless actions with an unexposed SDK body argument", asy
   expect(engineSupports(start!)).toBe(true);
 });
 
-test("engine supports Tier A reads and bodyless deletes", async () => {
+test("engine supports Tier A reads, bodyless deletes and writes", async () => {
   const apm = await loadService("apm-traces");
   const span = apm.commands["trace span get"];
   expect(span?.tier).toBe("A");
@@ -68,12 +68,10 @@ test("engine supports Tier A reads and bodyless deletes", async () => {
       operation: { ...remove!.operation!, body: "requestBody" },
     }),
   ).toBe(false);
-  expect(
-    isImplemented("data-safe private-endpoint create", {
-      ...get!,
-      operation: { ...get!.operation!, http: "POST" },
-    }),
-  ).toBe(false);
+  const update = safe.commands["private-endpoint update"];
+  expect(update?.tier).toBe("A");
+  expect(update?.operation?.http).toBe("PUT");
+  expect(isImplemented("data-safe private-endpoint update", update)).toBe(true);
 });
 
 test("loading cli and registry does not eagerly load command modules", () => {

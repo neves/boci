@@ -280,11 +280,7 @@ for (const service of services) {
       const operation = node.operation;
       if (
         (node.kind !== "generated" &&
-          !(
-            node.kind === "custom" &&
-            node.tier === "A" &&
-            ["GET", "HEAD", "DELETE"].includes(operation?.http ?? "")
-          )) ||
+          !(node.kind === "custom" && node.tier === "A")) ||
         !operation ||
         !kind.methods.includes(operation.http ?? "") ||
         !methods.has(operation.http ?? "") ||

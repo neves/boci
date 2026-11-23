@@ -42,7 +42,7 @@ describe("parity case generator", () => {
     ).toBe("y\n");
   });
 
-  test("does not generate Tier A write cases before write support", async () => {
+  test("generates Tier A write cases", async () => {
     const result = Bun.spawnSync(
       ["bun", "scripts/generate-cases.ts", "--service", "data-safe"],
       { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
@@ -53,7 +53,7 @@ describe("parity case generator", () => {
     ).json()) as { key: string }[];
     expect(
       cases.some((c) => c.key === "data-safe registration-policy create"),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test("generates request cases for bodyless POST actions", async () => {

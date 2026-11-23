@@ -136,6 +136,88 @@ test("callOperation sends {} when body bindings exist and all are omitted", asyn
   expect(request.headers["content-length"]).toBe("2");
 });
 
+test("callOperation prompts before replacing complex params unless --force is set", async () => {
+  using fake = startFakeEndpoint();
+  const command = {
+    kind: "generated",
+    operation: {
+      client: "things",
+      method: "update_thing",
+      http: "PUT",
+      path: "/things",
+    },
+    params: [
+      {
+        name: "freeform_tags",
+        type: "complex type",
+        typeClass: "oci_cli.custom_types.cli_complex_type.CliComplexType",
+      },
+      {
+        name: "defined_tags",
+        type: "complex type",
+        typeClass: "oci_cli.custom_types.cli_complex_type.CliComplexType",
+      },
+      { name: "force", type: "boolean", isFlag: true },
+    ],
+    bindings: [
+      {
+        target: "body",
+        key: ["freeformTags"],
+        param: "freeform_tags",
+        when: "freeform_tags is not None",
+      },
+      {
+        target: "body",
+        key: ["definedTags"],
+        param: "defined_tags",
+        when: "defined_tags is not None",
+      },
+    ],
+  } as unknown as GeneratedCommand;
+
+  const abortOut: string[] = [];
+  const abortIo: Invocation = {
+    ...invocation().io,
+    stdin: "n\n",
+    out: (t) => abortOut.push(t),
+    err: () => {},
+  };
+  await expect(
+    callOperation(abortIo, call(fake.url, { freeform_tags: {} }, {}, command)),
+  ).rejects.toThrow(Exit);
+  expect(abortOut.join("")).toBe(
+    "WARNING: Updates to freeform-tags and defined-tags will replace any existing values. Are you sure you want to continue? [y/N]: ",
+  );
+  expect(fake.requests).toHaveLength(0);
+
+  const confirmOut: string[] = [];
+  const confirmIo: Invocation = {
+    ...invocation().io,
+    stdin: "y\n",
+    out: (t) => confirmOut.push(t),
+  };
+  await callOperation(
+    confirmIo,
+    call(fake.url, { defined_tags: { ns: { k: "v" } } }, {}, command),
+  );
+  expect(confirmOut.join("")).toContain(
+    "WARNING: Updates to freeform-tags and defined-tags will replace any existing values.",
+  );
+  expect(fake.requests).toHaveLength(1);
+
+  const forcedOut: string[] = [];
+  const forcedIo: Invocation = {
+    ...invocation().io,
+    out: (t) => forcedOut.push(t),
+  };
+  await callOperation(
+    forcedIo,
+    call(fake.url, { freeform_tags: {}, force: true }, {}, command),
+  );
+  expect(forcedOut.join("")).toBe("");
+  expect(fake.requests).toHaveLength(2);
+});
+
 function call(
   endpoint: string,
   values: Record<string, unknown>,

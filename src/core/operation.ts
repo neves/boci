@@ -112,10 +112,32 @@ export type ServiceResponse = {
 
 export type GeneratedCommand = Pick<
   ServiceSpec["commands"][string],
-  "operation" | "otherOperations"
+  "operation" | "otherOperations" | "params"
 > & {
   bindings?: Record<string, unknown>[];
 };
+
+const COMPLEX_TYPE_CLASS =
+  "oci_cli.custom_types.cli_complex_type.CliComplexType";
+
+function replacedBodyParams(command: GeneratedCommand) {
+  if (!command.params?.some((p) => p.name === "force")) return [];
+  const bodyBindings = (command.bindings ?? []).filter(
+    (b) => b.target === "body" && Array.isArray(b.key) && b.key.length === 1,
+  );
+  return command.params.filter(
+    (p) =>
+      (p.typeClass === COMPLEX_TYPE_CLASS || p.multiple === true) &&
+      bodyBindings.some((b) => b.param === p.name),
+  );
+}
+
+function hasUpdateValue(value: unknown): boolean {
+  if (value === undefined || value === null || value === false || value === "")
+    return false;
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
+}
 
 function whenMatches(
   when: string | undefined,
@@ -701,6 +723,22 @@ export async function callOperation(
     if (!confirmed) {
       io.err("Abort: \n");
       throw new Exit(1);
+    }
+  } else if (values.force !== true) {
+    const replaced = replacedBodyParams(command);
+    if (replaced.some((p) => hasUpdateValue(values[p.name]))) {
+      const names = replaced
+        .map((p) => p.name.replaceAll("_", "-"))
+        .join(" and ");
+      const confirmed = await confirmUnderWrapExceptions(
+        io,
+        `WARNING: Updates to ${names} will replace any existing values. Are you sure you want to continue?`,
+        false,
+      );
+      if (!confirmed) {
+        io.err("Abort: \n");
+        throw new Exit(1);
+      }
     }
   }
   let requestBody = "";

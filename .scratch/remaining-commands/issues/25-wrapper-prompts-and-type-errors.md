@@ -4,7 +4,7 @@
 
 **Blocked by:** 20: wrappers outside the program subset.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -14,6 +14,6 @@
 
 ## Acceptance criteria
 
-- [ ] `rover node set-secrets` verified, or excluded with a reason.
-- [ ] The unexpected-keyword path either has a golden and matches, or is shown unreachable.
-- [ ] `bun run verify` green.
+- [x] `rover node set-secrets` verified, or excluded with a reason. (`test/parity/cases/wrapper-prompts.json`: hidden prompt with confirmation, mismatch, empty input, EOF.)
+- [x] The unexpected-keyword path either has a golden and matches, or is shown unreachable. (Reachable: `bastion session create`, `create-managed-ssh`, `create-port-forwarding` without `--ssh-public-key-file` pass `ssh_public_key_file=None`; `test/parity/cases/wrapper-type-errors.json`. A sweep of all 106 programmed wrappers, required options plus each optional one, found no other.)
+- [x] `bun run verify` green.

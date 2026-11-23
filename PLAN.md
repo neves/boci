@@ -905,7 +905,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `opsi database-insights test-macs-managed-autonomous-database-insight-connection-credential-by-named-credentials`
 - [x] `opsi database-insights test-macs-managed-cloud-database-insight-connection-credential-by-vault`
 - [ ] `rover node get-certificate`
-- [ ] `rover node set-secrets`
+- [x] `rover node set-secrets`
 - [ ] `rover standalone-cluster get-certificate`
 - [ ] `rover standalone-cluster set-secrets`
 - [ ] `rover station-cluster get-certificate`

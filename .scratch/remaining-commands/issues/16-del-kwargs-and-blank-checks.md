@@ -4,7 +4,7 @@
 
 **Blocked by:** 09: Tier A writes, 10: Tier B survey.
 
-**Status:** ready-for-agent
+**Status:** done. Tiers now A 853, B 133, C 202. All 61 commands (plus the two `data-science ... download-package` wrappers, mis-tagged `file-read` because they write a download to `--file`) are Tier A, run through the Engine, and pass their Parity cases; 63 Ladder items ticked. The extractor's new `.read()`/`parse_json_parameter` rule moved `support incident put-attachment` to Tier B (ticket 12). The Engine also gained the generated commands' path-param blank check.
 
 ## Context for the implementer
 
@@ -17,7 +17,7 @@
 
 ## Acceptance criteria
 
-- [ ] Regenerated spec: the 61 commands are Tier A (report the new A/B/C counts in the commit body); no previously verified case changes.
-- [ ] Every one of them is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Regenerated spec: the 61 commands are Tier A (report the new A/B/C counts in the commit body); no previously verified case changes.
+- [x] Every one of them is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

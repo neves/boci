@@ -187,25 +187,25 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `compute global-image-capability-schema-version get`
 - [x] `compute image-capability-schema get`
 - [x] `compute pic agreements get`
-- [ ] `compute-management instance-pool lb-attachment get`
+- [x] `compute-management instance-pool lb-attachment get`
 - [x] `data-integration connection-validation get`
 - [x] `data-integration data-flow-validation get`
 - [x] `data-safe private-endpoint get`
 - [x] `data-science ds-private-endpoint get`
-- [ ] `data-science ml-app get`
-- [ ] `data-science ml-app-implementation get`
-- [ ] `data-science ml-app-implementation-version get`
-- [ ] `data-science ml-app-instance get`
-- [ ] `data-science ml-app-instance-view get`
+- [x] `data-science ml-app get`
+- [x] `data-science ml-app-implementation get`
+- [x] `data-science ml-app-implementation-version get`
+- [x] `data-science ml-app-instance get`
+- [x] `data-science ml-app-instance-view get`
 - [x] `database-management private-endpoint get`
 - [x] `db cloud-exa-infra get`
-- [ ] `db db-system-upgrade-history get`
+- [x] `db db-system-upgrade-history get`
 - [x] `db external-cdb get`
 - [x] `db external-db-connector get`
 - [x] `db external-non-cdb get`
 - [x] `db external-pdb get`
 - [x] `db pdb-conversion-history get`
-- [ ] `db upgrade-history get`
+- [x] `db upgrade-history get`
 - [x] `dbtools connection get`
 - [x] `dbtools endpoint-service get`
 - [x] `dbtools identity get`
@@ -220,8 +220,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `generative-ai-data enrichment-jobs get`
 - [x] `generative-ai-data generate-sql-jobs get`
 - [ ] `iam db-token get`
-- [ ] `instance-agent command get`
-- [ ] `instance-agent command-execution get`
+- [x] `instance-agent command get`
+- [x] `instance-agent command-execution get`
 - [x] `integration integration-instance get`
 - [x] `limits-increase item get`
 - [x] `limits-increase limits-increase-request get`
@@ -284,11 +284,11 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `compute global-image-capability-schema-version list`
 - [ ] `compute volume-attachment list`
 - [x] `data-science ds-private-endpoint list`
-- [ ] `data-science ml-app list`
-- [ ] `data-science ml-app-implementation list`
-- [ ] `data-science ml-app-implementation-version list`
-- [ ] `data-science ml-app-instance list`
-- [ ] `data-science ml-app-instance-view list`
+- [x] `data-science ml-app list`
+- [x] `data-science ml-app-implementation list`
+- [x] `data-science ml-app-implementation-version list`
+- [x] `data-science ml-app-instance list`
+- [x] `data-science ml-app-instance-view list`
 - [ ] `data-science pipeline list`
 - [ ] `data-science pipeline-run list`
 - [ ] `db backup list`
@@ -362,10 +362,10 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `compute instance change-compartment`
 - [x] `data-safe private-endpoint change-compartment`
 - [x] `data-science ds-private-endpoint change-compartment`
-- [ ] `data-science ml-app change-compartment`
-- [ ] `data-science ml-app-implementation change-compartment`
-- [ ] `data-science ml-app-instance change-compartment`
-- [ ] `data-science ml-app-instance-view change-compartment`
+- [x] `data-science ml-app change-compartment`
+- [x] `data-science ml-app-implementation change-compartment`
+- [x] `data-science ml-app-instance change-compartment`
+- [x] `data-science ml-app-instance-view change-compartment`
 - [x] `database-management private-endpoint change-compartment`
 - [x] `db cloud-exa-infra change-compartment`
 - [x] `db external-cdb change-compartment`
@@ -385,7 +385,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `os-management-hub lifecycle-environment change-compartment`
 - [x] `os-management-hub managed-instance-group change-compartment`
 - [ ] `rover device data-sync task-definition change-compartment`
-- [ ] `rover node change-compartment`
+- [x] `rover node change-compartment`
 - [ ] `rover standalone-cluster change-compartment`
 - [ ] `rover station-cluster change-compartment`
 - [x] `stack-monitoring metric-extension change-compartment`
@@ -409,7 +409,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-science work-request list-work-request-logs`
 - [x] `database-management associated-database-summary list-associated-databases`
 - [ ] `database-management managed-database get-awr-db-report`
-- [ ] `db autonomous-database-wallet get-metadata`
+- [x] `db autonomous-database-wallet get-metadata`
 - [x] `db external-cdb list-external-pdbs`
 - [x] `db pluggable-database get-snapshot`
 - [ ] `devops project summarize-project-analytics`
@@ -446,7 +446,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `rover device diagnostics bundle view-summary`
 - [ ] `rover device system-upgrade get-import-history`
 - [ ] `rover device system-upgrade get-import-status`
-- [ ] `rover node get-encryption-key`
+- [x] `rover node get-encryption-key`
 - [ ] `rover node list-workload`
 - [ ] `rover standalone-cluster list-workloads`
 - [ ] `rover station-cluster list-workloads`
@@ -473,9 +473,9 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-integration data-flow-validation delete`
 - [x] `data-safe private-endpoint delete`
 - [x] `data-science ds-private-endpoint delete`
-- [ ] `data-science ml-app delete`
-- [ ] `data-science ml-app-implementation delete`
-- [ ] `data-science ml-app-instance delete`
+- [x] `data-science ml-app delete`
+- [x] `data-science ml-app-implementation delete`
+- [x] `data-science ml-app-instance delete`
 - [x] `database-management private-endpoint delete`
 - [ ] `db autonomous-database delete`
 - [x] `db cloud-exa-infra delete`
@@ -657,17 +657,17 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-safe private-endpoint update`
 - [x] `data-safe registration-policy update`
 - [x] `data-science ds-private-endpoint update`
-- [ ] `data-science job update`
-- [ ] `data-science ml-app update`
-- [ ] `data-science ml-app-implementation update`
-- [ ] `data-science ml-app-implementation-version update`
-- [ ] `data-science ml-app-instance update`
-- [ ] `data-science ml-app-instance-view update`
-- [ ] `data-science notebook-session update`
+- [x] `data-science job update`
+- [x] `data-science ml-app update`
+- [x] `data-science ml-app-implementation update`
+- [x] `data-science ml-app-implementation-version update`
+- [x] `data-science ml-app-instance update`
+- [x] `data-science ml-app-instance-view update`
+- [x] `data-science notebook-session update`
 - [x] `database-management job update-result-location`
 - [x] `database-management private-endpoint update`
 - [x] `datacc infrastructure update`
-- [ ] `db autonomous-database update`
+- [x] `db autonomous-database update`
 - [x] `db backup update`
 - [x] `db cloud-exa-infra update`
 - [ ] `db cloud-vm-cluster update`
@@ -785,7 +785,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `network-firewall nat-rule update`
 - [ ] `network-firewall service update`
 - [ ] `network-firewall tunnel-inspection-rule update`
-- [ ] `nosql row update`
+- [x] `nosql row update`
 - [x] `ocvs esxi-host update`
 - [x] `ocvs sddc update`
 - [x] `opsi database-insights update-autonomous-db`
@@ -925,8 +925,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `certs-mgmt certificate-version cancel-deletion`
 - [x] `certs-mgmt certificate-version schedule-deletion`
 - [ ] `compute instance launch`
-- [ ] `data-science ml-app-instance-view disable-trigger`
-- [ ] `data-science ml-app-instance-view enable-trigger`
+- [x] `data-science ml-app-instance-view disable-trigger`
+- [x] `data-science ml-app-instance-view enable-trigger`
 - [ ] `db database enable-database-management`
 - [x] `db external-cdb disable-db-management`
 - [x] `db external-cdb enable-db-management`
@@ -945,7 +945,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `db system launch-from-database`
 - [ ] `db system launch-from-db-system`
 - [ ] `generative-ai-data enrichment-jobs cancel`
-- [ ] `instance-agent command cancel`
+- [x] `instance-agent command cancel`
 - [x] `integration integration-instance start`
 - [x] `integration integration-instance stop`
 - [ ] `kms management key-version cancel-deletion`
@@ -1103,18 +1103,18 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-integration workspace create`
 - [x] `data-safe registration-policy create`
 - [x] `data-science ds-private-endpoint create`
-- [ ] `data-science job create`
+- [x] `data-science job create`
 - [ ] `data-science job create-job-artifact`
-- [ ] `data-science job-run create`
-- [ ] `data-science ml-app-implementation create`
-- [ ] `data-science ml-app-instance create`
-- [ ] `data-science ml-app-instance create-with-iam-auth`
+- [x] `data-science job-run create`
+- [x] `data-science ml-app-implementation create`
+- [x] `data-science ml-app-instance create`
+- [x] `data-science ml-app-instance create-with-iam-auth`
 - [ ] `data-science model create-model-artifact`
-- [ ] `data-science notebook-session create`
+- [x] `data-science notebook-session create`
 - [ ] `data-science pipeline create-step-artifact`
 - [ ] `database-migration connection create-oracle-connection`
 - [x] `datacc infrastructure create`
-- [ ] `db autonomous-database create`
+- [x] `db autonomous-database create`
 - [x] `db autonomous-database create-adb-cross-region-data-guard-details`
 - [x] `db backup create`
 - [x] `db cloud-vm-cluster create`
@@ -1127,7 +1127,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `db exascale-db-storage-vault create`
 - [x] `db external-pdb create`
 - [ ] `db key-store create-oracle-key-vault-details`
-- [ ] `db pluggable-database create`
+- [x] `db pluggable-database create`
 - [x] `db vm-cluster create`
 - [x] `dbtools connection create-generic-jdbc`
 - [x] `dbtools connection create-mysql-database`
@@ -1208,7 +1208,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `identity-domains smtp-credential create`
 - [x] `identity-domains user create`
 - [x] `identity-domains user-db-credential create`
-- [ ] `instance-agent command create`
+- [x] `instance-agent command create`
 - [x] `integration integration-instance create`
 - [ ] `kms management key-version create`
 - [ ] `lb backend-set create`
@@ -1231,7 +1231,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `network-firewall nat-rule create`
 - [ ] `network-firewall service create`
 - [ ] `network-firewall tunnel-inspection-rule create`
-- [ ] `nosql index create`
+- [x] `nosql index create`
 - [x] `nosql table create-replica`
 - [x] `ocvs esxi-host create`
 - [x] `ocvs sddc create`
@@ -1252,11 +1252,11 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `pss instance create`
 - [x] `queue queue-admin consumer-group create`
 - [x] `queue queue-admin queue create`
-- [ ] `resource-manager job create-apply-job`
+- [x] `resource-manager job create-apply-job`
 - [x] `resource-manager job create-apply-rollback-job`
-- [ ] `resource-manager job create-destroy-job`
+- [x] `resource-manager job create-destroy-job`
 - [ ] `resource-manager job create-import-tf-state-job`
-- [ ] `resource-manager job create-plan-job`
+- [x] `resource-manager job create-plan-job`
 - [ ] `resource-manager job create-plan-rollback-job`
 - [ ] `resource-manager stack create`
 - [x] `resource-manager stack create-from-template`
@@ -1290,7 +1290,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 
 - [x] `data-safe target-database manage-privileges`
 - [x] `database-management tablespace drop-with-pwd`
-- [ ] `db autonomous-database-wallet rotate`
+- [x] `db autonomous-database-wallet rotate`
 - [x] `db cloud-exa-infra configure-exascale`
 - [ ] `db data-guard-association create from-existing-db-system`
 - [ ] `db data-guard-association create from-existing-vm-cluster`
@@ -1332,8 +1332,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 
 - [x] `data-integration task-run-lineage list_taskrun_lineages`
 - [ ] `data-science job head-job-artifact`
-- [ ] `data-science ml-app-instance trigger`
-- [ ] `data-science ml-app-instance-view trigger`
+- [x] `data-science ml-app-instance trigger`
+- [x] `data-science ml-app-instance-view trigger`
 - [ ] `data-science model head-model-artifact`
 - [ ] `data-science pipeline head-step-artifact`
 - [x] `devops deployment approve`
@@ -1382,26 +1382,26 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <summary>35 commands</summary>
 
 - [x] `artifacts container image restore`
-- [ ] `data-science ml-app-instance-view recover`
+- [x] `data-science ml-app-instance-view recover`
 - [x] `db autonomous-database change-disaster-recovery-configuration`
 - [x] `db autonomous-database create-from-backup-id`
 - [x] `db autonomous-database create-from-backup-timestamp`
-- [ ] `db autonomous-database create-from-clone`
+- [x] `db autonomous-database create-from-clone`
 - [x] `db autonomous-database create-refreshable-clone`
 - [ ] `db data-guard-association failover`
 - [ ] `db data-guard-association switchover`
 - [ ] `db database create-from-backup`
 - [x] `db database restore`
 - [x] `db database upgrade-rollback`
-- [ ] `db database upgrade-with-database-software-image`
-- [ ] `db database upgrade-with-db-home`
-- [ ] `db database upgrade-with-db-version`
+- [x] `db database upgrade-with-database-software-image`
+- [x] `db database upgrade-with-db-home`
+- [x] `db database upgrade-with-db-version`
 - [x] `db pluggable-database create-local-clone`
 - [ ] `db pluggable-database create-remote-clone`
-- [ ] `db pluggable-database local-clone`
-- [ ] `db pluggable-database remote-clone`
+- [x] `db pluggable-database local-clone`
+- [x] `db pluggable-database remote-clone`
 - [ ] `db system launch-from-backup`
-- [ ] `db system upgrade`
+- [x] `db system upgrade`
 - [x] `disaster-recovery dr-plan-execution create-failover`
 - [x] `disaster-recovery dr-plan-execution create-failover-precheck`
 - [x] `disaster-recovery dr-plan-execution create-switchover`
@@ -1452,9 +1452,9 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `artifacts container image-signature sign-upload`
 - [x] `artifacts generic artifact download-by-path`
 - [ ] `artifacts generic artifact upload-by-path`
-- [ ] `data-science ml-app-implementation download-package`
+- [x] `data-science ml-app-implementation download-package`
 - [ ] `data-science ml-app-implementation upload-package`
-- [ ] `data-science ml-app-implementation-version download-package`
+- [x] `data-science ml-app-implementation-version download-package`
 - [ ] `generative-ai-sandbox sandbox-command stream`
 - [ ] `generative-ai-sandbox sandbox-command-event stream`
 - [ ] `iam user api-key upload`

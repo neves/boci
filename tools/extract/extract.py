@@ -201,6 +201,9 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                     "callback": delegate["callback"],
                     "renames": delegate["renames"],
                 }
+                for field in ("blankChecks", "wrapExceptions"):
+                    if field in delegate:
+                        entry["delegate"][field] = delegate[field]
                 entry["operation"] = delegate["operation"]
                 entry["bindings"] = delegate["bindings"]
                 client = delegate["operation"]["client"]

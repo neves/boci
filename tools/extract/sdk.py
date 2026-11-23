@@ -258,6 +258,8 @@ def custom_delegate(callback, client_map, custom_params):
             if isinstance(st, ast.If):
                 pairs.update(rename_pairs(st.body, seen))
                 pairs.update(rename_pairs(st.orelse, seen))
+            elif _kwargs_update(st) is not None:
+                pairs.update(_kwargs_update(st))
             elif isinstance(st, ast.Assign) and len(st.targets) == 1:
                 target = st.targets[0]
                 value = st.value
@@ -337,18 +339,25 @@ def custom_delegate(callback, client_map, custom_params):
         # A computed value (e.g. `not kwargs['no_hooks']`) is logic, not a rename.
         if isinstance(st, ast.Assign) and isinstance(st.value, computed):
             return "B", None
+    blank_checks = []
     for st in fn.body[:-1]:
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant) and isinstance(st.value.value, str):
             continue
+        check = _blank_check(st)
+        if check is not None:
+            blank_checks.append(check)
+            continue
         if isinstance(st, ast.If):
             # The callback body is deliberately kept conservative: only recognized
-            # kwargs renames and pop calls are accepted.
-            if not all(isinstance(child, (ast.Assign, ast.Expr)) for child in st.body + st.orelse):
+            # kwargs renames, pop calls and `del kwargs[...]` are accepted.
+            if not all(_rename_stmt(child) for child in st.body + st.orelse):
                 return "B", None
             continue
         if isinstance(st, ast.Assign) and len(st.targets) == 1 and _subscript_chain(st.targets[0]):
             continue
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Call) and isinstance(st.value.func, ast.Attribute) and st.value.func.attr == "pop":
+            continue
+        if _kwargs_del(st) or _kwargs_update(st) is not None:
             continue
         return "B", None
     target = call.args[0] if call.args else None
@@ -417,12 +426,109 @@ def custom_delegate(callback, client_map, custom_params):
     for name, value in constants.items():
         if name not in custom_params and name not in bound and value is not None:
             bindings.append({"target": "kwarg", "key": [name], "value": value})
-    return "A", {
+    delegate = {
         "callback": f"{delegated_callback.__module__}.{delegated_callback.__qualname__}",
         "renames": renames,
         "operation": operation,
         "bindings": bindings,
     }
+    if blank_checks:
+        delegate["blankChecks"] = blank_checks
+        delegate["wrapExceptions"] = any(
+            ast.unparse(d) == "cli_util.wrap_exceptions" for d in fn.decorator_list
+        )
+    return "A", delegate
+
+
+def _rename_stmt(st) -> bool:
+    """A statement inside a wrapper's `if` that renames, drops or fixes kwargs.
+
+    Reading a file (`.read()`) or parsing JSON (`parse_json_parameter`) is logic (tickets
+    11/12), which `del kwargs[...]` alone used to keep out of Tier A.
+    """
+    if _kwargs_del(st):
+        return True
+    if not isinstance(st, (ast.Assign, ast.Expr)):
+        return False
+    for node in ast.walk(st):
+        if (
+            isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+            and node.func.attr in ("read", "parse_json_parameter")
+        ):
+            return False
+    return True
+
+
+def _kwargs_del(st) -> bool:
+    """`del kwargs['x']`: drops a keyword argument, like a bare `kwargs.pop('x')`."""
+    if not isinstance(st, ast.Delete):
+        return False
+    for target in st.targets:
+        chain = _subscript_chain(target)
+        if not chain or chain[0] != "kwargs" or len(chain[1]) != 1:
+            return False
+    return True
+
+
+def _kwargs_update(st):
+    """`kwargs.update({'new': kwargs['old'], ...})` -> {"new": "old"}; None for anything else."""
+    if not (
+        isinstance(st, ast.Expr) and isinstance(st.value, ast.Call)
+        and isinstance(st.value.func, ast.Attribute) and st.value.func.attr == "update"
+        and isinstance(st.value.func.value, ast.Name) and st.value.func.value.id == "kwargs"
+        and len(st.value.args) == 1 and not st.value.keywords
+        and isinstance(st.value.args[0], ast.Dict)
+    ):
+        return None
+    pairs = {}
+    for key, value in zip(st.value.args[0].keys, st.value.args[0].values):
+        chain = _subscript_chain(value) if value is not None else None
+        if not (isinstance(key, ast.Constant) and isinstance(key.value, str)):
+            return None
+        if not chain or chain[0] != "kwargs" or len(chain[1]) != 1:
+            return None
+        pairs[key.value] = chain[1][0]
+    return pairs
+
+
+def _blank_check(st):
+    """
+    `if isinstance(kwargs['x'], six.string_types) and len(kwargs['x'].strip()) == 0:
+         raise click.UsageError('Parameter --x cannot be whitespace or empty string')`
+    -> {"param": "x", "message": ...}; None for anything else.
+    """
+    if not (isinstance(st, ast.If) and not st.orelse and len(st.body) == 1):
+        return None
+    raise_ = st.body[0]
+    if not (
+        isinstance(raise_, ast.Raise) and isinstance(raise_.exc, ast.Call)
+        and ast.unparse(raise_.exc.func) == "click.UsageError"
+        and len(raise_.exc.args) == 1 and isinstance(raise_.exc.args[0], ast.Constant)
+    ):
+        return None
+    message = raise_.exc.args[0].value
+    if not (isinstance(message, str) and message.endswith(" cannot be whitespace or empty string")):
+        return None
+    test = st.test
+    if not (isinstance(test, ast.BoolOp) and isinstance(test.op, ast.And) and len(test.values) == 2):
+        return None
+    chain = None
+    for node in ast.walk(test):
+        c = _subscript_chain(node) if isinstance(node, ast.Subscript) else None
+        if c:
+            if c[0] != "kwargs" or len(c[1]) != 1 or (chain and chain != c):
+                return None
+            chain = c
+    if chain is None:
+        return None
+    param = chain[1][0]
+    expected = (
+        f"isinstance(kwargs['{param}'], six.string_types) and "
+        f"len(kwargs['{param}'].strip()) == 0"
+    )
+    if ast.unparse(test) != expected:
+        return None
+    return {"param": param, "message": message}
 
 
 def _subscript_chain(node):

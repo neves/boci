@@ -1204,13 +1204,79 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.nosql.src.oci_cli_nosql.generated.nosql_cli.create_index"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.nosql.src.oci_cli_nosql.generated.nosql_cli.create_index",
+        "renames": {
+          "name": "index_name"
+        }
       },
+      "operation": {
+        "client": "nosql.nosql",
+        "method": "create_index",
+        "http": "POST",
+        "path": "/tables/{tableNameOrId}/indexes",
+        "positionalArgs": ["table_name_or_id", "create_index_details"],
+        "pathParams": {
+          "tableNameOrId": "table_name_or_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_index_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["table_name_or_id"],
+          "param": "table_name_or_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_index_details",
+          "key": ["name"],
+          "param": "index_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_index_details",
+          "key": ["keys"],
+          "transform": "parse_json_parameter",
+          "param": "keys"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_index_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id",
+          "when": "compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_index_details",
+          "key": ["isIfNotExists"],
+          "param": "is_if_not_exists",
+          "when": "is_if_not_exists is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3565,13 +3631,122 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.nosql.src.oci_cli_nosql.generated.nosql_cli.update_row"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.nosql.src.oci_cli_nosql.generated.nosql_cli.update_row",
+        "renames": {
+          "is_ttl_use_table_default": "ttl_use_default"
+        }
       },
+      "operation": {
+        "client": "nosql.nosql",
+        "method": "update_row",
+        "http": "PUT",
+        "path": "/tables/{tableNameOrId}/rows",
+        "positionalArgs": ["table_name_or_id", "update_row_details"],
+        "pathParams": {
+          "tableNameOrId": "table_name_or_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_row_details",
+        "responseType": "UpdateRowResult",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["table_name_or_id"],
+          "param": "table_name_or_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["value"],
+          "transform": "parse_json_parameter",
+          "param": "value"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id",
+          "when": "compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["option"],
+          "param": "option",
+          "when": "option is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["isGetReturnRow"],
+          "param": "is_get_return_row",
+          "when": "is_get_return_row is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["timeoutInMs"],
+          "param": "timeout_in_ms",
+          "when": "timeout_in_ms is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["ttl"],
+          "param": "ttl",
+          "when": "ttl is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["isTtlUseTableDefault"],
+          "param": "ttl_use_default",
+          "when": "ttl_use_default is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["identityCacheSize"],
+          "param": "identity_cache_size",
+          "when": "identity_cache_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_row_details",
+          "key": ["isExactMatch"],
+          "param": "is_exact_match",
+          "when": "is_exact_match is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -51,32 +51,7 @@
       "endpointTemplate": "https://datascience.{region}.oci.{secondLevelDomain}",
       "endpointTemplatePerRealm": {},
       "dualStackByDefault": false,
-      "serviceName": "data_science",
-      "lifecycleGetters": {
-        "get_ml_application": {
-          "client": "data_science.data_science",
-          "method": "get_ml_application",
-          "http": "GET",
-          "path": "/mlApplications/{mlApplicationId}",
-          "positionalArgs": ["ml_application_id"],
-          "pathParams": {
-            "mlApplicationId": "ml_application_id"
-          },
-          "queryParams": {},
-          "headerParams": {
-            "accept": {
-              "value": "application/json"
-            },
-            "content-type": {
-              "value": "application/json"
-            },
-            "opc-request-id": {
-              "arg": "opc_request_id"
-            }
-          },
-          "responseType": "MlApplication"
-        }
-      }
+      "serviceName": "data_science"
     }
   },
   "groups": {
@@ -7382,13 +7357,146 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_job"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_job",
+        "renames": {
+          "job_configuration_details": "configuration_details",
+          "job_infrastructure_configuration_details": "infrastructure_configuration_details",
+          "job_log_configuration_details": "log_configuration_details"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "create_job",
+        "http": "POST",
+        "path": "/jobs",
+        "positionalArgs": ["create_job_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_job_details",
+        "responseType": "Job",
+        "paginated": false,
+        "lifecycleGetter": "get_job"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["projectId"],
+          "param": "project_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobRunRetentionPeriodInDays"],
+          "param": "job_run_retention_period_in_days",
+          "when": "job_run_retention_period_in_days is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_details",
+          "when": "configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobInfrastructureConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "infrastructure_configuration_details",
+          "when": "infrastructure_configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobEnvironmentConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "job_environment_configuration_details",
+          "when": "job_environment_configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobLogConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "log_configuration_details",
+          "when": "log_configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobStorageMountConfigurationDetailsList"],
+          "transform": "parse_json_parameter",
+          "param": "job_storage_mount_configuration_details_list",
+          "when": "job_storage_mount_configuration_details_list is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobNodeConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "job_node_configuration_details",
+          "when": "job_node_configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9819,13 +9927,106 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_job"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_job",
+        "renames": {
+          "job_infrastructure_configuration_details": "infrastructure_configuration_details"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "update_job",
+        "http": "PUT",
+        "path": "/jobs/{jobId}",
+        "positionalArgs": ["job_id", "update_job_details"],
+        "pathParams": {
+          "jobId": "job_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "if-match": {
+            "arg": "if_match"
+          }
+        },
+        "body": "update_job_details",
+        "responseType": "Job",
+        "paginated": false,
+        "lifecycleGetter": "get_job"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["job_id"],
+          "param": "job_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_job_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_job_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_job_details",
+          "key": ["jobInfrastructureConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "infrastructure_configuration_details",
+          "when": "infrastructure_configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_job_details",
+          "key": ["jobStorageMountConfigurationDetailsList"],
+          "transform": "parse_json_parameter",
+          "param": "job_storage_mount_configuration_details_list",
+          "when": "job_storage_mount_configuration_details_list is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_job_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_job_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11084,13 +11285,153 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_job_run"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_job_run",
+        "renames": {
+          "job_configuration_override_details": "configuration_override_details",
+          "job_log_configuration_override_details": "log_configuration_override_details"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "create_job_run",
+        "http": "POST",
+        "path": "/jobRuns",
+        "positionalArgs": ["create_job_run_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-parent-rpt-url": {
+            "arg": "opc_parent_rpt_url"
+          }
+        },
+        "body": "create_job_run_details",
+        "responseType": "JobRun",
+        "paginated": false,
+        "lifecycleGetter": "get_job_run"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_parent_rpt_url"],
+          "param": "opc_parent_rpt_url",
+          "when": "opc_parent_rpt_url is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["projectId"],
+          "param": "project_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobId"],
+          "param": "job_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobRunRetentionPeriodInDaysOverride"],
+          "param": "job_run_retention_period_in_days_override",
+          "when": "job_run_retention_period_in_days_override is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobConfigurationOverrideDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_override_details",
+          "when": "configuration_override_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobLogConfigurationOverrideDetails"],
+          "transform": "parse_json_parameter",
+          "param": "log_configuration_override_details",
+          "when": "log_configuration_override_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobEnvironmentConfigurationOverrideDetails"],
+          "transform": "parse_json_parameter",
+          "param": "job_environment_configuration_override_details",
+          "when": "job_environment_configuration_override_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobInfrastructureConfigurationOverrideDetails"],
+          "transform": "parse_json_parameter",
+          "param": "job_infrastructure_configuration_override_details",
+          "when": "job_infrastructure_configuration_override_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobNodeConfigurationOverrideDetails"],
+          "transform": "parse_json_parameter",
+          "param": "job_node_configuration_override_details",
+          "when": "job_node_configuration_override_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["jobStorageMountConfigurationOverrideDetailsList"],
+          "transform": "parse_json_parameter",
+          "param": "job_storage_mount_configuration_override_details_list",
+          "when": "job_storage_mount_configuration_override_details_list is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_run_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13680,20 +14021,77 @@
       "help": "Moves a MlApplication resource from one compartment identifier to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeMlApplicationCompartment)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.change_ml_application_compartment",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_compartment"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_compartment",
+        "renames": {
+          "ml_application_id": "ml_app_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_id'], six.string_types) and len(kwargs['ml_app_id'].strip()) == 0",
-            "options": ["ml_app_id"],
+            "param": "ml_app_id",
             "message": "Parameter --ml-app-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "change_ml_application_compartment",
+        "http": "POST",
+        "path": "/mlApplications/{mlApplicationId}/actions/changeCompartment",
+        "positionalArgs": [
+          "ml_application_id",
+          "change_ml_application_compartment_details"
+        ],
+        "pathParams": {
+          "mlApplicationId": "ml_app_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_ml_application_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_ml_application_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -14157,20 +14555,64 @@
       "help": "Deletes a MlApplication resource by identifier \n[Command Reference](deleteMlApplication)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.delete_ml_application",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.delete_ml_application"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.delete_ml_application",
+        "renames": {
+          "ml_application_id": "ml_app_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_id'], six.string_types) and len(kwargs['ml_app_id'].strip()) == 0",
-            "options": ["ml_app_id"],
+            "param": "ml_app_id",
             "message": "Parameter --ml-app-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "delete_ml_application",
+        "http": "DELETE",
+        "path": "/mlApplications/{mlApplicationId}",
+        "positionalArgs": ["ml_application_id"],
+        "pathParams": {
+          "mlApplicationId": "ml_app_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -14346,20 +14788,56 @@
       "help": "Gets a MlApplication by identifier \n[Command Reference](getMlApplication)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.get_ml_application",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application",
+        "renames": {
+          "ml_application_id": "ml_app_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_id'], six.string_types) and len(kwargs['ml_app_id'].strip()) == 0",
-            "options": ["ml_app_id"],
+            "param": "ml_app_id",
             "message": "Parameter --ml-app-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "get_ml_application",
+        "http": "GET",
+        "path": "/mlApplications/{mlApplicationId}",
+        "positionalArgs": ["ml_application_id"],
+        "pathParams": {
+          "mlApplicationId": "ml_app_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplication",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -14482,13 +14960,129 @@
       "help": "Returns a list of MlApplications. \n[Command Reference](listMlApplications)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.list_ml_applications",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_applications"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_applications",
+        "renames": {
+          "ml_application_id": "ml_app_id"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "list_ml_applications",
+        "http": "GET",
+        "path": "/mlApplications",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "mlApplicationId": {
+            "arg": "ml_app_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationCollection",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id",
+          "when": "ml_app_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["compartment_id_in_subtree"],
+          "param": "compartment_id_in_subtree",
+          "when": "compartment_id_in_subtree is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["name"],
+          "param": "name",
+          "when": "name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -14785,20 +15379,93 @@
       "help": "Updates the MlApplication \n[Command Reference](updateMlApplication)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.update_ml_application",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application",
+        "renames": {
+          "ml_application_id": "ml_app_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_id'], six.string_types) and len(kwargs['ml_app_id'].strip()) == 0",
-            "options": ["ml_app_id"],
+            "param": "ml_app_id",
             "message": "Parameter --ml-app-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "update_ml_application",
+        "http": "PUT",
+        "path": "/mlApplications/{mlApplicationId}",
+        "positionalArgs": [
+          "ml_application_id",
+          "update_ml_application_details"
+        ],
+        "pathParams": {
+          "mlApplicationId": "ml_app_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_ml_application_details",
+        "responseType": "MlApplication",
+        "paginated": false,
+        "lifecycleGetter": "get_ml_application"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15052,20 +15719,77 @@
       "help": "Moves a MlApplicationImplementation resource from one compartment identifier to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeMlApplicationImplementationCompartment)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.change_ml_application_implementation_compartment",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_implementation_compartment"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_implementation_compartment",
+        "renames": {
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_id'], six.string_types) and len(kwargs['ml_app_implementation_id'].strip()) == 0",
-            "options": ["ml_app_implementation_id"],
+            "param": "ml_app_implementation_id",
             "message": "Parameter --ml-app-implementation-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "change_ml_application_implementation_compartment",
+        "http": "POST",
+        "path": "/mlApplicationImplementations/{mlApplicationImplementationId}/actions/changeCompartment",
+        "positionalArgs": [
+          "ml_application_implementation_id",
+          "change_ml_application_implementation_compartment_details"
+        ],
+        "pathParams": {
+          "mlApplicationImplementationId": "ml_app_implementation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_ml_application_implementation_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_ml_application_implementation_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15287,20 +16011,104 @@
       "help": "Creates a new MlApplicationImplementation. \n[Command Reference](createMlApplicationImplementation)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.create_ml_application_implementation",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_ml_application_implementation"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_ml_application_implementation",
+        "renames": {
+          "ml_application_id": "ml_app_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_id'], six.string_types) and len(kwargs['ml_app_id'].strip()) == 0",
-            "options": ["ml_app_id"],
+            "param": "ml_app_id",
             "message": "Parameter --ml-app-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "create_ml_application_implementation",
+        "http": "POST",
+        "path": "/mlApplicationImplementations",
+        "positionalArgs": ["create_ml_application_implementation_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_ml_application_implementation_details",
+        "responseType": "MlApplicationImplementation",
+        "paginated": false,
+        "lifecycleGetter": "get_ml_application_implementation"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_implementation_details",
+          "key": ["name"],
+          "param": "name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_implementation_details",
+          "key": ["mlApplicationId"],
+          "param": "ml_app_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_implementation_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_implementation_details",
+          "key": ["logging"],
+          "transform": "parse_json_parameter",
+          "param": "logging",
+          "when": "logging is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_implementation_details",
+          "key": ["allowedMigrationDestinations"],
+          "transform": "parse_json_parameter",
+          "param": "allowed_migration_destinations",
+          "when": "allowed_migration_destinations is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_implementation_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_implementation_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15574,20 +16382,64 @@
       "help": "Deletes a MlApplicationImplementation resource by identifier \n[Command Reference](deleteMlApplicationImplementation)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.delete_ml_application_implementation",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.delete_ml_application_implementation"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.delete_ml_application_implementation",
+        "renames": {
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_id'], six.string_types) and len(kwargs['ml_app_implementation_id'].strip()) == 0",
-            "options": ["ml_app_implementation_id"],
+            "param": "ml_app_implementation_id",
             "message": "Parameter --ml-app-implementation-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "delete_ml_application_implementation",
+        "http": "DELETE",
+        "path": "/mlApplicationImplementations/{mlApplicationImplementationId}",
+        "positionalArgs": ["ml_application_implementation_id"],
+        "pathParams": {
+          "mlApplicationImplementationId": "ml_app_implementation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15778,21 +16630,61 @@
       "help": "Retrieves last ML Application package uploaded for given ML Application Implementation \n[Command Reference](getMlApplicationPackageContent)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.get_ml_application_package_content",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check", "file-read"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_package_content"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_package_content",
+        "renames": {
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_id'], six.string_types) and len(kwargs['ml_app_implementation_id'].strip()) == 0",
-            "options": ["ml_app_implementation_id"],
+            "param": "ml_app_implementation_id",
             "message": "Parameter --ml-app-implementation-id cannot be whitespace or empty string"
           }
         ],
-        "files": ["file"]
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "get_ml_application_package_content",
+        "http": "GET",
+        "path": "/mlApplicationImplementations/{mlApplicationImplementationId}/mlApplicationPackage/content",
+        "positionalArgs": ["ml_application_implementation_id"],
+        "pathParams": {
+          "mlApplicationImplementationId": "ml_app_implementation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/octet-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "output",
+          "key": [],
+          "param": "file"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15896,20 +16788,56 @@
       "help": "Gets a MlApplicationImplementation by identifier \n[Command Reference](getMlApplicationImplementation)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.get_ml_application_implementation",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_implementation"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_implementation",
+        "renames": {
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_id'], six.string_types) and len(kwargs['ml_app_implementation_id'].strip()) == 0",
-            "options": ["ml_app_implementation_id"],
+            "param": "ml_app_implementation_id",
             "message": "Parameter --ml-app-implementation-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "get_ml_application_implementation",
+        "http": "GET",
+        "path": "/mlApplicationImplementations/{mlApplicationImplementationId}",
+        "positionalArgs": ["ml_application_implementation_id"],
+        "pathParams": {
+          "mlApplicationImplementationId": "ml_app_implementation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationImplementation",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16036,13 +16964,139 @@
       "help": "Returns a list of MlApplicationImplementations. \n[Command Reference](listMlApplicationImplementations)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.list_ml_application_implementations",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_implementations"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_implementations",
+        "renames": {
+          "ml_application_implementation_id": "ml_app_implementation_id",
+          "ml_application_id": "ml_app_id"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "list_ml_application_implementations",
+        "http": "GET",
+        "path": "/mlApplicationImplementations",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "mlApplicationImplementationId": {
+            "arg": "ml_app_implementation_id"
+          },
+          "name": {
+            "arg": "name"
+          },
+          "mlApplicationId": {
+            "arg": "ml_app_id"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "compartmentIdInSubtree": {
+            "arg": "compartment_id_in_subtree"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationImplementationCollection",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id",
+          "when": "ml_app_implementation_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["name"],
+          "param": "name",
+          "when": "name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id",
+          "when": "ml_app_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["compartment_id_in_subtree"],
+          "param": "compartment_id_in_subtree",
+          "when": "compartment_id_in_subtree is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16374,20 +17428,100 @@
       "help": "Updates the MlApplicationImplementation \n[Command Reference](updateMlApplicationImplementation)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.update_ml_application_implementation",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_implementation"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_implementation",
+        "renames": {
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_id'], six.string_types) and len(kwargs['ml_app_implementation_id'].strip()) == 0",
-            "options": ["ml_app_implementation_id"],
+            "param": "ml_app_implementation_id",
             "message": "Parameter --ml-app-implementation-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "update_ml_application_implementation",
+        "http": "PUT",
+        "path": "/mlApplicationImplementations/{mlApplicationImplementationId}",
+        "positionalArgs": [
+          "ml_application_implementation_id",
+          "update_ml_application_implementation_details"
+        ],
+        "pathParams": {
+          "mlApplicationImplementationId": "ml_app_implementation_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_ml_application_implementation_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_implementation_details",
+          "key": ["allowedMigrationDestinations"],
+          "transform": "parse_json_parameter",
+          "param": "allowed_migration_destinations",
+          "when": "allowed_migration_destinations is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_implementation_details",
+          "key": ["logging"],
+          "transform": "parse_json_parameter",
+          "param": "logging",
+          "when": "logging is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_implementation_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_implementation_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16927,21 +18061,61 @@
       "help": "Retrieves ML Application package for MlApplicationImplementationVersion with given id. \n[Command Reference](getMlApplicationHistoricalPackageContent)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.get_ml_application_historical_package_content",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check", "file-read"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_historical_package_content"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_historical_package_content",
+        "renames": {
+          "ml_application_implementation_version_id": "ml_app_implementation_version_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_version_id'], six.string_types) and len(kwargs['ml_app_implementation_version_id'].strip()) == 0",
-            "options": ["ml_app_implementation_version_id"],
+            "param": "ml_app_implementation_version_id",
             "message": "Parameter --ml-app-implementation-version-id cannot be whitespace or empty string"
           }
         ],
-        "files": ["file"]
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "get_ml_application_historical_package_content",
+        "http": "GET",
+        "path": "/mlApplicationImplementationVersions/{mlApplicationImplementationVersionId}/mlApplicationHistoricalPackage/content",
+        "positionalArgs": ["ml_application_implementation_version_id"],
+        "pathParams": {
+          "mlApplicationImplementationVersionId": "ml_app_implementation_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/octet-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "stream",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_version_id"],
+          "param": "ml_app_implementation_version_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "output",
+          "key": [],
+          "param": "file"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17045,20 +18219,56 @@
       "help": "Gets a MlApplicationImplementationVersion by identifier \n[Command Reference](getMlApplicationImplementationVersion)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.get_ml_application_implementation_version",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_implementation_version"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_implementation_version",
+        "renames": {
+          "ml_application_implementation_version_id": "ml_app_implementation_version_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_version_id'], six.string_types) and len(kwargs['ml_app_implementation_version_id'].strip()) == 0",
-            "options": ["ml_app_implementation_version_id"],
+            "param": "ml_app_implementation_version_id",
             "message": "Parameter --ml-app-implementation-version-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "get_ml_application_implementation_version",
+        "http": "GET",
+        "path": "/mlApplicationImplementationVersions/{mlApplicationImplementationVersionId}",
+        "positionalArgs": ["ml_application_implementation_version_id"],
+        "pathParams": {
+          "mlApplicationImplementationVersionId": "ml_app_implementation_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationImplementationVersion",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_version_id"],
+          "param": "ml_app_implementation_version_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17172,13 +18382,102 @@
       "help": "Returns a list of MlApplicationImplementationVersions. \n[Command Reference](listMlApplicationImplementationVersions)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.list_ml_application_implementation_versions",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_implementation_versions"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_implementation_versions",
+        "renames": {
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "list_ml_application_implementation_versions",
+        "http": "GET",
+        "path": "/mlApplicationImplementationVersions",
+        "positionalArgs": ["ml_application_implementation_id"],
+        "pathParams": {},
+        "queryParams": {
+          "mlApplicationImplementationId": {
+            "arg": "ml_app_implementation_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationImplementationVersionCollection",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17423,20 +18722,86 @@
       "help": "Updates the MlApplicationImplementationVersion \n[Command Reference](updateMlApplicationImplementationVersion)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.update_ml_application_implementation_version",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_implementation_version"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_implementation_version",
+        "renames": {
+          "ml_application_implementation_version_id": "ml_app_implementation_version_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_implementation_version_id'], six.string_types) and len(kwargs['ml_app_implementation_version_id'].strip()) == 0",
-            "options": ["ml_app_implementation_version_id"],
+            "param": "ml_app_implementation_version_id",
             "message": "Parameter --ml-app-implementation-version-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "update_ml_application_implementation_version",
+        "http": "PUT",
+        "path": "/mlApplicationImplementationVersions/{mlApplicationImplementationVersionId}",
+        "positionalArgs": [
+          "ml_application_implementation_version_id",
+          "update_ml_application_implementation_version_details"
+        ],
+        "pathParams": {
+          "mlApplicationImplementationVersionId": "ml_app_implementation_version_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_ml_application_implementation_version_details",
+        "responseType": "MlApplicationImplementationVersion",
+        "paginated": false,
+        "lifecycleGetter": "get_ml_application_implementation_version"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_version_id"],
+          "param": "ml_app_implementation_version_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_implementation_version_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_implementation_version_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17672,20 +19037,77 @@
       "help": "Moves a MlApplicationInstance resource from one compartment identifier to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeMlApplicationInstanceCompartment)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.change_ml_application_instance_compartment",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_instance_compartment"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_instance_compartment",
+        "renames": {
+          "ml_application_instance_id": "ml_app_instance_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_id'], six.string_types) and len(kwargs['ml_app_instance_id'].strip()) == 0",
-            "options": ["ml_app_instance_id"],
+            "param": "ml_app_instance_id",
             "message": "Parameter --ml-app-instance-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "change_ml_application_instance_compartment",
+        "http": "POST",
+        "path": "/mlApplicationInstances/{mlApplicationInstanceId}/actions/changeCompartment",
+        "positionalArgs": [
+          "ml_application_instance_id",
+          "change_ml_application_instance_compartment_details"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceId": "ml_app_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_ml_application_instance_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_id"],
+          "param": "ml_app_instance_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_ml_application_instance_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17915,20 +19337,118 @@
       "help": "Creates a new MlApplicationInstance. \n[Command Reference](createMlApplicationInstance)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.create_ml_application_instance",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_ml_application_instance"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_ml_application_instance",
+        "renames": {
+          "ml_application_id": "ml_app_id",
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_id'], six.string_types) and len(kwargs['ml_app_id'].strip()) == 0",
-            "options": ["ml_app_id"],
+            "param": "ml_app_id",
             "message": "Parameter --ml-app-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "create_ml_application_instance",
+        "http": "POST",
+        "path": "/mlApplicationInstances",
+        "positionalArgs": ["create_ml_application_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_ml_application_instance_details",
+        "responseType": "MlApplicationInstance",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["mlApplicationId"],
+          "param": "ml_app_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["mlApplicationImplementationId"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["authConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "auth_configuration",
+          "when": "auth_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["configuration"],
+          "transform": "parse_json_parameter",
+          "param": "configuration",
+          "when": "configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["isEnabled"],
+          "param": "is_enabled",
+          "when": "is_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18262,20 +19782,122 @@
       "help": "Creates a new MlApplicationInstance. \n[Command Reference](createMlApplicationInstance)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.create_ml_application_instance_create_iam_auth_configuration_create_details",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_ml_application_instance_create_iam_auth_configuration_create_details"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_ml_application_instance_create_iam_auth_configuration_create_details",
+        "renames": {
+          "ml_application_id": "ml_app_id",
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_id'], six.string_types) and len(kwargs['ml_app_id'].strip()) == 0",
-            "options": ["ml_app_id"],
+            "param": "ml_app_id",
             "message": "Parameter --ml-app-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "create_ml_application_instance",
+        "http": "POST",
+        "path": "/mlApplicationInstances",
+        "positionalArgs": ["create_ml_application_instance_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_ml_application_instance_details",
+        "responseType": "MlApplicationInstance",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["authConfiguration"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["mlApplicationId"],
+          "param": "ml_app_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["mlApplicationImplementationId"],
+          "param": "ml_app_implementation_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["configuration"],
+          "transform": "parse_json_parameter",
+          "param": "configuration",
+          "when": "configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["isEnabled"],
+          "param": "is_enabled",
+          "when": "is_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_ml_application_instance_details",
+          "key": ["authConfiguration", "type"],
+          "value": "IAM"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18568,20 +20190,64 @@
       "help": "Deletes a MlApplicationInstance resource by identifier \n[Command Reference](deleteMlApplicationInstance)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.delete_ml_application_instance",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.delete_ml_application_instance"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.delete_ml_application_instance",
+        "renames": {
+          "ml_application_instance_id": "ml_app_instance_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_id'], six.string_types) and len(kwargs['ml_app_instance_id'].strip()) == 0",
-            "options": ["ml_app_instance_id"],
+            "param": "ml_app_instance_id",
             "message": "Parameter --ml-app-instance-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "delete_ml_application_instance",
+        "http": "DELETE",
+        "path": "/mlApplicationInstances/{mlApplicationInstanceId}",
+        "positionalArgs": ["ml_application_instance_id"],
+        "pathParams": {
+          "mlApplicationInstanceId": "ml_app_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_id"],
+          "param": "ml_app_instance_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18768,20 +20434,56 @@
       "help": "Gets a MlApplicationInstance by identifier \n[Command Reference](getMlApplicationInstance)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.get_ml_application_instance",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_instance"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_instance",
+        "renames": {
+          "ml_application_instance_id": "ml_app_instance_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_id'], six.string_types) and len(kwargs['ml_app_instance_id'].strip()) == 0",
-            "options": ["ml_app_instance_id"],
+            "param": "ml_app_instance_id",
             "message": "Parameter --ml-app-instance-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "get_ml_application_instance",
+        "http": "GET",
+        "path": "/mlApplicationInstances/{mlApplicationInstanceId}",
+        "positionalArgs": ["ml_application_instance_id"],
+        "pathParams": {
+          "mlApplicationInstanceId": "ml_app_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationInstance",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_id"],
+          "param": "ml_app_instance_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18900,13 +20602,120 @@
       "help": "Returns a list of MlApplicationsInstances. \n[Command Reference](listMlApplicationInstances)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.list_ml_application_instances",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_instances"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_instances",
+        "renames": {
+          "ml_application_id": "ml_app_id"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "list_ml_application_instances",
+        "http": "GET",
+        "path": "/mlApplicationInstances",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "mlApplicationId": {
+            "arg": "ml_app_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationInstanceCollection",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id",
+          "when": "ml_app_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -19184,20 +20993,68 @@
       "help": "Trigger ML Application Instance flow if possible \n[Command Reference](triggerMlApplicationInstanceFlow)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.trigger_ml_application_instance_flow",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.trigger_ml_application_instance_flow"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.trigger_ml_application_instance_flow",
+        "renames": {
+          "ml_application_instance_id": "ml_app_instance_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_id'], six.string_types) and len(kwargs['ml_app_instance_id'].strip()) == 0",
-            "options": ["ml_app_instance_id"],
+            "param": "ml_app_instance_id",
             "message": "Parameter --ml-app-instance-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "trigger_ml_application_instance_flow",
+        "http": "POST",
+        "path": "/mlApplicationInstances/{mlApplicationInstanceId}/actions/trigger",
+        "positionalArgs": [
+          "trigger_ml_application_instance_flow_details",
+          "ml_application_instance_id"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceId": "ml_app_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "trigger_ml_application_instance_flow_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_id"],
+          "param": "ml_app_instance_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "trigger_ml_application_instance_flow_details",
+          "key": ["triggerName"],
+          "param": "trigger_name"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -19402,20 +21259,107 @@
       "help": "Updates the MlApplicationInstance \n[Command Reference](updateMlApplicationInstance)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.update_ml_application_instance",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_instance"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_instance",
+        "renames": {
+          "ml_application_instance_id": "ml_app_instance_id",
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_id'], six.string_types) and len(kwargs['ml_app_instance_id'].strip()) == 0",
-            "options": ["ml_app_instance_id"],
+            "param": "ml_app_instance_id",
             "message": "Parameter --ml-app-instance-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "update_ml_application_instance",
+        "http": "PUT",
+        "path": "/mlApplicationInstances/{mlApplicationInstanceId}",
+        "positionalArgs": [
+          "ml_application_instance_id",
+          "update_ml_application_instance_details"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceId": "ml_app_instance_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_ml_application_instance_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_id"],
+          "param": "ml_app_instance_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_instance_details",
+          "key": ["configuration"],
+          "transform": "parse_json_parameter",
+          "param": "configuration",
+          "when": "configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_instance_details",
+          "key": ["mlApplicationImplementationId"],
+          "param": "ml_app_implementation_id",
+          "when": "ml_app_implementation_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_instance_details",
+          "key": ["isEnabled"],
+          "param": "is_enabled",
+          "when": "is_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_instance_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_instance_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -19713,20 +21657,77 @@
       "help": "Moves a MlApplicationInstanceView resource from one compartment identifier to another. When provided, If-Match is checked against ETag values of the resource. \n[Command Reference](changeMlApplicationInstanceViewCompartment)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.change_ml_application_instance_view_compartment",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_instance_view_compartment"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.change_ml_application_instance_view_compartment",
+        "renames": {
+          "ml_application_instance_view_id": "ml_app_instance_view_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_view_id'], six.string_types) and len(kwargs['ml_app_instance_view_id'].strip()) == 0",
-            "options": ["ml_app_instance_view_id"],
+            "param": "ml_app_instance_view_id",
             "message": "Parameter --ml-app-instance-view-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "change_ml_application_instance_view_compartment",
+        "http": "POST",
+        "path": "/mlApplicationInstanceViews/{mlApplicationInstanceViewId}/actions/changeCompartment",
+        "positionalArgs": [
+          "ml_application_instance_view_id",
+          "change_ml_application_instance_view_compartment_details"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceViewId": "ml_app_instance_view_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_ml_application_instance_view_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_view_id"],
+          "param": "ml_app_instance_view_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_ml_application_instance_view_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -19929,20 +21930,79 @@
       "help": "Disable trigger of given name for given ML Application Instance View flow \n[Command Reference](disableMlApplicationInstanceViewTrigger)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.disable_ml_application_instance_view_trigger",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.disable_ml_application_instance_view_trigger"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.disable_ml_application_instance_view_trigger",
+        "renames": {
+          "ml_application_instance_view_id": "ml_app_instance_view_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_view_id'], six.string_types) and len(kwargs['ml_app_instance_view_id'].strip()) == 0",
-            "options": ["ml_app_instance_view_id"],
+            "param": "ml_app_instance_view_id",
             "message": "Parameter --ml-app-instance-view-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "disable_ml_application_instance_view_trigger",
+        "http": "POST",
+        "path": "/mlApplicationInstanceViews/{mlApplicationInstanceViewId}/actions/disableTrigger",
+        "positionalArgs": [
+          "disable_ml_application_instance_view_trigger_details",
+          "ml_application_instance_view_id"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceViewId": "ml_app_instance_view_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "disable_ml_application_instance_view_trigger_details",
+        "responseType": "MlApplicationInstanceView",
+        "paginated": false,
+        "lifecycleGetter": "get_ml_application_instance_view"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_view_id"],
+          "param": "ml_app_instance_view_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "disable_ml_application_instance_view_trigger_details",
+          "key": ["triggerName"],
+          "param": "trigger_name"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -20146,20 +22206,79 @@
       "help": "Enable trigger of given name for given ML Application Instance View flow \n[Command Reference](enableMlApplicationInstanceViewTrigger)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.enable_ml_application_instance_view_trigger",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.enable_ml_application_instance_view_trigger"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.enable_ml_application_instance_view_trigger",
+        "renames": {
+          "ml_application_instance_view_id": "ml_app_instance_view_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_view_id'], six.string_types) and len(kwargs['ml_app_instance_view_id'].strip()) == 0",
-            "options": ["ml_app_instance_view_id"],
+            "param": "ml_app_instance_view_id",
             "message": "Parameter --ml-app-instance-view-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "enable_ml_application_instance_view_trigger",
+        "http": "POST",
+        "path": "/mlApplicationInstanceViews/{mlApplicationInstanceViewId}/actions/enableTrigger",
+        "positionalArgs": [
+          "enable_ml_application_instance_view_trigger_details",
+          "ml_application_instance_view_id"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceViewId": "ml_app_instance_view_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "enable_ml_application_instance_view_trigger_details",
+        "responseType": "MlApplicationInstanceView",
+        "paginated": false,
+        "lifecycleGetter": "get_ml_application_instance_view"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_view_id"],
+          "param": "ml_app_instance_view_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "enable_ml_application_instance_view_trigger_details",
+          "key": ["triggerName"],
+          "param": "trigger_name"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -20346,20 +22465,56 @@
       "help": "Gets a MlApplicationInstanceView by identifier \n[Command Reference](getMlApplicationInstanceView)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.get_ml_application_instance_view",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_instance_view"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.get_ml_application_instance_view",
+        "renames": {
+          "ml_application_instance_view_id": "ml_app_instance_view_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_view_id'], six.string_types) and len(kwargs['ml_app_instance_view_id'].strip()) == 0",
-            "options": ["ml_app_instance_view_id"],
+            "param": "ml_app_instance_view_id",
             "message": "Parameter --ml-app-instance-view-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "get_ml_application_instance_view",
+        "http": "GET",
+        "path": "/mlApplicationInstanceViews/{mlApplicationInstanceViewId}",
+        "positionalArgs": ["ml_application_instance_view_id"],
+        "pathParams": {
+          "mlApplicationInstanceViewId": "ml_app_instance_view_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationInstanceView",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_view_id"],
+          "param": "ml_app_instance_view_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -20486,13 +22641,139 @@
       "help": "Returns a list of MlApplicationInstanceViews. \n[Command Reference](listMlApplicationInstanceViews)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.list_ml_application_instance_views",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_instance_views"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.list_ml_application_instance_views",
+        "renames": {
+          "ml_application_id": "ml_app_id",
+          "ml_application_implementation_id": "ml_app_implementation_id"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "list_ml_application_instance_views",
+        "http": "GET",
+        "path": "/mlApplicationInstanceViews",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "displayName": {
+            "arg": "display_name"
+          },
+          "mlApplicationId": {
+            "arg": "ml_app_id"
+          },
+          "mlApplicationImplementationId": {
+            "arg": "ml_app_implementation_id"
+          },
+          "mlApplicationInstanceId": {
+            "arg": "ml_application_instance_id"
+          },
+          "lifecycleState": {
+            "arg": "lifecycle_state"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "sortOrder": {
+            "arg": "sort_order"
+          },
+          "sortBy": {
+            "arg": "sort_by"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "MlApplicationInstanceViewCollection",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["display_name"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ml_application_id"],
+          "param": "ml_app_id",
+          "when": "ml_app_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ml_application_implementation_id"],
+          "param": "ml_app_implementation_id",
+          "when": "ml_app_implementation_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_id"],
+          "param": "ml_application_instance_id",
+          "when": "ml_application_instance_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["lifecycle_state"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_order"],
+          "param": "sort_order",
+          "when": "sort_order is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["sort_by"],
+          "param": "sort_by",
+          "when": "sort_by is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -20809,20 +23090,67 @@
       "help": "Provider can initiate recovery of the resource only if MlApplicationInstanceView is in one of the recoverable sub-states (RECOVERABLE_PROVIDER_ISSUE, RECOVERABLE_SERVICE_ISSUE). Provider should investigate (using MlApplicationInstanceView lifecycleDetails, relevant logs and metrics) and fix the issue before the recovery is initiated. \n[Command Reference](recoverMlApplicationInstanceView)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.recover_ml_application_instance_view",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.recover_ml_application_instance_view"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.recover_ml_application_instance_view",
+        "renames": {
+          "ml_application_instance_view_id": "ml_app_instance_view_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_view_id'], six.string_types) and len(kwargs['ml_app_instance_view_id'].strip()) == 0",
-            "options": ["ml_app_instance_view_id"],
+            "param": "ml_app_instance_view_id",
             "message": "Parameter --ml-app-instance-view-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "recover_ml_application_instance_view",
+        "http": "POST",
+        "path": "/mlApplicationInstanceViews/{mlApplicationInstanceViewId}/actions/recover",
+        "positionalArgs": ["ml_application_instance_view_id"],
+        "pathParams": {
+          "mlApplicationInstanceViewId": "ml_app_instance_view_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_view_id"],
+          "param": "ml_app_instance_view_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -21007,20 +23335,76 @@
       "help": "Trigger ML Application Instance View flow if possible \n[Command Reference](triggerMlApplicationInstanceViewFlow)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.trigger_ml_application_instance_view_flow",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.trigger_ml_application_instance_view_flow"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.trigger_ml_application_instance_view_flow",
+        "renames": {
+          "ml_application_instance_view_id": "ml_app_instance_view_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_view_id'], six.string_types) and len(kwargs['ml_app_instance_view_id'].strip()) == 0",
-            "options": ["ml_app_instance_view_id"],
+            "param": "ml_app_instance_view_id",
             "message": "Parameter --ml-app-instance-view-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "trigger_ml_application_instance_view_flow",
+        "http": "POST",
+        "path": "/mlApplicationInstanceViews/{mlApplicationInstanceViewId}/actions/trigger",
+        "positionalArgs": [
+          "trigger_ml_application_instance_view_flow_details",
+          "ml_application_instance_view_id"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceViewId": "ml_app_instance_view_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "trigger_ml_application_instance_view_flow_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_view_id"],
+          "param": "ml_app_instance_view_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "trigger_ml_application_instance_view_flow_details",
+          "key": ["triggerName"],
+          "param": "trigger_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "trigger_ml_application_instance_view_flow_details",
+          "key": ["parameters"],
+          "transform": "parse_json_parameter",
+          "param": "parameters",
+          "when": "parameters is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -21231,20 +23615,86 @@
       "help": "Updates the MlApplicationInstanceView \n[Command Reference](updateMlApplicationInstanceView)",
       "callback": "services.data_science.src.oci_cli_data_science.datascience_cli_extended.update_ml_application_instance_view",
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del", "blank-check"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_instance_view"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_ml_application_instance_view",
+        "renames": {
+          "ml_application_instance_view_id": "ml_app_instance_view_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['ml_app_instance_view_id'], six.string_types) and len(kwargs['ml_app_instance_view_id'].strip()) == 0",
-            "options": ["ml_app_instance_view_id"],
+            "param": "ml_app_instance_view_id",
             "message": "Parameter --ml-app-instance-view-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": false
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "update_ml_application_instance_view",
+        "http": "PUT",
+        "path": "/mlApplicationInstanceViews/{mlApplicationInstanceViewId}",
+        "positionalArgs": [
+          "ml_application_instance_view_id",
+          "update_ml_application_instance_view_details"
+        ],
+        "pathParams": {
+          "mlApplicationInstanceViewId": "ml_app_instance_view_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_ml_application_instance_view_details",
+        "responseType": "MlApplicationInstanceView",
+        "paginated": false,
+        "lifecycleGetter": "get_ml_application_instance_view"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["ml_application_instance_view_id"],
+          "param": "ml_app_instance_view_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_instance_view_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_ml_application_instance_view_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -45251,13 +47701,115 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_notebook_session"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.create_notebook_session",
+        "renames": {
+          "notebook_session_runtime_config_details": "runtime_config_details",
+          "notebook_session_configuration_details": "configuration_details",
+          "notebook_session_config_details": "config_details"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "create_notebook_session",
+        "http": "POST",
+        "path": "/notebookSessions",
+        "positionalArgs": ["create_notebook_session_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_notebook_session_details",
+        "responseType": "NotebookSession",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["projectId"],
+          "param": "project_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["notebookSessionConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_details",
+          "when": "configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["notebookSessionConfigDetails"],
+          "transform": "parse_json_parameter",
+          "param": "config_details",
+          "when": "config_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["notebookSessionRuntimeConfigDetails"],
+          "transform": "parse_json_parameter",
+          "param": "runtime_config_details",
+          "when": "runtime_config_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_notebook_session_details",
+          "key": ["notebookSessionStorageMountConfigurationDetailsList"],
+          "transform": "parse_json_parameter",
+          "param": "notebook_session_storage_mount_configuration_details_list",
+          "when": "notebook_session_storage_mount_configuration_details_list is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -46731,13 +49283,111 @@
         }
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["kwargs-del"],
-      "survey": {
-        "invokes": [
-          "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_notebook_session"
-        ]
+      "tier": "A",
+      "delegate": {
+        "callback": "services.data_science.src.oci_cli_data_science.generated.datascience_cli.update_notebook_session",
+        "renames": {
+          "notebook_session_runtime_config_details": "runtime_config_details",
+          "notebook_session_configuration_details": "configuration_details"
+        }
       },
+      "operation": {
+        "client": "data_science.data_science",
+        "method": "update_notebook_session",
+        "http": "PUT",
+        "path": "/notebookSessions/{notebookSessionId}",
+        "positionalArgs": [
+          "notebook_session_id",
+          "update_notebook_session_details"
+        ],
+        "pathParams": {
+          "notebookSessionId": "notebook_session_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_notebook_session_details",
+        "responseType": "NotebookSession",
+        "paginated": false,
+        "lifecycleGetter": "get_notebook_session"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["notebook_session_id"],
+          "param": "notebook_session_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_notebook_session_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_notebook_session_details",
+          "key": ["notebookSessionConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_details",
+          "when": "configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_notebook_session_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_notebook_session_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_notebook_session_details",
+          "key": ["notebookSessionRuntimeConfigDetails"],
+          "transform": "parse_json_parameter",
+          "param": "runtime_config_details",
+          "when": "runtime_config_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_notebook_session_details",
+          "key": ["notebookSessionStorageMountConfigurationDetailsList"],
+          "transform": "parse_json_parameter",
+          "param": "notebook_session_storage_mount_configuration_details_list",
+          "when": "notebook_session_storage_mount_configuration_details_list is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -5722,20 +5722,77 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["blank-check"],
-      "survey": {
-        "invokes": [
-          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.change_rover_node_compartment"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.change_rover_node_compartment",
+        "renames": {
+          "rover_node_id": "node_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['node_id'], six.string_types) and len(kwargs['node_id'].strip()) == 0",
-            "options": ["node_id"],
+            "param": "node_id",
             "message": "Parameter --node-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": true
       },
+      "operation": {
+        "client": "rover.rover_node",
+        "method": "change_rover_node_compartment",
+        "http": "POST",
+        "path": "/roverNodes/{roverNodeId}/actions/changeCompartment",
+        "positionalArgs": [
+          "rover_node_id",
+          "change_rover_node_compartment_details"
+        ],
+        "pathParams": {
+          "roverNodeId": "node_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_rover_node_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_node_id"],
+          "param": "node_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_rover_node_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7352,20 +7409,56 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "B",
-      "patterns": ["blank-check"],
-      "survey": {
-        "invokes": [
-          "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.get_rover_node_encryption_key"
-        ],
-        "checks": [
+      "tier": "A",
+      "delegate": {
+        "callback": "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.get_rover_node_encryption_key",
+        "renames": {
+          "rover_node_id": "node_id"
+        },
+        "blankChecks": [
           {
-            "when": "isinstance(kwargs['node_id'], six.string_types) and len(kwargs['node_id'].strip()) == 0",
-            "options": ["node_id"],
+            "param": "node_id",
             "message": "Parameter --node-id cannot be whitespace or empty string"
           }
-        ]
+        ],
+        "wrapExceptions": true
       },
+      "operation": {
+        "client": "rover.rover_node",
+        "method": "get_rover_node_encryption_key",
+        "http": "GET",
+        "path": "/roverNodes/{roverNodeId}/encryptionKey",
+        "positionalArgs": ["rover_node_id"],
+        "pathParams": {
+          "roverNodeId": "node_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "responseType": "RoverNodeEncryptionKey",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_node_id"],
+          "param": "node_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",

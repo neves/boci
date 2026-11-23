@@ -9,6 +9,7 @@
 ## Context for the implementer
 
 - **Scope (ticket 10 survey):** 37 Tier B commands, listed under "12" in `.scratch/remaining-commands/tier-b-report.md`: `file-read` (45 overall) and `base64` (7), single invoke. Examples: `lb certificate create`, `api-gateway certificate create`, `log-analytics lookup register-lookup`, `os object copy` (base64 SSE-C key). Several also fold options (`db system launch`, `bastion session create`, `compute instance launch`), so ticket 11's fold support comes first. `survey.files` lists the file options (`click.File` params and options passed to `open()`/`.read()`).
+- **Also in scope (ticket 16):** `support incident put-attachment` was Tier A by mistake (its `.read()` sat inside an `if`); the extractor now tags it Tier B `file-read`, and it left `EXCLUDED`.
 
 - Start from the Tier B report written by ticket 10 for the exact command list, counts and examples; that report overrides anything here.
 - Check goldens for error text on a missing file and for stripping/trailing-newline handling. Use tiny fixtures; stay offline.

@@ -117,6 +117,7 @@ function sample(param: Param): string {
       return "true";
     case "complex":
     case "json":
+    case "complex type":
       return "{}";
     default:
       return "test-value";
@@ -143,8 +144,8 @@ function getArgv(argv: string[], command: Command, operation: Operation) {
   return true;
 }
 
-// Simple body options, then the path/query/header options the request needs. Writes
-// without a simple body option aren't generated.
+// Body options, then the path/query/header options the request needs. Bodyless writes
+// aren't generated here.
 function writeArgv(argv: string[], command: Command, operation: Operation) {
   const params = command.params ?? [];
   const pathArgs = new Set(Object.values(operation.pathParams ?? {}));
@@ -158,11 +159,13 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
       (param !== undefined && !isComplex(param))
     );
   });
-  if (simpleBindings.length === 0) return false;
+  if (bodyBindings.length === 0) return false;
+  const complexOnly = simpleBindings.length === 0;
   for (const param of params) {
     const name = String(param.name);
     const binding = bodyBindings.find((b) => b.param === name);
-    if (!binding || !simpleBindings.includes(binding)) continue;
+    if (!binding) continue;
+    if (!complexOnly && !simpleBindings.includes(binding)) continue;
     if (
       typeof binding.value === "string" ||
       typeof binding.value === "boolean"
@@ -191,7 +194,18 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
     )
       pushParam(argv, param);
   }
-  if (operation.headerParams?.["opc-retry-token"] && !hasRetryToken(params))
+  if (
+    complexOnly &&
+    params.some((p) => (p.opts as string[] | undefined)?.includes("--force")) &&
+    !argv.includes("--force")
+  ) {
+    argv.push("--force");
+  }
+  if (
+    !complexOnly &&
+    operation.headerParams?.["opc-retry-token"] &&
+    !hasRetryToken(params)
+  )
     argv.push("--opc-retry-token", "{opc-retry-token}");
   argv.push("--endpoint", "{endpoint}");
   if (hasRetryToken(params))

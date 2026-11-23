@@ -54,4 +54,23 @@ describe("parity case generator", () => {
     expect(cluster?.argv).toContain("--display-name");
     expect(cluster?.argv).toContain("test-value");
   });
+
+  test("generates complex-only body flags for write operations", async () => {
+    const result = Bun.spawnSync(
+      ["bun", "scripts/generate-cases.ts", "--service", "compute"],
+      { cwd: `${import.meta.dir}/../..`, stdout: "pipe", stderr: "pipe" },
+    );
+    expect(result.exitCode).toBe(0);
+    const cases = (await Bun.file(
+      `${import.meta.dir}/../parity/cases/generated-request-compute.json`,
+    ).json()) as { key: string; argv: string[]; requestOnly: boolean }[];
+    const iccUpdate = cases.find(
+      (c) => c.key === "compute instance-console-connection update",
+    );
+    expect(iccUpdate).toBeDefined();
+    expect(iccUpdate?.requestOnly).toBe(true);
+    expect(iccUpdate?.argv).toContain("--freeform-tags");
+    expect(iccUpdate?.argv).toContain("{}");
+    expect(iccUpdate?.argv).toContain("--force");
+  });
 });

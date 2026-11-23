@@ -62,14 +62,11 @@ export type Command = ServiceSpec["commands"][string] & {
 };
 
 const WRITE_METHODS = ["POST", "PUT", "PATCH"];
-const isComplex = (p: { type?: string; typeClass?: string }) =>
-  ["complex", "json", "complex type"].includes(String(p.type)) ||
-  String(p.typeClass).includes("Complex");
 
 /**
  * Whether the generic engine runs this Generated command: every GET/HEAD, bodyless DELETE,
- * and POST/PUT/PATCH whose request body is built from at least one simple body option.
- * Writes with direct bodies or only complex body options aren't supported yet.
+ * and POST/PUT/PATCH whose request body is built from at least one body option.
+ * Bodyless writes and writes with direct bodies aren't supported yet.
  */
 export function engineSupports(command: Command): boolean {
   if (command.kind !== "generated") return false;
@@ -81,8 +78,7 @@ export function engineSupports(command: Command): boolean {
     if (b.target !== "body") return false;
     if (typeof b.value === "string" || typeof b.value === "boolean")
       return true;
-    const param = command.params?.find((p) => p.name === b.param);
-    return param !== undefined && !isComplex(param);
+    return command.params?.some((p) => p.name === b.param) ?? false;
   });
 }
 

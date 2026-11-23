@@ -1,0 +1,92 @@
+name: Test All Installs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test curl installer
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/neves/boci/main/site/install.sh | sh
+          ~/.local/bin/boci --version
+
+      - name: Test mise (GitHub + npm)
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+      - run: |
+          mise use -g github:neves/boci
+          mise exec -- boci --version
+          mise unuse -g github:neves/boci
+          mise use -g npm:boci-cli
+          mise exec -- boci --version
+
+      - name: Test npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: |
+          npm install -g boci-cli
+          boci --version
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: Test curl installer
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/neves/boci/main/site/install.sh | sh
+          ~/.local/bin/boci --version
+
+      - name: Test Homebrew
+        run: |
+          brew install neves/tap/boci
+          boci --version
+
+      - name: Test mise (GitHub + npm)
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+      - run: |
+          mise use -g github:neves/boci
+          mise exec -- boci --version
+          mise unuse -g github:neves/boci
+          mise use -g npm:boci-cli
+          mise exec -- boci --version
+
+      - name: Test npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: |
+          npm install -g boci-cli
+          boci --version
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Test PowerShell installer
+        shell: pwsh
+        run: |
+          irm https://raw.githubusercontent.com/neves/boci/main/site/install.ps1 | iex
+          & "$HOME\.local\bin\boci.exe" --version
+
+      - name: Test Scoop
+        shell: pwsh
+        run: |
+          if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+            irm get.scoop.sh | iex
+          }
+          scoop bucket add neves https://github.com/neves/scoop-bucket
+          scoop install boci
+          boci --version
+
+      - name: Test npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - shell: pwsh
+        run: |
+          npm install -g boci-cli
+          boci --version

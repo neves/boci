@@ -4,7 +4,7 @@
 
 **Blocked by:** 08: Tier A reads and deletes, 10: Tier B survey, 16: del kwargs and blank checks.
 
-**Status:** ready-for-agent
+**Status:** done. Checks compile to predicates (`tools/extract/checks.py`, evaluated by `src/core/checks.ts`): Tier A `delegate.checks`, Tier B `survey.checks[].test`. `db backup list` and `vault secret create-base64` are Tier A and verified (2 Ladder items ticked). Error paths of 20 Tier B commands are covered by `usage-checks` Parity cases (lb backend-set/listener create|update, bv volume|boot-volume create, ce cluster create / node-pool create|update, kms management key|vault backup|restore, os bucket delete / retention-rule create, db system|vm-cluster update, compute volume-attachment list, autoscaling policy create|update, generative-ai-sandbox sandbox-file read|write); their happy paths stay with 11/12/14/15. `network public-ip get` is really a three-operation variant (ticket 14) and its checks read a computed local: ticket 17. Uncompiled checks over computed locals: ticket 17. `raise-other` error paths: ticket 18. Rover and remote-peering checks follow requests/prompts: hand-written (15).
 
 ## Context for the implementer
 
@@ -18,6 +18,6 @@
 
 ## Acceptance criteria
 
-- [ ] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

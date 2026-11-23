@@ -291,7 +291,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-science ml-app-instance-view list`
 - [ ] `data-science pipeline list`
 - [ ] `data-science pipeline-run list`
-- [ ] `db backup list`
+- [x] `db backup list`
 - [x] `db cloud-vm-cluster list`
 - [ ] `db database list`
 - [x] `db exadb-vm-cluster list`
@@ -1278,7 +1278,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `stack-monitoring resource create`
 - [x] `stack-monitoring resource-type create-system-format-resource-type`
 - [ ] `support incident create`
-- [ ] `vault secret create-base64`
+- [x] `vault secret create-base64`
 - [x] `vbstudio instance create`
 
 </details>

@@ -4,7 +4,7 @@
 
 **Blocked by:** 09: Tier A writes, 10: Tier B survey, 11: options into a JSON body, 13: argument validation, 16: del kwargs and blank checks.
 
-**Status:** ready-for-agent
+**Status:** done (13 of 37 verified; 3 db excluded for key camelization → 19; binary request bodies → 21; response to `--file` → 22; own logic → 23; `db cloud-vm-cluster update` dict comprehension → 20)
 
 ## Context for the implementer
 
@@ -19,6 +19,6 @@
 
 ## Acceptance criteria
 
-- [ ] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every command tagged with this pattern is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

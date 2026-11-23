@@ -2,7 +2,7 @@
 
 **What to build:** After automatic tiers land, the remaining unticked Rung 8 items (hand-written Tier C commands plus anything excluded along the way) are reordered by user importance instead of guessed difficulty, so the normal one-item-per-subagent Ladder loop works on the most useful commands first. The Ladder-pause note in CLAUDE.md is removed.
 
-**Blocked by:** 06: ladder sync, 11, 12, 13, 14, 16, 17, 18, 19, 20.
+**Blocked by:** 06: ladder sync, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23.
 
 **Status:** ready-for-agent
 

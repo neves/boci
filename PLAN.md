@@ -602,7 +602,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 <details>
 <summary>230 commands</summary>
 
-- [ ] `analytics analytics-instance update-vanity-url`
+- [x] `analytics analytics-instance update-vanity-url`
 - [x] `apm-synthetics dedicated-vantage-point update-with-oracle-rm-stack`
 - [x] `apm-synthetics monitor update-browser-monitor`
 - [x] `apm-synthetics monitor update-dns-sec-monitor`
@@ -747,7 +747,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `goldengate connection update-object-storage-connection`
 - [x] `goldengate connection update-oracle-ai-data-platform-connection`
 - [x] `goldengate connection update-oracle-nosql-connection`
-- [ ] `goldengate deployment update`
+- [x] `goldengate deployment update`
 - [ ] `iam policy update`
 - [x] `iam tag update`
 - [ ] `iam tag-namespace update`
@@ -924,7 +924,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `certs-mgmt certificate-authority-version schedule-deletion`
 - [x] `certs-mgmt certificate-version cancel-deletion`
 - [x] `certs-mgmt certificate-version schedule-deletion`
-- [ ] `compute instance launch`
+- [x] `compute instance launch`
 - [x] `data-science ml-app-instance-view disable-trigger`
 - [x] `data-science ml-app-instance-view enable-trigger`
 - [x] `db database enable-database-management`
@@ -1039,9 +1039,9 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `adm vulnerability-audit create-vulnerability-audit-external-resource-vulnerability-audit-source`
 - [ ] `adm vulnerability-audit create-vulnerability-audit-oci-resource-vulnerability-audit-source`
 - [ ] `adm vulnerability-audit create-vulnerability-audit-unknown-source-vulnerability-audit-source`
-- [ ] `analytics analytics-instance create`
-- [ ] `analytics analytics-instance create-vanity-url`
-- [ ] `api-gateway certificate create`
+- [x] `analytics analytics-instance create`
+- [x] `analytics analytics-instance create-vanity-url`
+- [x] `api-gateway certificate create`
 - [x] `apm-synthetics dedicated-vantage-point create-with-oracle-rm-stack`
 - [x] `apm-synthetics monitor create-browser-monitor`
 - [x] `apm-synthetics monitor create-dns-sec-monitor`
@@ -1057,9 +1057,9 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `apm-traces scheduled-query create`
 - [ ] `autoscaling policy create`
 - [x] `bastion bastion create`
-- [ ] `bastion session create`
-- [ ] `bastion session create-managed-ssh`
-- [ ] `bastion session create-port-forwarding`
+- [x] `bastion session create`
+- [x] `bastion session create-managed-ssh`
+- [x] `bastion session create-port-forwarding`
 - [x] `batch batch-context create-oci-logging-configuration`
 - [ ] `bv boot-volume create`
 - [ ] `bv volume create`
@@ -1082,7 +1082,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `cloud-guard data-mask-rule create-for-targets`
 - [ ] `cloud-migrations target-asset create`
 - [x] `compute image-capability-schema create`
-- [ ] `compute instance-console-connection create`
+- [x] `compute instance-console-connection create`
 - [x] `compute pic subscription create`
 - [x] `cpg cluster-placement-group create`
 - [ ] `data-flow application create`
@@ -1193,7 +1193,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `goldengate connection create-object-storage-connection`
 - [x] `goldengate connection create-oracle-ai-data-platform-connection`
 - [x] `goldengate connection create-oracle-nosql-connection`
-- [ ] `goldengate deployment create`
+- [x] `goldengate deployment create`
 - [x] `goldengate pipeline create-zero-etl-pipeline`
 - [ ] `iam compartment create`
 - [x] `identity-domains api-key create`
@@ -1212,7 +1212,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `integration integration-instance create`
 - [ ] `kms management key-version create`
 - [x] `lb backend-set create`
-- [ ] `lb certificate create`
+- [x] `lb certificate create`
 - [x] `lb listener create`
 - [x] `lb load-balancer create`
 - [x] `limits-increase limits-increase-request create`
@@ -1457,7 +1457,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `data-science ml-app-implementation-version download-package`
 - [ ] `generative-ai-sandbox sandbox-command stream`
 - [ ] `generative-ai-sandbox sandbox-command-event stream`
-- [ ] `iam user api-key upload`
+- [x] `iam user api-key upload`
 - [ ] `kms management key restore-from-file`
 - [ ] `kms management vault restore-from-file`
 - [ ] `log-analytics content-import import-custom-content`

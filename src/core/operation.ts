@@ -20,6 +20,7 @@ import { loadExternalRegionMetadata, resolveEndpoint } from "./endpoint.ts";
 import { resolveInstancePrincipal } from "./instance-principal.ts";
 import { resolveResourcePrincipal } from "./resource-principal.ts";
 import { Exit, type Invocation } from "../lib/io.ts";
+import { pyStrip } from "../lib/configparser.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
   SecurityTokenDecodeError,
@@ -130,6 +131,40 @@ function replacedBodyParams(command: GeneratedCommand) {
       (p.typeClass === COMPLEX_TYPE_CLASS || p.multiple === true) &&
       bodyBindings.some((b) => b.param === p.name),
   );
+}
+
+const isBlank = (value: unknown) =>
+  typeof value === "string" && pyStrip(value) === "";
+
+/**
+ * The first `Parameter --x cannot be whitespace or empty string` UsageError the command
+ * raises: a Tier A wrapper's own checks (`wrapped` says whether the wrapper has
+ * wrap_exceptions), then the generated callback's check of each path param, named by the
+ * generated option (always under wrap_exceptions).
+ */
+export function blankCheckFailure(
+  command: ServiceSpec["commands"][string],
+  values: Record<string, unknown>,
+): { message: string; wrapped: boolean } | undefined {
+  const delegate = command.delegate;
+  for (const check of delegate?.blankChecks ?? []) {
+    if (isBlank(values[check.param]))
+      return {
+        message: check.message,
+        wrapped: delegate?.wrapExceptions === true,
+      };
+  }
+  const renames = delegate?.renames ?? {};
+  for (const arg of Object.values(command.operation?.pathParams ?? {})) {
+    if (!isBlank(values[arg])) continue;
+    const generated =
+      Object.entries(renames).find(([, custom]) => custom === arg)?.[0] ?? arg;
+    return {
+      message: `Parameter --${generated.replaceAll("_", "-")} cannot be whitespace or empty string`,
+      wrapped: true,
+    };
+  }
+  return undefined;
 }
 
 function hasUpdateValue(value: unknown): boolean {

@@ -28,7 +28,7 @@ const OPTCRE =
   /^(?<option>(?:(?![=:])\S)*(?:(?:(?![=:])\s)+(?:(?![=:])\S)+)*)\s*(?<vi>[=:])\s*(?<value>.*)$/s;
 
 /** Python str.strip() whitespace. */
-const pyStrip = (s: string) =>
+export const pyStrip = (s: string) =>
   s.replace(/^[\s\x1c-\x1f\x85]+|[\s\x1c-\x1f\x85]+$/gu, "");
 
 export function parseConfig(

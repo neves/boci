@@ -61,7 +61,14 @@ export type ServiceSpec = {
       otherOperations?: string[];
       kind: "generated" | "custom";
       tier?: "A" | "B" | "C";
-      delegate?: { callback: string; renames: Record<string, string> };
+      delegate?: {
+        callback: string;
+        renames: Record<string, string>;
+        /** The wrapper's own `Parameter --x cannot be whitespace or empty string` checks. */
+        blankChecks?: { param: string; message: string }[];
+        /** The wrapper is decorated with cli_util.wrap_exceptions. */
+        wrapExceptions?: boolean;
+      };
       operation?: OperationSpec;
     }
   >;

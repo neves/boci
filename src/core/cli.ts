@@ -54,7 +54,11 @@ import {
 import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
-import { callOperation, confirmUnderWrapExceptions } from "./operation.ts";
+import {
+  blankCheckFailure,
+  callOperation,
+  confirmUnderWrapExceptions,
+} from "./operation.ts";
 import { printResult } from "./output.ts";
 
 /** Click's prog name. boci answers as `oci` so usage text matches what scripts expect. */
@@ -549,13 +553,29 @@ async function main(io: Invocation): Promise<void> {
       );
       throw new Exit(1);
     }
+    const customHandler = CUSTOM_HANDLERS.get(canon.join(" "));
+    const http = specCmd.operation?.http ?? "";
+    const engineRoute =
+      (key === "ns get" && name === "os") ||
+      (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
+        isImplemented(`${name} ${key}`, specCmd));
+    if (!customHandler && engineRoute) {
+      // A Tier A wrapper's own blank checks run before it delegates; the generated
+      // callback then checks its path params first thing (both before JSON parsing).
+      const blank = blankCheckFailure(specCmd, values);
+      if (blank?.wrapped === false)
+        showPatched(io, usage(io, commandPath, cmd.helpDoc), blank.message);
+      if (blank) {
+        io.err(`UsageError: ${blank.message}\n`);
+        throw new Exit(1);
+      }
+    }
     for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
       if (values[p.name] !== undefined && isComplexParam(p)) {
         values[p.name] = parseJsonParameter(io, p.name, values[p.name]);
       }
     }
 
-    const customHandler = CUSTOM_HANDLERS.get(canon.join(" "));
     if (customHandler) {
       await customHandler({
         io,
@@ -573,12 +593,7 @@ async function main(io: Invocation): Promise<void> {
       return;
     }
 
-    const http = specCmd.operation?.http ?? "";
-    if (
-      (key === "ns get" && name === "os") ||
-      (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
-        isImplemented(`${name} ${key}`, specCmd))
-    ) {
+    if (engineRoute) {
       const call = {
         command: specCmd,
         values,

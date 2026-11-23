@@ -7,7 +7,9 @@
 **Status:** ready-for-agent
 
 ## Context for the implementer
+
 Rough call counts measured across Tier B bodies (a command can have several):
+
 - `click.UsageError` raised for argument checks — 63
 - `json.dumps` / dict building of a complex param from flattened options — 62
 - `cli_util.parse_json_parameter` — 33
@@ -18,6 +20,7 @@ Rough call counts measured across Tier B bodies (a command can have several):
 Detect patterns statically (AST); for each, also record what the extractor can learn declaratively (e.g. which options are folded into which complex param, which pairs are mutually exclusive) so tickets 11–14 can be data-driven. Also list the Tier C commands per service (some, like `identity-domains * list`, may share a pattern) and note it in the report.
 
 ## Acceptance criteria
+
 - [ ] Spec entries for Tier B commands carry a `patterns` list; `bun run spec` prints it.
 - [ ] Report written; each of tickets 11–14 updated in place (scope, counts, examples) or marked obsolete; new tickets filed for any pattern with ≥10 commands not covered.
 - [ ] `bun run verify` green.

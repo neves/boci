@@ -7,12 +7,14 @@
 **Status:** ready-for-agent
 
 ## Context for the implementer
+
 - Read GLOSSARY.md entries: Leaf command, Custom command, Generated command, Engine feature.
 - The registry module holds `IMPLEMENTED`/`EXCLUDED`/`engineSupports`; the CLI module currently imports `run*` functions from each command module directly. Find them with `rg -n "commands/" src/core/cli.ts`.
 - Use Bun-native dynamic `import()`; the build bundles to one binary, so dynamic imports stay in the binary but are only evaluated on use.
 - Keep the registry module free of heavy imports: tooling scripts (`bun run status`, `ladder`) call `isImplemented` and must stay fast.
 
 ## Acceptance criteria
+
 - [ ] One map is the single source of truth for Custom command handlers; the CLI no longer imports individual command modules statically.
 - [ ] Custom command keys in `IMPLEMENTED` come from that map; `bun run status` reports the same verified count as before (7458 at time of writing).
 - [ ] `bun run bench` startup time for `--version` and a generated GET is not worse than `bench/results/latest.md`.

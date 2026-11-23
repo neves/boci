@@ -11,6 +11,10 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
 
@@ -35,9 +39,16 @@ jobs:
           cd dist
           sha256sum boci-linux-x64 boci-linux-arm64 boci-linux-x64-musl boci-linux-arm64-musl boci-darwin-x64 boci-darwin-arm64 boci-windows-x64.exe > SHA256SUMS
 
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/boci-*
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          generate_release_notes: true
+          body: "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for curated release notes."
           files: |
             dist/boci-linux-x64
             dist/boci-linux-arm64

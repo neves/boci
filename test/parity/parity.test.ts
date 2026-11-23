@@ -13,7 +13,12 @@ import {
   loadGolden,
   RESULTS_FILE,
 } from "../harness/cases.ts";
-import { normalizeRun, remask, signatureValid } from "../harness/compare.ts";
+import {
+  normalizeRun,
+  remask,
+  requestOnlyMismatch,
+  signatureValid,
+} from "../harness/compare.ts";
 import { createPublicKey } from "node:crypto";
 import { CLIS, runCli, runInProcess } from "../harness/runner.ts";
 import { disposeSharedSandboxes } from "../harness/sandbox.ts";
@@ -156,8 +161,14 @@ async function runParityCase(c: (typeof cases)[number]) {
     if (c.requestOnly) {
       const actual = normalizeRun(run);
       const expected = remask(golden!.observed);
-      expect(actual.requests).toEqual(expected.requests);
-      record(c.key, true);
+      try {
+        expect(requestOnlyMismatch(actual, expected), c.id).toBeUndefined();
+        expect(actual.requests).toEqual(expected.requests);
+        record(c.key, true);
+      } catch (e) {
+        record(c.key, false);
+        throw e;
+      }
       return;
     }
     try {

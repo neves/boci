@@ -82,6 +82,39 @@ export function remask(run: NormalizedRun): NormalizedRun {
   return { ...run, stdout: mask(run.stdout), stderr: mask(run.stderr) };
 }
 
+/** boci's exit status and stderr marker for a command it has no implementation for. */
+const NOT_IMPLEMENTED_EXIT = 3;
+// The line src/core/cli.ts prints, not any mention of the phrase (a crash's stack trace can quote source).
+const NOT_IMPLEMENTED_LINE = /^boci: '[^'\n]*' is not implemented yet/m;
+
+/**
+ * A `requestOnly` case ignores output differences, but not ones that mean boci never ran
+ * the command: a "not implemented" exit, or sending a request where the Reference CLI
+ * sent none (or the reverse). Returns why the case fails, or undefined when it may go on
+ * to compare requests.
+ */
+export function requestOnlyMismatch(
+  actual: NormalizedRun,
+  expected: NormalizedRun,
+): string | undefined {
+  if (
+    NOT_IMPLEMENTED_LINE.test(actual.stderr) &&
+    !NOT_IMPLEMENTED_LINE.test(expected.stderr)
+  )
+    return `boci reports the command is not implemented: ${actual.stderr.trim()}`;
+  if (
+    actual.exitCode === NOT_IMPLEMENTED_EXIT &&
+    expected.exitCode !== NOT_IMPLEMENTED_EXIT
+  )
+    return `boci exited ${NOT_IMPLEMENTED_EXIT} (not implemented); the Reference CLI exited ${expected.exitCode}`;
+  const sent = actual.requests.length > 0;
+  if (sent !== expected.requests.length > 0)
+    return sent
+      ? "boci sent a request; the Reference CLI sent none"
+      : `the Reference CLI sent a request; boci sent none (exit ${actual.exitCode}: ${actual.stderr.trim()})`;
+  return undefined;
+}
+
 /**
  * Check a captured request's signature against the signing string rebuilt from its own
  * headers, with the sandbox's public key. Goldens can only compare signature structure

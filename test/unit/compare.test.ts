@@ -1,6 +1,10 @@
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import type { Run } from "../harness/runner.ts";
-import { normalizeRun, parseAuthorization } from "../harness/compare.ts";
+import {
+  normalizeRun,
+  parseAuthorization,
+  requestOnlyMismatch,
+} from "../harness/compare.ts";
 
 const auth =
   'Signature algorithm="rsa-sha256",headers="date (request-target) host",keyId="ocid1.tenancy.oc1..t/ocid1.user.oc1..u/aa:bb",signature="QUJD",version="1"';
@@ -79,4 +83,74 @@ test("JSON request bodies compare structurally, other bodies verbatim", () => {
 
 test("stderr warnings and error JSON are kept, stdout is byte-exact", () => {
   expect(normalizeRun(run({ stdout: "x " })).stdout).toBe("x ");
+});
+
+describe("requestOnlyMismatch", () => {
+  const norm = (over: Partial<Run> = {}) => normalizeRun(run(over));
+
+  test("passes when only the output differs", () => {
+    expect(
+      requestOnlyMismatch(
+        norm({ stdout: "boci output\n" }),
+        norm({ stdout: "oci output\n" }),
+      ),
+    ).toBeUndefined();
+  });
+
+  test("fails when boci reports the command is not implemented", () => {
+    const notImplemented = norm({
+      exitCode: 3,
+      stdout: "",
+      stderr:
+        "boci: 'network-firewall mapped-secret create' is not implemented yet (run `bun run status` in the boci repo for coverage).\n",
+      requests: [],
+    });
+    expect(
+      requestOnlyMismatch(notImplemented, norm({ exitCode: 2, requests: [] })),
+    ).toContain("not implemented");
+  });
+
+  test("fails when boci exits 3 and the Reference CLI did not", () => {
+    expect(
+      requestOnlyMismatch(
+        norm({ exitCode: 3, requests: [] }),
+        norm({ requests: [] }),
+      ),
+    ).toContain("exit");
+  });
+
+  test("fails when only one side sent a request", () => {
+    expect(requestOnlyMismatch(norm({ requests: [] }), norm())).toContain(
+      "request",
+    );
+    expect(requestOnlyMismatch(norm(), norm({ requests: [] }))).toContain(
+      "request",
+    );
+  });
+
+  test("passes when neither side sent a request", () => {
+    expect(
+      requestOnlyMismatch(
+        norm({ requests: [], exitCode: 1, stderr: "x" }),
+        norm({ requests: [], exitCode: 2, stderr: "y" }),
+      ),
+    ).toBeUndefined();
+  });
+});
+
+test("requestOnlyMismatch ignores the phrase inside a crash's stack trace", () => {
+  const crash = normalizeRun(
+    run({
+      exitCode: 1,
+      stderr:
+        "86 | throw e.err(`ERROR: 'oci session authenticate' is not implemented yet.\\n`)\n\nTypeError: ECONNREFUSED\n",
+      requests: [],
+    }),
+  );
+  expect(
+    requestOnlyMismatch(
+      crash,
+      normalizeRun(run({ exitCode: 1, requests: [] })),
+    ),
+  ).toBeUndefined();
 });

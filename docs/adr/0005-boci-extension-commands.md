@@ -1,0 +1,3 @@
+# List boci Extension commands in a trailing section of root `--help`
+
+boci needs a small number of boci-only Extension commands (starting with `boci update`) that do not exist in the Reference CLI. Hiding them from `boci --help` would preserve byte-for-byte root `--help` parity at the cost of discoverability, while mixing them into the alphabetical `Commands:` list would break `oci --help` comparisons everywhere. We append Extension commands in a separate trailing section at the end of `boci --help` so users can discover them and Parity tests can still verify the Reference CLI portion by trimming the trailing section, recording the difference in `DIVERGENCES.md`.

@@ -42,6 +42,10 @@ _Avoid_: extended command, special command
 A cross-cutting capability shared by many Leaf commands (an auth method, pagination, `--query`, waiting for state, output formats).
 _Avoid_: core feature, global option
 
+**Extension command**:
+A boci-only command (such as `boci update`) that does not exist in the Reference CLI, listed in a separate trailing section of root `--help`.
+_Avoid_: custom command, extra command, boci-native command
+
 ## Parity tracking
 
 **Parity test**:

@@ -94391,6 +94391,683 @@
         ],
         "files": ["ssh_authorized_keys_file"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ssh_authorized_keys_file", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "ssh_authorized_keys_file"]
+            ],
+            [
+              [
+                "let",
+                "content",
+                [
+                  "map",
+                  ["item", ["var", "kwargs"], "ssh_authorized_keys_file"],
+                  "line",
+                  ["call", "rstrip", ["var", "line"], "\n"]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "ssh_public_keys",
+                ["fn", "dumps", ["var", "content"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "update_action",
+            ["call", "get", ["var", "kwargs"], "update_action"]
+          ],
+          [
+            "let",
+            "update_mode",
+            ["call", "get", ["var", "kwargs"], "update_mode"]
+          ],
+          [
+            "let",
+            "update_identifiers",
+            [
+              "dict",
+              ["updateId", ["call", "get", ["var", "kwargs"], "update_id"]],
+              ["giImageId", ["call", "get", ["var", "kwargs"], "gi_image_id"]],
+              ["giHomeId", ["call", "get", ["var", "kwargs"], "gi_home_id"]]
+            ]
+          ],
+          [
+            "let",
+            "provided_update_identifiers",
+            [
+              "dictcomp",
+              ["fn", "items", ["var", "update_identifiers"]],
+              ["key", "value"],
+              ["var", "key"],
+              ["var", "value"],
+              [["cmp", "isnot", ["var", "value"], null]]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              ">",
+              ["fn", "len", ["var", "provided_update_identifiers"]],
+              1
+            ],
+            [
+              [
+                "usage",
+                "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home"
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["var", "update_action"],
+                  ["not", ["var", "provided_update_identifiers"]]
+                ],
+                [
+                  [
+                    "usage",
+                    "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified"
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "and",
+                      ["var", "provided_update_identifiers"],
+                      ["not", ["var", "update_action"]]
+                    ],
+                    [
+                      [
+                        "usage",
+                        "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified"
+                      ]
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "and",
+                          ["cmp", "isnot", ["var", "update_mode"], null],
+                          [
+                            "cmp",
+                            "notin",
+                            "updateId",
+                            ["var", "provided_update_identifiers"]
+                          ]
+                        ],
+                        [
+                          [
+                            "usage",
+                            "--update-mode is only required if --update-id is specified to perform DomU OS Update"
+                          ]
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "and",
+                              ["var", "update_action"],
+                              ["var", "provided_update_identifiers"]
+                            ],
+                            [
+                              [
+                                "unpack",
+                                ["update_detail_name", "update_detail_value"],
+                                [
+                                  "fn",
+                                  "next",
+                                  [
+                                    "fn",
+                                    "items",
+                                    ["var", "provided_update_identifiers"]
+                                  ]
+                                ]
+                              ],
+                              [
+                                "set",
+                                ["var", "kwargs"],
+                                "update_details",
+                                [
+                                  "dict",
+                                  ["updateAction", ["var", "update_action"]],
+                                  [
+                                    ["var", "update_detail_name"],
+                                    ["var", "update_detail_value"]
+                                  ]
+                                ]
+                              ],
+                              [
+                                "if",
+                                ["cmp", "isnot", ["var", "update_mode"], null],
+                                [
+                                  [
+                                    "set",
+                                    [
+                                      "item",
+                                      ["var", "kwargs"],
+                                      "update_details"
+                                    ],
+                                    "updateMode",
+                                    ["var", "update_mode"]
+                                  ]
+                                ],
+                                []
+                              ],
+                              [
+                                "if",
+                                [
+                                  "and",
+                                  [
+                                    "cmp",
+                                    "in",
+                                    "is_older_version_acknowledged",
+                                    ["var", "kwargs"]
+                                  ],
+                                  [
+                                    "item",
+                                    ["var", "kwargs"],
+                                    "is_older_version_acknowledged"
+                                  ]
+                                ],
+                                [
+                                  [
+                                    "set",
+                                    [
+                                      "item",
+                                      ["var", "kwargs"],
+                                      "update_details"
+                                    ],
+                                    "isOlderVersionAcknowledged",
+                                    [
+                                      "item",
+                                      ["var", "kwargs"],
+                                      "is_older_version_acknowledged"
+                                    ]
+                                  ]
+                                ],
+                                []
+                              ]
+                            ],
+                            []
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["del", ["var", "kwargs"], "ssh_authorized_keys_file"],
+          ["del", ["var", "kwargs"], "update_action"],
+          ["del", ["var", "kwargs"], "update_id"],
+          ["del", ["var", "kwargs"], "gi_image_id"],
+          ["del", ["var", "kwargs"], "update_mode"],
+          ["del", ["var", "kwargs"], "gi_home_id"],
+          ["del", ["var", "kwargs"], "is_older_version_acknowledged"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.update_cloud_vm_cluster",
+        "complexTypes": {
+          "ssh-public-keys": "database:list[string]",
+          "update-details": "database:UpdateDetails",
+          "nsg-ids": "database:list[string]",
+          "backup-network-nsg-ids": "database:list[string]",
+          "compute-nodes": "database:list[string]",
+          "freeform-tags": "database:dict(str, string)",
+          "defined-tags": "database:dict(str, dict(str, object))",
+          "security-attributes": "database:dict(str, dict(str, object))",
+          "data-collection-options": "database:DataCollectionOptions",
+          "file-system-configuration-details": "database:list[FileSystemConfigurationDetail]",
+          "cloud-automation-update-details": "database:CloudAutomationUpdateDetails"
+        },
+        "params": [
+          {
+            "name": "cloud_vm_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocpu_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_node_storage_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_tbs",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_keys",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "update_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_network_nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_nodes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "storage_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_collection_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "file_system_configuration_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cloud_automation_update_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vm_backup_storage_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "reco_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sparse_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_local_backup_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_sparse_diskgroup_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "update_cloud_vm_cluster",
+        "http": "PUT",
+        "path": "/cloudVmClusters/{cloudVmClusterId}",
+        "positionalArgs": [
+          "cloud_vm_cluster_id",
+          "update_cloud_vm_cluster_details"
+        ],
+        "pathParams": {
+          "cloudVmClusterId": "cloud_vm_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_cloud_vm_cluster_details",
+        "responseType": "CloudVmCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_cloud_vm_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["cloud_vm_cluster_id"],
+          "param": "cloud_vm_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["cpuCoreCount"],
+          "param": "cpu_core_count",
+          "when": "cpu_core_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["ocpuCount"],
+          "param": "ocpu_count",
+          "when": "ocpu_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["memorySizeInGBs"],
+          "param": "memory_size_in_gbs",
+          "when": "memory_size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["dbNodeStorageSizeInGBs"],
+          "param": "db_node_storage_size_in_gbs",
+          "when": "db_node_storage_size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["dataStorageSizeInTBs"],
+          "param": "data_storage_size_in_tbs",
+          "when": "data_storage_size_in_tbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["licenseModel"],
+          "param": "license_model",
+          "when": "license_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["sshPublicKeys"],
+          "transform": "parse_json_parameter",
+          "param": "ssh_public_keys",
+          "when": "ssh_public_keys is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["updateDetails"],
+          "transform": "parse_json_parameter",
+          "param": "update_details",
+          "when": "update_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["nsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "nsg_ids",
+          "when": "nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["backupNetworkNsgIds"],
+          "transform": "parse_json_parameter",
+          "param": "backup_network_nsg_ids",
+          "when": "backup_network_nsg_ids is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["computeNodes"],
+          "transform": "parse_json_parameter",
+          "param": "compute_nodes",
+          "when": "compute_nodes is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["storageSizeInGBs"],
+          "param": "storage_size_in_gbs",
+          "when": "storage_size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["securityAttributes"],
+          "transform": "parse_json_parameter",
+          "param": "security_attributes",
+          "when": "security_attributes is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["dataCollectionOptions"],
+          "transform": "parse_json_parameter",
+          "param": "data_collection_options",
+          "when": "data_collection_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["fileSystemConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "file_system_configuration_details",
+          "when": "file_system_configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["cloudAutomationUpdateDetails"],
+          "transform": "parse_json_parameter",
+          "param": "cloud_automation_update_details",
+          "when": "cloud_automation_update_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["vmBackupStorageType"],
+          "param": "vm_backup_storage_type",
+          "when": "vm_backup_storage_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["dataStoragePercentage"],
+          "param": "data_storage_percentage",
+          "when": "data_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["recoStoragePercentage"],
+          "param": "reco_storage_percentage",
+          "when": "reco_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["sparseStoragePercentage"],
+          "param": "sparse_storage_percentage",
+          "when": "sparse_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["isLocalBackupEnabled"],
+          "param": "is_local_backup_enabled",
+          "when": "is_local_backup_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_cloud_vm_cluster_details",
+          "key": ["isSparseDiskgroupEnabled"],
+          "param": "is_sparse_diskgroup_enabled",
+          "when": "is_sparse_diskgroup_enabled is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -214401,6 +215078,640 @@
           }
         ]
       },
+      "program": {
+        "body": [
+          [
+            "let",
+            "patch_action",
+            ["call", "get", ["var", "kwargs"], "patch_action"]
+          ],
+          ["let", "patch_id", ["call", "get", ["var", "kwargs"], "patch_id"]],
+          [
+            "if",
+            ["and", ["var", "patch_action"], ["not", ["var", "patch_id"]]],
+            [
+              ["usage", "--patch-id is required if --patch-action is specified"]
+            ],
+            [
+              [
+                "if",
+                ["and", ["var", "patch_id"], ["not", ["var", "patch_action"]]],
+                [
+                  [
+                    "usage",
+                    "--patch-action is required if --patch-id is specified"
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    ["and", ["var", "patch_id"], ["var", "patch_action"]],
+                    [
+                      [
+                        "set",
+                        ["var", "kwargs"],
+                        "version_parameterconflict",
+                        [
+                          "dict",
+                          ["action", ["var", "patch_action"]],
+                          ["patchId", ["var", "patch_id"]]
+                        ]
+                      ]
+                    ],
+                    []
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "update_action",
+            ["call", "get", ["var", "kwargs"], "update_action"]
+          ],
+          [
+            "let",
+            "update_mode",
+            ["call", "get", ["var", "kwargs"], "update_mode"]
+          ],
+          [
+            "let",
+            "update_identifiers",
+            [
+              "dict",
+              ["updateId", ["call", "get", ["var", "kwargs"], "update_id"]],
+              ["giImageId", ["call", "get", ["var", "kwargs"], "gi_image_id"]],
+              ["giHomeId", ["call", "get", ["var", "kwargs"], "gi_home_id"]]
+            ]
+          ],
+          [
+            "let",
+            "provided_update_identifiers",
+            [
+              "dictcomp",
+              ["fn", "items", ["var", "update_identifiers"]],
+              ["key", "value"],
+              ["var", "key"],
+              ["var", "value"],
+              [["cmp", "isnot", ["var", "value"], null]]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              ">",
+              ["fn", "len", ["var", "provided_update_identifiers"]],
+              1
+            ],
+            [
+              [
+                "usage",
+                "Provide only one of the identifiers --update-id for Oracle released update or --gi-image-id for custom software image or --gi-home-id for GI Home"
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["var", "update_action"],
+                  ["not", ["var", "provided_update_identifiers"]]
+                ],
+                [
+                  [
+                    "usage",
+                    "--update-id or --gi-image-id or --gi-home-id is required if --update-action is specified"
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "and",
+                      ["var", "provided_update_identifiers"],
+                      ["not", ["var", "update_action"]]
+                    ],
+                    [
+                      [
+                        "usage",
+                        "--update-action is required if --update-id or --gi-image-id or --gi-home-id is specified"
+                      ]
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "and",
+                          ["cmp", "isnot", ["var", "update_mode"], null],
+                          [
+                            "cmp",
+                            "notin",
+                            "updateId",
+                            ["var", "provided_update_identifiers"]
+                          ]
+                        ],
+                        [
+                          [
+                            "usage",
+                            "--update-mode is only required if --update-id is specified to perform DomU OS Update"
+                          ]
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "and",
+                              ["var", "update_action"],
+                              ["var", "provided_update_identifiers"]
+                            ],
+                            [
+                              [
+                                "unpack",
+                                ["update_detail_name", "update_detail_value"],
+                                [
+                                  "fn",
+                                  "next",
+                                  [
+                                    "fn",
+                                    "items",
+                                    ["var", "provided_update_identifiers"]
+                                  ]
+                                ]
+                              ],
+                              [
+                                "set",
+                                ["var", "kwargs"],
+                                "update_details",
+                                [
+                                  "dict",
+                                  ["updateAction", ["var", "update_action"]],
+                                  [
+                                    ["var", "update_detail_name"],
+                                    ["var", "update_detail_value"]
+                                  ]
+                                ]
+                              ],
+                              [
+                                "if",
+                                ["cmp", "isnot", ["var", "update_mode"], null],
+                                [
+                                  [
+                                    "set",
+                                    [
+                                      "item",
+                                      ["var", "kwargs"],
+                                      "update_details"
+                                    ],
+                                    "updateMode",
+                                    ["var", "update_mode"]
+                                  ]
+                                ],
+                                []
+                              ],
+                              [
+                                "if",
+                                [
+                                  "and",
+                                  [
+                                    "cmp",
+                                    "in",
+                                    "is_older_version_acknowledged",
+                                    ["var", "kwargs"]
+                                  ],
+                                  [
+                                    "item",
+                                    ["var", "kwargs"],
+                                    "is_older_version_acknowledged"
+                                  ]
+                                ],
+                                [
+                                  [
+                                    "set",
+                                    [
+                                      "item",
+                                      ["var", "kwargs"],
+                                      "update_details"
+                                    ],
+                                    "isOlderVersionAcknowledged",
+                                    [
+                                      "item",
+                                      ["var", "kwargs"],
+                                      "is_older_version_acknowledged"
+                                    ]
+                                  ]
+                                ],
+                                []
+                              ]
+                            ],
+                            []
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["del", ["var", "kwargs"], "patch_action"],
+          ["del", ["var", "kwargs"], "patch_id"],
+          ["del", ["var", "kwargs"], "update_action"],
+          ["del", ["var", "kwargs"], "update_id"],
+          ["del", ["var", "kwargs"], "gi_image_id"],
+          ["del", ["var", "kwargs"], "update_mode"],
+          ["del", ["var", "kwargs"], "gi_home_id"],
+          ["del", ["var", "kwargs"], "is_older_version_acknowledged"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.database.src.oci_cli_database.generated.database_cli.update_vm_cluster",
+        "complexTypes": {
+          "ssh-public-keys": "database:list[string]",
+          "version-parameterconflict": "database:PatchDetails",
+          "update-details": "database:VmClusterUpdateDetails",
+          "freeform-tags": "database:dict(str, string)",
+          "defined-tags": "database:dict(str, dict(str, object))",
+          "data-collection-options": "database:DataCollectionOptions",
+          "file-system-configuration-details": "database:list[FileSystemConfigurationDetail]",
+          "cloud-automation-update-details": "database:CloudAutomationUpdateDetails"
+        },
+        "params": [
+          {
+            "name": "vm_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocpu_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_node_storage_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_tbs",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_gbs",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "reco_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sparse_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_local_backup_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_sparse_diskgroup_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_keys",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "version_parameterconflict",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "update_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_collection_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "file_system_configuration_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cloud_automation_update_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vm_backup_storage_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "database.database",
+        "method": "update_vm_cluster",
+        "http": "PUT",
+        "path": "/vmClusters/{vmClusterId}",
+        "positionalArgs": ["vm_cluster_id", "update_vm_cluster_details"],
+        "pathParams": {
+          "vmClusterId": "vm_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_vm_cluster_details",
+        "responseType": "VmCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_vm_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["vm_cluster_id"],
+          "param": "vm_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["cpuCoreCount"],
+          "param": "cpu_core_count",
+          "when": "cpu_core_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["ocpuCount"],
+          "param": "ocpu_count",
+          "when": "ocpu_count is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["memorySizeInGBs"],
+          "param": "memory_size_in_gbs",
+          "when": "memory_size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["dbNodeStorageSizeInGBs"],
+          "param": "db_node_storage_size_in_gbs",
+          "when": "db_node_storage_size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["dataStorageSizeInTBs"],
+          "param": "data_storage_size_in_tbs",
+          "when": "data_storage_size_in_tbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["dataStorageSizeInGBs"],
+          "param": "data_storage_size_in_gbs",
+          "when": "data_storage_size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["dataStoragePercentage"],
+          "param": "data_storage_percentage",
+          "when": "data_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["recoStoragePercentage"],
+          "param": "reco_storage_percentage",
+          "when": "reco_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["sparseStoragePercentage"],
+          "param": "sparse_storage_percentage",
+          "when": "sparse_storage_percentage is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["isLocalBackupEnabled"],
+          "param": "is_local_backup_enabled",
+          "when": "is_local_backup_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["isSparseDiskgroupEnabled"],
+          "param": "is_sparse_diskgroup_enabled",
+          "when": "is_sparse_diskgroup_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["licenseModel"],
+          "param": "license_model",
+          "when": "license_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["sshPublicKeys"],
+          "transform": "parse_json_parameter",
+          "param": "ssh_public_keys",
+          "when": "ssh_public_keys is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["version"],
+          "transform": "parse_json_parameter",
+          "param": "version_parameterconflict",
+          "when": "version_parameterconflict is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["updateDetails"],
+          "transform": "parse_json_parameter",
+          "param": "update_details",
+          "when": "update_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["dataCollectionOptions"],
+          "transform": "parse_json_parameter",
+          "param": "data_collection_options",
+          "when": "data_collection_options is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["fileSystemConfigurationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "file_system_configuration_details",
+          "when": "file_system_configuration_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["cloudAutomationUpdateDetails"],
+          "transform": "parse_json_parameter",
+          "param": "cloud_automation_update_details",
+          "when": "cloud_automation_update_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_vm_cluster_details",
+          "key": ["vmBackupStorageType"],
+          "param": "vm_backup_storage_type",
+          "when": "vm_backup_storage_type is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -52,29 +52,7 @@
       "endpointServiceName": "iaas",
       "endpointTemplatePerRealm": {},
       "dualStackByDefault": false,
-      "serviceName": "virtual_network",
-      "lifecycleGetters": {
-        "get_public_ip": {
-          "client": "core.virtual_network",
-          "method": "get_public_ip",
-          "http": "GET",
-          "path": "/publicIps/{publicIpId}",
-          "positionalArgs": ["public_ip_id"],
-          "pathParams": {
-            "publicIpId": "public_ip_id"
-          },
-          "queryParams": {},
-          "headerParams": {
-            "accept": {
-              "value": "application/json"
-            },
-            "content-type": {
-              "value": "application/json"
-            }
-          },
-          "responseType": "PublicIp"
-        }
-      }
+      "serviceName": "virtual_network"
     },
     "work_requests.work_request": {
       "class": "oci.work_requests.work_request_client.WorkRequestClient",
@@ -50697,6 +50675,231 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "let",
+            "command_args",
+            [
+              "fn",
+              "dict",
+              [
+                "map",
+                ["call", "items", ["var", "kwargs"]],
+                ["k", "v"],
+                ["list", ["var", "k"], ["var", "v"]],
+                [["cmp", "isnot", ["var", "v"], null]]
+              ]
+            ]
+          ],
+          ["do", ["call", "pop", ["var", "command_args"], "from_json", null]],
+          [
+            "if",
+            ["cmp", "==", ["fn", "len", ["var", "command_args"]], 0],
+            [
+              [
+                "usage",
+                "At least one of the options (--public-ip-id or --public-ip-address or --private-ip-id) MUST be specified"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "command_args"]], 1],
+            [
+              [
+                "usage",
+                "This command accepts ONLY one option : EITHER --public-ip-id OR --public-ip_address OR --private-ip-id"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "func_call_dict",
+            [
+              "dict",
+              ["public_ip_id", ["target", 0]],
+              ["public_ip_address", ["target", 1]],
+              ["private_ip_id", ["target", 2]]
+            ]
+          ],
+          [
+            "let",
+            "func_call_key",
+            [
+              "item",
+              ["fn", "list", ["call", "keys", ["var", "command_args"]]],
+              0
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "in", "public_ip_address", ["var", "command_args"]],
+            [
+              [
+                "set",
+                ["var", "command_args"],
+                "ip_address",
+                ["call", "pop", ["var", "command_args"], "public_ip_address"]
+              ]
+            ],
+            []
+          ],
+          [
+            "invoke",
+            [],
+            ["var", "command_args"],
+            ["item", ["var", "func_call_dict"], ["var", "func_call_key"]]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.core.src.oci_cli_virtual_network.generated.virtualnetwork_cli.get_public_ip",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "public_ip_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "core.virtual_network",
+        "method": "get_public_ip",
+        "http": "GET",
+        "path": "/publicIps/{publicIpId}",
+        "positionalArgs": ["public_ip_id"],
+        "pathParams": {
+          "publicIpId": "public_ip_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "PublicIp",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["public_ip_id"],
+          "param": "public_ip_id"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.core.src.oci_cli_virtual_network.generated.virtualnetwork_cli.get_public_ip_by_ip_address",
+            "complexTypes": {},
+            "params": [
+              {
+                "name": "ip_address",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "core.virtual_network",
+            "method": "get_public_ip_by_ip_address",
+            "http": "POST",
+            "path": "/publicIps/actions/getByIpAddress",
+            "positionalArgs": ["get_public_ip_by_ip_address_details"],
+            "pathParams": {},
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              }
+            },
+            "body": "get_public_ip_by_ip_address_details",
+            "responseType": "PublicIp",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "body",
+              "bodyArg": "get_public_ip_by_ip_address_details",
+              "key": ["ipAddress"],
+              "param": "ip_address"
+            }
+          ]
+        },
+        {
+          "generated": {
+            "callback": "services.core.src.oci_cli_virtual_network.generated.virtualnetwork_cli.get_public_ip_by_private_ip_id",
+            "complexTypes": {},
+            "params": [
+              {
+                "name": "private_ip_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "core.virtual_network",
+            "method": "get_public_ip_by_private_ip_id",
+            "http": "POST",
+            "path": "/publicIps/actions/getByPrivateIpId",
+            "positionalArgs": ["get_public_ip_by_private_ip_id_details"],
+            "pathParams": {},
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              }
+            },
+            "body": "get_public_ip_by_private_ip_id_details",
+            "responseType": "PublicIp",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "body",
+              "bodyArg": "get_public_ip_by_private_ip_id_details",
+              "key": ["privateIpId"],
+              "param": "private_ip_id"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",

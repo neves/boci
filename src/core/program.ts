@@ -32,6 +32,11 @@ export class ProgramUnsupported extends Error {}
 
 type Dict = Record<string, unknown>;
 
+/** A generated command as a value: `{'k': generated_cli.get_x}[key]` picks what to invoke. */
+class ProgramTarget {
+  constructor(readonly index: number) {}
+}
+
 /**
  * An option typed `click.File`, as the wrapper sees it: opened during option conversion
  * (`data` holds what a read-mode file contains). Text mode decodes UTF-8 with universal
@@ -76,6 +81,7 @@ const isDict = (v: unknown): v is Dict =>
   v !== null &&
   !Array.isArray(v) &&
   !(v instanceof ProgramFile) &&
+  !(v instanceof ProgramTarget) &&
   !(v instanceof Uint8Array);
 
 /** Python iteration: a list's items, a dict's keys, a str's characters, a file's lines. */
@@ -271,6 +277,9 @@ export function runProgram(
         case "keys":
           if (args.length === 0) return Object.keys(obj);
           break;
+        case "items":
+          if (args.length === 0) return Object.entries(obj);
+          break;
       }
     } else if (Array.isArray(obj) && method === "append") {
       obj.push(args[0]);
@@ -399,12 +408,43 @@ export function runProgram(
       case "dataflowConfiguration":
         // json.dumps(..., sort_keys=True): the generated command parses it back.
         return JSON.stringify(sortKeys(HAND_CODED[name]?.(pyStr(a))));
+      case "items":
+        if (isDict(a)) return Object.entries(a);
+        throw new ProgramUnsupported("iteritems()");
+      case "list":
+        return args.length === 0 ? [] : [...iterate(a)];
+      case "next": {
+        // next(iterator): its first item; only ever called on a fresh one.
+        const items = iterate(a);
+        if (items.length === 0) throw new ProgramUnsupported("StopIteration");
+        return items[0];
+      }
       case "len":
         if (typeof a === "string" || Array.isArray(a)) return a.length;
         if (isDict(a)) return Object.keys(a).length;
         throw new ProgramUnsupported("len()");
     }
     throw new ProgramUnsupported(`${name}()`);
+  };
+
+  /** Assigns `x` to a name or unpacks it over names (`a, b = x`). */
+  const assign = (target: unknown, x: unknown): void => {
+    if (typeof target === "string") {
+      env[target] = x;
+      return;
+    }
+    const names = target as string[];
+    if (!Array.isArray(x) || x.length !== names.length)
+      throw new ProgramUnsupported("ValueError: unpack");
+    names.forEach((n, i) => {
+      env[n] = x[i];
+    });
+  };
+
+  /** A comprehension's loop variable(s) bound to `x`; true when every `if` holds. */
+  const bind = (target: unknown, x: unknown, conds?: Expr[]): boolean => {
+    assign(target, x);
+    return (conds ?? []).every((c) => truthy(evaluate(c)));
   };
 
   const evaluate = (e: Expr): unknown => {
@@ -438,12 +478,24 @@ export function runProgram(
       case "list":
         return rest.map(evaluate);
       case "map": {
-        const name = rest[1] as string;
-        return iterate(evaluate(rest[0] as Expr)).map((x) => {
-          env[name] = x;
-          return evaluate(rest[2] as Expr);
-        });
+        const out: unknown[] = [];
+        for (const x of iterate(evaluate(rest[0] as Expr)))
+          if (bind(rest[1], x, rest[3] as Expr[] | undefined))
+            out.push(evaluate(rest[2] as Expr));
+        return out;
       }
+      case "dictcomp": {
+        const out: Dict = {};
+        for (const x of iterate(evaluate(rest[0] as Expr))) {
+          if (!bind(rest[1], x, rest[4] as Expr[])) continue;
+          const key = evaluate(rest[2] as Expr);
+          if (typeof key !== "string") throw new ProgramUnsupported("dict key");
+          out[key] = evaluate(rest[3] as Expr);
+        }
+        return out;
+      }
+      case "target":
+        return new ProgramTarget(rest[0] as number);
       case "not":
         return !truthy(evaluate(rest[0] as Expr));
       case "and": {
@@ -491,6 +543,9 @@ export function runProgram(
       switch (op) {
         case "let":
           env[rest[0] as string] = evaluate(rest[1] as Expr);
+          break;
+        case "unpack":
+          assign(rest[0], evaluate(rest[1] as Expr));
           break;
         case "set": {
           const obj = evaluate(rest[0] as Expr);
@@ -540,7 +595,13 @@ export function runProgram(
           const star = rest[1] === null ? {} : evaluate(rest[1] as Expr);
           if (!isDict(star)) throw new ProgramUnsupported("** of a non-dict");
           invoked = { ...star };
-          target = (rest[2] as number | undefined) ?? 0;
+          const picked =
+            rest[2] === undefined || typeof rest[2] === "number"
+              ? (rest[2] ?? 0)
+              : evaluate(rest[2] as Expr);
+          if (!(picked instanceof ProgramTarget) && typeof picked !== "number")
+            throw new ProgramUnsupported("invoke of a non-command");
+          target = typeof picked === "number" ? picked : picked.index;
           for (const [name, e] of rest[0] as [string, Expr][])
             invoked[name] = evaluate(e);
           break;

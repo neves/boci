@@ -16,7 +16,9 @@ Statements (lists):
     ["usage", message]            raise click.UsageError(message)
     ["raise", source, cls, e]     raise cls(e), cls one of RAISABLE (ticket 18)
     ["raise", source]             any other raise (the Engine stops)
-    ["invoke", [[name, e]...], e, i?] ctx.invoke(<generated command i>, name=e..., **e)
+    ["invoke", [[name, e]...], e, i?] ctx.invoke(<generated command i>, name=e..., **e);
+                                  i is an expression when the command is picked at run time
+    ["unpack", [name...], e]      a, b = e
     ["for", name, e, body]        for name in e: body (no break/continue/else)
 
 Expressions: JSON scalars are constants; lists are operations:
@@ -24,7 +26,9 @@ Expressions: JSON scalars are constants; lists are operations:
     ["fn", name, args...]  (dumps, parse, str, len, bool, dict, b64encode, removeSkeleton)
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
-    ["map", e, name, elt]  [elt for name in e]
+    ["map", e, t, elt, conds?]  [elt for t in e if cond...]; t a name or a list of names
+    ["dictcomp", e, t, k, v, conds]  {k: v for t in e if cond...}
+    ["target", i]  a generated command (a dict value `ctx.invoke` picks: ticket 20)
     ["bin", op, a, b]  (+ -)
 
 A wrapper may invoke several generated commands, one per variant (ticket 14): `i`
@@ -42,7 +46,7 @@ import textwrap
 
 METHODS = {
     "get", "pop", "append", "setdefault", "split", "upper", "lower", "strip", "update",
-    "read", "rstrip", "decode", "keys", "join", "format",
+    "read", "rstrip", "decode", "keys", "join", "format", "items",
 }
 FUNCTIONS = {
     "json.dumps": "dumps",
@@ -54,6 +58,9 @@ FUNCTIONS = {
     "b64encode": "b64encode",
     "base64.b64encode": "b64encode",
     "json_skeleton_utils.remove_json_skeleton_params_from_dict": "removeSkeleton",
+    "six.iteritems": "items",
+    "next": "next",
+    "list": "list",
 }
 # Module helpers outside the subset (re.split, enumerate, return), hand-coded in the
 # Engine as named functions (src/core/program.ts, ticket 20).
@@ -162,6 +169,8 @@ class Compiler:
     def assign(self, target, value, scope):
         if isinstance(target, ast.Name):
             return ["let", self.name(target.id, scope), value]
+        if isinstance(target, ast.Tuple) and all(isinstance(e, ast.Name) for e in target.elts):
+            return ["unpack", [self.name(e.id, scope) for e in target.elts], value]
         if isinstance(target, ast.Subscript):
             return ["set", self.expr(target.value, scope), self.expr(target.slice, scope), value]
         raise Unsupported("assign target")
@@ -188,12 +197,7 @@ class Compiler:
         if len(call.args) != 1:
             raise Unsupported("invoke args")
         target = self.resolve(call.args[0])
-        if target is None:
-            raise Unsupported("invoke target")
-        index = next((i for i, t in enumerate(self.targets) if t is target), None)
-        if index is None:
-            index = len(self.targets)
-            self.targets.append(target)
+        index = self.expr(call.args[0], scope) if target is None else self.target_index(target)
         keywords = []
         star = None
         for kw in call.keywords:
@@ -204,6 +208,27 @@ class Compiler:
             else:
                 keywords.append([kw.arg, self.expr(kw.value, scope)])
         return ["invoke", keywords, star] + ([index] if index else [])
+
+    def target_index(self, target):
+        index = next((i for i, t in enumerate(self.targets) if t is target), None)
+        if index is None:
+            index = len(self.targets)
+            self.targets.append(target)
+        return index
+
+    def comprehension(self, generators, scope):
+        if len(generators) != 1:
+            raise Unsupported("comprehension")
+        gen = generators[0]
+        if gen.is_async:
+            raise Unsupported("comprehension")
+        if isinstance(gen.target, ast.Name):
+            target = self.name(gen.target.id, scope)
+        elif isinstance(gen.target, ast.Tuple) and all(isinstance(e, ast.Name) for e in gen.target.elts):
+            target = [self.name(e.id, scope) for e in gen.target.elts]
+        else:
+            raise Unsupported("comprehension target")
+        return self.expr(gen.iter, scope), target, [self.expr(c, scope) for c in gen.ifs]
 
     def constant(self, value):
         """A module-level constant as an expression; anything else (a module, a function)
@@ -236,6 +261,14 @@ class Compiler:
         for attr in attrs:
             obj = getattr(obj, attr, None)
         return obj if getattr(obj, "callback", None) is not None else None
+
+    def value(self, node, scope):
+        """A dict value: a generated command (`{'k': generated_cli.get_x}`) or an expression."""
+        if isinstance(node, ast.Attribute):
+            target = self.resolve(node)
+            if target is not None:
+                return ["target", self.target_index(target)]
+        return self.expr(node, scope)
 
     def expr(self, node, scope):
         if isinstance(node, ast.Constant):
@@ -275,18 +308,17 @@ class Compiler:
         if isinstance(node, ast.Dict):
             if any(k is None for k in node.keys):
                 raise Unsupported("dict **")
-            return ["dict", *([self.expr(k, scope), self.expr(v, scope)] for k, v in zip(node.keys, node.values))]
+            return ["dict", *([self.expr(k, scope), self.value(v, scope)] for k, v in zip(node.keys, node.values))]
         if isinstance(node, (ast.List, ast.Tuple)):
             # A tuple only builds dict() pairs here; a list stands in for it.
             return ["list", *(self.expr(e, scope) for e in node.elts)]
         if isinstance(node, ast.ListComp):
-            if len(node.generators) != 1:
-                raise Unsupported("listcomp")
-            gen = node.generators[0]
-            if gen.ifs or gen.is_async or not isinstance(gen.target, ast.Name):
-                raise Unsupported("listcomp")
             # Comprehension variables don't leak (Python 3), but names are unique enough.
-            return ["map", self.expr(gen.iter, scope), self.name(gen.target.id, scope), self.expr(node.elt, scope)]
+            it, target, conds = self.comprehension(node.generators, scope)
+            return ["map", it, target, self.expr(node.elt, scope)] + ([conds] if conds else [])
+        if isinstance(node, ast.DictComp):
+            it, target, conds = self.comprehension(node.generators, scope)
+            return ["dictcomp", it, target, self.expr(node.key, scope), self.expr(node.value, scope), conds]
         if isinstance(node, ast.Call):
             if node.keywords and not (
                 _dotted(node.func) == "json.dumps"

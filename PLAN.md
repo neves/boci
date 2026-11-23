@@ -236,7 +236,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `media-services media-asset-distribution-channel-attachment get`
 - [x] `network drg-route-distribution get`
 - [x] `network nsg get`
-- [ ] `network public-ip get`
+- [x] `network public-ip get`
 - [x] `ocvs esxi-host get`
 - [x] `opsi awr-hub-objects get`
 - [x] `opsi awr-hub-objects head`
@@ -641,7 +641,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `cloud-migrations target-asset update`
 - [x] `compute capacity-topology update`
 - [x] `compute image-capability-schema update`
-- [ ] `data-flow application update`
+- [x] `data-flow application update`
 - [x] `data-integration connection update`
 - [x] `data-integration data-asset update`
 - [x] `data-integration schedule update`
@@ -670,7 +670,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db autonomous-database update`
 - [x] `db backup update`
 - [x] `db cloud-exa-infra update`
-- [ ] `db cloud-vm-cluster update`
+- [x] `db cloud-vm-cluster update`
 - [ ] `db data-guard-association update`
 - [x] `db database update`
 - [x] `db exadb-vm-cluster update`
@@ -682,7 +682,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `db external-pdb update`
 - [x] `db key-store update-oracle-key-vault-details`
 - [x] `db system update`
-- [ ] `db vm-cluster update`
+- [x] `db vm-cluster update`
 - [x] `dbtools connection update-generic-jdbc`
 - [x] `dbtools connection update-mysql-database`
 - [x] `dbtools connection update-oracle-database`
@@ -771,7 +771,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `management-agent agent update-prometheus-datasource`
 - [x] `management-agent install-key update`
 - [x] `monitoring alarm update`
-- [ ] `mysql channel update-from-mysql`
+- [x] `mysql channel update-from-mysql`
 - [x] `mysql db-system update`
 - [x] `network drg-route-distribution update`
 - [x] `network drg-route-distribution-statement update`
@@ -986,7 +986,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `certs-mgmt certificate-authority-version revoke`
 - [x] `certs-mgmt certificate-version revoke`
 - [x] `data-catalog search query`
-- [ ] `data-flow run submit`
+- [x] `data-flow run submit`
 - [ ] `dbtools-runtime connection execute-sql async`
 - [ ] `dbtools-runtime connection execute-sql sync`
 - [x] `dif stack deploy-artifacts`
@@ -1085,8 +1085,8 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `compute instance-console-connection create`
 - [x] `compute pic subscription create`
 - [x] `cpg cluster-placement-group create`
-- [ ] `data-flow application create`
-- [ ] `data-flow run create`
+- [x] `data-flow application create`
+- [x] `data-flow run create`
 - [x] `data-integration connection create`
 - [x] `data-integration data-asset create`
 - [x] `data-integration schedule create`

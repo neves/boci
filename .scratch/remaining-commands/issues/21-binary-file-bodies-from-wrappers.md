@@ -4,7 +4,7 @@
 
 **Blocked by:** 05: engine file bodies, 12: file content params.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -20,6 +20,11 @@
 
 ## Acceptance criteria
 
-- [ ] Every command listed above is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every command listed above is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.
+
+## Outcome
+
+- Verified: the four `log-analytics content-import|lookup` commands (bytes body); `data-science job create-job-artifact`, `model create-model-artifact`, `pipeline create-step-artifact`, `ml-app-implementation upload-package`, `artifacts generic artifact upload-by-path`, `log-analytics upload upload-log-file|upload-log-events-file`, `log-analytics entity upload-discovery-data` (open file body); `log-analytics upload upload-otlp-logs` (`os.path.exists`, all three branches in `test/parity/cases/file-bodies.json`).
+- Follow-up ticket 26: `opsi awr-hub-objects put`, `generative-ai-sandbox sandbox-file write`.

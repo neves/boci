@@ -4,7 +4,7 @@
 
 **Blocked by:** 11: options into a JSON body, 12: file content params, 18: raise-other error paths.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -21,6 +21,11 @@
 
 ## Acceptance criteria
 
-- [ ] Every command listed above is verified, excluded with a reason, or covered by a follow-up ticket.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every command listed above is verified, excluded with a reason, or covered by a follow-up ticket.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.
+
+## Outcome
+
+- Verified (`test/parity/cases/wrappers-outside-subset.json`): `data-flow application create|update`, `data-flow run create|submit` (converters hand-coded as `dataflowArguments` / `dataflowParameters` / `dataflowConfiguration`, `Exception` goldens for odd tokens and a missing `=`), `db vm-cluster update`, `db cloud-vm-cluster update`, `network public-ip get` (comprehensions, `next`, unpacking, a command picked from a dict), `mysql channel update-from-mysql` (`click.confirm` replay, `ctx.abort`).
+- Follow-up ticket 25: `rover node set-secrets` (`click.prompt`) and the unexpected-keyword TypeError path (the `enable-database-management` example is unreachable: `--user-name` is required).

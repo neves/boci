@@ -4,7 +4,7 @@
 
 **Blocked by:** 13: argument checks.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -21,6 +21,13 @@
 
 ## Acceptance criteria
 
-- [ ] Every listed check is compiled and covered by a Parity case, or the command is excluded/assigned with a reason.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Every listed check is compiled and covered by a Parity case, or the command is excluded/assigned with a reason.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.
+
+## Outcome
+
+- New predicate `{"countGt": [[options], n]}` for locals holding the options given (filtered dict comprehension over option reads, or `dict([... kwargs.items() if v is not None])` minus popped keys): `db cloud-vm-cluster update` (4), `db vm-cluster update` (4), `network public-ip get` (2) compile all checks. Their happy paths stay Tier B (dict comprehension / `next(six.iteritems(...))`, multi-operation by key): `usage-checks` cases only; all three happy paths: ticket 20.
+- click.File aliases: `hasattr(f, 'name')` -> option given, `f.name == '<stdin>'` -> value `-`: `opsi awr-hub-objects put` (1) compiles.
+- `compute instance launch` (6) and `goldengate deployment create` (3) / `update` (4) already run their checks through their compiled program (tickets 11/12; survey tests stay uncompiled but are unused); Parity cases now cover every check. The `RequiredValueNotInDefaultOrUserInputError` path of `create` stays with ticket 18.
+- `rover node add-workload|delete-workload` and `network remote-peering-connection connect`: ticket 15 (own logic), as planned.

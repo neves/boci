@@ -5,6 +5,7 @@
 import type { Invocation } from "../lib/io.ts";
 import type { OutputFileHandle } from "./click-file.ts";
 import type { Rc } from "./rc.ts";
+import type { OsObjectPutOptions } from "../commands/os/shared.ts";
 import {
   loadIndex,
   loadService,
@@ -36,22 +37,12 @@ const outputOptions = (ctx: CustomCommandContext) => ({
   rc: ctx.rc,
 });
 
-function lazyOsOutput(
-  pick: (m: typeof import("../commands/os.ts")) => (
-    io: Invocation,
-    opts: {
-      values: Record<string, unknown>;
-      rootValues: Record<string, unknown>;
-      settings: CustomCommandContext["settings"];
-      spec: ServiceSpec;
-      index: Index;
-      usageText: () => string;
-      outputOptions: ReturnType<typeof outputOptions>;
-    },
-  ) => Promise<void>,
+function lazyOsOutput<T>(
+  load: () => Promise<T>,
+  pick: (m: T) => (io: Invocation, opts: OsObjectPutOptions) => Promise<void>,
 ): CustomCommandHandler {
   return async (ctx) => {
-    const mod = await import("../commands/os.ts");
+    const mod = await load();
     await pick(mod)(ctx.io, {
       values: ctx.values,
       rootValues: ctx.rootValues,
@@ -76,7 +67,7 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
   [
     "os object get",
     async (ctx) => {
-      const { runOsObjectGet } = await import("../commands/os.ts");
+      const { runOsObjectGet } = await import("../commands/os/get.ts");
       await runOsObjectGet(ctx.io, {
         values: ctx.values,
         rootValues: ctx.rootValues,
@@ -88,12 +79,48 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
       });
     },
   ],
-  ["os object put", lazyOsOutput((m) => m.runOsObjectPut)],
-  ["os object resume-put", lazyOsOutput((m) => m.runOsObjectResumePut)],
-  ["os object bulk-upload", lazyOsOutput((m) => m.runOsObjectBulkUpload)],
-  ["os object bulk-download", lazyOsOutput((m) => m.runOsObjectBulkDownload)],
-  ["os object bulk-delete", lazyOsOutput((m) => m.runOsObjectBulkDelete)],
-  ["os object sync", lazyOsOutput((m) => m.runOsObjectSync)],
+  [
+    "os object put",
+    lazyOsOutput(
+      () => import("../commands/os/put.ts"),
+      (m) => m.runOsObjectPut,
+    ),
+  ],
+  [
+    "os object resume-put",
+    lazyOsOutput(
+      () => import("../commands/os/resume_put.ts"),
+      (m) => m.runOsObjectResumePut,
+    ),
+  ],
+  [
+    "os object bulk-upload",
+    lazyOsOutput(
+      () => import("../commands/os/bulk_upload.ts"),
+      (m) => m.runOsObjectBulkUpload,
+    ),
+  ],
+  [
+    "os object bulk-download",
+    lazyOsOutput(
+      () => import("../commands/os/bulk_download.ts"),
+      (m) => m.runOsObjectBulkDownload,
+    ),
+  ],
+  [
+    "os object bulk-delete",
+    lazyOsOutput(
+      () => import("../commands/os/bulk_delete.ts"),
+      (m) => m.runOsObjectBulkDelete,
+    ),
+  ],
+  [
+    "os object sync",
+    lazyOsOutput(
+      () => import("../commands/os/sync.ts"),
+      (m) => m.runOsObjectSync,
+    ),
+  ],
   [
     "setup repair-file-permissions",
     async (ctx) => {

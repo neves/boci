@@ -82,6 +82,33 @@ test("generated PUT signs Python-compatible JSON bytes for nested Unicode bodies
   );
 });
 
+test("callOperation honors operation.enforce_content_headers = false", async () => {
+  using fake = startFakeEndpoint();
+  const { io } = invocation();
+  const command = {
+    kind: "generated",
+    operation: {
+      client: "things",
+      method: "put_messages",
+      http: "POST",
+      path: "/streams/{streamId}/messages",
+      pathParams: { streamId: "stream_id" },
+      enforce_content_headers: false,
+    },
+    bindings: [{ target: "body", key: ["messages"], param: "messages" }],
+  } as unknown as GeneratedCommand;
+  await callOperation(
+    io,
+    call(fake.url, { stream_id: "s1", messages: [] }, {}, command),
+  );
+
+  const request = fake.requests[0]!;
+  expect(request.headers["x-content-sha256"]).toBeUndefined();
+  expect(request.headers.authorization).toContain(
+    'headers="date (request-target) host"',
+  );
+});
+
 function call(
   endpoint: string,
   values: Record<string, unknown>,

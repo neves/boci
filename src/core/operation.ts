@@ -782,6 +782,7 @@ export async function callOperation(
       body: requestBody,
       requestIdHeader,
       noRetry: hasNoneRetry,
+      enforceContentHeaders: operation.enforce_content_headers,
     });
     firstUrl ??= sent.url;
     response = sent.response;

@@ -1,10 +1,22 @@
-name: Test Windows
+name: Test Platforms
 
 on:
   workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform to test"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - windows
+          - macos
+          - linux
 
 jobs:
   test-windows:
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'windows' }}
     runs-on: windows-latest
     steps:
       - name: Install boci
@@ -16,3 +28,23 @@ jobs:
         shell: pwsh
         run: |
           & "$HOME\.local\bin\boci.exe" --version
+
+  test-macos:
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'macos' }}
+    runs-on: macos-latest
+    steps:
+      - name: Install boci
+        run: curl -fsSL https://raw.githubusercontent.com/neves/boci/main/site/install.sh | sh
+
+      - name: Run boci --version
+        run: ~/.local/bin/boci --version
+
+  test-linux:
+    if: ${{ inputs.platform == 'all' || inputs.platform == 'linux' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install boci
+        run: curl -fsSL https://raw.githubusercontent.com/neves/boci/main/site/install.sh | sh
+
+      - name: Run boci --version
+        run: ~/.local/bin/boci --version

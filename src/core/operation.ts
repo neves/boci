@@ -277,7 +277,7 @@ function buildRequestBody(
     }
     return serializeRequestJson(direct);
   }
-  return Object.keys(body).length ? serializeRequestJson(body) : "";
+  return hasBodyBindings ? serializeRequestJson(body) : "";
 }
 
 /**

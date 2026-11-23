@@ -109,6 +109,33 @@ test("callOperation honors operation.enforce_content_headers = false", async () 
   );
 });
 
+test("callOperation sends {} when body bindings exist and all are omitted", async () => {
+  using fake = startFakeEndpoint();
+  const { io } = invocation();
+  const command = {
+    kind: "generated",
+    operation: {
+      client: "things",
+      method: "patch_things",
+      http: "PATCH",
+      path: "/things",
+    },
+    bindings: [
+      {
+        target: "body",
+        key: ["items"],
+        param: "items",
+        when: "items is not None",
+      },
+    ],
+  } as unknown as GeneratedCommand;
+  await callOperation(io, call(fake.url, {}, {}, command));
+
+  const request = fake.requests[0]!;
+  expect(request.body).toBe("{}");
+  expect(request.headers["content-length"]).toBe("2");
+});
+
 function call(
   endpoint: string,
   values: Record<string, unknown>,

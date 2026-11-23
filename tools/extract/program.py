@@ -14,7 +14,8 @@ Statements (lists):
     ["do", e]                     an expression statement (pop, append, ...)
     ["if", test, then, else]
     ["usage", message]            raise click.UsageError(message)
-    ["raise", source]             any other raise (the Engine stops: ticket 18)
+    ["raise", source, cls, e]     raise cls(e), cls one of RAISABLE (ticket 18)
+    ["raise", source]             any other raise (the Engine stops)
     ["invoke", [[name, e]...], e, i?] ctx.invoke(<generated command i>, name=e..., **e)
     ["for", name, e, body]        for name in e: body (no break/continue/else)
 
@@ -53,6 +54,8 @@ FUNCTIONS = {
     "base64.b64encode": "b64encode",
     "json_skeleton_utils.remove_json_skeleton_params_from_dict": "removeSkeleton",
 }
+# Exceptions a wrapper raises that cli_util.wrap_exceptions renders (ticket 18).
+RAISABLE = {"ValueError", "KeyError", "Exception", "RequiredValueNotInDefaultOrUserInputError"}
 CMP = {
     ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=",
     ast.Is: "is", ast.IsNot: "isnot", ast.In: "in", ast.NotIn: "notin",
@@ -131,6 +134,12 @@ class Compiler:
                 and isinstance(exc.args[0].value, str)
             ):
                 return [["usage", exc.args[0].value]]
+            cls = (_dotted(exc.func) or "").rsplit(".", 1)[-1] if isinstance(exc, ast.Call) else ""
+            if cls in RAISABLE and len(exc.args) == 1 and not exc.keywords:
+                try:
+                    return [["raise", ast.unparse(st), cls, self.expr(exc.args[0], scope)]]
+                except Unsupported:
+                    pass
             return [["raise", ast.unparse(st)]]
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Call):
             call = st.value

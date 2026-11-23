@@ -57,6 +57,7 @@ import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState } from "./waiter.ts";
 import {
   ProgramFile,
+  ProgramRaise,
   ProgramUnsupported,
   ProgramUsageError,
   runProgram,
@@ -828,6 +829,16 @@ function runWrapper(
     };
   } catch (e) {
     if (e instanceof ProgramUnsupported) return "unsupported";
+    if (e instanceof ProgramRaise) {
+      // cli_util.wrap_exceptions: sys.exit(...) → stderr, exit 1.
+      if (!program.wrapExceptions) return "unsupported";
+      io.err(
+        e.cls === "RequiredValueNotInDefaultOrUserInputError"
+          ? `${usageText()}\n\nError: ${e.message}\n`
+          : `${e.cls}: ${e.message}\n`,
+      );
+      throw new Exit(1);
+    }
     if (!(e instanceof ProgramUsageError)) throw e;
     if (!program.wrapExceptions) showPatched(io, usageText(), e.message);
     io.err(`UsageError: ${e.message}\n`);

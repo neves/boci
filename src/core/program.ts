@@ -6,12 +6,26 @@
  */
 import type { TypedParam } from "./convert.ts";
 import { kwarg, truthy } from "./checks.ts";
+import { pyRepr } from "./convert.ts";
 
 export type Expr = null | boolean | number | string | Expr[];
 export type Statement = (string | Expr | Statement[])[];
 
 /** `raise click.UsageError(message)` in the wrapper. */
 export class ProgramUsageError extends Error {}
+
+/**
+ * `raise cls(message)` in the wrapper, for an exception class cli_util.wrap_exceptions
+ * renders; `message` is what Python's `str()` gives the exception.
+ */
+export class ProgramRaise extends Error {
+  constructor(
+    readonly cls: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}
 
 /** The wrapper took a path the Engine does not model (another exception, a TypeError). */
 export class ProgramUnsupported extends Error {}
@@ -428,8 +442,13 @@ export function runProgram(
           break;
         case "usage":
           throw new ProgramUsageError(rest[0] as string);
-        case "raise":
-          throw new ProgramUnsupported(rest[0] as string);
+        case "raise": {
+          if (rest.length < 3) throw new ProgramUnsupported(rest[0] as string);
+          const cls = rest[1] as string;
+          const arg = pyStr(evaluate(rest[2] as Expr));
+          // str(KeyError(x)) is repr(x).
+          throw new ProgramRaise(cls, cls === "KeyError" ? pyRepr(arg) : arg);
+        }
         case "invoke": {
           if (invoked) throw new ProgramUnsupported("second invoke");
           const star = rest[1] === null ? {} : evaluate(rest[1] as Expr);

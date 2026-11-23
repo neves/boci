@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { TypedParam } from "../../src/core/convert.ts";
 import {
   ProgramFile,
+  ProgramRaise,
   ProgramUnsupported,
   ProgramUsageError,
   runProgram,
@@ -69,6 +70,24 @@ describe("runProgram", () => {
       a: "{}",
       p: {},
     });
+  });
+
+  test("raises other exceptions with the text Python's str() gives them", () => {
+    const raised = (cls: string, message: Expr) => {
+      try {
+        runProgram([["raise", "src", cls, message]], {}, params, parse);
+      } catch (e) {
+        return e instanceof ProgramRaise ? [e.cls, e.message] : e;
+      }
+    };
+    expect(raised("ValueError", "type doesn't match")).toEqual([
+      "ValueError",
+      "type doesn't match",
+    ]);
+    expect(raised("KeyError", "protocol is missing.")).toEqual([
+      "KeyError",
+      "'protocol is missing.'",
+    ]);
   });
 
   test("raises usage errors, and stops on paths it does not model", () => {

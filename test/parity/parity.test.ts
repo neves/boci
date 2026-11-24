@@ -193,7 +193,7 @@ async function runParityCase(c: (typeof cases)[number]) {
     for (const [name, value] of Object.entries(want.requestHeaders ?? {}))
       expect(run.requests[0]?.headers[name]).toBe(value);
     for (const [rel, content] of Object.entries(want.files ?? {}))
-      expect(run.files?.[rel]).toBe(content);
+      expect(run.files?.[rel] ?? null).toBe(content);
     for (const [rel, mode] of Object.entries(want.fileModes ?? {}))
       expect(run.fileModes?.[rel]).toBe(mode);
     if (want.golden === false) {

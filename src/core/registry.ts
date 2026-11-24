@@ -189,6 +189,46 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
     },
   ],
   [
+    "profile list",
+    async (ctx) => {
+      const { runProfileList } =
+        await import("../commands/profile/inspection.ts");
+      await runProfileList(ctx);
+    },
+  ],
+  [
+    "profile diagnose",
+    async (ctx) => {
+      const { runProfileDiagnose } =
+        await import("../commands/profile/inspection.ts");
+      await runProfileDiagnose(ctx);
+    },
+  ],
+  [
+    "session terminate",
+    async (ctx) => {
+      const { runSessionTerminate } =
+        await import("../commands/session/terminate.ts");
+      await runSessionTerminate(ctx);
+    },
+  ],
+  [
+    "setup find-installations",
+    async (ctx) => {
+      const { runFindInstallations } =
+        await import("../commands/setup/find_installations.ts");
+      await runFindInstallations(ctx);
+    },
+  ],
+  [
+    "setup oci-cli-rc",
+    async (ctx) => {
+      const { runSetupOciCliRc } =
+        await import("../commands/setup/oci_cli_rc.ts");
+      await runSetupOciCliRc(ctx);
+    },
+  ],
+  [
     "profile current",
     async (ctx) => {
       const { runProfileCurrent } = await import("../commands/profile.ts");

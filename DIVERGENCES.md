@@ -130,3 +130,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** prints response header names in lowercase (e.g. `"content-type"`, `"content-length"`, `"date"`)
 - **Why:** HTTP header names are case-insensitive per RFC 9110 and WHATWG `fetch()` normalizes `Response.headers` keys to lowercase; HTTP/2 servers already send lowercase keys on the wire. Normalized in `test/harness/masks.ts`.
 - **State:** accepted
+
+### `setup oci-cli-rc` omits Python stack frames for a missing parent path
+
+- **Invocation:** `oci setup oci-cli-rc --file -` or `oci setup oci-cli-rc --file missing.rc` when the bare filename does not exist
+- **Reference CLI:** exits 1 with a Python traceback ending in `FileNotFoundError: [Errno 2] No such file or directory: ''`
+- **boci:** prints the same exception line and exits 1
+- **Why:** the preceding frames describe the Python and Click implementation and include local interpreter paths
+- **State:** accepted

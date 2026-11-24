@@ -57,8 +57,8 @@ export type CaseExpectations = {
   requests?: number;
   /** Headers expected on the first captured request. */
   requestHeaders?: Record<string, string>;
-  /** Expected contents of files written relative to the sandbox HOME. */
-  files?: Record<string, string>;
+  /** Expected contents of files relative to the sandbox HOME, or null for a missing file. */
+  files?: Record<string, string | null>;
   /** Expected Unix mode bits (e.g. 0o600 = 384) of files relative to the sandbox HOME. */
   fileModes?: Record<string, number>;
 };

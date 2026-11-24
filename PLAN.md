@@ -297,8 +297,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `os object restore`
 - [x] `os object restore-status`
 - [x] `os retention-rule update`
-- [ ] `profile diagnose`
-- [ ] `profile list`
+- [x] `profile diagnose`
+- [x] `profile list`
 - [x] `rover create-master-key-policy`
 - [x] `rover device data-sync task cancel`
 - [x] `rover device data-sync task get`
@@ -351,11 +351,11 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `rover station-cluster set-secrets`
 - [x] `rover station-cluster show`
 - [x] `rover station-cluster update`
-- [ ] `session terminate`
+- [x] `session terminate`
 - [ ] `setup bootstrap`
-- [ ] `setup find-installations`
+- [x] `setup find-installations`
 - [ ] `setup instance-principal`
-- [ ] `setup oci-cli-rc`
+- [x] `setup oci-cli-rc`
 - [ ] `setup pkcs11-auth`
 - [x] `support incident put-attachment`
 - [x] `waas policy-config update`

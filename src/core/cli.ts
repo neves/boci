@@ -12,6 +12,7 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
+import { open } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { checkFileAccessibility } from "../lib/accessibility.ts";
 import { isZipBuffer } from "../utils/zip.ts";
@@ -67,6 +68,7 @@ import {
   type OutputFileHandle,
   openClickFileForWrite,
   openClickFileForProgram,
+  osErrorReason,
   validateClickFileForRead,
   validateOsNamespace,
 } from "./click-file.ts";
@@ -640,7 +642,34 @@ async function main(io: Invocation): Promise<void> {
       if (!isMissing(values[p.name] ?? parsed.opts[p.name])) continue;
       const rcVal = lookupDefault(defaults, rc, path, p);
       if (rcVal !== undefined && rcVal !== null) {
-        values[p.name] = convertDefaultValue(io.env, p, rcVal, index.datetime);
+        if (name === "setup" && key === "oci-cli-rc" && p.name === "file") {
+          if (!rcVal) continue;
+          // The rc-supplied Click file is eager, unlike the explicit --file.
+          const file = expandUser(expandVars(rcVal, io.env), io.env);
+          if (file === "-")
+            showPatched(
+              io,
+              usage(io, commandPath, cmd.helpDoc),
+              "This command does not support writing data to stdout",
+            );
+          try {
+            await using handle = await open(resolve(io.cwd, file), "a+");
+          } catch (e) {
+            showPatched(
+              io,
+              usage(io, commandPath, cmd.helpDoc),
+              `Invalid value for ${errorHint(p)}: ${pyRepr(file)}: ${osErrorReason(e)}`,
+            );
+          }
+          values[p.name] = file;
+        } else {
+          values[p.name] = convertDefaultValue(
+            io.env,
+            p,
+            rcVal,
+            index.datetime,
+          );
+        }
         continue;
       }
       if (p.required && !p.isFlag) missing.push(p.name.replaceAll("_", "-"));

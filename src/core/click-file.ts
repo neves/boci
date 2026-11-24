@@ -32,7 +32,7 @@ const ERRNO_MESSAGES: Record<string, string> = {
   ENAMETOOLONG: "File name too long",
 };
 
-function osErrorReason(err: unknown): string {
+export function osErrorReason(err: unknown): string {
   const e = err as NodeJS.ErrnoException | null;
   if (e?.code && ERRNO_MESSAGES[e.code])
     return ERRNO_MESSAGES[e.code] as string;

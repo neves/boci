@@ -1,0 +1,258 @@
+[
+  {
+    "id": "local-cli-profile-list-inheritance",
+    "key": "profile list",
+    "argv": ["--profile", "Lab", "profile", "list"],
+    "config": "[Lab]\nregion=us-phoenix-1\nsecurity_token_file=missing\n[Other]\ndelegation_token_file=~/.oci/key.pem\n"
+  },
+  {
+    "id": "local-cli-profile-list-missing",
+    "key": "profile list",
+    "argv": ["--config-file", "missing.ini", "profile", "list"]
+  },
+  {
+    "id": "local-cli-profile-list-empty-default",
+    "key": "profile list",
+    "argv": ["--config-file", "profiles.ini", "profile", "list"],
+    "sandbox": {
+      "files": {
+        "profiles.ini": "[DEFAULT]\n[Empty]\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-profile-diagnose-healthy",
+    "key": "profile diagnose",
+    "argv": ["profile", "diagnose"]
+  },
+  {
+    "id": "local-cli-profile-diagnose-missing-profile",
+    "key": "profile diagnose",
+    "argv": [
+      "--profile",
+      "Missing",
+      "--region",
+      "us-phoenix-1",
+      "profile",
+      "diagnose"
+    ]
+  },
+  {
+    "id": "local-cli-profile-diagnose-overrides",
+    "key": "profile diagnose",
+    "argv": ["--profile", "Lab", "profile", "diagnose"],
+    "config": "[Lab]\nsecurity_token_file=missing\ndelegation_token_file=also-missing\n",
+    "env": {
+      "OCI_CLI_REGION": "us-phoenix-1",
+      "OCI_CLI_AUTH": "security_token"
+    }
+  },
+  {
+    "id": "local-cli-profile-diagnose-fallback",
+    "key": "profile diagnose",
+    "argv": ["profile", "diagnose"],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oraclebmc/config": "[DEFAULT]\nregion=us-phoenix-1\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-profile-diagnose-malformed",
+    "key": "profile diagnose",
+    "argv": ["--config-file", "bad.ini", "profile", "diagnose"],
+    "sandbox": {
+      "files": {
+        "bad.ini": "outside=section\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-session-terminate-remove",
+    "key": "session terminate",
+    "argv": [
+      "--config-file",
+      "sessions.ini",
+      "--profile",
+      "Lab",
+      "session",
+      "terminate"
+    ],
+    "sandbox": {
+      "files": {
+        "sessions.ini": "# comment\n[DEFAULT]\nregion=us-ashburn-1\n[Lab]\nsecurity_token_file=token\n[Other]\nregion=us-phoenix-1\n",
+        ".oci/sessions/Lab/token": "fake",
+        "token": "outside"
+      }
+    },
+    "expect": {
+      "files": {
+        "sessions.ini": "[DEFAULT]\nregion = us-ashburn-1\n\n[Other]\nregion = us-phoenix-1\n\n",
+        "token": "outside",
+        ".oci/sessions/Lab/token": null
+      }
+    }
+  },
+  {
+    "id": "local-cli-session-terminate-no-token",
+    "key": "session terminate",
+    "argv": ["session", "terminate"]
+  },
+  {
+    "id": "local-cli-session-terminate-default-protected",
+    "key": "session terminate",
+    "argv": ["--config-file", "sessions.ini", "session", "terminate"],
+    "sandbox": {
+      "files": {
+        "sessions.ini": "[DEFAULT]\nsecurity_token_file=token\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-session-terminate-missing-profile",
+    "key": "session terminate",
+    "argv": ["--profile", "Missing", "session", "terminate"]
+  },
+  {
+    "id": "local-cli-setup-find-installations-empty",
+    "key": "setup find-installations",
+    "argv": ["setup", "find-installations"],
+    "env": {
+      "PATH": "{home}/empty"
+    }
+  },
+  {
+    "id": "local-cli-setup-find-installations-found",
+    "key": "setup find-installations",
+    "argv": ["setup", "find-installations"],
+    "env": {
+      "PATH": "{home}/bin"
+    },
+    "sandbox": {
+      "files": {
+        "lib/oracle-cli/installed": "",
+        "bin/nested/oci": "",
+        "bin/brew": "#!/bin/sh\ncase \"$1\" in\nlist) echo oci-cli;;\n--cellar) echo /cellar/oci-cli;;\n--prefix) echo /prefix/oci-cli;;\nesac\n",
+        "bin/yum": "#!/bin/sh\necho python39-oci-cli\n",
+        "bin/pip3": "#!/bin/sh\necho \"Location: /pip/site-packages\"\n"
+      },
+      "fileModes": {
+        "bin/brew": 448,
+        "bin/yum": 448,
+        "bin/pip3": 448
+      }
+    }
+  },
+  {
+    "id": "local-cli-setup-oci-cli-rc-default",
+    "key": "setup oci-cli-rc",
+    "argv": ["setup", "oci-cli-rc"],
+    "expect": {
+      "files": {
+        ".oci/oci_cli_rc": "\n\n\n[OCI_CLI_CANNED_QUERIES]\n# For list results, this gets the ID and display-name of each item in the list. Note that when the names of attirbutes have\n# dashes in them they need to be surrounded with double quotes. This query knows to look for a list because of the\n# [*] syntax\nget_id_and_display_name_from_list=data[*].{id: id, \"display-name\": \"display-name\"}\n\nget_id_and_display_name_from_single_result=data.{id: id, \"display-name\": \"display-name\"}\n\n# Retrieves a comma separated string, for example:\n#     ocid1.instance.oc1.phx.xyz....,cli_test_instance_675195,RUNNING\nget_id_display_name_and_lifecycle_state_from_single_result_as_csv=data.[id, \"display-name\", \"lifecycle-state\"] | join(`,`, @)\n\n# Retrieves comma separated strings from a list of results\nget_id_display_name_and_lifecycle_state_from_list_as_csv=data[*].[join(`,`, [id, \"display-name\", \"lifecycle-state\"])][]\n\n# Filters where the display name contains some text\nfilter_by_display_name_contains_text=data[?contains(\"display-name\", `your_text_here`)]\n\n# Filters where the display name contains some text and pull out certain attributes(id and time-created)\nfilter_by_display_name_contains_text_and_get_attributes=data[?contains(\"display-name\", `your_text_here`)].{id: id, timeCreated: \"time-created\"}\n\n# Get the top 5 results from a list operation\nget_top_5_results=data[:5]\n\n# Get the last 2 results from a list operation\nget_last_2_results=data[-2:]\n\n# List instance public IPs from list vnics response\n# Example: oci compute instance list-vnics --instance-id $I --query query://list_public_ips\nlist_public_ips=data[?\"public-ip\" != null].\"public-ip\"\n\n# Get first public IP from list vnics response\n# Example: oci compute instance list-vnics --instance-id $I --query query://get_public_ip\nget_public_ip=data[?\"public-ip\" != null].\"public-ip\" | [0]\n\n\n\n[OCI_CLI_COMMAND_ALIASES]\n# This lets you use \"ls\" instead of \"list\" for any list command in the CLI\nls = list\n\n# This lets you do \"oci os object rm\" rather than \"oci os object delete\". This is an example of a \"command sequence alias\", where the alias on the left\n# hand side only applies when the command sequence on the right hand side is invoked. You can think of these as being of the form:\n#    <alias> = <dot-separated sequence of groups and sub-groups>.<command or group to alias>\n#\n# So in our example, <alias> = rm, <sequence of groups and sub-groups> = os object, <command or group to alias> = delete\nrm = os.object.delete\n\n\n\n[OCI_CLI_PARAM_ALIASES]\n# Parameter aliases either need to start with a double dash (--) or be a single dash (-) followed by a single letter. For example: --foo, -f\n--ad = --availability-domain\n--dn = --display-name\n--egress-rules = --egress-security-rules\n--ingress-rules = --ingress-security-rules\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-setup-oci-cli-rc-new",
+    "key": "setup oci-cli-rc",
+    "argv": ["setup", "oci-cli-rc", "--file", "{home}/nested/rc"],
+    "expect": {
+      "files": {
+        "nested/rc": "\n\n\n[OCI_CLI_CANNED_QUERIES]\n# For list results, this gets the ID and display-name of each item in the list. Note that when the names of attirbutes have\n# dashes in them they need to be surrounded with double quotes. This query knows to look for a list because of the\n# [*] syntax\nget_id_and_display_name_from_list=data[*].{id: id, \"display-name\": \"display-name\"}\n\nget_id_and_display_name_from_single_result=data.{id: id, \"display-name\": \"display-name\"}\n\n# Retrieves a comma separated string, for example:\n#     ocid1.instance.oc1.phx.xyz....,cli_test_instance_675195,RUNNING\nget_id_display_name_and_lifecycle_state_from_single_result_as_csv=data.[id, \"display-name\", \"lifecycle-state\"] | join(`,`, @)\n\n# Retrieves comma separated strings from a list of results\nget_id_display_name_and_lifecycle_state_from_list_as_csv=data[*].[join(`,`, [id, \"display-name\", \"lifecycle-state\"])][]\n\n# Filters where the display name contains some text\nfilter_by_display_name_contains_text=data[?contains(\"display-name\", `your_text_here`)]\n\n# Filters where the display name contains some text and pull out certain attributes(id and time-created)\nfilter_by_display_name_contains_text_and_get_attributes=data[?contains(\"display-name\", `your_text_here`)].{id: id, timeCreated: \"time-created\"}\n\n# Get the top 5 results from a list operation\nget_top_5_results=data[:5]\n\n# Get the last 2 results from a list operation\nget_last_2_results=data[-2:]\n\n# List instance public IPs from list vnics response\n# Example: oci compute instance list-vnics --instance-id $I --query query://list_public_ips\nlist_public_ips=data[?\"public-ip\" != null].\"public-ip\"\n\n# Get first public IP from list vnics response\n# Example: oci compute instance list-vnics --instance-id $I --query query://get_public_ip\nget_public_ip=data[?\"public-ip\" != null].\"public-ip\" | [0]\n\n\n\n[OCI_CLI_COMMAND_ALIASES]\n# This lets you use \"ls\" instead of \"list\" for any list command in the CLI\nls = list\n\n# This lets you do \"oci os object rm\" rather than \"oci os object delete\". This is an example of a \"command sequence alias\", where the alias on the left\n# hand side only applies when the command sequence on the right hand side is invoked. You can think of these as being of the form:\n#    <alias> = <dot-separated sequence of groups and sub-groups>.<command or group to alias>\n#\n# So in our example, <alias> = rm, <sequence of groups and sub-groups> = os object, <command or group to alias> = delete\nrm = os.object.delete\n\n\n\n[OCI_CLI_PARAM_ALIASES]\n# Parameter aliases either need to start with a double dash (--) or be a single dash (-) followed by a single letter. For example: --foo, -f\n--ad = --availability-domain\n--dn = --display-name\n--egress-rules = --egress-security-rules\n--ingress-rules = --ingress-security-rules\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-setup-oci-cli-rc-existing",
+    "key": "setup oci-cli-rc",
+    "argv": ["setup", "oci-cli-rc", "--file", "existing.rc"],
+    "sandbox": {
+      "files": {
+        "existing.rc": "[OCI_CLI_CANNED_QUERIES]\ncustom=data\n[OCI_CLI_COMMAND_ALIASES]\n[OCI_CLI_PARAM_ALIASES]\n"
+      }
+    },
+    "expect": {
+      "files": {
+        "existing.rc": "[OCI_CLI_CANNED_QUERIES]\ncustom=data\n[OCI_CLI_COMMAND_ALIASES]\n[OCI_CLI_PARAM_ALIASES]\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-setup-oci-cli-rc-stdout",
+    "key": "setup oci-cli-rc",
+    "argv": ["setup", "oci-cli-rc", "--file", "-"],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stderrContains": "No such file or directory"
+    }
+  },
+  {
+    "id": "local-cli-setup-oci-cli-rc-relative-missing",
+    "key": "setup oci-cli-rc",
+    "argv": ["setup", "oci-cli-rc", "--file", "missing.rc"],
+    "expect": {
+      "golden": false,
+      "exitCode": 1,
+      "stderrContains": "No such file or directory"
+    }
+  },
+  {
+    "id": "local-cli-setup-oci-cli-rc-rc-default",
+    "key": "setup oci-cli-rc",
+    "argv": ["--cli-rc-file", "defaults.rc", "setup", "oci-cli-rc"],
+    "sandbox": {
+      "files": {
+        "defaults.rc": "[DEFAULT]\nsetup.oci-cli-rc.file=~/custom/rc\n"
+      }
+    }
+  },
+  {
+    "id": "local-cli-profile-list-query",
+    "key": "profile list",
+    "argv": ["--query", "data[0].name", "--raw-output", "profile", "list"]
+  },
+  {
+    "id": "local-cli-session-terminate-env-token",
+    "key": "session terminate",
+    "argv": [
+      "--config-file",
+      "sessions.ini",
+      "--profile",
+      "Lab",
+      "session",
+      "terminate"
+    ],
+    "sandbox": {
+      "files": {
+        "sessions.ini": "[Lab]\nregion=us-ashburn-1\n"
+      }
+    },
+    "env": {
+      "OCI_CLI_SECURITY_TOKEN_FILE": "outside-token"
+    },
+    "expect": {
+      "files": {
+        "sessions.ini": ""
+      }
+    }
+  },
+  {
+    "id": "local-cli-setup-oci-cli-rc-rc-default-existing-parent",
+    "key": "setup oci-cli-rc",
+    "argv": ["--cli-rc-file", "defaults.rc", "setup", "oci-cli-rc"],
+    "sandbox": {
+      "files": {
+        "defaults.rc": "[DEFAULT]\nsetup.oci-cli-rc.file=~/custom/rc\n",
+        "custom/.keep": ""
+      }
+    },
+    "expect": {
+      "files": {
+        "custom/rc": "\n\n\n[OCI_CLI_CANNED_QUERIES]\n# For list results, this gets the ID and display-name of each item in the list. Note that when the names of attirbutes have\n# dashes in them they need to be surrounded with double quotes. This query knows to look for a list because of the\n# [*] syntax\nget_id_and_display_name_from_list=data[*].{id: id, \"display-name\": \"display-name\"}\n\nget_id_and_display_name_from_single_result=data.{id: id, \"display-name\": \"display-name\"}\n\n# Retrieves a comma separated string, for example:\n#     ocid1.instance.oc1.phx.xyz....,cli_test_instance_675195,RUNNING\nget_id_display_name_and_lifecycle_state_from_single_result_as_csv=data.[id, \"display-name\", \"lifecycle-state\"] | join(`,`, @)\n\n# Retrieves comma separated strings from a list of results\nget_id_display_name_and_lifecycle_state_from_list_as_csv=data[*].[join(`,`, [id, \"display-name\", \"lifecycle-state\"])][]\n\n# Filters where the display name contains some text\nfilter_by_display_name_contains_text=data[?contains(\"display-name\", `your_text_here`)]\n\n# Filters where the display name contains some text and pull out certain attributes(id and time-created)\nfilter_by_display_name_contains_text_and_get_attributes=data[?contains(\"display-name\", `your_text_here`)].{id: id, timeCreated: \"time-created\"}\n\n# Get the top 5 results from a list operation\nget_top_5_results=data[:5]\n\n# Get the last 2 results from a list operation\nget_last_2_results=data[-2:]\n\n# List instance public IPs from list vnics response\n# Example: oci compute instance list-vnics --instance-id $I --query query://list_public_ips\nlist_public_ips=data[?\"public-ip\" != null].\"public-ip\"\n\n# Get first public IP from list vnics response\n# Example: oci compute instance list-vnics --instance-id $I --query query://get_public_ip\nget_public_ip=data[?\"public-ip\" != null].\"public-ip\" | [0]\n\n\n\n[OCI_CLI_COMMAND_ALIASES]\n# This lets you use \"ls\" instead of \"list\" for any list command in the CLI\nls = list\n\n# This lets you do \"oci os object rm\" rather than \"oci os object delete\". This is an example of a \"command sequence alias\", where the alias on the left\n# hand side only applies when the command sequence on the right hand side is invoked. You can think of these as being of the form:\n#    <alias> = <dot-separated sequence of groups and sub-groups>.<command or group to alias>\n#\n# So in our example, <alias> = rm, <sequence of groups and sub-groups> = os object, <command or group to alias> = delete\nrm = os.object.delete\n\n\n\n[OCI_CLI_PARAM_ALIASES]\n# Parameter aliases either need to start with a double dash (--) or be a single dash (-) followed by a single letter. For example: --foo, -f\n--ad = --availability-domain\n--dn = --display-name\n--egress-rules = --egress-security-rules\n--ingress-rules = --ingress-security-rules\n"
+      }
+    }
+  }
+]

@@ -49,6 +49,46 @@ describe("scaffold-lib", () => {
     );
   });
 
+  test("renderCommandFile flags arguments and calls the wrapper builds itself", () => {
+    const op = (method: string, extra: Record<string, unknown> = {}) => ({
+      client: "identity.identity",
+      method,
+      line: 1,
+      operation: {
+        client: "identity.identity",
+        method,
+        http: "POST",
+        path: "/x",
+        queryParams: {},
+        ...extra,
+      },
+    });
+    const out = renderCommandFile(
+      {
+        key: "iam group add-user",
+        helpers: ["cli_util.list_call_get_all_results"],
+        sdkCalls: [
+          op("add_user_to_group", {
+            body: "add_user_to_group_details",
+            pathParams: { groupId: "group_id" },
+          }),
+          op("get_user"),
+        ],
+      },
+      [{ name: "group_id" }, { name: "user_id" }],
+    );
+    expect(out).toContain(
+      "// TODO: the wrapper builds add_user_to_group_details itself",
+    );
+    expect(out).not.toContain("builds group_id");
+    expect(out).toContain(
+      "// TODO: port the remaining calls: getUserOperation",
+    );
+    // A non-list first call is not rendered as a list, whatever helpers appear.
+    expect(out).toContain("runOperation(");
+    expect(out).not.toContain("renderListPages");
+  });
+
   test("registerCustomHandler is idempotent", () => {
     const base = `export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([\n]);\n`;
     const first = registerCustomHandler(

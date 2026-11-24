@@ -18,13 +18,11 @@ export type SpecParam = {
  * Render a starter Custom command file from its Reference CLI triage metadata.
  * Pre-fills every extracted SDK OperationSpec so the author only writes the wrapper logic.
  */
-export function renderCommandFile(t: Triage): string {
+export function renderCommandFile(t: Triage, params?: SpecParam[]): string {
   const { path, fn } = scaffoldNames(t.key);
   const ops = (t.sdkCalls ?? []).filter((c) => c.operation);
   const firstOp = ops[0];
-  const isList =
-    firstOp?.method.startsWith("list_") ||
-    (t.helpers ?? []).some((h) => h.includes("list_call_get_"));
+  const isList = firstOp?.method.startsWith("list_") ?? false;
 
   const lines: string[] = [];
   if (t.source) {
@@ -72,6 +70,18 @@ export function renderCommandFile(t: Triage): string {
   }
   if (firstOp) {
     const constName = operationConst(firstOp.method);
+    const unbound = params ? unboundArgs(firstOp.operation!, params) : [];
+    if (unbound.length)
+      lines.push(
+        `  // TODO: the wrapper builds ${unbound.join(", ")} itself; these aren't options of the command.`,
+      );
+    if (ops.length > 1)
+      lines.push(
+        `  // TODO: port the remaining calls: ${ops
+          .slice(1)
+          .map((c) => operationConst(c.method))
+          .join(", ")}.`,
+      );
     if (isList) {
       lines.push(
         `  const command = sdkCommand(ctx, ${JSON.stringify(path)}, ${constName});`,
@@ -92,6 +102,23 @@ export function renderCommandFile(t: Triage): string {
   }
   lines.push(`}`, "");
   return lines.join("\n");
+}
+
+/** The body and path arguments an operation reads that the command has no option for. */
+function unboundArgs(
+  operation: Record<string, unknown>,
+  params: SpecParam[],
+): string[] {
+  const names = new Set(params.map((p) => p.name));
+  const args = [
+    operation.body,
+    ...Object.values((operation.pathParams ?? {}) as Record<string, unknown>),
+  ];
+  return [
+    ...new Set(
+      args.filter((a): a is string => typeof a === "string" && !names.has(a)),
+    ),
+  ];
 }
 
 /**

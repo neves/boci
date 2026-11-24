@@ -42,7 +42,7 @@ const [info] = await cachedTriage([key]);
 if (!info || info.error) throw new Error(info?.error ?? "No triage result");
 const params = (specCmd?.params ?? []) as SpecParam[];
 
-const commandSource = renderCommandFile(info);
+const commandSource = renderCommandFile(info, params);
 const caseSource = renderParityCase(
   key,
   params,

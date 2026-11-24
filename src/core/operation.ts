@@ -1,3 +1,4 @@
+import { fetchTransportFromEnv } from "./transport.ts";
 // The API operation behind a Generated command: parameter values in, the service's response
 // out. Config and key loading, endpoint resolution, the request (path, query, headers, body
 // bindings), signing, timeouts, retries and --all pagination all live here, in the order
@@ -6,6 +7,7 @@ import {
   ConnectionPhaseTimeout,
   connectionErrorReport,
   isConnectionError,
+  isCertificateError,
   fetchWithConnectionTimeout,
 } from "./connection-timeout.ts";
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -755,7 +757,10 @@ export async function sendServiceRequest(
       };
       response =
         sc.connectionTimeout === undefined
-          ? await fetch(req.url, init)
+          ? await fetch(req.url, {
+              ...init,
+              ...fetchTransportFromEnv(req.url, io.env, io.cwd),
+            })
           : await fetchWithConnectionTimeout(
               io,
               url,
@@ -776,6 +781,10 @@ export async function sendServiceRequest(
         if (sc.rootValues.debug !== true) {
           if (e instanceof ConnectionPhaseTimeout) {
             io.err(e.report());
+            throw new Exit(1);
+          }
+          if (isCertificateError(e)) {
+            io.err(connectionErrorReport("SSLException", req.method, url));
             throw new Exit(1);
           }
           if (isConnectionError(e)) {

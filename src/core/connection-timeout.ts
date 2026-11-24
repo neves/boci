@@ -41,25 +41,31 @@ const invocationAgents = new WeakMap<
  * RequestException (refused, reset, DNS, proxy and TLS-handshake failures) or ConnectTimeout.
  */
 export function connectionErrorReport(
-  kind: "RequestException" | "ConnectTimeout",
+  kind: "RequestException" | "ConnectTimeout" | "SSLException",
   method: string,
   url: URL,
 ): string {
-  const handshake = kind === "RequestException";
+  const handshake = kind !== "ConnectTimeout";
   // cli_util.get_request_endpoint_from_exception_string splits at the last "/n".
   const endpoint = url.href.split("?")[0]!;
   const cut = endpoint.lastIndexOf("/n");
   const curl = handshake && cut >= 0 ? endpoint.slice(0, cut) : undefined;
-  const tips = handshake
-    ? curl
-      ? `Try running curl ${curl}. If the curl doesn't work, check your network setting or contact your network administrator. If it does work, verify the resource state before retrying.`
-      : "Verify the resource state before retrying."
-    : "It looks like a connection timeout. Verify the resource state before retrying, then check your network setting or contact your network administrator.";
+  const tips =
+    kind === "SSLException"
+      ? "If you have a root certificate, either use --cert-bundle <path_to_cert_bundle_file> with CLI command or set REQUESTS_CA_BUNDLE env variable. i.e export REQUESTS_CA_BUNDLE=path_to_cert_bundle_file on POSIX-compliant bash-like shell terminal."
+      : handshake
+        ? curl
+          ? `Try running curl ${curl}. If the curl doesn't work, check your network setting or contact your network administrator. If it does work, verify the resource state before retrying.`
+          : "Verify the resource state before retrying."
+        : "It looks like a connection timeout. Verify the resource state before retrying, then check your network setting or contact your network administrator.";
   const details = {
     client_version: `Oracle-PythonCLI/${REFERENCE_VERSION}`,
     logging_tips:
       "Please run the OCI CLI command using --debug flag to find more debug information.",
-    message: `The request timed out${curl ? ` while trying to reach ${curl}` : ""}. The request may have reached the service and the operation may have completed. Verify the resource state before retrying.`,
+    message:
+      kind === "SSLException"
+        ? "It looks like you are missing some additional certificates for operation. run 'curl request_endpoint' to make sure you are able to call endpoint using curl."
+        : `The request timed out${curl ? ` while trying to reach ${curl}` : ""}. The request may have reached the service and the operation may have completed. Verify the resource state before retrying.`,
     ...(handshake
       ? { request_endpoint: curl ? ` ${method} ${curl}` : null }
       : {}),
@@ -70,6 +76,15 @@ export function connectionErrorReport(
       " See [https://docs.oracle.com/iaas/Content/API/SDKDocs/clitroubleshooting.htm] for more information about resolving this error. If you are unable to resolve this issue, run this CLI command with --debug option and contact Oracle support and provide them the full error message.",
   };
   return `${kind}:\n${JSON.stringify(details, null, 4)}\n`;
+}
+
+/** TLS peer verification errors from Bun.fetch and node:https. */
+export function isCertificateError(e: unknown): boolean {
+  if (!(e instanceof Error) || !("code" in e) || typeof e.code !== "string")
+    return false;
+  return /CERT|SELF_SIGNED|UNABLE_TO_VERIFY|UNABLE_TO_GET_ISSUER|INVALID_CA/.test(
+    e.code,
+  );
 }
 
 /**

@@ -377,3 +377,17 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `os object bulk-delete-versions`
 - [x] `rover device system-upgrade import-bundle`
 - [x] `rover device system-upgrade upload-bundle`
+
+## Rung 9 — Differential fuzzing
+
+`bun run fuzz` (scripts/fuzz.ts) runs random spec-valid invocations through both CLIs against random model-shaped replies. Per item: reproduce with the seed and command given, `--promote` the mismatches into `test/parity/cases/fuzz-found.json` (goldens included), make them pass, and fix by cause, not per command. Findings from `bun run fuzz --limit 300 --seed 42`.
+
+- [ ] Fuzz: hangs. boci runs past 60 s where oci returns (e.g. `network vcn topology get`, `network vcn patch`, `identity-domains my-smtp-credential delete`, `opsi database-insights update-mds-my-sql-database`; seed 42).
+- [ ] Fuzz: SDK model deserialisation. Unknown enum values print as `UNKNOWN_ENUM_VALUE`; datetimes keep microseconds (`.123000+00:00`); unknown response fields are dropped; nulls and polymorphic subtypes print like the SDK.
+- [ ] Fuzz: service error output. `TransientServiceError` for 429/5xx, response headers (`etag`, `opc-work-request-id`, …) in the error body, non-JSON error bodies.
+- [ ] Fuzz: invalid `--query`. JMESPath `ParseError` message and exit 1 instead of a JavaScript stack trace or exit 0.
+- [ ] Fuzz: `--query` results with `--output table` and `--raw-output` (e.g. `length(data)` with `--output table` fails in oci with `TypeError`).
+- [ ] Fuzz: command validation rules (e.g. `bv volume list --sort-by` without `--availability-domain`; `--all` with `--limit`; confirmation `Abort:` on wrapper commands).
+- [ ] Fuzz: request encoding of unusual values (non-latin-1 header values make oci fail with `UnicodeEncodeError`; empty strings, `&`/`?`/`/` in path and query values; repeated `multiple` options).
+- [ ] Fuzz: option values starting with `-` parse as Click short-option clusters (e.g. `--compartment-id -leading-dash` enters interactive mode in oci). Re-add `-leading-dash` to the TEXT pool in scripts/fuzz-lib.ts.
+- [ ] Fuzz: full sweep. `bun run fuzz` over every command with `--iterations 3`; split what remains into items by cause.

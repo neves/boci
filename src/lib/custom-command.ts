@@ -6,11 +6,16 @@ import {
   type GeneratedCommand,
   type OperationResult,
 } from "../core/operation.ts";
-import { printResult, type OutputOptions } from "../core/output.ts";
+import {
+  printResult,
+  renderModel,
+  type OutputOptions,
+} from "../core/output.ts";
 import type { CustomCommandContext } from "../core/registry.ts";
 import { loadService, type OperationSpec } from "../core/spec.ts";
 import { waitForState } from "../core/waiter.ts";
 import { parseJsonBody } from "../utils/parseJsonBody.ts";
+import { Exit } from "./io.ts";
 
 /** The root --query/--output/--raw-output options `cli_util.render_response` honors. */
 export function outputOptions(ctx: CustomCommandContext): OutputOptions {
@@ -78,16 +83,85 @@ export async function callCommand(
   });
 }
 
+/** How the wrapper pages: cli_util's `list_call_get_*` or their `_multiple_keys` variants. */
+export type ListOptions = { multipleKeys?: boolean };
+
+class PythonTypeError extends Error {}
+
+type Attribute = { snake: string; key: string; wire: string; type?: string };
+
+/**
+ * A collection model's attributes as Python iterates them: sorted snake_case names,
+ * aggregated under dashed keys. Without the model in the spec, the response's own keys.
+ */
+function collectionAttributes(
+  result: OperationResult,
+  data: Record<string, unknown>,
+): Attribute[] {
+  const model = result.responseModels?.[result.operation.responseType ?? ""];
+  const attributes = model
+    ? model.attributes.map(([snake, type, wire]) => ({ snake, wire, type }))
+    : Object.keys(data).map((wire) => ({
+        snake: wire.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`),
+        wire,
+        type: undefined,
+      }));
+  return attributes
+    .map((a) => ({ ...a, key: a.snake.replaceAll("_", "-") }))
+    .sort((a, b) => (a.snake < b.snake ? -1 : a.snake > b.snake ? 1 : 0));
+}
+
+/** Python's len() of a deserialized attribute value. */
+function pyLen(value: unknown, type?: string): number {
+  if (Array.isArray(value)) return value.length;
+  if (typeof value === "string" && type !== "datetime" && type !== "date")
+    return [...value].length;
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    (type === undefined || type.startsWith("dict("))
+  )
+    return Object.keys(value).length;
+  const name =
+    value === null || value === undefined
+      ? "NoneType"
+      : typeof value === "boolean"
+        ? "bool"
+        : typeof value === "number"
+          ? type === "float" || (type !== "int" && !Number.isInteger(value))
+            ? "float"
+            : "int"
+          : type === "datetime" || type === "date"
+            ? `datetime.${type}`
+            : (type ?? "object");
+  throw new PythonTypeError(`object of type '${name}' has no len()`);
+}
+
+/** itertools.chain.from_iterable over the values one attribute had on each page. */
+function pyChain(values: unknown[]): unknown[] {
+  return values.flatMap((v) =>
+    Array.isArray(v)
+      ? v
+      : typeof v === "string"
+        ? [...v]
+        : typeof v === "object" && v !== null
+          ? Object.keys(v)
+          : [],
+  );
+}
+
 /**
  * A paginated list call honoring --all, --limit and --page-size the way
- * cli_util.list_call_get_all_results / list_call_get_up_to_limit do. A failed page is
- * rendered (and exits) like render_response would.
+ * cli_util.list_call_get_all_results / list_call_get_up_to_limit (or, with
+ * `multipleKeys`, their _multiple_keys variants) do. A failed page is rendered (and
+ * exits) like render_response would.
  */
 export async function listPages(
   ctx: CustomCommandContext,
   name: string,
   args: Record<string, unknown>,
   command?: GeneratedCommand,
+  { multipleKeys = false }: ListOptions = {},
 ): Promise<{ items: unknown[]; lastResult: OperationResult }> {
   const options = outputOptions(ctx);
   const call = (values: Record<string, unknown>) =>
@@ -113,57 +187,91 @@ export async function listPages(
       : Infinity;
   let remaining = limit;
   let page = args.page;
-  const fields: Record<string, unknown> = Object.create(null);
+  // Python's aggregated_results_dict: per dashed key, the value of each page (a list
+  // of them until chained), or the last scalar (_multiple_keys).
+  const fields = new Map<string, { attribute: Attribute; value: unknown }>();
   const aggregated: unknown[] = [];
   let result: OperationResult;
-  do {
-    const count = Math.min(size, remaining);
-    result = await call({
-      ...args,
-      page,
-      all_pages: false,
-      page_size: undefined,
-      limit: Number.isFinite(count) ? count : undefined,
-    });
-    if (!result.response.ok) printResult(ctx.io, result, options);
-    if (collection) {
-      for (const [key, value] of Object.entries(JSON.parse(result.raw))) {
-        if (Array.isArray(value)) {
-          const previous = fields[key];
-          fields[key] = Array.isArray(previous)
-            ? previous.concat(value)
-            : value;
-          remaining -= value.length;
-        } else fields[key] = value;
+  try {
+    do {
+      const count = Math.min(size, remaining);
+      result = await call({
+        ...args,
+        page,
+        all_pages: false,
+        page_size: undefined,
+        limit: Number.isFinite(count) ? count : undefined,
+      });
+      if (!result.response.ok) printResult(ctx.io, result, options);
+      if (collection) {
+        const data = (parseJsonBody(result.raw) ?? {}) as Record<
+          string,
+          unknown
+        >;
+        for (const attribute of collectionAttributes(result, data)) {
+          const value = Object.hasOwn(data, attribute.wire)
+            ? data[attribute.wire]
+            : null;
+          const pages = fields.get(attribute.key)?.value;
+          if (Array.isArray(value) || (!multipleKeys && limited)) {
+            fields.set(attribute.key, {
+              attribute,
+              value: [...(Array.isArray(pages) ? pages : []), value],
+            });
+            if (limited) remaining -= pyLen(value, attribute.type);
+          } else if (multipleKeys)
+            fields.set(attribute.key, { attribute, value });
+        }
+      } else {
+        const items = extractListItems(result.raw);
+        aggregated.push(...items);
+        remaining -= items.length;
       }
-    } else {
-      const items = extractListItems(result.raw);
-      aggregated.push(...items);
-      remaining -= items.length;
-    }
-    page = result.response.headers.get("opc-next-page");
-  } while (page !== null && remaining > 0);
+      page = result.response.headers.get("opc-next-page");
+    } while (page !== null && remaining > 0);
+  } catch (e) {
+    if (!(e instanceof PythonTypeError)) throw e;
+    ctx.io.err(`TypeError: ${e.message}\n`);
+    throw new Exit(1);
+  }
+  if (!collection) {
+    const items = aggregated.slice(0, limit);
+    return {
+      items,
+      lastResult: { ...result, allPages: all, raw: JSON.stringify(items) },
+    };
+  }
+  // Chain each list attribute's pages; under --limit, cut them to the limit in key order.
+  const data: Record<string, unknown> = Object.create(null);
   let keep = limit;
-  for (const key of Object.keys(fields).sort()) {
-    const value = fields[key];
-    if (!Array.isArray(value)) continue;
-    if (keep <= 0) delete fields[key];
-    else {
-      fields[key] = value.slice(0, keep);
-      keep -= value.length;
+  for (const key of [...fields.keys()].sort()) {
+    const { attribute, value } = fields.get(key)!;
+    const isList = !multipleKeys || Array.isArray(value);
+    if (!isList)
+      data[key] = renderModel(
+        value,
+        attribute.type ?? "",
+        result.responseModels,
+      );
+    else if (keep > 0) {
+      const chained = pyChain(value as unknown[]);
+      const kept = Number.isFinite(keep) ? chained.slice(0, keep) : chained;
+      keep -= kept.length;
+      data[key] = renderModel(
+        kept,
+        attribute.type ?? "",
+        result.responseModels,
+      );
     }
   }
-  const items = collection
-    ? Array.isArray(fields.items)
-      ? fields.items
-      : []
-    : aggregated.slice(0, limit);
   return {
-    items,
+    items: Array.isArray(data.items) ? data.items : [],
+    // Already rendered: printResult must not render it as the collection model again.
     lastResult: {
       ...result,
       allPages: all,
-      raw: JSON.stringify(collection ? fields : items),
+      raw: JSON.stringify(data),
+      responseModels: undefined,
     },
   };
 }
@@ -174,8 +282,9 @@ export async function renderListPages(
   name: string,
   args: Record<string, unknown>,
   command?: GeneratedCommand,
+  list?: ListOptions,
 ): Promise<void> {
-  const { lastResult } = await listPages(ctx, name, args, command);
+  const { lastResult } = await listPages(ctx, name, args, command, list);
   printResult(ctx.io, lastResult, outputOptions(ctx));
 }
 

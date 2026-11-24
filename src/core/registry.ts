@@ -387,7 +387,8 @@ export function engineSupports(command: Command): boolean {
   if (programmed(command)) {
     const hasInvoke = command.operation !== undefined;
     const sdkOps = command.sdkOperations ?? [];
-    if (!hasInvoke && sdkOps.length === 0) return false;
+    if (!hasInvoke && sdkOps.length === 0 && !command.program?.rawRequests)
+      return false;
     return (
       (!hasInvoke ||
         requestSupported(

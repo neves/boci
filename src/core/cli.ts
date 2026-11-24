@@ -71,7 +71,7 @@ import {
   validateOsNamespace,
 } from "./click-file.ts";
 import { Exit, type Env, type Invocation } from "../lib/io.ts";
-import { parseJsonParameter, repr } from "./json-input.ts";
+import { loadFileContents, parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState, waitUntilResponse } from "./waiter.ts";
 import { paginateSdkList } from "./pagination.ts";
 import {
@@ -83,8 +83,11 @@ import {
   ProgramEcho,
   ProgramExit,
   ProgramHeaders,
+  ProgramHttpResponse,
   ProgramListCall,
   ProgramPrompt,
+  ProgramRawRequest,
+  type ProgramRawOutcome,
   ProgramSecret,
   ProgramSleep,
   type ProgramAnswer,
@@ -97,6 +100,8 @@ import {
   ProgramServiceError,
   type ProgramSdkOutcome,
   ProgramUnsupported,
+  ProgramUploadObject,
+  type ProgramUploadOutcome,
   type ProgramContext,
   ProgramUsageError,
   ProgramWaitUntil,
@@ -110,11 +115,14 @@ import {
   tierBCheckFailure,
   callBaseClientApi,
   callOperation,
+  callRawSessionRequest,
   callSdkOperation,
   confirmUnderWrapExceptions,
+  createServiceClient,
   keyTypes,
   outputBinding,
   parseSdkResponseData,
+  sendServiceRequest,
 } from "./operation.ts";
 import { printResult, renderCliData, type OutputOptions } from "./output.ts";
 import {
@@ -638,7 +646,10 @@ async function main(io: Invocation): Promise<void> {
       (key === "ns get" && name === "os") ||
       (isImplemented(`${name} ${key}`, specCmd) &&
         (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) ||
-          Boolean(specCmd.program && specCmd.sdkOperations?.length)));
+          Boolean(
+            specCmd.program &&
+            (specCmd.sdkOperations?.length || specCmd.program.rawRequests),
+          )));
     if (!customHandler) {
       // A Tier A wrapper's own checks run before it delegates; the generated callback
       // then checks its path params first thing (both before JSON parsing). A Tier B
@@ -898,19 +909,259 @@ async function main(io: Invocation): Promise<void> {
                 return null;
               }
             },
-            namespace: async () => {
+            namespace: async (region, endpoint) => {
               // client.get_namespace(): `os ns get`, its ServiceError and all.
+              const osSpec =
+                spec.commands["ns get"] !== undefined
+                  ? spec
+                  : await loadService("os");
+              const callRootValues: Record<string, unknown> = {
+                ...wrapperRootValues,
+              };
+              if (region !== undefined) callRootValues.region = region;
+              if (endpoint !== undefined) {
+                if (endpoint === null) delete callRootValues.endpoint;
+                else callRootValues.endpoint = endpoint;
+              }
               const nsCall = {
-                command: spec.commands["ns get"] as GeneratedCommand,
+                command: osSpec.commands["ns get"] as GeneratedCommand,
                 values: {},
-                rootValues: wrapperRootValues,
+                rootValues: callRootValues,
                 settings: wrapperSettings,
-                spec,
+                spec: osSpec,
                 index,
               };
               const result = await callOperation(io, nsCall);
               if (!result.response.ok) printResult(io, result, { rc });
-              return String(JSON.parse(result.raw));
+              try {
+                return String(JSON.parse(result.raw));
+              } catch {
+                return result.raw;
+              }
+            },
+            rawRequest: async (req) => {
+              const res = await callRawSessionRequest(io, {
+                method: req.method,
+                url: req.url,
+                params: req.params,
+                headers: req.headers,
+                data: req.data,
+                hasJson: req.hasJson,
+                json: req.json,
+                stream: req.stream,
+                basicAuth: req.basicAuth,
+                retryMode: req.retryMode,
+                requestId: req.requestId,
+                rootValues: wrapperRootValues,
+                settings: wrapperSettings,
+                index,
+              });
+              return new ProgramHttpResponse(
+                res.statusCode,
+                res.reason,
+                res.headers,
+                res.content,
+                res.text,
+                res.requestUrl,
+                res.requestHeaders,
+              );
+            },
+            uploadObject: async (req) => {
+              const osSpec =
+                spec.service === "os" ? spec : await loadService("os");
+              const osClient = osSpec.clients[
+                "object_storage.object_storage"
+              ] as Record<string, unknown>;
+              const callRootValues: Record<string, unknown> = {
+                ...wrapperRootValues,
+              };
+              if (req.region !== undefined) callRootValues.region = req.region;
+              if (req.endpoint !== undefined) {
+                if (req.endpoint === null) delete callRootValues.endpoint;
+                else callRootValues.endpoint = req.endpoint;
+              }
+              if (req.requestId) callRootValues.request_id = req.requestId;
+              const sc = await createServiceClient(io, {
+                client: osClient,
+                values: {},
+                rootValues: callRootValues,
+                settings: wrapperSettings,
+                index,
+              });
+              const rawBytes = req.file.reopen().read();
+              const fileBytes =
+                rawBytes instanceof Uint8Array
+                  ? rawBytes
+                  : new TextEncoder().encode(rawBytes);
+              const totalSize = fileBytes.length;
+              const DEFAULT_MULTIPART_THRESHOLD = 128 * 1024 * 1024;
+              const pathParams = {
+                namespaceName: req.namespace,
+                bucketName: req.bucketName,
+                objectName: req.objectName,
+              };
+              if (totalSize <= DEFAULT_MULTIPART_THRESHOLD) {
+                const putRes = await sendServiceRequest(io, sc, {
+                  method: "PUT",
+                  pathTemplate:
+                    "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+                  pathParams,
+                  headers: {
+                    accept: "application/json",
+                    "content-type": "application/octet-stream",
+                    expect: "100-continue",
+                  },
+                  body: fileBytes,
+                  requestIdHeader: "opc-client-request-id",
+                  enforceContentHeaders: false,
+                });
+                if (totalSize > 0) io.err("Uploading object\n");
+                if (!putRes.response.ok) {
+                  return new ProgramServiceError({
+                    operation: {
+                      client: "object_storage.object_storage",
+                      method: "put_object",
+                      http: "PUT",
+                      path: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+                      queryParams: {},
+                    },
+                    url: putRes.url,
+                    response: putRes.response,
+                    raw: putRes.raw,
+                    allPages: false,
+                    pageItems: [],
+                    targetService: sc.targetService,
+                  });
+                }
+                return null;
+              }
+              // Multipart upload for bundles > 128 MiB.
+              const createRes = await sendServiceRequest(io, sc, {
+                method: "POST",
+                pathTemplate: "/n/{namespaceName}/b/{bucketName}/u",
+                pathParams: {
+                  namespaceName: req.namespace,
+                  bucketName: req.bucketName,
+                },
+                headers: {
+                  accept: "application/json",
+                  "content-type": "application/json",
+                },
+                body: JSON.stringify({ object: req.objectName }),
+                requestIdHeader: "opc-client-request-id",
+              });
+              if (!createRes.response.ok) {
+                return new ProgramServiceError({
+                  operation: {
+                    client: "object_storage.object_storage",
+                    method: "create_multipart_upload",
+                    http: "POST",
+                    path: "/n/{namespaceName}/b/{bucketName}/u",
+                    queryParams: {},
+                  },
+                  url: createRes.url,
+                  response: createRes.response,
+                  raw: createRes.raw,
+                  allPages: false,
+                  pageItems: [],
+                  targetService: sc.targetService,
+                });
+              }
+              const uploadId = String(
+                (JSON.parse(createRes.raw) as { uploadId: string }).uploadId,
+              );
+              io.err(`Upload ID: ${uploadId}\n`);
+              let partSize = 10 * 1024 * 1024;
+              if (Math.ceil(totalSize / partSize) > 10000) {
+                partSize =
+                  Math.ceil(Math.ceil(totalSize / 10000) / (1024 * 1024)) *
+                  (1024 * 1024);
+              }
+              const partCount = Math.ceil(totalSize / partSize);
+              io.err(`Split file into ${partCount} parts for upload.\n`);
+              const partsToCommit: { partNum: number; etag: string }[] = [];
+              for (let p = 0; p < partCount; p++) {
+                const start = p * partSize;
+                const chunk = fileBytes.subarray(
+                  start,
+                  Math.min(start + partSize, totalSize),
+                );
+                const partMd5 = new Bun.CryptoHasher("md5")
+                  .update(chunk)
+                  .digest("base64");
+                const partRes = await sendServiceRequest(io, sc, {
+                  method: "PUT",
+                  pathTemplate:
+                    "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+                  pathParams,
+                  queryParams: [
+                    ["uploadId", uploadId],
+                    ["uploadPartNum", String(p + 1)],
+                  ],
+                  headers: {
+                    accept: "application/json",
+                    "content-md5": partMd5,
+                    "content-type": "application/octet-stream",
+                    expect: "100-continue",
+                  },
+                  body: chunk,
+                  requestIdHeader: "opc-client-request-id",
+                  enforceContentHeaders: false,
+                });
+                if (!partRes.response.ok) {
+                  return new ProgramServiceError({
+                    operation: {
+                      client: "object_storage.object_storage",
+                      method: "upload_part",
+                      http: "PUT",
+                      path: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+                      queryParams: {},
+                    },
+                    url: partRes.url,
+                    response: partRes.response,
+                    raw: partRes.raw,
+                    allPages: false,
+                    pageItems: [],
+                    targetService: sc.targetService,
+                  });
+                }
+                partsToCommit.push({
+                  partNum: p + 1,
+                  etag: partRes.response.headers.get("etag") ?? "",
+                });
+              }
+              io.err("Uploading object\n");
+              const commitRes = await sendServiceRequest(io, sc, {
+                method: "POST",
+                pathTemplate:
+                  "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+                pathParams,
+                queryParams: [["uploadId", uploadId]],
+                headers: {
+                  accept: "application/json",
+                  "content-type": "application/json",
+                },
+                body: JSON.stringify({ partsToCommit }),
+                requestIdHeader: "opc-client-request-id",
+              });
+              if (!commitRes.response.ok) {
+                return new ProgramServiceError({
+                  operation: {
+                    client: "object_storage.object_storage",
+                    method: "commit_multipart_upload",
+                    http: "POST",
+                    path: "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+                    queryParams: {},
+                  },
+                  url: commitRes.url,
+                  response: commitRes.response,
+                  raw: commitRes.raw,
+                  allPages: false,
+                  pageItems: [],
+                  targetService: sc.targetService,
+                });
+              }
+              return null;
             },
             sdkCall: async (opIndex, posArgs, kwArgs, region, endpoint) => {
               const op = specCmd.sdkOperations?.[opIndex];
@@ -1212,6 +1463,9 @@ async function main(io: Invocation): Promise<void> {
               return q;
             },
             loadContextDefaults,
+            loadFileContents: (path) => loadFileContents(io, path),
+            defaultValuesFromFile: Object.fromEntries(defaults),
+            timestamps: [],
             defaultMap:
               Object.keys(fromJsonDefaults).length > 0
                 ? fromJsonDefaults
@@ -1401,7 +1655,9 @@ function convertDefaultValue(
 type WrapperLookups = {
   region: () => string | undefined;
   tenancy: () => string | null;
-  namespace: () => Promise<string>;
+  namespace: (region?: string, endpoint?: string | null) => Promise<string>;
+  rawRequest: (req: ProgramRawRequest) => Promise<ProgramRawOutcome>;
+  uploadObject: (req: ProgramUploadObject) => Promise<ProgramUploadOutcome>;
   sdkCall: (
     opIndex: number,
     posArgs: unknown[],
@@ -1707,7 +1963,7 @@ async function runWrapper(
       );
     }
     if (e instanceof ProgramLookup) {
-      const namespace = await lookups.namespace();
+      const namespace = await lookups.namespace(e.region, e.endpoint);
       return runWrapper(
         io,
         command,
@@ -1719,6 +1975,63 @@ async function runWrapper(
         {
           ...ctx,
           namespace,
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramRawRequest) {
+      let outcome: ProgramRawOutcome;
+      try {
+        outcome = await lookups.rawRequest(e);
+      } catch (rawErr) {
+        if (rawErr instanceof ProgramUnsupported) return "unsupported";
+        if (rawErr instanceof ProgramRaise) outcome = rawErr;
+        else if (rawErr instanceof Exit) throw rawErr;
+        else
+          outcome = new ProgramRaise(
+            "Exception",
+            rawErr instanceof Error ? rawErr.message : String(rawErr),
+          );
+      }
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          rawResults: [...(ctx.rawResults ?? []), outcome],
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramUploadObject) {
+      let outcome: ProgramUploadOutcome;
+      try {
+        outcome = await lookups.uploadObject(e);
+      } catch (upErr) {
+        if (upErr instanceof ProgramUnsupported) return "unsupported";
+        if (
+          upErr instanceof ProgramRaise ||
+          upErr instanceof ProgramServiceError
+        )
+          outcome = upErr;
+        else throw upErr;
+      }
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          uploadResults: [...(ctx.uploadResults ?? []), outcome],
         },
         stdin,
       );

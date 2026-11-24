@@ -4,7 +4,7 @@
  * into the complex params of the generated command it invokes; the result is that
  * command's kwargs, which the Engine then binds to the request like any Generated command.
  */
-import { randomUUID } from "node:crypto";
+import { createDecipheriv, randomUUID } from "node:crypto";
 import { basename, resolve } from "node:path";
 import { applyQuery } from "../lib/query.ts";
 import { expandHomeDir } from "../utils/expandHomeDir.ts";
@@ -103,7 +103,14 @@ type Dict = Record<string, unknown>;
  * `client.get_namespace().data` before the Engine has looked the namespace up: it makes
  * the request, then runs the program again with the answer (ticket 23).
  */
-export class ProgramLookup extends Error {}
+export class ProgramLookup extends Error {
+  constructor(
+    readonly region?: string,
+    readonly endpoint?: string | null,
+  ) {
+    super("get_namespace");
+  }
+}
 
 /**
  * Case-insensitive header mapping matching `oci.response.Response.headers`
@@ -442,6 +449,164 @@ export class ProgramListCall extends Error {
 export type ProgramSdkOutcome =
   ProgramResponse | ProgramRaise | ProgramServiceError;
 
+/** Raw HTTP response matching Python `requests.Response` (for `build_raw_requests_session`). */
+export class ProgramHttpResponse {
+  readonly headers: ProgramHeaders;
+  readonly requestHeaders: ProgramHeaders;
+  constructor(
+    readonly statusCode: number,
+    readonly reason: string,
+    headers: Headers | Record<string, string>,
+    readonly content: Uint8Array,
+    readonly text: string,
+    readonly requestUrl: string,
+    requestHeaders: Record<string, string> = {},
+  ) {
+    this.headers = new ProgramHeaders(headers);
+    this.requestHeaders = new ProgramHeaders(requestHeaders);
+  }
+
+  json(): unknown {
+    try {
+      return JSON.parse(this.text);
+    } catch (err) {
+      throw new ProgramRaise(
+        "JSONDecodeError",
+        err instanceof Error ? err.message : "Invalid JSON",
+      );
+    }
+  }
+
+  raiseForStatus(): void {
+    if (this.statusCode >= 400) {
+      const kind = this.statusCode < 500 ? "Client" : "Server";
+      throw new ProgramRaise(
+        "HTTPError",
+        `${this.statusCode} ${kind} Error: ${this.reason} for url: ${this.requestUrl}`,
+      );
+    }
+  }
+
+  iterContent(chunkSize = 1): Uint8Array[] {
+    const size = Math.max(1, Math.trunc(chunkSize));
+    const chunks: Uint8Array[] = [];
+    for (let i = 0; i < this.content.length; i += size) {
+      chunks.push(this.content.subarray(i, i + size));
+    }
+    return chunks;
+  }
+}
+
+export type ProgramRawOutcome = ProgramHttpResponse | ProgramRaise;
+
+/** Raw HTTP request suspension from `requests_session.request(...)` / `make_retrying_call`. */
+export class ProgramRawRequest extends Error {
+  constructor(
+    readonly method: string,
+    readonly url: string,
+    readonly params: Dict | null,
+    readonly headers: Record<string, string>,
+    readonly data: unknown,
+    readonly hasJson: boolean,
+    readonly json: unknown,
+    readonly stream: boolean,
+    readonly basicAuth: [string, string] | null,
+    readonly retryMode: "default" | "builder" | "none",
+    readonly requestId: string | null,
+  ) {
+    super(`rawRequest ${method} ${url}`);
+  }
+}
+
+/** Object Storage bundle upload suspension (`rover_utils.upload_multi_part`). */
+export class ProgramUploadObject extends Error {
+  constructor(
+    readonly file: ProgramFile,
+    readonly namespace: string,
+    readonly bucketName: string,
+    readonly objectName: string,
+    readonly region?: string,
+    readonly endpoint?: string | null,
+    readonly requestId?: string | null,
+  ) {
+    super(`uploadObject ${bucketName}/${objectName}`);
+  }
+}
+
+export type ProgramUploadOutcome = null | ProgramRaise | ProgramServiceError;
+
+/** Lightweight response wrapper (`RoverDiagAPI(data=..., headers=...)`) for `cli_util.render_response`. */
+class ProgramSimpleResponse {
+  constructor(
+    readonly data: unknown,
+    readonly headers: ProgramHeaders | Dict | null,
+  ) {}
+}
+
+/** Python `requests.Session` built by `cli_util.build_raw_requests_session(ctx)`. */
+class ProgramRequestsSession {
+  readonly params: Dict = {};
+  readonly headers: ProgramHeaders;
+  auth: [string, string] | null = null;
+  constructor(requestId: string | null) {
+    this.headers = new ProgramHeaders(
+      requestId ? { "opc-request-id": requestId } : {},
+    );
+  }
+}
+
+/** Bound method reference (e.g. `requests_session.request` passed to `make_retrying_call`). */
+class ProgramBoundMethod {
+  constructor(
+    readonly target: unknown,
+    readonly method: string,
+  ) {}
+}
+
+/** OCI SDK retry strategy / builder (`DEFAULT_RETRY_STRATEGY`, `RetryStrategyBuilder`). */
+class ProgramRetryStrategy {
+  constructor(
+    readonly mode: "default" | "builder",
+    readonly opts: Dict = {},
+  ) {}
+}
+
+/** Click progressbar handle (`with click.progressbar(...) as bar:`). */
+class ProgramProgressBar {
+  finished = false;
+  printed = false;
+  constructor(
+    readonly length: number | null,
+    readonly label: string,
+    readonly toStderr: boolean,
+  ) {}
+}
+
+/** Single-expression Python `lambda` value. */
+class ProgramLambda {
+  constructor(
+    readonly params: string[],
+    readonly body: Expr,
+  ) {}
+}
+
+/** Result of `re.match(pattern, string)`. */
+class ProgramMatch {
+  constructor(readonly groups: (string | undefined)[]) {}
+
+  group(n = 0): string | null {
+    if (!Number.isInteger(n) || n < 0 || n >= this.groups.length) {
+      throw new ProgramRaise("IndexError", "no such group");
+    }
+    return this.groups[n] ?? null;
+  }
+}
+
+/** Result of `os.fstat(fd)`. */
+class ProgramStatResult {
+  constructor(readonly st_size: number) {}
+}
+
 /**
  * What a program reads outside its kwargs: the config region `build_client` puts in
  * `ctx.obj['config']`, `ctx.obj['request_id']`, the namespace `get_namespace()` returned,
@@ -464,16 +629,22 @@ export type ProgramContext = {
   noRetry?: boolean;
   maxAttempts?: number | null;
   defaultMap?: Dict | null;
+  defaultValuesFromFile?: Dict | null;
   env?: Record<string, string | undefined>;
   models?: Models;
   configFromFile?: (fileLocation?: string, profileName?: string) => Dict;
   buildConfig?: (commandArgs: Dict) => Dict;
+  createConfigAndSigner?: (commandArgs: Dict) => Dict;
+  loadFileContents?: (path: string) => string | null;
   resolveQuery?: () => string | null;
   loadContextDefaults?: () => Dict;
   sdkResults?: ProgramSdkOutcome[];
+  rawResults?: ProgramRawOutcome[];
+  uploadResults?: ProgramUploadOutcome[];
   listResults?: ProgramSdkOutcome[];
   waitResults?: ProgramSdkOutcome[];
   randomChoices?: unknown[];
+  timestamps?: number[];
   renderedCount?: number;
   echoCount?: number;
   sleepCount?: number;
@@ -585,7 +756,10 @@ class ProgramTarget {
 export class ProgramFile {
   private consumed = false;
   private closed = false;
+  private textOffset = 0;
+  private byteOffset = 0;
   private readonly chunks: Uint8Array[] = [];
+  private assignedFd?: number;
   constructor(
     readonly mode: string,
     private readonly data?: Uint8Array,
@@ -607,19 +781,71 @@ export class ProgramFile {
     return /[wax+]/.test(this.mode);
   }
 
-  read(): string | Uint8Array {
+  get size(): number {
+    return this.data?.length ?? 0;
+  }
+
+  getFd(alloc: () => number): number {
+    if (this.assignedFd === undefined) this.assignedFd = alloc();
+    return this.assignedFd;
+  }
+
+  private decodedText(): string {
     if (this.data === undefined || /[wax+]/.test(this.mode))
       throw new ProgramUnsupported("io.UnsupportedOperation: not readable");
-    const data = this.consumed ? new Uint8Array() : this.data;
-    this.consumed = true;
-    if (this.binary) return data;
     let text: string;
     try {
-      text = decodePythonUtf8(data);
+      text = decodePythonUtf8(this.data);
     } catch {
       throw new ProgramUnsupported("UnicodeDecodeError");
     }
     return text.replace(/\r\n?/g, "\n");
+  }
+
+  read(): string | Uint8Array {
+    if (this.data === undefined || /[wax+]/.test(this.mode))
+      throw new ProgramUnsupported("io.UnsupportedOperation: not readable");
+    if (this.binary) {
+      const out = this.consumed
+        ? new Uint8Array()
+        : this.data.subarray(this.byteOffset);
+      this.byteOffset = this.data.length;
+      this.consumed = true;
+      return out;
+    }
+    const text = this.decodedText();
+    const out = this.consumed ? "" : text.slice(this.textOffset);
+    this.textOffset = text.length;
+    this.consumed = true;
+    return out;
+  }
+
+  readline(): string | Uint8Array {
+    if (this.data === undefined || /[wax+]/.test(this.mode))
+      throw new ProgramUnsupported("io.UnsupportedOperation: not readable");
+    if (this.binary) {
+      if (this.consumed || this.byteOffset >= this.data.length) {
+        this.consumed = true;
+        return new Uint8Array();
+      }
+      const nl = this.data.indexOf(0x0a, this.byteOffset);
+      const end = nl === -1 ? this.data.length : nl + 1;
+      const out = this.data.subarray(this.byteOffset, end);
+      this.byteOffset = end;
+      if (this.byteOffset >= this.data.length) this.consumed = true;
+      return out;
+    }
+    const text = this.decodedText();
+    if (this.consumed || this.textOffset >= text.length) {
+      this.consumed = true;
+      return "";
+    }
+    const nl = text.indexOf("\n", this.textOffset);
+    const end = nl === -1 ? text.length : nl + 1;
+    const out = text.slice(this.textOffset, end);
+    this.textOffset = end;
+    if (this.textOffset >= text.length) this.consumed = true;
+    return out;
   }
 
   write(chunk: unknown): number {
@@ -673,6 +899,15 @@ const isDict = (v: unknown): v is Dict =>
   !(v instanceof ProgramTarget) &&
   !(v instanceof ProgramObject) &&
   !(v instanceof ProgramResponse) &&
+  !(v instanceof ProgramSimpleResponse) &&
+  !(v instanceof ProgramHttpResponse) &&
+  !(v instanceof ProgramRequestsSession) &&
+  !(v instanceof ProgramBoundMethod) &&
+  !(v instanceof ProgramRetryStrategy) &&
+  !(v instanceof ProgramProgressBar) &&
+  !(v instanceof ProgramLambda) &&
+  !(v instanceof ProgramMatch) &&
+  !(v instanceof ProgramStatResult) &&
   !(v instanceof ProgramHeaders) &&
   !(v instanceof ProgramModel) &&
   !(v instanceof ProgramJmespath) &&
@@ -683,6 +918,15 @@ const pyTruthy = (v: unknown): boolean => {
   if (v instanceof ProgramHeaders) return v.size > 0;
   if (
     v instanceof ProgramResponse ||
+    v instanceof ProgramSimpleResponse ||
+    v instanceof ProgramHttpResponse ||
+    v instanceof ProgramRequestsSession ||
+    v instanceof ProgramBoundMethod ||
+    v instanceof ProgramRetryStrategy ||
+    v instanceof ProgramProgressBar ||
+    v instanceof ProgramLambda ||
+    v instanceof ProgramMatch ||
+    v instanceof ProgramStatResult ||
     v instanceof ProgramObject ||
     v instanceof ProgramFile ||
     v instanceof ProgramTarget ||
@@ -869,6 +1113,8 @@ function isSuspension(e: unknown): boolean {
     e instanceof ProgramLookup ||
     e instanceof ProgramSdkCall ||
     e instanceof ProgramCallApi ||
+    e instanceof ProgramRawRequest ||
+    e instanceof ProgramUploadObject ||
     e instanceof ProgramListCall ||
     e instanceof ProgramWaitUntil ||
     e instanceof ProgramRender ||
@@ -1732,12 +1978,17 @@ export function runProgram(
   let target = 0;
   let asked = 0;
   let sdkCalled = 0;
+  let rawCalled = 0;
+  let uploadCalled = 0;
   let listCalled = 0;
   let waitCalled = 0;
   let renderCalled = 0;
   let echoCalled = 0;
   let sleepCalled = 0;
   let randomCalled = 0;
+  let timeCalled = 0;
+  let nextFd = 100;
+  const fdToFile = new Map<number, ProgramFile>();
   const caught: Error[] = [];
   const ctxObj = new ProgramObject("ctx.obj", {
     request_id: context.requestId ?? null,
@@ -1751,6 +2002,7 @@ export function runProgram(
     debug: context.debug ?? false,
     no_retry: context.noRetry ?? false,
     max_attempts: context.maxAttempts ?? null,
+    default_values_from_file: context.defaultValuesFromFile ?? {},
     ...(context.regionOverride !== undefined && context.regionOverride !== null
       ? { region: context.regionOverride }
       : {}),
@@ -1913,6 +2165,32 @@ export function runProgram(
             return obj.split(args[0]);
           if (args.length === 0) return obj.split(/\s+/).filter(Boolean);
           break;
+        case "splitlines": {
+          const keepends = args.length >= 1 ? pyTruthy(args[0]) : false;
+          if (obj === "") return [];
+          if (keepends) {
+            return obj.match(/[^\r\n]*(?:\r\n|\r|\n)|[^\r\n]+$/g) ?? [];
+          }
+          const parts = obj.split(/\r\n|\r|\n/);
+          if (/\r\n$|\r$|\n$/.test(obj)) parts.pop();
+          return parts;
+        }
+        case "ljust": {
+          if (args.length < 1 || args.length > 2) break;
+          const width = args[0];
+          const fill = args.length === 2 ? args[1] : " ";
+          if (
+            typeof width !== "number" ||
+            !Number.isInteger(width) ||
+            typeof fill !== "string" ||
+            [...fill].length !== 1
+          ) {
+            throw new ProgramRaise("TypeError", "ljust() invalid arguments");
+          }
+          return obj.length >= width
+            ? obj
+            : obj + fill.repeat(width - obj.length);
+        }
         case "startswith": {
           const target = args[0];
           if (typeof target === "string") return obj.startsWith(target);
@@ -1962,9 +2240,55 @@ export function runProgram(
       }
     } else if (obj instanceof ProgramFile) {
       if (method === "read" && args.length === 0) return obj.read();
+      if (method === "readline" && args.length === 0) return obj.readline();
+      if (method === "fileno" && args.length === 0) {
+        const fd = obj.getFd(() => nextFd++);
+        fdToFile.set(fd, obj);
+        return fd;
+      }
       if (method === "write" && args.length === 1) return obj.write(args[0]);
       if (method === "close" && args.length === 0) {
         obj.close();
+        return null;
+      }
+    } else if (obj instanceof ProgramMatch) {
+      if (method === "group") {
+        if (args.length === 0) return obj.group(0);
+        if (args.length === 1 && typeof args[0] === "number")
+          return obj.group(args[0]);
+        if (args.every((x) => typeof x === "number"))
+          return args.map((x) => obj.group(x as number));
+      }
+    } else if (obj instanceof ProgramHttpResponse) {
+      if (method === "json" && args.length === 0) return obj.json();
+      if (method === "raise_for_status" && args.length === 0) {
+        obj.raiseForStatus();
+        return null;
+      }
+      if (method === "iter_content" && args.length <= 1) {
+        const size = typeof args[0] === "number" ? args[0] : 1;
+        return obj.iterContent(size);
+      }
+    } else if (obj instanceof ProgramProgressBar) {
+      if (method === "update") {
+        // Click's non-TTY progressbar prints label once on first update/finish.
+        if (!obj.printed && obj.label) {
+          obj.printed = true;
+          const i = echoCalled++;
+          if (i >= (context.echoCount ?? 0)) {
+            throw new ProgramEcho(`${obj.label}\n`, obj.toStderr);
+          }
+        }
+        return null;
+      }
+      if (method === "render_finish" && args.length === 0) {
+        if (!obj.printed && obj.label) {
+          obj.printed = true;
+          const i = echoCalled++;
+          if (i >= (context.echoCount ?? 0)) {
+            throw new ProgramEcho(`${obj.label}\n`, obj.toStderr);
+          }
+        }
         return null;
       }
     } else if (obj instanceof ProgramJmespath) {
@@ -2085,11 +2409,16 @@ export function runProgram(
       case "sorted": {
         const items = [...iterate(a)];
         const keyFnName = typeof b === "string" ? b : null;
+        const keyLambda = b instanceof ProgramLambda ? b : null;
         const reverse = pyTruthy(args[2] ?? false);
         const keyed = items.map((item, idx) => ({
           item,
           idx,
-          key: keyFnName ? fn(keyFnName, [item]) : item,
+          key: keyLambda
+            ? evalLambda(keyLambda, [item])
+            : keyFnName
+              ? fn(keyFnName, [item])
+              : item,
         }));
         keyed.sort((x, y) => {
           if (pyEq(x.key, y.key)) return x.idx - y.idx;
@@ -2097,6 +2426,210 @@ export function runProgram(
           return reverse ? (lt ? 1 : -1) : lt ? -1 : 1;
         });
         return keyed.map((k) => k.item);
+      }
+      case "time": {
+        const i = timeCalled++;
+        if (context.timestamps && i < context.timestamps.length) {
+          return context.timestamps[i];
+        }
+        const now = Date.now() / 1000;
+        context.timestamps?.push(now);
+        return now;
+      }
+      case "fstat": {
+        if (typeof a !== "number" || !Number.isInteger(a))
+          throw new ProgramRaise("TypeError", "fstat() fd must be an int");
+        const f = fdToFile.get(a);
+        if (!f)
+          throw new ProgramRaise("OSError", "[Errno 9] Bad file descriptor");
+        return new ProgramStatResult(f.size);
+      }
+      case "bytesFromHex": {
+        if (typeof a !== "string")
+          throw new ProgramRaise("TypeError", "fromhex() argument must be str");
+        const cleaned = a.replace(/[ \t\r\n\f\v]+/g, "");
+        if (cleaned.length % 2 !== 0 || !/^[0-9a-fA-F]*$/.test(cleaned)) {
+          throw new ProgramRaise(
+            "ValueError",
+            "non-hexadecimal number found in fromhex() arg",
+          );
+        }
+        const out = new Uint8Array(cleaned.length / 2);
+        for (let i = 0; i < out.length; i++) {
+          out[i] = Number.parseInt(cleaned.slice(i * 2, i * 2 + 2), 16);
+        }
+        return out;
+      }
+      case "reMatch": {
+        if (typeof a !== "string" || typeof b !== "string")
+          throw new ProgramRaise("TypeError", "re.match() expects strings");
+        const anchored = a.startsWith("^") ? a : `^(?:${a})`;
+        const m = new RegExp(anchored).exec(b);
+        return m ? new ProgramMatch([...m]) : null;
+      }
+      case "prettyPrintFormat":
+        return pyDumpsOpts(a, 2, true, null, false);
+      case "loadFileContents": {
+        if (typeof a !== "string") return null;
+        if (!context.loadFileContents)
+          throw new ProgramUnsupported("cli_util.load_file_contents()");
+        return context.loadFileContents(a);
+      }
+      case "createConfigAndSigner": {
+        if (!pyTruthy(ctxObj.fields.request_id)) {
+          ctxObj.fields.request_id = randomUUID()
+            .replaceAll("-", "")
+            .toUpperCase();
+        }
+        const cfg = context.createConfigAndSigner
+          ? context.createConfigAndSigner(ctxObj.fields)
+          : context.buildConfig
+            ? context.buildConfig(ctxObj.fields)
+            : {};
+        return new ProgramObject("ConfigAndSigner", {
+          config: cfg,
+          signer: null,
+          uses_instance_principals_auth:
+            ctxObj.fields.auth === "instance_principal",
+        });
+      }
+      case "rawSession": {
+        if (!pyTruthy(ctxObj.fields.request_id)) {
+          ctxObj.fields.request_id = randomUUID()
+            .replaceAll("-", "")
+            .toUpperCase();
+        }
+        if (context.createConfigAndSigner) {
+          context.createConfigAndSigner(ctxObj.fields);
+        }
+        return new ProgramRequestsSession(
+          typeof ctxObj.fields.request_id === "string"
+            ? ctxObj.fields.request_id
+            : null,
+        );
+      }
+      case "retryStrategy":
+        return new ProgramRetryStrategy("default", {});
+      case "retryStrategyBuilder":
+        return new ProgramRetryStrategy("builder", isDict(a) ? { ...a } : {});
+      case "simpleResponse": {
+        const hdrs =
+          b instanceof ProgramHeaders ||
+          isDict(b) ||
+          b === null ||
+          b === undefined
+            ? (b ?? null)
+            : null;
+        return new ProgramSimpleResponse(a, hdrs);
+      }
+      case "progressbar": {
+        const length = typeof a === "number" ? a : null;
+        const label =
+          typeof b === "string"
+            ? b
+            : b === null || b === undefined
+              ? ""
+              : pyStr(b);
+        const fileArg = args[2];
+        const toStderr =
+          fileArg instanceof ProgramObject && fileArg.kind === "sys.stderr";
+        return new ProgramProgressBar(length, label, toStderr);
+      }
+      case "roverBundleDecrypt": {
+        // services.rover.src.oci_cli_rover.rover_utils.bundle_decrypt(in_file, out_file, key)
+        if (
+          typeof a !== "string" ||
+          typeof b !== "string" ||
+          typeof args[2] !== "string"
+        ) {
+          throw new ProgramUnsupported("bundle_decrypt()");
+        }
+        const keyHex =
+          args[2].length >= 32
+            ? args[2]
+            : args[2] + "0".repeat(32 - args[2].length);
+        const bkey = fn("bytesFromHex", [keyHex]) as Uint8Array;
+        const inHandle = files.open(a, "rb");
+        const encData = inHandle.read() as Uint8Array;
+        const algo =
+          bkey.length === 16
+            ? "aes-128-cbc"
+            : bkey.length === 24
+              ? "aes-192-cbc"
+              : "aes-256-cbc";
+        const iv = bkey.subarray(0, 16);
+        let decData: Uint8Array;
+        try {
+          const decipher = createDecipheriv(algo, bkey, iv);
+          decData = Buffer.concat([decipher.update(encData), decipher.final()]);
+        } catch (err) {
+          throw new ProgramRaise(
+            "ValueError",
+            err instanceof Error ? err.message : "Decryption failed",
+          );
+        }
+        const outHandle = files.open(b, "wb");
+        outHandle.write(decData);
+        outHandle.close();
+        return null;
+      }
+      case "roverUploadMultipart": {
+        // upload_multi_part(ctx, file, namespace, bucket_name, name)
+        const fileObj = args[1];
+        const namespace = args[2];
+        const bucketName = args[3];
+        const objectName = args[4];
+        if (
+          !(fileObj instanceof ProgramFile) ||
+          typeof namespace !== "string" ||
+          typeof bucketName !== "string" ||
+          typeof objectName !== "string"
+        ) {
+          throw new ProgramUnsupported("upload_multi_part()");
+        }
+        const i = uploadCalled++;
+        const cached = context.uploadResults?.[i];
+        if (cached !== undefined) {
+          if (cached instanceof Error) throw cached;
+          return cached;
+        }
+        // Apply get_object_storage_helper region/endpoint overrides.
+        let region: string | undefined;
+        let endpoint: string | null | undefined;
+        const cfg = ctxObj.fields.config;
+        const cfgRegion =
+          cfg instanceof ProgramObject
+            ? cfg.fields.region
+            : isDict(cfg)
+              ? cfg.region
+              : undefined;
+        if (
+          typeof cfgRegion === "string" &&
+          cfgRegion.trim().split(".")[0] === "r1"
+        ) {
+          region = "r1.oracleiaas.com";
+        } else if (
+          isDict(ctxObj.fields.default_values_from_file) &&
+          typeof ctxObj.fields.default_values_from_file["os.endpoint"] ===
+            "string"
+        ) {
+          endpoint = ctxObj.fields.default_values_from_file["os.endpoint"];
+        } else if (typeof ctxObj.fields.endpoint === "string") {
+          endpoint = ctxObj.fields.endpoint;
+        }
+        const requestId =
+          typeof ctxObj.fields.request_id === "string"
+            ? ctxObj.fields.request_id
+            : null;
+        throw new ProgramUploadObject(
+          fileObj,
+          namespace,
+          bucketName,
+          objectName,
+          region,
+          endpoint,
+          requestId,
+        );
       }
       case "dirname":
         if (typeof a !== "string")
@@ -2379,7 +2912,14 @@ export function runProgram(
           a.kind !== "object_storage.object_storage"
         )
           throw new ProgramUnsupported("get_namespace()");
-        if (context.namespace === undefined) throw new ProgramLookup();
+        if (context.namespace === undefined) {
+          throw new ProgramLookup(
+            typeof a.fields.region === "string" ? a.fields.region : undefined,
+            "endpoint" in a.fields
+              ? (a.fields.endpoint as string | null)
+              : undefined,
+          );
+        }
         return context.namespace;
       case "confirm": {
         const defaultVal = args.length >= 2 ? pyTruthy(args[1]) : false;
@@ -2560,6 +3100,76 @@ export function runProgram(
     return (conds ?? []).every((c) => pyTruthy(evaluate(c)));
   };
 
+  /** Evaluates a single-expression Python lambda with bound parameter values. */
+  const evalLambda = (lam: ProgramLambda, argVals: unknown[]): unknown => {
+    if (argVals.length !== lam.params.length) {
+      throw new ProgramRaise("TypeError", "lambda argument count mismatch");
+    }
+    const saved: [string, boolean, unknown][] = lam.params.map((p) => [
+      p,
+      p in env,
+      env[p],
+    ]);
+    for (let i = 0; i < lam.params.length; i++) {
+      env[lam.params[i]!] = argVals[i];
+    }
+    try {
+      return evaluate(lam.body);
+    } finally {
+      for (const [p, had, prev] of saved) {
+        if (had) env[p] = prev;
+        else delete env[p];
+      }
+    }
+  };
+
+  /** Executes a raw HTTP request on a `ProgramRequestsSession` (with replay caching). */
+  const executeSessionRequest = (
+    session: ProgramRequestsSession,
+    pos: unknown[],
+    kw: Dict,
+    retryMode: "default" | "builder" | "none",
+  ): ProgramHttpResponse => {
+    const method = (pos[0] ?? kw.method) as unknown;
+    const url = (pos[1] ?? kw.url) as unknown;
+    if (typeof method !== "string" || typeof url !== "string") {
+      throw new ProgramUnsupported("requests_session.request() method/url");
+    }
+    const mergedParams: Dict = { ...session.params };
+    if (isDict(kw.params)) Object.assign(mergedParams, kw.params);
+    const mergedHeaders: Record<string, string> = {};
+    for (const [k, v] of session.headers.entries()) mergedHeaders[k] = v;
+    if (isDict(kw.headers)) {
+      for (const [k, v] of Object.entries(kw.headers)) {
+        if (v !== undefined && v !== null) mergedHeaders[k] = String(v);
+      }
+    }
+    const hasJson = "json" in kw && kw.json !== null && kw.json !== undefined;
+    const i = rawCalled++;
+    const cached = context.rawResults?.[i];
+    if (cached !== undefined) {
+      if (cached instanceof Error) throw cached;
+      return cached;
+    }
+    const requestId =
+      typeof ctxObj.fields.request_id === "string"
+        ? ctxObj.fields.request_id
+        : null;
+    throw new ProgramRawRequest(
+      method,
+      url,
+      Object.keys(mergedParams).length > 0 ? mergedParams : null,
+      mergedHeaders,
+      kw.data,
+      hasJson,
+      kw.json,
+      pyTruthy(kw.stream ?? false),
+      session.auth,
+      retryMode,
+      requestId,
+    );
+  };
+
   const evaluate = (e: Expr): unknown => {
     if (!Array.isArray(e)) return e;
     const [op, ...rest] = e as [string, ...Expr[]];
@@ -2619,6 +3229,65 @@ export function runProgram(
       case "attr": {
         const attr = rest[0] as string;
         const obj = evaluate(rest[1] as Expr);
+        if (obj instanceof ProgramFile) {
+          if (attr === "name") return obj.name ?? null;
+          throw new ProgramRaise(
+            "AttributeError",
+            `'file' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj instanceof ProgramRequestsSession) {
+          if (attr === "params") return obj.params;
+          if (attr === "headers") return obj.headers;
+          if (attr === "auth") return obj.auth;
+          if (attr === "request") return new ProgramBoundMethod(obj, "request");
+          throw new ProgramRaise(
+            "AttributeError",
+            `'Session' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj instanceof ProgramHttpResponse) {
+          if (attr === "status_code") return obj.statusCode;
+          if (attr === "reason") return obj.reason;
+          if (attr === "headers") return obj.headers;
+          if (attr === "text") return obj.text;
+          if (attr === "content") return obj.content;
+          if (attr === "request") {
+            return new ProgramObject("http.request", {
+              url: obj.requestUrl,
+              headers: obj.requestHeaders,
+            });
+          }
+          throw new ProgramRaise(
+            "AttributeError",
+            `'Response' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj instanceof ProgramSimpleResponse) {
+          if (attr === "data") return obj.data;
+          if (attr === "headers") return obj.headers;
+          throw new ProgramRaise(
+            "AttributeError",
+            `'RoverDiagAPI' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj instanceof ProgramStatResult) {
+          if (attr === "st_size") return obj.st_size;
+          throw new ProgramRaise(
+            "AttributeError",
+            `'stat_result' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj instanceof ProgramProgressBar) {
+          if (attr === "finished") return obj.finished;
+          throw new ProgramRaise(
+            "AttributeError",
+            `'ProgressBar' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj instanceof ProgramObject && attr in obj.fields) {
+          return obj.fields[attr];
+        }
         if (obj instanceof ProgramResponse) {
           if (attr === "data") return obj.data;
           if (attr === "headers") return obj.headers;
@@ -2651,6 +3320,77 @@ export function runProgram(
         if (obj instanceof ProgramModel) return obj.getAttr(attr);
         if (isDict(obj)) return modelAttr(obj, attr);
         throw new ProgramUnsupported(`attribute .${attr}`);
+      }
+      case "lambda": {
+        const pnames = rest[0] as unknown as string[];
+        const bodyExpr = rest[1] as Expr;
+        return new ProgramLambda(pnames, bodyExpr);
+      }
+      case "retryBuilderMethod": {
+        const methodName = rest[0] as string;
+        const recv = evaluate(rest[1] as Expr);
+        if (!(recv instanceof ProgramRetryStrategy)) {
+          throw new ProgramUnsupported(`retryBuilderMethod ${methodName}`);
+        }
+        // Evaluate arguments for side effects; return strategy object.
+        (rest[2] as Expr[]).map(evaluate);
+        for (const [k, vExpr] of rest[3] as [string, Expr][]) {
+          recv.opts[k] = evaluate(vExpr);
+        }
+        return recv;
+      }
+      case "retryCall": {
+        const strategy = evaluate(rest[0] as Expr);
+        if (!(strategy instanceof ProgramRetryStrategy)) {
+          throw new ProgramUnsupported("make_retrying_call on non-strategy");
+        }
+        const pos = (rest[1] as Expr[]).map(evaluate);
+        const kwPairs = rest[2] as [string, Expr][];
+        const starExpr = rest[3] as Expr | null;
+        const kw: Dict = {};
+        if (starExpr !== null) {
+          const star = evaluate(starExpr);
+          if (!isDict(star))
+            throw new ProgramUnsupported("make_retrying_call ** of non-dict");
+          Object.assign(kw, star);
+        }
+        for (const [k, expr] of kwPairs) {
+          kw[k] = evaluate(expr);
+        }
+        const targetFn = pos[0];
+        if (
+          targetFn instanceof ProgramBoundMethod &&
+          targetFn.target instanceof ProgramRequestsSession &&
+          targetFn.method === "request"
+        ) {
+          return executeSessionRequest(
+            targetFn.target,
+            pos.slice(1),
+            kw,
+            strategy.mode,
+          );
+        }
+        throw new ProgramUnsupported("make_retrying_call target");
+      }
+      case "sessionRequest": {
+        const session = evaluate(rest[0] as Expr);
+        if (!(session instanceof ProgramRequestsSession)) {
+          throw new ProgramUnsupported("request() on non-session");
+        }
+        const pos = (rest[1] as Expr[]).map(evaluate);
+        const kwPairs = rest[2] as [string, Expr][];
+        const starExpr = rest[3] as Expr | null;
+        const kw: Dict = {};
+        if (starExpr !== null) {
+          const star = evaluate(starExpr);
+          if (!isDict(star))
+            throw new ProgramUnsupported("request() ** of non-dict");
+          Object.assign(kw, star);
+        }
+        for (const [k, expr] of kwPairs) {
+          kw[k] = evaluate(expr);
+        }
+        return executeSessionRequest(session, pos, kw, "none");
       }
       case "fstr":
         return rest
@@ -3137,6 +3877,25 @@ export function runProgram(
             obj.dataOverridden = true;
             break;
           }
+          if (obj instanceof ProgramRequestsSession && attr === "auth") {
+            if (
+              Array.isArray(value) &&
+              value.length === 2 &&
+              typeof value[0] === "string" &&
+              typeof value[1] === "string"
+            ) {
+              obj.auth = [value[0], value[1]];
+            } else if (value === null || value === undefined) {
+              obj.auth = null;
+            } else {
+              throw new ProgramUnsupported("session.auth");
+            }
+            break;
+          }
+          if (obj instanceof ProgramProgressBar && attr === "finished") {
+            obj.finished = pyTruthy(value);
+            break;
+          }
           throw new ProgramUnsupported(String(rest[3] ?? `.${attr} =`));
         }
         case "setCtxAttr": {
@@ -3261,6 +4020,31 @@ export function runProgram(
           opened.close();
           break;
         }
+        case "withSession": {
+          const varName = rest[0] as string | null;
+          const session = evaluate(rest[1] as Expr);
+          if (!(session instanceof ProgramRequestsSession))
+            throw new ProgramUnsupported("with session returned non-session");
+          if (varName !== null) env[varName] = session;
+          execute(rest[2] as Statement[]);
+          break;
+        }
+        case "withProgressBar": {
+          const varName = rest[0] as string | null;
+          const bar = evaluate(rest[1] as Expr);
+          if (!(bar instanceof ProgramProgressBar))
+            throw new ProgramUnsupported("with progressbar returned non-bar");
+          if (varName !== null) env[varName] = bar;
+          execute(rest[2] as Statement[]);
+          if (!bar.printed && bar.label) {
+            bar.printed = true;
+            const i = echoCalled++;
+            if (i >= (context.echoCount ?? 0)) {
+              throw new ProgramEcho(`${bar.label}\n`, bar.toStderr);
+            }
+          }
+          break;
+        }
         case "try":
           try {
             execute(rest[0] as Statement[]);
@@ -3328,7 +4112,8 @@ export function runProgram(
           const arg = evaluate(rest[0] as Expr);
           if (arg === null || arg === undefined) throw new ProgramExit(0);
           if (typeof arg === "boolean") throw new ProgramExit(arg ? 1 : 0);
-          if (typeof arg === "number") throw new ProgramExit(arg);
+          if (typeof arg === "number")
+            throw new ProgramExit(((arg % 256) + 256) % 256);
           throw new ProgramExit(1, `${pyStr(arg)}\n`);
         }
         case "checkNoExtraKwargs": {
@@ -3357,6 +4142,16 @@ export function runProgram(
         }
         case "render": {
           const res = evaluate(rest[0] as Expr);
+          if (res instanceof ProgramSimpleResponse) {
+            const i = renderCalled++;
+            if (i < (context.renderedCount ?? 0)) break;
+            throw new ProgramRenderData(
+              pyTruthy(res.data) ? toDictValue(res.data) : null,
+              res.headers,
+              false,
+              true,
+            );
+          }
           if (!(res instanceof ProgramResponse))
             throw new ProgramUnsupported("render_response of non-response");
           const i = renderCalled++;

@@ -300,6 +300,8 @@ def wrapper_program(callback, client_map) -> dict | None:
         for d in wrapper_compiler._fn_ast(callback).decorator_list
     )
     out = {"program": {"body": program, "wrapExceptions": wrapped}}
+    if not compiled and not sdk_ops:
+        out["program"]["rawRequests"] = True
     if compiled:
         out.update(compiled[0])
         out["variants"] = compiled[1:]

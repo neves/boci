@@ -85,8 +85,12 @@ export type ServiceSpec = {
         checks?: { message: string; test?: Predicate }[];
         wrapExceptions?: boolean;
       };
-      /** A Tier B wrapper's body compiled to a program (tools/extract/program.py). */
-      program?: { body: Statement[]; wrapExceptions: boolean };
+      /** A Tier B/C wrapper's body compiled to a program (tools/extract/program.py). */
+      program?: {
+        body: Statement[];
+        wrapExceptions: boolean;
+        rawRequests?: boolean;
+      };
       /** The generated command a programmed wrapper invokes; operation and bindings are its. */
       generated?: GeneratedTarget;
       operation?: OperationSpec;

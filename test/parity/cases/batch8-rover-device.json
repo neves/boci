@@ -1,0 +1,594 @@
+[
+  {
+    "id": "batch8-rover-device-datasync-task-start",
+    "key": "rover device data-sync task start",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task",
+      "start",
+      "--task-definition-id",
+      "ocid1.datasyncdef.oc1..td1",
+      "--threads",
+      "4",
+      "--multipart-threads",
+      "2",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasynctask.oc1..t1",
+        "taskDefinitionId": "ocid1.datasyncdef.oc1..td1",
+        "lifecycleState": "RUNNING"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-list",
+    "key": "rover device data-sync task list",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task",
+      "list",
+      "--task-definition-id",
+      "ocid1.datasyncdef.oc1..td1",
+      "--sort-order",
+      "DESC",
+      "--limit",
+      "1",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": [
+        { "id": "t1", "startTime": "2025-01-01T00:00:00Z" },
+        { "id": "t2", "startTime": "2025-02-01T00:00:00Z" }
+      ]
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-get",
+    "key": "rover device data-sync task get",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task",
+      "get",
+      "--task-id",
+      "ocid1.datasynctask.oc1..t1",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": [
+        {
+          "id": "ocid1.datasynctask.oc1..t1",
+          "status": {
+            "completionStatus": {
+              "lifecycleState": "COMPLETED",
+              "startTimeInMs": 1700000000000,
+              "endTimeInMs": 1700000010000
+            },
+            "progress": {
+              "numFilesToSync": 5,
+              "bytesToSync": 2048,
+              "bytesSynced": 2048,
+              "syncThroughput": 1024,
+              "statsPerStateList": [
+                { "state": "COMPLETED", "numFiles": 4 },
+                { "state": "PREV_COPIED", "numFiles": 1 },
+                { "state": "FAILED", "numFiles": 0 }
+              ]
+            },
+            "summary": {
+              "totalCnt": 5,
+              "copiedCnt": 4,
+              "nameCollisionCnt": 0,
+              "errorCnt": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-get-snapshot",
+    "key": "rover device data-sync task get-snapshot",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task",
+      "get-snapshot",
+      "--task-id",
+      "ocid1.datasynctask.oc1..t1",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasynctask.oc1..t1",
+        "snapshot": { "name": "sync-job-1" }
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-cancel",
+    "key": "rover device data-sync task cancel",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task",
+      "cancel",
+      "--task-id",
+      "ocid1.datasynctask.oc1..t1",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasynctask.oc1..t1",
+        "lifecycleState": "CANCELED"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-def-create",
+    "key": "rover device data-sync task-definition create",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task-definition",
+      "create",
+      "--name",
+      "sync-def-1",
+      "--source",
+      "{\"dataStore\":\"RED\",\"bucketName\":\"src-bkt\"}",
+      "--destination",
+      "{\"dataStore\":\"OCI\",\"bucketName\":\"dst-bkt\"}",
+      "--schedule",
+      "{\"priority\":\"HIGH\"}",
+      "--rate-limit",
+      "100M",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasyncdef.oc1..td1",
+        "name": "sync-def-1"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-def-update",
+    "key": "rover device data-sync task-definition update",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task-definition",
+      "update",
+      "--task-definition-id",
+      "ocid1.datasyncdef.oc1..td1",
+      "--name",
+      "sync-def-updated",
+      "--rate-limit",
+      "250M",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasyncdef.oc1..td1",
+        "name": "sync-def-updated"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-def-get",
+    "key": "rover device data-sync task-definition get",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task-definition",
+      "get",
+      "--task-definition-id",
+      "ocid1.datasyncdef.oc1..td1",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasyncdef.oc1..td1",
+        "name": "sync-def-1"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-def-list",
+    "key": "rover device data-sync task-definition list",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task-definition",
+      "list",
+      "--sort-by",
+      "sourceBucket",
+      "--sort-order",
+      "DESC",
+      "--limit",
+      "1",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": [
+        {
+          "id": "td1",
+          "name": "a",
+          "timeCreated": "2025-01-01T00:00:00Z",
+          "dataSyncSource": { "dataStore": "RED", "bucketName": "alpha" },
+          "dataSyncDestination": { "dataStore": "OCI", "bucketName": "dest-a" }
+        },
+        {
+          "id": "td2",
+          "name": "z",
+          "timeCreated": "2025-02-01T00:00:00Z",
+          "dataSyncSource": { "dataStore": "RED", "bucketName": "zeta" },
+          "dataSyncDestination": { "dataStore": "OCI", "bucketName": "dest-z" }
+        }
+      ]
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-def-delete",
+    "key": "rover device data-sync task-definition delete",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task-definition",
+      "delete",
+      "--task-definition-id",
+      "ocid1.datasyncdef.oc1..td1",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasyncdef.oc1..td1",
+        "lifecycleState": "DELETED"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-def-change-state",
+    "key": "rover device data-sync task-definition change-state",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task-definition",
+      "change-state",
+      "--task-definition-id",
+      "ocid1.datasyncdef.oc1..td1",
+      "--is-enabled",
+      "true",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasyncdef.oc1..td1",
+        "isEnabled": true
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-datasync-task-def-change-compartment",
+    "key": "rover device data-sync task-definition change-compartment",
+    "argv": [
+      "rover",
+      "device",
+      "data-sync",
+      "task-definition",
+      "change-compartment",
+      "--task-definition-id",
+      "ocid1.datasyncdef.oc1..td1",
+      "--compartment-id",
+      "ocid1.compartment.oc1..c1",
+      "--edge-type",
+      "pca",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.datasyncdef.oc1..td1",
+        "compartmentId": "ocid1.compartment.oc1..c1"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-diag-bundle-create",
+    "key": "rover device diagnostics bundle create",
+    "argv": [
+      "rover",
+      "device",
+      "diagnostics",
+      "bundle",
+      "create",
+      "--display-name",
+      "diag-1",
+      "--node-name",
+      "node-a",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.diagbundle.oc1..b1",
+        "displayName": "diag-1",
+        "nodes": [{ "nodeName": "node-a", "lifecycleState": "ACCEPTED" }]
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-diag-bundle-view-summary",
+    "key": "rover device diagnostics bundle view-summary",
+    "argv": [
+      "rover",
+      "device",
+      "diagnostics",
+      "bundle",
+      "view-summary",
+      "--bundle-id",
+      "ocid1.diagbundle.oc1..b1",
+      "--node-name",
+      "node-a",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "id": "ocid1.diagbundle.oc1..b1",
+        "nodes": [{ "nodeName": "node-a", "lifecycleState": "COMPLETED" }]
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-diag-bundle-cancel",
+    "key": "rover device diagnostics bundle cancel",
+    "argv": [
+      "rover",
+      "device",
+      "diagnostics",
+      "bundle",
+      "cancel",
+      "--bundle-id",
+      "ocid1.diagbundle.oc1..b1",
+      "--node-name",
+      "node-a",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": [
+      {
+        "body": {}
+      },
+      {
+        "body": {
+          "id": "ocid1.diagbundle.oc1..b1",
+          "nodes": [{ "nodeName": "node-a", "lifecycleState": "CANCELED" }]
+        }
+      }
+    ]
+  },
+  {
+    "id": "batch8-rover-device-diag-bundle-get",
+    "key": "rover device diagnostics bundle get",
+    "argv": [
+      "rover",
+      "device",
+      "diagnostics",
+      "bundle",
+      "get",
+      "--bundle-id",
+      "ocid1.diagbundle.oc1..b1",
+      "--file",
+      "boci-parity-diag-bundle.bin",
+      "--node-name",
+      "node-a",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "headers": {
+        "content-type": "application/octet-stream",
+        "content-length": "12"
+      },
+      "body": "hello-bundle"
+    }
+  },
+  {
+    "id": "batch8-rover-device-diag-bundle-list",
+    "key": "rover device diagnostics bundle list",
+    "argv": [
+      "rover",
+      "device",
+      "diagnostics",
+      "bundle",
+      "list",
+      "--node-name",
+      "node-a",
+      "--lifecycle-state",
+      "COMPLETED",
+      "--sort-by",
+      "timeCreated",
+      "--sort-order",
+      "DESC",
+      "--limit",
+      "5",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "items": [{ "id": "ocid1.diagbundle.oc1..b1", "displayName": "diag-1" }]
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-diag-bundle-missing-endpoint",
+    "key": "rover device diagnostics bundle list",
+    "argv": ["rover", "device", "diagnostics", "bundle", "list", "--no-retry"]
+  },
+  {
+    "id": "batch8-rover-device-sysupgrade-get-import-history",
+    "key": "rover device system-upgrade get-import-history",
+    "argv": [
+      "rover",
+      "device",
+      "system-upgrade",
+      "get-import-history",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "requestOnly": true,
+    "replies": {
+      "body": {
+        "items": [{ "taskId": "task-1", "status": "IMPORTED" }]
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-sysupgrade-get-import-status",
+    "key": "rover device system-upgrade get-import-status",
+    "argv": [
+      "rover",
+      "device",
+      "system-upgrade",
+      "get-import-status",
+      "--task-id",
+      "task-1",
+      "--wait",
+      "false",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "status": {
+          "state": {
+            "state": "IMPORTED"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-sysupgrade-import-bundle",
+    "key": "rover device system-upgrade import-bundle",
+    "argv": [
+      "rover",
+      "device",
+      "system-upgrade",
+      "import-bundle",
+      "--object-name",
+      "1.0.0.20250101000000.rover_disconnected_release.tar",
+      "--wait",
+      "false",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": {
+      "body": {
+        "taskId": "task-1"
+      }
+    }
+  },
+  {
+    "id": "batch8-rover-device-sysupgrade-upload-bundle",
+    "key": "rover device system-upgrade upload-bundle",
+    "argv": [
+      "rover",
+      "device",
+      "system-upgrade",
+      "upload-bundle",
+      "--file",
+      "1.0.0.20250101000000.rover_disconnected_release.tar",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "stdin": "y\n",
+    "sandbox": {
+      "files": {
+        "1.0.0.20250101000000.rover_disconnected_release.tar": "fake-tar-content"
+      }
+    },
+    "replies": [
+      {
+        "body": "my-namespace"
+      },
+      {
+        "headers": {
+          "etag": "etag-1",
+          "opc-content-md5": "abc123"
+        },
+        "body": {}
+      }
+    ]
+  },
+  {
+    "id": "batch8-rover-device-sysupgrade-upload-bundle-decline",
+    "key": "rover device system-upgrade upload-bundle",
+    "argv": [
+      "rover",
+      "device",
+      "system-upgrade",
+      "upload-bundle",
+      "--file",
+      "1.0.0.20250101000000.rover_disconnected_release.tar",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "stdin": "n\n",
+    "sandbox": {
+      "files": {
+        "1.0.0.20250101000000.rover_disconnected_release.tar": "fake-tar-content"
+      }
+    }
+  }
+]

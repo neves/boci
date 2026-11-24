@@ -300,25 +300,25 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `profile diagnose`
 - [ ] `profile list`
 - [x] `rover create-master-key-policy`
-- [ ] `rover device data-sync task cancel`
-- [ ] `rover device data-sync task get`
-- [ ] `rover device data-sync task get-snapshot`
-- [ ] `rover device data-sync task list`
-- [ ] `rover device data-sync task start`
-- [ ] `rover device data-sync task-definition change-compartment`
-- [ ] `rover device data-sync task-definition change-state`
-- [ ] `rover device data-sync task-definition create`
-- [ ] `rover device data-sync task-definition delete`
-- [ ] `rover device data-sync task-definition get`
-- [ ] `rover device data-sync task-definition list`
-- [ ] `rover device data-sync task-definition update`
-- [ ] `rover device diagnostics bundle cancel`
-- [ ] `rover device diagnostics bundle create`
-- [ ] `rover device diagnostics bundle get`
-- [ ] `rover device diagnostics bundle list`
-- [ ] `rover device diagnostics bundle view-summary`
-- [ ] `rover device system-upgrade get-import-history`
-- [ ] `rover device system-upgrade get-import-status`
+- [x] `rover device data-sync task cancel`
+- [x] `rover device data-sync task get`
+- [x] `rover device data-sync task get-snapshot`
+- [x] `rover device data-sync task list`
+- [x] `rover device data-sync task start`
+- [x] `rover device data-sync task-definition change-compartment`
+- [x] `rover device data-sync task-definition change-state`
+- [x] `rover device data-sync task-definition create`
+- [x] `rover device data-sync task-definition delete`
+- [x] `rover device data-sync task-definition get`
+- [x] `rover device data-sync task-definition list`
+- [x] `rover device data-sync task-definition update`
+- [x] `rover device diagnostics bundle cancel`
+- [x] `rover device diagnostics bundle create`
+- [x] `rover device diagnostics bundle get`
+- [x] `rover device diagnostics bundle list`
+- [x] `rover device diagnostics bundle view-summary`
+- [x] `rover device system-upgrade get-import-history`
+- [x] `rover device system-upgrade get-import-status`
 - [x] `rover node add-workload`
 - [x] `rover node create`
 - [x] `rover node delete`
@@ -375,5 +375,5 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `management-dashboard dashboard export`
 - [ ] `model-deployment inference-result predict-with-response-stream`
 - [ ] `os object bulk-delete-versions`
-- [ ] `rover device system-upgrade import-bundle`
-- [ ] `rover device system-upgrade upload-bundle`
+- [x] `rover device system-upgrade import-bundle`
+- [x] `rover device system-upgrade upload-bundle`

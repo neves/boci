@@ -1,3 +1,4 @@
+import { createCipheriv } from "node:crypto";
 import { describe, expect, test } from "bun:test";
 import type { TypedParam } from "../../src/core/convert.ts";
 import { bindSdkArgs, type OperationResult } from "../../src/core/operation.ts";
@@ -7,9 +8,11 @@ import {
   ProgramExit,
   ProgramFile,
   ProgramHeaders,
+  ProgramHttpResponse,
   ProgramListCall,
   ProgramPrompt,
   ProgramRaise,
+  ProgramRawRequest,
   ProgramRender,
   ProgramRenderData,
   ProgramResponse,
@@ -17,6 +20,7 @@ import {
   ProgramServiceError,
   ProgramSleep,
   ProgramUnsupported,
+  ProgramUploadObject,
   ProgramUsageError,
   ProgramWaitUntil,
   runProgram,
@@ -2619,6 +2623,421 @@ program.importlib.import_module = lambda name: mod if name == mod.__name__ else 
 prog, targets, sdk_calls = program.compile_wrapper(mod.batch7_wrapper)
 assert prog is not None, program.why_unsupported(mod.batch7_wrapper)
 assert sdk_calls == [("database", "database", "__call_api__")], sdk_calls
+print(json.dumps({"ok": True, "stmts": len(prog)}))
+`;
+    const res = Bun.spawnSync(["python3", "-c", py], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    expect(res.exitCode, new TextDecoder().decode(res.stderr)).toBe(0);
+    const parsed = JSON.parse(new TextDecoder().decode(res.stdout));
+    expect(parsed.ok).toBe(true);
+  });
+});
+
+describe("Batch 8 program features (raw sessions, lambdas, time/fstat/bytes.fromhex/readline/decrypt)", () => {
+  test("sorted with lambda key, closure variable, and reverse", () => {
+    const program: Statement[] = [
+      ["let", "field", "score"],
+      [
+        "let",
+        "rows",
+        [
+          "list",
+          ["dict", ["id", "a"], ["score", 10]],
+          ["dict", ["id", "b"], ["score", 30]],
+          ["dict", ["id", "c"], ["score", 20]],
+        ],
+      ],
+      [
+        "let",
+        "out",
+        [
+          "fn",
+          "sorted",
+          ["var", "rows"],
+          ["lambda", ["$x"], ["item", ["var", "$x"], ["var", "field"]]],
+          true,
+        ],
+      ],
+      ["invoke", [["result", ["var", "out"]]], null],
+    ];
+    const res = runProgram(program, {}, [], (_, v) => v);
+    expect(res.kwargs?.result).toEqual([
+      { id: "b", score: 30 },
+      { id: "c", score: 20 },
+      { id: "a", score: 10 },
+    ]);
+  });
+
+  test("time.time() caches timestamps across replay", () => {
+    const timestamps: number[] = [];
+    const program: Statement[] = [
+      ["let", "t1", ["fn", "time"]],
+      ["invoke", [["t1", ["var", "t1"]]], null],
+    ];
+    const r1 = runProgram(program, {}, [], (_, v) => v, [], undefined, {
+      timestamps,
+    });
+    expect(typeof r1.kwargs?.t1).toBe("number");
+    expect(timestamps).toHaveLength(1);
+    const r2 = runProgram(program, {}, [], (_, v) => v, [], undefined, {
+      timestamps,
+    });
+    expect(r2.kwargs?.t1).toBe(r1.kwargs?.t1);
+  });
+
+  test("file.readline(), file.fileno() + os.fstat().st_size, and bytes.fromhex()", () => {
+    const content = new TextEncoder().encode("deadbeef\nsecond line\n");
+    const f = new ProgramFile("r", content, "key.txt");
+    const program: Statement[] = [
+      ["let", "f", ["item", ["var", "kwargs"], "f"]],
+      [
+        "let",
+        "line1",
+        ["call", "strip", ["call", "readline", ["var", "f"]], "\n"],
+      ],
+      ["let", "line2", ["call", "readline", ["var", "f"]]],
+      ["let", "eof", ["call", "readline", ["var", "f"]]],
+      [
+        "let",
+        "size",
+        ["attr", "st_size", ["fn", "fstat", ["call", "fileno", ["var", "f"]]]],
+      ],
+      [
+        "let",
+        "raw",
+        ["fn", "bytesFromHex", ["call", "ljust", ["var", "line1"], 16, "0"]],
+      ],
+      ["let", "fname", ["attr", "name", ["var", "f"]]],
+      [
+        "invoke",
+        [
+          ["line1", ["var", "line1"]],
+          ["line2", ["var", "line2"]],
+          ["eof", ["var", "eof"]],
+          ["size", ["var", "size"]],
+          ["raw", ["var", "raw"]],
+          ["fname", ["var", "fname"]],
+        ],
+        null,
+      ],
+    ];
+    const res = runProgram(
+      program,
+      { f },
+      [{ name: "f" }] as unknown as TypedParam[],
+      (_, v) => v,
+    );
+    expect(res.kwargs?.line1).toBe("deadbeef");
+    expect(res.kwargs?.line2).toBe("second line\n");
+    expect(res.kwargs?.eof).toBe("");
+    expect(res.kwargs?.size).toBe(content.length);
+    expect(res.kwargs?.fname).toBe("key.txt");
+    expect(res.kwargs?.raw).toEqual(
+      new Uint8Array([0xde, 0xad, 0xbe, 0xef, 0x00, 0x00, 0x00, 0x00]),
+    );
+  });
+
+  test("re.match + .group() and str.splitlines()", () => {
+    const program: Statement[] = [
+      ["let", "lines", ["call", "splitlines", "user alice\npassword s3cr3t\n"]],
+      ["let", "u", null],
+      ["let", "p", null],
+      [
+        "for",
+        "line",
+        ["var", "lines"],
+        [
+          ["let", "um", ["fn", "reMatch", "^user\\s+(\\D.+)", ["var", "line"]]],
+          [
+            "let",
+            "pm",
+            ["fn", "reMatch", "^password\\s+(.+)", ["var", "line"]],
+          ],
+          [
+            "if",
+            ["var", "um"],
+            [["let", "u", ["call", "group", ["var", "um"], 1]]],
+            [],
+          ],
+          [
+            "if",
+            ["var", "pm"],
+            [["let", "p", ["call", "group", ["var", "pm"], 1]]],
+            [],
+          ],
+        ],
+      ],
+      [
+        "invoke",
+        [
+          ["u", ["var", "u"]],
+          ["p", ["var", "p"]],
+        ],
+        null,
+      ],
+    ];
+    const res = runProgram(program, {}, [], (_, v) => v);
+    expect(res.kwargs).toEqual({ u: "alice", p: "s3cr3t" });
+  });
+
+  test("withSession + RetryStrategyBuilder + make_retrying_call + ProgramHttpResponse + simpleResponse", () => {
+    const program: Statement[] = [
+      [
+        "withSession",
+        "sess",
+        ["fn", "rawSession"],
+        [
+          [
+            "do",
+            [
+              "call",
+              "update",
+              ["attr", "params", ["var", "sess"]],
+              ["dict", ["k", "v"]],
+            ],
+          ],
+          [
+            "setAttr",
+            ["var", "sess"],
+            "auth",
+            ["list", "alice", "pw"],
+            "sess.auth = ...",
+          ],
+          [
+            "let",
+            "strat",
+            [
+              "retryBuilderMethod",
+              "get_retry_strategy",
+              [
+                "fn",
+                "retryStrategyBuilder",
+                ["dict", ["total_elapsed_time_seconds", 120]],
+              ],
+              [],
+              [],
+            ],
+          ],
+          [
+            "let",
+            "resp",
+            [
+              "retryCall",
+              ["var", "strat"],
+              [["attr", "request", ["var", "sess"]]],
+              [
+                ["method", "POST"],
+                ["url", "http://127.0.0.1:9999/test"],
+                ["json", ["dict", ["a", 1]]],
+                ["stream", false],
+              ],
+              null,
+            ],
+          ],
+          ["do", ["call", "raise_for_status", ["var", "resp"]]],
+          [
+            "render",
+            [
+              "fn",
+              "simpleResponse",
+              ["call", "json", ["var", "resp"]],
+              [
+                "dictcomp",
+                ["call", "items", ["attr", "headers", ["var", "resp"]]],
+                ["k", "v"],
+                ["var", "k"],
+                ["var", "v"],
+                [],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ];
+    let caught: unknown;
+    try {
+      runProgram(program, {}, [], (_, v) => v);
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(ProgramRawRequest);
+    const req = caught as ProgramRawRequest;
+    expect(req.method).toBe("POST");
+    expect(req.url).toBe("http://127.0.0.1:9999/test");
+    expect(req.params).toEqual({ k: "v" });
+    expect(req.basicAuth).toEqual(["alice", "pw"]);
+    expect(req.hasJson).toBe(true);
+    expect(req.json).toEqual({ a: 1 });
+
+    const body = '{"ok":true}';
+    const fakeResp = new ProgramHttpResponse(
+      200,
+      "OK",
+      { "content-type": "application/json" },
+      new TextEncoder().encode(body),
+      body,
+      req.url,
+    );
+    let rendered: unknown;
+    try {
+      runProgram(program, {}, [], (_, v) => v, [], undefined, {
+        rawResults: [fakeResp],
+      });
+    } catch (e) {
+      rendered = e;
+    }
+    expect(rendered).toBeInstanceOf(ProgramRenderData);
+    expect((rendered as ProgramRenderData).data).toEqual({ ok: true });
+  });
+
+  test("roverBundleDecrypt decrypts AES-128-CBC PKCS7 payload", () => {
+    const keyHex = "00112233445566778899aabbccddeeff";
+    const keyBytes = Buffer.from(keyHex, "hex");
+    const cipher = createCipheriv("aes-128-cbc", keyBytes, keyBytes);
+    const plaintext = new TextEncoder().encode(
+      "diagnostic-bundle-secret-payload",
+    );
+    const ciphertext = new Uint8Array(
+      Buffer.concat([cipher.update(plaintext), cipher.final()]),
+    );
+    const store = new Map<string, Uint8Array>([["/tmp/in.enc", ciphertext]]);
+    const files = {
+      open(path: string, mode: string) {
+        if (mode.includes("w")) {
+          return new ProgramFile(mode, undefined, path, (bytes) => {
+            store.set(path, bytes);
+          });
+        }
+        return new ProgramFile(mode, store.get(path)!, path);
+      },
+      exists: (p: string) => store.has(p),
+      isfile: (p: string) => store.has(p),
+    };
+    const program: Statement[] = [
+      [
+        "do",
+        ["fn", "roverBundleDecrypt", "/tmp/in.enc", "/tmp/out.dec", keyHex],
+      ],
+    ];
+    runProgram(program, {}, [], (_, v) => v, [], files);
+    expect(new TextDecoder().decode(store.get("/tmp/out.dec")!)).toBe(
+      "diagnostic-bundle-secret-payload",
+    );
+  });
+
+  test("roverUploadMultipart suspends with ProgramUploadObject", () => {
+    const f = new ProgramFile(
+      "rb",
+      new TextEncoder().encode("bundle"),
+      "b.tar",
+    );
+    const program: Statement[] = [
+      ["let", "f", ["item", ["var", "kwargs"], "f"]],
+      [
+        "do",
+        [
+          "fn",
+          "roverUploadMultipart",
+          ["fn", "ctxObj"],
+          ["var", "f"],
+          "ns1",
+          "rover-system-upgrade-staging",
+          "b.tar",
+        ],
+      ],
+    ];
+    let caught: unknown;
+    try {
+      runProgram(
+        program,
+        { f },
+        [{ name: "f" }] as unknown as TypedParam[],
+        (_, v) => v,
+        [],
+        undefined,
+        {
+          endpoint: "http://127.0.0.1:9999",
+        },
+      );
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(ProgramUploadObject);
+    const up = caught as ProgramUploadObject;
+    expect(up.namespace).toBe("ns1");
+    expect(up.bucketName).toBe("rover-system-upgrade-staging");
+    expect(up.objectName).toBe("b.tar");
+    expect(up.endpoint).toBe("http://127.0.0.1:9999");
+  });
+
+  test("tools/extract/program.py compiles Batch 8 constructs (withSession, progressbar, Lambda, time.time, os.fstat, bytes.fromhex, readline)", () => {
+    const py = `
+import ast, json, os, sys, time, timeit, types
+sys.path.insert(0, "tools/extract")
+import program
+
+cli_util = types.ModuleType("oci_cli.cli_util")
+def build_raw_requests_session(ctx): pass
+build_raw_requests_session.__module__ = "oci_cli.cli_util"
+def create_config_and_signer_based_on_click_context(ctx): pass
+create_config_and_signer_based_on_click_context.__module__ = "oci_cli.cli_util"
+def pretty_print_format(d): pass
+pretty_print_format.__module__ = "oci_cli.cli_util"
+cli_util.build_raw_requests_session = build_raw_requests_session
+cli_util.create_config_and_signer_based_on_click_context = create_config_and_signer_based_on_click_context
+cli_util.pretty_print_format = pretty_print_format
+
+retry_mod = types.ModuleType("oci.retry.retry")
+class RetryStrategyBuilder:
+    def __init__(self, **kw): pass
+RetryStrategyBuilder.__module__ = "oci.retry.retry"
+class FakeRetryStrategy: pass
+FakeRetryStrategy.__module__ = "oci.retry.retry"
+DEFAULT_RETRY_STRATEGY = FakeRetryStrategy()
+
+mod = types.ModuleType("services.demo.cli_extended")
+mod.cli_util = cli_util
+mod.create_config_and_signer_based_on_click_context = create_config_and_signer_based_on_click_context
+mod.RetryStrategyBuilder = RetryStrategyBuilder
+mod.DEFAULT_RETRY_STRATEGY = DEFAULT_RETRY_STRATEGY
+mod.time = time
+mod.os = os
+mod.timer = timeit.default_timer
+
+src = """
+def batch8_wrapper(ctx, **kwargs):
+    create_config_and_signer_based_on_click_context(ctx)
+    now = time.time()
+    t0 = timer()
+    raw = bytes.fromhex("aabb")
+    rows = sorted([{"k": 2}, {"k": 1}], key=lambda x: x["k"], reverse=True)
+    with open("x.txt") as f:
+        line = f.readline()
+        sz = os.fstat(f.fileno()).st_size
+    with cli_util.build_raw_requests_session(ctx) as sess:
+        strat = RetryStrategyBuilder(total_elapsed_time_seconds=60).get_retry_strategy()
+        r = strat.make_retrying_call(sess.request, method="GET", url="http://127.0.0.1/x", stream=True)
+        with click.progressbar(length=10, label="DL", file=sys.stderr) as bar:
+            for c in r.iter_content(chunk_size=4):
+                bar.update(4)
+            bar.finished = True
+            bar.render_finish()
+        print(cli_util.pretty_print_format({"now": now, "t0": t0, "rows": rows, "line": line, "sz": sz}))
+"""
+exec(compile(src, "<demo>", "exec"), mod.__dict__)
+mod.batch8_wrapper.__module__ = mod.__name__
+tree = ast.parse(src)
+ast_map = {mod.__dict__[n.name]: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+orig_fn_ast = program._fn_ast
+program._fn_ast = lambda fn: ast_map.get(fn) or orig_fn_ast(fn)
+orig_import = program.importlib.import_module
+program.importlib.import_module = lambda name: mod if name == mod.__name__ else orig_import(name)
+
+prog, targets, sdk_calls = program.compile_wrapper(mod.batch8_wrapper)
+assert prog is not None, program.why_unsupported(mod.batch8_wrapper)
+assert targets == [] and sdk_calls == []
 print(json.dumps({"ok": True, "stmts": len(prog)}))
 `;
     const res = Bun.spawnSync(["python3", "-c", py], {

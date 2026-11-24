@@ -54,11 +54,12 @@ import functools
 import importlib
 import inspect
 import textwrap
+import timeit
 
 METHODS = {
-    "get", "pop", "append", "insert", "extend", "setdefault", "split", "upper", "lower", "strip", "update",
-    "read", "write", "close", "rstrip", "decode", "keys", "join", "format", "items",
-    "startswith", "endswith", "replace", "find", "search",
+    "get", "pop", "append", "insert", "extend", "setdefault", "split", "splitlines", "upper", "lower", "strip", "update",
+    "read", "readline", "write", "close", "rstrip", "ljust", "decode", "keys", "join", "format", "items",
+    "startswith", "endswith", "replace", "find", "search", "group", "json", "raise_for_status", "fileno", "render_finish",
 }
 FUNCTIONS = {
     "json.dumps": "dumps",
@@ -67,6 +68,8 @@ FUNCTIONS = {
     "cli_util.parse_json_parameter": "parse",
     "cli_util.use_or_generate_request_id": "requestId",
     "use_or_generate_request_id": "requestId",
+    "cli_util.pretty_print_format": "prettyPrintFormat",
+    "cli_util.load_file_contents": "loadFileContents",
     "str": "str",
     "int": "int",
     "len": "len",
@@ -79,12 +82,15 @@ FUNCTIONS = {
     "range": "range",
     "b64encode": "b64encode",
     "base64.b64encode": "b64encode",
+    "bytes.fromhex": "bytesFromHex",
+    "re.match": "reMatch",
     "json_skeleton_utils.remove_json_skeleton_params_from_dict": "removeSkeleton",
     "six.iteritems": "items",
     "next": "next",
     "list": "list",
     "click.confirm": "confirm",
     "open": "open",
+    "os.fstat": "fstat",
     "os.path.exists": "exists",
     "os.path.isfile": "isfile",
     "os.path.abspath": "abspath",
@@ -93,6 +99,7 @@ FUNCTIONS = {
     "os.path.expandvars": "expandvars",
     "zipfile.is_zipfile": "isZipfile",
     "time.sleep": "sleep",
+    "time.time": "time",
     "random.choice": "randomChoice",
     "cli_util.to_dict": "toDict",
     "cli_util.formatted_flat_dict": "formattedFlatDict",
@@ -154,6 +161,10 @@ HAND_CODED = {
     "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_sse_customer_key_details": "sseCustomerKey",
     # click.prompt(hide_input=True, confirmation_prompt=True) for a Rover secret (ticket 25).
     "services.rover.src.oci_cli_rover.rover_utils.prompt_for_secrets": "roverSecret",
+    # Rover diagnostic bundle AES-CBC decryption (cryptography.hazmat).
+    "services.rover.src.oci_cli_rover.rover_utils.bundle_decrypt": "roverBundleDecrypt",
+    # Rover system-upgrade Object Storage single/multipart upload (oci.object_storage.UploadManager).
+    "services.rover.src.oci_cli_rover.rover_utils.upload_multi_part": "roverUploadMultipart",
     # Functions invoke endpoint cache invalidation after update/delete.
     "services.functions.src.oci_cli_functions.invoke_endpoint_cache.delete_cached_endpoint": "deleteFnEndpointCache",
 }
@@ -272,6 +283,7 @@ class Compiler:
         self.targets = []  # the generated command objects ctx.invoke targets, in order
         self.clients = {}  # scoped variable name -> (spec_name, service_name)
         self.sdk_calls = []  # (spec_name, service_name, method) called directly, in order
+        self.has_external_io = False  # raw HTTP session, namespace lookup, or custom upload I/O
         self._inlining = set()
         self._inline_counts = {}
         self._temp_counter = 0
@@ -393,6 +405,34 @@ class Compiler:
                 or (isinstance(func.value, ast.Name) and self.name(func.value.id, scope) == "ctx")
             )
         )
+
+    def _compile_lambda(self, node, scope):
+        args = node.args
+        if args.posonlyargs or args.kwonlyargs or args.vararg or args.kwarg or args.defaults:
+            raise Unsupported("Lambda")
+        pnames = [self._fresh_temp(f"$lam_{a.arg}_") for a in args.args]
+        lam_scope = {**scope, **{a.arg: pname for a, pname in zip(args.args, pnames)}}
+        return ["lambda", pnames, self.expr(node.body, lam_scope)]
+
+    def _compile_progressbar(self, call, scope):
+        if any(isinstance(a, ast.Starred) for a in call.args) or len(call.args) > 15:
+            raise Unsupported("call click.progressbar")
+        slots = [
+            "iterable", "length", "label", "show_eta", "show_percent", "show_pos",
+            "item_show_func", "fill_char", "empty_char", "bar_template", "info_sep",
+            "width", "file", "color", "update_min_steps",
+        ]
+        bound = {}
+        for idx, a in enumerate(call.args):
+            bound[slots[idx]] = a
+        for kw in call.keywords:
+            if kw.arg not in slots or kw.arg in bound:
+                raise Unsupported("call keywords: click.progressbar")
+            bound[kw.arg] = kw.value
+        length_expr = self.expr(bound["length"], scope) if "length" in bound else None
+        label_expr = self.expr(bound["label"], scope) if "label" in bound else ""
+        file_expr = self.expr(bound["file"], scope) if "file" in bound else None
+        return ["fn", "progressbar", length_expr, label_expr, file_expr]
 
     def _compile_open(self, call, scope):
         if any(isinstance(a, ast.Starred) for a in call.args) or len(call.args) > 2:
@@ -545,19 +585,34 @@ class Compiler:
             for item in st.items:
                 call = item.context_expr
                 if not (
-                    isinstance(call, ast.Call) and _dotted(call.func) == "open"
+                    isinstance(call, ast.Call)
                     and (item.optional_vars is None or isinstance(item.optional_vars, ast.Name))
                 ):
                     raise Unsupported("with")
-                try:
-                    open_expr = self._compile_open(call, scope)
-                except Unsupported:
-                    raise Unsupported("with")
                 var_name = self.name(item.optional_vars.id, scope) if item.optional_vars is not None else None
-                items.append((var_name, open_expr))
+                if _dotted(call.func) == "open":
+                    try:
+                        open_expr = self._compile_open(call, scope)
+                    except Unsupported:
+                        raise Unsupported("with")
+                    items.append(("withOpen", var_name, open_expr))
+                elif (
+                    self._is_cli_util_fn(call.func, "build_raw_requests_session")
+                    and len(call.args) == 1
+                    and not call.keywords
+                    and isinstance(call.args[0], ast.Name)
+                    and self.name(call.args[0].id, scope) == "ctx"
+                ):
+                    self.has_external_io = True
+                    items.append(("withSession", var_name, ["fn", "rawSession"]))
+                elif _dotted(call.func) == "click.progressbar":
+                    pb_expr = self._compile_progressbar(call, scope)
+                    items.append(("withProgressBar", var_name, pb_expr))
+                else:
+                    raise Unsupported("with")
             body = self.stmts(st.body, scope)
-            for var_name, open_expr in reversed(items):
-                body = [["withOpen", var_name, open_expr, body]]
+            for kind, var_name, cm_expr in reversed(items):
+                body = [[kind, var_name, cm_expr, body]]
             return body
         if isinstance(st, ast.Try):
             if not st.handlers and not st.finalbody:
@@ -740,7 +795,7 @@ class Compiler:
         if any(isinstance(a, ast.Starred) for a in call.args):
             raise Unsupported("helper args")
         if any(
-            isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef, ast.Global, ast.Nonlocal))
+            isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Global, ast.Nonlocal))
             for st in fn.body for n in ast.walk(st)
         ):
             raise Unsupported("helper nested")
@@ -1093,11 +1148,16 @@ class Compiler:
                 target = self.resolve(node)
                 if target is not None:
                     return ["target", self.target_index(target)]
+                gval = self.globals[node.id]
+                if getattr(type(gval), "__module__", "") == "oci.retry.retry" and "Strategy" in type(gval).__name__:
+                    return ["fn", "retryStrategy", "default"]
                 try:
-                    return self.constant(self.globals[node.id])
+                    return self.constant(gval)
                 except Unsupported:
                     pass  # a module or function: a NameError if the program reads it
             return ["var", self.name(node.id, scope)]
+        if isinstance(node, ast.Lambda):
+            return self._compile_lambda(node, scope)
         if isinstance(node, ast.Subscript):
             if isinstance(node.slice, ast.Slice):
                 lower = self.expr(node.slice.lower, scope) if node.slice.lower is not None else None
@@ -1127,6 +1187,7 @@ class Compiler:
                 and isinstance(call.func, ast.Attribute) and call.func.attr == "get_namespace"
                 and not call.args and not call.keywords
             ):
+                self.has_external_io = True
                 return ["fn", "namespace", self.expr(call.func.value, scope)]
             # Reject SDK client method references (e.g. client.list_events) and module/global attrs.
             if isinstance(node.value, ast.Name) and self.name(node.value.id, scope) in self.clients:
@@ -1143,6 +1204,8 @@ class Compiler:
                 if root_mod not in _NO_INLINE_MODULES:
                     ok, val = self._resolve_global_obj(node, scope)
                     if ok:
+                        if getattr(type(val), "__module__", "") == "oci.retry.retry" and "Strategy" in type(val).__name__:
+                            return ["fn", "retryStrategy", "default"]
                         try:
                             return self.constant(val)
                         except Unsupported:
@@ -1289,6 +1352,112 @@ class Compiler:
                 if not (isinstance(ctx_node, ast.Name) and self.name(ctx_node.id, scope) == "ctx"):
                     raise Unsupported("call cli_util.get_jmespath_expression_from_context")
                 return ["fn", "jmespathFromContext"]
+            if self._is_cli_util_fn(node.func, "create_config_and_signer_based_on_click_context"):
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 1:
+                    raise Unsupported("call create_config_and_signer_based_on_click_context")
+                ctx_node = node.args[0] if len(node.args) == 1 else None
+                for kw in node.keywords:
+                    if kw.arg == "ctx" and ctx_node is None:
+                        ctx_node = kw.value
+                    else:
+                        raise Unsupported("call keywords")
+                if not (isinstance(ctx_node, ast.Name) and self.name(ctx_node.id, scope) == "ctx"):
+                    raise Unsupported("call create_config_and_signer_based_on_click_context")
+                return ["fn", "createConfigAndSigner"]
+            if self._is_cli_util_fn(node.func, "build_raw_requests_session"):
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 1:
+                    raise Unsupported("call cli_util.build_raw_requests_session")
+                ctx_node = node.args[0] if len(node.args) == 1 else None
+                for kw in node.keywords:
+                    if kw.arg == "ctx" and ctx_node is None:
+                        ctx_node = kw.value
+                    else:
+                        raise Unsupported("call keywords")
+                if not (isinstance(ctx_node, ast.Name) and self.name(ctx_node.id, scope) == "ctx"):
+                    raise Unsupported("call cli_util.build_raw_requests_session")
+                self.has_external_io = True
+                return ["fn", "rawSession"]
+            if self._is_cli_util_fn(node.func, "pretty_print_format") and len(node.args) == 1 and not node.keywords:
+                return ["fn", "prettyPrintFormat", self.expr(node.args[0], scope)]
+            if self._is_cli_util_fn(node.func, "load_file_contents") and len(node.args) == 1 and not node.keywords:
+                return ["fn", "loadFileContents", self.expr(node.args[0], scope)]
+            ok_fn, resolved_fn = self._resolve_global_obj(node.func, scope)
+            if ok_fn and resolved_fn is timeit.default_timer and not node.args and not node.keywords:
+                return ["fn", "time"]
+            if (
+                ok_fn and inspect.isclass(resolved_fn)
+                and getattr(resolved_fn, "__module__", "") == "oci.retry.retry"
+                and resolved_fn.__name__ == "RetryStrategyBuilder"
+            ):
+                if any(isinstance(a, ast.Starred) for a in node.args) or any(kw.arg is None for kw in node.keywords):
+                    raise Unsupported("call RetryStrategyBuilder")
+                kw_pairs = [[kw.arg, self.expr(kw.value, scope)] for kw in node.keywords]
+                return ["fn", "retryStrategyBuilder", ["dict", *kw_pairs]]
+            if (
+                ok_fn and inspect.isclass(resolved_fn)
+                and getattr(resolved_fn, "__module__", "") == "services.rover.src.oci_cli_rover.rover_utils"
+                and resolved_fn.__name__ == "RoverDiagAPI"
+            ):
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 2:
+                    raise Unsupported("call RoverDiagAPI")
+                data_expr = self.expr(node.args[0], scope) if len(node.args) >= 1 else None
+                headers_expr = self.expr(node.args[1], scope) if len(node.args) >= 2 else None
+                for kw in node.keywords:
+                    if kw.arg == "data":
+                        data_expr = self.expr(kw.value, scope)
+                    elif kw.arg == "headers":
+                        headers_expr = self.expr(kw.value, scope)
+                    else:
+                        raise Unsupported("call keywords")
+                return ["fn", "simpleResponse", data_expr, headers_expr]
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "make_retrying_call":
+                if any(isinstance(a, ast.Starred) for a in node.args):
+                    raise Unsupported("make_retrying_call *args")
+                pos = [self.expr(a, scope) for a in node.args]
+                keywords = []
+                star = None
+                for kw in node.keywords:
+                    if kw.arg is None:
+                        if star is not None:
+                            raise Unsupported("two **")
+                        star = self.expr(kw.value, scope)
+                    else:
+                        keywords.append([kw.arg, self.expr(kw.value, scope)])
+                return ["retryCall", self.expr(node.func.value, scope), pos, keywords, star]
+            if isinstance(node.func, ast.Attribute) and node.func.attr in (
+                "get_retry_strategy", "add_max_attempts", "no_total_elapsed_time", "add_service_error_check",
+            ):
+                if any(isinstance(a, ast.Starred) for a in node.args) or any(kw.arg is None for kw in node.keywords):
+                    raise Unsupported(f"call {node.func.attr}")
+                pos = [self.expr(a, scope) for a in node.args]
+                kw_pairs = [[kw.arg, self.expr(kw.value, scope)] for kw in node.keywords]
+                return ["retryBuilderMethod", node.func.attr, self.expr(node.func.value, scope), pos, kw_pairs]
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "iter_content":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 1:
+                    raise Unsupported("call iter_content")
+                chunk_size = self.expr(node.args[0], scope) if node.args else 1
+                for kw in node.keywords:
+                    if kw.arg == "chunk_size":
+                        chunk_size = self.expr(kw.value, scope)
+                    elif kw.arg == "decode_unicode":
+                        continue
+                    else:
+                        raise Unsupported("call keywords")
+                return ["call", "iter_content", self.expr(node.func.value, scope), chunk_size]
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "request" and (node.keywords or node.args):
+                if any(isinstance(a, ast.Starred) for a in node.args):
+                    raise Unsupported("call request *args")
+                pos = [self.expr(a, scope) for a in node.args]
+                keywords = []
+                star = None
+                for kw in node.keywords:
+                    if kw.arg is None:
+                        if star is not None:
+                            raise Unsupported("two **")
+                        star = self.expr(kw.value, scope)
+                    else:
+                        keywords.append([kw.arg, self.expr(kw.value, scope)])
+                return ["sessionRequest", self.expr(node.func.value, scope), pos, keywords, star]
             if dotted == "click.prompt":
                 if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 10:
                     raise Unsupported("call click.prompt")
@@ -1375,6 +1544,8 @@ class Compiler:
                     else:
                         if isinstance(kw.value, ast.Constant) and kw.value.value is None:
                             key_fn = None
+                        elif isinstance(kw.value, ast.Lambda):
+                            key_fn = self._compile_lambda(kw.value, scope)
                         else:
                             kd = _dotted(kw.value)
                             mapped_k = FUNCTIONS.get(kd) if kd else None
@@ -1560,7 +1731,15 @@ class Compiler:
                 return self._compile_open(node, scope)
             hand = self.hand_coded(node.func, scope)
             if hand and not node.keywords:
-                return ["fn", hand, *(self.expr(a, scope) for a in node.args)]
+                if hand == "roverUploadMultipart":
+                    self.has_external_io = True
+                hand_args = [
+                    ["fn", "ctxObj"]
+                    if isinstance(a, ast.Name) and self.name(a.id, scope) == "ctx"
+                    else self.expr(a, scope)
+                    for a in node.args
+                ]
+                return ["fn", hand, *hand_args]
             helper = self._resolve_helper(node.func, scope)
             if helper is not None:
                 return self.inline(node, scope, as_expr=True, helper=helper)
@@ -1698,6 +1877,6 @@ def _compile_wrapper(callback):
         ]
     else:
         program = prelude + compiler.stmts(fn.body, {})
-    if not compiler.targets and not compiler.sdk_calls:
+    if not compiler.targets and not compiler.sdk_calls and not compiler.has_external_io:
         raise Unsupported("no ctx.invoke (calls the SDK directly)")
     return program, compiler.targets, compiler.sdk_calls

@@ -28,7 +28,12 @@ export function kwarg(
   const value = values[name];
   if (value !== undefined) return value;
   const param = params.find((p) => p.name === name);
-  if (param?.multiple) return [];
+  if (param?.multiple) {
+    if ((param as { callback?: string }).callback === "oci-default") {
+      return param.default ?? null;
+    }
+    return [];
+  }
   if (param?.isFlag) return param.default ?? false;
   return param?.default ?? null;
 }

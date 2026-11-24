@@ -202,7 +202,7 @@ async function runParityCase(c: (typeof cases)[number]) {
     }
     const verifyKey = run.sessionPublicKey ?? publicKey;
     for (const req of run.requests) {
-      if (req.headers.authorization)
+      if (req.headers.authorization?.startsWith("Signature "))
         expect(
           signatureValid(req, verifyKey),
           `${c.id}: invalid signature`,

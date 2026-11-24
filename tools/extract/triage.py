@@ -243,7 +243,7 @@ def needs(fn, module_globals, clients):
                 fn.body.append(ast.copy_location(ast.Assign(
                     targets=[ast.Name(id="_probe", ctx=ast.Store())], value=expr), expr))
             continue
-        if not compiler.targets and not compiler.sdk_calls and not invokes:
+        if not compiler.targets and not compiler.sdk_calls and not compiler.has_external_io and not invokes:
             found.setdefault("no ctx.invoke (calls the SDK directly)" if clients else "local wrapper without ctx.invoke", None)
         break
     else:

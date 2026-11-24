@@ -1358,6 +1358,198 @@ export async function callBaseClientApi(
   };
 }
 
+const HTTP_REASON_PHRASES: Record<number, string> = {
+  200: "OK",
+  201: "Created",
+  202: "Accepted",
+  204: "No Content",
+  301: "Moved Permanently",
+  302: "Found",
+  304: "Not Modified",
+  400: "Bad Request",
+  401: "Unauthorized",
+  403: "Forbidden",
+  404: "Not Found",
+  405: "Method Not Allowed",
+  409: "Conflict",
+  412: "Precondition Failed",
+  429: "Too Many Requests",
+  500: "Internal Server Error",
+  502: "Bad Gateway",
+  503: "Service Unavailable",
+  504: "Gateway Timeout",
+};
+
+export type RawSessionRequestCall = {
+  method: string;
+  url: string;
+  params?: Record<string, unknown> | null;
+  headers?: Record<string, string>;
+  data?: unknown;
+  hasJson?: boolean;
+  json?: unknown;
+  stream?: boolean;
+  basicAuth?: [string, string] | null;
+  retryMode?: "default" | "builder" | "none";
+  requestId?: string | null;
+  rootValues: Record<string, unknown>;
+  settings: ClientSettings;
+  index: Pick<Index, "regions">;
+};
+
+export type RawSessionResponse = {
+  statusCode: number;
+  reason: string;
+  headers: Headers;
+  content: Uint8Array;
+  text: string;
+  requestUrl: string;
+  requestHeaders: Record<string, string>;
+};
+
+/**
+ * Execute an HTTP request via `cli_util.build_raw_requests_session(ctx)` with OCI
+ * request signing (or HTTP Basic Auth when `session.auth` is overridden).
+ */
+export async function callRawSessionRequest(
+  io: Invocation,
+  call: RawSessionRequestCall,
+): Promise<RawSessionResponse> {
+  const sc = await createServiceClient(io, {
+    client: {},
+    values: {},
+    rootValues: call.rootValues,
+    settings: call.settings,
+    index: call.index,
+  });
+  const url = new URL(call.url);
+  if (call.params) {
+    for (const [k, v] of Object.entries(call.params)) {
+      if (v === undefined || v === null) continue;
+      if (Array.isArray(v)) {
+        for (const elem of v) {
+          if (elem !== undefined && elem !== null) {
+            url.searchParams.append(k, String(elem));
+          }
+        }
+      } else {
+        url.searchParams.append(k, String(v));
+      }
+    }
+  }
+  const method = call.method.toUpperCase();
+  const headers: Record<string, string> = {};
+  const reqId = call.requestId ?? call.rootValues.request_id;
+  if (typeof reqId === "string" && reqId) {
+    headers["opc-request-id"] = reqId;
+  }
+  if (call.headers) {
+    for (const [k, v] of Object.entries(call.headers)) {
+      if (v !== undefined && v !== null) {
+        headers[k.toLowerCase()] = String(v);
+      }
+    }
+  }
+  let body: string | Uint8Array = "";
+  if (call.hasJson && call.json !== undefined && call.json !== null) {
+    body = JSON.stringify(call.json);
+    headers["content-type"] ??= "application/json";
+  } else if (
+    call.data !== undefined &&
+    call.data !== null &&
+    call.data !== ""
+  ) {
+    if (call.data instanceof ProgramFile) {
+      body = call.data.read();
+    } else if (
+      call.data instanceof Uint8Array ||
+      typeof call.data === "string"
+    ) {
+      body = call.data;
+    } else {
+      body = String(call.data);
+    }
+  }
+  const req = {
+    method,
+    url: url.toString(),
+    headers,
+    body,
+  };
+  prepareContentLength(req);
+  const maxAttempts =
+    call.retryMode === "none" ||
+    call.retryMode === "builder" ||
+    call.rootValues.no_retry === true
+      ? 1
+      : sc.maxAttempts;
+  let response: Response;
+  let content = new Uint8Array(0);
+  let text = "";
+  for (let attempt = 1; ; attempt++) {
+    delete req.headers.date;
+    delete req.headers.authorization;
+    if (call.basicAuth) {
+      req.headers.authorization = `Basic ${Buffer.from(`${call.basicAuth[0]}:${call.basicAuth[1]}`, "utf8").toString("base64")}`;
+    } else {
+      if (sc.delegationToken !== undefined) {
+        req.headers["opc-obo-token"] = sc.delegationToken;
+      }
+      signRequest(
+        req,
+        { keyId: sc.keyId, privateKey: sc.privateKey },
+        true,
+        sc.delegationToken !== undefined
+          ? ["date", "(request-target)", "host", "opc-obo-token"]
+          : undefined,
+      );
+    }
+    try {
+      const init: RequestInit = {
+        method: req.method,
+        headers: req.headers,
+        ...(req.method !== "GET" &&
+        req.method !== "HEAD" &&
+        req.body !== "" &&
+        req.body !== undefined
+          ? { body: req.body }
+          : {}),
+      };
+      response = await fetch(req.url, {
+        ...init,
+        ...fetchTransportFromEnv(req.url, io.env, io.cwd),
+      });
+      content = new Uint8Array(await response.arrayBuffer());
+      text = new TextDecoder("utf-8", { fatal: false }).decode(content);
+    } catch (e) {
+      if (attempt >= maxAttempts) throw e;
+      const delay = Math.min(
+        1000 * 2 ** (attempt - 1) + Math.random() * 1000,
+        30000,
+      );
+      await Bun.sleep(delay);
+      continue;
+    }
+    if (attempt >= maxAttempts || !retryableResponse(response, text)) break;
+    const delay = Math.min(
+      1000 * 2 ** (attempt - 1) + Math.random() * 1000,
+      30000,
+    );
+    await Bun.sleep(delay);
+  }
+  const reason =
+    response.statusText || HTTP_REASON_PHRASES[response.status] || "";
+  return {
+    statusCode: response.status,
+    reason,
+    headers: response.headers,
+    content,
+    text,
+    requestUrl: req.url,
+    requestHeaders: { ...req.headers },
+  };
+}
+
 function timeoutSecondsFor(value: unknown): number | undefined {
   const seconds = Number(value);
   if (Number.isFinite(seconds) && seconds > 0) return seconds;

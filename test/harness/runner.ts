@@ -313,7 +313,10 @@ function captured(
   fileModes?: Record<string, number>,
 ): Run {
   const norm = (s: string) => {
-    let out = s.replaceAll(sb.home, "{home}").replaceAll(url, "{endpoint}");
+    let out = s
+      .replaceAll(`/private${sb.home}`, "{home}")
+      .replaceAll(sb.home, "{home}")
+      .replaceAll(url, "{endpoint}");
     if (metadata) {
       out = out
         .replaceAll(metadata.baseUrl, "{metadata}")

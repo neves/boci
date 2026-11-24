@@ -101,9 +101,7 @@ describe("setup autocomplete", () => {
       await writeFile(join(dir, ".bash_profile"), "# profile\n");
       const res = await runAutocomplete(dir, "\ny\n");
       expect(res.exitCode).toBe(0);
-      expect(res.stdout).toContain(
-        `leave blank to use '${join(dir, ".bashrc")}'`,
-      );
+      expect(res.stdout).toContain(`leave blank to use '${dir}/.bashrc'`);
       expect(await readFile(join(dir, ".bash_profile"), "utf8")).toBe(
         "# profile\n",
       );

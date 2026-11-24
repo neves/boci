@@ -69,6 +69,14 @@ function lazyOsOutput<T>(
 
 /** Single source of truth for Custom OCI Leaf command handlers, loaded lazily on dispatch. */
 export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
+  [
+    "ce cluster create-kubeconfig",
+    async (ctx) => {
+      const { runCeClusterCreateKubeconfig } =
+        await import("../commands/ce/cluster_create_kubeconfig.ts");
+      await runCeClusterCreateKubeconfig(ctx);
+    },
+  ],
   ["compute instance list-vnics", computeHandler],
   [
     "compute instance-console-connection get-plink-connection-string",

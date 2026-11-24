@@ -164,7 +164,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `compute instance detach-vnic`
 - [x] `compute instance-console-connection get-plink-connection-string`
 - [x] `compute volume-attachment list`
-- [ ] `ce cluster create-kubeconfig`
+- [x] `ce cluster create-kubeconfig`
 - [ ] `ce cluster generate-token`
 - [ ] `iam compartment create`
 - [ ] `iam compartment list`

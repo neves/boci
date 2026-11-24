@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Opening a named input no longer requires a validation open followed by reopening the same path.
-- [ ] Named files and stdin supply the expected bytes to the command.
-- [ ] Missing and unreadable named inputs produce the Reference CLI diagnostic and exit status.
+- [x] Opening a named input no longer requires a validation open followed by reopening the same path.
+- [x] Named files and stdin supply the expected bytes to the command.
+- [x] Missing and unreadable named inputs produce the Reference CLI diagnostic and exit status.

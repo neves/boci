@@ -68,12 +68,14 @@ import {
   ProgramConfirm,
   ProgramEcho,
   ProgramExit,
+  ProgramHeaders,
   ProgramSecret,
   ProgramSleep,
   type ProgramAnswer,
   ProgramLookup,
   ProgramRaise,
   ProgramRender,
+  ProgramRenderData,
   ProgramResponse,
   ProgramSdkCall,
   ProgramServiceError,
@@ -96,7 +98,7 @@ import {
   outputBinding,
   parseSdkResponseData,
 } from "./operation.ts";
-import { printResult, type OutputOptions } from "./output.ts";
+import { printResult, renderCliData, type OutputOptions } from "./output.ts";
 import {
   type StdinReader,
   createStdinReader,
@@ -690,6 +692,133 @@ async function main(io: Invocation): Promise<void> {
       };
       if (specCmd.program) {
         const stdin = createStdinReader(io);
+        const wrapperRootValues: Record<string, unknown> = { ...rootValues };
+        const wrapperSettings: RootSettings = { ...settings };
+        const wrapperOutput: OutputOptions = { ...output };
+        const loadContextDefaults = (): Record<string, unknown> => {
+          const stringKeys: [string, string][] = [
+            ["region", "region"],
+            ["endpoint", "endpoint"],
+            ["cert_bundle", "cert-bundle"],
+            ["output", "output"],
+            ["query", "query"],
+            ["generate_param_json_input", "generate-param-json-input"],
+            ["auth", "auth"],
+          ];
+          const boolKeys: [string, string][] = [
+            ["debug", "debug"],
+            ["raw_output", "raw_output"],
+            [
+              "generate_full_command_json_input",
+              "generate-full-command-json-input",
+            ],
+            ["no_retry", "no_retry"],
+            ["realm_specific_endpoint", "realm-specific-endpoint"],
+            ["enable_dual_stack", "enable-dual-stack"],
+          ];
+          const lookupGlobal = (paramName: string) => {
+            const names = [paramName];
+            for (const alias of rc.parameterAliases[`--${paramName}`] ?? []) {
+              names.push(
+                alias.startsWith("--") ? alias.slice(2) : alias.slice(1),
+              );
+            }
+            const leafParam = (cmd.params ?? []).find((p) =>
+              p.opts.includes(`--${paramName}`),
+            );
+            if (leafParam) {
+              for (const o of leafParam.opts) {
+                const n = o.startsWith("--") ? o.slice(2) : o.slice(1);
+                if (!names.includes(n)) names.push(n);
+              }
+            }
+            const hierarchy = path
+              .map((_, i) => path.slice(0, path.length - i).join("."))
+              .concat([""]);
+            for (const prefix of hierarchy) {
+              for (const n of names) {
+                const k = prefix ? `${prefix}.${n}` : n;
+                if (defaults.has(k)) return defaults.get(k);
+              }
+            }
+            return undefined;
+          };
+          for (const [key, paramName] of stringKeys) {
+            if (
+              wrapperRootValues[key] === undefined ||
+              wrapperRootValues[key] === null
+            ) {
+              const rcVal = lookupGlobal(paramName);
+              if (rcVal !== undefined && rcVal !== null) {
+                wrapperRootValues[key] = rcVal;
+              }
+            }
+          }
+          if (
+            wrapperRootValues.output === undefined ||
+            wrapperRootValues.output === null
+          )
+            wrapperRootValues.output = "json";
+          if (
+            wrapperRootValues.auth === undefined ||
+            wrapperRootValues.auth === null
+          )
+            wrapperRootValues.auth = wrapperSettings.auth ?? "api_key";
+          else if (
+            wrapperSettings.auth === null &&
+            typeof wrapperRootValues.auth === "string"
+          )
+            wrapperSettings.auth = wrapperRootValues.auth;
+          for (const [key, paramName] of boolKeys) {
+            if (!wrapperRootValues[key]) {
+              const rcVal = lookupGlobal(paramName);
+              if (rcVal !== undefined && rcVal !== null) {
+                const globalParam = index.globalParams.find(
+                  (p) => p.name === key,
+                );
+                wrapperRootValues[key] = convertDefaultValue(
+                  io.env,
+                  globalParam ?? {
+                    kind: "option",
+                    name: key,
+                    opts: [`--${paramName}`],
+                    secondaryOpts: [],
+                    multiple: false,
+                    count: false,
+                    nargs: 1,
+                    isFlag: true,
+                    typeClass: "click.types.BoolParamType",
+                  },
+                  rcVal,
+                  index.datetime,
+                );
+              }
+            }
+          }
+          wrapperOutput.output = wrapperRootValues.output;
+          wrapperOutput.query = wrapperRootValues.query;
+          wrapperOutput.rawOutput = wrapperRootValues.raw_output;
+          return {
+            region: wrapperRootValues.region ?? null,
+            endpoint: wrapperRootValues.endpoint ?? null,
+            cert_bundle: wrapperRootValues.cert_bundle ?? null,
+            output: wrapperRootValues.output,
+            query: wrapperRootValues.query ?? null,
+            generate_param_json_input:
+              wrapperRootValues.generate_param_json_input ?? null,
+            auth: wrapperRootValues.auth,
+            debug: Boolean(wrapperRootValues.debug),
+            raw_output: Boolean(wrapperRootValues.raw_output),
+            generate_full_command_json_input: Boolean(
+              wrapperRootValues.generate_full_command_json_input,
+            ),
+            no_retry: Boolean(wrapperRootValues.no_retry),
+            realm_specific_endpoint: Boolean(
+              wrapperRootValues.realm_specific_endpoint,
+            ),
+            enable_dual_stack: Boolean(wrapperRootValues.enable_dual_stack),
+          };
+        };
         // @cli_util.confirm_delete_option prompts inside wrap_exceptions before the callback runs.
         if (
           specCmd.program.wrapExceptions &&
@@ -720,11 +849,11 @@ async function main(io: Invocation): Promise<void> {
             region: () => {
               try {
                 const region =
-                  rootValues.region ??
+                  wrapperRootValues.region ??
                   io.env.OCI_CLI_REGION ??
                   fromFile(
-                    settings.configFile,
-                    settings.profile,
+                    wrapperSettings.configFile,
+                    wrapperSettings.profile,
                     io.env,
                     io.cwd,
                   ).region;
@@ -738,8 +867,8 @@ async function main(io: Invocation): Promise<void> {
               const nsCall = {
                 command: spec.commands["ns get"] as GeneratedCommand,
                 values: {},
-                rootValues,
-                settings,
+                rootValues: wrapperRootValues,
+                settings: wrapperSettings,
                 spec,
                 index,
               };
@@ -751,13 +880,15 @@ async function main(io: Invocation): Promise<void> {
               const op = specCmd.sdkOperations?.[opIndex];
               if (!op) throw new ProgramUnsupported(`sdk[${opIndex}]`);
               const callRootValues =
-                region !== undefined ? { ...rootValues, region } : rootValues;
+                region !== undefined
+                  ? { ...wrapperRootValues, region }
+                  : wrapperRootValues;
               const result = await callSdkOperation(io, {
                 operation: op,
                 posArgs,
                 kwArgs,
                 rootValues: callRootValues,
-                settings,
+                settings: wrapperSettings,
                 spec,
                 index,
               });
@@ -777,8 +908,8 @@ async function main(io: Invocation): Promise<void> {
               if (!op) throw new ProgramUnsupported(`sdk[${call.opIndex}]`);
               const callRootValues =
                 call.region !== undefined
-                  ? { ...rootValues, region: call.region }
-                  : rootValues;
+                  ? { ...wrapperRootValues, region: call.region }
+                  : wrapperRootValues;
               const outcome = await waitUntilResponse({
                 initial: wait.response.result,
                 property: wait.property,
@@ -792,7 +923,7 @@ async function main(io: Invocation): Promise<void> {
                     posArgs: call.posArgs,
                     kwArgs: call.kwArgs,
                     rootValues: callRootValues,
-                    settings,
+                    settings: wrapperSettings,
                     spec,
                     index,
                   }),
@@ -819,19 +950,37 @@ async function main(io: Invocation): Promise<void> {
               }
             },
             render: (response) => {
-              printResult(io, response.result, output);
+              printResult(io, response.result, wrapperOutput);
+            },
+            renderData: (r) => {
+              const hasAllPagesParam = (specCmd.params ?? []).some(
+                (p) => p.name === "all_pages",
+              );
+              const headerEntries =
+                r.headers instanceof ProgramHeaders
+                  ? r.headers.entries()
+                  : r.headers
+                    ? Object.entries(r.headers)
+                    : null;
+              renderCliData(io, r.data, headerEntries, wrapperOutput, {
+                displayAllHeaders: r.displayAllHeaders,
+                nestDataInDataAttribute: r.nestDataInDataAttribute,
+                hasAllPagesParam,
+              });
             },
             serviceError: (result) => {
-              printResult(io, result, output);
+              printResult(io, result, wrapperOutput);
             },
             sleep: (seconds) => Bun.sleep(seconds * 1000),
           },
           [],
           {
             region: undefined,
+            env: io.env,
+            loadContextDefaults,
             requestId:
-              typeof rootValues.request_id === "string"
-                ? rootValues.request_id
+              typeof wrapperRootValues.request_id === "string"
+                ? wrapperRootValues.request_id
                 : null,
           },
           stdin,
@@ -986,6 +1135,7 @@ type WrapperLookups = {
   ) => Promise<ProgramSdkOutcome>;
   waitUntil: (wait: ProgramWaitUntil) => Promise<ProgramSdkOutcome>;
   render: (response: ProgramResponse) => void;
+  renderData: (render: ProgramRenderData) => void;
   serviceError: (result: OperationResult) => void;
   sleep: (seconds: number) => Promise<void>;
 };
@@ -1209,6 +1359,23 @@ async function runWrapper(
     }
     if (e instanceof ProgramRender) {
       lookups.render(e.response);
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          renderedCount: (ctx.renderedCount ?? 0) + 1,
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramRenderData) {
+      lookups.renderData(e);
       return runWrapper(
         io,
         command,

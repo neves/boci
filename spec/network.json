@@ -76141,6 +76141,526 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "vnic_id", ["call", "pop", ["var", "kwargs"], "vnic_id"]],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "ip_address",
+            ["call", "pop", ["var", "kwargs"], "ip_address"]
+          ],
+          [
+            "let",
+            "unassign_if_already_assigned",
+            ["call", "pop", ["var", "kwargs"], "unassign_if_already_assigned"]
+          ],
+          [
+            "let",
+            "ipv6_subnet_cidr",
+            ["call", "pop", ["var", "kwargs"], "ipv6_subnet_cidr"]
+          ],
+          [
+            "let",
+            "route_table_id",
+            ["call", "pop", ["var", "kwargs"], "route_table_id"]
+          ],
+          ["let", "lifetime", ["call", "pop", ["var", "kwargs"], "lifetime"]],
+          [
+            "let",
+            "cidr_prefix_length",
+            ["call", "pop", ["var", "kwargs"], "cidr_prefix_length"]
+          ],
+          ["checkNoExtraKwargs", "assign_ipv6"],
+          [
+            "let",
+            "networking_client",
+            ["fn", "client", "core", "virtual_network"]
+          ],
+          [
+            "let",
+            "vnic",
+            [
+              "attr",
+              "data",
+              [
+                "sdk",
+                0,
+                ["var", "networking_client"],
+                [["var", "vnic_id"]],
+                [],
+                null
+              ]
+            ]
+          ],
+          ["let", "subnet_id", ["attr", "subnet_id", ["var", "vnic"]]],
+          ["let", "is_ip_reassignment", false],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "ip_address"], null],
+            [
+              [
+                "let",
+                "list_ips_response",
+                [
+                  "sdk",
+                  1,
+                  ["var", "networking_client"],
+                  [],
+                  [
+                    ["ip_address", ["var", "ip_address"]],
+                    ["subnet_id", ["var", "subnet_id"]]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "let",
+                "list_ips_response_data",
+                ["attr", "data", ["var", "list_ips_response"]]
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["var", "list_ips_response_data"], null],
+                [
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "==",
+                      ["fn", "len", ["var", "list_ips_response_data"]],
+                      1
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "==",
+                          [
+                            "attr",
+                            "vnic_id",
+                            ["item", ["var", "list_ips_response_data"], 0]
+                          ],
+                          ["var", "vnic_id"]
+                        ],
+                        [
+                          [
+                            "do",
+                            [
+                              "fn",
+                              "echo",
+                              [
+                                "call",
+                                "format",
+                                "Taking no action as IP address {} is already assigned to VNIC {}",
+                                ["var", "ip_address"],
+                                ["var", "vnic_id"]
+                              ],
+                              null,
+                              true,
+                              true
+                            ]
+                          ],
+                          ["return", null]
+                        ],
+                        []
+                      ],
+                      [
+                        "if",
+                        ["not", ["var", "unassign_if_already_assigned"]],
+                        [
+                          [
+                            "exit",
+                            [
+                              "call",
+                              "format",
+                              "IP address {} is already assigned to a different VNIC: {}. To reassign it, re-run this command with the --unassign-if-already-assigned option",
+                              ["var", "ip_address"],
+                              [
+                                "attr",
+                                "vnic_id",
+                                ["item", ["var", "list_ips_response_data"], 0]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      ["let", "is_ip_reassignment", true]
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          ">",
+                          ["fn", "len", ["var", "list_ips_response_data"]],
+                          1
+                        ],
+                        [
+                          [
+                            "exit",
+                            [
+                              "call",
+                              "format",
+                              "IP address {} appeared {} times in subnet with OCID {}. It is expected to appear at most once (Request ID: {})",
+                              ["var", "ip_address"],
+                              ["fn", "len", ["var", "list_ips_response_data"]],
+                              ["var", "subnet_id"],
+                              [
+                                "attr",
+                                "request_id",
+                                ["var", "list_ips_response"]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "assign_ip_request_body", ["dict"]],
+          [
+            "set",
+            ["var", "assign_ip_request_body"],
+            "vnicId",
+            ["var", "vnic_id"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "assign_ip_request_body"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "assign_ip_request_body"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "assign_ip_request_body"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "ipv6_subnet_cidr"], null],
+            [
+              [
+                "set",
+                ["var", "assign_ip_request_body"],
+                "ipv6SubnetCidr",
+                ["var", "ipv6_subnet_cidr"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "route_table_id"], null],
+            [
+              [
+                "set",
+                ["var", "assign_ip_request_body"],
+                "routeTableId",
+                ["var", "route_table_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifetime"], null],
+            [
+              [
+                "set",
+                ["var", "assign_ip_request_body"],
+                "lifetime",
+                ["var", "lifetime"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "is_ip_reassignment"]],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "ip_address"], null],
+                [
+                  [
+                    "set",
+                    ["var", "assign_ip_request_body"],
+                    "ipAddress",
+                    ["var", "ip_address"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["var", "cidr_prefix_length"], null],
+                [
+                  [
+                    "set",
+                    ["var", "assign_ip_request_body"],
+                    "cidrPrefixLength",
+                    ["var", "cidr_prefix_length"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["var", "subnet_id"], null],
+                [
+                  [
+                    "set",
+                    ["var", "assign_ip_request_body"],
+                    "subnetId",
+                    ["var", "subnet_id"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  2,
+                  ["var", "networking_client"],
+                  [["var", "assign_ip_request_body"]],
+                  [],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  3,
+                  ["var", "networking_client"],
+                  [
+                    [
+                      "attr",
+                      "id",
+                      ["item", ["var", "list_ips_response_data"], 0]
+                    ],
+                    ["var", "assign_ip_request_body"]
+                  ],
+                  [],
+                  null
+                ]
+              ]
+            ]
+          ],
+          ["let", "ip_id", ["attr", "id", ["attr", "data", ["var", "result"]]]],
+          [
+            "let",
+            "get_ip_id_result",
+            [
+              "sdk",
+              4,
+              ["var", "networking_client"],
+              [["var", "ip_id"]],
+              [],
+              null
+            ]
+          ],
+          ["render", ["var", "get_ip_id_result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.virtual_network",
+          "method": "get_vnic",
+          "http": "GET",
+          "path": "/vnics/{vnicId}",
+          "positionalArgs": ["vnic_id"],
+          "pathParams": {
+            "vnicId": "vnic_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Vnic"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "list_ipv6s",
+          "http": "GET",
+          "path": "/ipv6",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "ipAddress": {
+              "arg": "ip_address"
+            },
+            "subnetId": {
+              "arg": "subnet_id"
+            },
+            "vnicId": {
+              "arg": "vnic_id"
+            },
+            "ipState": {
+              "arg": "ip_state"
+            },
+            "lifetime": {
+              "arg": "lifetime"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "list[Ipv6]"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "create_ipv6",
+          "http": "POST",
+          "path": "/ipv6",
+          "positionalArgs": ["create_ipv6_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_ipv6_details",
+          "responseType": "Ipv6"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "update_ipv6",
+          "http": "PUT",
+          "path": "/ipv6/{ipv6Id}",
+          "positionalArgs": ["ipv6_id", "update_ipv6_details"],
+          "pathParams": {
+            "ipv6Id": "ipv6_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "update_ipv6_details",
+          "responseType": "Ipv6"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "get_ipv6",
+          "http": "GET",
+          "path": "/ipv6/{ipv6Id}",
+          "positionalArgs": ["ipv6_id"],
+          "pathParams": {
+            "ipv6Id": "ipv6_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "Ipv6"
+        }
+      ],
       "params": [
         {
           "kind": "option",

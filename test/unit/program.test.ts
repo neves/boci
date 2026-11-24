@@ -5,8 +5,10 @@ import {
   ProgramEcho,
   ProgramExit,
   ProgramFile,
+  ProgramHeaders,
   ProgramRaise,
   ProgramRender,
+  ProgramRenderData,
   ProgramResponse,
   ProgramSdkCall,
   ProgramServiceError,
@@ -15,9 +17,11 @@ import {
   ProgramUsageError,
   ProgramWaitUntil,
   runProgram,
+  toDictValue,
   type Expr,
   type Statement,
 } from "../../src/core/program.ts";
+import { renderCliData } from "../../src/core/output.ts";
 import { waitUntilResponse } from "../../src/core/waiter.ts";
 
 const params = [
@@ -862,5 +866,290 @@ describe("runProgram", () => {
     expect(err?.message).toBe(
       "update_asset_source() got an unexpected keyword argument 'b'",
     );
+  });
+
+  test("Return exits top-level, statement block, and evalBlock helper with value", () => {
+    // Top-level early return skips later statements.
+    const earlyTop: Statement[] = [
+      ["if", ["cmp", "==", kw("a"), "stop"], [["return", null]], []],
+      invoke,
+    ];
+    expect(
+      runProgram(earlyTop, { a: "stop" }, params, parse).kwargs,
+    ).toBeUndefined();
+    expect(runProgram(earlyTop, { a: "go" }, params, parse).kwargs).toEqual({
+      a: "go",
+    });
+
+    // Statement block catches its own return without aborting the outer program.
+    const blockProg: Statement[] = [
+      [
+        "block",
+        [
+          ["set", ["var", "kwargs"], "a", "from-block"],
+          ["return", null],
+          ["set", ["var", "kwargs"], "a", "unreachable"],
+        ],
+      ],
+      invoke,
+    ];
+    expect(runProgram(blockProg, {}, params, parse).kwargs).toEqual({
+      a: "from-block",
+    });
+
+    // evalBlock returns the value passed to return, or null if falling off.
+    const evalProg: Statement[] = [
+      [
+        "let",
+        "res",
+        [
+          "evalBlock",
+          [
+            ["let", "x", ["bin", "+", 2, 3]],
+            ["return", ["bin", "*", ["var", "x"], 4]],
+          ],
+        ] as unknown as Expr,
+      ],
+      ["invoke", [["ans", ["var", "res"]]], null],
+    ];
+    expect(runProgram(evalProg, {}, params, parse).kwargs).toEqual({ ans: 20 });
+  });
+
+  test("AugAssign mutates numbers, strings, lists in place, and dict items", () => {
+    const program: Statement[] = [
+      ["let", "n", 10],
+      ["aug", "+", "n", 5],
+      ["aug", "-", "n", 3],
+      ["aug", "*", "n", 2],
+      ["aug", "//", "n", 5],
+      ["let", "xs", ["list", 1]],
+      ["let", "alias", ["var", "xs"]],
+      ["aug", "+", "xs", ["list", 2, 3]],
+      ["let", "s", "hi"],
+      ["aug", "+", "s", "!"],
+      ["let", "d", ["dict", ["k", 7]]],
+      ["augItem", "+", ["var", "d"], "k", 4],
+      [
+        "invoke",
+        [
+          ["n", ["var", "n"]],
+          ["alias", ["var", "alias"]],
+          ["s", ["var", "s"]],
+          ["d", ["var", "d"]],
+        ],
+        null,
+      ],
+    ];
+    expect(runProgram(program, {}, params, parse).kwargs).toEqual({
+      n: 4,
+      alias: [1, 2, 3],
+      s: "hi!",
+      d: { k: 11 },
+    });
+  });
+
+  test("print yields ProgramEcho with sep, end, stdout/stderr, and Python formatting", () => {
+    const prog: Statement[] = [
+      ["do", ["fn", "print", ["list", kw("ids")], null, null, null]],
+      ["do", ["fn", "print", ["list", "a", "b"], ", ", "!", ["fn", "stderr"]]],
+    ];
+    let first: ProgramEcho | undefined;
+    try {
+      runProgram(prog, { ids: ["TLS_V1_2"] }, params, parse);
+    } catch (e) {
+      if (e instanceof ProgramEcho) first = e;
+      else throw e;
+    }
+    expect(first?.text).toBe("('TLS_V1_2',)\n");
+    expect(first?.toStderr).toBe(false);
+
+    let second: ProgramEcho | undefined;
+    try {
+      runProgram(prog, { ids: ["TLS_V1_2"] }, params, parse, [], undefined, {
+        echoCount: 1,
+      });
+    } catch (e) {
+      if (e instanceof ProgramEcho) second = e;
+      else throw e;
+    }
+    expect(second?.text).toBe("a, b!");
+    expect(second?.toStderr).toBe(true);
+  });
+
+  test("str.format supports positional, keyword, !r conversion, and **kwargs", () => {
+    const prog: Statement[] = [
+      [
+        "invoke",
+        [
+          [
+            "kw",
+            [
+              "format",
+              "ns={ns} bn={bn} name={name!r}",
+              [],
+              [
+                ["ns", "myns"],
+                ["bn", "mybucket"],
+                ["name", "a.txt"],
+              ],
+              null,
+            ],
+          ],
+          ["pos", ["call", "format", "User {!r} not in {!r}", "u-1", "g-1"]],
+          [
+            "mixed",
+            ["format", "{}: {val} {{ok}}", ["key"], [], ["dict", ["val", 42]]],
+          ],
+        ],
+        null,
+      ],
+    ];
+    expect(runProgram(prog, {}, params, parse).kwargs).toEqual({
+      kw: "ns=myns bn=mybucket name='a.txt'",
+      pos: "User 'u-1' not in 'g-1'",
+      mixed: "key: 42 {ok}",
+    });
+  });
+
+  test("os.path.expanduser and os.path.expandvars expand against context.env", () => {
+    const prog: Statement[] = [
+      [
+        "invoke",
+        [
+          ["home", ["fn", "expanduser", "~/wallet.zip"]],
+          ["env", ["fn", "expandvars", "$BASE/${SUB}/$UNKNOWN"]],
+        ],
+        null,
+      ],
+    ];
+    expect(
+      runProgram(prog, {}, params, parse, [], undefined, {
+        env: { HOME: "/home/alice", BASE: "/opt", SUB: "oci" },
+      }).kwargs,
+    ).toEqual({
+      home: "/home/alice/wallet.zip",
+      env: "/opt/oci/$UNKNOWN",
+    });
+  });
+
+  test("toDict, formattedFlatDict, setAttr on response.data, loadContextDefaults, and renderData", () => {
+    const models = {
+      Policy: {
+        attributes: [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["statements", "list[str]", "statements"],
+        ] as [string, string, string][],
+      },
+    };
+    const resp = new ProgramResponse(
+      {
+        operation: {
+          client: "identity.identity",
+          method: "get_policy",
+          http: "GET",
+          path: "/policies/{policyId}",
+          queryParams: {},
+          responseType: "Policy",
+        },
+        responseModels: models,
+        url: new URL("https://example.invalid/policies/p-1"),
+        response: new Response("{}", {
+          status: 200,
+          headers: { etag: "e-1", "opc-request-id": "req-9" },
+        }),
+        raw: "{}",
+        allPages: false,
+        pageItems: [],
+      },
+      {
+        id: "p-1",
+        timeCreated: "2026-01-01T00:00:00Z",
+        statements: ["Allow group A to read all-resources in tenancy"],
+      },
+    );
+    expect(toDictValue(resp.data)).toEqual({
+      id: "p-1",
+      "time-created": "2026-01-01T00:00:00+00:00",
+      statements: ["Allow group A to read all-resources in tenancy"],
+    });
+    expect(resp.requestId).toBe("req-9");
+
+    // loadContextDefaults populates ctx.obj; formattedFlatDict formats sorted JSON;
+    // setting result.data triggers renderData with overridden payload.
+    const prog: Statement[] = [
+      ["loadContextDefaults"],
+      ["let", "client", ["fn", "client", "identity", "identity"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [], [], null]],
+      [
+        "let",
+        "flat",
+        [
+          "fn",
+          "formattedFlatDict",
+          ["attr", "statements", ["attr", "data", ["var", "res"]]],
+        ],
+      ],
+      ["let", "d", ["fn", "toDict", ["attr", "data", ["var", "res"]]]],
+      ["set", ["var", "d"], "extra", ["item", ["fn", "ctxObj"], "output"]],
+      ["setAttr", ["var", "res"], "data", ["var", "d"], "res.data = d"],
+      ["render", ["var", "res"]],
+    ];
+    let rendered: ProgramRenderData | undefined;
+    try {
+      runProgram(prog, {}, params, parse, [], undefined, {
+        sdkResults: [resp],
+        loadContextDefaults: () => ({ output: "json" }),
+      });
+    } catch (e) {
+      if (e instanceof ProgramRenderData) rendered = e;
+      else throw e;
+    }
+    expect(rendered).toBeInstanceOf(ProgramRenderData);
+    expect(rendered?.data).toEqual({
+      id: "p-1",
+      "time-created": "2026-01-01T00:00:00+00:00",
+      statements: ["Allow group A to read all-resources in tenancy"],
+      extra: "json",
+    });
+
+    // renderCliData handles display_all_headers, nest_data_in_data_attribute, table + headers, and opc-next-page.
+    let out = "";
+    let err = "";
+    const fakeIo = {
+      argv: [],
+      env: {},
+      cwd: "/",
+      isTTY: () => false,
+      columns: () => 80,
+      out: (s: string) => {
+        out += s;
+      },
+      err: (s: string) => {
+        err += s;
+      },
+    };
+    renderCliData(
+      fakeIo,
+      null,
+      new ProgramHeaders({ ETag: "e-1", "X-Custom": "v" }).entries(),
+      { rc: { cannedQueries: {}, path: "" } },
+      { displayAllHeaders: true },
+    );
+    expect(JSON.parse(out)).toEqual({ etag: "e-1", "x-custom": "v" });
+    expect(err).toBe("");
+
+    out = "";
+    err = "";
+    renderCliData(
+      fakeIo,
+      [{ name: "a" }],
+      [["opc-next-page", "p2"]],
+      { output: "table", rc: { cannedQueries: {}, path: "" } },
+      { displayAllHeaders: false, hasAllPagesParam: true },
+    );
+    expect(out).toContain("name");
+    expect(err).toContain("opc-next-page: p2\n");
+    expect(err).toContain("Re-run using the --all option");
   });
 });

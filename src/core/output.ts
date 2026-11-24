@@ -139,6 +139,110 @@ function renderGeneratedResponse(
   renderDocument(io, output, options);
 }
 
+export const DISPLAY_HEADERS = new Set([
+  "etag",
+  "opc-next-cursor",
+  "opc-next-page",
+  "opc-total-items",
+  "opc-work-request-id",
+]);
+
+export type RenderCliDataOptions = {
+  displayAllHeaders?: boolean;
+  nestDataInDataAttribute?: boolean;
+  hasAllPagesParam?: boolean;
+};
+
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+const isDisplayTruthy = (v: unknown): boolean => {
+  if (v === null || v === undefined || v === false || v === 0 || v === "")
+    return false;
+  if (Array.isArray(v)) return v.length > 0;
+  if (isPlainObject(v)) return Object.keys(v).length > 0;
+  return true;
+};
+
+/**
+ * Matches `oci_cli.cli_util.render(data, headers, ctx, display_all_headers=False,
+ * nest_data_in_data_attribute=True)`.
+ */
+export function renderCliData(
+  io: Invocation,
+  data: unknown,
+  headers: Iterable<[string, unknown]> | null,
+  options: OutputOptions,
+  renderOpts: RenderCliDataOptions = {},
+): void {
+  const displayAllHeaders = renderOpts.displayAllHeaders ?? false;
+  const nestData = renderOpts.nestDataInDataAttribute ?? true;
+  let displayDict: unknown = {};
+  if (isDisplayTruthy(data)) {
+    if (nestData) {
+      (displayDict as Record<string, unknown>).data = data;
+    } else {
+      displayDict = isPlainObject(data) ? { ...data } : data;
+    }
+  }
+  let opcNextPage: unknown = undefined;
+  if (headers) {
+    for (const [rawKey, value] of headers) {
+      const key = rawKey.toLowerCase();
+      if (key === "opc-next-page") opcNextPage = value;
+      if (
+        (DISPLAY_HEADERS.has(key) || displayAllHeaders) &&
+        isPlainObject(displayDict)
+      ) {
+        displayDict[key] = value ?? null;
+      }
+    }
+  }
+  if (isDisplayTruthy(displayDict)) {
+    let query = options.query;
+    if (typeof query === "string" && query.startsWith("query://")) {
+      const queryName = query.slice("query://".length);
+      query = options.rc.cannedQueries[queryName];
+      if (query === undefined) {
+        io.err(
+          `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${options.rc.path}\n`,
+        );
+        throw new Exit(1);
+      }
+    }
+    const hasQuery = typeof query === "string";
+    const displayData = hasQuery
+      ? applyQuery(displayDict, query as string)
+      : displayDict;
+    if (displayData === null) {
+      io.err("Query returned empty result, no output to show.\n");
+      return;
+    }
+    const format = options.output ?? "json";
+    if (format === "table") {
+      const tableData =
+        !hasQuery && isPlainObject(displayData) && "data" in displayData
+          ? displayData.data
+          : displayData;
+      io.out(renderTable(tableData));
+      if (isPlainObject(displayDict) && "data" in displayDict) {
+        for (const [key, value] of Object.entries(displayDict)) {
+          if (key !== "data") io.err(`${key}: ${String(value)}\n`);
+        }
+      }
+    } else if (options.rawOutput && typeof displayData === "string") {
+      io.out(`${displayData}\n`);
+    } else {
+      io.out(`${JSON.stringify(sortJson(displayData), null, 2)}\n`);
+    }
+  }
+  if (isDisplayTruthy(opcNextPage) && renderOpts.hasAllPagesParam) {
+    io.err(
+      "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
+    );
+  }
+}
+
 /** Render an already-shaped response document (data and/or headers) with --query/--output/--raw-output. */
 export function renderDocument(
   io: Invocation,
@@ -255,7 +359,9 @@ export function renderModel(
           ? "UNKNOWN_ENUM_VALUE"
           : Object.hasOwn(data, wire)
             ? data[wire]
-            : null,
+            : Object.hasOwn(data, name)
+              ? data[name]
+              : null,
         fieldType,
         models,
       ),

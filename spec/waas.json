@@ -14510,6 +14510,573 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "waas_policy_id",
+            ["call", "pop", ["var", "kwargs"], "waas_policy_id"]
+          ],
+          [
+            "let",
+            "certificate_id",
+            ["call", "pop", ["var", "kwargs"], "certificate_id"]
+          ],
+          [
+            "let",
+            "is_https_enabled",
+            ["call", "pop", ["var", "kwargs"], "is_https_enabled"]
+          ],
+          [
+            "let",
+            "is_https_forced",
+            ["call", "pop", ["var", "kwargs"], "is_https_forced"]
+          ],
+          [
+            "let",
+            "tls_protocols",
+            ["call", "pop", ["var", "kwargs"], "tls_protocols"]
+          ],
+          [
+            "let",
+            "is_origin_compression_enabled",
+            ["call", "pop", ["var", "kwargs"], "is_origin_compression_enabled"]
+          ],
+          [
+            "let",
+            "is_behind_cdn",
+            ["call", "pop", ["var", "kwargs"], "is_behind_cdn"]
+          ],
+          [
+            "let",
+            "client_address_header",
+            ["call", "pop", ["var", "kwargs"], "client_address_header"]
+          ],
+          [
+            "let",
+            "is_cache_control_respected",
+            ["call", "pop", ["var", "kwargs"], "is_cache_control_respected"]
+          ],
+          [
+            "let",
+            "is_response_buffering_enabled",
+            ["call", "pop", ["var", "kwargs"], "is_response_buffering_enabled"]
+          ],
+          [
+            "let",
+            "cipher_group",
+            ["call", "pop", ["var", "kwargs"], "cipher_group"]
+          ],
+          [
+            "let",
+            "load_balancing_method",
+            ["call", "pop", ["var", "kwargs"], "load_balancing_method"]
+          ],
+          [
+            "let",
+            "websocket_path_prefixes",
+            ["call", "pop", ["var", "kwargs"], "websocket_path_prefixes"]
+          ],
+          [
+            "let",
+            "is_sni_enabled",
+            ["call", "pop", ["var", "kwargs"], "is_sni_enabled"]
+          ],
+          [
+            "let",
+            "health_checks",
+            ["call", "pop", ["var", "kwargs"], "health_checks"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "update_policy_config"],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "waas_policy_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "waas_policy_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --waas-policy-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["var", "tls_protocols"],
+                  ["var", "load_balancing_method"],
+                  ["var", "websocket_path_prefixes"],
+                  ["var", "health_checks"]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        "WARNING: Updates to tls-protocols, load-balancing-method, websocket-path-prefixes and health-checks will replace any existing values. Are you sure you want to continue?"
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "details", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "certificate_id"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "certificateId",
+                ["var", "certificate_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_https_enabled"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "isHttpsEnabled",
+                ["var", "is_https_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_https_forced"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "isHttpsForced",
+                ["var", "is_https_forced"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "tls_protocols"], null],
+              ["cmp", ">", ["fn", "len", ["var", "tls_protocols"]], 0]
+            ],
+            [
+              [
+                "do",
+                [
+                  "fn",
+                  "print",
+                  ["list", ["var", "tls_protocols"]],
+                  null,
+                  null,
+                  null
+                ]
+              ],
+              [
+                "set",
+                ["var", "details"],
+                "tlsProtocols",
+                ["var", "tls_protocols"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_origin_compression_enabled"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "isOriginCompressionEnabled",
+                ["var", "is_origin_compression_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_behind_cdn"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "isBehindCdn",
+                ["var", "is_behind_cdn"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "client_address_header"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "clientAddressHeader",
+                ["var", "client_address_header"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_cache_control_respected"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "isCacheControlRespected",
+                ["var", "is_cache_control_respected"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_response_buffering_enabled"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "isResponseBufferingEnabled",
+                ["var", "is_response_buffering_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "cipher_group"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "cipherGroup",
+                ["var", "cipher_group"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "load_balancing_method"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "loadBalancingMethod",
+                [
+                  "fn",
+                  "parse",
+                  "load_balancing_method",
+                  ["var", "load_balancing_method"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "websocket_path_prefixes"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "websocketPathPrefixes",
+                [
+                  "fn",
+                  "parse",
+                  "websocket_path_prefixes",
+                  ["var", "websocket_path_prefixes"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_sni_enabled"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "isSniEnabled",
+                ["var", "is_sni_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "health_checks"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "healthChecks",
+                ["fn", "parse", "health_checks", ["var", "health_checks"]]
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "waas", "waas"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["waas_policy_id", ["var", "waas_policy_id"]],
+                ["update_policy_config_details", ["var", "details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the work request has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [
+                            [
+                              "item",
+                              ["attr", "headers", ["var", "result"]],
+                              "opc-work-request-id"
+                            ]
+                          ],
+                          [],
+                          null
+                        ],
+                        "status",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the work request entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for work request to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "waas.waas",
+          "method": "update_policy_config",
+          "http": "PUT",
+          "path": "/waasPolicies/{waasPolicyId}/policyConfig",
+          "positionalArgs": ["waas_policy_id", "update_policy_config_details"],
+          "pathParams": {
+            "waasPolicyId": "waas_policy_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "update_policy_config_details"
+        },
+        {
+          "client": "waas.waas",
+          "method": "get_work_request",
+          "http": "GET",
+          "path": "/workRequests/{workRequestId}",
+          "positionalArgs": ["work_request_id"],
+          "pathParams": {
+            "workRequestId": "work_request_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "WorkRequest"
+        }
+      ],
       "params": [
         {
           "kind": "option",

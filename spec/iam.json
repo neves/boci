@@ -3697,6 +3697,7 @@
             "defined_tags",
             ["call", "pop", ["var", "kwargs"], "defined_tags"]
           ],
+          ["checkNoExtraKwargs", "create_compartment"],
           ["let", "kwargs", ["dict"]],
           ["let", "_details", ["dict"]],
           [
@@ -11583,6 +11584,63 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "user_id", ["call", "pop", ["var", "kwargs"], "user_id"]],
+          ["let", "group_id", ["call", "pop", ["var", "kwargs"], "group_id"]],
+          ["checkNoExtraKwargs", "add_user_to_group"],
+          ["loadContextDefaults"],
+          ["let", "client", ["fn", "client", "identity", "identity"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                [
+                  "add_user_to_group_details",
+                  [
+                    "dict",
+                    ["userId", ["var", "user_id"]],
+                    ["groupId", ["var", "group_id"]]
+                  ]
+                ]
+              ],
+              null
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity.identity",
+          "method": "add_user_to_group",
+          "http": "POST",
+          "path": "/userGroupMemberships",
+          "positionalArgs": ["add_user_to_group_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "add_user_to_group_details",
+          "responseType": "UserGroupMembership"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12956,6 +13014,159 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          ["let", "user_id", ["call", "pop", ["var", "kwargs"], "user_id"]],
+          ["let", "group_id", ["call", "pop", ["var", "kwargs"], "group_id"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          ["checkNoExtraKwargs", "remove_user_from_group"],
+          ["loadContextDefaults"],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "if",
+                [
+                  "not",
+                  [
+                    "fn",
+                    "confirm",
+                    "Are you sure you want to remove the given user from the given group?"
+                  ]
+                ],
+                [["abort"]],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "identity", "identity"]],
+          [
+            "let",
+            "memberships",
+            [
+              "attr",
+              "data",
+              [
+                "sdk",
+                0,
+                ["var", "client"],
+                [],
+                [
+                  ["compartment_id", ["var", "compartment_id"]],
+                  ["user_id", ["var", "user_id"]],
+                  ["group_id", ["var", "group_id"]]
+                ],
+                null
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["var", "memberships"],
+              ["cmp", "==", ["fn", "len", ["var", "memberships"]], 1]
+            ],
+            [
+              [
+                "render",
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "user_group_membership_id",
+                      ["attr", "id", ["item", ["var", "memberships"], 0]]
+                    ]
+                  ],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "exit",
+                [
+                  "call",
+                  "format",
+                  "User {!r} is not a member of group {!r}",
+                  ["var", "user_id"],
+                  ["var", "group_id"]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity.identity",
+          "method": "list_user_group_memberships",
+          "http": "GET",
+          "path": "/userGroupMemberships",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "userId": {
+              "arg": "user_id"
+            },
+            "groupId": {
+              "arg": "group_id"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "limit": {
+              "arg": "limit"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[UserGroupMembership]"
+        },
+        {
+          "client": "identity.identity",
+          "method": "remove_user_from_group",
+          "http": "DELETE",
+          "path": "/userGroupMemberships/{userGroupMembershipId}",
+          "positionalArgs": ["user_group_membership_id"],
+          "pathParams": {
+            "userGroupMembershipId": "user_group_membership_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -20106,6 +20317,314 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "policy_id", ["call", "pop", ["var", "kwargs"], "policy_id"]],
+          [
+            "let",
+            "description",
+            ["call", "pop", ["var", "kwargs"], "description"]
+          ],
+          [
+            "let",
+            "statements",
+            ["call", "pop", ["var", "kwargs"], "statements"]
+          ],
+          [
+            "let",
+            "version_date",
+            ["call", "pop", ["var", "kwargs"], "version_date"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          ["checkNoExtraKwargs", "update_policy"],
+          ["loadContextDefaults"],
+          ["let", "client", ["fn", "client", "identity", "identity"]],
+          [
+            "if",
+            ["or", ["var", "statements"], ["var", "version_date"]],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["cmp", "is", ["var", "statements"], null],
+                  ["cmp", "is", ["var", "version_date"], null]
+                ],
+                [
+                  [
+                    "exit",
+                    "If updating either statements or version date, both parameters must be specified."
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                ["not", ["var", "force"]],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["policy_id", ["var", "policy_id"]]],
+                      null
+                    ]
+                  ],
+                  [
+                    "let",
+                    "etag",
+                    ["item", ["attr", "headers", ["var", "result"]], "etag"]
+                  ],
+                  [
+                    "if",
+                    [
+                      "and",
+                      ["var", "if_match"],
+                      ["cmp", "!=", ["var", "etag"], ["var", "if_match"]]
+                    ],
+                    [
+                      [
+                        "exit",
+                        [
+                          "call",
+                          "format",
+                          "If-match {!r} does not match the current etag, {!r}.",
+                          ["var", "if_match"],
+                          [
+                            "item",
+                            ["attr", "headers", ["var", "result"]],
+                            "etag"
+                          ]
+                        ]
+                      ]
+                    ],
+                    []
+                  ],
+                  ["let", "if_match", ["var", "etag"]],
+                  [
+                    "let",
+                    "existing_statements",
+                    [
+                      "fn",
+                      "formattedFlatDict",
+                      [
+                        "attr",
+                        "statements",
+                        ["attr", "data", ["var", "result"]]
+                      ]
+                    ]
+                  ],
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        [
+                          "bin",
+                          "+",
+                          [
+                            "bin",
+                            "+",
+                            "WARNING: The value passed to statements will overwrite all existing statements for this policy. The existing statements are:\n",
+                            ["var", "existing_statements"]
+                          ],
+                          "\nAre you sure you want to continue?"
+                        ]
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "if",
+                ["or", ["var", "defined_tags"], ["var", "freeform_tags"]],
+                [
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        "WARNING: Updates to defined-tags and freeform-tags will replace any existing values. Are you sure you want to continue?"
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "args", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "args"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          ["let", "details", ["dict"]],
+          [
+            "if",
+            ["var", "description"],
+            [
+              ["set", ["var", "details"], "description", ["var", "description"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "statements"],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "statements",
+                ["fn", "parse", "statements", ["var", "statements"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "version_date"],
+            [
+              [
+                "if",
+                ["cmp", "==", ["fn", "len", ["var", "version_date"]], 0],
+                [["let", "version_date", null]],
+                []
+              ],
+              [
+                "set",
+                ["var", "details"],
+                "versionDate",
+                ["var", "version_date"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              1,
+              ["var", "client"],
+              [],
+              [
+                ["policy_id", ["var", "policy_id"]],
+                ["update_policy_details", ["var", "details"]]
+              ],
+              ["var", "args"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity.identity",
+          "method": "get_policy",
+          "http": "GET",
+          "path": "/policies/{policyId}",
+          "positionalArgs": ["policy_id"],
+          "pathParams": {
+            "policyId": "policy_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Policy"
+        },
+        {
+          "client": "identity.identity",
+          "method": "update_policy",
+          "http": "PUT",
+          "path": "/policies/{policyId}",
+          "positionalArgs": ["policy_id", "update_policy_details"],
+          "pathParams": {
+            "policyId": "policy_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "update_policy_details",
+          "responseType": "Policy"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -38186,6 +38705,17 @@
             "bool",
             "canUseOAuth2ClientCredentials"
           ]
+        ]
+      },
+      "UserGroupMembership": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["group_id", "str", "groupId"],
+          ["user_id", "str", "userId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["inactive_status", "int", "inactiveStatus"]
         ]
       },
       "WorkRequest": {

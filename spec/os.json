@@ -2810,6 +2810,7 @@
           ],
           ["let", "upload_id", ["call", "pop", ["var", "kwargs"], "upload_id"]],
           ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          ["checkNoExtraKwargs", "multipart_abort"],
           [
             "let",
             "client",
@@ -7544,6 +7545,136 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "namespace", ["call", "pop", ["var", "kwargs"], "namespace"]],
+          [
+            "let",
+            "bucket_name",
+            ["call", "pop", ["var", "kwargs"], "bucket_name"]
+          ],
+          ["let", "name", ["call", "pop", ["var", "kwargs"], "name"]],
+          [
+            "let",
+            "version_id",
+            ["call", "pop", ["var", "kwargs"], "version_id"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "let",
+            "if_none_match",
+            ["call", "pop", ["var", "kwargs"], "if_none_match"]
+          ],
+          [
+            "let",
+            "encryption_key_file",
+            ["call", "pop", ["var", "kwargs"], "encryption_key_file"]
+          ],
+          ["checkNoExtraKwargs", "object_head"],
+          ["let", "encryption_key_params", ["dict"]],
+          [
+            "if",
+            ["var", "encryption_key_file"],
+            [
+              [
+                "let",
+                "sse_args",
+                ["fn", "sseParams", ["var", "encryption_key_file"]]
+              ],
+              [
+                "if",
+                ["var", "sse_args"],
+                [["let", "encryption_key_params", ["var", "sse_args"]]],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "object_storage", "object_storage"]
+          ],
+          [
+            "let",
+            "response",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [
+                ["var", "namespace"],
+                ["var", "bucket_name"],
+                ["var", "name"]
+              ],
+              [
+                ["if_match", ["var", "if_match"]],
+                ["if_none_match", ["var", "if_none_match"]],
+                [
+                  "opc_client_request_id",
+                  ["item", ["fn", "ctxObj"], "request_id"]
+                ],
+                ["version_id", ["var", "version_id"]]
+              ],
+              ["var", "encryption_key_params"]
+            ]
+          ],
+          [
+            "renderData",
+            null,
+            ["attr", "headers", ["var", "response"]],
+            true,
+            true
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "object_storage.object_storage",
+          "method": "head_object",
+          "http": "HEAD",
+          "path": "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
+          "positionalArgs": ["namespace_name", "bucket_name", "object_name"],
+          "pathParams": {
+            "namespaceName": "namespace_name",
+            "bucketName": "bucket_name",
+            "objectName": "object_name"
+          },
+          "queryParams": {
+            "versionId": {
+              "arg": "version_id"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "if-none-match": {
+              "arg": "if_none_match"
+            },
+            "opc-client-request-id": {
+              "arg": "opc_client_request_id"
+            },
+            "opc-sse-customer-algorithm": {
+              "arg": "opc_sse_customer_algorithm"
+            },
+            "opc-sse-customer-key": {
+              "arg": "opc_sse_customer_key"
+            },
+            "opc-sse-customer-key-sha256": {
+              "arg": "opc_sse_customer_key_sha256"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9884,6 +10015,133 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "details", ["dict"]],
+          ["let", "namespace", ["item", ["var", "kwargs"], "namespace"]],
+          ["let", "bucket", ["item", ["var", "kwargs"], "bucket_name"]],
+          ["let", "name", ["item", ["var", "kwargs"], "name"]],
+          ["set", ["var", "details"], "objectName", ["var", "name"]],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "hours"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "hours",
+                ["item", ["var", "kwargs"], "hours"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "version_id"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "versionId",
+                ["item", ["var", "kwargs"], "version_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "version_id"]]
+            ],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "object_storage", "object_storage"]
+          ],
+          [
+            "let",
+            "kwargs",
+            [
+              "dict",
+              [
+                "opc_client_request_id",
+                ["item", ["fn", "ctxObj"], "request_id"]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["namespace_name", ["var", "namespace"]],
+                ["bucket_name", ["var", "bucket"]],
+                ["restore_objects_details", ["var", "details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "==", ["attr", "status", ["var", "result"]], 200],
+            [
+              [
+                "do",
+                [
+                  "fn",
+                  "echo",
+                  [
+                    "format",
+                    "This object will be available for download in about 1 hour. Use 'oci os object restore-status -ns {ns} -bn {bn} --name {name}' command to check the status.",
+                    [],
+                    [
+                      ["ns", ["var", "namespace"]],
+                      ["bn", ["var", "bucket"]],
+                      ["name", ["var", "name"]]
+                    ],
+                    null
+                  ],
+                  ["fn", "stderr"],
+                  true,
+                  false
+                ]
+              ]
+            ],
+            [["render", ["var", "result"]]]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "object_storage.object_storage",
+          "method": "restore_objects",
+          "http": "POST",
+          "path": "/n/{namespaceName}/b/{bucketName}/actions/restoreObjects",
+          "positionalArgs": [
+            "namespace_name",
+            "bucket_name",
+            "restore_objects_details"
+          ],
+          "pathParams": {
+            "namespaceName": "namespace_name",
+            "bucketName": "bucket_name"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-client-request-id": {
+              "arg": "opc_client_request_id"
+            }
+          },
+          "body": "restore_objects_details"
+        }
+      ],
       "params": [
         {
           "kind": "option",

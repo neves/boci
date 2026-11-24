@@ -1578,6 +1578,153 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "export_dashboard_id",
+            ["call", "pop", ["var", "kwargs"], "export_dashboard_id"]
+          ],
+          ["checkNoExtraKwargs", "export_dashboard"],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "export_dashboard_id"]],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  ["call", "strip", ["var", "export_dashboard_id"]]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --export-dashboard-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "management_dashboard", "dashx_apis"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["export_dashboard_id", ["var", "export_dashboard_id"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["attr", "data", ["var", "result"]],
+            [
+              [
+                "try",
+                [
+                  [
+                    "let",
+                    "data",
+                    ["fn", "toDict", ["attr", "data", ["var", "result"]]]
+                  ],
+                  [
+                    "for",
+                    "dashboard",
+                    ["item", ["var", "data"], "dashboards"],
+                    [
+                      [
+                        "for",
+                        "saved_search",
+                        ["item", ["var", "dashboard"], "saved-searches"],
+                        [
+                          [
+                            "if",
+                            ["cmp", "in", "widget-vm", ["var", "saved_search"]],
+                            [
+                              [
+                                "set",
+                                ["var", "saved_search"],
+                                "widget-v-m",
+                                ["item", ["var", "saved_search"], "widget-vm"]
+                              ],
+                              ["del", ["var", "saved_search"], "widget-vm"]
+                            ],
+                            []
+                          ]
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "result"],
+                    "data",
+                    ["var", "data"],
+                    "result.data = data"
+                  ]
+                ],
+                null,
+                []
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "management_dashboard.dashx_apis",
+          "method": "export_dashboard",
+          "http": "GET",
+          "path": "/managementDashboards/actions/exportDashboard/{exportDashboardId}",
+          "positionalArgs": ["export_dashboard_id"],
+          "pathParams": {
+            "exportDashboardId": "export_dashboard_id"
+          },
+          "queryParams": {
+            "exportTags": {
+              "arg": "export_tags"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "ManagementDashboardExportDetails"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7865,6 +8012,15 @@
       },
       "ManagementDashboardCollection": {
         "attributes": [["items", "list[ManagementDashboardSummary]", "items"]]
+      },
+      "ManagementDashboardExportDetails": {
+        "attributes": [
+          [
+            "dashboards",
+            "list[ManagementDashboardForImportExportDetails]",
+            "dashboards"
+          ]
+        ]
       },
       "ManagementDashboardForImportExportDetails": {
         "attributes": [

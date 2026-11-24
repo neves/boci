@@ -10648,6 +10648,111 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["item", ["var", "kwargs"], "node_id"]],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  ["call", "strip", ["item", ["var", "kwargs"], "node_id"]]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --node-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "result",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "get_rover_node_helper.node_id",
+                  ["item", ["var", "kwargs"], "node_id"]
+                ],
+                [
+                  "let",
+                  "get_rover_node_helper.kwargs_request",
+                  [
+                    "dict",
+                    [
+                      "opc_request_id",
+                      [
+                        "fn",
+                        "requestId",
+                        ["item", ["fn", "ctxObj"], "request_id"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "get_rover_node_helper.client",
+                  ["fn", "client", "rover", "rover_node"]
+                ],
+                [
+                  "return",
+                  [
+                    "sdk",
+                    0,
+                    ["var", "get_rover_node_helper.client"],
+                    [],
+                    [
+                      [
+                        "rover_node_id",
+                        ["var", "get_rover_node_helper.node_id"]
+                      ]
+                    ],
+                    ["var", "get_rover_node_helper.kwargs_request"]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "rover.rover_node",
+          "method": "get_rover_node",
+          "http": "GET",
+          "path": "/roverNodes/{roverNodeId}",
+          "positionalArgs": ["rover_node_id"],
+          "pathParams": {
+            "roverNodeId": "rover_node_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "RoverNode"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -169,10 +169,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `iam compartment create`
 - [ ] `iam compartment list`
 - [ ] `iam db-token get`
-- [ ] `iam group add-user`
+- [x] `iam group add-user`
 - [ ] `iam group list-users`
-- [ ] `iam group remove-user`
-- [ ] `iam policy update`
+- [x] `iam group remove-user`
+- [x] `iam policy update`
 - [x] `iam tag reactivate`
 - [x] `iam tag retire`
 - [x] `iam tag-namespace reactivate`
@@ -184,7 +184,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `bv boot-volume-backup copy`
 - [x] `bv volume create`
 - [ ] `network remote-peering-connection connect`
-- [ ] `network vnic assign-ipv6`
+- [x] `network vnic assign-ipv6`
 - [ ] `network vnic assign-private-ip`
 - [ ] `network vnic unassign-ipv6`
 - [ ] `network vnic unassign-private-ip`
@@ -264,9 +264,9 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `cloud-guard data-mask-rule update-for-targets`
 - [x] `cloud-migrations target-asset create`
 - [x] `cloud-migrations target-asset update`
-- [ ] `data-science job head-job-artifact`
-- [ ] `data-science model head-model-artifact`
-- [ ] `data-science pipeline head-step-artifact`
+- [x] `data-science job head-job-artifact`
+- [x] `data-science model head-model-artifact`
+- [x] `data-science pipeline head-step-artifact`
 - [ ] `data-science pipeline list`
 - [ ] `data-science pipeline-run list`
 - [ ] `database-management managed-database get-awr-db-report`
@@ -291,10 +291,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] Object Storage namespace lookup when `--namespace` is omitted. Cover the Engine path using the `GET /n` recording pattern from `os object copy`.
 - [ ] `os bucket delete`
 - [x] `os multipart abort`
-- [ ] `os object head`
+- [x] `os object head`
 - [ ] `os object list`
 - [ ] `os object list-object-versions`
-- [ ] `os object restore`
+- [x] `os object restore`
 - [ ] `os object restore-status`
 - [ ] `os retention-rule update`
 - [ ] `profile diagnose`
@@ -327,7 +327,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `rover node list-workload`
 - [x] `rover node request-approval`
 - [ ] `rover node setup-identity`
-- [ ] `rover node show`
+- [x] `rover node show`
 - [ ] `rover node update`
 - [ ] `rover standalone-cluster add-workload`
 - [ ] `rover standalone-cluster change-compartment`
@@ -358,7 +358,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `setup oci-cli-rc`
 - [ ] `setup pkcs11-auth`
 - [ ] `support incident put-attachment`
-- [ ] `waas policy-config update`
+- [x] `waas policy-config update`
 
 ### File transfers, streaming and bulk operations
 
@@ -372,7 +372,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `generative-ai-sandbox sandbox-file read`
 - [x] `kms management key restore-from-file`
 - [x] `kms management vault restore-from-file`
-- [ ] `management-dashboard dashboard export`
+- [x] `management-dashboard dashboard export`
 - [ ] `model-deployment inference-result predict-with-response-stream`
 - [ ] `os object bulk-delete-versions`
 - [ ] `rover device system-upgrade import-bundle`

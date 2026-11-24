@@ -78,7 +78,11 @@ FUNCTIONS = {
     "open": "open",
     "os.path.exists": "exists",
     "os.path.isfile": "isfile",
+    "os.path.expanduser": "expanduser",
+    "os.path.expandvars": "expandvars",
     "time.sleep": "sleep",
+    "cli_util.to_dict": "toDict",
+    "cli_util.formatted_flat_dict": "formattedFlatDict",
 }
 # Exception types accepted in `except <type>:` handlers.
 CATCHABLE = {
@@ -122,7 +126,14 @@ HAND_CODED = {
     # click.prompt(hide_input=True, confirmation_prompt=True) for a Rover secret (ticket 25).
     "services.rover.src.oci_cli_rover.rover_utils.prompt_for_secrets": "roverSecret",
 }
-BINOP = {ast.Add: "+", ast.Sub: "-"}
+BINOP = {
+    ast.Add: "+",
+    ast.Sub: "-",
+    ast.Mult: "*",
+    ast.Div: "/",
+    ast.FloorDiv: "//",
+    ast.Mod: "%",
+}
 # Exceptions a wrapper raises that cli_util.wrap_exceptions renders (ticket 18).
 RAISABLE = {
     "ValueError", "KeyError", "Exception", "RequiredValueNotInDefaultOrUserInputError",
@@ -181,6 +192,20 @@ class Compiler:
         self.targets = []  # the generated command objects ctx.invoke targets, in order
         self.clients = {}  # scoped variable name -> (spec_name, service_name)
         self.sdk_calls = []  # (spec_name, service_name, method) called directly, in order
+        self._inlining = set()
+        self._inline_counts = {}
+
+    def _is_cli_util_fn(self, func, name):
+        dotted = _dotted(func)
+        if dotted == f"cli_util.{name}":
+            return True
+        if isinstance(func, ast.Name) and func.id == name and func.id not in self.locals:
+            fn = self.globals.get(func.id)
+            return (
+                getattr(fn, "__module__", None) == "oci_cli.cli_util"
+                and getattr(fn, "__name__", None) == name
+            )
+        return False
 
     def stmts(self, body, scope):
         out = []
@@ -201,8 +226,14 @@ class Compiler:
             return []  # docstring / string comment
         if isinstance(st, ast.Assign) and len(st.targets) == 1:
             if isinstance(st.targets[0], ast.Attribute):
-                # `some_dict.attr = x`: an AttributeError in the Reference CLI.
-                return [["raise", ast.unparse(st)]]
+                # Setting an attribute on an object (e.g. `result.data = data`); on a plain
+                # dict the Engine stops like Python's AttributeError.
+                try:
+                    target_obj = self.expr(st.targets[0].value, scope)
+                    value = self.expr(st.value, scope)
+                    return [["setAttr", target_obj, st.targets[0].attr, value, ast.unparse(st)]]
+                except Unsupported:
+                    return [["raise", ast.unparse(st)]]
             value = self.expr(st.value, scope)
             if (
                 isinstance(st.targets[0], ast.Name)
@@ -211,6 +242,18 @@ class Compiler:
             ):
                 self.clients[self.name(st.targets[0].id, scope)] = (value[2], value[3])
             return [self.assign(st.targets[0], value, scope)]
+        if isinstance(st, ast.AugAssign):
+            if type(st.op) not in BINOP:
+                raise Unsupported("augassign")
+            op = BINOP[type(st.op)]
+            val = self.expr(st.value, scope)
+            if isinstance(st.target, ast.Name):
+                return [["aug", op, self.name(st.target.id, scope), val]]
+            if isinstance(st.target, ast.Subscript):
+                return [["augItem", op, self.expr(st.target.value, scope), self.expr(st.target.slice, scope), val]]
+            raise Unsupported("augassign target")
+        if isinstance(st, ast.Return):
+            return [["return", self.expr(st.value, scope) if st.value is not None else None]]
         if isinstance(st, ast.For):
             if st.orelse or not isinstance(st.target, ast.Name):
                 raise Unsupported("for")
@@ -284,12 +327,53 @@ class Compiler:
             if isinstance(call.func, ast.Attribute) and call.func.attr == "invoke" and _dotted(call.func.value) == "ctx":
                 return [self.invoke(call, scope)]
             if (
-                _dotted(call.func) in ("cli_util.render_response", "render_response")
+                self._is_cli_util_fn(call.func, "render_response")
                 and len(call.args) == 2
                 and isinstance(call.args[1], ast.Name) and self.name(call.args[1].id, scope) == "ctx"
                 and not call.keywords
             ):
                 return [["render", self.expr(call.args[0], scope)]]
+            if self._is_cli_util_fn(call.func, "render"):
+                if any(isinstance(a, ast.Starred) for a in call.args) or len(call.args) > 5:
+                    raise Unsupported("call cli_util.render")
+                # render(data, headers, ctx, display_all_headers=False, nest_data_in_data_attribute=True)
+                slots = [None, None, None, False, True]
+                provided = set()
+                ctx_node = None
+                for idx, a in enumerate(call.args):
+                    if idx == 2:
+                        ctx_node = a
+                    else:
+                        slots[idx] = self.expr(a, scope)
+                    provided.add(idx)
+                slot_of = {
+                    "data": 0,
+                    "headers": 1,
+                    "ctx": 2,
+                    "display_all_headers": 3,
+                    "nest_data_in_data_attribute": 4,
+                }
+                for kw in call.keywords:
+                    if kw.arg not in slot_of or slot_of[kw.arg] in provided:
+                        raise Unsupported("call keywords")
+                    idx = slot_of[kw.arg]
+                    if idx == 2:
+                        ctx_node = kw.value
+                    else:
+                        slots[idx] = self.expr(kw.value, scope)
+                    provided.add(idx)
+                if not ({0, 1, 2} <= provided) or not (
+                    isinstance(ctx_node, ast.Name) and self.name(ctx_node.id, scope) == "ctx"
+                ):
+                    raise Unsupported("call cli_util.render")
+                return [["renderData", slots[0], slots[1], slots[3], slots[4]]]
+            if (
+                self._is_cli_util_fn(call.func, "load_context_obj_values_from_defaults")
+                and len(call.args) == 1
+                and isinstance(call.args[0], ast.Name) and self.name(call.args[0].id, scope) == "ctx"
+                and not call.keywords
+            ):
+                return [["loadContextDefaults"]]
             if _dotted(call.func) == "ctx.abort" and not call.args:
                 return [["abort"]]
             if _dotted(call.func) == "sys.exit":
@@ -315,27 +399,49 @@ class Compiler:
             return ["set", self.expr(target.value, scope), self.expr(target.slice, scope), value]
         raise Unsupported("assign target")
 
-    def inline(self, call, scope):
+    def inline(self, call, scope, as_expr=False):
         """A module helper called with names, e.g. `process_health_checker_kwargs(kwargs)`."""
         helper = self.globals[call.func.id]
+        if helper in self._inlining:
+            raise Unsupported("helper recursion")
         fn = _fn_ast(helper) if inspect.isfunction(helper) else None
         if fn is None or call.keywords or fn.args.vararg or fn.args.kwarg:
             raise Unsupported("helper")
-        if len(call.args) != len(fn.args.args) or not all(isinstance(a, ast.Name) for a in call.args):
+        if len(call.args) != len(fn.args.args):
             raise Unsupported("helper args")
-        if any(isinstance(n, (ast.Return, ast.FunctionDef, ast.Lambda)) for st in fn.body for n in ast.walk(st)):
-            raise Unsupported("helper return")
+        if not as_expr and not all(isinstance(a, ast.Name) for a in call.args):
+            raise Unsupported("helper args")
+        if any(isinstance(n, (ast.FunctionDef, ast.Lambda)) for st in fn.body for n in ast.walk(st)):
+            raise Unsupported("helper nested")
+        has_return = any(isinstance(n, ast.Return) for st in fn.body for n in ast.walk(st))
+        seq = self._inline_counts.get(fn.name, 0)
+        self._inline_counts[fn.name] = seq + 1
+        prefix = fn.name if seq == 0 else f"{fn.name}${seq}"
         inner = {}
         for n in ast.walk(fn):
             if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store):
-                inner[n.id] = f"{fn.name}.{n.id}"
+                inner[n.id] = f"{prefix}.{n.id}"
+        prelude = []
         for param, arg in zip(fn.args.args, call.args):
-            inner[param.arg] = self.name(arg.id, scope)
+            if isinstance(arg, ast.Name):
+                inner[param.arg] = self.name(arg.id, scope)
+            else:
+                local_param = f"{prefix}.{param.arg}"
+                inner[param.arg] = local_param
+                prelude.append(["let", local_param, self.expr(arg, scope)])
+        self._inlining.add(helper)
         try:
-            return self.stmts(fn.body, inner)
+            body = prelude + self.stmts(fn.body, inner)
         except Unsupported as e:
             # Blame the call: the helper's own nodes aren't in the wrapper (bun run triage).
             raise Unsupported(f"helper {call.func.id}: {e}") from e
+        finally:
+            self._inlining.discard(helper)
+        if as_expr:
+            return ["evalBlock", body]
+        if has_return:
+            return [["block", body]]
+        return body
 
     def invoke(self, call, scope):
         if len(call.args) != 1:
@@ -575,6 +681,42 @@ class Compiler:
                     params[slot_of[kw.arg]] = self.expr(kw.value, scope)
                     set_slots.add(slot_of[kw.arg])
                 return ["fn", "echo", *params]
+            if dotted == "print":
+                if any(isinstance(a, ast.Starred) for a in node.args):
+                    raise Unsupported("call print")
+                items = [self.expr(a, scope) for a in node.args]
+                sep, end, file_arg = None, None, None
+                seen = set()
+                for kw in node.keywords:
+                    if kw.arg == "flush":
+                        continue
+                    if kw.arg not in ("sep", "end", "file") or kw.arg in seen:
+                        raise Unsupported("call keywords")
+                    seen.add(kw.arg)
+                    val = self.expr(kw.value, scope)
+                    if kw.arg == "sep":
+                        sep = val
+                    elif kw.arg == "end":
+                        end = val
+                    elif kw.arg == "file":
+                        file_arg = val
+                return ["fn", "print", ["list", *items], sep, end, file_arg]
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "format":
+                if any(isinstance(a, ast.Starred) for a in node.args):
+                    raise Unsupported("call str.format")
+                pos = [self.expr(a, scope) for a in node.args]
+                if not node.keywords:
+                    return ["call", "format", self.expr(node.func.value, scope), *pos]
+                keywords = []
+                star = None
+                for kw in node.keywords:
+                    if kw.arg is None:
+                        if star is not None:
+                            raise Unsupported("two **")
+                        star = self.expr(kw.value, scope)
+                    else:
+                        keywords.append([kw.arg, self.expr(kw.value, scope)])
+                return ["format", self.expr(node.func.value, scope), pos, keywords, star]
             if dotted == "oci.wait_until":
                 if any(isinstance(a, ast.Starred) for a in node.args):
                     raise Unsupported("call oci.wait_until")
@@ -625,6 +767,10 @@ class Compiler:
                 if len(node.args) != 3 or not all(isinstance(a, ast.Constant) for a in node.args[:2]):
                     raise Unsupported("build_client")
                 return ["fn", "client", node.args[0].value, node.args[1].value]
+            if self._is_cli_util_fn(node.func, "to_dict") and len(node.args) == 1:
+                return ["fn", "toDict", self.expr(node.args[0], scope)]
+            if self._is_cli_util_fn(node.func, "formatted_flat_dict") and len(node.args) == 1:
+                return ["fn", "formattedFlatDict", self.expr(node.args[0], scope)]
             hand = self.hand_coded(node.func)
             if hand:
                 return ["fn", hand, *(self.expr(a, scope) for a in node.args)]
@@ -638,6 +784,21 @@ class Compiler:
                 return ["fn", FUNCTIONS[dotted], *args]
             if isinstance(node.func, ast.Attribute) and node.func.attr in METHODS:
                 return ["call", node.func.attr, self.expr(node.func.value, scope), *(self.expr(a, scope) for a in node.args)]
+            if (
+                isinstance(node.func, ast.Name)
+                and node.func.id in self.globals
+                and node.func.id not in self.locals
+            ):
+                snap = (
+                    list(self.targets),
+                    dict(self.clients),
+                    list(self.sdk_calls),
+                    dict(self._inline_counts),
+                )
+                try:
+                    return self.inline(node, scope, as_expr=True)
+                except Unsupported:
+                    self.targets, self.clients, self.sdk_calls, self._inline_counts = snap
             raise Unsupported(f"call {dotted}")
         raise Unsupported(type(node).__name__)
 

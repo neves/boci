@@ -54,13 +54,17 @@ function runCiInstalls(binDir: string) {
   });
 }
 
-test("ci-installs waits until GitHub registers the new run ID before watching it", () => {
-  const stateDir = mkdtempSync(join(tmpdir(), "boci-ci-state-"));
-  tempDirs.push(stateDir);
-  const counterFile = join(stateDir, "attempts");
-  writeFileSync(counterFile, "0");
+const testPosix = test.skipIf(process.platform === "win32");
 
-  const { binDir, logFile } = setupFakeBin(`
+testPosix(
+  "ci-installs waits until GitHub registers the new run ID before watching it",
+  () => {
+    const stateDir = mkdtempSync(join(tmpdir(), "boci-ci-state-"));
+    tempDirs.push(stateDir);
+    const counterFile = join(stateDir, "attempts");
+    writeFileSync(counterFile, "0");
+
+    const { binDir, logFile } = setupFakeBin(`
     if [ "$1" = "workflow" ] && [ "$2" = "run" ]; then
       echo "https://github.com/neves/boci/actions/runs/987654321"
       exit 0
@@ -93,29 +97,34 @@ test("ci-installs waits until GitHub registers the new run ID before watching it
     exit 1
   `);
 
-  const result = runCiInstalls(binDir);
-  const stdout = result.stdout.toString();
-  const stderr = result.stderr.toString();
-  const calls = readFileSync(logFile, "utf8").trim().split("\n");
+    const result = runCiInstalls(binDir);
+    const stdout = result.stdout.toString();
+    const stderr = result.stderr.toString();
+    const calls = readFileSync(logFile, "utf8").trim().split("\n");
 
-  expect(result.exitCode).toBe(0);
-  expect(stdout).toContain(
-    "https://github.com/neves/boci/actions/runs/987654321",
-  );
-  expect(stdout).toContain("workflow logs");
-  expect(stderr).not.toContain("HTTP 404");
-  expect(
-    calls.some((line) => line.startsWith("run watch 987654321 --exit-status")),
-  ).toBe(true);
-});
+    expect(result.exitCode).toBe(0);
+    expect(stdout).toContain(
+      "https://github.com/neves/boci/actions/runs/987654321",
+    );
+    expect(stdout).toContain("workflow logs");
+    expect(stderr).not.toContain("HTTP 404");
+    expect(
+      calls.some((line) =>
+        line.startsWith("run watch 987654321 --exit-status"),
+      ),
+    ).toBe(true);
+  },
+);
 
-test("ci-installs falls back to polling gh run list when workflow run output omits the ID", () => {
-  const stateDir = mkdtempSync(join(tmpdir(), "boci-ci-state-"));
-  tempDirs.push(stateDir);
-  const listCounter = join(stateDir, "list-attempts");
-  writeFileSync(listCounter, "0");
+testPosix(
+  "ci-installs falls back to polling gh run list when workflow run output omits the ID",
+  () => {
+    const stateDir = mkdtempSync(join(tmpdir(), "boci-ci-state-"));
+    tempDirs.push(stateDir);
+    const listCounter = join(stateDir, "list-attempts");
+    writeFileSync(listCounter, "0");
 
-  const { binDir, logFile } = setupFakeBin(`
+    const { binDir, logFile } = setupFakeBin(`
     if [ "$1" = "workflow" ] && [ "$2" = "run" ]; then
       echo "✓ Created workflow_dispatch event for test-installs.yml at main"
       exit 0
@@ -146,18 +155,23 @@ test("ci-installs falls back to polling gh run list when workflow run output omi
     exit 1
   `);
 
-  const result = runCiInstalls(binDir);
-  const calls = readFileSync(logFile, "utf8").trim().split("\n");
+    const result = runCiInstalls(binDir);
+    const calls = readFileSync(logFile, "utf8").trim().split("\n");
 
-  expect(result.exitCode).toBe(0);
-  expect(result.stdout.toString()).toContain("fallback logs");
-  expect(
-    calls.some((line) => line.startsWith("run watch 112233445 --exit-status")),
-  ).toBe(true);
-});
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout.toString()).toContain("fallback logs");
+    expect(
+      calls.some((line) =>
+        line.startsWith("run watch 112233445 --exit-status"),
+      ),
+    ).toBe(true);
+  },
+);
 
-test("ci-installs propagates non-zero exit when gh run watch fails", () => {
-  const { binDir } = setupFakeBin(`
+testPosix(
+  "ci-installs propagates non-zero exit when gh run watch fails",
+  () => {
+    const { binDir } = setupFakeBin(`
     if [ "$1" = "workflow" ] && [ "$2" = "run" ]; then
       echo "https://github.com/neves/boci/actions/runs/555666777"
       exit 0
@@ -173,7 +187,8 @@ test("ci-installs propagates non-zero exit when gh run watch fails", () => {
     exit 1
   `);
 
-  const result = runCiInstalls(binDir);
-  expect(result.exitCode).toBe(1);
-  expect(result.stderr.toString()).toContain("Run 555666777 failed");
-});
+    const result = runCiInstalls(binDir);
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr.toString()).toContain("Run 555666777 failed");
+  },
+);

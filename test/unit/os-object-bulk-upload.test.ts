@@ -7,6 +7,7 @@ import {
   fnmatchToRegex,
   formatBulkProgressLabel,
 } from "../../src/commands/os.ts";
+import { setPosixMode } from "../../src/utils/posixMode.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object bulk-upload", () => {
@@ -376,6 +377,7 @@ describe("os object bulk-upload", () => {
     await using sb = await createSandbox();
     const locked = join(sb.home, "locked");
     mkdirSync(locked, { mode: 0o000 });
+    setPosixMode(locked, 0o000);
     try {
       let stderr = "";
       const code = await run({
@@ -407,7 +409,7 @@ describe("os object bulk-upload", () => {
         `UsageError: The specified --src-dir ${locked} (expanded to: ${locked}) does not have read permissions\n`,
       );
     } finally {
-      chmodSync(locked, 0o700);
+      setPosixMode(locked, 0o700);
     }
   });
 });

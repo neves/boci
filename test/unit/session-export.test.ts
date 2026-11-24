@@ -1,12 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  chmod,
-  mkdir,
-  mkdtemp,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
@@ -15,6 +8,7 @@ import {
   translateConfigFilepathsToPrefix,
 } from "../../src/commands/session.ts";
 import { buildZip, readZip } from "../../src/lib/zip.ts";
+import { setPosixMode } from "../../src/utils/posixMode.ts";
 
 async function runExport(
   argv: string[],
@@ -109,21 +103,23 @@ describe("session export helpers", () => {
 
 describe("session export archive contents", () => {
   test("exports config, key, token, and custom _file/_token files with inherited DEFAULT keys", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-session-export-"));
+    const dir = (
+      await mkdtemp(join(tmpdir(), "boci-session-export-"))
+    ).replaceAll("\\", "/");
     try {
-      const ociDir = join(dir, ".oci");
+      const ociDir = `${dir}/.oci`;
       await mkdir(ociDir, { recursive: true });
-      const keyPath = join(ociDir, "oci_api_key.pem");
-      const tokPath = join(ociDir, "token");
-      const extraPath = join(ociDir, "extra.tok");
-      const cfgPath = join(ociDir, "config");
+      const keyPath = `${ociDir}/oci_api_key.pem`;
+      const tokPath = `${ociDir}/token`;
+      const extraPath = `${ociDir}/extra.tok`;
+      const cfgPath = `${ociDir}/config`;
 
       await writeFile(keyPath, "PRIVATE-KEY-BYTES\n");
-      await chmod(keyPath, 0o600);
+      setPosixMode(keyPath, 0o600);
       await writeFile(tokPath, "jwt.payload.sig");
-      await chmod(tokPath, 0o600);
+      setPosixMode(tokPath, 0o600);
       await writeFile(extraPath, "extra-token-bytes");
-      await chmod(extraPath, 0o640);
+      setPosixMode(extraPath, 0o640);
       await writeFile(
         cfgPath,
         [
@@ -152,7 +148,7 @@ describe("session export archive contents", () => {
         dir,
       );
       expect(res.exitCode).toBe(0);
-      const zipPath = join(dir, "exports/dev-session.zip");
+      const zipPath = `${dir}/exports/dev-session.zip`;
       expect(res.stderr).toBe(
         `Exporting profile: DEV from config file: ${cfgPath}\nExport file written to: ${zipPath}\n`,
       );

@@ -1,6 +1,14 @@
-import { closeSync, fstatSync, openSync, readFileSync } from "node:fs";
+import {
+  closeSync,
+  existsSync,
+  fstatSync,
+  openSync,
+  readFileSync,
+  statSync,
+} from "node:fs";
 import { resolve } from "node:path";
 import type { Invocation } from "../lib/io.ts";
+import { getPosixMode } from "../utils/posixMode.ts";
 import { BadParameter, pyRepr } from "./convert.ts";
 import { ProgramFile } from "./program.ts";
 
@@ -51,10 +59,23 @@ export function openClickFileForWrite(
   rawPath: string,
 ): OutputFileHandle {
   if (rawPath === "-") return { rawPath, isStdout: true };
+  const resolved = resolve(io.cwd, rawPath);
   try {
-    const fd = openSync(resolve(io.cwd, rawPath), "w");
+    if (existsSync(resolved)) {
+      if (statSync(resolved).isDirectory()) {
+        throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
+      }
+      if (
+        process.platform === "win32" &&
+        (getPosixMode(resolved) & 0o200) === 0
+      ) {
+        throw new BadParameter(`${pyRepr(rawPath)}: Permission denied`);
+      }
+    }
+    const fd = openSync(resolved, "w");
     return { rawPath, isStdout: false, fd };
   } catch (e) {
+    if (e instanceof BadParameter) throw e;
     throw new BadParameter(`${pyRepr(rawPath)}: ${osErrorReason(e)}`);
   }
 }
@@ -65,9 +86,21 @@ export function validateClickFileForRead(
   rawPath: string,
 ): void {
   if (rawPath === "-") return;
+  const resolved = resolve(io.cwd, rawPath);
   let fd: number | undefined;
   try {
-    fd = openSync(resolve(io.cwd, rawPath), "r");
+    if (existsSync(resolved)) {
+      if (statSync(resolved).isDirectory()) {
+        throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
+      }
+      if (
+        process.platform === "win32" &&
+        (getPosixMode(resolved) & 0o400) === 0
+      ) {
+        throw new BadParameter(`${pyRepr(rawPath)}: Permission denied`);
+      }
+    }
+    fd = openSync(resolved, "r");
     if (fstatSync(fd).isDirectory()) {
       throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
     }
@@ -104,9 +137,21 @@ export async function openClickFileForProgram(
   if (/[wa]/.test(mode)) return new ProgramFile(mode, undefined, rawPath);
   if (rawPath === "-")
     return new ProgramFile(mode, await readStdinBytes(io), rawPath);
+  const resolved = resolve(io.cwd, rawPath);
   let fd: number | undefined;
   try {
-    fd = openSync(resolve(io.cwd, rawPath), "r");
+    if (existsSync(resolved)) {
+      if (statSync(resolved).isDirectory()) {
+        throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
+      }
+      if (
+        process.platform === "win32" &&
+        (getPosixMode(resolved) & 0o400) === 0
+      ) {
+        throw new BadParameter(`${pyRepr(rawPath)}: Permission denied`);
+      }
+    }
+    fd = openSync(resolved, "r");
     if (fstatSync(fd).isDirectory()) {
       throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
     }

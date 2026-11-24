@@ -84,7 +84,7 @@ test("loading cli and registry does not eagerly load command modules", () => {
         'import "./src/core/registry.ts";',
         'import { Exit } from "./src/lib/io.ts";',
         'const code = await run({ argv: ["--version"], env: {}, cwd: process.cwd(), out: () => {}, err: () => {}, isTTY: () => false });',
-        'const loaded = Object.keys(require.cache).filter((k) => k.includes("/src/commands/"));',
+        'const loaded = Object.keys(require.cache).filter((k) => k.replaceAll("\\\\", "/").includes("/src/commands/"));',
         "console.log(JSON.stringify({ code, loaded }));",
       ].join("\n"),
     ],

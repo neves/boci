@@ -3,9 +3,9 @@
 // `{config}` placeholders in argv substituted, everything observable captured.
 // runCli spawns a process; runInProcess calls boci's run() in this process with the same
 // sandbox environment (no spawn, module load or spec parsing per case).
-import { stat } from "node:fs/promises";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
+import { getPosixMode } from "../../src/utils/posixMode.ts";
 import {
   type CapturedRequest,
   type Reply,
@@ -293,7 +293,7 @@ async function readCapturedFileModes(
   const out: Record<string, number> = {};
   for (const rel of paths) {
     try {
-      out[rel] = (await stat(join(home, rel))).mode & 0o777;
+      out[rel] = getPosixMode(join(home, rel));
     } catch {
       // Missing file: leave unset so assertions see undefined.
     }
@@ -312,10 +312,14 @@ function captured(
   files?: Record<string, string>,
   fileModes?: Record<string, number>,
 ): Run {
+  const winHome = sb.home.replaceAll("/", "\\");
+  const winHomeEscaped = sb.home.replaceAll("/", "\\\\");
   const norm = (s: string) => {
     let out = s
       .replaceAll(`/private${sb.home}`, "{home}")
       .replaceAll(sb.home, "{home}")
+      .replaceAll(winHomeEscaped, "{home}")
+      .replaceAll(winHome, "{home}")
       .replaceAll(url, "{endpoint}");
     if (metadata) {
       out = out

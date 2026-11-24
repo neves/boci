@@ -226,8 +226,15 @@ function report(result: Result) {
   console.log(
     `✗ [${results.length}/${steps.length}] ${result.step.name} (exit ${result.code}, ${secs})`,
   );
-  if (lines.length > shown.length)
+  if (lines.length > shown.length) {
+    const omittedFails = lines
+      .slice(0, lines.length - shown.length)
+      .filter((line) => /^\(fail\)/.test(line));
+    if (omittedFails.length > 0) {
+      console.log(omittedFails.join("\n"));
+    }
     console.log(`  … ${lines.length - shown.length} earlier lines omitted`);
+  }
   console.log(shown.join("\n"));
 }
 

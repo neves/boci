@@ -8,6 +8,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { getPosixMode } from "../utils/posixMode.ts";
 import {
   type Config,
   ConfigError,
@@ -482,7 +483,10 @@ export function translateConfigFilepathsToPrefix(
   for (const [key, value] of config) {
     if (isSessionFileKey(key)) {
       const base = posixBasename(value);
-      translated.set(key, prefix ? join(prefix, base) : base);
+      translated.set(
+        key,
+        prefix ? `${prefix.replace(/[\\/]+$/, "")}/${base}` : base,
+      );
     } else {
       translated.set(key, value);
     }
@@ -523,10 +527,20 @@ export async function runSessionExport(
   let profileMap: Map<string, string | null> | undefined;
   let configText: string | undefined;
   try {
-    configText = readFileSync(resolvedConfigPath, "utf8");
+    if (
+      !existsSync(resolvedConfigPath) ||
+      !statSync(resolvedConfigPath).isDirectory()
+    ) {
+      configText = readFileSync(resolvedConfigPath, "utf8");
+    }
   } catch (e) {
     const code = (e as NodeJS.ErrnoException | null)?.code;
-    if (code !== "ENOENT" && code !== "ENOTDIR" && code !== "EISDIR") {
+    if (
+      code !== "ENOENT" &&
+      code !== "ENOTDIR" &&
+      code !== "EISDIR" &&
+      code !== "EACCES"
+    ) {
       throw e;
     }
   }
@@ -609,7 +623,7 @@ export async function runSessionExport(
         throw new Exit(1);
       }
       data = readFileSync(diskPath);
-      mode = st.mode;
+      mode = (st.mode & ~0o777) | getPosixMode(diskPath);
       mtime = st.mtime;
     } catch (e) {
       if (e instanceof Exit) throw e;
@@ -641,7 +655,7 @@ export async function runSessionExport(
   }
 
   writeZipFile(resolvedZipPath, [...archiveEntries.values()]);
-  io.err(`Export file written to: ${resolvedZipPath}\n`);
+  io.err(`Export file written to: ${resolvedZipPath.replaceAll("\\", "/")}\n`);
 }
 
 const SESSION_PROFILE_NAME_PATTERN = /^[A-Za-z0-9._\-@]+$/;
@@ -715,10 +729,20 @@ export async function runSessionImport(
   const resolvedConfigPath = resolve(io.cwd, configFile);
   let configText: string | undefined;
   try {
-    configText = readFileSync(resolvedConfigPath, "utf8");
+    if (
+      !existsSync(resolvedConfigPath) ||
+      !statSync(resolvedConfigPath).isDirectory()
+    ) {
+      configText = readFileSync(resolvedConfigPath, "utf8");
+    }
   } catch (e) {
     const code = (e as NodeJS.ErrnoException | null)?.code;
-    if (code !== "ENOENT" && code !== "ENOTDIR" && code !== "EISDIR") {
+    if (
+      code !== "ENOENT" &&
+      code !== "ENOTDIR" &&
+      code !== "EISDIR" &&
+      code !== "EACCES"
+    ) {
       throw e;
     }
   }
@@ -848,14 +872,13 @@ export async function runSessionImport(
     validateSessionProfileName(io, archivedProfileName);
   }
 
-  const defaultTokenDirectory = join(
-    expandUser("~", io.env),
-    ".oci",
-    "sessions",
+  const defaultTokenDirectory = `${expandUser("~", io.env).replace(/[\\/]+$/, "")}/.oci/sessions`;
+  const importedResourcesDir = `${defaultTokenDirectory}/${archivedProfileName}`;
+  const resolvedTokenDir = resolve(defaultTokenDirectory).replaceAll("\\", "/");
+  const resolvedResourcesDir = resolve(importedResourcesDir).replaceAll(
+    "\\",
+    "/",
   );
-  const importedResourcesDir = join(defaultTokenDirectory, archivedProfileName);
-  const resolvedTokenDir = resolve(defaultTokenDirectory);
-  const resolvedResourcesDir = resolve(importedResourcesDir);
   if (
     resolvedResourcesDir !== resolvedTokenDir &&
     !resolvedResourcesDir.startsWith(`${resolvedTokenDir}/`)
@@ -880,9 +903,9 @@ export async function runSessionImport(
       );
       throw new Exit(1);
     }
-    const destPath = join(importedResourcesDir, posixBasename(value));
+    const destPath = `${importedResourcesDir}/${posixBasename(value)}`;
     writeFileSync(destPath, data);
-    applyUserOnlyAccessPermissions(join(importedResourcesDir, value));
+    applyUserOnlyAccessPermissions(`${importedResourcesDir}/${value}`);
   }
 
   const translated = translateConfigFilepathsToPrefix(
@@ -1279,9 +1302,9 @@ async function persistUserSession(
     persistOnlyPublicKey: boolean;
   },
 ): Promise<{ profileName: string; configLocation: string }> {
-  const defaultOciDir = join(expandUser("~", io.env), ".oci");
-  const defaultConfigLocation = join(defaultOciDir, "config");
-  const defaultTokenDir = join(defaultOciDir, "sessions");
+  const defaultOciDir = `${expandUser("~", io.env).replace(/[\\/]+$/, "")}/.oci`;
+  const defaultConfigLocation = `${defaultOciDir}/config`;
+  const defaultTokenDir = `${defaultOciDir}/sessions`;
 
   let profileName = opts.profileName;
   if (!profileName) {
@@ -1294,19 +1317,16 @@ async function persistUserSession(
   const configLocation = opts.configLocation || defaultConfigLocation;
   const tokenDir = opts.tokenLocation ?? defaultTokenDir;
 
-  const sessionAuthLocation = resolve(io.cwd, join(tokenDir, profileName));
+  const sessionAuthLocation = resolve(
+    io.cwd,
+    `${tokenDir.replace(/[\\/]+$/, "")}/${profileName}`,
+  ).replaceAll("\\", "/");
   if (!existsSync(sessionAuthLocation)) {
     createDirectory(sessionAuthLocation);
   }
 
-  const publicKeyFilePath = join(
-    sessionAuthLocation,
-    `${DEFAULT_KEY_NAME}${PUBLIC_KEY_FILENAME_SUFFIX}`,
-  );
-  const privateKeyFilePath = join(
-    sessionAuthLocation,
-    `${DEFAULT_KEY_NAME}${PRIVATE_KEY_FILENAME_SUFFIX}`,
-  );
+  const publicKeyFilePath = `${sessionAuthLocation}/${DEFAULT_KEY_NAME}${PUBLIC_KEY_FILENAME_SUFFIX}`;
+  const privateKeyFilePath = `${sessionAuthLocation}/${DEFAULT_KEY_NAME}${PRIVATE_KEY_FILENAME_SUFFIX}`;
 
   writeFileSync(publicKeyFilePath, serializePublicKey(userSession.publicKey));
   applyUserOnlyAccessPermissions(publicKeyFilePath);
@@ -1324,7 +1344,7 @@ async function persistUserSession(
     applyUserOnlyAccessPermissions(privateKeyFilePath);
   }
 
-  const tokenFilePath = join(sessionAuthLocation, "token");
+  const tokenFilePath = `${sessionAuthLocation}/token`;
   writeFileSync(tokenFilePath, userSession.token, "utf8");
   applyUserOnlyAccessPermissions(tokenFilePath);
 
@@ -1437,7 +1457,7 @@ export async function runSessionAuthenticate(
   }
 
   let persistOnlyPublicKey = false;
-  const defaultTokenDir = join(expandUser("~", io.env), ".oci", "sessions");
+  const defaultTokenDir = `${expandUser("~", io.env).replace(/[\\/]+$/, "")}/.oci/sessions`;
   const tokenLocation =
     typeof values.token_location === "string"
       ? values.token_location

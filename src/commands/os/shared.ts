@@ -11,6 +11,7 @@ import {
   readdirSync,
   readFileSync,
   readSync,
+  realpathSync,
   rmdirSync,
   statSync,
   unlinkSync,
@@ -616,6 +617,17 @@ export type WalkEntry = {
   resolvedFilePath: string;
 };
 
+function dirIdentityKey(
+  resolvedPath: string,
+  st: { dev: number | bigint; ino: number | bigint },
+): string {
+  try {
+    return `${st.dev}:${st.ino}:${realpathSync(resolvedPath).replaceAll("\\", "/").toLowerCase()}`;
+  } catch {
+    return `${st.dev}:${st.ino}:${resolvedPath.replaceAll("\\", "/").toLowerCase()}`;
+  }
+}
+
 /** Top-down directory walk matching `os.walk(expandedDir, followlinks=not noFollowSymlinks)`. */
 export function walkDirectoryForBulkUpload(
   io: Invocation,
@@ -664,7 +676,7 @@ export function walkDirectoryForBulkUpload(
         try {
           const targetStat = statSync(childResolved);
           if (targetStat.isDirectory()) {
-            const key = `${targetStat.dev}:${targetStat.ino}`;
+            const key = dirIdentityKey(childResolved, targetStat);
             if (!ancestors.has(key)) {
               subdirs.push({
                 display: childDisplay,
@@ -689,7 +701,7 @@ export function walkDirectoryForBulkUpload(
         subdirs.push({
           display: childDisplay,
           resolved: childResolved,
-          key: `${lst.dev}:${lst.ino}`,
+          key: dirIdentityKey(childResolved, lst),
         });
       } else {
         files.push({
@@ -710,7 +722,7 @@ export function walkDirectoryForBulkUpload(
   visit(
     expandedDir,
     resolvedRoot,
-    new Set([`${rootStat.dev}:${rootStat.ino}`]),
+    new Set([dirIdentityKey(resolvedRoot, rootStat)]),
   );
   return entries;
 }
@@ -1046,7 +1058,7 @@ export function walkDirectoryForSyncUpload(
         try {
           const targetStat = statSync(childResolved);
           if (targetStat.isDirectory()) {
-            const key = `${targetStat.dev}:${targetStat.ino}`;
+            const key = dirIdentityKey(childResolved, targetStat);
             if (!ancestors.has(key)) {
               subdirs.push({
                 display: childDisplay,
@@ -1072,7 +1084,7 @@ export function walkDirectoryForSyncUpload(
         subdirs.push({
           display: childDisplay,
           resolved: childResolved,
-          key: `${lst.dev}:${lst.ino}`,
+          key: dirIdentityKey(childResolved, lst),
         });
       } else {
         files.push({
@@ -1094,7 +1106,7 @@ export function walkDirectoryForSyncUpload(
   visit(
     expandedDir,
     resolvedRoot,
-    new Set([`${rootStat.dev}:${rootStat.ino}`]),
+    new Set([dirIdentityKey(resolvedRoot, rootStat)]),
   );
   return entries;
 }
@@ -1161,7 +1173,7 @@ export function walkDirectoryBottomUpForDelete(
           const targetStat = statSync(childResolved);
           if (targetStat.isDirectory()) {
             isDirTarget = true;
-            targetKey = `${targetStat.dev}:${targetStat.ino}`;
+            targetKey = dirIdentityKey(childResolved, targetStat);
           }
         } catch {
           // Broken symlink -> treated as a file by os.walk
@@ -1186,7 +1198,7 @@ export function walkDirectoryBottomUpForDelete(
         subdirs.push({
           display: childDisplay,
           resolved: childResolved,
-          key: `${lst.dev}:${lst.ino}`,
+          key: dirIdentityKey(childResolved, lst),
         });
       } else {
         files.push({
@@ -1209,7 +1221,7 @@ export function walkDirectoryBottomUpForDelete(
   visit(
     expandedDir,
     resolvedRoot,
-    new Set([`${rootStat.dev}:${rootStat.ino}`]),
+    new Set([dirIdentityKey(resolvedRoot, rootStat)]),
   );
   return result;
 }

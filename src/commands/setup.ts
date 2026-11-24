@@ -6,7 +6,6 @@ import {
 } from "node:crypto";
 import {
   appendFileSync,
-  chmodSync,
   existsSync,
   mkdirSync,
   readFileSync,
@@ -18,6 +17,7 @@ import {
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { expandUser } from "../core/config.ts";
+import { setPosixMode } from "../utils/posixMode.ts";
 import {
   ConfigParserError,
   formatParsedConfig,
@@ -525,7 +525,7 @@ async function promptForConfigLocation(
       },
     },
   );
-  const configLocation = resolve(io.cwd, rawLocation);
+  const configLocation = resolve(io.cwd, rawLocation).replaceAll("\\", "/");
 
   if (existsSync(configLocation)) {
     try {
@@ -698,10 +698,17 @@ export function removeProfileFromConfig(
 ): void {
   let text: string | undefined;
   try {
-    text = readFileSync(diskConfigPath, "utf8");
+    if (!isDirSync(diskConfigPath)) {
+      text = readFileSync(diskConfigPath, "utf8");
+    }
   } catch (e) {
     const code = (e as NodeJS.ErrnoException | null)?.code;
-    if (code !== "ENOENT" && code !== "ENOTDIR" && code !== "EISDIR") {
+    if (
+      code !== "ENOENT" &&
+      code !== "ENOTDIR" &&
+      code !== "EISDIR" &&
+      code !== "EACCES"
+    ) {
       throw e;
     }
   }
@@ -775,7 +782,10 @@ export async function runSetupConfig(
       "Enter a directory for your keys to be created",
       { default: defaultDir },
     );
-    const keyLocation = resolve(io.cwd, expandUser(rawKeyDir, io.env));
+    const keyLocation = resolve(
+      io.cwd,
+      expandUser(rawKeyDir, io.env),
+    ).replaceAll("\\", "/");
     if (!existsSync(keyLocation)) {
       createDirectory(keyLocation);
     }
@@ -833,7 +843,7 @@ export async function runSetupConfig(
         valueProc: (filename) => validatePrivateKeyFile(io, filename),
       },
     );
-    privateKeyFile = resolve(io.cwd, validated.filename);
+    privateKeyFile = resolve(io.cwd, validated.filename).replaceAll("\\", "/");
 
     if (!readFileSync(privateKeyFile, "utf8").endsWith(PRIVATE_KEY_LABEL)) {
       const warning =
@@ -910,11 +920,13 @@ function pyRealpath(rawPath: string, cwd: string): string {
   while (true) {
     try {
       const real = realpathSync(current);
-      return tail.length ? join(real, ...tail.reverse()) : real;
+      const out = tail.length ? join(real, ...tail.reverse()) : real;
+      return out.replaceAll("\\", "/");
     } catch {
       const parent = dirname(current);
       if (parent === current) {
-        return tail.length ? join(current, ...tail.reverse()) : current;
+        const out = tail.length ? join(current, ...tail.reverse()) : current;
+        return out.replaceAll("\\", "/");
       }
       tail.push(basename(current));
       current = parent;
@@ -975,7 +987,7 @@ async function promptInputWithDefault(
  */
 export async function runSetupAutocomplete(io: Invocation): Promise<void> {
   const stdin = createStdinReader(io);
-  const isDarwin = process.platform === "darwin";
+  const isDarwin = io.env.BOCI_SETUP_PLATFORM === "darwin";
   const userBashRc = expandUser("~/.bashrc", io.env);
   const userBashProfile = expandUser("~/.bash_profile", io.env);
 
@@ -1031,10 +1043,9 @@ export async function runSetupAutocomplete(io: Invocation): Promise<void> {
     throw new Exit(1);
   }
 
-  const completionScriptFile = join(
+  const completionScriptFile = pyPathJoin(
     expandUser("~/.oci", io.env),
-    "bin",
-    "oci_autocomplete.sh",
+    "bin/oci_autocomplete.sh",
   );
   io.out(`Using tab completion script at: ${completionScriptFile}\n`);
 
@@ -1044,7 +1055,7 @@ export async function runSetupAutocomplete(io: Invocation): Promise<void> {
 
   if (await confirmClick(io, stdin, confirmPrompt, true)) {
     if (existsSync(softLink)) {
-      chmodSync(softLink, 0o644);
+      setPosixMode(softLink, 0o644);
       unlinkSync(softLink);
     }
     try {
@@ -1053,6 +1064,7 @@ export async function runSetupAutocomplete(io: Invocation): Promise<void> {
       writeFileSync(completionScriptFile, OCI_AUTOCOMPLETE_SCRIPT, {
         mode: 0o644,
       });
+      setPosixMode(completionScriptFile, 0o644);
       const linkDir = dirname(softLink);
       if (!isDirSync(linkDir)) mkdirSync(linkDir, { recursive: true });
       symlinkSync(completionScriptFile, softLink);

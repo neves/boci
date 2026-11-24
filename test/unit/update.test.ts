@@ -4,7 +4,6 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -12,6 +11,7 @@ import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { Exit, type Invocation } from "../../src/lib/io.ts";
 import { runUpdate } from "../../src/commands/update.ts";
+import { getPosixMode } from "../../src/utils/posixMode.ts";
 
 function captureInvocation(
   argv: string[],
@@ -191,7 +191,7 @@ describe("boci update download, verify, and replace", () => {
       expect(res.code).toBe(0);
       expect(res.out).toContain("v0.2.0");
       expect(readFileSync(bin)).toEqual(Buffer.from(newBytes));
-      expect(statSync(bin).mode & 0o111).toBeGreaterThan(0);
+      expect(getPosixMode(bin) & 0o111).toBeGreaterThan(0);
       expect(readdirSync(dir)).toEqual(["boci"]);
     } finally {
       rmSync(dir, { recursive: true, force: true });

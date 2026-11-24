@@ -9,6 +9,7 @@ import {
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { buildBulkDownloadFilter, pyDirname } from "../../src/commands/os.ts";
+import { setPosixMode } from "../../src/utils/posixMode.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object bulk-download", () => {
@@ -349,7 +350,7 @@ describe("os object bulk-download", () => {
     // 1. Non-writable dest-dir
     const roDir = join(sb.home, "readonly-dl");
     mkdirSync(roDir);
-    chmodSync(roDir, 0o500);
+    setPosixMode(roDir, 0o500);
     let roErr = "";
     try {
       const roCode = await run({
@@ -381,7 +382,7 @@ describe("os object bulk-download", () => {
         `UsageError: The specified --dest-dir ${roDir} (expanded to: ${roDir}) does not have write permissions\n`,
       );
     } finally {
-      chmodSync(roDir, 0o700);
+      setPosixMode(roDir, 0o700);
     }
 
     // 2. Sequential prompts (invalid -> n, y, a) + unknown-size HEAD 404 + --debug

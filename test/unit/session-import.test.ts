@@ -1,19 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import {
-  chmod,
-  mkdir,
-  mkdtemp,
-  readFile,
-  rm,
-  stat,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { formatParsedConfig, parseConfig } from "../../src/lib/configparser.ts";
 import { removeProfileFromConfig } from "../../src/commands/setup.ts";
 import { buildZip } from "../../src/lib/zip.ts";
+import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
 
 async function runCliInHome(
   argv: string[],
@@ -80,17 +73,21 @@ describe("session import helpers", () => {
 
 describe("session export -> import round-trip", () => {
   test("exports a session profile and imports it cleanly into another home", async () => {
-    const srcHome = await mkdtemp(join(tmpdir(), "boci-sess-src-"));
-    const dstHome = await mkdtemp(join(tmpdir(), "boci-sess-dst-"));
+    const srcHome = (
+      await mkdtemp(join(tmpdir(), "boci-sess-src-"))
+    ).replaceAll("\\", "/");
+    const dstHome = (
+      await mkdtemp(join(tmpdir(), "boci-sess-dst-"))
+    ).replaceAll("\\", "/");
     try {
-      const srcOci = join(srcHome, ".oci");
+      const srcOci = `${srcHome}/.oci`;
       await mkdir(srcOci, { recursive: true });
-      await writeFile(join(srcOci, "oci_api_key.pem"), "EXPORTED-KEY-DATA\n");
-      await chmod(join(srcOci, "oci_api_key.pem"), 0o600);
-      await writeFile(join(srcOci, "token"), "exported.jwt.token");
-      await chmod(join(srcOci, "token"), 0o600);
+      await writeFile(`${srcOci}/oci_api_key.pem`, "EXPORTED-KEY-DATA\n");
+      setPosixMode(`${srcOci}/oci_api_key.pem`, 0o600);
+      await writeFile(`${srcOci}/token`, "exported.jwt.token");
+      setPosixMode(`${srcOci}/token`, 0o600);
       await writeFile(
-        join(srcOci, "config"),
+        `${srcOci}/config`,
         [
           "[DEV]",
           "region=us-phoenix-1",
@@ -109,24 +106,24 @@ describe("session export -> import round-trip", () => {
           "--profile",
           "DEV",
           "--output-file",
-          join(dstHome, "exported-dev"),
+          `${dstHome}/exported-dev`,
         ],
         srcHome,
       );
       expect(exportRes.exitCode).toBe(0);
 
-      await mkdir(join(dstHome, ".oci"), { recursive: true });
+      await mkdir(`${dstHome}/.oci`, { recursive: true });
       const importRes = await runCliInHome(
         [
           "session",
           "import",
           "--session-archive",
-          join(dstHome, "exported-dev.zip"),
+          `${dstHome}/exported-dev.zip`,
         ],
         dstHome,
       );
       expect(importRes.exitCode).toBe(0);
-      const dstCfg = join(dstHome, ".oci", "config");
+      const dstCfg = `${dstHome}/.oci/config`;
       expect(importRes.stderr).toBe(
         `Imported profile DEV written to: ${dstCfg}\n`,
       );
@@ -134,30 +131,24 @@ describe("session export -> import round-trip", () => {
         [
           "[DEV]",
           "fingerprint=11:22:33",
-          `key_file=${join(dstHome, ".oci/sessions/DEV/oci_api_key.pem")}`,
+          `key_file=${dstHome}/.oci/sessions/DEV/oci_api_key.pem`,
           "tenancy=ocid1.tenancy.oc1..roundtrip",
           "region=us-phoenix-1",
-          `security_token_file=${join(dstHome, ".oci/sessions/DEV/token")}`,
+          `security_token_file=${dstHome}/.oci/sessions/DEV/token`,
           "",
         ].join("\n"),
       );
       expect(
-        await readFile(
-          join(dstHome, ".oci/sessions/DEV/oci_api_key.pem"),
-          "utf8",
-        ),
+        await readFile(`${dstHome}/.oci/sessions/DEV/oci_api_key.pem`, "utf8"),
       ).toBe("EXPORTED-KEY-DATA\n");
-      expect(
-        await readFile(join(dstHome, ".oci/sessions/DEV/token"), "utf8"),
-      ).toBe("exported.jwt.token");
-      expect((await stat(dstCfg)).mode & 0o777).toBe(0o600);
-      expect(
-        (await stat(join(dstHome, ".oci/sessions/DEV/oci_api_key.pem"))).mode &
-          0o777,
-      ).toBe(0o600);
-      expect(
-        (await stat(join(dstHome, ".oci/sessions/DEV/token"))).mode & 0o777,
-      ).toBe(0o600);
+      expect(await readFile(`${dstHome}/.oci/sessions/DEV/token`, "utf8")).toBe(
+        "exported.jwt.token",
+      );
+      expect(getPosixMode(dstCfg)).toBe(0o600);
+      expect(getPosixMode(`${dstHome}/.oci/sessions/DEV/oci_api_key.pem`)).toBe(
+        0o600,
+      );
+      expect(getPosixMode(`${dstHome}/.oci/sessions/DEV/token`)).toBe(0o600);
     } finally {
       await rm(srcHome, { recursive: true, force: true });
       await rm(dstHome, { recursive: true, force: true });

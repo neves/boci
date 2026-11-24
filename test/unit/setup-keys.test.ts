@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createHash, createPublicKey } from "node:crypto";
-import { chmod, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
@@ -9,6 +9,7 @@ import {
   publicKeyToFingerprint,
 } from "../../src/commands/setup.ts";
 import { loadPrivateKey } from "../../src/core/signer.ts";
+import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
 
 async function runKeys(argv: string[], home: string, stdin?: string) {
   let stdout = "";
@@ -41,12 +42,12 @@ describe("setup keys", () => {
         "N/A\nN/A\n",
       );
       expect(res.exitCode).toBe(0);
-      expect((await stat(outDir)).mode & 0o777).toBe(0o700);
+      expect(getPosixMode(outDir)).toBe(0o700);
 
       const pubPath = join(outDir, "oci_api_key_public.pem");
       const privPath = join(outDir, "oci_api_key.pem");
-      expect((await stat(pubPath)).mode & 0o777).toBe(0o600);
-      expect((await stat(privPath)).mode & 0o777).toBe(0o600);
+      expect(getPosixMode(pubPath)).toBe(0o600);
+      expect(getPosixMode(privPath)).toBe(0o600);
 
       const pubPem = await readFile(pubPath, "utf8");
       const privPem = await readFile(privPath, "utf8");
@@ -174,7 +175,7 @@ describe("setup keys", () => {
     try {
       const existing = join(dir, "existing");
       await mkdir(existing, { mode: 0o755 });
-      await chmod(existing, 0o755);
+      setPosixMode(existing, 0o755);
 
       const res = await runKeys(
         [
@@ -188,7 +189,7 @@ describe("setup keys", () => {
         dir,
       );
       expect(res.exitCode).toBe(0);
-      expect((await stat(existing)).mode & 0o777).toBe(0o755);
+      expect(getPosixMode(existing)).toBe(0o755);
       expect(res.stdout).toContain(
         "Public key written to: ./existing/oci_api_key_public.pem\n",
       );

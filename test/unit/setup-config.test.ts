@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createPublicKey } from "node:crypto";
-import { chmod, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
@@ -9,6 +9,7 @@ import {
   publicKeyToFingerprint,
 } from "../../src/commands/setup.ts";
 import { loadPrivateKey } from "../../src/core/signer.ts";
+import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
 import { FAKE, FAKE_KEY_PEM } from "../harness/sandbox.ts";
 
 async function runConfig(
@@ -37,7 +38,9 @@ async function runConfig(
 
 describe("setup config", () => {
   test("creates a new config and key pair with matching fingerprint and permissions", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-config-"));
+    const dir = (
+      await mkdtemp(join(tmpdir(), "boci-setup-config-"))
+    ).replaceAll("\\", "/");
     try {
       const stdin = [
         "",
@@ -54,15 +57,15 @@ describe("setup config", () => {
       const res = await runConfig(dir, stdin);
       expect(res.exitCode).toBe(0);
 
-      const ociDir = join(dir, ".oci");
-      const configPath = join(ociDir, "config");
-      const pubPath = join(ociDir, "oci_api_key_public.pem");
-      const privPath = join(ociDir, "oci_api_key.pem");
+      const ociDir = `${dir}/.oci`;
+      const configPath = `${ociDir}/config`;
+      const pubPath = `${ociDir}/oci_api_key_public.pem`;
+      const privPath = `${ociDir}/oci_api_key.pem`;
 
-      expect((await stat(ociDir)).mode & 0o777).toBe(0o700);
-      expect((await stat(configPath)).mode & 0o777).toBe(0o600);
-      expect((await stat(pubPath)).mode & 0o777).toBe(0o600);
-      expect((await stat(privPath)).mode & 0o777).toBe(0o600);
+      expect(getPosixMode(ociDir)).toBe(0o700);
+      expect(getPosixMode(configPath)).toBe(0o600);
+      expect(getPosixMode(pubPath)).toBe(0o600);
+      expect(getPosixMode(privPath)).toBe(0o600);
 
       const pubPem = await readFile(pubPath, "utf8");
       const privPem = await readFile(privPath, "utf8");
@@ -137,14 +140,17 @@ describe("setup config", () => {
   });
 
   test("appends a new profile with blank-line separator and overwrites when requested", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-config-exist-"));
+    const dir = (
+      await mkdtemp(join(tmpdir(), "boci-setup-config-exist-"))
+    ).replaceAll("\\", "/");
     try {
-      const ociDir = join(dir, ".oci");
+      const ociDir = `${dir}/.oci`;
       await mkdir(ociDir, { mode: 0o700 });
-      const keyPath = join(ociDir, "existing.pem");
+      setPosixMode(ociDir, 0o700);
+      const keyPath = `${ociDir}/existing.pem`;
       await Bun.write(keyPath, `${FAKE_KEY_PEM.trimEnd()}`);
-      await chmod(keyPath, 0o600);
-      const configPath = join(ociDir, "config");
+      setPosixMode(keyPath, 0o600);
+      const configPath = `${ociDir}/config`;
       await Bun.write(configPath, "[DEFAULT]\nuser=old\n");
 
       const expectedFp = publicKeyToFingerprint(
@@ -218,9 +224,11 @@ describe("setup config", () => {
   });
 
   test("colors the unlabeled private key warning yellow only when stdout is a TTY", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-config-tty-"));
+    const dir = (
+      await mkdtemp(join(tmpdir(), "boci-setup-config-tty-"))
+    ).replaceAll("\\", "/");
     try {
-      const keyPath = join(dir, "unlabeled.pem");
+      const keyPath = `${dir}/unlabeled.pem`;
       await Bun.write(keyPath, FAKE_KEY_PEM.replace(/OCI_API_KEY\s*$/, ""));
 
       const stdin = [

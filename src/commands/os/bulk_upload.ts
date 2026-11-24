@@ -19,6 +19,7 @@ import {
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
+import { getPosixMode } from "../../utils/posixMode.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
@@ -167,6 +168,12 @@ export async function runOsObjectBulkUpload(
   }
   try {
     accessSync(resolvedSrcDir, fsConstants.R_OK);
+    if (
+      process.platform === "win32" &&
+      (getPosixMode(resolvedSrcDir) & 0o400) === 0
+    ) {
+      throw new Error("EACCES");
+    }
   } catch {
     usageError(
       io,

@@ -20,29 +20,38 @@ const KEY =
 // Generated from oci.config.from_file by tools/extract/config_fixtures.py.
 test("fromFile matches oci.config.from_file", async () => {
   for (const c of cases) {
-    const dir = await mkdtemp(join(tmpdir(), "boci-config-"));
+    const dir = (await mkdtemp(join(tmpdir(), "boci-config-"))).replaceAll(
+      "\\",
+      "/",
+    );
     try {
-      await Bun.write(join(dir, "key.pem"), KEY);
+      await Bun.write(`${dir}/key.pem`, KEY);
       if (c.text !== null) {
-        await Bun.write(join(dir, "config"), c.text.replaceAll("{dir}", dir));
-        await chmod(join(dir, "config"), 0o600);
+        await Bun.write(`${dir}/config`, c.text.replaceAll("{dir}", dir));
+        await chmod(`${dir}/config`, 0o600);
       }
       const env = { HOME: dir };
       let got: { config?: unknown; error?: unknown };
+      const winDir = dir.replaceAll("/", "\\");
+      const normDir = (s: string) =>
+        s.replaceAll(dir, "{dir}").replaceAll(winDir, "{dir}");
       try {
-        const cfg = fromFile(join(dir, "config"), c.profile, env, dir);
+        const cfg = fromFile(`${dir}/config`, c.profile, env, dir);
         got = {
           config: Object.fromEntries(
             Object.entries(cfg).map(([k, v]) => [
               k,
-              typeof v === "string" ? v.replaceAll(dir, "{dir}") : v,
+              typeof v === "string" ? normDir(v) : v,
             ]),
           ),
         };
       } catch (e) {
         if (!(e instanceof ConfigError)) throw e;
         got = {
-          error: { type: e.type, message: e.message.replaceAll(dir, "{dir}") },
+          error: {
+            type: e.type,
+            message: normDir(e.message),
+          },
         };
       }
       expect({

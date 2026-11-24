@@ -11,6 +11,6 @@ export function expandHomeDir(
   if (user) return path; // ~otheruser: left alone (not resolved without pwd lookup)
   const home = env.HOME ?? homedir();
   return (
-    home.replace(/\/+$/, "") + (slash === -1 ? "" : path.slice(slash)) || "/"
+    home.replace(/[\\/]+$/, "") + (slash === -1 ? "" : path.slice(slash)) || "/"
   );
 }

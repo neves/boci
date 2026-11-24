@@ -19,6 +19,7 @@ import {
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
+import { getPosixMode } from "../../utils/posixMode.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
@@ -184,6 +185,12 @@ export async function runOsObjectSync(
     }
     try {
       accessSync(resolvedSrcDir, fsConstants.R_OK);
+      if (
+        process.platform === "win32" &&
+        (getPosixMode(resolvedSrcDir) & 0o400) === 0
+      ) {
+        throw new Error("EACCES");
+      }
     } catch {
       usageError(
         io,
@@ -871,6 +878,12 @@ export async function runOsObjectSync(
   } else {
     try {
       accessSync(resolvedDestDir, fsConstants.W_OK);
+      if (
+        process.platform === "win32" &&
+        (getPosixMode(resolvedDestDir) & 0o200) === 0
+      ) {
+        throw new Error("EACCES");
+      }
     } catch {
       usageError(
         io,

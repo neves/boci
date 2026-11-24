@@ -1,5 +1,4 @@
 import {
-  chmodSync,
   existsSync,
   realpathSync,
   renameSync,
@@ -8,6 +7,7 @@ import {
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { Exit, type Invocation } from "../lib/io.ts";
+import { setPosixMode } from "../utils/posixMode.ts";
 import { helpWidth } from "../core/help/formatter.ts";
 import { commandHelp } from "../core/help/render.ts";
 import type { HelpDoc } from "../core/spec.ts";
@@ -237,8 +237,9 @@ export function replaceBinary(
         // On Windows the running process may still hold a lock on .old until exit.
       }
     } else {
-      chmodSync(tmpPath, 0o755);
+      setPosixMode(tmpPath, 0o755);
       renameSync(tmpPath, execPath);
+      setPosixMode(execPath, 0o755);
     }
   } catch (e) {
     try {

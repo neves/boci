@@ -1,10 +1,11 @@
 // Isolated HOME + OCI config signed with a committed throwaway key, so no test
 // ever reads the real ~/.oci or needs real credentials.
 import { createPrivateKey, createPublicKey } from "node:crypto";
-import { chmod, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildZip } from "../../src/lib/zip.ts";
+import { setPosixMode } from "../../src/utils/posixMode.ts";
 
 export const FAKE = {
   tenancy:
@@ -78,11 +79,13 @@ export async function createSandbox(
   extraConfig = "",
   options: SandboxOptions = {},
 ): Promise<Sandbox> {
-  const home = await mkdtemp(join(tmpdir(), "boci-sandbox-"));
-  const dir = join(home, ".oci");
+  const rawHome = await mkdtemp(join(tmpdir(), "boci-sandbox-"));
+  const home = (await realpath(rawHome)).replaceAll("\\", "/");
+  const dir = `${home}/.oci`;
   await mkdir(dir, { mode: 0o700 });
-  const keyFile = join(dir, "key.pem");
-  const configFile = join(dir, "config");
+  setPosixMode(dir, 0o700);
+  const keyFile = `${dir}/key.pem`;
+  const configFile = `${dir}/config`;
   if (!options.noConfig) {
     let key = FAKE_KEY_PEM;
     if (options.keyPassphrase !== undefined) {
@@ -104,19 +107,19 @@ export async function createSandbox(
       configFile,
       `[DEFAULT]\nuser=${FAKE.user}\nfingerprint=${await keyFingerprint(KEY_SOURCE, options.keyLabel)}\ntenancy=${FAKE.tenancy}\nregion=${FAKE.region}\nkey_file=${keyFile}\n${extraConfig}`,
     );
-    await chmod(keyFile, options.keyMode ?? 0o600);
-    await chmod(configFile, options.configMode ?? 0o600);
+    setPosixMode(keyFile, options.keyMode ?? 0o600);
+    setPosixMode(configFile, options.configMode ?? 0o600);
   }
   for (const [rel, content] of Object.entries(options.files ?? {})) {
-    const path = join(home, rel);
+    const path = `${home}/${rel}`;
     await Bun.write(
       path,
       content.replaceAll("{home}", home).replaceAll("{fakeKey}", FAKE_KEY_PEM),
     );
-    await chmod(path, options.fileModes?.[rel] ?? 0o600);
+    setPosixMode(path, options.fileModes?.[rel] ?? 0o600);
   }
   for (const [rel, entries] of Object.entries(options.zipFiles ?? {})) {
-    const path = join(home, rel);
+    const path = `${home}/${rel}`;
     const zipEntries = Object.entries(entries).map(([name, content]) => ({
       name,
       data: Buffer.from(
@@ -127,7 +130,7 @@ export async function createSandbox(
       ),
     }));
     await Bun.write(path, buildZip(zipEntries));
-    await chmod(path, options.fileModes?.[rel] ?? 0o600);
+    setPosixMode(path, options.fileModes?.[rel] ?? 0o600);
   }
 
   const env: Record<string, string> = {};

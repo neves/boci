@@ -1,4 +1,5 @@
-import { chmodSync, statSync } from "node:fs";
+import { statSync } from "node:fs";
+import { setPosixMode } from "./posixMode.ts";
 
 /** Restrict `path` permissions to the current user (`0o600` for files, `0o700` for directories). */
 export function applyUserOnlyPermissions(path: string): void {
@@ -10,5 +11,5 @@ export function applyUserOnlyPermissions(path: string): void {
       `Failed attempting to set permissions on path that does not exist: ${path}`,
     );
   }
-  chmodSync(path, st.isFile() ? 0o600 : 0o700);
+  setPosixMode(path, st.isFile() ? 0o600 : 0o700);
 }

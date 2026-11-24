@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { stat } from "node:fs/promises";
+import { getPosixMode } from "../../src/utils/posixMode.ts";
 import { FAKE, createSandbox, fingerprint } from "../harness/sandbox.ts";
 
 test("sandbox writes a config with the fake identity and an isolated HOME", async () => {
@@ -16,7 +16,7 @@ test("sandbox writes a config with the fake identity and an isolated HOME", asyn
 test("sandbox files are private so neither CLI warns about permissions", async () => {
   await using sb = await createSandbox();
   for (const file of [sb.configFile, sb.keyFile]) {
-    expect((await stat(file)).mode & 0o777).toBe(0o600);
+    expect(getPosixMode(file)).toBe(0o600);
   }
 });
 

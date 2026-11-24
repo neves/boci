@@ -10,8 +10,9 @@ import {
   isCertificateError,
   fetchWithConnectionTimeout,
 } from "./connection-timeout.ts";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { getPosixMode } from "../utils/posixMode.ts";
 import { randomBytes, type KeyObject } from "node:crypto";
 import {
   type Config,
@@ -1051,7 +1052,7 @@ export function applyConfigEnvVars(
 
 export function warnFilePermissions(io: Invocation, file: string) {
   try {
-    if ((statSync(resolve(io.cwd, file)).mode & 0o077) === 0) return;
+    if ((getPosixMode(resolve(io.cwd, file)) & 0o077) === 0) return;
   } catch {
     return;
   }

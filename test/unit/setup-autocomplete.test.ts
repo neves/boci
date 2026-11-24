@@ -5,6 +5,7 @@ import {
   mkdtemp,
   readFile,
   readlink,
+  realpath,
   rm,
   symlink,
   writeFile,
@@ -13,6 +14,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { OCI_AUTOCOMPLETE_SCRIPT } from "../../src/commands/setup.ts";
+
+async function makeTempHome(prefix: string): Promise<string> {
+  const raw = await mkdtemp(join(tmpdir(), prefix));
+  return (await realpath(raw)).replaceAll("\\", "/");
+}
 
 async function runAutocomplete(home: string, stdin: string) {
   let stdout = "";
@@ -36,13 +42,13 @@ async function runAutocomplete(home: string, stdin: string) {
 
 describe("setup autocomplete", () => {
   test("creates .bashrc, symlinks ~/lib/oci_autocomplete.sh, and writes source line", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-"));
+    const dir = await makeTempHome("boci-setup-ac-");
     try {
       const res = await runAutocomplete(dir, "y\ny\n");
       expect(res.exitCode).toBe(0);
       expect(res.stderr).toBe("");
 
-      const softLink = join(dir, "lib", "oci_autocomplete.sh");
+      const softLink = `${dir}/lib/oci_autocomplete.sh`;
       const linkStat = await lstat(softLink);
       expect(linkStat.isSymbolicLink()).toBe(true);
       const target = await readlink(softLink);
@@ -50,7 +56,7 @@ describe("setup autocomplete", () => {
       expect(await readFile(softLink, "utf8")).toBe(OCI_AUTOCOMPLETE_SCRIPT);
 
       const expectedLine = `[[ -e "${softLink}" ]] && source "${softLink}"`;
-      const bashrc = await readFile(join(dir, ".bashrc"), "utf8");
+      const bashrc = await readFile(`${dir}/.bashrc`, "utf8");
       expect(bashrc).toBe(`\n${expectedLine}\n`);
     } finally {
       await rm(dir, { recursive: true, force: true });
@@ -58,14 +64,14 @@ describe("setup autocomplete", () => {
   });
 
   test("appends to existing .bashrc without clobbering existing content", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-exist-"));
+    const dir = await makeTempHome("boci-setup-ac-exist-");
     try {
-      const bashrcPath = join(dir, ".bashrc");
+      const bashrcPath = `${dir}/.bashrc`;
       await writeFile(bashrcPath, "export FOO=bar\n");
       const res = await runAutocomplete(dir, "\ny\n");
       expect(res.exitCode).toBe(0);
 
-      const softLink = join(dir, "lib", "oci_autocomplete.sh");
+      const softLink = `${dir}/lib/oci_autocomplete.sh`;
       const expectedLine = `[[ -e "${softLink}" ]] && source "${softLink}"`;
       expect(await readFile(bashrcPath, "utf8")).toBe(
         `export FOO=bar\n\n${expectedLine}\n`,
@@ -76,10 +82,10 @@ describe("setup autocomplete", () => {
   });
 
   test("does not duplicate line when already configured", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-dup-"));
+    const dir = await makeTempHome("boci-setup-ac-dup-");
     try {
-      const bashrcPath = join(dir, ".bashrc");
-      const softLink = join(dir, "lib", "oci_autocomplete.sh");
+      const bashrcPath = `${dir}/.bashrc`;
+      const softLink = `${dir}/lib/oci_autocomplete.sh`;
       const existing = `export FOO=1\n[[ -e "${softLink}" ]] && source "${softLink}"\n`;
       await writeFile(bashrcPath, existing);
       const res = await runAutocomplete(dir, "\ny\n");
@@ -94,15 +100,14 @@ describe("setup autocomplete", () => {
   });
 
   test("prefers .bashrc over .bash_profile when both exist on Linux", async () => {
-    if (process.platform === "darwin") return;
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-both-"));
+    const dir = await makeTempHome("boci-setup-ac-both-");
     try {
-      await writeFile(join(dir, ".bashrc"), "# bashrc\n");
-      await writeFile(join(dir, ".bash_profile"), "# profile\n");
+      await writeFile(`${dir}/.bashrc`, "# bashrc\n");
+      await writeFile(`${dir}/.bash_profile`, "# profile\n");
       const res = await runAutocomplete(dir, "\ny\n");
       expect(res.exitCode).toBe(0);
       expect(res.stdout).toContain(`leave blank to use '${dir}/.bashrc'`);
-      expect(await readFile(join(dir, ".bash_profile"), "utf8")).toBe(
+      expect(await readFile(`${dir}/.bash_profile`, "utf8")).toBe(
         "# profile\n",
       );
     } finally {
@@ -111,44 +116,42 @@ describe("setup autocomplete", () => {
   });
 
   test("broken existing symlink at ~/lib/oci_autocomplete.sh reports unable to symlink", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-broken-"));
+    const dir = await makeTempHome("boci-setup-ac-broken-");
     try {
-      await writeFile(join(dir, ".bashrc"), "# keep\n");
-      await mkdir(join(dir, "lib"), { recursive: true });
+      await writeFile(`${dir}/.bashrc`, "# keep\n");
+      await mkdir(`${dir}/lib`, { recursive: true });
       await symlink(
-        join(dir, "does-not-exist.sh"),
-        join(dir, "lib", "oci_autocomplete.sh"),
+        `${dir}/does-not-exist.sh`,
+        `${dir}/lib/oci_autocomplete.sh`,
       );
       const res = await runAutocomplete(dir, "\ny\n");
       expect(res.exitCode).toBe(0);
       expect(res.stdout).toContain(
         "Unable to symlink ~/lib/oci_autocomplete.sh to",
       );
-      expect(await readFile(join(dir, ".bashrc"), "utf8")).toBe("# keep\n");
+      expect(await readFile(`${dir}/.bashrc`, "utf8")).toBe("# keep\n");
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
   });
 
   test("declining confirmation after auto-creating default .bashrc leaves empty .bashrc and no symlink", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-decline-"));
+    const dir = await makeTempHome("boci-setup-ac-decline-");
     try {
       const res = await runAutocomplete(dir, "y\nn\n");
       expect(res.exitCode).toBe(0);
       expect(res.stdout).toContain(
         "Exiting script. Tab completion not set up.",
       );
-      expect(await readFile(join(dir, ".bashrc"), "utf8")).toBe("");
-      await expect(
-        lstat(join(dir, "lib", "oci_autocomplete.sh")),
-      ).rejects.toThrow();
+      expect(await readFile(`${dir}/.bashrc`, "utf8")).toBe("");
+      await expect(lstat(`${dir}/lib/oci_autocomplete.sh`)).rejects.toThrow();
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
   });
 
   test("declining default creation and leaving path blank fails with CLIInstallError", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-empty-"));
+    const dir = await makeTempHome("boci-setup-ac-empty-");
     try {
       const res = await runAutocomplete(dir, "n\n\n");
       expect(res.exitCode).toBe(1);
@@ -161,7 +164,7 @@ describe("setup autocomplete", () => {
   });
 
   test("EOF during prompt_input exits 1 with EOFError", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "boci-setup-ac-eof-"));
+    const dir = await makeTempHome("boci-setup-ac-eof-");
     try {
       const res = await runAutocomplete(dir, "");
       expect(res.exitCode).toBe(1);

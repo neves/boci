@@ -3,6 +3,7 @@
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { closeSync, existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
+import { getPosixMode } from "../utils/posixMode.ts";
 import {
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,
@@ -1041,8 +1042,16 @@ function programFiles(io: Invocation): ProgramFiles {
   return {
     open(path, mode) {
       if (/[wax+]/.test(mode)) throw new ProgramUnsupported("open() to write");
+      const resolved = resolve(io.cwd, path);
       try {
-        return new ProgramFile(mode, readFileSync(resolve(io.cwd, path)));
+        if (
+          process.platform === "win32" &&
+          existsSync(resolved) &&
+          (getPosixMode(resolved) & 0o400) === 0
+        ) {
+          throw Object.assign(new Error("EACCES"), { code: "EACCES" });
+        }
+        return new ProgramFile(mode, readFileSync(resolved));
       } catch (e) {
         if ((e as NodeJS.ErrnoException).code === "EACCES")
           throw new ProgramRaise(
@@ -1085,19 +1094,29 @@ async function notImplemented(
   if (fallback && depth === 0) {
     const bin =
       Bun.which(fallback, { PATH: io.env.PATH ?? "", cwd: io.cwd }) ?? fallback;
+    const cmd =
+      process.platform === "win32" && /\.[mc]?[jt]s$/i.test(bin)
+        ? [
+            Bun.which("bun", {
+              PATH: io.env.PATH ?? process.env.PATH ?? "",
+            }) ?? process.execPath,
+            bin,
+            ...argv,
+          ]
+        : [bin, ...argv];
     const options = {
       cwd: io.cwd,
       env: { ...io.env, BOCI_FALLBACK_DEPTH: String(depth + 1) },
     };
     if (io.inheritStdio) {
       await io.inheritStdio.flush(); // boci's warnings come before the child's output
-      const proc = Bun.spawn([bin, ...argv], {
+      const proc = Bun.spawn(cmd, {
         ...options,
         stdio: ["inherit", "inherit", "inherit"],
       });
       throw new Exit(await proc.exited);
     }
-    const proc = Bun.spawn([bin, ...argv], {
+    const proc = Bun.spawn(cmd, {
       ...options,
       stdin: io.stdin === undefined ? "ignore" : new Blob([io.stdin]),
       stdout: "pipe",

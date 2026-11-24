@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createPublicKey } from "node:crypto";
-import { chmod, mkdir, mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
@@ -21,6 +21,7 @@ import {
   loadPrivateKey,
 } from "../../src/core/signer.ts";
 import { loadIndex, loadService } from "../../src/core/spec.ts";
+import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
 import { startFakeEndpoint } from "../harness/fake-endpoint.ts";
 import { FAKE, FAKE_KEY_PEM } from "../harness/sandbox.ts";
 
@@ -93,7 +94,9 @@ describe("session authenticate helpers", () => {
 
 describe("session authenticate browser flow", () => {
   test("serves OAuth callback, writes keys/token/config, and validates JWK & URL params", async () => {
-    const home = await mkdtemp(join(tmpdir(), "boci-auth-browser-"));
+    const home = (
+      await mkdtemp(join(tmpdir(), "boci-auth-browser-"))
+    ).replaceAll("\\", "/");
     const index = await loadIndex();
     const spec = await loadService("session");
     // Reserve an ephemeral free port, release it, and pass to runSessionAuthenticate.
@@ -196,14 +199,14 @@ describe("session authenticate browser flow", () => {
       );
       expect(stdout).toContain(`Config written to: ${home}/.oci/config\n`);
 
-      const sessDir = join(home, ".oci", "sessions", "BROWSER_SESS");
+      const sessDir = `${home}/.oci/sessions/BROWSER_SESS`;
       const pubPem = await readFile(
-        join(sessDir, "oci_api_key_public.pem"),
+        `${sessDir}/oci_api_key_public.pem`,
         "utf8",
       );
-      const privPem = await readFile(join(sessDir, "oci_api_key.pem"), "utf8");
-      const tokenText = await readFile(join(sessDir, "token"), "utf8");
-      const configText = await readFile(join(home, ".oci", "config"), "utf8");
+      const privPem = await readFile(`${sessDir}/oci_api_key.pem`, "utf8");
+      const tokenText = await readFile(`${sessDir}/token`, "utf8");
+      const configText = await readFile(`${home}/.oci/config`, "utf8");
 
       expect(tokenText).toBe(SAMPLE_JWT);
       expect(privPem.endsWith(PRIVATE_KEY_LABEL)).toBe(true);
@@ -222,27 +225,17 @@ describe("session authenticate browser flow", () => {
 
       expect(configText).toContain("[BROWSER_SESS]\n");
       expect(configText).toContain(`fingerprint=${fp}\n`);
-      expect(configText).toContain(
-        `key_file=${join(sessDir, "oci_api_key.pem")}\n`,
-      );
+      expect(configText).toContain(`key_file=${sessDir}/oci_api_key.pem\n`);
       expect(configText).toContain("tenancy=ocid1.tenancy.oc1..unittenancy\n");
       expect(configText).toContain("region=us-phoenix-1\n");
-      expect(configText).toContain(
-        `security_token_file=${join(sessDir, "token")}\n`,
-      );
+      expect(configText).toContain(`security_token_file=${sessDir}/token\n`);
       expect(configText).not.toContain("user=");
 
-      expect((await stat(sessDir)).mode & 0o777).toBe(0o700);
-      expect((await stat(join(sessDir, "oci_api_key.pem"))).mode & 0o777).toBe(
-        0o600,
-      );
-      expect(
-        (await stat(join(sessDir, "oci_api_key_public.pem"))).mode & 0o777,
-      ).toBe(0o600);
-      expect((await stat(join(sessDir, "token"))).mode & 0o777).toBe(0o600);
-      expect((await stat(join(home, ".oci", "config"))).mode & 0o777).toBe(
-        0o600,
-      );
+      expect(getPosixMode(sessDir)).toBe(0o700);
+      expect(getPosixMode(`${sessDir}/oci_api_key.pem`)).toBe(0o600);
+      expect(getPosixMode(`${sessDir}/oci_api_key_public.pem`)).toBe(0o600);
+      expect(getPosixMode(`${sessDir}/token`)).toBe(0o600);
+      expect(getPosixMode(`${home}/.oci/config`)).toBe(0o600);
     } finally {
       await rm(home, { recursive: true, force: true });
     }
@@ -306,22 +299,25 @@ describe("session authenticate browser flow", () => {
 
 describe("session authenticate --no-browser generated keypair", () => {
   test("generates an encrypted RSA keypair, sends public key, and persists session", async () => {
-    const home = await mkdtemp(join(tmpdir(), "boci-auth-genkey-"));
+    const home = (
+      await mkdtemp(join(tmpdir(), "boci-auth-genkey-"))
+    ).replaceAll("\\", "/");
     using fake = startFakeEndpoint({
       status: 200,
       body: { token: SAMPLE_JWT },
     });
     try {
-      const ociDir = join(home, ".oci");
+      const ociDir = `${home}/.oci`;
       await mkdir(ociDir, { mode: 0o700 });
-      const keyPath = join(ociDir, "key.pem");
+      setPosixMode(ociDir, 0o700);
+      const keyPath = `${ociDir}/key.pem`;
       await Bun.write(keyPath, `${FAKE_KEY_PEM.trimEnd()}\nOCI_API_KEY\n`);
-      await chmod(keyPath, 0o600);
+      setPosixMode(keyPath, 0o600);
       const authFp = publicKeyToFingerprint(
         createPublicKey(loadPrivateKey(FAKE_KEY_PEM, null)),
       );
       await Bun.write(
-        join(ociDir, "config"),
+        `${ociDir}/config`,
         [
           "[DEFAULT]",
           `user=${FAKE.user}`,
@@ -332,7 +328,7 @@ describe("session authenticate --no-browser generated keypair", () => {
           "",
         ].join("\n"),
       );
-      await chmod(join(ociDir, "config"), 0o600);
+      setPosixMode(`${ociDir}/config`, 0o600);
 
       let stdout = "";
       let stderr = "";
@@ -347,7 +343,7 @@ describe("session authenticate --no-browser generated keypair", () => {
           "GENKEY",
           "--use-passphrase",
           "--config-location",
-          join(ociDir, "gen_config"),
+          `${ociDir}/gen_config`,
           "--endpoint",
           fake.url,
         ],
@@ -372,12 +368,12 @@ describe("session authenticate --no-browser generated keypair", () => {
       };
       expect(reqBody.sessionExpirationInMinutes).toBe("60");
 
-      const sessDir = join(ociDir, "sessions", "GENKEY");
+      const sessDir = `${ociDir}/sessions/GENKEY`;
       const pubPem = await readFile(
-        join(sessDir, "oci_api_key_public.pem"),
+        `${sessDir}/oci_api_key_public.pem`,
         "utf8",
       );
-      const privPem = await readFile(join(sessDir, "oci_api_key.pem"), "utf8");
+      const privPem = await readFile(`${sessDir}/oci_api_key.pem`, "utf8");
       expect(reqBody.publicKey).toBe(pubPem);
       expect(privPem.endsWith(PRIVATE_KEY_LABEL)).toBe(true);
       expect(() => loadPrivateKey(privPem, null)).toThrow(
@@ -387,12 +383,10 @@ describe("session authenticate --no-browser generated keypair", () => {
       const fp = publicKeyToFingerprint(createPublicKey(decrypted));
       expect(publicKeyToFingerprint(createPublicKey(pubPem))).toBe(fp);
 
-      const genConfig = await readFile(join(ociDir, "gen_config"), "utf8");
+      const genConfig = await readFile(`${ociDir}/gen_config`, "utf8");
       expect(genConfig).toContain("[GENKEY]\n");
       expect(genConfig).toContain(`fingerprint=${fp}\n`);
-      expect(genConfig).toContain(
-        `key_file=${join(sessDir, "oci_api_key.pem")}\n`,
-      );
+      expect(genConfig).toContain(`key_file=${sessDir}/oci_api_key.pem\n`);
       expect(genConfig).not.toContain("pass_phrase=");
       expect(stdout).toContain(`Config written to: ${ociDir}/gen_config\n`);
       expect(stderr).toContain("Warning: Password input may be echoed.");

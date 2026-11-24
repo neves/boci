@@ -1,9 +1,7 @@
 // Object Storage custom commands (`oci os object ...`), matching
 // services/object_storage/src/oci_cli_object_storage/objectstorage_cli_extended.py.
 import {
-  accessSync,
   closeSync,
-  constants as fsConstants,
   existsSync,
   lstatSync,
   mkdirSync,
@@ -19,7 +17,7 @@ import {
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
-import { getPosixMode } from "../../lib/posixMode.ts";
+import { checkDirectoryWritable } from "../../lib/accessibility.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
@@ -172,13 +170,7 @@ export async function runOsObjectBulkDownload(
     mkdirSync(resolvedDestDir, { recursive: true });
   } else {
     try {
-      accessSync(resolvedDestDir, fsConstants.W_OK);
-      if (
-        process.platform === "win32" &&
-        (getPosixMode(resolvedDestDir) & 0o200) === 0
-      ) {
-        throw new Error("EACCES");
-      }
+      checkDirectoryWritable(resolvedDestDir);
     } catch {
       usageError(
         io,

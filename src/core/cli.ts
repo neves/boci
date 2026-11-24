@@ -3,7 +3,7 @@
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { closeSync, existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
-import { getPosixMode } from "../lib/posixMode.ts";
+import { checkFileAccessibility } from "../lib/accessibility.ts";
 import {
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,
@@ -1044,13 +1044,7 @@ function programFiles(io: Invocation): ProgramFiles {
       if (/[wax+]/.test(mode)) throw new ProgramUnsupported("open() to write");
       const resolved = resolve(io.cwd, path);
       try {
-        if (
-          process.platform === "win32" &&
-          existsSync(resolved) &&
-          (getPosixMode(resolved) & 0o400) === 0
-        ) {
-          throw Object.assign(new Error("EACCES"), { code: "EACCES" });
-        }
+        checkFileAccessibility(resolved, "r");
         return new ProgramFile(mode, readFileSync(resolved));
       } catch (e) {
         if ((e as NodeJS.ErrnoException).code === "EACCES")

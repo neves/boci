@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 import { resolve } from "node:path";
 import type { Invocation } from "../lib/io.ts";
-import { getPosixMode } from "../lib/posixMode.ts";
+import { checkFileAccessibility } from "../lib/accessibility.ts";
 import { BadParameter, pyRepr } from "./convert.ts";
 import { ProgramFile } from "./program.ts";
 
@@ -65,12 +65,7 @@ export function openClickFileForWrite(
       if (statSync(resolved).isDirectory()) {
         throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
       }
-      if (
-        process.platform === "win32" &&
-        (getPosixMode(resolved) & 0o200) === 0
-      ) {
-        throw new BadParameter(`${pyRepr(rawPath)}: Permission denied`);
-      }
+      checkFileAccessibility(resolved, "w");
     }
     const fd = openSync(resolved, "w");
     return { rawPath, isStdout: false, fd };
@@ -93,13 +88,8 @@ export function validateClickFileForRead(
       if (statSync(resolved).isDirectory()) {
         throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
       }
-      if (
-        process.platform === "win32" &&
-        (getPosixMode(resolved) & 0o400) === 0
-      ) {
-        throw new BadParameter(`${pyRepr(rawPath)}: Permission denied`);
-      }
     }
+    checkFileAccessibility(resolved, "r");
     fd = openSync(resolved, "r");
     if (fstatSync(fd).isDirectory()) {
       throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
@@ -144,13 +134,8 @@ export async function openClickFileForProgram(
       if (statSync(resolved).isDirectory()) {
         throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
       }
-      if (
-        process.platform === "win32" &&
-        (getPosixMode(resolved) & 0o400) === 0
-      ) {
-        throw new BadParameter(`${pyRepr(rawPath)}: Permission denied`);
-      }
     }
+    checkFileAccessibility(resolved, "r");
     fd = openSync(resolved, "r");
     if (fstatSync(fd).isDirectory()) {
       throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);

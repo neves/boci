@@ -1,0 +1,253 @@
+[
+  {
+    "id": "ce-cluster-generate-token-basic",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..test"
+    ],
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-region-override",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--region",
+      "eu-frankfurt-1",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..regiontest"
+    ],
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-from-json",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "ce",
+      "cluster",
+      "generate-token",
+      "--from-json",
+      "{\"clusterId\": \"ocid1.cluster.oc1..fromjson\"}"
+    ],
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-blank-cluster-id",
+    "key": "ce cluster generate-token",
+    "argv": ["ce", "cluster", "generate-token", "--cluster-id", "   "],
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-security-token",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--auth",
+      "security_token",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..sectok"
+    ],
+    "config": "security_token_file=~/.oci/session-token\n",
+    "sandbox": {
+      "files": {
+        ".oci/session-token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA"
+      }
+    },
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-instance-principal",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--auth",
+      "instance_principal",
+      "--region",
+      "us-phoenix-1",
+      "--federation-endpoint",
+      "{federation}",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..ip"
+    ],
+    "env": {
+      "OCI_METADATA_BASE_URL": "{metadata}"
+    },
+    "sandbox": {
+      "noConfig": true
+    },
+    "instanceMetadata": true,
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-instance-principal-no-region",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--auth",
+      "instance_principal",
+      "--federation-endpoint",
+      "{federation}",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..ipnoregion"
+    ],
+    "env": {
+      "OCI_METADATA_BASE_URL": "{metadata}"
+    },
+    "sandbox": {
+      "noConfig": true
+    },
+    "instanceMetadata": true,
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-instance-obo-user",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--auth",
+      "instance_obo_user",
+      "--region",
+      "us-phoenix-1",
+      "--federation-endpoint",
+      "{federation}",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..obo"
+    ],
+    "env": {
+      "OCI_METADATA_BASE_URL": "{metadata}"
+    },
+    "config": "delegation_token_file=~/.oci/delegation_token\n",
+    "sandbox": {
+      "files": {
+        ".oci/delegation_token": "obo-delegation-token-value\n"
+      }
+    },
+    "instanceMetadata": true,
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-instance-obo-missing-config",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--auth",
+      "instance_obo_user",
+      "--federation-endpoint",
+      "{federation}",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..obomissing"
+    ],
+    "env": {
+      "OCI_METADATA_BASE_URL": "{metadata}"
+    },
+    "instanceMetadata": true,
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-instance-obo-missing-file",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--auth",
+      "instance_obo_user",
+      "--federation-endpoint",
+      "{federation}",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..obonofile"
+    ],
+    "env": {
+      "OCI_METADATA_BASE_URL": "{metadata}"
+    },
+    "config": "delegation_token_file=~/.oci/no-such-delegation-token\n",
+    "instanceMetadata": true,
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-resource-principal",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--auth",
+      "resource_principal",
+      "--region",
+      "us-phoenix-1",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..rp"
+    ],
+    "env": {
+      "OCI_RESOURCE_PRINCIPAL_VERSION": "2.2",
+      "OCI_RESOURCE_PRINCIPAL_RPST": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjIwODQxMDAwMDAsImlhdCI6MjA4NDA5MDAwMH0.eA",
+      "OCI_RESOURCE_PRINCIPAL_PRIVATE_PEM": "{fakeKeyPem}",
+      "OCI_RESOURCE_PRINCIPAL_REGION": "us-ashburn-1"
+    },
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "requests": 0
+    }
+  },
+  {
+    "id": "ce-cluster-generate-token-missing-region-with-endpoint",
+    "key": "ce cluster generate-token",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "ce",
+      "cluster",
+      "generate-token",
+      "--cluster-id",
+      "ocid1.cluster.oc1..noregion"
+    ],
+    "sandbox": {
+      "noConfig": true,
+      "files": {
+        ".oci/config": "[DEFAULT]\nuser=ocid1.user.oc1..aaaaaaaabocifakeuser00000000000000000000000000000000000000\nfingerprint=3b:a8:fd:b2:3d:53:2c:cc:a0:11:58:0e:a2:28:f2:49\ntenancy=ocid1.tenancy.oc1..aaaaaaaabocifaketenancy0000000000000000000000000000000000\nkey_file={home}/.oci/key.pem\n",
+        ".oci/key.pem": "{fakeKey}"
+      }
+    },
+    "expect": {
+      "requests": 0
+    }
+  }
+]

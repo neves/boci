@@ -85,6 +85,42 @@ export function maskStderr(s: string): string {
   );
 }
 
+/**
+ * Normalize dynamic fields inside an OKE `ExecCredential` JSON envelope while keeping
+ * base64url padding, URL structure, region, cluster ID, query encoding, headers, keyId,
+ * and opc-obo-token unmasked for exact parity comparison.
+ */
+function maskExecCredential(s: string): string {
+  if (!s.includes('"kind": "ExecCredential"')) return s;
+  return s.replace(
+    /\{\n    "apiVersion": "client\.authentication\.k8s\.io\/v1beta1",\n    "kind": "ExecCredential",\n    "status": \{\n        "token": "([A-Za-z0-9_-]+={0,2})",\n        "expirationTimestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?Z"\n    \}\n\}/g,
+    (match, token: string) => {
+      if (token.length % 4 !== 0) return match;
+      const decoded = Buffer.from(
+        token.replaceAll("-", "+").replaceAll("_", "/"),
+        "base64",
+      ).toString("utf8");
+      const maskedUrl = decoded
+        .replace(/(signature%3D%22)[A-Za-z0-9%_-]+(%22)/, "$1<signature>$2")
+        .replace(
+          /(&date=)[A-Za-z]{3}%2C\+\d{2}\+[A-Za-z]{3}\+\d{4}\+\d{2}%3A\d{2}%3A\d{2}\+GMT/,
+          "$1<date>",
+        );
+      return match
+        .replace(
+          `"token": "${token}"`,
+          `"token": "<exec-credential-token:${maskedUrl}>"`,
+        )
+        .replace(
+          /"expirationTimestamp": "[^"]+"/,
+          '"expirationTimestamp": "<timestamp>"',
+        );
+    },
+  );
+}
+
 export function applyMasks(s: string): string {
-  return OUTPUT_MASKS.reduce((acc, [re, to]) => acc.replace(re, to), s);
+  return maskExecCredential(
+    OUTPUT_MASKS.reduce((acc, [re, to]) => acc.replace(re, to), s),
+  );
 }

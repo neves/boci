@@ -165,7 +165,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `compute instance-console-connection get-plink-connection-string`
 - [x] `compute volume-attachment list`
 - [x] `ce cluster create-kubeconfig`
-- [ ] `ce cluster generate-token`
+- [x] `ce cluster generate-token`
 - [ ] `iam compartment create`
 - [ ] `iam compartment list`
 - [ ] `iam db-token get`

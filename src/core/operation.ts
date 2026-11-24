@@ -89,8 +89,11 @@ export type ServiceClient = {
   rootValues: Record<string, unknown>;
   keyId: string;
   privateKey: KeyObject;
+  delegationToken?: string;
   endpointOpt?: string;
   region?: string;
+  /** Region explicitly present in config / --region / OCI_CLI_REGION (ctx.obj['config']['region']). */
+  configRegion?: string;
   regionMetadata?: Awaited<ReturnType<typeof loadExternalRegionMetadata>>;
   realmSpecific: boolean;
   dualStack: boolean;
@@ -424,6 +427,7 @@ export async function createServiceClient(
 ): Promise<ServiceClient> {
   const { client, values = {}, rootValues, settings, index, noRetry } = opts;
   const isInstancePrincipal = settings.auth === "instance_principal";
+  const isInstanceOboUser = settings.auth === "instance_obo_user";
   const isResourcePrincipal = settings.auth === "resource_principal";
   const configOptional = isInstancePrincipal || isResourcePrincipal;
   let config: Config = {};
@@ -459,14 +463,33 @@ export async function createServiceClient(
   applyConfigEnvVars(config, io.env);
   let principal:
     { keyId: string; privateKey: KeyObject; region?: string } | undefined;
-  if (isInstancePrincipal) {
+  let delegationToken: string | undefined;
+  if (isInstancePrincipal || isInstanceOboUser) {
+    if (isInstanceOboUser) {
+      const tokenLocation = config.delegation_token_file;
+      if (tokenLocation === undefined || tokenLocation === null) {
+        io.err(
+          "ERROR: Please specify the location of the delegation_token_file in the config.\n",
+        );
+        throw new Exit(1);
+      }
+      const expanded = expandUser(String(tokenLocation), io.env);
+      const resolvedPath = resolve(io.cwd, expanded);
+      if (!existsSync(resolvedPath)) {
+        io.err(`ERROR: delegation_token_file not found at ${expanded}\n`);
+        throw new Exit(1);
+      }
+      delegationToken = pyStrip(readFileSync(resolvedPath, "utf8"));
+    }
     try {
       principal = await resolveInstancePrincipal({
         env: io.env,
         regions: index.regions,
         federationEndpoint: rootValues.federation_endpoint as
           string | undefined,
-        authPurpose: rootValues.auth_purpose as string | undefined,
+        authPurpose: isInstanceOboUser
+          ? undefined
+          : (rootValues.auth_purpose as string | undefined),
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -489,10 +512,10 @@ export async function createServiceClient(
   }
   const endpointOpt = (rootValues.endpoint ?? config.endpoint) as
     string | undefined;
-  const region = (rootValues.region ??
+  const configRegion = (rootValues.region ??
     io.env.OCI_CLI_REGION ??
-    config.region ??
-    principal?.region) as string | undefined;
+    config.region) as string | undefined;
+  const region = (configRegion ?? principal?.region) as string | undefined;
   const regionMetadata =
     region && !endpointOpt
       ? await loadExternalRegionMetadata(region, index.regions, io.env)
@@ -636,8 +659,10 @@ export async function createServiceClient(
     rootValues,
     keyId,
     privateKey,
+    ...(delegationToken !== undefined ? { delegationToken } : {}),
     endpointOpt,
     region,
+    configRegion,
     regionMetadata,
     realmSpecific: configBool(
       rootValues.realm_specific_endpoint ??
@@ -730,10 +755,16 @@ export async function sendServiceRequest(
   for (let attempt = 1; ; attempt++) {
     delete req.headers.date;
     delete req.headers.authorization;
+    if (sc.delegationToken !== undefined) {
+      req.headers["opc-obo-token"] = sc.delegationToken;
+    }
     signRequest(
       req,
       { keyId: sc.keyId, privateKey: sc.privateKey },
       opts.enforceContentHeaders ?? true,
+      sc.delegationToken !== undefined
+        ? ["date", "(request-target)", "host", "opc-obo-token"]
+        : undefined,
     );
     const controller = new AbortController();
     const readTimer =

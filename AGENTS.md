@@ -28,8 +28,6 @@ Every byte read stays in context and is re-sent on every later turn. Keep contex
 
 ## Resume requests
 
-- **Ladder paused** until `.scratch/remaining-commands/issues/15-*` is done: work those tickets in order of their "Blocked by" (one ticket per fresh subagent) instead of Rung 8 items. Ticket 15 removes this note.
-
 - Treat requests to "resume" or "loop" as "Resume the project ladder": continue from the first unticked item in PLAN.md. Honor an explicit pause or stop request.
 - **One fresh context per item.** As the orchestrator, don't implement items yourself. For each item, start a new subagent with your harness's native subagent tool (same model) and this brief:
 

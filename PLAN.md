@@ -579,7 +579,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [ ] `network vnic assign-private-ip`
 - [ ] `network vnic unassign-ipv6`
 - [ ] `network vnic unassign-private-ip`
-- [ ] `opsi awr-hub-objects put`
+- [x] `opsi awr-hub-objects put`
 - [x] `os-management-hub lifecycle-stage attach-managed-instance`
 - [x] `os-management-hub lifecycle-stage detach-managed-instance`
 - [x] `os-management-hub managed-instance-group attach-managed-instances`
@@ -996,7 +996,7 @@ Difficulty estimates range from **1/5 (easiest)** to **5/5 (hardest)**. Groups r
 - [x] `generative-ai-data enrichment-jobs generate-partial-build`
 - [x] `generative-ai-data generate-sql-jobs generate`
 - [ ] `generative-ai-sandbox sandbox-file read`
-- [ ] `generative-ai-sandbox sandbox-file write`
+- [x] `generative-ai-sandbox sandbox-file write`
 - [ ] `iam tag reactivate`
 - [ ] `iam tag retire`
 - [ ] `iam tag-namespace reactivate`

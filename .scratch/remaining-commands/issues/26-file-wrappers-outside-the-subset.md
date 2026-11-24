@@ -4,7 +4,7 @@
 
 **Blocked by:** 21: binary file bodies from wrappers.
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Context for the implementer
 
@@ -16,6 +16,6 @@
 
 ## Acceptance criteria
 
-- [ ] Both commands are verified or excluded with a reason.
-- [ ] One commit per cause; `bun run ladder sync` run.
-- [ ] `bun run verify` green.
+- [x] Both commands are verified or excluded with a reason.
+- [x] One commit per cause; `bun run ladder sync` run.
+- [x] `bun run verify` green.

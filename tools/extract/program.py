@@ -435,7 +435,22 @@ def compile_wrapper(callback):
     # Click binds named parameters by name; the rest stay in **kwargs.
     prelude = [["let", a, ["call", "pop", ["var", "kwargs"], a]] for a in named[1:]]
     try:
-        program = prelude + compiler.stmts(fn.body, {})
+        if (callback.__module__, fn.name) == (
+            "services.generative_ai_sandbox.src.oci_cli_generative_ai_sandbox.generative_ai_sandbox_cli_extended",
+            "write_sandbox_file_extended",
+        ):
+            # Click files in the Engine are already buffered and seekable, including stdin.
+            # Replace the ExitStack's stream preparation; compile its actual delegate call.
+            stack = fn.body[-1]
+            if not isinstance(stack, ast.With) or not isinstance(stack.body[-1], ast.Expr):
+                raise Unsupported("sandbox file wrapper")
+            kwargs = ["var", "kwargs"]
+            program = prelude + compiler.stmts(fn.body[:-1], {}) + [
+                ["set", kwargs, "file", ["fn", "sandboxFile", ["var", "local_file"], ["item", kwargs, "file"]]],
+                compiler.invoke(stack.body[-1].value, {}),
+            ]
+        else:
+            program = prelude + compiler.stmts(fn.body, {})
     except Unsupported:
         return None, None
     if not compiler.targets:

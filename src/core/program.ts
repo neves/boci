@@ -608,6 +608,11 @@ export function runProgram(
         if (i < answers.length) return answers[i];
         throw new ProgramSecret(`Enter ${pyStr(a)} (minimum 8 characters)`);
       }
+      case "sandboxFile":
+        if (a instanceof ProgramFile) return a;
+        if (typeof b === "string")
+          return new ProgramFile("rb", new TextEncoder().encode(b));
+        throw new ProgramUnsupported("sandbox file body");
       case "hasName":
         return a instanceof ProgramFile && a.name !== undefined;
       case "fileName":

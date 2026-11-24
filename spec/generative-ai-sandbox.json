@@ -8018,6 +8018,144 @@
         "wrapExceptions": true,
         "files": ["local_file", "file"]
       },
+      "program": {
+        "body": [
+          [
+            "let",
+            "local_file",
+            ["call", "pop", ["var", "kwargs"], "local_file", null]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "==",
+              ["cmp", "is", ["call", "get", ["var", "kwargs"], "file"], null],
+              ["cmp", "is", ["var", "local_file"], null]
+            ],
+            [["usage", "Specify exactly one of --file or --local-file"]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "file",
+            [
+              "fn",
+              "sandboxFile",
+              ["var", "local_file"],
+              ["item", ["var", "kwargs"], "file"]
+            ]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.generative_ai_sandbox.src.oci_cli_generative_ai_sandbox.generated.generativeaisandbox_cli.write_sandbox_file",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "sandbox_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sandbox_file_path",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "file",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_content_sha256",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "generative_ai_sandbox.generative_ai_sandbox",
+        "method": "write_sandbox_file",
+        "http": "POST",
+        "path": "/sandboxes/{sandboxId}/files/write",
+        "positionalArgs": [
+          "sandbox_id",
+          "file_path",
+          "write_sandbox_file_content_details"
+        ],
+        "pathParams": {
+          "sandboxId": "sandbox_id"
+        },
+        "queryParams": {
+          "filePath": {
+            "arg": "file_path"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-content-sha256": {
+            "arg": "opc_content_sha256"
+          }
+        },
+        "body": "write_sandbox_file_content_details",
+        "responseType": "SandboxFile",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["sandbox_id"],
+          "param": "sandbox_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["file_path"],
+          "param": "sandbox_file_path"
+        },
+        {
+          "target": "kwarg",
+          "key": ["write_sandbox_file_content_details"],
+          "param": "file"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_content_sha256"],
+          "param": "opc_content_sha256",
+          "when": "opc_content_sha256 is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["retry_strategy"],
+          "transform": "NoneRetryStrategy"
+        }
+      ],
       "params": [
         {
           "kind": "option",

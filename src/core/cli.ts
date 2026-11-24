@@ -930,7 +930,14 @@ async function runWrapper(
     }
     // Bytes, or a file opened for reading, go out only as the direct request body; a
     // `--file` opened for writing only as a download's output.
-    const directBody = invoked.operation?.body;
+    const bodyArg = invoked.operation?.body;
+    const directBody =
+      invoked.bindings?.find(
+        (binding) =>
+          binding.target === "kwarg" &&
+          Array.isArray(binding.key) &&
+          binding.key[0] === bodyArg,
+      )?.param ?? bodyArg;
     const output = invoked.bindings?.find((b) => b.target === "output")?.param;
     if (
       Object.entries(kwargs).some(([name, v]) =>

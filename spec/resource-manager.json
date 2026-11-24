@@ -10155,6 +10155,244 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "job_id", ["call", "pop", ["var", "kwargs"], "job_id"]],
+          ["let", "type", ["call", "pop", ["var", "kwargs"], "type"]],
+          [
+            "let",
+            "level_greater_than_or_equal_to",
+            ["call", "pop", ["var", "kwargs"], "level_greater_than_or_equal_to"]
+          ],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          [
+            "let",
+            "timestamp_greater_than_or_equal_to",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "timestamp_greater_than_or_equal_to"
+            ]
+          ],
+          [
+            "let",
+            "timestamp_less_than_or_equal_to",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "timestamp_less_than_or_equal_to"
+            ]
+          ],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "job_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "job_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --job-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "type"], null],
+              ["cmp", ">", ["fn", "len", ["var", "type"]], 0]
+            ],
+            [["set", ["var", "kwargs"], "type", ["var", "type"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "level_greater_than_or_equal_to"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "level_greater_than_or_equal_to",
+                ["var", "level_greater_than_or_equal_to"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["var", "timestamp_greater_than_or_equal_to"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "timestamp_greater_than_or_equal_to",
+                ["var", "timestamp_greater_than_or_equal_to"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "timestamp_less_than_or_equal_to"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "timestamp_less_than_or_equal_to",
+                ["var", "timestamp_less_than_or_equal_to"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "resource_manager", "resource_manager"]
+          ],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  false,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["job_id", ["var", "job_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  0,
+                  ["var", "client"],
+                  [],
+                  [["job_id", ["var", "job_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "resource_manager.resource_manager",
+          "method": "get_job_logs",
+          "http": "GET",
+          "path": "/jobs/{jobId}/logs",
+          "positionalArgs": ["job_id"],
+          "pathParams": {
+            "jobId": "job_id"
+          },
+          "queryParams": {
+            "type": {
+              "arg": "type",
+              "collectionFormat": "multi"
+            },
+            "levelGreaterThanOrEqualTo": {
+              "arg": "level_greater_than_or_equal_to"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "timestampGreaterThanOrEqualTo": {
+              "arg": "timestamp_greater_than_or_equal_to"
+            },
+            "timestampLessThanOrEqualTo": {
+              "arg": "timestamp_less_than_or_equal_to"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "list[LogEntry]"
+        }
+      ],
       "params": [
         {
           "kind": "option",

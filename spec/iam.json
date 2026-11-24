@@ -4553,6 +4553,307 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          [
+            "let",
+            "access_level",
+            ["call", "pop", ["var", "kwargs"], "access_level"]
+          ],
+          [
+            "let",
+            "compartment_id_in_subtree",
+            ["call", "pop", ["var", "kwargs"], "compartment_id_in_subtree"]
+          ],
+          ["let", "name", ["call", "pop", ["var", "kwargs"], "name"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          ["let", "with_root", ["call", "pop", ["var", "kwargs"], "with_root"]],
+          ["checkNoExtraKwargs", "list_compartments"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "access_level"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "access_level",
+                ["var", "access_level"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id_in_subtree"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "compartment_id_in_subtree",
+                ["var", "compartment_id_in_subtree"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "name"], null],
+            [["set", ["var", "kwargs"], "name", ["var", "name"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "identity", "identity"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  false,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      false,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["var", "with_root"],
+            [
+              ["let", "tenancy_id", ["fn", "tenancyFromConfig"]],
+              [
+                "if",
+                ["cmp", "is", ["var", "tenancy_id"], null],
+                [["let", "tenancy_id", ["var", "compartment_id"]]],
+                []
+              ],
+              [
+                "let",
+                "tenancy_result",
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [],
+                  [["compartment_id", ["var", "tenancy_id"]]],
+                  null
+                ]
+              ],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "isnot", ["var", "limit"], null],
+                  ["attr", "data", ["var", "result"]]
+                ],
+                [["do", ["call", "pop", ["attr", "data", ["var", "result"]]]]],
+                []
+              ],
+              [
+                "do",
+                [
+                  "call",
+                  "insert",
+                  ["attr", "data", ["var", "result"]],
+                  0,
+                  ["attr", "data", ["var", "tenancy_result"]]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity.identity",
+          "method": "list_compartments",
+          "http": "GET",
+          "path": "/compartments",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "accessLevel": {
+              "arg": "access_level"
+            },
+            "compartmentIdInSubtree": {
+              "arg": "compartment_id_in_subtree"
+            },
+            "name": {
+              "arg": "name"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[Compartment]"
+        },
+        {
+          "client": "identity.identity",
+          "method": "get_compartment",
+          "http": "GET",
+          "path": "/compartments/{compartmentId}",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {
+            "compartmentId": "compartment_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Compartment"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12825,6 +13126,206 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          ["let", "group_id", ["call", "pop", ["var", "kwargs"], "group_id"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          ["checkNoExtraKwargs", "list_users_for_group"],
+          ["loadContextDefaults"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "identity", "identity"]],
+          ["let", "args", ["dict"]],
+          ["set", ["var", "args"], "group_id", ["var", "group_id"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "args"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "args"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "args"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  false,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "args"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      false,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "args"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "args"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["let", "users", ["list"]],
+          [
+            "for",
+            "membership",
+            ["attr", "data", ["var", "result"]],
+            [
+              [
+                "do",
+                [
+                  "call",
+                  "append",
+                  ["var", "users"],
+                  [
+                    "attr",
+                    "data",
+                    [
+                      "sdk",
+                      1,
+                      ["var", "client"],
+                      [["attr", "user_id", ["var", "membership"]]],
+                      [],
+                      null
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "renderData",
+            ["var", "users"],
+            ["attr", "headers", ["var", "result"]],
+            false,
+            true
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity.identity",
+          "method": "list_user_group_memberships",
+          "http": "GET",
+          "path": "/userGroupMemberships",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "userId": {
+              "arg": "user_id"
+            },
+            "groupId": {
+              "arg": "group_id"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "limit": {
+              "arg": "limit"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[UserGroupMembership]"
+        },
+        {
+          "client": "identity.identity",
+          "method": "get_user",
+          "http": "GET",
+          "path": "/users/{userId}",
+          "positionalArgs": ["user_id"],
+          "pathParams": {
+            "userId": "user_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "User"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -34343,6 +34844,206 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          ["let", "user_id", ["call", "pop", ["var", "kwargs"], "user_id"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          ["checkNoExtraKwargs", "list_groups_for_user"],
+          ["loadContextDefaults"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "identity", "identity"]],
+          ["let", "args", ["dict"]],
+          ["set", ["var", "args"], "user_id", ["var", "user_id"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "args"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "args"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "args"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  false,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "args"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      false,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "args"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "args"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["let", "groups", ["list"]],
+          [
+            "for",
+            "membership",
+            ["attr", "data", ["var", "result"]],
+            [
+              [
+                "do",
+                [
+                  "call",
+                  "append",
+                  ["var", "groups"],
+                  [
+                    "attr",
+                    "data",
+                    [
+                      "sdk",
+                      1,
+                      ["var", "client"],
+                      [["attr", "group_id", ["var", "membership"]]],
+                      [],
+                      null
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "renderData",
+            ["var", "groups"],
+            ["attr", "headers", ["var", "result"]],
+            false,
+            true
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity.identity",
+          "method": "list_user_group_memberships",
+          "http": "GET",
+          "path": "/userGroupMemberships",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "userId": {
+              "arg": "user_id"
+            },
+            "groupId": {
+              "arg": "group_id"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "limit": {
+              "arg": "limit"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[UserGroupMembership]"
+        },
+        {
+          "client": "identity.identity",
+          "method": "get_group",
+          "http": "GET",
+          "path": "/groups/{groupId}",
+          "positionalArgs": ["group_id"],
+          "pathParams": {
+            "groupId": "group_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Group"
+        }
+      ],
       "params": [
         {
           "kind": "option",

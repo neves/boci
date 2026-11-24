@@ -11,6 +11,13 @@ import {
   renderModel,
   type OutputOptions,
 } from "../core/output.ts";
+import {
+  collectionAttributes,
+  pyChain,
+  pyLen,
+  PythonTypeError,
+  type CollectionAttribute as Attribute,
+} from "../core/pagination.ts";
 import type { CustomCommandContext } from "../core/registry.ts";
 import { loadService, type OperationSpec } from "../core/spec.ts";
 import { waitForState } from "../core/waiter.ts";
@@ -85,70 +92,6 @@ export async function callCommand(
 
 /** How the wrapper pages: cli_util's `list_call_get_*` or their `_multiple_keys` variants. */
 export type ListOptions = { multipleKeys?: boolean };
-
-class PythonTypeError extends Error {}
-
-type Attribute = { snake: string; key: string; wire: string; type?: string };
-
-/**
- * A collection model's attributes as Python iterates them: sorted snake_case names,
- * aggregated under dashed keys. Without the model in the spec, the response's own keys.
- */
-function collectionAttributes(
-  result: OperationResult,
-  data: Record<string, unknown>,
-): Attribute[] {
-  const model = result.responseModels?.[result.operation.responseType ?? ""];
-  const attributes = model
-    ? model.attributes.map(([snake, type, wire]) => ({ snake, wire, type }))
-    : Object.keys(data).map((wire) => ({
-        snake: wire.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`),
-        wire,
-        type: undefined,
-      }));
-  return attributes
-    .map((a) => ({ ...a, key: a.snake.replaceAll("_", "-") }))
-    .sort((a, b) => (a.snake < b.snake ? -1 : a.snake > b.snake ? 1 : 0));
-}
-
-/** Python's len() of a deserialized attribute value. */
-function pyLen(value: unknown, type?: string): number {
-  if (Array.isArray(value)) return value.length;
-  if (typeof value === "string" && type !== "datetime" && type !== "date")
-    return [...value].length;
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    (type === undefined || type.startsWith("dict("))
-  )
-    return Object.keys(value).length;
-  const name =
-    value === null || value === undefined
-      ? "NoneType"
-      : typeof value === "boolean"
-        ? "bool"
-        : typeof value === "number"
-          ? type === "float" || (type !== "int" && !Number.isInteger(value))
-            ? "float"
-            : "int"
-          : type === "datetime" || type === "date"
-            ? `datetime.${type}`
-            : (type ?? "object");
-  throw new PythonTypeError(`object of type '${name}' has no len()`);
-}
-
-/** itertools.chain.from_iterable over the values one attribute had on each page. */
-function pyChain(values: unknown[]): unknown[] {
-  return values.flatMap((v) =>
-    Array.isArray(v)
-      ? v
-      : typeof v === "string"
-        ? [...v]
-        : typeof v === "object" && v !== null
-          ? Object.keys(v)
-          : [],
-  );
-}
 
 /**
  * A paginated list call honoring --all, --limit and --page-size the way

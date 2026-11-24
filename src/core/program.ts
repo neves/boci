@@ -117,8 +117,25 @@ type ModelMeta = {
 };
 
 const modelMeta = new WeakMap<object, ModelMeta>();
+const responseOwner = new WeakMap<object, ProgramResponse>();
 
-function tagModelData(
+function markMutated(obj: object): void {
+  const owner = responseOwner.get(obj);
+  if (owner) owner.dataOverridden = true;
+}
+
+function cloneResponseData(v: unknown): unknown {
+  if (Array.isArray(v)) return [...v];
+  if (isDict(v)) {
+    const copy: Dict = { ...v };
+    const meta = modelMeta.get(v);
+    if (meta) modelMeta.set(copy, meta);
+    return copy;
+  }
+  return v;
+}
+
+export function tagModelData(
   data: unknown,
   models: Record<string, Model> | undefined,
   typeName: string | undefined,
@@ -145,17 +162,41 @@ export class ProgramResponse {
   readonly headers: ProgramHeaders;
   readonly status: number | null;
   data: unknown;
-  dataOverridden = false;
+  dataOverridden: boolean;
+  private readonly initialData: unknown;
+  private readonly initialDataOverridden: boolean;
   constructor(
     readonly result: OperationResult,
     data: unknown,
     readonly call?: ProgramSdkCallRecord,
     headers?: Headers | Record<string, string>,
+    dataOverridden = false,
   ) {
-    this.data = data;
+    if (!dataOverridden) {
+      tagModelData(
+        data,
+        result?.responseModels,
+        result?.operation?.responseType,
+      );
+    }
+    this.initialData = cloneResponseData(data);
+    this.initialDataOverridden = dataOverridden;
+    this.data = cloneResponseData(this.initialData);
+    this.dataOverridden = dataOverridden;
+    if (this.data && typeof this.data === "object") {
+      responseOwner.set(this.data, this);
+    }
     this.headers = new ProgramHeaders(headers ?? result?.response?.headers);
     this.status = result?.response?.status ?? null;
-    tagModelData(data, result?.responseModels, result?.operation?.responseType);
+  }
+
+  /** Restore pristine data and override state before each replay of runProgram. */
+  reset(): void {
+    this.data = cloneResponseData(this.initialData);
+    this.dataOverridden = this.initialDataOverridden;
+    if (this.data && typeof this.data === "object") {
+      responseOwner.set(this.data, this);
+    }
   }
 
   get requestId(): string | null {
@@ -263,6 +304,25 @@ export class ProgramWaitUntil extends Error {
   }
 }
 
+/**
+ * `cli_util.list_call_get_all_results[_multiple_keys]` or
+ * `cli_util.list_call_get_up_to_limit[_multiple_keys]`: caller runs the paginated
+ * SDK list loop, appends the outcome to `context.listResults`, and replays.
+ */
+export class ProgramListCall extends Error {
+  constructor(
+    readonly mode: "all" | "limit",
+    readonly multipleKeys: boolean,
+    readonly opIndex: number,
+    readonly kwArgs: Dict,
+    readonly region?: string,
+    readonly recordLimit?: unknown,
+    readonly pageSize?: unknown,
+  ) {
+    super(`listCall[${mode}:${opIndex}]`);
+  }
+}
+
 export type ProgramSdkOutcome =
   ProgramResponse | ProgramRaise | ProgramServiceError;
 
@@ -273,11 +333,13 @@ export type ProgramSdkOutcome =
  */
 export type ProgramContext = {
   region?: () => string | undefined;
+  tenancy?: () => string | null;
   namespace?: string;
   requestId?: string | null;
   env?: Record<string, string | undefined>;
   loadContextDefaults?: () => Dict;
   sdkResults?: ProgramSdkOutcome[];
+  listResults?: ProgramSdkOutcome[];
   waitResults?: ProgramSdkOutcome[];
   renderedCount?: number;
   echoCount?: number;
@@ -465,7 +527,7 @@ function snakeToCamel(s: string): string {
 }
 
 /** Resolve Python `snake_case` attribute lookup on a decoded OCI SDK model object. */
-function modelAttr(obj: Dict, attr: string): unknown {
+export function modelAttr(obj: Dict, attr: string): unknown {
   const meta = modelMeta.get(obj);
   if (meta) {
     let modelName = meta.type;
@@ -801,6 +863,7 @@ export function runProgram(
   let target = 0;
   let asked = 0;
   let sdkCalled = 0;
+  let listCalled = 0;
   let waitCalled = 0;
   let renderCalled = 0;
   let echoCalled = 0;
@@ -860,16 +923,21 @@ export function runProgram(
           if (key in obj) {
             const v = obj[key];
             delete obj[key];
+            markMutated(obj);
             return v;
           }
           if (args.length > 1) return args[1];
           throw new ProgramUnsupported(`KeyError: ${key}`);
         case "setdefault":
-          if (!(key in obj)) obj[key] = args[1] ?? null;
+          if (!(key in obj)) {
+            obj[key] = args[1] ?? null;
+            markMutated(obj);
+          }
           return obj[key];
         case "update":
           if (!isDict(args[0])) throw new ProgramUnsupported("update");
           Object.assign(obj, args[0]);
+          markMutated(obj);
           return null;
         case "keys":
           if (args.length === 0) return Object.keys(obj);
@@ -878,9 +946,40 @@ export function runProgram(
           if (args.length === 0) return Object.entries(obj);
           break;
       }
-    } else if (Array.isArray(obj) && method === "append") {
-      obj.push(args[0]);
-      return null;
+    } else if (Array.isArray(obj)) {
+      switch (method) {
+        case "append":
+          obj.push(args[0]);
+          markMutated(obj);
+          return null;
+        case "pop": {
+          if (args.length > 1) break;
+          if (obj.length === 0)
+            throw new ProgramRaise("IndexError", "pop from empty list");
+          const rawIdx = args.length === 0 ? obj.length - 1 : args[0];
+          if (typeof rawIdx !== "number" || !Number.isInteger(rawIdx))
+            throw new ProgramUnsupported("list.pop() index");
+          let idx = rawIdx < 0 ? rawIdx + obj.length : rawIdx;
+          if (idx < 0 || idx >= obj.length)
+            throw new ProgramRaise("IndexError", "pop index out of range");
+          const [removed] = obj.splice(idx, 1);
+          markMutated(obj);
+          return removed;
+        }
+        case "insert": {
+          if (args.length !== 2) break;
+          const rawIdx = args[0];
+          if (typeof rawIdx !== "number" || !Number.isInteger(rawIdx))
+            throw new ProgramUnsupported("list.insert() index");
+          const idx =
+            rawIdx < 0
+              ? Math.max(0, obj.length + rawIdx)
+              : Math.min(rawIdx, obj.length);
+          obj.splice(idx, 0, args[1]);
+          markMutated(obj);
+          return null;
+        }
+      }
     } else if (typeof obj === "string") {
       switch (method) {
         case "upper":
@@ -1048,6 +1147,8 @@ export function runProgram(
         return toDictValue(a);
       case "formattedFlatDict":
         return JSON.stringify(sortKeys(toDictValue(a)), null, 2);
+      case "tenancyFromConfig":
+        return context.tenancy?.() ?? null;
       case "expanduser":
         if (typeof a !== "string")
           throw new ProgramUnsupported("os.path.expanduser()");
@@ -1311,6 +1412,7 @@ export function runProgram(
         const cached = context.sdkResults?.[i];
         if (cached !== undefined) {
           if (cached instanceof Error) throw cached;
+          cached.reset();
           return cached;
         }
         const region =
@@ -1318,6 +1420,58 @@ export function runProgram(
             ? clientObj.fields.region
             : undefined;
         throw new ProgramSdkCall(opIndex, pos, kw, region);
+      }
+      case "listCall": {
+        const mode = rest[0] as "all" | "limit";
+        const multipleKeys = Boolean(rest[1]);
+        const opIndex = rest[2] as number;
+        const clientObj = evaluate(rest[3] as Expr);
+        if (!(clientObj instanceof ProgramObject))
+          throw new ProgramUnsupported("listCall on non-client");
+        const extra = (rest[4] as Expr[]).map(evaluate);
+        const kwPairs = rest[5] as [string, Expr][];
+        const starExpr = rest[6] as Expr | null;
+        const kw: Dict = {};
+        if (starExpr !== null) {
+          const star = evaluate(starExpr);
+          if (!isDict(star))
+            throw new ProgramUnsupported("listCall ** of a non-dict");
+          Object.assign(kw, star);
+        }
+        for (const [k, expr] of kwPairs) {
+          if (k in kw)
+            throw new ProgramUnsupported(`duplicate listCall kwarg ${k}`);
+          kw[k] = evaluate(expr);
+        }
+        let recordLimit: unknown;
+        let pageSize: unknown;
+        if (mode === "all") {
+          const [, streamOutput] = extra;
+          if (pyTruthy(streamOutput))
+            throw new ProgramUnsupported("list_call stream_output");
+        } else {
+          [recordLimit, pageSize] = extra;
+        }
+        const i = listCalled++;
+        const cached = context.listResults?.[i];
+        if (cached !== undefined) {
+          if (cached instanceof Error) throw cached;
+          cached.reset();
+          return cached;
+        }
+        const region =
+          typeof clientObj.fields.region === "string"
+            ? clientObj.fields.region
+            : undefined;
+        throw new ProgramListCall(
+          mode,
+          multipleKeys,
+          opIndex,
+          kw,
+          region,
+          recordLimit,
+          pageSize,
+        );
       }
       case "waitUntil": {
         const pos = (rest[0] as Expr[]).map(evaluate);
@@ -1359,6 +1513,7 @@ export function runProgram(
         const cached = context.waitResults?.[i];
         if (cached !== undefined) {
           if (cached instanceof Error) throw cached;
+          cached.reset();
           return cached;
         }
         throw new ProgramWaitUntil(
@@ -1506,10 +1661,13 @@ export function runProgram(
           const value = evaluate(rest[2] as Expr);
           if (obj === ctxObj && typeof key === "string")
             ctxObj.fields[key] = value;
-          else if (isDict(obj) && typeof key === "string") obj[key] = value;
-          else if (Array.isArray(obj) && typeof key === "number")
+          else if (isDict(obj) && typeof key === "string") {
+            obj[key] = value;
+            markMutated(obj);
+          } else if (Array.isArray(obj) && typeof key === "number") {
             obj[key < 0 ? obj.length + key : key] = value;
-          else throw new ProgramUnsupported("item assignment");
+            markMutated(obj);
+          } else throw new ProgramUnsupported("item assignment");
           break;
         }
         case "setAttr": {
@@ -1571,6 +1729,7 @@ export function runProgram(
           if (!isDict(obj) || typeof key !== "string" || !(key in obj))
             throw new ProgramUnsupported(`KeyError: ${String(key)}`);
           delete obj[key];
+          markMutated(obj);
           break;
         }
         case "do":

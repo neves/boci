@@ -61,6 +61,7 @@ import {
 import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
 import { waitForState, waitUntilResponse } from "./waiter.ts";
+import { paginateSdkList } from "./pagination.ts";
 import {
   ProgramFile,
   type ProgramFiles,
@@ -69,6 +70,7 @@ import {
   ProgramEcho,
   ProgramExit,
   ProgramHeaders,
+  ProgramListCall,
   ProgramSecret,
   ProgramSleep,
   type ProgramAnswer,
@@ -862,6 +864,22 @@ async function main(io: Invocation): Promise<void> {
                 return undefined; // no config: not modeled
               }
             },
+            tenancy: () => {
+              if (typeof io.env.OCI_CLI_TENANCY === "string") {
+                return io.env.OCI_CLI_TENANCY;
+              }
+              try {
+                const cfg = fromFile(
+                  wrapperSettings.configFile,
+                  wrapperSettings.profile,
+                  io.env,
+                  io.cwd,
+                );
+                return typeof cfg.tenancy === "string" ? cfg.tenancy : null;
+              } catch {
+                return null;
+              }
+            },
             namespace: async () => {
               // client.get_namespace(): `os ns get`, its ServiceError and all.
               const nsCall = {
@@ -898,6 +916,44 @@ async function main(io: Invocation): Promise<void> {
                 posArgs,
                 kwArgs,
                 region,
+              });
+            },
+            listCall: async (call) => {
+              const op = specCmd.sdkOperations?.[call.opIndex];
+              if (!op) throw new ProgramUnsupported(`sdk[${call.opIndex}]`);
+              const callRootValues =
+                call.region !== undefined
+                  ? { ...wrapperRootValues, region: call.region }
+                  : wrapperRootValues;
+              return paginateSdkList({
+                mode: call.mode,
+                multipleKeys: call.multipleKeys,
+                recordLimit: call.recordLimit,
+                pageSize: call.pageSize,
+                kwArgs: call.kwArgs,
+                fetchPage: async (pageKwArgs) => {
+                  const result = await callSdkOperation(io, {
+                    operation: op,
+                    posArgs: [],
+                    kwArgs: pageKwArgs,
+                    rootValues: callRootValues,
+                    settings: wrapperSettings,
+                    spec,
+                    index,
+                  });
+                  if (!result.response.ok)
+                    return new ProgramServiceError(result);
+                  return new ProgramResponse(
+                    result,
+                    parseSdkResponseData(result),
+                    {
+                      opIndex: call.opIndex,
+                      posArgs: [],
+                      kwArgs: pageKwArgs,
+                      region: call.region,
+                    },
+                  );
+                },
               });
             },
             waitUntil: async (wait) => {
@@ -1126,6 +1182,7 @@ function convertDefaultValue(
 /** What a wrapper program looks up or runs outside its kwargs (ProgramContext), on demand. */
 type WrapperLookups = {
   region: () => string | undefined;
+  tenancy: () => string | null;
   namespace: () => Promise<string>;
   sdkCall: (
     opIndex: number,
@@ -1133,6 +1190,7 @@ type WrapperLookups = {
     kwArgs: Record<string, unknown>,
     region?: string,
   ) => Promise<ProgramSdkOutcome>;
+  listCall: (call: ProgramListCall) => Promise<ProgramSdkOutcome>;
   waitUntil: (wait: ProgramWaitUntil) => Promise<ProgramSdkOutcome>;
   render: (response: ProgramResponse) => void;
   renderData: (render: ProgramRenderData) => void;
@@ -1163,7 +1221,11 @@ async function runWrapper(
   | "unsupported"
 > {
   const program = command.program as NonNullable<typeof command.program>;
-  const ctx: ProgramContext = { ...context, region: lookups.region };
+  const ctx: ProgramContext = {
+    ...context,
+    region: lookups.region,
+    tenancy: lookups.tenancy,
+  };
   try {
     const {
       kwargs,
@@ -1329,6 +1391,30 @@ async function runWrapper(
         {
           ...ctx,
           sdkResults: [...(ctx.sdkResults ?? []), outcome],
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramListCall) {
+      let outcome: ProgramSdkOutcome;
+      try {
+        outcome = await lookups.listCall(e);
+      } catch (listErr) {
+        if (listErr instanceof ProgramUnsupported) return "unsupported";
+        if (listErr instanceof ProgramRaise) outcome = listErr;
+        else throw listErr;
+      }
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          listResults: [...(ctx.listResults ?? []), outcome],
         },
         stdin,
       );

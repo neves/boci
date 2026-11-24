@@ -167,10 +167,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `ce cluster create-kubeconfig`
 - [x] `ce cluster generate-token`
 - [x] `iam compartment create`
-- [ ] `iam compartment list`
+- [x] `iam compartment list`
 - [ ] `iam db-token get`
 - [x] `iam group add-user`
-- [ ] `iam group list-users`
+- [x] `iam group list-users`
 - [x] `iam group remove-user`
 - [x] `iam policy update`
 - [x] `iam tag reactivate`
@@ -178,7 +178,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `iam tag-namespace reactivate`
 - [x] `iam tag-namespace retire`
 - [x] `iam tag-namespace update`
-- [ ] `iam user list-groups`
+- [x] `iam user list-groups`
 - [x] `bv backup copy`
 - [x] `bv boot-volume create`
 - [x] `bv boot-volume-backup copy`
@@ -227,19 +227,19 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `fn function update pbf-function`
 - [ ] `resource-manager job create-import-tf-state-job`
 - [ ] `resource-manager job create-plan-rollback-job`
-- [ ] `resource-manager job get-job-logs`
+- [x] `resource-manager job get-job-logs`
 - [ ] `resource-manager stack copy`
 - [ ] `resource-manager stack create`
 - [ ] `resource-manager stack update`
 - [x] `kms management key-version cancel-deletion`
 - [x] `kms management key-version create`
 - [x] `kms management key-version schedule-deletion`
-- [ ] `artifacts container image list`
+- [x] `artifacts container image list`
 - [ ] `artifacts container image-signature get-verify`
-- [ ] `artifacts container image-signature list`
-- [ ] `artifacts container repository list`
-- [ ] `artifacts generic artifact list`
-- [ ] `artifacts repository list`
+- [x] `artifacts container image-signature list`
+- [x] `artifacts container repository list`
+- [x] `artifacts generic artifact list`
+- [x] `artifacts repository list`
 
 ### Remaining services
 
@@ -267,8 +267,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `data-science job head-job-artifact`
 - [x] `data-science model head-model-artifact`
 - [x] `data-science pipeline head-step-artifact`
-- [ ] `data-science pipeline list`
-- [ ] `data-science pipeline-run list`
+- [x] `data-science pipeline list`
+- [x] `data-science pipeline-run list`
 - [ ] `database-management managed-database get-awr-db-report`
 - [ ] `dbtools-runtime connection execute-sql async`
 - [ ] `dbtools-runtime connection execute-sql sync`
@@ -277,9 +277,9 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `devops project summarize-project-analytics`
 - [x] `devops repository summarize-repository-analytics`
 - [x] `generative-ai-data enrichment-jobs cancel`
-- [ ] `identity-domains apps list`
-- [ ] `identity-domains groups list`
-- [ ] `identity-domains users list`
+- [x] `identity-domains apps list`
+- [x] `identity-domains groups list`
+- [x] `identity-domains users list`
 - [ ] `iot digital-twin-instance update`
 - [x] `media-services media-stream stream-distribution-channel generate-session-token`
 - [x] `model-deployment inference-result predict`

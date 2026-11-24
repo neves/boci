@@ -30446,6 +30446,275 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          ["let", "filter", ["call", "pop", ["var", "kwargs"], "filter"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          [
+            "let",
+            "start_index",
+            ["call", "pop", ["var", "kwargs"], "start_index"]
+          ],
+          ["let", "count", ["call", "pop", ["var", "kwargs"], "count"]],
+          [
+            "let",
+            "attributes",
+            ["call", "pop", ["var", "kwargs"], "attributes"]
+          ],
+          [
+            "let",
+            "attribute_sets",
+            ["call", "pop", ["var", "kwargs"], "attribute_sets"]
+          ],
+          [
+            "let",
+            "authorization",
+            ["call", "pop", ["var", "kwargs"], "authorization"]
+          ],
+          [
+            "let",
+            "resource_type_schema_version",
+            ["call", "pop", ["var", "kwargs"], "resource_type_schema_version"]
+          ],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["checkNoExtraKwargs", "list_apps_extended"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "filter"], null],
+            [["set", ["var", "kwargs"], "filter", ["var", "filter"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "start_index"], null],
+            [["set", ["var", "kwargs"], "start_index", ["var", "start_index"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "count"], null],
+            [["set", ["var", "kwargs"], "count", ["var", "count"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "attributes"], null],
+            [["set", ["var", "kwargs"], "attributes", ["var", "attributes"]]],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "attribute_sets"], null],
+              ["cmp", ">", ["fn", "len", ["var", "attribute_sets"]], 0]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "attribute_sets",
+                ["var", "attribute_sets"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "authorization"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "authorization",
+                ["var", "authorization"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "resource_type_schema_version"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "resource_type_schema_version",
+                ["var", "resource_type_schema_version"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "identity_domains", "identity_domains"]
+          ],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    ["sdk", 0, ["var", "client"], [], [], ["var", "kwargs"]]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity_domains.identity_domains",
+          "method": "list_apps",
+          "http": "GET",
+          "path": "/admin/v1/Apps",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {
+            "filter": {
+              "arg": "filter"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "startIndex": {
+              "arg": "start_index"
+            },
+            "count": {
+              "arg": "count"
+            },
+            "attributes": {
+              "arg": "attributes"
+            },
+            "attributeSets": {
+              "arg": "attribute_sets",
+              "collectionFormat": "multi"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "limit": {
+              "arg": "limit"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json, application/scim+json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "authorization": {
+              "arg": "authorization"
+            },
+            "resource_type_schema_version": {
+              "arg": "resource_type_schema_version"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "responseType": "Apps"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -65126,6 +65395,275 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          ["let", "filter", ["call", "pop", ["var", "kwargs"], "filter"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          [
+            "let",
+            "start_index",
+            ["call", "pop", ["var", "kwargs"], "start_index"]
+          ],
+          ["let", "count", ["call", "pop", ["var", "kwargs"], "count"]],
+          [
+            "let",
+            "attributes",
+            ["call", "pop", ["var", "kwargs"], "attributes"]
+          ],
+          [
+            "let",
+            "attribute_sets",
+            ["call", "pop", ["var", "kwargs"], "attribute_sets"]
+          ],
+          [
+            "let",
+            "authorization",
+            ["call", "pop", ["var", "kwargs"], "authorization"]
+          ],
+          [
+            "let",
+            "resource_type_schema_version",
+            ["call", "pop", ["var", "kwargs"], "resource_type_schema_version"]
+          ],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["checkNoExtraKwargs", "list_groups_extended"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "filter"], null],
+            [["set", ["var", "kwargs"], "filter", ["var", "filter"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "start_index"], null],
+            [["set", ["var", "kwargs"], "start_index", ["var", "start_index"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "count"], null],
+            [["set", ["var", "kwargs"], "count", ["var", "count"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "attributes"], null],
+            [["set", ["var", "kwargs"], "attributes", ["var", "attributes"]]],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "attribute_sets"], null],
+              ["cmp", ">", ["fn", "len", ["var", "attribute_sets"]], 0]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "attribute_sets",
+                ["var", "attribute_sets"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "authorization"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "authorization",
+                ["var", "authorization"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "resource_type_schema_version"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "resource_type_schema_version",
+                ["var", "resource_type_schema_version"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "identity_domains", "identity_domains"]
+          ],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    ["sdk", 0, ["var", "client"], [], [], ["var", "kwargs"]]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity_domains.identity_domains",
+          "method": "list_groups",
+          "http": "GET",
+          "path": "/admin/v1/Groups",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {
+            "filter": {
+              "arg": "filter"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "startIndex": {
+              "arg": "start_index"
+            },
+            "count": {
+              "arg": "count"
+            },
+            "attributes": {
+              "arg": "attributes"
+            },
+            "attributeSets": {
+              "arg": "attribute_sets",
+              "collectionFormat": "multi"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "limit": {
+              "arg": "limit"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json, application/scim+json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "authorization": {
+              "arg": "authorization"
+            },
+            "resource_type_schema_version": {
+              "arg": "resource_type_schema_version"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "responseType": "Groups"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -184101,6 +184639,275 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          ["let", "filter", ["call", "pop", ["var", "kwargs"], "filter"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          [
+            "let",
+            "start_index",
+            ["call", "pop", ["var", "kwargs"], "start_index"]
+          ],
+          ["let", "count", ["call", "pop", ["var", "kwargs"], "count"]],
+          [
+            "let",
+            "attributes",
+            ["call", "pop", ["var", "kwargs"], "attributes"]
+          ],
+          [
+            "let",
+            "attribute_sets",
+            ["call", "pop", ["var", "kwargs"], "attribute_sets"]
+          ],
+          [
+            "let",
+            "authorization",
+            ["call", "pop", ["var", "kwargs"], "authorization"]
+          ],
+          [
+            "let",
+            "resource_type_schema_version",
+            ["call", "pop", ["var", "kwargs"], "resource_type_schema_version"]
+          ],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["checkNoExtraKwargs", "list_users_extended"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "filter"], null],
+            [["set", ["var", "kwargs"], "filter", ["var", "filter"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "start_index"], null],
+            [["set", ["var", "kwargs"], "start_index", ["var", "start_index"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "count"], null],
+            [["set", ["var", "kwargs"], "count", ["var", "count"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "attributes"], null],
+            [["set", ["var", "kwargs"], "attributes", ["var", "attributes"]]],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "attribute_sets"], null],
+              ["cmp", ">", ["fn", "len", ["var", "attribute_sets"]], 0]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "attribute_sets",
+                ["var", "attribute_sets"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "authorization"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "authorization",
+                ["var", "authorization"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "resource_type_schema_version"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "resource_type_schema_version",
+                ["var", "resource_type_schema_version"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "identity_domains", "identity_domains"]
+          ],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    ["sdk", 0, ["var", "client"], [], [], ["var", "kwargs"]]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "identity_domains.identity_domains",
+          "method": "list_users",
+          "http": "GET",
+          "path": "/admin/v1/Users",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {
+            "filter": {
+              "arg": "filter"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "startIndex": {
+              "arg": "start_index"
+            },
+            "count": {
+              "arg": "count"
+            },
+            "attributes": {
+              "arg": "attributes"
+            },
+            "attributeSets": {
+              "arg": "attribute_sets",
+              "collectionFormat": "multi"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "limit": {
+              "arg": "limit"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json, application/scim+json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "authorization": {
+              "arg": "authorization"
+            },
+            "resource_type_schema_version": {
+              "arg": "resource_type_schema_version"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "responseType": "Users"
+        }
+      ],
       "params": [
         {
           "kind": "option",

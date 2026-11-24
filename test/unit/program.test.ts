@@ -6,6 +6,7 @@ import {
   ProgramExit,
   ProgramFile,
   ProgramHeaders,
+  ProgramListCall,
   ProgramRaise,
   ProgramRender,
   ProgramRenderData,
@@ -21,6 +22,7 @@ import {
   type Expr,
   type Statement,
 } from "../../src/core/program.ts";
+import { paginateSdkList } from "../../src/core/pagination.ts";
 import { renderCliData } from "../../src/core/output.ts";
 import { waitUntilResponse } from "../../src/core/waiter.ts";
 
@@ -1151,5 +1153,425 @@ describe("runProgram", () => {
     expect(out).toContain("name");
     expect(err).toContain("opc-next-page: p2\n");
     expect(err).toContain("Re-run using the --all option");
+  });
+
+  test("listCall yields ProgramListCall, replays, and handles list.pop/insert and tenancyFromConfig", () => {
+    const models = {
+      Compartment: {
+        attributes: [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+        ] as [string, string, string][],
+      },
+    };
+    const makeResp = (
+      data: unknown,
+      responseType: string,
+      headers: Record<string, string> = {},
+    ) =>
+      new ProgramResponse(
+        {
+          operation: {
+            client: "identity.identity",
+            method: "list_compartments",
+            http: "GET",
+            path: "/compartments",
+            responseType,
+            queryParams: {},
+          },
+          responseModels: models,
+          url: new URL("https://example.test/compartments"),
+          response: new Response(JSON.stringify(data), {
+            status: 200,
+            headers,
+          }),
+          raw: JSON.stringify(data),
+          allPages: false,
+          pageItems: [],
+        },
+        data,
+      );
+
+    const prog: Statement[] = [
+      ["let", "client", ["fn", "client", "identity", "identity"]],
+      [
+        "let",
+        "res",
+        [
+          "listCall",
+          "limit",
+          false,
+          0,
+          ["var", "client"],
+          [2, 1],
+          [["compartment_id", "comp-1"]],
+          null,
+        ],
+      ],
+      ["let", "tenancy", ["fn", "tenancyFromConfig"]],
+      [
+        "let",
+        "root",
+        [
+          "sdk",
+          1,
+          ["var", "client"],
+          [],
+          [["compartment_id", ["var", "tenancy"]]],
+          null,
+        ],
+      ],
+      ["do", ["call", "pop", ["attr", "data", ["var", "res"]]]],
+      [
+        "do",
+        [
+          "call",
+          "insert",
+          ["attr", "data", ["var", "res"]],
+          0,
+          ["attr", "data", ["var", "root"]],
+        ],
+      ],
+      ["render", ["var", "res"]],
+    ];
+
+    // Step 1: yields ProgramListCall.
+    let listCall: ProgramListCall | undefined;
+    try {
+      runProgram(prog, {}, params, parse);
+    } catch (e) {
+      if (e instanceof ProgramListCall) listCall = e;
+      else throw e;
+    }
+    expect(listCall?.mode).toBe("limit");
+    expect(listCall?.multipleKeys).toBe(false);
+    expect(listCall?.opIndex).toBe(0);
+    expect(listCall?.recordLimit).toBe(2);
+    expect(listCall?.pageSize).toBe(1);
+    expect(listCall?.kwArgs).toEqual({ compartment_id: "comp-1" });
+
+    // Step 2: replay with listResults yields ProgramSdkCall with tenancyFromConfig.
+    const listResp = makeResp(
+      [
+        { id: "c1", name: "alpha" },
+        { id: "c2", name: "beta" },
+      ],
+      "list[Compartment]",
+    );
+    let sdkCall: ProgramSdkCall | undefined;
+    try {
+      runProgram(prog, {}, params, parse, [], undefined, {
+        listResults: [listResp],
+        tenancy: () => "tenancy-root",
+      });
+    } catch (e) {
+      if (e instanceof ProgramSdkCall) sdkCall = e;
+      else throw e;
+    }
+    expect(sdkCall?.opIndex).toBe(1);
+    expect(sdkCall?.kwArgs).toEqual({ compartment_id: "tenancy-root" });
+
+    // Step 3: replay with both mutates result.data in place (pop + insert) and triggers ProgramRenderData.
+    const rootResp = makeResp(
+      { id: "tenancy-root", name: "root" },
+      "Compartment",
+    );
+    let rendered: ProgramRenderData | undefined;
+    try {
+      runProgram(prog, {}, params, parse, [], undefined, {
+        listResults: [listResp],
+        sdkResults: [rootResp],
+        tenancy: () => "tenancy-root",
+      });
+    } catch (e) {
+      if (e instanceof ProgramRenderData) rendered = e;
+      else throw e;
+    }
+    expect(rendered).toBeInstanceOf(ProgramRenderData);
+    expect(rendered?.data).toEqual([
+      { id: "tenancy-root", name: "root" },
+      { id: "c1", name: "alpha" },
+    ]);
+
+    // Step 4: replay after render resets listResp cleanly and does not double-mutate.
+    const done = runProgram(prog, {}, params, parse, [], undefined, {
+      listResults: [listResp],
+      sdkResults: [rootResp],
+      renderedCount: 1,
+      tenancy: () => "tenancy-root",
+    });
+    expect(done.kwargs).toBeUndefined();
+    expect(listResp.data).toEqual([
+      { id: "tenancy-root", name: "root" },
+      { id: "c1", name: "alpha" },
+    ]);
+
+    // stream_output=True is rejected as ProgramUnsupported.
+    expect(() =>
+      runProgram(
+        [
+          ["let", "client", ["fn", "client", "audit", "audit"]],
+          [
+            "do",
+            [
+              "listCall",
+              "all",
+              false,
+              0,
+              ["var", "client"],
+              [true, true],
+              [],
+              null,
+            ],
+          ],
+        ],
+        {},
+        params,
+        parse,
+      ),
+    ).toThrow(ProgramUnsupported);
+  });
+
+  test("paginateSdkList matches cli_util list_call_get_all_results and list_call_get_up_to_limit semantics", async () => {
+    const listModels = {
+      PipelineSummary: {
+        attributes: [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+        ] as [string, string, string][],
+      },
+    };
+    const collectionModels = {
+      Apps: {
+        attributes: [
+          ["items_per_page", "int", "itemsPerPage"],
+          ["resources", "list[App]", "Resources"],
+          ["schemas", "list[str]", "schemas"],
+          ["total_results", "int", "totalResults"],
+        ] as [string, string, string][],
+      },
+      App: {
+        attributes: [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+        ] as [string, string, string][],
+      },
+    };
+    const pageResp = (
+      data: unknown,
+      responseType: string,
+      models: Record<string, { attributes: [string, string, string][] }>,
+      headers: Record<string, string> = {},
+    ) =>
+      new ProgramResponse(
+        {
+          operation: {
+            client: "svc.svc",
+            method: "list_x",
+            http: "GET",
+            path: "/x",
+            responseType,
+            queryParams: {},
+          },
+          responseModels: models,
+          url: new URL("https://example.test/x"),
+          response: new Response(JSON.stringify(data), {
+            status: 200,
+            headers,
+          }),
+          raw: JSON.stringify(data),
+          allPages: false,
+          pageItems: [],
+        },
+        data,
+      );
+
+    // 1. list_call_get_all_results on bare list with DISPLAYNAME sort DESC across 2 pages.
+    const seenAll: Record<string, unknown>[] = [];
+    const allRes = await paginateSdkList({
+      mode: "all",
+      multipleKeys: false,
+      kwArgs: { sort_by: "displayName", sort_order: "DESC" },
+      fetchPage: async (kw) => {
+        seenAll.push(kw);
+        if (seenAll.length === 1)
+          return pageResp(
+            [
+              {
+                id: "1",
+                displayName: "alpha",
+                timeCreated: "2026-01-01T00:00:00Z",
+              },
+            ],
+            "list[PipelineSummary]",
+            listModels,
+            { "opc-next-page": "p2" },
+          );
+        return pageResp(
+          [
+            {
+              id: "2",
+              displayName: "zeta",
+              timeCreated: "2026-01-02T00:00:00Z",
+            },
+          ],
+          "list[PipelineSummary]",
+          listModels,
+        );
+      },
+    });
+    expect(allRes).toBeInstanceOf(ProgramResponse);
+    expect(seenAll).toEqual([
+      { sort_by: "displayName", sort_order: "DESC" },
+      { sort_by: "displayName", sort_order: "DESC", page: "p2" },
+    ]);
+    expect(toDictValue((allRes as ProgramResponse).data)).toEqual([
+      {
+        id: "2",
+        "display-name": "zeta",
+        "time-created": "2026-01-02T00:00:00+00:00",
+      },
+      {
+        id: "1",
+        "display-name": "alpha",
+        "time-created": "2026-01-01T00:00:00+00:00",
+      },
+    ]);
+
+    // 2. list_call_get_up_to_limit with recordLimit=3, pageSize=2 adjusts limit per page and truncates.
+    const seenLimit: Record<string, unknown>[] = [];
+    const limitRes = await paginateSdkList({
+      mode: "limit",
+      multipleKeys: false,
+      recordLimit: 3,
+      pageSize: 2,
+      kwArgs: { limit: 3 },
+      fetchPage: async (kw) => {
+        seenLimit.push(kw);
+        if (seenLimit.length === 1)
+          return pageResp(
+            [{ id: "1" }, { id: "2" }],
+            "list[PipelineSummary]",
+            listModels,
+            { "opc-next-page": "p2" },
+          );
+        return pageResp(
+          [{ id: "3" }, { id: "4" }],
+          "list[PipelineSummary]",
+          listModels,
+          { "opc-next-page": "p3" },
+        );
+      },
+    });
+    expect(seenLimit).toEqual([{ limit: 2 }, { limit: 1, page: "p2" }]);
+    expect((limitRes as ProgramResponse).data).toEqual([
+      { id: "1" },
+      { id: "2" },
+      { id: "3" },
+    ]);
+    expect((limitRes as ProgramResponse).headers.get("opc-next-page")).toBe(
+      "p3",
+    );
+
+    // 3. list_call_get_up_to_limit with recordLimit=0 still makes one call with limit=0.
+    const seenZero: Record<string, unknown>[] = [];
+    const zeroRes = await paginateSdkList({
+      mode: "limit",
+      multipleKeys: false,
+      recordLimit: 0,
+      pageSize: null,
+      kwArgs: { limit: 0 },
+      fetchPage: async (kw) => {
+        seenZero.push(kw);
+        return pageResp([{ id: "1" }], "list[PipelineSummary]", listModels);
+      },
+    });
+    expect(seenZero).toEqual([{ limit: 0 }]);
+    expect((zeroRes as ProgramResponse).data).toEqual([]);
+
+    // 4. list_call_get_all_results_multiple_keys keeps scalars from last page and chains lists.
+    const mkPages = [
+      {
+        itemsPerPage: 1,
+        Resources: [{ id: "a1", displayName: "One" }],
+        schemas: ["s1"],
+        totalResults: 2,
+      },
+      {
+        itemsPerPage: 1,
+        Resources: [{ id: "a2", displayName: "Two" }],
+        schemas: ["s2"],
+        totalResults: 2,
+      },
+    ];
+    let mkIdx = 0;
+    const mkAll = await paginateSdkList({
+      mode: "all",
+      multipleKeys: true,
+      kwArgs: {},
+      fetchPage: async () =>
+        pageResp(
+          mkPages[mkIdx]!,
+          "Apps",
+          collectionModels,
+          mkIdx++ === 0 ? { "opc-next-page": "p2" } : {},
+        ),
+    });
+    expect((mkAll as ProgramResponse).data).toEqual({
+      "items-per-page": 1,
+      resources: [
+        { id: "a1", "display-name": "One" },
+        { id: "a2", "display-name": "Two" },
+      ],
+      schemas: ["s1", "s2"],
+      "total-results": 2,
+    });
+
+    // 5. list_call_get_up_to_limit (non-multiple_keys) raises TypeError on int collection field.
+    const typeErr = await paginateSdkList({
+      mode: "limit",
+      multipleKeys: false,
+      recordLimit: 2,
+      pageSize: null,
+      kwArgs: { limit: 2 },
+      fetchPage: async () => pageResp(mkPages[0]!, "Apps", collectionModels),
+    });
+    expect(typeErr).toBeInstanceOf(ProgramRaise);
+    expect((typeErr as ProgramRaise).cls).toBe("TypeError");
+    expect((typeErr as ProgramRaise).message).toBe(
+      "object of type 'int' has no len()",
+    );
+
+    // 6. ServiceError on page 2 propagates cleanly.
+    let errIdx = 0;
+    const errRes = await paginateSdkList({
+      mode: "all",
+      multipleKeys: false,
+      kwArgs: {},
+      fetchPage: async () => {
+        if (errIdx++ === 0)
+          return pageResp([{ id: "1" }], "list[PipelineSummary]", listModels, {
+            "opc-next-page": "p2",
+          });
+        return new ProgramServiceError({
+          operation: {
+            client: "svc.svc",
+            method: "list_x",
+            http: "GET",
+            path: "/x",
+            queryParams: {},
+          },
+          url: new URL("https://example.test/x"),
+          response: new Response('{"code":"NotAuthorized","message":"nope"}', {
+            status: 404,
+          }),
+          raw: '{"code":"NotAuthorized","message":"nope"}',
+          allPages: false,
+          pageItems: [],
+        });
+      },
+    });
+    expect(errRes).toBeInstanceOf(ProgramServiceError);
   });
 });

@@ -1204,6 +1204,330 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "compartment_id_in_subtree",
+            ["call", "pop", ["var", "kwargs"], "compartment_id_in_subtree"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          ["let", "image_id", ["call", "pop", ["var", "kwargs"], "image_id"]],
+          [
+            "let",
+            "is_versioned",
+            ["call", "pop", ["var", "kwargs"], "is_versioned"]
+          ],
+          [
+            "let",
+            "repository_id",
+            ["call", "pop", ["var", "kwargs"], "repository_id"]
+          ],
+          [
+            "let",
+            "repository_name",
+            ["call", "pop", ["var", "kwargs"], "repository_name"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "image_version", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "version",
+                ["item", ["var", "kwargs"], "image_version"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "image_version"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id_in_subtree"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "compartment_id_in_subtree",
+                ["var", "compartment_id_in_subtree"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "display_name",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "image_id"], null],
+            [["set", ["var", "kwargs"], "image_id", ["var", "image_id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_versioned"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_versioned",
+                ["var", "is_versioned"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "repository_id"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "repository_id",
+                ["var", "repository_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "repository_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "repository_name",
+                ["var", "repository_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "artifacts", "artifacts"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "artifacts.artifacts",
+          "method": "list_container_images",
+          "http": "GET",
+          "path": "/container/images",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentIdInSubtree": {
+              "arg": "compartment_id_in_subtree"
+            },
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "displayName": {
+              "arg": "display_name"
+            },
+            "imageId": {
+              "arg": "image_id"
+            },
+            "isVersioned": {
+              "arg": "is_versioned"
+            },
+            "repositoryId": {
+              "arg": "repository_id"
+            },
+            "repositoryName": {
+              "arg": "repository_name"
+            },
+            "version": {
+              "arg": "version"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "imageDigest": {
+              "arg": "image_digest"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "ContainerImageCollection"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3616,6 +3940,347 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "compartment_id_in_subtree",
+            ["call", "pop", ["var", "kwargs"], "compartment_id_in_subtree"]
+          ],
+          ["let", "image_id", ["call", "pop", ["var", "kwargs"], "image_id"]],
+          [
+            "let",
+            "repository_id",
+            ["call", "pop", ["var", "kwargs"], "repository_id"]
+          ],
+          [
+            "let",
+            "repository_name",
+            ["call", "pop", ["var", "kwargs"], "repository_name"]
+          ],
+          [
+            "let",
+            "image_digest",
+            ["call", "pop", ["var", "kwargs"], "image_digest"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "kms_key_id",
+            ["call", "pop", ["var", "kwargs"], "kms_key_id"]
+          ],
+          [
+            "let",
+            "kms_key_version_id",
+            ["call", "pop", ["var", "kwargs"], "kms_key_version_id"]
+          ],
+          [
+            "let",
+            "signing_algorithm",
+            ["call", "pop", ["var", "kwargs"], "signing_algorithm"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          ["checkNoExtraKwargs", "list_container_image_signatures_extended"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id_in_subtree"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "compartment_id_in_subtree",
+                ["var", "compartment_id_in_subtree"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "image_id"], null],
+            [["set", ["var", "kwargs"], "image_id", ["var", "image_id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "repository_id"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "repository_id",
+                ["var", "repository_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "repository_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "repository_name",
+                ["var", "repository_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "image_digest"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "image_digest",
+                ["var", "image_digest"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "display_name",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "kms_key_id"], null],
+            [["set", ["var", "kwargs"], "kms_key_id", ["var", "kms_key_id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "kms_key_version_id"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "kms_key_version_id",
+                ["var", "kms_key_version_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "signing_algorithm"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "signing_algorithm",
+                ["var", "signing_algorithm"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "artifacts", "artifacts"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "artifacts.artifacts",
+          "method": "list_container_image_signatures",
+          "http": "GET",
+          "path": "/container/imageSignatures",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentIdInSubtree": {
+              "arg": "compartment_id_in_subtree"
+            },
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "imageId": {
+              "arg": "image_id"
+            },
+            "repositoryId": {
+              "arg": "repository_id"
+            },
+            "repositoryName": {
+              "arg": "repository_name"
+            },
+            "imageDigest": {
+              "arg": "image_digest"
+            },
+            "displayName": {
+              "arg": "display_name"
+            },
+            "kmsKeyId": {
+              "arg": "kms_key_id"
+            },
+            "kmsKeyVersionId": {
+              "arg": "kms_key_version_id"
+            },
+            "signingAlgorithm": {
+              "arg": "signing_algorithm"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "ContainerImageSignatureCollection"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5772,6 +6437,312 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "compartment_id_in_subtree",
+            ["call", "pop", ["var", "kwargs"], "compartment_id_in_subtree"]
+          ],
+          [
+            "let",
+            "repository_id",
+            ["call", "pop", ["var", "kwargs"], "repository_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "repository_type",
+            ["call", "pop", ["var", "kwargs"], "repository_type"]
+          ],
+          [
+            "let",
+            "is_top_level",
+            ["call", "pop", ["var", "kwargs"], "is_top_level"]
+          ],
+          ["let", "is_public", ["call", "pop", ["var", "kwargs"], "is_public"]],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          ["checkNoExtraKwargs", "list_container_repositories_extended"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id_in_subtree"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "compartment_id_in_subtree",
+                ["var", "compartment_id_in_subtree"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "repository_id"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "repository_id",
+                ["var", "repository_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "display_name",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "repository_type"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "repository_type",
+                ["var", "repository_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_top_level"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_top_level",
+                ["var", "is_top_level"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_public"], null],
+            [["set", ["var", "kwargs"], "is_public", ["var", "is_public"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "artifacts", "artifacts"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "artifacts.artifacts",
+          "method": "list_container_repositories",
+          "http": "GET",
+          "path": "/container/repositories",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentIdInSubtree": {
+              "arg": "compartment_id_in_subtree"
+            },
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "repositoryId": {
+              "arg": "repository_id"
+            },
+            "displayName": {
+              "arg": "display_name"
+            },
+            "repositoryType": {
+              "arg": "repository_type"
+            },
+            "isTopLevel": {
+              "arg": "is_top_level"
+            },
+            "isPublic": {
+              "arg": "is_public"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "ContainerRepositoryCollection"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7775,6 +8746,292 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "repository_id",
+            ["call", "pop", ["var", "kwargs"], "repository_id"]
+          ],
+          ["let", "id", ["call", "pop", ["var", "kwargs"], "id"]],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "artifact_path",
+            ["call", "pop", ["var", "kwargs"], "artifact_path"]
+          ],
+          [
+            "let",
+            "artifact_version",
+            ["call", "pop", ["var", "kwargs"], "artifact_version"]
+          ],
+          ["let", "sha256", ["call", "pop", ["var", "kwargs"], "sha256"]],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          ["checkNoExtraKwargs", "list_generic_artifacts_extended"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "id"], null],
+            [["set", ["var", "kwargs"], "id", ["var", "id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "display_name",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "artifact_path"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "artifact_path",
+                ["var", "artifact_path"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "artifact_version"], null],
+            [
+              ["set", ["var", "kwargs"], "version", ["var", "artifact_version"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sha256"], null],
+            [["set", ["var", "kwargs"], "sha256", ["var", "sha256"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "artifacts", "artifacts"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [
+                    ["compartment_id", ["var", "compartment_id"]],
+                    ["repository_id", ["var", "repository_id"]]
+                  ],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [
+                        ["compartment_id", ["var", "compartment_id"]],
+                        ["repository_id", ["var", "repository_id"]]
+                      ],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [
+                        ["compartment_id", ["var", "compartment_id"]],
+                        ["repository_id", ["var", "repository_id"]]
+                      ],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "artifacts.artifacts",
+          "method": "list_generic_artifacts",
+          "http": "GET",
+          "path": "/generic/artifacts",
+          "positionalArgs": ["compartment_id", "repository_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "repositoryId": {
+              "arg": "repository_id"
+            },
+            "id": {
+              "arg": "id"
+            },
+            "displayName": {
+              "arg": "display_name"
+            },
+            "artifactPath": {
+              "arg": "artifact_path"
+            },
+            "version": {
+              "arg": "version"
+            },
+            "sha256": {
+              "arg": "sha256"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "GenericArtifactCollection"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10475,6 +11732,249 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          ["let", "id", ["call", "pop", ["var", "kwargs"], "id"]],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "is_immutable",
+            ["call", "pop", ["var", "kwargs"], "is_immutable"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          ["checkNoExtraKwargs", "list_repositories_extended"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "id"], null],
+            [["set", ["var", "kwargs"], "id", ["var", "id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "display_name",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "is_immutable"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_immutable",
+                ["var", "is_immutable"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "artifacts", "artifacts"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  true,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      true,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "artifacts.artifacts",
+          "method": "list_repositories",
+          "http": "GET",
+          "path": "/repositories",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "id": {
+              "arg": "id"
+            },
+            "displayName": {
+              "arg": "display_name"
+            },
+            "isImmutable": {
+              "arg": "is_immutable"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "RepositoryCollection"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -11575,6 +13075,12 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
+      "ContainerImageCollection": {
+        "attributes": [
+          ["items", "list[ContainerImageSummary]", "items"],
+          ["remaining_items_count", "int", "remainingItemsCount"]
+        ]
+      },
       "ContainerImageLayer": {
         "attributes": [
           ["digest", "str", "digest"],
@@ -11596,6 +13102,46 @@
           ["signing_algorithm", "str", "signingAlgorithm"],
           ["time_created", "datetime", "timeCreated"],
           ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ContainerImageSignatureCollection": {
+        "attributes": [
+          ["items", "list[ContainerImageSignatureSummary]", "items"],
+          ["remaining_items_count", "int", "remainingItemsCount"]
+        ]
+      },
+      "ContainerImageSignatureSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["id", "str", "id"],
+          ["image_id", "str", "imageId"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["message", "str", "message"],
+          ["signature", "str", "signature"],
+          ["signing_algorithm", "str", "signingAlgorithm"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ContainerImageSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["digest", "str", "digest"],
+          ["display_name", "str", "displayName"],
+          ["id", "str", "id"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["repository_id", "str", "repositoryId"],
+          ["repository_name", "str", "repositoryName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["version", "str", "version"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
@@ -11629,10 +13175,40 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
+      "ContainerRepositoryCollection": {
+        "attributes": [
+          ["layer_count", "int", "layerCount"],
+          ["layers_size_in_bytes", "int", "layersSizeInBytes"],
+          ["image_count", "int", "imageCount"],
+          ["items", "list[ContainerRepositorySummary]", "items"],
+          ["remaining_items_count", "int", "remainingItemsCount"],
+          ["repository_count", "int", "repositoryCount"]
+        ]
+      },
       "ContainerRepositoryReadme": {
         "attributes": [
           ["content", "str", "content"],
           ["format", "str", "format"]
+        ]
+      },
+      "ContainerRepositorySummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["id", "str", "id"],
+          ["repository_type", "str", "repositoryType"],
+          ["is_top_level", "bool", "isTopLevel"],
+          ["image_count", "int", "imageCount"],
+          ["is_public", "bool", "isPublic"],
+          ["layer_count", "int", "layerCount"],
+          ["layers_size_in_bytes", "int", "layersSizeInBytes"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["billable_size_in_gbs", "int", "billableSizeInGBs"],
+          ["namespace", "str", "namespace"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "ContainerVersion": {
@@ -11643,6 +13219,25 @@
         ]
       },
       "GenericArtifact": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["repository_id", "str", "repositoryId"],
+          ["artifact_path", "str", "artifactPath"],
+          ["version", "str", "version"],
+          ["sha256", "str", "sha256"],
+          ["size_in_bytes", "int", "sizeInBytes"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
+      "GenericArtifactCollection": {
+        "attributes": [["items", "list[GenericArtifactSummary]", "items"]]
+      },
+      "GenericArtifactSummary": {
         "attributes": [
           ["id", "str", "id"],
           ["display_name", "str", "displayName"],
@@ -11673,6 +13268,21 @@
         ],
         "discriminator": "Repository"
       },
+      "GenericRepositorySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["repository_type", "str", "repositoryType"],
+          ["description", "str", "description"],
+          ["is_immutable", "bool", "isImmutable"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["time_created", "datetime", "timeCreated"]
+        ],
+        "discriminator": "RepositorySummary"
+      },
       "Repository": {
         "attributes": [
           ["id", "str", "id"],
@@ -11692,6 +13302,30 @@
             "GENERIC": "GenericRepository"
           },
           "fallback": "Repository"
+        }
+      },
+      "RepositoryCollection": {
+        "attributes": [["items", "list[RepositorySummary]", "items"]]
+      },
+      "RepositorySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["repository_type", "str", "repositoryType"],
+          ["description", "str", "description"],
+          ["is_immutable", "bool", "isImmutable"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["time_created", "datetime", "timeCreated"]
+        ],
+        "discriminator": {
+          "field": "repositoryType",
+          "values": {
+            "GENERIC": "GenericRepositorySummary"
+          },
+          "fallback": "RepositorySummary"
         }
       }
     },

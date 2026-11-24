@@ -56,7 +56,7 @@ import inspect
 import textwrap
 
 METHODS = {
-    "get", "pop", "append", "setdefault", "split", "upper", "lower", "strip", "update",
+    "get", "pop", "append", "insert", "setdefault", "split", "upper", "lower", "strip", "update",
     "read", "rstrip", "decode", "keys", "join", "format", "items",
 }
 FUNCTIONS = {
@@ -490,6 +490,111 @@ class Compiler:
         op_index = self.sdk_call_index(*client_pair, call.func.attr)
         return ["sdk", op_index, self.expr(call.func.value, scope), pos, keywords, star]
 
+    def _list_call_ref(self, node, scope):
+        if (
+            isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Name)
+            and self.name(node.value.id, scope) in self.clients
+        ):
+            client_pair = self.clients[self.name(node.value.id, scope)]
+            op_index = self.sdk_call_index(*client_pair, node.attr)
+            return op_index, self.expr(node.value, scope)
+        raise Unsupported("list_call func ref")
+
+    def list_call_all(self, node, scope, multiple_keys):
+        # list_call_get_all_results[_multiple_keys](list_func_ref, ctx=None, is_json=False, stream_output=False, **func_kwargs)
+        if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 4:
+            raise Unsupported("list_call_get_all_results args")
+        ref_node = None
+        ctx_node = None
+        is_json = False
+        stream_output = False
+        provided = set()
+        for idx, a in enumerate(node.args):
+            provided.add(idx)
+            if idx == 0:
+                ref_node = a
+            elif idx == 1:
+                ctx_node = a
+            elif idx == 2:
+                is_json = self.expr(a, scope)
+            elif idx == 3:
+                stream_output = self.expr(a, scope)
+        special = {"list_func_ref": 0, "ctx": 1, "is_json": 2, "stream_output": 3}
+        keywords = []
+        star = None
+        for kw in node.keywords:
+            if kw.arg is None:
+                if star is not None:
+                    raise Unsupported("two **")
+                star = self.expr(kw.value, scope)
+            elif kw.arg in special:
+                idx = special[kw.arg]
+                if idx in provided:
+                    raise Unsupported("call keywords")
+                provided.add(idx)
+                if idx == 0:
+                    ref_node = kw.value
+                elif idx == 1:
+                    ctx_node = kw.value
+                elif idx == 2:
+                    is_json = self.expr(kw.value, scope)
+                elif idx == 3:
+                    stream_output = self.expr(kw.value, scope)
+            else:
+                keywords.append([kw.arg, self.expr(kw.value, scope)])
+        if ref_node is None:
+            raise Unsupported("list_call_get_all_results args")
+        if ctx_node is not None and not (
+            (isinstance(ctx_node, ast.Constant) and ctx_node.value is None)
+            or (isinstance(ctx_node, ast.Name) and self.name(ctx_node.id, scope) == "ctx")
+        ):
+            raise Unsupported("list_call_get_all_results ctx")
+        op_index, client_expr = self._list_call_ref(ref_node, scope)
+        return ["listCall", "all", multiple_keys, op_index, client_expr, [is_json, stream_output], keywords, star]
+
+    def list_call_limit(self, node, scope, multiple_keys):
+        # list_call_get_up_to_limit[_multiple_keys](list_func_ref, record_limit, page_size, **func_kwargs)
+        if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 3:
+            raise Unsupported("list_call_get_up_to_limit args")
+        ref_node = None
+        record_limit = None
+        page_size = None
+        provided = set()
+        for idx, a in enumerate(node.args):
+            provided.add(idx)
+            if idx == 0:
+                ref_node = a
+            elif idx == 1:
+                record_limit = self.expr(a, scope)
+            elif idx == 2:
+                page_size = self.expr(a, scope)
+        special = {"list_func_ref": 0, "record_limit": 1, "page_size": 2}
+        keywords = []
+        star = None
+        for kw in node.keywords:
+            if kw.arg is None:
+                if star is not None:
+                    raise Unsupported("two **")
+                star = self.expr(kw.value, scope)
+            elif kw.arg in special:
+                idx = special[kw.arg]
+                if idx in provided:
+                    raise Unsupported("call keywords")
+                provided.add(idx)
+                if idx == 0:
+                    ref_node = kw.value
+                elif idx == 1:
+                    record_limit = self.expr(kw.value, scope)
+                elif idx == 2:
+                    page_size = self.expr(kw.value, scope)
+            else:
+                keywords.append([kw.arg, self.expr(kw.value, scope)])
+        if not ({0, 1, 2} <= provided) or ref_node is None:
+            raise Unsupported("list_call_get_up_to_limit args")
+        op_index, client_expr = self._list_call_ref(ref_node, scope)
+        return ["listCall", "limit", multiple_keys, op_index, client_expr, [record_limit, page_size], keywords, star]
+
     def comprehension(self, generators, scope):
         if len(generators) != 1:
             raise Unsupported("comprehension")
@@ -717,6 +822,14 @@ class Compiler:
                     else:
                         keywords.append([kw.arg, self.expr(kw.value, scope)])
                 return ["format", self.expr(node.func.value, scope), pos, keywords, star]
+            if self._is_cli_util_fn(node.func, "list_call_get_all_results"):
+                return self.list_call_all(node, scope, False)
+            if self._is_cli_util_fn(node.func, "list_call_get_all_results_multiple_keys"):
+                return self.list_call_all(node, scope, True)
+            if self._is_cli_util_fn(node.func, "list_call_get_up_to_limit"):
+                return self.list_call_limit(node, scope, False)
+            if self._is_cli_util_fn(node.func, "list_call_get_up_to_limit_multiple_keys"):
+                return self.list_call_limit(node, scope, True)
             if dotted == "oci.wait_until":
                 if any(isinstance(a, ast.Starred) for a in node.args):
                     raise Unsupported("call oci.wait_until")
@@ -771,6 +884,13 @@ class Compiler:
                 return ["fn", "toDict", self.expr(node.args[0], scope)]
             if self._is_cli_util_fn(node.func, "formatted_flat_dict") and len(node.args) == 1:
                 return ["fn", "formattedFlatDict", self.expr(node.args[0], scope)]
+            if (
+                self._is_cli_util_fn(node.func, "get_tenancy_from_config")
+                and len(node.args) == 1
+                and isinstance(node.args[0], ast.Name)
+                and self.name(node.args[0].id, scope) == "ctx"
+            ):
+                return ["fn", "tenancyFromConfig"]
             hand = self.hand_coded(node.func)
             if hand:
                 return ["fn", hand, *(self.expr(a, scope) for a in node.args)]

@@ -52995,6 +52995,256 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "project_id",
+            ["call", "pop", ["var", "kwargs"], "project_id"]
+          ],
+          ["let", "id", ["call", "pop", ["var", "kwargs"], "id"]],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          [
+            "let",
+            "created_by",
+            ["call", "pop", ["var", "kwargs"], "created_by"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          ["checkNoExtraKwargs", "list_pipelines"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "project_id"], null],
+            [["set", ["var", "kwargs"], "project_id", ["var", "project_id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "id"], null],
+            [["set", ["var", "kwargs"], "id", ["var", "id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "display_name",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "created_by"], null],
+            [["set", ["var", "kwargs"], "created_by", ["var", "created_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "data_science", "data_science"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  false,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      false,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "data_science.data_science",
+          "method": "list_pipelines",
+          "http": "GET",
+          "path": "/pipelines",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "projectId": {
+              "arg": "project_id"
+            },
+            "id": {
+              "arg": "id"
+            },
+            "displayName": {
+              "arg": "display_name"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "createdBy": {
+              "arg": "created_by"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "list[PipelineSummary]"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -55424,6 +55674,256 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          ["let", "id", ["call", "pop", ["var", "kwargs"], "id"]],
+          [
+            "let",
+            "pipeline_id",
+            ["call", "pop", ["var", "kwargs"], "pipeline_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          [
+            "let",
+            "created_by",
+            ["call", "pop", ["var", "kwargs"], "created_by"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          [
+            "let",
+            "sort_order",
+            ["call", "pop", ["var", "kwargs"], "sort_order"]
+          ],
+          ["let", "sort_by", ["call", "pop", ["var", "kwargs"], "sort_by"]],
+          ["checkNoExtraKwargs", "list_pipeline_runs"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "id"], null],
+            [["set", ["var", "kwargs"], "id", ["var", "id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "pipeline_id"], null],
+            [["set", ["var", "kwargs"], "pipeline_id", ["var", "pipeline_id"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "display_name",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "created_by"], null],
+            [["set", ["var", "kwargs"], "created_by", ["var", "created_by"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_order"], null],
+            [["set", ["var", "kwargs"], "sort_order", ["var", "sort_order"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "sort_by"], null],
+            [["set", ["var", "kwargs"], "sort_by", ["var", "sort_by"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "data_science", "data_science"]],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "listCall",
+                  "all",
+                  false,
+                  0,
+                  ["var", "client"],
+                  [false, false],
+                  [["compartment_id", ["var", "compartment_id"]]],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "listCall",
+                      "limit",
+                      false,
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "result",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["compartment_id", ["var", "compartment_id"]]],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "data_science.data_science",
+          "method": "list_pipeline_runs",
+          "http": "GET",
+          "path": "/pipelineRuns",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "id": {
+              "arg": "id"
+            },
+            "pipelineId": {
+              "arg": "pipeline_id"
+            },
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "displayName": {
+              "arg": "display_name"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "createdBy": {
+              "arg": "created_by"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "list[PipelineRunSummary]"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -67729,6 +68229,25 @@
           ["log_id", "str", "logId"]
         ]
       },
+      "PipelineRunSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["pipeline_id", "str", "pipelineId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "PipelineShapeConfigDetails": {
         "attributes": [
           ["ocpus", "float", "ocpus"],
@@ -67859,6 +68378,21 @@
           },
           "fallback": "PipelineStepUpdateDetails"
         }
+      },
+      "PipelineSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "PredefinedExpressionThresholdScalingConfiguration": {
         "attributes": [

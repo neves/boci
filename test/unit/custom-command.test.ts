@@ -24,7 +24,7 @@ async function collection(
         method: "list_container_images",
         http: "GET",
         path: "/container/images",
-        responseType: "ContainerImageCollection",
+        responseType: "SyntheticCollection",
         queryParams: { page: { arg: "page" }, limit: { arg: "limit" } },
       }),
       { multipleKeys },

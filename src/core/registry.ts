@@ -70,6 +70,64 @@ function lazyOsOutput<T>(
 /** Single source of truth for Custom OCI Leaf command handlers, loaded lazily on dispatch. */
 export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
   [
+    "model-deployment inference-result predict-with-response-stream",
+    async (ctx) => {
+      const { runModelDeploymentInferenceResultPredictWithResponseStream } =
+        await import("../commands/model-deployment/inference_result_predict_with_response_stream.ts");
+      await runModelDeploymentInferenceResultPredictWithResponseStream(ctx);
+    },
+  ],
+  [
+    "generative-ai-sandbox sandbox-file read",
+    async (ctx) => {
+      const { runGenerativeAiSandboxSandboxFileRead } =
+        await import("../commands/generative-ai-sandbox/sandbox_file_read.ts");
+      await runGenerativeAiSandboxSandboxFileRead(ctx);
+    },
+  ],
+  [
+    "generative-ai-sandbox sandbox-command-event stream",
+    async (ctx) => {
+      const { runGenerativeAiSandboxCommandStream } =
+        await import("../commands/generative-ai-sandbox/sandbox_command_stream.ts");
+      await runGenerativeAiSandboxCommandStream(
+        ctx,
+        "sandbox-command-event stream",
+      );
+    },
+  ],
+  [
+    "generative-ai-sandbox sandbox-command stream",
+    async (ctx) => {
+      const { runGenerativeAiSandboxCommandStream } =
+        await import("../commands/generative-ai-sandbox/sandbox_command_stream.ts");
+      await runGenerativeAiSandboxCommandStream(ctx, "sandbox-command stream");
+    },
+  ],
+  [
+    "audit event list",
+    async (ctx) => {
+      const { runAuditEventList } =
+        await import("../commands/audit/event_list.ts");
+      await runAuditEventList(ctx);
+    },
+  ],
+  [
+    "os object restore-status",
+    async (ctx) => {
+      const { runOsObjectRestoreStatus } =
+        await import("../commands/os/object_restore_status.ts");
+      await runOsObjectRestoreStatus(ctx);
+    },
+  ],
+  [
+    "os object list",
+    async (ctx) => {
+      const { runOsObjectList } = await import("../commands/os/object_list.ts");
+      await runOsObjectList(ctx);
+    },
+  ],
+  [
     "ce cluster generate-token",
     async (ctx) => {
       const { runCeClusterGenerateToken } =
@@ -319,6 +377,7 @@ const ENGINE_FEATURES = [
   "max-retries",
   "work-request-waiter",
   "lifecycle-waiter",
+  "os-namespace-lookup",
   // Tier B argument checks (survey.checks) whose happy path is not implemented yet.
   "usage-checks",
   // Generated commands outside engineSupports, tested by hand-written cases.

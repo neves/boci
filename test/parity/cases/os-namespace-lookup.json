@@ -1,0 +1,76 @@
+[
+  {
+    "id": "os-namespace-lookup-bucket-get",
+    "key": "os-namespace-lookup",
+    "argv": [
+      "os",
+      "bucket",
+      "get",
+      "--name",
+      "mybucket",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": "\"looked-up-ns\""
+      },
+      {
+        "body": {
+          "name": "mybucket",
+          "namespace": "looked-up-ns",
+          "compartmentId": "ocid1.compartment.oc1..aaa"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-namespace-lookup-bucket-list",
+    "key": "os-namespace-lookup",
+    "argv": [
+      "os",
+      "bucket",
+      "list",
+      "--compartment-id",
+      "ocid1.compartment.oc1..aaa",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": "\"looked-up-ns\""
+      },
+      {
+        "body": [
+          {
+            "name": "mybucket",
+            "namespace": "looked-up-ns"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "os-namespace-lookup-error",
+    "key": "os-namespace-lookup",
+    "argv": [
+      "os",
+      "bucket",
+      "get",
+      "--name",
+      "mybucket",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": [
+      {
+        "status": 404,
+        "body": {
+          "code": "NamespaceNotFound",
+          "message": "Namespace not found"
+        }
+      }
+    ]
+  }
+]

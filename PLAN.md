@@ -249,7 +249,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `adm vulnerability-audit create-vulnerability-audit-unknown-source-vulnerability-audit-source`
 - [x] `apm-synthetics monitor create-sql-monitor`
 - [x] `apm-synthetics monitor update-sql-monitor`
-- [ ] `audit event list`
+- [x] `audit event list`
 - [x] `cloud-bridge discovery asset-source create`
 - [x] `cloud-bridge discovery asset-source update`
 - [x] `cloud-bridge inventory asset create`
@@ -288,14 +288,14 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `network-firewall service create`
 - [x] `network-firewall service update`
 - [x] `ocvs sddc retrieve-sddc-operation-status`
-- [ ] Object Storage namespace lookup when `--namespace` is omitted. Cover the Engine path using the `GET /n` recording pattern from `os object copy`.
+- [x] Object Storage namespace lookup when `--namespace` is omitted. Cover the Engine path using the `GET /n` recording pattern from `os object copy`.
 - [ ] `os bucket delete`
 - [x] `os multipart abort`
 - [x] `os object head`
-- [ ] `os object list`
+- [x] `os object list`
 - [x] `os object list-object-versions`
 - [x] `os object restore`
-- [ ] `os object restore-status`
+- [x] `os object restore-status`
 - [x] `os retention-rule update`
 - [ ] `profile diagnose`
 - [ ] `profile list`
@@ -367,13 +367,13 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `compute image export to-object-uri`
 - [x] `compute image import from-object`
 - [x] `compute image import from-object-uri`
-- [ ] `generative-ai-sandbox sandbox-command stream`
-- [ ] `generative-ai-sandbox sandbox-command-event stream`
-- [ ] `generative-ai-sandbox sandbox-file read`
+- [x] `generative-ai-sandbox sandbox-command stream`
+- [x] `generative-ai-sandbox sandbox-command-event stream`
+- [x] `generative-ai-sandbox sandbox-file read`
 - [x] `kms management key restore-from-file`
 - [x] `kms management vault restore-from-file`
 - [x] `management-dashboard dashboard export`
-- [ ] `model-deployment inference-result predict-with-response-stream`
+- [x] `model-deployment inference-result predict-with-response-stream`
 - [ ] `os object bulk-delete-versions`
 - [x] `rover device system-upgrade import-bundle`
 - [x] `rover device system-upgrade upload-bundle`

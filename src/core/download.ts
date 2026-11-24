@@ -6,20 +6,33 @@ import type { Invocation } from "../lib/io.ts";
 import { Exit } from "../lib/io.ts";
 import { writeAllBytes } from "../utils/byte-writer.ts";
 
+function openOutput(io: Invocation, path: string): number {
+  try {
+    return openSync(resolve(io.cwd, path), "w");
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      io.err("FileError: No such file or directory\n");
+      throw new Exit(1);
+    }
+    throw error;
+  }
+}
+
 /**
  * Write a successful response's body to `path` (`-` is stdout). Like the generated code,
  * print click's hidden progress bar label when the file isn't stdout and the response
  * has a non-zero Content-Length; the lazy file is created only by the first chunk, so an
- * empty body leaves no file.
+ * empty body leaves no file unless the caller requests one.
  */
 export async function writeDownload(
   io: Invocation,
   response: Response,
   path: string,
+  { createEmpty = false, showProgress = true } = {},
 ): Promise<void> {
   const toStdout = path === "-";
   const length = response.headers.get("content-length");
-  if (!toStdout && length !== null && Number(length) > 0)
+  if (showProgress && !toStdout && length !== null && Number(length) > 0)
     io.out("Downloading file\n");
   const decoder = new TextDecoder();
   let fd: number | undefined;
@@ -31,23 +44,10 @@ export async function writeDownload(
         else io.out(decoder.decode(chunk, { stream: true }));
         continue;
       }
-      if (fd === undefined) {
-        try {
-          fd = openSync(resolve(io.cwd, path), "w");
-        } catch (error) {
-          if (
-            error instanceof Error &&
-            "code" in error &&
-            error.code === "ENOENT"
-          ) {
-            io.err("FileError: No such file or directory\n");
-            throw new Exit(1);
-          }
-          throw error;
-        }
-      }
+      fd ??= openOutput(io, path);
       writeAllBytes(fd, chunk);
     }
+    if (!toStdout && createEmpty) fd ??= openOutput(io, path);
     if (toStdout && !io.outBytes) {
       const tail = decoder.decode();
       if (tail) io.out(tail);

@@ -723,6 +723,38 @@ async function main(io: Invocation): Promise<void> {
     }
 
     if (engineRoute) {
+      if (name === "os") {
+        const nsParam = (specCmd.params ?? []).find(
+          (p) =>
+            (p.name === "namespace" || p.name === "namespace_name") &&
+            values[p.name] === undefined,
+        );
+        if (nsParam) {
+          const nsResult = await callOperation(io, {
+            command: spec.commands["ns get"] as GeneratedCommand,
+            values: {},
+            rootValues,
+            settings,
+            spec,
+            index,
+          });
+          if (!nsResult.response.ok) {
+            const optName =
+              nsParam.name === "namespace_name"
+                ? "namespace-name"
+                : "namespace";
+            io.err(
+              `${usage(io, commandPath, cmd.helpDoc)}\n\nError: Unable to retrieve namespace internally. Please provide the namespace using the option "--['${optName}']".\n`,
+            );
+            throw new Exit(1);
+          }
+          try {
+            values[nsParam.name] = String(JSON.parse(nsResult.raw));
+          } catch {
+            values[nsParam.name] = nsResult.raw;
+          }
+        }
+      }
       let command: GeneratedCommand = specCmd;
       let callValues = values;
       let stdin: StdinReader | undefined;

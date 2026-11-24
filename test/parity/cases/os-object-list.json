@@ -1,0 +1,148 @@
+[
+  {
+    "id": "os-object-list-basic",
+    "key": "os object list",
+    "argv": [
+      "os",
+      "object",
+      "list",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 12,
+              "etag": "e1"
+            }
+          ],
+          "prefixes": ["dir/"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-list-paginated",
+    "key": "os object list",
+    "argv": [
+      "os",
+      "object",
+      "list",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--all",
+      "--page-size",
+      "1",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 1
+            }
+          ],
+          "prefixes": ["p1/"],
+          "nextStartWith": "b.txt"
+        }
+      },
+      {
+        "body": {
+          "objects": [
+            {
+              "name": "b.txt",
+              "size": 2
+            }
+          ],
+          "prefixes": ["p1/", "p2/"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-list-all-and-limit-error",
+    "key": "os object list",
+    "argv": [
+      "os",
+      "object",
+      "list",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--all",
+      "--limit",
+      "10"
+    ]
+  },
+  {
+    "id": "os-object-list-stream-output",
+    "key": "os object list",
+    "argv": [
+      "os",
+      "object",
+      "list",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--all",
+      "--stream-output",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 1
+            }
+          ],
+          "prefixes": ["p1/"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-list-auto-namespace",
+    "key": "os object list",
+    "argv": [
+      "os",
+      "object",
+      "list",
+      "-bn",
+      "mybucket",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": "\"autons\""
+      },
+      {
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt",
+              "size": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -1,5 +1,5 @@
 import { Exit } from "../../lib/io.ts";
-import { callComputeOperation, computeOutputOptions } from "./shared.ts";
+import { callCommand, outputOptions } from "../../lib/custom-command.ts";
 import type { CustomCommandContext } from "../../core/registry.ts";
 
 const INTERMEDIATE_HOST =
@@ -16,7 +16,7 @@ export async function runComputeInstanceConsolePlink(
     throw new Exit(1);
   }
 
-  const result = await callComputeOperation(
+  const result = await callCommand(
     ctx,
     ctx.spec.service,
     "instance-console-connection get",
@@ -24,7 +24,7 @@ export async function runComputeInstanceConsolePlink(
   );
   if (!result.response.ok) {
     const { printResult } = await import("../../core/output.ts");
-    printResult(ctx.io, result, computeOutputOptions(ctx));
+    printResult(ctx.io, result, outputOptions(ctx));
   }
 
   const connection = JSON.parse(result.raw) as {

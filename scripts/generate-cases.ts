@@ -2,6 +2,7 @@
 // generated-get, POST/PUT/PATCH (including bodyless actions) into generated-request,
 // and bodyless HEAD/DELETE into generated-bodyless.
 // `bun run parity:cases --service <name>[,<name>…] | --all [--method GET,POST,PUT,PATCH,HEAD,DELETE]`
+import { sample } from "./sample-param.ts";
 import { parseArgs } from "util";
 
 const { values } = parseArgs({
@@ -118,26 +119,6 @@ const hasRetryToken = (params: Param[]) =>
 const isComplex = (param: Param) =>
   ["complex", "json", "complex type"].includes(String(param.type)) ||
   String(param.typeClass).includes("Complex");
-
-function sample(param: Param): string {
-  if (param.name === "shape_availabilities") return '{"shapes":[]}';
-  const choices = param.choices;
-  if (Array.isArray(choices) && choices.length) return String(choices[0]);
-  switch (param.type) {
-    case "integer":
-      return "1";
-    case "float":
-      return "1.5";
-    case "boolean":
-      return "true";
-    case "complex":
-    case "json":
-    case "complex type":
-      return "{}";
-    default:
-      return "test-value";
-  }
-}
 
 function pushParam(argv: string[], param: Param) {
   const option = optionOf(param);

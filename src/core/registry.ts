@@ -315,13 +315,19 @@ const IMPLEMENTED = new Set<string>([
 ]);
 
 // Generated and Tier A commands that don't match the Reference CLI; each entry includes its reason.
-const EXCLUDED = new Set<string>([
+export const EXCLUDED = new Map<string, string>([
   // Reference CLI ignores --operation-name and sends the fixed SDK operation name;
   // the generated path binding cannot represent that command-specific behavior.
-  "ocvs sddc retrieve-sddc-operation-status",
+  [
+    "ocvs sddc retrieve-sddc-operation-status",
+    "Reference CLI sends a fixed operation name",
+  ],
   // Tier A wrapper the Reference CLI can't run: the delegated generated command rejects
   // the injected `operation` kwarg with a TypeError before any request.
-  "resource-manager job create-plan-rollback-job",
+  [
+    "resource-manager job create-plan-rollback-job",
+    "Reference delegate rejects the injected operation argument",
+  ],
 ]);
 
 export type Command = ServiceSpec["commands"][string] & {

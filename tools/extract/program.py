@@ -98,7 +98,11 @@ CMP = {
 
 
 class Unsupported(Exception):
-    pass
+    """Why a wrapper is outside the subset; `source` is the innermost offending node."""
+
+    source = None
+    line = None
+    node = None
 
 
 def _fn_ast(fn):
@@ -121,6 +125,18 @@ def _dotted(node):
     return None
 
 
+def _blame(compile_node, node, scope):
+    """Attach the innermost node that left the subset to its Unsupported (bun run triage)."""
+    try:
+        return compile_node(node, scope)
+    except Unsupported as e:
+        if e.source is None:
+            e.source = ast.unparse(node)
+            e.line = getattr(node, "lineno", None)
+            e.node = node
+        raise
+
+
 class Compiler:
     def __init__(self, module_globals, local_names=()):
         self.globals = module_globals
@@ -137,6 +153,9 @@ class Compiler:
         return scope.get(ident, ident)
 
     def stmt(self, st, scope):
+        return _blame(self._stmt, st, scope)
+
+    def _stmt(self, st, scope):
         if isinstance(st, ast.Pass):
             return []
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant):
@@ -234,7 +253,11 @@ class Compiler:
                 inner[n.id] = f"{fn.name}.{n.id}"
         for param, arg in zip(fn.args.args, call.args):
             inner[param.arg] = self.name(arg.id, scope)
-        return self.stmts(fn.body, inner)
+        try:
+            return self.stmts(fn.body, inner)
+        except Unsupported as e:
+            # Blame the call: the helper's own nodes aren't in the wrapper (bun run triage).
+            raise Unsupported(f"helper {call.func.id}: {e}") from e
 
     def invoke(self, call, scope):
         if len(call.args) != 1:
@@ -314,6 +337,9 @@ class Compiler:
         return self.expr(node, scope)
 
     def expr(self, node, scope):
+        return _blame(self._expr, node, scope)
+
+    def _expr(self, node, scope):
         if isinstance(node, ast.Constant):
             if node.value is None or isinstance(node.value, (str, bool, int, float)):
                 return node.value
@@ -417,42 +443,55 @@ class Compiler:
 
 def compile_wrapper(callback):
     """(program, the generated commands it invokes) for a Tier B wrapper, or (None, None)."""
+    try:
+        return _compile_wrapper(callback)
+    except Unsupported:
+        return None, None
+
+
+def why_unsupported(callback):
+    """The Unsupported that keeps a wrapper out of the subset, or None (bun run triage)."""
+    try:
+        _compile_wrapper(callback)
+    except Unsupported as e:
+        return e
+    return None
+
+
+def _compile_wrapper(callback):
     fn = _fn_ast(callback)
     if fn is None:
-        return None, None
+        raise Unsupported("no source")
     module_globals = vars(importlib.import_module(callback.__module__))
     args = fn.args
     # Either **kwargs, or every option named (the body may then build its own kwargs).
     if args.vararg or (args.kwarg is not None and args.kwarg.arg != "kwargs"):
-        return None, None
+        raise Unsupported("signature: *args or **<not kwargs>")
     named = [a.arg for a in args.args]
     if named[:1] != ["ctx"] or args.kwonlyargs or args.defaults:
-        return None, None
+        raise Unsupported("signature: no ctx, keyword-only args or defaults")
     local_names = set(named) | {"kwargs"} | {
         n.id for n in ast.walk(fn) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
     } | {h.name for h in ast.walk(fn) if isinstance(h, ast.ExceptHandler) and h.name}
     compiler = Compiler(module_globals, local_names)
     # Click binds named parameters by name; the rest stay in **kwargs.
     prelude = [["let", a, ["call", "pop", ["var", "kwargs"], a]] for a in named[1:]]
-    try:
-        if (callback.__module__, fn.name) == (
-            "services.generative_ai_sandbox.src.oci_cli_generative_ai_sandbox.generative_ai_sandbox_cli_extended",
-            "write_sandbox_file_extended",
-        ):
-            # Click files in the Engine are already buffered and seekable, including stdin.
-            # Replace the ExitStack's stream preparation; compile its actual delegate call.
-            stack = fn.body[-1]
-            if not isinstance(stack, ast.With) or not isinstance(stack.body[-1], ast.Expr):
-                raise Unsupported("sandbox file wrapper")
-            kwargs = ["var", "kwargs"]
-            program = prelude + compiler.stmts(fn.body[:-1], {}) + [
-                ["set", kwargs, "file", ["fn", "sandboxFile", ["var", "local_file"], ["item", kwargs, "file"]]],
-                compiler.invoke(stack.body[-1].value, {}),
-            ]
-        else:
-            program = prelude + compiler.stmts(fn.body, {})
-    except Unsupported:
-        return None, None
+    if (callback.__module__, fn.name) == (
+        "services.generative_ai_sandbox.src.oci_cli_generative_ai_sandbox.generative_ai_sandbox_cli_extended",
+        "write_sandbox_file_extended",
+    ):
+        # Click files in the Engine are already buffered and seekable, including stdin.
+        # Replace the ExitStack's stream preparation; compile its actual delegate call.
+        stack = fn.body[-1]
+        if not isinstance(stack, ast.With) or not isinstance(stack.body[-1], ast.Expr):
+            raise Unsupported("sandbox file wrapper")
+        kwargs = ["var", "kwargs"]
+        program = prelude + compiler.stmts(fn.body[:-1], {}) + [
+            ["set", kwargs, "file", ["fn", "sandboxFile", ["var", "local_file"], ["item", kwargs, "file"]]],
+            compiler.invoke(stack.body[-1].value, {}),
+        ]
+    else:
+        program = prelude + compiler.stmts(fn.body, {})
     if not compiler.targets:
-        return None, None
+        raise Unsupported("no ctx.invoke (calls the SDK directly)")
     return program, compiler.targets

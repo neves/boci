@@ -1,6 +1,6 @@
 import type { CustomCommandContext } from "../../core/registry.ts";
 import type { OperationSpec } from "../../core/spec.ts";
-import { runComputeOperation } from "./shared.ts";
+import { runOperation } from "../../lib/custom-command.ts";
 
 const attachmentOperation: OperationSpec = {
   client: "core.compute",
@@ -28,7 +28,7 @@ const bodyBindings = [
 export async function runComputeInstanceAttachVnic(
   ctx: CustomCommandContext,
 ): Promise<void> {
-  await runComputeOperation(
+  await runOperation(
     ctx,
     "instance attach-vnic",
     attachmentOperation,

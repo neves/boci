@@ -3,11 +3,11 @@ import type { CustomCommandContext } from "../../core/registry.ts";
 import type { OperationSpec } from "../../core/spec.ts";
 import { printResult } from "../../core/output.ts";
 import {
-  callComputeOperation,
-  computeOutputOptions,
+  callCommand,
+  outputOptions,
   extractListItems,
-  runComputeOperation,
-} from "./shared.ts";
+  runOperation,
+} from "../../lib/custom-command.ts";
 
 const detachOperation: OperationSpec = {
   client: "core.compute",
@@ -36,8 +36,8 @@ export async function runComputeInstanceDetachVnic(
       throw new Exit(1);
     }
   }
-  const outputOptions = computeOutputOptions(ctx);
-  const listed = await callComputeOperation(
+  const options = outputOptions(ctx);
+  const listed = await callCommand(
     ctx,
     ctx.spec.service,
     "vnic-attachment list",
@@ -46,7 +46,7 @@ export async function runComputeInstanceDetachVnic(
       vnic_id: ctx.values.vnic_id,
     },
   );
-  if (!listed.response.ok) printResult(ctx.io, listed, outputOptions);
+  if (!listed.response.ok) printResult(ctx.io, listed, options);
   const items = extractListItems(listed.raw);
   const attachment = items[0] as { id?: unknown } | undefined;
   if (typeof attachment?.id !== "string" || attachment.id === "") {
@@ -60,10 +60,10 @@ export async function runComputeInstanceDetachVnic(
       vnic_attachment_id: attachment.id,
     },
   };
-  const result = await runComputeOperation(
+  const result = await runOperation(
     deleteCtx,
     "instance detach-vnic",
     detachOperation,
   );
-  printResult(ctx.io, result, outputOptions);
+  printResult(ctx.io, result, options);
 }

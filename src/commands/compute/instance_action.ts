@@ -1,7 +1,7 @@
 import type { CustomCommandContext } from "../../core/registry.ts";
 import type { OperationSpec } from "../../core/spec.ts";
 import { printResult } from "../../core/output.ts";
-import { computeOutputOptions, runComputeOperation } from "./shared.ts";
+import { outputOptions, runOperation } from "../../lib/custom-command.ts";
 
 const instanceActionOperation: OperationSpec = {
   client: "core.compute",
@@ -27,10 +27,10 @@ const instanceActionOperation: OperationSpec = {
 export async function runComputeInstanceAction(
   ctx: CustomCommandContext,
 ): Promise<void> {
-  const result = await runComputeOperation(
+  const result = await runOperation(
     ctx,
     "instance action",
     instanceActionOperation,
   );
-  printResult(ctx.io, result, computeOutputOptions(ctx));
+  printResult(ctx.io, result, outputOptions(ctx));
 }

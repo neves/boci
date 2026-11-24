@@ -1,13 +1,13 @@
+import { parseJsonBody } from "../../utils/parseJsonBody.ts";
 import { Exit } from "../../lib/io.ts";
 import { printResult, renderDocument, renderModel } from "../../core/output.ts";
 import type { CustomCommandContext } from "../../core/registry.ts";
 import {
-  callComputeOperation,
-  computeOutputOptions,
-  listComputePages,
-  parseJsonBody,
-  resolveInstanceCompartmentId,
-} from "./shared.ts";
+  callCommand,
+  outputOptions,
+  listPages,
+} from "../../lib/custom-command.ts";
+import { resolveInstanceCompartmentId } from "./shared.ts";
 
 const ATTACHMENTS = "vnic-attachment list";
 const VNIC_GET = "vnic get";
@@ -33,11 +33,11 @@ export async function runComputeInstanceListVnics(
   if (!compartmentId && !hasInstanceId)
     usageError(ctx, "--compartment-id or --instance-id must be provided");
 
-  const outputOptions = computeOutputOptions(ctx);
+  const options = outputOptions(ctx);
   if (!compartmentId)
     compartmentId = await resolveInstanceCompartmentId(ctx, instanceId);
 
-  const { items: attachments } = await listComputePages(ctx, ATTACHMENTS, {
+  const { items: attachments } = await listPages(ctx, ATTACHMENTS, {
     compartment_id: compartmentId,
     availability_domain: values.availability_domain,
     instance_id: instanceId,
@@ -56,7 +56,7 @@ export async function runComputeInstanceListVnics(
       typeof attachment.vnicId !== "string"
     )
       continue;
-    const vnic = await callComputeOperation(ctx, "network", VNIC_GET, {
+    const vnic = await callCommand(ctx, "network", VNIC_GET, {
       vnic_id: attachment.vnicId,
     });
     if (vnic.response.status === 404) {
@@ -65,7 +65,7 @@ export async function runComputeInstanceListVnics(
       );
       continue;
     }
-    if (!vnic.response.ok) printResult(ctx.io, vnic, outputOptions);
+    if (!vnic.response.ok) printResult(ctx.io, vnic, options);
     result.push(
       renderModel(parseJsonBody(vnic.raw), "Vnic", vnic.responseModels),
     );
@@ -81,5 +81,5 @@ export async function runComputeInstanceListVnics(
         "No VNICs found under this compartment. Please check that the compartment has instances in RUNNING state.\n",
       );
   }
-  renderDocument(ctx.io, result.length ? { data: result } : [], outputOptions);
+  renderDocument(ctx.io, result.length ? { data: result } : [], options);
 }

@@ -1,13 +1,8 @@
 import { Exit } from "../../lib/io.ts";
-import { printResult } from "../../core/output.ts";
-import type { GeneratedCommand } from "../../core/operation.ts";
 import type { CustomCommandContext } from "../../core/registry.ts";
 import type { OperationSpec } from "../../core/spec.ts";
-import {
-  computeOutputOptions,
-  listComputePages,
-  resolveInstanceCompartmentId,
-} from "./shared.ts";
+import { sdkCommand, renderListPages } from "../../lib/custom-command.ts";
+import { resolveInstanceCompartmentId } from "./shared.ts";
 
 const LIST_COMMAND = "volume-attachment list";
 
@@ -53,16 +48,7 @@ export async function runComputeVolumeAttachmentList(
   if (!compartmentId)
     compartmentId = await resolveInstanceCompartmentId(ctx, instanceId);
 
-  const wrapper = ctx.spec.commands[LIST_COMMAND];
-  if (!wrapper) throw new Error(`Missing compute ${LIST_COMMAND} spec`);
-  const listCommand: GeneratedCommand = {
-    params: wrapper.params,
-    complexTypes: wrapper.complexTypes,
-    operation: listVolumeAttachmentsOperation,
-    bindings: [],
-  };
-
-  const { items, lastResult } = await listComputePages(
+  await renderListPages(
     ctx,
     LIST_COMMAND,
     {
@@ -75,12 +61,6 @@ export async function runComputeVolumeAttachmentList(
       page_size: values.page_size,
       all_pages: values.all_pages,
     },
-    listCommand,
+    sdkCommand(ctx, LIST_COMMAND, listVolumeAttachmentsOperation),
   );
-
-  const result =
-    typeof values.limit === "number" && values.all_pages !== true
-      ? { ...lastResult, raw: JSON.stringify(items) }
-      : lastResult;
-  printResult(ctx.io, result, computeOutputOptions(ctx));
 }

@@ -353,11 +353,21 @@ export type Command = ServiceSpec["commands"][string] & {
 const WRITE_METHODS = ["POST", "PUT", "PATCH"];
 
 /**
- * A Tier B wrapper compiled to a program (tickets 11 and 12; `click.File` options reach
- * it as open files).
+ * A Tier B or Tier C wrapper compiled to a program (`click.File` options reach it as
+ * open files; Tier C programs call SDK operations directly via `sdkOperations`).
  */
 function programmed(command: Command): boolean {
-  return command.kind === "custom" && command.tier === "B" && !!command.program;
+  return (
+    command.kind === "custom" &&
+    (command.tier === "B" || command.tier === "C") &&
+    !!command.program
+  );
+}
+
+const SDK_METHODS = new Set(["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"]);
+
+function sdkOperationSupported(operation: Command["operation"]): boolean {
+  return Boolean(operation && SDK_METHODS.has(operation.http));
 }
 
 /**
@@ -371,14 +381,24 @@ export function engineSupports(command: Command): boolean {
     !programmed(command)
   )
     return false;
-  // A programmed wrapper that picks among several generated commands (ticket 14) runs
-  // only when the Engine can send every one of them.
-  return (
-    requestSupported(command.operation, command.bindings, command.params) &&
-    (command.variants ?? []).every((v) =>
-      requestSupported(v.operation, v.bindings, v.generated.params),
-    )
-  );
+  if (programmed(command)) {
+    const hasInvoke = command.operation !== undefined;
+    const sdkOps = command.sdkOperations ?? [];
+    if (!hasInvoke && sdkOps.length === 0) return false;
+    return (
+      (!hasInvoke ||
+        requestSupported(
+          command.operation,
+          command.bindings,
+          command.params,
+        )) &&
+      (command.variants ?? []).every((v) =>
+        requestSupported(v.operation, v.bindings, v.generated.params),
+      ) &&
+      sdkOps.every(sdkOperationSupported)
+    );
+  }
+  return requestSupported(command.operation, command.bindings, command.params);
 }
 
 function requestSupported(

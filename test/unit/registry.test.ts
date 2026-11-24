@@ -74,6 +74,28 @@ test("engine supports Tier A reads, bodyless deletes and writes", async () => {
   expect(isImplemented("data-safe private-endpoint update", update)).toBe(true);
 });
 
+test("engine supports compiled Tier C SDK-direct commands", async () => {
+  const iam = await loadService("iam");
+  const reactivate = iam.commands["tag reactivate"];
+  expect(reactivate?.tier).toBe("C");
+  expect(reactivate?.program).toBeDefined();
+  expect(reactivate?.sdkOperations?.length).toBe(1);
+  expect(engineSupports(reactivate!)).toBe(true);
+  expect(isImplemented("iam tag reactivate", reactivate)).toBe(true);
+
+  const rover = await loadService("rover");
+  const del = rover.commands["node delete"];
+  expect(del?.tier).toBe("C");
+  expect(engineSupports(del!)).toBe(true);
+  expect(isImplemented("rover node delete", del)).toBe(true);
+
+  const compute = await loadService("compute");
+  const exp = compute.commands["image export to-object"];
+  expect(exp?.tier).toBe("C");
+  expect(engineSupports(exp!)).toBe(true);
+  expect(isImplemented("compute image export to-object", exp)).toBe(true);
+});
+
 test("loading cli and registry does not eagerly load command modules", () => {
   const res = Bun.spawnSync(
     [

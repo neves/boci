@@ -17,6 +17,7 @@ export type TypedParam = ParamSpec & {
     clamp: boolean;
   };
   datetimeRounding?: string | null;
+  callback?: string;
 };
 
 export type DatetimeSpec = {

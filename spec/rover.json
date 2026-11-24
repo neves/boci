@@ -7000,6 +7000,86 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["item", ["var", "kwargs"], "node_id"]],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  ["call", "strip", ["item", ["var", "kwargs"], "node_id"]]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --node-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs_request", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs_request"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "rover", "rover_node"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["rover_node_id", ["item", ["var", "kwargs"], "node_id"]]],
+              ["var", "kwargs_request"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "rover.rover_node",
+          "method": "delete_rover_node",
+          "http": "DELETE",
+          "path": "/roverNodes/{roverNodeId}",
+          "positionalArgs": ["rover_node_id"],
+          "pathParams": {
+            "roverNodeId": "rover_node_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -57681,6 +57681,182 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "project_id",
+            ["call", "pop", ["var", "kwargs"], "project_id"]
+          ],
+          [
+            "let",
+            "repository_metrics",
+            ["call", "pop", ["var", "kwargs"], "repository_metrics"]
+          ],
+          [
+            "let",
+            "start_time",
+            ["call", "pop", ["var", "kwargs"], "start_time"]
+          ],
+          [
+            "let",
+            "author_email",
+            ["call", "pop", ["var", "kwargs"], "author_email"]
+          ],
+          [
+            "let",
+            "aggregation_duration",
+            ["call", "pop", ["var", "kwargs"], "aggregation_duration"]
+          ],
+          ["let", "end_time", ["call", "pop", ["var", "kwargs"], "end_time"]],
+          ["let", "group_by", ["call", "pop", ["var", "kwargs"], "group_by"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "project_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "project_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --project-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "repositoryMetrics",
+            ["fn", "parse", "repository_metrics", ["var", "repository_metrics"]]
+          ],
+          ["set", ["var", "_details"], "startTime", ["var", "start_time"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "author_email"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "authorEmail",
+                ["var", "author_email"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "aggregation_duration"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "aggregationDuration",
+                ["var", "aggregation_duration"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "end_time"], null],
+            [["set", ["var", "_details"], "endTime", ["var", "end_time"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "group_by"], null],
+            [["set", ["var", "_details"], "groupBy", ["var", "group_by"]]],
+            []
+          ],
+          ["let", "client", ["fn", "client", "devops", "devops"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["project_id", ["var", "project_id"]],
+                [
+                  "summarize_project_repository_analytics_details",
+                  ["var", "_details"]
+                ]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "devops.devops",
+          "method": "summarize_project_repository_analytics",
+          "http": "POST",
+          "path": "/projects/{projectId}/repositoryAnalytics",
+          "positionalArgs": [
+            "project_id",
+            "summarize_project_repository_analytics_details"
+          ],
+          "pathParams": {
+            "projectId": "project_id"
+          },
+          "queryParams": {
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "summarize_project_repository_analytics_details",
+          "responseType": "RepositoryMetricAggregation"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -75908,6 +76084,179 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "repository_id",
+            ["call", "pop", ["var", "kwargs"], "repository_id"]
+          ],
+          [
+            "let",
+            "repository_metrics",
+            ["call", "pop", ["var", "kwargs"], "repository_metrics"]
+          ],
+          [
+            "let",
+            "start_time",
+            ["call", "pop", ["var", "kwargs"], "start_time"]
+          ],
+          [
+            "let",
+            "author_email",
+            ["call", "pop", ["var", "kwargs"], "author_email"]
+          ],
+          [
+            "let",
+            "aggregation_duration",
+            ["call", "pop", ["var", "kwargs"], "aggregation_duration"]
+          ],
+          ["let", "end_time", ["call", "pop", ["var", "kwargs"], "end_time"]],
+          ["let", "group_by", ["call", "pop", ["var", "kwargs"], "group_by"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "repository_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "repository_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --repository-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "repositoryMetrics",
+            ["fn", "parse", "repository_metrics", ["var", "repository_metrics"]]
+          ],
+          ["set", ["var", "_details"], "startTime", ["var", "start_time"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "author_email"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "authorEmail",
+                ["var", "author_email"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "aggregation_duration"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "aggregationDuration",
+                ["var", "aggregation_duration"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "end_time"], null],
+            [["set", ["var", "_details"], "endTime", ["var", "end_time"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "group_by"], null],
+            [["set", ["var", "_details"], "groupBy", ["var", "group_by"]]],
+            []
+          ],
+          ["let", "client", ["fn", "client", "devops", "devops"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["repository_id", ["var", "repository_id"]],
+                ["summarize_repository_analytics_details", ["var", "_details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "devops.devops",
+          "method": "summarize_repository_analytics",
+          "http": "POST",
+          "path": "/repository/{repositoryId}/repositoryAnalytics",
+          "positionalArgs": [
+            "repository_id",
+            "summarize_repository_analytics_details"
+          ],
+          "pathParams": {
+            "repositoryId": "repository_id"
+          },
+          "queryParams": {
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "summarize_repository_analytics_details",
+          "responseType": "RepositoryMetricAggregation"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -93543,6 +93892,23 @@
       },
       "RepositoryFileLines": {
         "attributes": [["lines", "list[FileLineDetails]", "lines"]]
+      },
+      "RepositoryMetricAggregation": {
+        "attributes": [["items", "list[RepositoryMetricSummary]", "items"]]
+      },
+      "RepositoryMetricSummary": {
+        "attributes": [
+          ["metric_name", "str", "metricName"],
+          ["duration_in_seconds", "int", "durationInSeconds"],
+          ["dimensions", "dict(str, str)", "dimensions"],
+          [
+            "start_timestamp_in_epoch_seconds",
+            "int",
+            "startTimestampInEpochSeconds"
+          ],
+          ["count", "float", "count"],
+          ["sum", "float", "sum"]
+        ]
       },
       "RepositoryMirrorRecord": {
         "attributes": [

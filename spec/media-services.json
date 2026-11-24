@@ -5109,6 +5109,108 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "scopes", ["call", "pop", ["var", "kwargs"], "scopes"]],
+          [
+            "let",
+            "packaging_config_id",
+            ["call", "pop", ["var", "kwargs"], "packaging_config_id"]
+          ],
+          [
+            "let",
+            "time_expires",
+            ["call", "pop", ["var", "kwargs"], "time_expires"]
+          ],
+          ["let", "asset_ids", ["call", "pop", ["var", "kwargs"], "asset_ids"]],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "scopes",
+            ["fn", "parse", "scopes", ["var", "scopes"]]
+          ],
+          [
+            "set",
+            ["var", "_details"],
+            "packagingConfigId",
+            ["var", "packaging_config_id"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "time_expires"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "timeExpires",
+                ["var", "time_expires"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "asset_ids"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "assetIds",
+                ["fn", "parse", "asset_ids", ["var", "asset_ids"]]
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "media_services", "media_stream"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["generate_session_token_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "media_services.media_stream",
+          "method": "generate_session_token",
+          "http": "POST",
+          "path": "/actions/generateSessionToken",
+          "positionalArgs": ["generate_session_token_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "generate_session_token_details",
+          "responseType": "SessionToken"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -24446,6 +24548,9 @@
           ["message", "str", "message"],
           ["time_created", "datetime", "timeCreated"]
         ]
+      },
+      "SessionToken": {
+        "attributes": [["token", "str", "token"]]
       },
       "StreamCdnConfig": {
         "attributes": [

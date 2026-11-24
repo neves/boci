@@ -17,6 +17,7 @@ export type OperationSpec = {
   method: string;
   http: string;
   path: string;
+  positionalArgs?: string[];
   responseType?: string;
   queryParams: Record<string, { arg?: string; collectionFormat?: string }>;
   pathParams?: Record<string, string>;
@@ -94,6 +95,8 @@ export type ServiceSpec = {
        * (ticket 14); an invoke's target index `i` names `variants[i - 1]`.
        */
       variants?: WrapperTarget[];
+      /** Direct SDK operations a programmed wrapper calls (`client.<method>(...)`). */
+      sdkOperations?: OperationSpec[];
     }
   >;
   clients: Record<

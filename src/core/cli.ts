@@ -70,6 +70,9 @@ import {
   type ProgramAnswer,
   ProgramLookup,
   ProgramRaise,
+  ProgramRender,
+  ProgramResponse,
+  ProgramSdkCall,
   ProgramUnsupported,
   type ProgramContext,
   ProgramUsageError,
@@ -80,11 +83,13 @@ import {
   usageCheckFailure,
   tierBCheckFailure,
   callOperation,
+  callSdkOperation,
   confirmUnderWrapExceptions,
   keyTypes,
   outputBinding,
+  parseSdkResponseData,
 } from "./operation.ts";
-import { printResult } from "./output.ts";
+import { printResult, type OutputOptions } from "./output.ts";
 import {
   type StdinReader,
   createStdinReader,
@@ -603,8 +608,9 @@ async function main(io: Invocation): Promise<void> {
     const http = specCmd.operation?.http ?? "";
     const engineRoute =
       (key === "ns get" && name === "os") ||
-      (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) &&
-        isImplemented(`${name} ${key}`, specCmd));
+      (isImplemented(`${name} ${key}`, specCmd) &&
+        (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) ||
+          Boolean(specCmd.program && specCmd.sdkOperations?.length)));
     if (!customHandler) {
       // A Tier A wrapper's own checks run before it delegates; the generated callback
       // then checks its path params first thing (both before JSON parsing). A Tier B
@@ -669,7 +675,34 @@ async function main(io: Invocation): Promise<void> {
     if (engineRoute) {
       let command: GeneratedCommand = specCmd;
       let callValues = values;
-      if (specCmd.program && specCmd.generated) {
+      const output: OutputOptions = {
+        query: rootValues.query,
+        output: rootValues.output,
+        rawOutput: rootValues.raw_output,
+        rc,
+      };
+      if (specCmd.program) {
+        const stdin = createStdinReader(io);
+        // @cli_util.confirm_delete_option prompts inside wrap_exceptions before the callback runs.
+        if (
+          specCmd.program.wrapExceptions &&
+          !specCmd.generated &&
+          (specCmd.params ?? []).some(
+            (p) => p.callback === "oci_cli.cli_util.confirmation_callback",
+          ) &&
+          values.force !== true
+        ) {
+          const confirmed = await confirmUnderWrapExceptions(
+            io,
+            "Are you sure you want to delete this resource?",
+            false,
+            stdin,
+          );
+          if (!confirmed) {
+            io.err("Abort: \n");
+            throw new Exit(1);
+          }
+        }
         const generated = await runWrapper(
           io,
           specCmd,
@@ -707,13 +740,40 @@ async function main(io: Invocation): Promise<void> {
               if (!result.response.ok) printResult(io, result, { rc });
               return String(JSON.parse(result.raw));
             },
+            sdkCall: async (opIndex, posArgs, kwArgs) => {
+              const op = specCmd.sdkOperations?.[opIndex];
+              if (!op) throw new ProgramUnsupported(`sdk[${opIndex}]`);
+              const result = await callSdkOperation(io, {
+                operation: op,
+                posArgs,
+                kwArgs,
+                rootValues,
+                settings,
+                spec,
+                index,
+              });
+              if (!result.response.ok) printResult(io, result, output);
+              return new ProgramResponse(result, parseSdkResponseData(result));
+            },
+            render: (response) => {
+              printResult(io, response.result, output);
+            },
           },
+          [],
+          {
+            region: undefined,
+            requestId:
+              typeof rootValues.request_id === "string"
+                ? rootValues.request_id
+                : null,
+          },
+          stdin,
         );
         if (generated === "unsupported") {
           await notImplemented(io, argv, commandPath);
           return;
         }
-        // The wrapper returned without invoking anything: no request, no output.
+        // The wrapper returned without invoking a generated command (or finished via SDK calls).
         if (generated === undefined) return;
         command = generated.command;
         callValues = generated.kwargs;
@@ -742,12 +802,6 @@ async function main(io: Invocation): Promise<void> {
         );
         return;
       }
-      const output = {
-        query: rootValues.query,
-        output: rootValues.output,
-        rawOutput: rootValues.raw_output,
-        rc,
-      };
       printResult(io, await waitForState(io, call, result, output), output);
       return;
     }
@@ -853,17 +907,23 @@ function convertDefaultValue(
   return convertSingle(expanded);
 }
 
-/** What a wrapper program looks up outside its kwargs (ProgramContext), on demand. */
+/** What a wrapper program looks up or runs outside its kwargs (ProgramContext), on demand. */
 type WrapperLookups = {
   region: () => string | undefined;
   namespace: () => Promise<string>;
+  sdkCall: (
+    opIndex: number,
+    posArgs: unknown[],
+    kwArgs: Record<string, unknown>,
+  ) => Promise<ProgramResponse>;
+  render: (response: ProgramResponse) => void;
 };
 
 /**
- * Runs a programmed Tier B wrapper: the generated command it invokes (one per variant)
- * and that command's kwargs, undefined when it returns without invoking, "unsupported"
- * for a path the Engine doesn't model (another exception, or a wrapper without
- * wrap_exceptions that passes a keyword the generated callback doesn't take).
+ * Runs a programmed Tier B/C wrapper: executes any direct SDK calls and render_response
+ * statements, and returns the generated command it invokes (when it uses ctx.invoke)
+ * plus that command's kwargs, undefined when it finishes without invoking, or
+ * "unsupported" for a path the Engine doesn't model.
  */
 async function runWrapper(
   io: Invocation,
@@ -873,7 +933,7 @@ async function runWrapper(
   models: ServiceSpec["models"],
   lookups: WrapperLookups,
   answers: ProgramAnswer[] = [],
-  context: ProgramContext = { region: lookups.region },
+  context: ProgramContext = {},
   // One reader for every prompt: the program runs again after each answer.
   stdin: StdinReader = createStdinReader(io),
 ): Promise<
@@ -882,6 +942,7 @@ async function runWrapper(
   | "unsupported"
 > {
   const program = command.program as NonNullable<typeof command.program>;
+  const ctx: ProgramContext = { ...context, region: lookups.region };
   try {
     const {
       kwargs,
@@ -891,14 +952,21 @@ async function runWrapper(
       program.body,
       values,
       command.params ?? [],
-      (name, value) =>
-        parseJsonParameter(io, name, value, {
-          complexTypes: command.complexTypes,
-          models,
-        }),
+      (name, value, camelize = true) =>
+        parseJsonParameter(
+          io,
+          name,
+          value,
+          camelize
+            ? {
+                complexTypes: command.complexTypes,
+                models,
+              }
+            : undefined,
+        ),
       answers,
       programFiles(io),
-      context,
+      ctx,
     );
     if (!kwargs) return undefined;
     const variant = command.variants?.[target - 1];
@@ -1009,8 +1077,53 @@ async function runWrapper(
         lookups,
         answers,
         {
-          ...context,
+          ...ctx,
           namespace,
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramSdkCall) {
+      let response: ProgramResponse;
+      try {
+        response = await lookups.sdkCall(e.opIndex, e.posArgs, e.kwArgs);
+      } catch (sdkErr) {
+        if (sdkErr instanceof ProgramUnsupported) return "unsupported";
+        if (sdkErr instanceof ProgramRaise) {
+          if (!program.wrapExceptions) return "unsupported";
+          io.err(`${sdkErr.cls}: ${sdkErr.message}\n`);
+          throw new Exit(1);
+        }
+        throw sdkErr;
+      }
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          sdkResults: [...(ctx.sdkResults ?? []), response],
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramRender) {
+      lookups.render(e.response);
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          renderedCount: (ctx.renderedCount ?? 0) + 1,
         },
         stdin,
       );

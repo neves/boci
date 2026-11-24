@@ -43,7 +43,19 @@
       "shortHelp": "Model Deployment Data Plane"
     }
   },
-  "clients": {},
+  "clients": {
+    "model_deployment.model_deployment": {
+      "class": "oci.model_deployment.model_deployment_client.ModelDeploymentClient",
+      "regionalClient": true,
+      "basePath": "/",
+      "endpointTemplate": "https://md.datascience.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {
+        "oc1": "https://modeldeployment.{region}.oci.customer-oci.com"
+      },
+      "dualStackByDefault": false,
+      "serviceName": "model_deployment"
+    }
+  },
   "groups": {
     "inference-result": {
       "hidden": false,
@@ -128,6 +140,124 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "model_deployment_id",
+            ["call", "pop", ["var", "kwargs"], "model_deployment_id"]
+          ],
+          [
+            "let",
+            "request_body",
+            ["call", "pop", ["var", "kwargs"], "request_body"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "model_deployment_id"]],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  ["call", "strip", ["var", "model_deployment_id"]]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --model-deployment-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "parsed_request_body", ""],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "request_body"], null],
+              ["cmp", "!=", ["call", "strip", ["var", "request_body"]], ""]
+            ],
+            [
+              [
+                "let",
+                "parsed_request_body",
+                [
+                  "fn",
+                  "parse",
+                  "request_body",
+                  ["var", "request_body"],
+                  "camelize_keys",
+                  false
+                ]
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "model_deployment", "model_deployment"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["model_deployment_id", ["var", "model_deployment_id"]],
+                ["request_body", ["var", "parsed_request_body"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "model_deployment.model_deployment",
+          "method": "predict",
+          "http": "POST",
+          "path": "/{modelDeploymentId}/predict",
+          "positionalArgs": ["model_deployment_id", "request_body"],
+          "pathParams": {
+            "modelDeploymentId": "model_deployment_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "request_body",
+          "responseType": "str"
+        }
+      ],
       "params": [
         {
           "kind": "option",

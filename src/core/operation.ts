@@ -28,7 +28,7 @@ import { Exit, type Invocation } from "../lib/io.ts";
 import { pyStrip } from "../lib/configparser.ts";
 import { failingCheck, type UsageCheck } from "./checks.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
-import { ProgramFile } from "./program.ts";
+import { ProgramFile, ProgramRaise, ProgramUnsupported } from "./program.ts";
 import {
   SecurityTokenDecodeError,
   SecurityTokenKeyError,
@@ -1031,6 +1031,181 @@ export async function callOperation(
     raw,
     allPages,
     pageItems,
+    targetService: sc.targetService,
+  };
+}
+
+export type SdkOperationCall = {
+  operation: OperationSpec;
+  posArgs: unknown[];
+  kwArgs: Record<string, unknown>;
+  rootValues: Record<string, unknown>;
+  settings: ClientSettings;
+  spec: Pick<ServiceSpec, "clients" | "models">;
+  index: Pick<Index, "regions">;
+};
+
+/** Bind positional + keyword arguments to an SDK method's parameter names. */
+export function bindSdkArgs(
+  operation: OperationSpec,
+  posArgs: unknown[],
+  kwArgs: Record<string, unknown>,
+): Record<string, unknown> {
+  const bound: Record<string, unknown> = { ...kwArgs };
+  const positional = operation.positionalArgs ?? [];
+  if (posArgs.length > positional.length)
+    throw new ProgramUnsupported(`too many args for ${operation.method}`);
+  for (let i = 0; i < posArgs.length; i++) {
+    const name = positional[i]!;
+    if (name in bound)
+      throw new ProgramUnsupported(
+        `${operation.method}() got multiple values for argument '${name}'`,
+      );
+    bound[name] = posArgs[i];
+  }
+  for (const [pathName, argName] of Object.entries(
+    operation.pathParams ?? {},
+  )) {
+    const value = bound[argName];
+    if (value === undefined || value === null || isBlank(value))
+      throw new ProgramRaise(
+        "ValueError",
+        `Parameter ${pathName} cannot be None, whitespace or empty string`,
+      );
+  }
+  return bound;
+}
+
+/** Decode an SDK operation's response body into its `.data` value. */
+export function parseSdkResponseData(result: OperationResult): unknown {
+  if (
+    !result.response.ok ||
+    !result.operation.responseType ||
+    result.raw.trim().length === 0
+  )
+    return null;
+  try {
+    const parsed: unknown = JSON.parse(result.raw);
+    if (typeof parsed === "string") return parsed;
+    if (result.operation.responseType === "str") return result.raw;
+    return parsed;
+  } catch {
+    return result.raw;
+  }
+}
+
+const COLLECTION_SEPARATORS: Record<string, string> = {
+  csv: ",",
+  ssv: " ",
+  tsv: "\t",
+  pipes: "|",
+};
+
+/**
+ * Execute one direct SDK client method call (`client.<method>(*pos, **kw)`) from a
+ * compiled Tier B/C program. No CLI prompts or auto-pagination run here.
+ */
+export async function callSdkOperation(
+  io: Invocation,
+  call: SdkOperationCall,
+): Promise<OperationResult> {
+  const { operation, posArgs, kwArgs, rootValues, settings, spec, index } =
+    call;
+  const sdkArgs = bindSdkArgs(operation, posArgs, kwArgs);
+  let requestBody: string | Uint8Array = "";
+  let streamBody = false;
+  if (operation.http !== "GET" && typeof operation.body === "string") {
+    const direct = sdkArgs[operation.body];
+    if (direct === undefined || direct === null) {
+      requestBody = "";
+    } else if (direct instanceof ProgramFile) {
+      streamBody = true;
+      requestBody = direct.read();
+    } else if (direct instanceof Uint8Array) {
+      requestBody = direct;
+    } else if (typeof direct === "string") {
+      requestBody = direct;
+    } else {
+      requestBody = serializeRequestJson(direct);
+    }
+  }
+  const client = spec.clients[operation.client] as Record<string, unknown>;
+  const sc = await createServiceClient(io, {
+    client,
+    values: {},
+    rootValues,
+    settings,
+    index,
+  });
+  const pathParams: Record<string, string> = {};
+  for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const value = sdkArgs[arg];
+    if (value !== undefined && value !== null) pathParams[name] = String(value);
+  }
+  const queryParams: [string, string][] = [];
+  for (const [name, { arg, collectionFormat }] of Object.entries(
+    operation.queryParams ?? {},
+  )) {
+    const value = arg ? sdkArgs[arg] : undefined;
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      if (collectionFormat === "multi") {
+        for (const item of value) queryParams.push([name, String(item)]);
+      } else {
+        const sep = COLLECTION_SEPARATORS[collectionFormat ?? "csv"] ?? ",";
+        queryParams.push([name, value.map(String).join(sep)]);
+      }
+    } else {
+      queryParams.push([name, String(value)]);
+    }
+  }
+  const baseHeaders: Record<string, string> =
+    operation.http === "GET"
+      ? {}
+      : {
+          "content-type": streamBody
+            ? "application/octet-stream"
+            : "application/json",
+        };
+  if (
+    ["POST", "PUT", "PATCH"].includes(operation.http) &&
+    operation.client.startsWith("log_analytics.") &&
+    requestBody !== ""
+  )
+    baseHeaders.expect = "100-continue";
+  for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
+    const value = param.value ?? (param.arg ? sdkArgs[param.arg] : undefined);
+    if (value !== undefined && value !== null)
+      baseHeaders[name] = String(value);
+  }
+  if (
+    operation.headerParams?.["opc-retry-token"] &&
+    baseHeaders["opc-retry-token"] === undefined &&
+    rootValues.no_retry !== true
+  )
+    baseHeaders["opc-retry-token"] = randomBytes(22).toString("base64url");
+  const requestIdHeader =
+    operation.headerParams?.["opc-request-id"] !== undefined
+      ? "opc-request-id"
+      : "opc-client-request-id";
+  const sent = await sendServiceRequest(io, sc, {
+    method: operation.http,
+    pathTemplate: operation.path,
+    pathParams,
+    queryParams,
+    headers: baseHeaders,
+    body: requestBody,
+    requestIdHeader,
+    enforceContentHeaders: operation.enforce_content_headers,
+  });
+  return {
+    operation,
+    responseModels: spec.models?.[operation.client.split(".")[0]!],
+    url: sent.url,
+    response: sent.response,
+    raw: sent.raw,
+    allPages: false,
+    pageItems: [],
     targetService: sc.targetService,
   };
 }

@@ -207,16 +207,24 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
                 entry["patterns"], survey = tier_b.survey(cmd)
                 if survey:
                     entry["survey"] = survey
+            if tier in ("B", "C"):
                 compiled = wrapper_program(cmd.callback, CLIENT_MAP)
                 if compiled:
                     entry["program"] = compiled["program"]
-                    entry["generated"] = compiled["generated"]
-                    entry["operation"] = compiled["operation"]
-                    entry["bindings"] = compiled["bindings"]
-                    if compiled["variants"]:
+                    if "generated" in compiled:
+                        entry["generated"] = compiled["generated"]
+                        entry["operation"] = compiled["operation"]
+                        entry["bindings"] = compiled["bindings"]
+                    if compiled.get("variants"):
                         entry["variants"] = compiled["variants"]
-                    for target in [compiled, *compiled["variants"]]:
-                        client = target["operation"]["client"]
+                    if compiled.get("sdkOperations"):
+                        entry["sdkOperations"] = compiled["sdkOperations"]
+                    for op in [
+                        *(t["operation"] for t in ([compiled] if "operation" in compiled else [])),
+                        *(v["operation"] for v in compiled.get("variants", [])),
+                        *compiled.get("sdkOperations", []),
+                    ]:
+                        client = op["client"]
                         spec_name, service_name = client.split(".", 1)
                         CLIENTS[client] = sdk.client_info(CLIENT_MAP[spec_name][service_name])
             if delegate:
@@ -242,25 +250,37 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
 
 
 def wrapper_program(callback, client_map) -> dict | None:
-    """A Tier B wrapper compiled to a program over kwargs, with the generated commands it
-    invokes: each one's operation, bindings and params, all in its own param names. The
-    first target's are top-level; any others (one per variant, ticket 14) are `variants`,
-    in the order the program's invokes index them."""
-    program, targets = wrapper_compiler.compile_wrapper(callback)
+    """A Tier B or Tier C wrapper compiled to a program over kwargs, with the generated
+    commands it invokes and/or direct SDK operations it calls. For ctx.invoke targets,
+    the first target's fields are top-level and any others are `variants`. Direct SDK
+    calls are `sdkOperations`, in the order the program's `sdk` expressions index them."""
+    program, targets, sdk_calls = wrapper_compiler.compile_wrapper(callback)
     if program is None:
         return None
     compiled = [generated_target(t, client_map) for t in targets]
     if any(c is None for c in compiled):
         return None
+    sdk_ops = []
+    for spec_name, service_name, method in sdk_calls:
+        if spec_name not in client_map:
+            from oci_cli import dynamic_loader
+
+            dynamic_loader.load_service_dir(spec_name)
+        cls = client_map.get(spec_name, {}).get(service_name)
+        if cls is None or not callable(getattr(cls, method, None)):
+            return None
+        sdk_ops.append({"client": f"{spec_name}.{service_name}", **sdk.sdk_operation(cls, method)})
     wrapped = any(
         ast.unparse(d) == "cli_util.wrap_exceptions"
         for d in wrapper_compiler._fn_ast(callback).decorator_list
     )
-    return {
-        "program": {"body": program, "wrapExceptions": wrapped},
-        **compiled[0],
-        "variants": compiled[1:],
-    }
+    out = {"program": {"body": program, "wrapExceptions": wrapped}}
+    if compiled:
+        out.update(compiled[0])
+        out["variants"] = compiled[1:]
+    if sdk_ops:
+        out["sdkOperations"] = sdk_ops
+    return out
 
 
 def generated_target(invoked, client_map) -> dict | None:

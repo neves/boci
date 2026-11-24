@@ -110,6 +110,8 @@ def collect_responses(commands, clients, pool):
     """Walk the response models of every callable operation, including waiter getters."""
     operations = [target.get("operation", {}) for command in commands.values()
                   for target in [command, *command.get("variants", [])]]
+    for command in commands.values():
+        operations.extend(command.get("sdkOperations", []))
     for client in clients.values():
         operations.extend(client.get("lifecycleGetters", {}).values())
         operations.append(client.get("workRequestGetter", {}))

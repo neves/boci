@@ -4,9 +4,11 @@
  * into the complex params of the generated command it invokes; the result is that
  * command's kwargs, which the Engine then binds to the request like any Generated command.
  */
+import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
 import { decodePythonUtf8 } from "../utils/utf8.ts";
 import type { TypedParam } from "./convert.ts";
+import type { OperationResult } from "./operation.ts";
 import { kwarg, truthy } from "./checks.ts";
 import { pyRepr } from "./convert.ts";
 
@@ -58,13 +60,49 @@ type Dict = Record<string, unknown>;
  */
 export class ProgramLookup extends Error {}
 
+/** An SDK operation response held by a program (`result = client.<method>(...)`). */
+export class ProgramResponse {
+  constructor(
+    readonly result: OperationResult,
+    readonly data: unknown,
+  ) {}
+}
+
+/**
+ * `client.<method>(*pos, **kw)` before the Engine has executed that SDK call: the caller
+ * sends the HTTP request, appends a ProgramResponse to `context.sdkResults`, and replays.
+ */
+export class ProgramSdkCall extends Error {
+  constructor(
+    readonly opIndex: number,
+    readonly posArgs: unknown[],
+    readonly kwArgs: Dict,
+  ) {
+    super(`sdk[${opIndex}]`);
+  }
+}
+
+/**
+ * `cli_util.render_response(result, ctx)` before the Engine has rendered that response:
+ * the caller prints it, increments `context.renderedCount`, and replays.
+ */
+export class ProgramRender extends Error {
+  constructor(readonly response: ProgramResponse) {
+    super("render_response");
+  }
+}
+
 /**
  * What a program reads outside its kwargs: the config region `build_client` puts in
- * `ctx.obj['config']`, and the namespace `get_namespace()` returned.
+ * `ctx.obj['config']`, `ctx.obj['request_id']`, the namespace `get_namespace()` returned,
+ * and cached SDK responses / render count for deterministic replay.
  */
 export type ProgramContext = {
   region?: () => string | undefined;
   namespace?: string;
+  requestId?: string | null;
+  sdkResults?: ProgramResponse[];
+  renderedCount?: number;
 };
 
 /**
@@ -136,6 +174,7 @@ const isDict = (v: unknown): v is Dict =>
   !(v instanceof ProgramFile) &&
   !(v instanceof ProgramTarget) &&
   !(v instanceof ProgramObject) &&
+  !(v instanceof ProgramResponse) &&
   !(v instanceof Error) &&
   !(v instanceof Uint8Array);
 
@@ -372,7 +411,7 @@ export function runProgram(
   program: Statement[],
   values: Dict,
   params: TypedParam[],
-  parse: (name: string, value: unknown) => unknown,
+  parse: (name: string, value: unknown, camelize?: boolean) => unknown,
   answers: ProgramAnswer[] = [],
   files: ProgramFiles = NO_FILES,
   context: ProgramContext = {},
@@ -391,7 +430,11 @@ export function runProgram(
   let invoked: Dict | undefined;
   let target = 0;
   let asked = 0;
-  const ctxObj = new ProgramObject("ctx.obj");
+  let sdkCalled = 0;
+  let renderCalled = 0;
+  const ctxObj = new ProgramObject("ctx.obj", {
+    request_id: context.requestId ?? null,
+  });
 
   const item = (obj: unknown, key: unknown): unknown => {
     if (obj instanceof ProgramObject && typeof key === "string") {
@@ -531,8 +574,17 @@ export function runProgram(
         return JSON.stringify(a);
       case "dumpsSorted":
         return JSON.stringify(sortKeys(a));
-      case "parse":
-        return parse(String(a), b);
+      case "parse": {
+        // cli_util.parse_json_parameter(name, value, default=None, camelize_keys=True)
+        const defaultVal = args.length >= 3 ? args[2] : null;
+        const camelize = args.length >= 4 ? truthy(args[3]) : true;
+        if (b === null || b === undefined) return defaultVal;
+        return parse(String(a), b, camelize);
+      }
+      case "requestId":
+        return truthy(a)
+          ? String(a)
+          : randomUUID().replaceAll("-", "").toUpperCase();
       case "str":
         return pyStr(a);
       case "bool":
@@ -585,9 +637,10 @@ export function runProgram(
       case "client": {
         // cli_util.build_client: ctx.obj['config'] is the config it built from.
         const region = context.region?.();
-        if (region === undefined)
-          throw new ProgramUnsupported("build_client without a region");
-        ctxObj.fields.config = new ProgramObject("config", { region });
+        ctxObj.fields.config = new ProgramObject(
+          "config",
+          region !== undefined ? { region } : {},
+        );
         return new ProgramObject(`${String(a)}.${String(b)}`);
       }
       case "namespace":
@@ -695,6 +748,36 @@ export function runProgram(
           evaluate(rest[1] as Expr),
           rest.slice(2).map(evaluate),
         );
+      case "attr": {
+        const attr = rest[0] as string;
+        const obj = evaluate(rest[1] as Expr);
+        if (obj instanceof ProgramResponse && attr === "data") return obj.data;
+        throw new ProgramUnsupported(`attribute .${attr}`);
+      }
+      case "sdk": {
+        const opIndex = rest[0] as number;
+        const clientObj = evaluate(rest[1] as Expr);
+        if (!(clientObj instanceof ProgramObject))
+          throw new ProgramUnsupported("sdk call on non-client");
+        const pos = (rest[2] as Expr[]).map(evaluate);
+        const kwPairs = rest[3] as [string, Expr][];
+        const starExpr = rest[4] as Expr | null;
+        const kw: Dict = {};
+        if (starExpr !== null) {
+          const star = evaluate(starExpr);
+          if (!isDict(star))
+            throw new ProgramUnsupported("sdk ** of a non-dict");
+          Object.assign(kw, star);
+        }
+        for (const [k, expr] of kwPairs) {
+          if (k in kw) throw new ProgramUnsupported(`duplicate sdk kwarg ${k}`);
+          kw[k] = evaluate(expr);
+        }
+        const i = sdkCalled++;
+        const cached = context.sdkResults?.[i];
+        if (cached !== undefined) return cached;
+        throw new ProgramSdkCall(opIndex, pos, kw);
+      }
       case "fn":
         return fn(rest[0] as string, rest.slice(1).map(evaluate));
       case "dict": {
@@ -832,6 +915,14 @@ export function runProgram(
           const arg = pyStr(evaluate(rest[2] as Expr));
           // str(KeyError(x)) is repr(x).
           throw new ProgramRaise(cls, cls === "KeyError" ? pyRepr(arg) : arg);
+        }
+        case "render": {
+          const res = evaluate(rest[0] as Expr);
+          if (!(res instanceof ProgramResponse))
+            throw new ProgramUnsupported("render_response of non-response");
+          const i = renderCalled++;
+          if (i < (context.renderedCount ?? 0)) break;
+          throw new ProgramRender(res);
         }
         case "invoke": {
           if (invoked) throw new ProgramUnsupported("second invoke");

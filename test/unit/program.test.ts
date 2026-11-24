@@ -1,8 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type { TypedParam } from "../../src/core/convert.ts";
+import { bindSdkArgs, type OperationResult } from "../../src/core/operation.ts";
 import {
   ProgramFile,
   ProgramRaise,
+  ProgramRender,
+  ProgramResponse,
+  ProgramSdkCall,
   ProgramUnsupported,
   ProgramUsageError,
   runProgram,
@@ -244,5 +248,169 @@ describe("runProgram", () => {
         b64: "aGk=",
       }),
     });
+  });
+
+  test("Tier C programs yield sdk calls, read .data, render responses, and replay", () => {
+    const program: Statement[] = [
+      ["let", "req", ["dict"]],
+      [
+        "set",
+        ["var", "req"],
+        "opc_request_id",
+        ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]],
+      ],
+      ["let", "client", ["fn", "client", "identity", "identity"]],
+      [
+        "let",
+        "res",
+        [
+          "sdk",
+          0,
+          ["var", "client"],
+          [kw("a")],
+          [["details", ["dict", ["isRetired", true]]]],
+          ["var", "req"],
+        ],
+      ],
+      ["render", ["var", "res"]],
+    ];
+
+    let sdkCall: ProgramSdkCall | undefined;
+    try {
+      runProgram(program, { a: "ns-1" }, params, parse, [], undefined, {
+        requestId: "req-123",
+      });
+    } catch (e) {
+      if (e instanceof ProgramSdkCall) sdkCall = e;
+      else throw e;
+    }
+    expect(sdkCall).toBeDefined();
+    expect(sdkCall?.opIndex).toBe(0);
+    expect(sdkCall?.posArgs).toEqual(["ns-1"]);
+    expect(sdkCall?.kwArgs).toEqual({
+      opc_request_id: "req-123",
+      details: { isRetired: true },
+    });
+
+    const fakeResponse = new ProgramResponse({} as OperationResult, {
+      id: "tag-1",
+    });
+    let rendered: ProgramRender | undefined;
+    try {
+      runProgram(program, { a: "ns-1" }, params, parse, [], undefined, {
+        requestId: "req-123",
+        sdkResults: [fakeResponse],
+      });
+    } catch (e) {
+      if (e instanceof ProgramRender) rendered = e;
+      else throw e;
+    }
+    expect(rendered?.response).toBe(fakeResponse);
+
+    // Final replay after render completes cleanly with no ctx.invoke.
+    expect(
+      runProgram(program, { a: "ns-1" }, params, parse, [], undefined, {
+        requestId: "req-123",
+        sdkResults: [fakeResponse],
+        renderedCount: 1,
+      }).kwargs,
+    ).toBeUndefined();
+
+    // `.data` reads the decoded SDK response payload.
+    const dataProgram: Statement[] = [
+      ["let", "client", ["fn", "client", "database", "database"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [kw("a")], [], null]],
+      ["invoke", [["got", ["attr", "data", ["var", "res"]]]], null],
+    ];
+    expect(
+      runProgram(dataProgram, { a: "db-1" }, params, parse, [], undefined, {
+        sdkResults: [fakeResponse],
+      }).kwargs,
+    ).toEqual({ got: { id: "tag-1" } });
+  });
+
+  test("use_or_generate_request_id generates a 32-char hex UUID when absent", () => {
+    const program: Statement[] = [
+      [
+        "invoke",
+        [["id", ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]]],
+        null,
+      ],
+    ];
+    const generated = runProgram(program, {}, params, parse).kwargs?.id;
+    expect(typeof generated).toBe("string");
+    expect(generated).toMatch(/^[0-9A-F]{32}$/);
+    expect(
+      runProgram(program, {}, params, parse, [], undefined, {
+        requestId: "custom-id",
+      }).kwargs?.id,
+    ).toBe("custom-id");
+  });
+
+  test("parse_json_parameter honors default and camelize_keys arguments", () => {
+    const calls: [string, unknown, boolean | undefined][] = [];
+    const trackingParse = (
+      name: string,
+      value: unknown,
+      camelize?: boolean,
+    ) => {
+      calls.push([name, value, camelize]);
+      return typeof value === "string" ? JSON.parse(value) : value;
+    };
+    const program: Statement[] = [
+      [
+        "invoke",
+        [
+          [
+            "parsed",
+            ["fn", "parse", "request_body", kw("a"), "fallback", false],
+          ],
+          ["fallback", ["fn", "parse", "missing", kw("b"), "defaulted", false]],
+        ],
+        null,
+      ],
+    ];
+    const res = runProgram(
+      program,
+      { a: '{"snake_key":1}' },
+      params,
+      trackingParse,
+    );
+    expect(res.kwargs).toEqual({
+      parsed: { snake_key: 1 },
+      fallback: "defaulted",
+    });
+    expect(calls).toEqual([["request_body", '{"snake_key":1}', false]]);
+  });
+
+  test("bindSdkArgs maps positional arguments and validates path params", () => {
+    const op = {
+      client: "identity.identity",
+      method: "update_tag",
+      http: "PUT",
+      path: "/tagNamespaces/{tagNamespaceId}/tags/{tagName}",
+      positionalArgs: ["tag_namespace_id", "tag_name", "update_tag_details"],
+      pathParams: {
+        tagNamespaceId: "tag_namespace_id",
+        tagName: "tag_name",
+      },
+      queryParams: {},
+      headerParams: {},
+    };
+    expect(
+      bindSdkArgs(op, ["ns1", "tag1"], {
+        update_tag_details: { isRetired: true },
+      }),
+    ).toEqual({
+      tag_namespace_id: "ns1",
+      tag_name: "tag1",
+      update_tag_details: { isRetired: true },
+    });
+    expect(() =>
+      bindSdkArgs(op, ["ns1", "   "], { update_tag_details: {} }),
+    ).toThrow(ProgramRaise);
+    expect(() =>
+      bindSdkArgs(op, ["ns1"], { tag_namespace_id: "dup", tag_name: "t" }),
+    ).toThrow(ProgramUnsupported);
   });
 });

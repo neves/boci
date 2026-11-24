@@ -18,6 +18,7 @@ Statements (lists):
     ["raise", source]             any other raise (the Engine stops)
     ["invoke", [[name, e]...], e, i?] ctx.invoke(<generated command i>, name=e..., **e);
                                   i is an expression when the command is picked at run time
+    ["render", e]                 cli_util.render_response(e, ctx)
     ["unpack", [name...], e]      a, b = e
     ["abort"]                     ctx.abort()
     ["for", name, e, body]        for name in e: body (no break/continue/else)
@@ -28,8 +29,11 @@ then body (ticket 21): the file stays open for the invoke, which may send it as 
 
 Expressions: JSON scalars are constants; lists are operations:
     ["var", name] ["item", obj, key] ["call", method, obj, args...]
+    ["attr", name, e]             e.<name> (currently `.data` on an SDK response)
+    ["sdk", i, client, pos, [[k, e]...], star]  client.<method>(*pos, k=e..., **star)
     ["fn", name, args...]  (dumps, parse, str, len, bool, dict, b64encode, removeSkeleton,
-                            open, exists, isfile, isstr, client, namespace, ctxObj)
+                            open, exists, isfile, isstr, client, namespace, ctxObj,
+                            requestId)
     ["dict", [k, v]...] ["list", e...] ["not", e] ["and", e...] ["or", e...]
     ["cmp", op, a, b]  (== != < <= > >= is isnot in notin) ["ifexp", t, a, b]
     ["map", e, t, elt, conds?]  [elt for t in e if cond...]; t a name or a list of names
@@ -57,6 +61,8 @@ METHODS = {
 FUNCTIONS = {
     "json.dumps": "dumps",
     "cli_util.parse_json_parameter": "parse",
+    "cli_util.use_or_generate_request_id": "requestId",
+    "use_or_generate_request_id": "requestId",
     "str": "str",
     "len": "len",
     "dict": "dict",
@@ -142,6 +148,8 @@ class Compiler:
         self.globals = module_globals
         self.locals = set(local_names)  # names the callback binds; never module constants
         self.targets = []  # the generated command objects ctx.invoke targets, in order
+        self.clients = {}  # scoped variable name -> (spec_name, service_name)
+        self.sdk_calls = []  # (spec_name, service_name, method) called directly, in order
 
     def stmts(self, body, scope):
         out = []
@@ -164,7 +172,14 @@ class Compiler:
             if isinstance(st.targets[0], ast.Attribute):
                 # `some_dict.attr = x`: an AttributeError in the Reference CLI.
                 return [["raise", ast.unparse(st)]]
-            return [self.assign(st.targets[0], self.expr(st.value, scope), scope)]
+            value = self.expr(st.value, scope)
+            if (
+                isinstance(st.targets[0], ast.Name)
+                and isinstance(value, list) and len(value) == 4
+                and value[0] == "fn" and value[1] == "client"
+            ):
+                self.clients[self.name(st.targets[0].id, scope)] = (value[2], value[3])
+            return [self.assign(st.targets[0], value, scope)]
         if isinstance(st, ast.For):
             if st.orelse or not isinstance(st.target, ast.Name):
                 raise Unsupported("for")
@@ -221,6 +236,13 @@ class Compiler:
             call = st.value
             if isinstance(call.func, ast.Attribute) and call.func.attr == "invoke" and _dotted(call.func.value) == "ctx":
                 return [self.invoke(call, scope)]
+            if (
+                _dotted(call.func) in ("cli_util.render_response", "render_response")
+                and len(call.args) == 2
+                and isinstance(call.args[1], ast.Name) and self.name(call.args[1].id, scope) == "ctx"
+                and not call.keywords
+            ):
+                return [["render", self.expr(call.args[0], scope)]]
             if _dotted(call.func) == "ctx.abort" and not call.args:
                 return [["abort"]]
             if isinstance(call.func, ast.Name) and call.func.id in self.globals:
@@ -281,6 +303,30 @@ class Compiler:
             index = len(self.targets)
             self.targets.append(target)
         return index
+
+    def sdk_call_index(self, spec_name, service_name, method):
+        key = (spec_name, service_name, method)
+        index = next((i for i, k in enumerate(self.sdk_calls) if k == key), None)
+        if index is None:
+            index = len(self.sdk_calls)
+            self.sdk_calls.append(key)
+        return index
+
+    def sdk_call(self, client_pair, call, scope):
+        if any(isinstance(a, ast.Starred) for a in call.args):
+            raise Unsupported("sdk *args")
+        pos = [self.expr(a, scope) for a in call.args]
+        keywords = []
+        star = None
+        for kw in call.keywords:
+            if kw.arg is None:
+                if star is not None:
+                    raise Unsupported("two **")
+                star = self.expr(kw.value, scope)
+            else:
+                keywords.append([kw.arg, self.expr(kw.value, scope)])
+        op_index = self.sdk_call_index(*client_pair, call.func.attr)
+        return ["sdk", op_index, self.expr(call.func.value, scope), pos, keywords, star]
 
     def comprehension(self, generators, scope):
         if len(generators) != 1:
@@ -360,7 +406,7 @@ class Compiler:
             # (a request the Engine makes, then runs the program again): ticket 23.
             if _dotted(node) == "file.name":
                 return ["fn", "fileName", self.expr(node.value, scope)]
-            if _dotted(node) == "ctx.obj":
+            if isinstance(node.value, ast.Name) and self.name(node.value.id, scope) == "ctx" and node.attr == "obj":
                 return ["fn", "ctxObj"]
             call = node.value
             if (
@@ -369,6 +415,8 @@ class Compiler:
                 and not call.args and not call.keywords
             ):
                 return ["fn", "namespace", self.expr(call.func.value, scope)]
+            if node.attr == "data":
+                return ["attr", "data", self.expr(node.value, scope)]
             raise Unsupported("attribute")
         if isinstance(node, ast.UnaryOp):
             if isinstance(node.op, ast.Not):
@@ -404,12 +452,38 @@ class Compiler:
             it, target, conds = self.comprehension(node.generators, scope)
             return ["dictcomp", it, target, self.expr(node.key, scope), self.expr(node.value, scope), conds]
         if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+                client_pair = self.clients.get(self.name(node.func.value.id, scope))
+                if client_pair is not None:
+                    return self.sdk_call(client_pair, node, scope)
+            dotted = _dotted(node.func)
+            if dotted == "cli_util.parse_json_parameter":
+                # parse_json_parameter(name, value, default=None, camelize_keys=True)
+                if len(node.args) < 2 or len(node.args) > 4:
+                    raise Unsupported("parse_json_parameter args")
+                args = [self.expr(a, scope) for a in node.args]
+                if node.keywords:
+                    kw_map = {}
+                    for kw in node.keywords:
+                        if kw.arg not in ("default", "camelize_keys") or kw.arg in kw_map:
+                            raise Unsupported("call keywords")
+                        kw_map[kw.arg] = self.expr(kw.value, scope)
+                    if "default" in kw_map:
+                        if len(args) >= 3:
+                            raise Unsupported("call keywords")
+                        args.append(kw_map["default"])
+                    if "camelize_keys" in kw_map:
+                        if len(args) >= 4:
+                            raise Unsupported("call keywords")
+                        while len(args) < 3:
+                            args.append(None)
+                        args.append(kw_map["camelize_keys"])
+                return ["fn", "parse", *args]
             if node.keywords and not (
-                _dotted(node.func) == "json.dumps"
+                dotted == "json.dumps"
                 and all(k.arg == "sort_keys" for k in node.keywords)
             ):
                 raise Unsupported("call keywords")
-            dotted = _dotted(node.func)
             if (
                 dotted == "isinstance" and len(node.args) == 2
                 and _dotted(node.args[1]) == "six.string_types"
@@ -442,11 +516,11 @@ class Compiler:
 
 
 def compile_wrapper(callback):
-    """(program, the generated commands it invokes) for a Tier B wrapper, or (None, None)."""
+    """(program, invoked generated commands, direct SDK calls) or (None, None, None)."""
     try:
         return _compile_wrapper(callback)
     except Unsupported:
-        return None, None
+        return None, None, None
 
 
 def why_unsupported(callback):
@@ -492,6 +566,6 @@ def _compile_wrapper(callback):
         ]
     else:
         program = prelude + compiler.stmts(fn.body, {})
-    if not compiler.targets:
+    if not compiler.targets and not compiler.sdk_calls:
         raise Unsupported("no ctx.invoke (calls the SDK directly)")
-    return program, compiler.targets
+    return program, compiler.targets, compiler.sdk_calls

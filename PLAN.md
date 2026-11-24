@@ -173,11 +173,11 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `iam group list-users`
 - [ ] `iam group remove-user`
 - [ ] `iam policy update`
-- [ ] `iam tag reactivate`
-- [ ] `iam tag retire`
-- [ ] `iam tag-namespace reactivate`
-- [ ] `iam tag-namespace retire`
-- [ ] `iam tag-namespace update`
+- [x] `iam tag reactivate`
+- [x] `iam tag retire`
+- [x] `iam tag-namespace reactivate`
+- [x] `iam tag-namespace retire`
+- [x] `iam tag-namespace update`
 - [ ] `iam user list-groups`
 - [ ] `bv backup copy`
 - [ ] `bv boot-volume create`
@@ -193,9 +193,9 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 ### Database, Functions, Resource Manager, KMS and Artifacts
 
 - [ ] `db autonomous-database delete`
-- [ ] `db data-guard-association create from-existing-db-system`
-- [ ] `db data-guard-association create from-existing-vm-cluster`
-- [ ] `db data-guard-association create with-new-db-system`
+- [x] `db data-guard-association create from-existing-db-system`
+- [x] `db data-guard-association create from-existing-vm-cluster`
+- [x] `db data-guard-association create with-new-db-system`
 - [ ] `db data-guard-association failover`
 - [ ] `db data-guard-association reinstate`
 - [ ] `db data-guard-association switchover`
@@ -220,7 +220,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `fn function create archive-function object-storage fn-update-runtime-config`
 - [ ] `fn function create archive-function object-storage manual-runtime-config`
 - [ ] `fn function create container-function`
-- [ ] `fn function create pbf-function`
+- [x] `fn function create pbf-function`
 - [ ] `fn function delete`
 - [ ] `fn function update archive-function`
 - [ ] `fn function update container-function`
@@ -274,15 +274,15 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `dbtools-runtime connection execute-sql sync`
 - [ ] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec create default`
 - [ ] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec update default`
-- [ ] `devops project summarize-project-analytics`
-- [ ] `devops repository summarize-repository-analytics`
+- [x] `devops project summarize-project-analytics`
+- [x] `devops repository summarize-repository-analytics`
 - [ ] `generative-ai-data enrichment-jobs cancel`
 - [ ] `identity-domains apps list`
 - [ ] `identity-domains groups list`
 - [ ] `identity-domains users list`
 - [ ] `iot digital-twin-instance update`
-- [ ] `media-services media-stream stream-distribution-channel generate-session-token`
-- [ ] `model-deployment inference-result predict`
+- [x] `media-services media-stream stream-distribution-channel generate-session-token`
+- [x] `model-deployment inference-result predict`
 - [ ] `mysql db-system start`
 - [ ] `mysql db-system stop`
 - [ ] `network-firewall service create`
@@ -321,7 +321,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `rover device system-upgrade get-import-status`
 - [ ] `rover node add-workload`
 - [ ] `rover node create`
-- [ ] `rover node delete`
+- [x] `rover node delete`
 - [ ] `rover node delete-workload`
 - [ ] `rover node get-certificate`
 - [ ] `rover node list-workload`
@@ -363,10 +363,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 ### File transfers, streaming and bulk operations
 
 - [ ] `artifacts container image-signature sign-upload`
-- [ ] `compute image export to-object`
-- [ ] `compute image export to-object-uri`
-- [ ] `compute image import from-object`
-- [ ] `compute image import from-object-uri`
+- [x] `compute image export to-object`
+- [x] `compute image export to-object-uri`
+- [x] `compute image import from-object`
+- [x] `compute image import from-object-uri`
 - [ ] `generative-ai-sandbox sandbox-command stream`
 - [ ] `generative-ai-sandbox sandbox-command-event stream`
 - [ ] `generative-ai-sandbox sandbox-file read`

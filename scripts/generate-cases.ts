@@ -47,6 +47,7 @@ type Command = {
   patterns?: string[];
   survey?: { folds?: { options: string[] }[] };
   operation?: Operation;
+  sdkOperations?: Operation[];
   params?: Param[];
   bindings?: Binding[];
 };
@@ -75,14 +76,17 @@ const kinds = (
       replies: () => ({ body: {} }),
     },
     {
-      // Tier B wrappers compiled to a program (ticket 11): required options plus every
+      // Tier B and Tier C wrappers compiled to a program: required options plus every
       // option the wrapper folds into a complex param.
       file: "generated-wrapper",
-      methods: ["GET", "POST", "PUT", "PATCH"],
+      methods: ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"],
       build: wrapperArgv,
-      replies: (operation) => ({
-        body: operation.responseType?.startsWith("list[") ? [] : {},
-      }),
+      replies: (operation) =>
+        operation.http === "DELETE" || operation.http === "HEAD"
+          ? { status: operation.http === "DELETE" ? 204 : 200, body: "" }
+          : {
+              body: operation.responseType?.startsWith("list[") ? [] : {},
+            },
     },
     {
       file: "generated-bodyless",
@@ -240,18 +244,21 @@ function writeArgv(argv: string[], command: Command, operation: Operation) {
 const GENERATED_FILE = "generated-file.txt";
 
 /**
- * The kwargs a wrapper program hands to `open(path, mode)` (ticket 21): options naming a
- * file path, which a case points at the sandbox file. A path is a kwargs item, directly
- * or through a variable bound to one.
+ * The kwargs a wrapper program passes to `["fn", fnName, ...]` at `argIndex` (e.g.
+ * `open(path, mode)` at 2, or `parse_json_parameter(name, value)` at 3).
  */
-function openedOptions(program: unknown): Set<string> {
+function fnOptions(
+  program: unknown,
+  fnName: string,
+  argIndex: number,
+): Set<string> {
   const lets = new Map<string, unknown>();
-  const opened: unknown[] = [];
+  const matched: unknown[] = [];
   const walk = (node: unknown) => {
     if (!Array.isArray(node)) return;
     if (node[0] === "let" && typeof node[1] === "string")
       lets.set(node[1], node[2]);
-    if (node[0] === "fn" && node[1] === "open") opened.push(node[2]);
+    if (node[0] === "fn" && node[1] === fnName) matched.push(node[argIndex]);
     node.forEach(walk);
   };
   walk((program as { body?: unknown } | undefined)?.body);
@@ -267,16 +274,17 @@ function openedOptions(program: unknown): Set<string> {
     return undefined;
   };
   return new Set(
-    opened.map(kwargsKey).filter((k): k is string => k !== undefined),
+    matched.map(kwargsKey).filter((k): k is string => k !== undefined),
   );
 }
 
-function wrapperArgv(argv: string[], command: Command) {
+function wrapperArgv(argv: string[], command: Command, operation: Operation) {
   const params = command.params ?? [];
   const folded = new Set(
     (command.survey?.folds ?? []).flatMap((fold) => fold.options),
   );
-  const opened = openedOptions(command.program);
+  const opened = fnOptions(command.program, "open", 2);
+  const jsonParsed = fnOptions(command.program, "parse", 3);
   for (const param of params) {
     const name = String(param.name);
     if (name === "from_json") continue;
@@ -298,10 +306,19 @@ function wrapperArgv(argv: string[], command: Command) {
     }
     if (param.isFlag === true) continue;
     argv.push(
-      param.type === "datetime" ? "2024-01-02T03:04:05.000Z" : sample(param),
+      param.type === "datetime"
+        ? "2024-01-02T03:04:05.000Z"
+        : jsonParsed.has(name) &&
+            param.type === "text" &&
+            param.multiple !== true
+          ? "{}"
+          : sample(param),
     );
   }
-  if (params.some((p) => (p.opts as string[] | undefined)?.includes("--force")))
+  if (
+    operation.http !== "DELETE" &&
+    params.some((p) => (p.opts as string[] | undefined)?.includes("--force"))
+  )
     argv.push("--force");
   argv.push("--endpoint", "{endpoint}");
   if (hasRetryToken(params))
@@ -343,10 +360,10 @@ for (const service of services) {
     const generated: Record<string, unknown>[] = [];
     for (const [command, node] of Object.entries(spec.commands)) {
       const key = `${service} ${command}`;
-      const operation = node.operation;
+      const operation = node.operation ?? node.sdkOperations?.[0];
       const programmed =
         node.kind === "custom" &&
-        node.tier === "B" &&
+        (node.tier === "B" || node.tier === "C") &&
         node.program !== undefined;
       if (
         (kind.file === "generated-wrapper") !== programmed ||

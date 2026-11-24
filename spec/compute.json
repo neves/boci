@@ -26744,6 +26744,128 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "image_id", ["call", "pop", ["var", "kwargs"], "image_id"]],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["let", "namespace", ["call", "pop", ["var", "kwargs"], "namespace"]],
+          [
+            "let",
+            "bucket_name",
+            ["call", "pop", ["var", "kwargs"], "bucket_name"]
+          ],
+          ["let", "name", ["call", "pop", ["var", "kwargs"], "name"]],
+          [
+            "let",
+            "export_format",
+            ["call", "pop", ["var", "kwargs"], "export_format"]
+          ],
+          ["let", "export_image_details", ["dict"]],
+          [
+            "set",
+            ["var", "export_image_details"],
+            "destinationType",
+            "objectStorageTuple"
+          ],
+          [
+            "set",
+            ["var", "export_image_details"],
+            "namespaceName",
+            ["var", "namespace"]
+          ],
+          [
+            "set",
+            ["var", "export_image_details"],
+            "bucketName",
+            ["var", "bucket_name"]
+          ],
+          [
+            "set",
+            ["var", "export_image_details"],
+            "objectName",
+            ["var", "name"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "export_format"], null],
+            [
+              [
+                "set",
+                ["var", "export_image_details"],
+                "exportFormat",
+                ["var", "export_format"]
+              ]
+            ],
+            []
+          ],
+          ["let", "export_image_internal.kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [
+              [
+                "set",
+                ["var", "export_image_internal.kwargs"],
+                "if_match",
+                ["var", "if_match"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "export_image_internal.client",
+            ["fn", "client", "core", "compute"]
+          ],
+          [
+            "let",
+            "export_image_internal.result",
+            [
+              "sdk",
+              0,
+              ["var", "export_image_internal.client"],
+              [],
+              [
+                ["image_id", ["var", "image_id"]],
+                ["export_image_details", ["var", "export_image_details"]]
+              ],
+              ["var", "export_image_internal.kwargs"]
+            ]
+          ],
+          ["render", ["var", "export_image_internal.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "export_image",
+          "http": "POST",
+          "path": "/images/{imageId}/actions/export",
+          "positionalArgs": ["image_id", "export_image_details"],
+          "pathParams": {
+            "imageId": "image_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "export_image_details",
+          "responseType": "Image"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -26940,6 +27062,110 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "image_id", ["call", "pop", ["var", "kwargs"], "image_id"]],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["let", "uri", ["call", "pop", ["var", "kwargs"], "uri"]],
+          [
+            "let",
+            "export_format",
+            ["call", "pop", ["var", "kwargs"], "export_format"]
+          ],
+          ["let", "export_image_details", ["dict"]],
+          [
+            "set",
+            ["var", "export_image_details"],
+            "destinationType",
+            "objectStorageUri"
+          ],
+          [
+            "set",
+            ["var", "export_image_details"],
+            "destinationUri",
+            ["var", "uri"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "export_format"], null],
+            [
+              [
+                "set",
+                ["var", "export_image_details"],
+                "exportFormat",
+                ["var", "export_format"]
+              ]
+            ],
+            []
+          ],
+          ["let", "export_image_internal.kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [
+              [
+                "set",
+                ["var", "export_image_internal.kwargs"],
+                "if_match",
+                ["var", "if_match"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "export_image_internal.client",
+            ["fn", "client", "core", "compute"]
+          ],
+          [
+            "let",
+            "export_image_internal.result",
+            [
+              "sdk",
+              0,
+              ["var", "export_image_internal.client"],
+              [],
+              [
+                ["image_id", ["var", "image_id"]],
+                ["export_image_details", ["var", "export_image_details"]]
+              ],
+              ["var", "export_image_internal.kwargs"]
+            ]
+          ],
+          ["render", ["var", "export_image_internal.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "export_image",
+          "http": "POST",
+          "path": "/images/{imageId}/actions/export",
+          "positionalArgs": ["image_id", "export_image_details"],
+          "pathParams": {
+            "imageId": "image_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "export_image_details",
+          "responseType": "Image"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -27270,6 +27496,236 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          ["let", "namespace", ["call", "pop", ["var", "kwargs"], "namespace"]],
+          [
+            "let",
+            "bucket_name",
+            ["call", "pop", ["var", "kwargs"], "bucket_name"]
+          ],
+          ["let", "name", ["call", "pop", ["var", "kwargs"], "name"]],
+          [
+            "let",
+            "source_image_type",
+            ["call", "pop", ["var", "kwargs"], "source_image_type"]
+          ],
+          [
+            "let",
+            "operating_system",
+            ["call", "pop", ["var", "kwargs"], "operating_system"]
+          ],
+          [
+            "let",
+            "operating_system_version",
+            ["call", "pop", ["var", "kwargs"], "operating_system_version"]
+          ],
+          [
+            "let",
+            "launch_mode",
+            ["call", "pop", ["var", "kwargs"], "launch_mode"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          ["let", "import_image_details", ["dict"]],
+          [
+            "set",
+            ["var", "import_image_details"],
+            "sourceType",
+            "objectStorageTuple"
+          ],
+          [
+            "set",
+            ["var", "import_image_details"],
+            "namespaceName",
+            ["var", "namespace"]
+          ],
+          [
+            "set",
+            ["var", "import_image_details"],
+            "bucketName",
+            ["var", "bucket_name"]
+          ],
+          [
+            "set",
+            ["var", "import_image_details"],
+            "objectName",
+            ["var", "name"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "source_image_type"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_details"],
+                "sourceImageType",
+                ["var", "source_image_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "operating_system"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_details"],
+                "operatingSystem",
+                ["var", "operating_system"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "operating_system_version"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_details"],
+                "operatingSystemVersion",
+                ["var", "operating_system_version"]
+              ]
+            ],
+            []
+          ],
+          ["let", "import_image_internal.kwargs", ["dict"]],
+          ["let", "import_image_internal.details", ["dict"]],
+          [
+            "set",
+            ["var", "import_image_internal.details"],
+            "compartmentId",
+            ["var", "compartment_id"]
+          ],
+          [
+            "set",
+            ["var", "import_image_internal.details"],
+            "imageSourceDetails",
+            ["var", "import_image_details"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "launch_mode"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "launchMode",
+                ["var", "launch_mode"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "import_image_internal.client",
+            ["fn", "client", "core", "compute"]
+          ],
+          [
+            "let",
+            "import_image_internal.result",
+            [
+              "sdk",
+              0,
+              ["var", "import_image_internal.client"],
+              [],
+              [
+                [
+                  "create_image_details",
+                  ["var", "import_image_internal.details"]
+                ]
+              ],
+              ["var", "import_image_internal.kwargs"]
+            ]
+          ],
+          ["render", ["var", "import_image_internal.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "create_image",
+          "http": "POST",
+          "path": "/images",
+          "positionalArgs": ["create_image_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_image_details",
+          "responseType": "Image"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -27608,6 +28064,213 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          ["let", "uri", ["call", "pop", ["var", "kwargs"], "uri"]],
+          [
+            "let",
+            "source_image_type",
+            ["call", "pop", ["var", "kwargs"], "source_image_type"]
+          ],
+          [
+            "let",
+            "operating_system",
+            ["call", "pop", ["var", "kwargs"], "operating_system"]
+          ],
+          [
+            "let",
+            "operating_system_version",
+            ["call", "pop", ["var", "kwargs"], "operating_system_version"]
+          ],
+          [
+            "let",
+            "launch_mode",
+            ["call", "pop", ["var", "kwargs"], "launch_mode"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          ["let", "import_image_details", ["dict"]],
+          [
+            "set",
+            ["var", "import_image_details"],
+            "sourceType",
+            "objectStorageUri"
+          ],
+          ["set", ["var", "import_image_details"], "sourceUri", ["var", "uri"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "source_image_type"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_details"],
+                "sourceImageType",
+                ["var", "source_image_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "operating_system"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_details"],
+                "operatingSystem",
+                ["var", "operating_system"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "operating_system_version"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_details"],
+                "operatingSystemVersion",
+                ["var", "operating_system_version"]
+              ]
+            ],
+            []
+          ],
+          ["let", "import_image_internal.kwargs", ["dict"]],
+          ["let", "import_image_internal.details", ["dict"]],
+          [
+            "set",
+            ["var", "import_image_internal.details"],
+            "compartmentId",
+            ["var", "compartment_id"]
+          ],
+          [
+            "set",
+            ["var", "import_image_internal.details"],
+            "imageSourceDetails",
+            ["var", "import_image_details"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "launch_mode"], null],
+            [
+              [
+                "set",
+                ["var", "import_image_internal.details"],
+                "launchMode",
+                ["var", "launch_mode"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "import_image_internal.client",
+            ["fn", "client", "core", "compute"]
+          ],
+          [
+            "let",
+            "import_image_internal.result",
+            [
+              "sdk",
+              0,
+              ["var", "import_image_internal.client"],
+              [],
+              [
+                [
+                  "create_image_details",
+                  ["var", "import_image_internal.details"]
+                ]
+              ],
+              ["var", "import_image_internal.kwargs"]
+            ]
+          ],
+          ["render", ["var", "import_image_internal.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "create_image",
+          "http": "POST",
+          "path": "/images",
+          "positionalArgs": ["create_image_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_image_details",
+          "responseType": "Image"
+        }
+      ],
       "params": [
         {
           "kind": "option",

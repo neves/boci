@@ -90,10 +90,46 @@ def helper_calls(fn, module_globals):
     return sorted(names)
 
 
-def _label(e, clients, local_names):
+def _callee(node, source):
+    """The called name, with a literal receiver reduced to its type ('...'.format -> str.format)."""
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+        receiver = node.func.value
+        if isinstance(receiver, ast.JoinedStr) or (
+            isinstance(receiver, ast.Constant) and not isinstance(receiver.value, (int, float))
+        ):
+            kind = "str" if isinstance(receiver, ast.JoinedStr) else type(receiver.value).__name__
+            return f"{kind}.{node.func.attr}"
+    return source.split("(", 1)[0] if "(" in source else ""
+
+
+def _clients(fn):
+    """Names the function assigns a `cli_util.build_client(...)` result to."""
+    return {
+        n.targets[0].id for n in ast.walk(fn)
+        if isinstance(n, ast.Assign) and len(n.targets) == 1
+        and isinstance(n.targets[0], ast.Name) and isinstance(n.value, ast.Call)
+        and (program._dotted(n.value.func) or "").endswith("build_client")
+    }
+
+
+def _local_names(fn):
+    return {a.arg for a in fn.args.args} | {"kwargs"} | {
+        n.id for n in ast.walk(fn) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
+    } | {h.name for h in ast.walk(fn) if isinstance(h, ast.ExceptHandler) and h.name}
+
+
+def _label(e, clients, local_names, module_globals=None):
     """A capability name for one Unsupported, shared by every wrapper that needs it."""
     reason, source = str(e), e.source or ""
-    callee = source.split("(", 1)[0] if "(" in source else ""
+    if reason.startswith("helper ") and isinstance(e.__cause__, program.Unsupported):
+        # A helper's blocker is the same capability wherever it occurs: label the cause,
+        # in the helper's own scope (its clients and locals).
+        helper = (module_globals or {}).get(reason[len("helper "):].split(":", 1)[0])
+        fn = program._fn_ast(helper) if inspect.isfunction(helper) else None
+        if fn is not None:
+            clients, local_names = _clients(fn), _local_names(fn)
+        return _label(e.__cause__, clients, local_names, module_globals)
+    callee = _callee(e.node, source)
     head = callee.split(".", 1)[0]
     if reason in ("call keywords",) or reason.startswith("call "):
         if head in clients:
@@ -105,8 +141,6 @@ def _label(e, clients, local_names):
         return f"call {callee or reason[5:]}"
     if reason == "attribute":
         return f"attribute .{source.rsplit('.', 1)[-1][:40]}"
-    if reason.startswith("helper "):
-        return reason
     if reason.startswith("helper"):
         return f"{reason}: {callee}"
     return reason
@@ -150,9 +184,7 @@ def needs(fn, module_globals, clients):
     """Every independent blocker in a wrapper, not just the first: compile, blame the
     innermost unsupported node, stand something supported in for it, and compile again."""
     fn = copy.deepcopy(fn)
-    local_names = {a.arg for a in fn.args.args} | {"kwargs"} | {
-        n.id for n in ast.walk(fn) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
-    } | {h.name for h in ast.walk(fn) if isinstance(h, ast.ExceptHandler) and h.name}
+    local_names = _local_names(fn)
     found = {}
     # Probe operands removed with a rejected expression or statement in their own
     # assignments. This keeps nested blockers visible without inventing Expr statements.
@@ -179,7 +211,7 @@ def needs(fn, module_globals, clients):
         try:
             compiler.stmts(fn.body, {})
         except program.Unsupported as e:
-            found.setdefault(_label(e, clients, local_names), (e.source or "").partition("\n")[0][:160] or None)
+            found.setdefault(_label(e, clients, local_names, module_globals), (e.source or "").partition("\n")[0][:160] or None)
             if e.node is None or not _replace(fn, e.node):
                 found["analysis incomplete: unreplaceable node"] = None
                 break
@@ -238,12 +270,7 @@ def triage(root, service, path, client_map):
             ast.unparse(n.args[0]) for n in ast.walk(fn)
             if isinstance(n, ast.Call) and program._dotted(n.func) == "ctx.invoke" and n.args
         })
-        clients = {
-            n.targets[0].id for n in ast.walk(fn)
-            if isinstance(n, ast.Assign) and len(n.targets) == 1
-            and isinstance(n.targets[0], ast.Name) and isinstance(n.value, ast.Call)
-            and (program._dotted(n.value.func) or "").endswith("build_client")
-        }
+        clients = _clients(fn)
         out["needs"] = needs(fn, module_globals, clients) if reason is not None else {}
         if reason is not None and reason.source is None and not str(reason).startswith("no ctx.invoke"):
             out["needs"][str(reason)] = None

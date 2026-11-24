@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] With a missing job artifact file, create-job-artifact reproduces the Reference CLI FileNotFoundError diagnostic and exits 1.
 - [x] The failure occurs before any service request and without suggesting a fallback.

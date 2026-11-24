@@ -85,6 +85,30 @@ test("stderr warnings and error JSON are kept, stdout is byte-exact", () => {
   expect(normalizeRun(run({ stdout: "x " })).stdout).toBe("x ");
 });
 
+test("successful stdout timestamps, including timezone-free values, compare exactly", () => {
+  const a = '{"timestamp": "2026-01-01T00:00:00"}';
+  const b = '{"timestamp": "2026-01-02T00:00:00"}';
+  expect(normalizeRun(run({ stdout: a })).stdout).toBe(a);
+  expect(normalizeRun(run({ stdout: a })).stdout).not.toBe(
+    normalizeRun(run({ stdout: b })).stdout,
+  );
+});
+
+test("only the top-level timestamp of a recognized stderr exception is masked", () => {
+  const a =
+    'ServiceError:\n{\n    "timestamp": "2026-01-01T00:00:00.000000+00:00",\n    "details": {"timestamp": "2026-01-01T00:00:00"}\n}\n';
+  const b = a.replaceAll("2026-01-01", "2026-01-02");
+  expect(normalizeRun(run({ stderr: a })).stderr).not.toBe(
+    normalizeRun(run({ stderr: b })).stderr,
+  );
+  expect(normalizeRun(run({ stderr: a })).stderr).toContain(
+    '"timestamp": "<timestamp>"',
+  );
+  expect(
+    normalizeRun(run({ stderr: a.replace("ServiceError:", "noise:") })).stderr,
+  ).toContain("2026-01-01");
+});
+
 describe("requestOnlyMismatch", () => {
   const norm = (over: Partial<Run> = {}) => normalizeRun(run(over));
 

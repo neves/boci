@@ -195,6 +195,8 @@ function renderModel(
   type: string,
   models?: Models[string],
 ): unknown {
+  if (type === "datetime" && typeof value === "string")
+    return value.replace(/Z$/, "+00:00");
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) {
     const element = /^list\[(.*)\]$/.exec(type)?.[1];
@@ -226,7 +228,26 @@ function renderModel(
     model.attributes.map(([name, fieldType, wire]) => [
       name.replaceAll("_", "-"),
       renderModel(
-        Object.hasOwn(data, wire) ? data[wire] : null,
+        name === "lifecycle_state" &&
+          typeof data[wire] === "string" &&
+          ![
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "INACTIVE",
+            "TERMINATING",
+            "TERMINATED",
+            "PROVISIONING",
+            "AVAILABLE",
+            "UNKNOWN_ENUM_VALUE",
+          ].includes(data[wire] as string)
+          ? "UNKNOWN_ENUM_VALUE"
+          : Object.hasOwn(data, wire)
+            ? data[wire]
+            : null,
         fieldType,
         models,
       ),

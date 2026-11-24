@@ -32,16 +32,6 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "Python's GetPassWarning (a hidden prompt with no terminal) carries the local Python install path; see DIVERGENCES.md",
   ],
   [
-    /"timestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}\+00:00"/g,
-    '"timestamp": "<timestamp>"',
-    "ServiceError timestamp is generated at response time",
-  ],
-  [
-    /"timestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?"/g,
-    '"timestamp": "<timestamp>"',
-    "ClientException (RequestException, ConnectTimeout) timestamp is utcnow() at failure time",
-  ],
-  [
     /File (\\?)"[^"\\]+\/site-packages\/([^"\\]+)\1"/g,
     'File $1"<site-packages>/$2$1"',
     "Python tracebacks from oci worker pools carry the local site-packages install path",
@@ -82,3 +72,21 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "boci-only Extension commands appended to root --help; see ADR 0005 and DIVERGENCES.md",
   ],
 ];
+
+/** Only mask the top-level timestamp in recognized exception envelopes on stderr. */
+export function maskStderr(s: string): string {
+  if (!/^(?:ServiceError|(?:\w+Exception)):\n\{/m.test(s)) return applyMasks(s);
+  return applyMasks(s)
+    .replace(
+      /("timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}\+00:00("(?=,?\s*\n))/g,
+      "$1<timestamp>$2",
+    )
+    .replace(
+      /("timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?("(?=,?\s*\n))/g,
+      "$1<timestamp>$2",
+    );
+}
+
+export function applyMasks(s: string): string {
+  return OUTPUT_MASKS.reduce((acc, [re, to]) => acc.replace(re, to), s);
+}

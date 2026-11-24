@@ -50,6 +50,7 @@ and named callback parameters are popped from kwargs first, as Click binds them.
 """
 
 import ast
+import base64
 import functools
 import importlib
 import inspect
@@ -75,6 +76,7 @@ FUNCTIONS = {
     "len": "len",
     "dict": "dict",
     "bool": "bool",
+    "bytearray": "bytearray",
     "min": "min",
     "max": "max",
     "any": "any",
@@ -179,7 +181,7 @@ BINOP = {
 # Exceptions a wrapper raises that cli_util.wrap_exceptions renders (ticket 18).
 RAISABLE = {
     "ValueError", "KeyError", "Exception", "RequiredValueNotInDefaultOrUserInputError",
-    "ClickException",
+    "ClickException", "BadParameter",
 }
 CMP = {
     ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=",
@@ -226,11 +228,19 @@ def _fn_locals(fn):
         names.add(args.vararg.arg)
     if args.kwarg is not None:
         names.add(args.kwarg.arg)
-    for n in ast.walk(fn):
-        if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store):
-            names.add(n.id)
-        elif isinstance(n, ast.ExceptHandler) and n.name:
-            names.add(n.name)
+
+    def walk_body(nodes):
+        for n in nodes:
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                names.add(n.name)
+                continue
+            if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store):
+                names.add(n.id)
+            elif isinstance(n, ast.ExceptHandler) and n.name:
+                names.add(n.name)
+            walk_body(ast.iter_child_nodes(n))
+
+    walk_body(fn.body)
     return names
 
 
@@ -282,6 +292,7 @@ class Compiler:
         self.service_pkg = _service_package(self.module_name)
         self.targets = []  # the generated command objects ctx.invoke targets, in order
         self.clients = {}  # scoped variable name -> (spec_name, service_name)
+        self.local_fns = {}  # scoped variable name -> nested ast.FunctionDef
         self.sdk_calls = []  # (spec_name, service_name, method) called directly, in order
         self.has_external_io = False  # raw HTTP session, namespace lookup, or custom upload I/O
         self._inlining = set()
@@ -490,6 +501,11 @@ class Compiler:
             return helper
         return None
 
+    def _resolve_local_fn(self, func, scope):
+        if isinstance(func, ast.Name):
+            return self.local_fns.get(self.name(func.id, scope))
+        return None
+
     def stmts(self, body, scope):
         out = []
         for st in body:
@@ -505,11 +521,18 @@ class Compiler:
     def _stmt(self, st, scope):
         if isinstance(st, ast.Pass):
             return []
+        if isinstance(st, ast.FunctionDef):
+            if st.decorator_list or st.args.vararg is not None:
+                raise Unsupported("FunctionDef")
+            self.local_fns[self.name(st.name, scope)] = st
+            return []
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant):
             return []  # docstring / string comment
         if isinstance(st, ast.Assign):
             if len(st.targets) == 1:
                 if isinstance(st.targets[0], ast.Attribute):
+                    if _dotted(st.targets[0]) == "six.moves.http_client.HTTPConnection.debuglevel":
+                        return []
                     if (
                         isinstance(st.targets[0].value, ast.Name)
                         and self.name(st.targets[0].value.id, scope) == "ctx"
@@ -665,9 +688,11 @@ class Compiler:
                 except Unsupported:
                     pass
             cls = (_dotted(exc.func) or "").rsplit(".", 1)[-1] if isinstance(exc, ast.Call) else ""
-            if cls in RAISABLE and len(exc.args) == 1 and not exc.keywords:
+            if cls in RAISABLE and len(exc.args) >= 1 and not exc.keywords and not any(isinstance(a, ast.Starred) for a in exc.args):
                 try:
-                    return [["raise", ast.unparse(st), cls, self.expr(exc.args[0], scope)]]
+                    if len(exc.args) == 1:
+                        return [["raise", ast.unparse(st), cls, self.expr(exc.args[0], scope)]]
+                    return [["raiseMulti", ast.unparse(st), cls, *(self.expr(a, scope) for a in exc.args)]]
                 except Unsupported:
                     pass
             return [["raise", ast.unparse(st)]]
@@ -736,6 +761,9 @@ class Compiler:
                 return [["exit", arg]]
             if self.hand_coded(call.func, scope):
                 return [["do", self.expr(call, scope)]]
+            local_fn = self._resolve_local_fn(call.func, scope)
+            if local_fn is not None:
+                return self.inline(call, scope, as_expr=False, helper=local_fn)
             helper = self._resolve_helper(call.func, scope)
             if helper is not None:
                 return self.inline(call, scope, as_expr=False, helper=helper)
@@ -784,12 +812,12 @@ class Compiler:
             helper = self._resolve_helper(call.func, scope)
         if helper is None:
             raise Unsupported("helper")
-        label = _dotted(call.func) or getattr(helper, "__name__", "helper")
+        label = _dotted(call.func) or (helper.name if isinstance(helper, ast.FunctionDef) else getattr(helper, "__name__", "helper"))
         if helper in self._inlining:
             raise Unsupported("helper recursion")
         if len(self._inlining) >= MAX_INLINE_DEPTH:
             raise Unsupported("helper depth")
-        fn = _fn_ast(helper) if inspect.isfunction(helper) else None
+        fn = helper if isinstance(helper, ast.FunctionDef) else (_fn_ast(helper) if inspect.isfunction(helper) else None)
         if fn is None or fn.args.vararg is not None:
             raise Unsupported("helper")
         if any(isinstance(a, ast.Starred) for a in call.args):
@@ -1089,8 +1117,10 @@ class Compiler:
         is out of the subset."""
         if value is None or isinstance(value, (str, bool, int, float)):
             return value
-        if isinstance(value, dict) and all(isinstance(k, str) for k in value):
-            return ["dict", *([k, self.constant(v)] for k, v in value.items())]
+        if isinstance(value, bytes):
+            return ["bytes", base64.b64encode(value).decode("ascii")]
+        if isinstance(value, dict) and all(isinstance(k, (str, int)) for k in value):
+            return ["dict", *([str(k), self.constant(v)] for k, v in value.items())]
         if isinstance(value, (list, tuple)):
             return ["list", *(self.constant(v) for v in value)]
         raise Unsupported("global")
@@ -1140,6 +1170,8 @@ class Compiler:
         if isinstance(node, ast.Constant):
             if node.value is None or isinstance(node.value, (str, bool, int, float)):
                 return node.value
+            if isinstance(node.value, bytes):
+                return ["bytes", base64.b64encode(node.value).decode("ascii")]
             raise Unsupported("constant")
         if isinstance(node, ast.Name):
             if node.id in ("True", "False", "None"):
@@ -1206,6 +1238,8 @@ class Compiler:
                     if ok:
                         if getattr(type(val), "__module__", "") == "oci.retry.retry" and "Strategy" in type(val).__name__:
                             return ["fn", "retryStrategy", "default"]
+                        if getattr(type(val), "__module__", "") == "click.core" and type(val).__name__ == "ParameterSource":
+                            return val.name
                         try:
                             return self.constant(val)
                         except Unsupported:
@@ -1308,7 +1342,53 @@ class Compiler:
                             keywords.append([kw.arg, self.expr(kw.value, scope)])
                     op_index = self.sdk_call_index(*client_pair, "__call_api__")
                     return ["callApi", op_index, self.expr(node.func.value.value, scope), pos, keywords, star]
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "set_region"
+                and isinstance(node.func.value, ast.Attribute)
+                and node.func.value.attr == "base_client"
+                and isinstance(node.func.value.value, ast.Name)
+                and len(node.args) == 1
+                and not node.keywords
+            ):
+                client_pair = self.clients.get(self.name(node.func.value.value.id, scope))
+                if client_pair is not None:
+                    return ["setClientRegion", self.expr(node.func.value.value, scope), self.expr(node.args[0], scope)]
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "get_parameter_source"
+                and isinstance(node.func.value, ast.Name)
+                and self.name(node.func.value.id, scope) == "ctx"
+                and len(node.args) == 1
+                and not node.keywords
+            ):
+                return ["fn", "getParameterSource", self.expr(node.args[0], scope)]
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "convert"
+                and isinstance(node.func.value, ast.Call)
+                and len(node.args) >= 1
+                and not node.keywords
+            ):
+                ok_dt, dt_cls = self._resolve_global_obj(node.func.value.func, scope)
+                if (
+                    ok_dt
+                    and inspect.isclass(dt_cls)
+                    and getattr(dt_cls, "__module__", "") == "oci_cli.custom_types.cli_datetime"
+                    and dt_cls.__name__ == "CliDatetime"
+                ):
+                    return ["fn", "cliDatetimeConvert", self.expr(node.args[0], scope)]
             dotted = _dotted(node.func)
+            if self._is_mod_fn(node.func, "oci.regions", "is_region", scope) and len(node.args) == 1 and not node.keywords:
+                return ["fn", "isRegion", self.expr(node.args[0], scope)]
+            if self._is_mod_fn(node.func, "oci.regions", "get_realm_from_region", scope) and len(node.args) == 1 and not node.keywords:
+                return ["fn", "getRealmFromRegion", self.expr(node.args[0], scope)]
+            if (
+                dotted == "io.BytesIO"
+                or self._is_mod_fn(node.func, "io", "BytesIO", scope)
+                or self._is_mod_fn(node.func, "_io", "BytesIO", scope)
+            ) and len(node.args) <= 1 and not node.keywords:
+                return ["fn", "bytesIO", *(self.expr(a, scope) for a in node.args)]
             if dotted == "oci.config.from_file" or self._is_mod_fn(node.func, "oci.config", "from_file", scope):
                 if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 2:
                     raise Unsupported("call oci.config.from_file")
@@ -1387,6 +1467,13 @@ class Compiler:
             if (
                 ok_fn and inspect.isclass(resolved_fn)
                 and getattr(resolved_fn, "__module__", "") == "oci.retry.retry"
+                and resolved_fn.__name__ == "NoneRetryStrategy"
+                and not node.args and not node.keywords
+            ):
+                return ["fn", "retryStrategy", "none"]
+            if (
+                ok_fn and inspect.isclass(resolved_fn)
+                and getattr(resolved_fn, "__module__", "") == "oci.retry.retry"
                 and resolved_fn.__name__ == "RetryStrategyBuilder"
             ):
                 if any(isinstance(a, ast.Starred) for a in node.args) or any(kw.arg is None for kw in node.keywords):
@@ -1425,13 +1512,25 @@ class Compiler:
                         keywords.append([kw.arg, self.expr(kw.value, scope)])
                 return ["retryCall", self.expr(node.func.value, scope), pos, keywords, star]
             if isinstance(node.func, ast.Attribute) and node.func.attr in (
-                "get_retry_strategy", "add_max_attempts", "no_total_elapsed_time", "add_service_error_check",
+                "get_retry_strategy", "add_max_attempts", "no_total_elapsed_time", "add_total_elapsed_time", "add_service_error_check",
             ):
                 if any(isinstance(a, ast.Starred) for a in node.args) or any(kw.arg is None for kw in node.keywords):
                     raise Unsupported(f"call {node.func.attr}")
                 pos = [self.expr(a, scope) for a in node.args]
                 kw_pairs = [[kw.arg, self.expr(kw.value, scope)] for kw in node.keywords]
                 return ["retryBuilderMethod", node.func.attr, self.expr(node.func.value, scope), pos, kw_pairs]
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "stream":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 1:
+                    raise Unsupported("call stream")
+                chunk_size = self.expr(node.args[0], scope) if node.args else 65536
+                for kw in node.keywords:
+                    if kw.arg == "amt":
+                        chunk_size = self.expr(kw.value, scope)
+                    elif kw.arg == "decode_content":
+                        continue
+                    else:
+                        raise Unsupported("call keywords")
+                return ["call", "rawStream", self.expr(node.func.value, scope), chunk_size]
             if isinstance(node.func, ast.Attribute) and node.func.attr == "iter_content":
                 if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 1:
                     raise Unsupported("call iter_content")
@@ -1740,6 +1839,9 @@ class Compiler:
                     for a in node.args
                 ]
                 return ["fn", hand, *hand_args]
+            local_fn = self._resolve_local_fn(node.func, scope)
+            if local_fn is not None:
+                return self.inline(node, scope, as_expr=True, helper=local_fn)
             helper = self._resolve_helper(node.func, scope)
             if helper is not None:
                 return self.inline(node, scope, as_expr=True, helper=helper)

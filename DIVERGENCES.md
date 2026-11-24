@@ -122,3 +122,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** always prints the label line, as when stdout isn't a terminal
 - **Why:** the bar's redraws are cosmetic, timing-dependent and never seen by scripts; the non-terminal output (what Parity records) matches.
 - **State:** accepted
+
+### `raw-request`: lowercase response header keys in JSON output
+
+- **Invocation:** `oci raw-request --target-uri <uri> --http-method GET`
+- **Reference CLI:** prints response header names in the wire casing returned by the HTTP/1.1 server (e.g. `"Content-Type"`, `"Content-Length"`, `"Date"`)
+- **boci:** prints response header names in lowercase (e.g. `"content-type"`, `"content-length"`, `"date"`)
+- **Why:** HTTP header names are case-insensitive per RFC 9110 and WHATWG `fetch()` normalizes `Response.headers` keys to lowercase; HTTP/2 servers already send lowercase keys on the wire. Normalized in `test/harness/masks.ts`.
+- **State:** accepted

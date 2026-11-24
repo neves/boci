@@ -9836,21 +9836,206 @@
         "terraform-advanced-options": "resource_manager:TerraformAdvancedOptions"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": [],
+      "survey": {
+        "invokes": [
+          "services.resource_manager.src.oci_cli_resource_manager.generated.resourcemanager_cli.update_stack_update_dev_ops_config_source_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "target_rollback_job_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "job_operation_details_target_rollback_job_id",
+                ["item", ["var", "kwargs"], "target_rollback_job_id"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "target_rollback_job_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "terraform_advanced_options", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "job_operation_details_terraform_advanced_options",
+                ["item", ["var", "kwargs"], "terraform_advanced_options"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "terraform_advanced_options"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "branch_name", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "config_source_branch_name",
+                ["item", ["var", "kwargs"], "branch_name"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "branch_name"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "working_directory", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "config_source_working_directory",
+                ["item", ["var", "kwargs"], "working_directory"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "working_directory"]]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.resource_manager.src.oci_cli_resource_manager.generated.resourcemanager_cli.update_stack_update_dev_ops_config_source_details",
-        "renames": {
-          "job_operation_details_target_rollback_job_id": "target_rollback_job_id",
-          "job_operation_details_terraform_advanced_options": "terraform_advanced_options",
-          "config_source_branch_name": "branch_name",
-          "config_source_working_directory": "working_directory"
-        },
         "complexTypes": {
           "custom-terraform-provider": "resource_manager:CustomTerraformProvider",
           "variables": "resource_manager:dict(str, string)",
           "freeform-tags": "resource_manager:dict(str, string)",
           "defined-tags": "resource_manager:dict(str, dict(str, object))"
-        }
+        },
+        "params": [
+          {
+            "name": "stack_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config_source_project_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config_source_repository_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "custom_terraform_provider",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_third_party_provider_experience_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "variables",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "terraform_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config_source_working_directory",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config_source_branch_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "resource_manager.resource_manager",
@@ -9889,6 +10074,12 @@
         },
         {
           "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
           "key": ["opc_request_id"],
           "transform": "use_or_generate_request_id"
         },
@@ -9902,13 +10093,13 @@
           "target": "body",
           "bodyArg": "update_stack_details",
           "key": ["configSource", "projectId"],
-          "value": null
+          "param": "config_source_project_id"
         },
         {
           "target": "body",
           "bodyArg": "update_stack_details",
           "key": ["configSource", "repositoryId"],
-          "value": null
+          "param": "config_source_repository_id"
         },
         {
           "target": "body",
@@ -9916,6 +10107,43 @@
           "key": ["displayName"],
           "param": "display_name",
           "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_stack_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_stack_details",
+          "key": ["customTerraformProvider"],
+          "transform": "parse_json_parameter",
+          "param": "custom_terraform_provider",
+          "when": "custom_terraform_provider is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_stack_details",
+          "key": ["isThirdPartyProviderExperienceEnabled"],
+          "param": "is_third_party_provider_experience_enabled",
+          "when": "is_third_party_provider_experience_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_stack_details",
+          "key": ["variables"],
+          "transform": "parse_json_parameter",
+          "param": "variables",
+          "when": "variables is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_stack_details",
+          "key": ["terraformVersion"],
+          "param": "terraform_version",
+          "when": "terraform_version is not None"
         },
         {
           "target": "body",
@@ -9932,6 +10160,20 @@
           "transform": "parse_json_parameter",
           "param": "defined_tags",
           "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_stack_details",
+          "key": ["configSource", "workingDirectory"],
+          "param": "config_source_working_directory",
+          "when": "config_source_working_directory is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_stack_details",
+          "key": ["configSource", "branchName"],
+          "param": "config_source_branch_name",
+          "when": "config_source_branch_name is not None"
         },
         {
           "target": "body",
@@ -15932,6 +16174,1699 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "stack_id", ["call", "pop", ["var", "kwargs"], "stack_id"]],
+          [
+            "let",
+            "destination_region",
+            ["call", "pop", ["var", "kwargs"], "destination_region"]
+          ],
+          [
+            "let",
+            "destination_compartment_id",
+            ["call", "pop", ["var", "kwargs"], "destination_compartment_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "description",
+            ["call", "pop", ["var", "kwargs"], "description"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "variables", ["call", "pop", ["var", "kwargs"], "variables"]],
+          [
+            "let",
+            "access_token",
+            ["call", "pop", ["var", "kwargs"], "access_token"]
+          ],
+          ["checkNoExtraKwargs", "copy_stack"],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "stack_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "stack_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --stack-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "destination_region"], null],
+              ["not", ["fn", "isRegion", ["var", "destination_region"]]]
+            ],
+            [
+              [
+                "usage",
+                [
+                  "call",
+                  "format",
+                  "Unrecognized region: {}. Review valid regions at https://docs.oracle.com/iaas/Content/General/Concepts/regions.htm",
+                  ["var", "destination_region"]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["let", "inner_kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "inner_kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "resource_manager", "resource_manager"]
+          ],
+          [
+            "let",
+            "source_stack_response",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["stack_id", ["var", "stack_id"]]],
+              ["var", "inner_kwargs"]
+            ]
+          ],
+          [
+            "let",
+            "source_region",
+            ["item", ["item", ["fn", "ctxObj"], "config"], "region"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "destination_region"], null],
+              [
+                "cmp",
+                "!=",
+                ["fn", "getRealmFromRegion", ["var", "destination_region"]],
+                ["fn", "getRealmFromRegion", ["var", "source_region"]]
+              ]
+            ],
+            [
+              [
+                "usage",
+                [
+                  "call",
+                  "format",
+                  "Invalid region. Destination region must be in the same realm {}. Review valid regions at https://docs.oracle.com/iaas/Content/General/Concepts/regions.htm",
+                  ["var", "destination_region"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "copy_display_name_prefix",
+            [
+              "bin",
+              "+",
+              ["bin", "+", "[copy-from-", ["var", "source_region"]],
+              "]-"
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "destination_region"], null],
+              [
+                "cmp",
+                "==",
+                ["var", "destination_region"],
+                ["var", "source_region"]
+              ]
+            ],
+            [["let", "destination_region", null]],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              ["cmp", "is", ["var", "source_stack_response"], null],
+              [
+                "cmp",
+                "is",
+                ["attr", "data", ["var", "source_stack_response"]],
+                null
+              ]
+            ],
+            [
+              [
+                "raiseMulti",
+                "raise Exception('Could not retrieve stack object', inner_kwargs['opc_request_id'])",
+                "Exception",
+                "Could not retrieve stack object",
+                ["item", ["var", "inner_kwargs"], "opc_request_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "source_stack",
+            ["attr", "data", ["var", "source_stack_response"]]
+          ],
+          [
+            "let",
+            "_details",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "copy_stack_metadata.source_stack_data",
+                  ["var", "source_stack"]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.compartment_id",
+                  ["var", "destination_compartment_id"]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.display_name",
+                  ["var", "display_name"]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.description",
+                  ["var", "description"]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.freeform_tags",
+                  ["var", "freeform_tags"]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.defined_tags",
+                  ["var", "defined_tags"]
+                ],
+                ["let", "copy_stack_metadata.variables", ["var", "variables"]],
+                [
+                  "let",
+                  "copy_stack_metadata.copy_prefix_name",
+                  ["var", "copy_display_name_prefix"]
+                ],
+                ["let", "copy_stack_metadata._details", ["dict"]],
+                [
+                  "set",
+                  ["var", "copy_stack_metadata._details"],
+                  "terraformVersion",
+                  [
+                    "attr",
+                    "terraform_version",
+                    ["var", "copy_stack_metadata.source_stack_data"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["var", "copy_stack_metadata.display_name"],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "copy_stack_metadata._details"],
+                      "displayName",
+                      ["var", "copy_stack_metadata.display_name"]
+                    ]
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "copy_stack_metadata._details"],
+                      "displayName",
+                      [
+                        "bin",
+                        "+",
+                        ["var", "copy_stack_metadata.copy_prefix_name"],
+                        [
+                          "attr",
+                          "display_name",
+                          ["var", "copy_stack_metadata.source_stack_data"]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["var", "copy_stack_metadata.compartment_id"],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "copy_stack_metadata._details"],
+                      "compartmentId",
+                      ["var", "copy_stack_metadata.compartment_id"]
+                    ]
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "copy_stack_metadata._details"],
+                      "compartmentId",
+                      [
+                        "attr",
+                        "compartment_id",
+                        ["var", "copy_stack_metadata.source_stack_data"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["var", "copy_stack_metadata.description"],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "copy_stack_metadata._details"],
+                      "description",
+                      ["var", "copy_stack_metadata.description"]
+                    ]
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "copy_stack_metadata._details"],
+                      "description",
+                      [
+                        "attr",
+                        "description",
+                        ["var", "copy_stack_metadata.source_stack_data"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.merged_freeform_tags",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "merge_tags_variables.source_data",
+                        [
+                          "attr",
+                          "freeform_tags",
+                          ["var", "copy_stack_metadata.source_stack_data"]
+                        ]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables.new_data",
+                        ["var", "copy_stack_metadata.freeform_tags"]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables.param_key",
+                        "freeform_tags"
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables.original_map",
+                        [
+                          "fn",
+                          "parse",
+                          ["var", "merge_tags_variables.param_key"],
+                          ["var", "merge_tags_variables.source_data"]
+                        ]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables.new_map",
+                        [
+                          "fn",
+                          "parse",
+                          ["var", "merge_tags_variables.param_key"],
+                          ["var", "merge_tags_variables.new_data"]
+                        ]
+                      ],
+                      ["let", "merge_tags_variables.merged", ["dict"]],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          ["var", "merge_tags_variables.original_map"],
+                          null
+                        ],
+                        [
+                          [
+                            "do",
+                            [
+                              "call",
+                              "update",
+                              ["var", "merge_tags_variables.merged"],
+                              ["var", "merge_tags_variables.original_map"]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          ["var", "merge_tags_variables.new_map"],
+                          null
+                        ],
+                        [
+                          [
+                            "for",
+                            "merge_tags_variables.key",
+                            ["var", "merge_tags_variables.new_map"],
+                            [
+                              [
+                                "set",
+                                ["var", "merge_tags_variables.merged"],
+                                ["var", "merge_tags_variables.key"],
+                                [
+                                  "item",
+                                  ["var", "merge_tags_variables.new_map"],
+                                  ["var", "merge_tags_variables.key"]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      ["return", ["var", "merge_tags_variables.merged"]]
+                    ]
+                  ]
+                ],
+                [
+                  "set",
+                  ["var", "copy_stack_metadata._details"],
+                  "freeformTags",
+                  ["var", "copy_stack_metadata.merged_freeform_tags"]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.merged_defined_tags",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "merge_tags_variables$1.source_data",
+                        [
+                          "attr",
+                          "defined_tags",
+                          ["var", "copy_stack_metadata.source_stack_data"]
+                        ]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables$1.new_data",
+                        ["var", "copy_stack_metadata.defined_tags"]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables$1.param_key",
+                        "defined_tags"
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables$1.original_map",
+                        [
+                          "fn",
+                          "parse",
+                          ["var", "merge_tags_variables$1.param_key"],
+                          ["var", "merge_tags_variables$1.source_data"]
+                        ]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables$1.new_map",
+                        [
+                          "fn",
+                          "parse",
+                          ["var", "merge_tags_variables$1.param_key"],
+                          ["var", "merge_tags_variables$1.new_data"]
+                        ]
+                      ],
+                      ["let", "merge_tags_variables$1.merged", ["dict"]],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          ["var", "merge_tags_variables$1.original_map"],
+                          null
+                        ],
+                        [
+                          [
+                            "do",
+                            [
+                              "call",
+                              "update",
+                              ["var", "merge_tags_variables$1.merged"],
+                              ["var", "merge_tags_variables$1.original_map"]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          ["var", "merge_tags_variables$1.new_map"],
+                          null
+                        ],
+                        [
+                          [
+                            "for",
+                            "merge_tags_variables$1.key",
+                            ["var", "merge_tags_variables$1.new_map"],
+                            [
+                              [
+                                "set",
+                                ["var", "merge_tags_variables$1.merged"],
+                                ["var", "merge_tags_variables$1.key"],
+                                [
+                                  "item",
+                                  ["var", "merge_tags_variables$1.new_map"],
+                                  ["var", "merge_tags_variables$1.key"]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      ["return", ["var", "merge_tags_variables$1.merged"]]
+                    ]
+                  ]
+                ],
+                [
+                  "set",
+                  ["var", "copy_stack_metadata._details"],
+                  "definedTags",
+                  ["var", "copy_stack_metadata.merged_defined_tags"]
+                ],
+                [
+                  "let",
+                  "copy_stack_metadata.merged_variables",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "merge_tags_variables$2.source_data",
+                        [
+                          "attr",
+                          "variables",
+                          ["var", "copy_stack_metadata.source_stack_data"]
+                        ]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables$2.new_data",
+                        ["var", "copy_stack_metadata.variables"]
+                      ],
+                      ["let", "merge_tags_variables$2.param_key", "variables"],
+                      [
+                        "let",
+                        "merge_tags_variables$2.original_map",
+                        [
+                          "fn",
+                          "parse",
+                          ["var", "merge_tags_variables$2.param_key"],
+                          ["var", "merge_tags_variables$2.source_data"]
+                        ]
+                      ],
+                      [
+                        "let",
+                        "merge_tags_variables$2.new_map",
+                        [
+                          "fn",
+                          "parse",
+                          ["var", "merge_tags_variables$2.param_key"],
+                          ["var", "merge_tags_variables$2.new_data"]
+                        ]
+                      ],
+                      ["let", "merge_tags_variables$2.merged", ["dict"]],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          ["var", "merge_tags_variables$2.original_map"],
+                          null
+                        ],
+                        [
+                          [
+                            "do",
+                            [
+                              "call",
+                              "update",
+                              ["var", "merge_tags_variables$2.merged"],
+                              ["var", "merge_tags_variables$2.original_map"]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          ["var", "merge_tags_variables$2.new_map"],
+                          null
+                        ],
+                        [
+                          [
+                            "for",
+                            "merge_tags_variables$2.key",
+                            ["var", "merge_tags_variables$2.new_map"],
+                            [
+                              [
+                                "set",
+                                ["var", "merge_tags_variables$2.merged"],
+                                ["var", "merge_tags_variables$2.key"],
+                                [
+                                  "item",
+                                  ["var", "merge_tags_variables$2.new_map"],
+                                  ["var", "merge_tags_variables$2.key"]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      ["return", ["var", "merge_tags_variables$2.merged"]]
+                    ]
+                  ]
+                ],
+                [
+                  "set",
+                  ["var", "copy_stack_metadata._details"],
+                  "variables",
+                  ["var", "copy_stack_metadata.merged_variables"]
+                ],
+                ["return", ["var", "copy_stack_metadata._details"]]
+              ]
+            ]
+          ],
+          [
+            "set",
+            ["var", "_details"],
+            "configSource",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "get_config_source_metadata_for_stack.source_stack",
+                  ["var", "source_stack"]
+                ],
+                [
+                  "let",
+                  "get_config_source_metadata_for_stack.destination_region",
+                  ["var", "destination_region"]
+                ],
+                [
+                  "let",
+                  "get_config_source_metadata_for_stack.access_token",
+                  ["var", "access_token"]
+                ],
+                [
+                  "let",
+                  "get_config_source_metadata_for_stack._details",
+                  ["dict"]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "==",
+                    [
+                      "attr",
+                      "config_source_type",
+                      [
+                        "attr",
+                        "config_source",
+                        [
+                          "var",
+                          "get_config_source_metadata_for_stack.source_stack"
+                        ]
+                      ]
+                    ],
+                    "GIT_CONFIG_SOURCE"
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "and",
+                        [
+                          "cmp",
+                          "isnot",
+                          [
+                            "var",
+                            "get_config_source_metadata_for_stack.destination_region"
+                          ],
+                          null
+                        ],
+                        [
+                          "cmp",
+                          "is",
+                          [
+                            "var",
+                            "get_config_source_metadata_for_stack.access_token"
+                          ],
+                          null
+                        ]
+                      ],
+                      [
+                        [
+                          "usage",
+                          "Need access token for Git configuration source provider to copy the stack across regions"
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "is",
+                        [
+                          "var",
+                          "get_config_source_metadata_for_stack.destination_region"
+                        ],
+                        null
+                      ],
+                      [
+                        [
+                          "set",
+                          [
+                            "var",
+                            "get_config_source_metadata_for_stack._details"
+                          ],
+                          "configurationSourceProviderId",
+                          [
+                            "attr",
+                            "configuration_source_provider_id",
+                            [
+                              "attr",
+                              "config_source",
+                              [
+                                "var",
+                                "get_config_source_metadata_for_stack.source_stack"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "set",
+                      ["var", "get_config_source_metadata_for_stack._details"],
+                      "workingDirectory",
+                      [
+                        "attr",
+                        "working_directory",
+                        [
+                          "attr",
+                          "config_source",
+                          [
+                            "var",
+                            "get_config_source_metadata_for_stack.source_stack"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "set",
+                      ["var", "get_config_source_metadata_for_stack._details"],
+                      "repositoryUrl",
+                      [
+                        "attr",
+                        "repository_url",
+                        [
+                          "attr",
+                          "config_source",
+                          [
+                            "var",
+                            "get_config_source_metadata_for_stack.source_stack"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "set",
+                      ["var", "get_config_source_metadata_for_stack._details"],
+                      "branchName",
+                      [
+                        "attr",
+                        "branch_name",
+                        [
+                          "attr",
+                          "config_source",
+                          [
+                            "var",
+                            "get_config_source_metadata_for_stack.source_stack"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "set",
+                      ["var", "get_config_source_metadata_for_stack._details"],
+                      "configSourceType",
+                      "GIT_CONFIG_SOURCE"
+                    ]
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "get_config_source_metadata_for_stack._details"],
+                      "workingDirectory",
+                      [
+                        "attr",
+                        "working_directory",
+                        [
+                          "attr",
+                          "config_source",
+                          [
+                            "var",
+                            "get_config_source_metadata_for_stack.source_stack"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "set",
+                      ["var", "get_config_source_metadata_for_stack._details"],
+                      "configSourceType",
+                      "ZIP_UPLOAD"
+                    ]
+                  ]
+                ],
+                [
+                  "return",
+                  ["var", "get_config_source_metadata_for_stack._details"]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "is_zip_upload",
+            [
+              "or",
+              [
+                "cmp",
+                "==",
+                [
+                  "attr",
+                  "config_source_type",
+                  ["attr", "config_source", ["var", "source_stack"]]
+                ],
+                "ZIP_UPLOAD"
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "attr",
+                  "config_source_type",
+                  ["attr", "config_source", ["var", "source_stack"]]
+                ],
+                "COMPARTMENT_CONFIG_SOURCE"
+              ]
+            ]
+          ],
+          [
+            "let",
+            "is_git_config",
+            [
+              "cmp",
+              "==",
+              [
+                "attr",
+                "config_source_type",
+                ["attr", "config_source", ["var", "source_stack"]]
+              ],
+              "GIT_CONFIG_SOURCE"
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["var", "is_zip_upload"]],
+              ["not", ["var", "is_git_config"]]
+            ],
+            [
+              [
+                "raiseMulti",
+                "raise Exception('Only zip-upload config, git-configuration-source and create-from-compartment stacks are supported for copy stack', inner_kwargs['opc_request_id'])",
+                "Exception",
+                "Only zip-upload config, git-configuration-source and create-from-compartment stacks are supported for copy stack",
+                ["item", ["var", "inner_kwargs"], "opc_request_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "is_zip_upload"],
+            [
+              [
+                "let",
+                "stack_tf_config_response",
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [],
+                  [["stack_id", ["var", "stack_id"]]],
+                  ["var", "inner_kwargs"]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "or",
+                  ["cmp", "is", ["var", "stack_tf_config_response"], null],
+                  [
+                    "cmp",
+                    "is",
+                    ["attr", "data", ["var", "stack_tf_config_response"]],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "raiseMulti",
+                    "raise Exception('Could not retrieve stack TF config', inner_kwargs['opc_request_id'])",
+                    "Exception",
+                    "Could not retrieve stack TF config",
+                    ["item", ["var", "inner_kwargs"], "opc_request_id"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "base64encoded_stack_tf_config",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "get_source_stack_tf_config_base64encoded_zip.stack_id",
+                      ["var", "stack_id"]
+                    ],
+                    [
+                      "let",
+                      "get_source_stack_tf_config_base64encoded_zip.stack_tf_config_response",
+                      ["var", "stack_tf_config_response"]
+                    ],
+                    [
+                      "let",
+                      "get_source_stack_tf_config_base64encoded_zip.tf_config",
+                      ["bytes", ""]
+                    ],
+                    [
+                      "try",
+                      [
+                        [
+                          "for",
+                          "get_source_stack_tf_config_base64encoded_zip.chunk",
+                          [
+                            "call",
+                            "rawStream",
+                            [
+                              "attr",
+                              "raw",
+                              [
+                                "attr",
+                                "data",
+                                [
+                                  "var",
+                                  "get_source_stack_tf_config_base64encoded_zip.stack_tf_config_response"
+                                ]
+                              ]
+                            ],
+                            1048576
+                          ],
+                          [
+                            [
+                              "aug",
+                              "+",
+                              "get_source_stack_tf_config_base64encoded_zip.tf_config",
+                              [
+                                "var",
+                                "get_source_stack_tf_config_base64encoded_zip.chunk"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      null,
+                      [
+                        [
+                          "raise",
+                          "raise Exception(\"Unable to complete download of the stack's Terraform configuration\")",
+                          "Exception",
+                          "Unable to complete download of the stack's Terraform configuration"
+                        ]
+                      ]
+                    ],
+                    [
+                      "let",
+                      "get_source_stack_tf_config_base64encoded_zip.base64encoded_tf_config",
+                      [
+                        "call",
+                        "decode",
+                        [
+                          "fn",
+                          "b64encode",
+                          [
+                            "var",
+                            "get_source_stack_tf_config_base64encoded_zip.tf_config"
+                          ]
+                        ],
+                        "utf-8"
+                      ]
+                    ],
+                    [
+                      "if",
+                      [
+                        "not",
+                        [
+                          "var",
+                          "get_source_stack_tf_config_base64encoded_zip.base64encoded_tf_config"
+                        ]
+                      ],
+                      [
+                        [
+                          "raise",
+                          "raise Exception('Internal error: Unable to generate encoded Terraform configuration')",
+                          "Exception",
+                          "Internal error: Unable to generate encoded Terraform configuration"
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "return",
+                      [
+                        "var",
+                        "get_source_stack_tf_config_base64encoded_zip.base64encoded_tf_config"
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["item", ["var", "_details"], "configSource"],
+                "zipFileBase64Encoded",
+                ["var", "base64encoded_stack_tf_config"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "destination_region"], null],
+              ["var", "is_git_config"]
+            ],
+            [
+              ["let", "_get_config_details", ["dict"]],
+              [
+                "let",
+                "get_config_source_provider_response",
+                [
+                  "sdk",
+                  2,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "configuration_source_provider_id",
+                      [
+                        "attr",
+                        "configuration_source_provider_id",
+                        ["attr", "config_source", ["var", "source_stack"]]
+                      ]
+                    ]
+                  ],
+                  ["var", "inner_kwargs"]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "or",
+                  [
+                    "cmp",
+                    "is",
+                    ["var", "get_config_source_provider_response"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "is",
+                    [
+                      "attr",
+                      "data",
+                      ["var", "get_config_source_provider_response"]
+                    ],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "raiseMulti",
+                    "raise Exception('Unable to get git config source provider', inner_kwargs['opc_request_id'])",
+                    "Exception",
+                    "Unable to get git config source provider",
+                    ["item", ["var", "inner_kwargs"], "opc_request_id"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "do",
+                [
+                  "call",
+                  "update",
+                  ["var", "_get_config_details"],
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "copy_git_config_source_provider_metadata.config_source_provider_data",
+                        [
+                          "attr",
+                          "data",
+                          ["var", "get_config_source_provider_response"]
+                        ]
+                      ],
+                      [
+                        "let",
+                        "copy_git_config_source_provider_metadata.access_token",
+                        ["var", "access_token"]
+                      ],
+                      [
+                        "let",
+                        "copy_git_config_source_provider_metadata.copy_prefix_name",
+                        ["var", "copy_display_name_prefix"]
+                      ],
+                      [
+                        "let",
+                        "copy_git_config_source_provider_metadata._config_provider_details",
+                        ["dict"]
+                      ],
+                      [
+                        "set",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata._config_provider_details"
+                        ],
+                        "apiEndpoint",
+                        [
+                          "attr",
+                          "api_endpoint",
+                          [
+                            "var",
+                            "copy_git_config_source_provider_metadata.config_source_provider_data"
+                          ]
+                        ]
+                      ],
+                      [
+                        "set",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata._config_provider_details"
+                        ],
+                        "accessToken",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata.access_token"
+                        ]
+                      ],
+                      [
+                        "set",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata._config_provider_details"
+                        ],
+                        "compartmentId",
+                        [
+                          "attr",
+                          "compartment_id",
+                          [
+                            "var",
+                            "copy_git_config_source_provider_metadata.config_source_provider_data"
+                          ]
+                        ]
+                      ],
+                      [
+                        "set",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata._config_provider_details"
+                        ],
+                        "displayName",
+                        [
+                          "bin",
+                          "+",
+                          [
+                            "var",
+                            "copy_git_config_source_provider_metadata.copy_prefix_name"
+                          ],
+                          [
+                            "attr",
+                            "display_name",
+                            [
+                              "var",
+                              "copy_git_config_source_provider_metadata.config_source_provider_data"
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "set",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata._config_provider_details"
+                        ],
+                        "description",
+                        [
+                          "attr",
+                          "description",
+                          [
+                            "var",
+                            "copy_git_config_source_provider_metadata.config_source_provider_data"
+                          ]
+                        ]
+                      ],
+                      [
+                        "set",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata._config_provider_details"
+                        ],
+                        "configSourceProviderType",
+                        [
+                          "attr",
+                          "config_source_provider_type",
+                          [
+                            "var",
+                            "copy_git_config_source_provider_metadata.config_source_provider_data"
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          [
+                            "attr",
+                            "freeform_tags",
+                            [
+                              "var",
+                              "copy_git_config_source_provider_metadata.config_source_provider_data"
+                            ]
+                          ],
+                          null
+                        ],
+                        [
+                          [
+                            "set",
+                            [
+                              "var",
+                              "copy_git_config_source_provider_metadata._config_provider_details"
+                            ],
+                            "freeformTags",
+                            [
+                              "fn",
+                              "parse",
+                              "freeform_tags",
+                              [
+                                "attr",
+                                "freeform_tags",
+                                [
+                                  "var",
+                                  "copy_git_config_source_provider_metadata.config_source_provider_data"
+                                ]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          [
+                            "attr",
+                            "defined_tags",
+                            [
+                              "var",
+                              "copy_git_config_source_provider_metadata.config_source_provider_data"
+                            ]
+                          ],
+                          null
+                        ],
+                        [
+                          [
+                            "set",
+                            [
+                              "var",
+                              "copy_git_config_source_provider_metadata._config_provider_details"
+                            ],
+                            "definedTags",
+                            [
+                              "fn",
+                              "parse",
+                              "defined_tags",
+                              [
+                                "attr",
+                                "defined_tags",
+                                [
+                                  "var",
+                                  "copy_git_config_source_provider_metadata.config_source_provider_data"
+                                ]
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "copy_git_config_source_provider_metadata._config_provider_details"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "do",
+                [
+                  "setClientRegion",
+                  ["var", "client"],
+                  ["var", "destination_region"]
+                ]
+              ],
+              [
+                "let",
+                "create_config_source_provider_response",
+                [
+                  "sdk",
+                  3,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "create_configuration_source_provider_details",
+                      ["var", "_get_config_details"]
+                    ]
+                  ],
+                  ["var", "inner_kwargs"]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "or",
+                  [
+                    "cmp",
+                    "is",
+                    ["var", "create_config_source_provider_response"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "is",
+                    [
+                      "attr",
+                      "data",
+                      ["var", "create_config_source_provider_response"]
+                    ],
+                    null
+                  ]
+                ],
+                [
+                  [
+                    "raiseMulti",
+                    "raise Exception('Unable to copy Git configuration source provider', inner_kwargs['opc_request_id'])",
+                    "Exception",
+                    "Unable to copy Git configuration source provider",
+                    ["item", ["var", "inner_kwargs"], "opc_request_id"]
+                  ]
+                ],
+                []
+              ],
+              ["render", ["var", "create_config_source_provider_response"]],
+              [
+                "set",
+                ["item", ["var", "_details"], "configSource"],
+                "configurationSourceProviderId",
+                [
+                  "attr",
+                  "id",
+                  [
+                    "attr",
+                    "data",
+                    ["var", "create_config_source_provider_response"]
+                  ]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "destination_region"], null],
+                [
+                  [
+                    "do",
+                    [
+                      "setClientRegion",
+                      ["var", "client"],
+                      ["var", "destination_region"]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            "try",
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  5,
+                  ["var", "client"],
+                  [],
+                  [["create_stack_details", ["var", "_details"]]],
+                  ["var", "inner_kwargs"]
+                ]
+              ],
+              ["render", ["var", "result"]]
+            ],
+            "e",
+            [
+              [
+                "do",
+                [
+                  "fn",
+                  "print",
+                  ["list", "Failed to copy stack: ", ["var", "stack_id"]],
+                  null,
+                  null,
+                  null
+                ]
+              ],
+              ["do", ["fn", "print", ["list", ["var", "e"]], null, null, null]],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "isnot", ["var", "destination_region"], null],
+                  ["var", "is_git_config"]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "print",
+                      [
+                        "list",
+                        "Deleting copied configuration source provider: ",
+                        [
+                          "attr",
+                          "id",
+                          [
+                            "attr",
+                            "data",
+                            ["var", "create_config_source_provider_response"]
+                          ]
+                        ]
+                      ],
+                      null,
+                      null,
+                      null
+                    ]
+                  ],
+                  [
+                    "let",
+                    "delete_config_source",
+                    [
+                      "sdk",
+                      4,
+                      ["var", "client"],
+                      [],
+                      [
+                        [
+                          "configuration_source_provider_id",
+                          [
+                            "attr",
+                            "id",
+                            [
+                              "attr",
+                              "data",
+                              ["var", "create_config_source_provider_response"]
+                            ]
+                          ]
+                        ]
+                      ],
+                      ["var", "inner_kwargs"]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "resource_manager.resource_manager",
+          "method": "get_stack",
+          "http": "GET",
+          "path": "/stacks/{stackId}",
+          "positionalArgs": ["stack_id"],
+          "pathParams": {
+            "stackId": "stack_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "Stack"
+        },
+        {
+          "client": "resource_manager.resource_manager",
+          "method": "get_stack_tf_config",
+          "http": "GET",
+          "path": "/stacks/{stackId}/tfConfig",
+          "positionalArgs": ["stack_id"],
+          "pathParams": {
+            "stackId": "stack_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/zip"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "stream"
+        },
+        {
+          "client": "resource_manager.resource_manager",
+          "method": "get_configuration_source_provider",
+          "http": "GET",
+          "path": "/configurationSourceProviders/{configurationSourceProviderId}",
+          "positionalArgs": ["configuration_source_provider_id"],
+          "pathParams": {
+            "configurationSourceProviderId": "configuration_source_provider_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "ConfigurationSourceProvider"
+        },
+        {
+          "client": "resource_manager.resource_manager",
+          "method": "create_configuration_source_provider",
+          "http": "POST",
+          "path": "/configurationSourceProviders",
+          "positionalArgs": ["create_configuration_source_provider_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_configuration_source_provider_details",
+          "responseType": "ConfigurationSourceProvider"
+        },
+        {
+          "client": "resource_manager.resource_manager",
+          "method": "delete_configuration_source_provider",
+          "http": "DELETE",
+          "path": "/configurationSourceProviders/{configurationSourceProviderId}",
+          "positionalArgs": ["configuration_source_provider_id"],
+          "pathParams": {
+            "configurationSourceProviderId": "configuration_source_provider_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          }
+        },
+        {
+          "client": "resource_manager.resource_manager",
+          "method": "create_stack",
+          "http": "POST",
+          "path": "/stacks",
+          "positionalArgs": ["create_stack_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_stack_details",
+          "responseType": "Stack"
+        }
+      ],
       "params": [
         {
           "kind": "option",

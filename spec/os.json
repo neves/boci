@@ -17898,6 +17898,298 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "namespace_name",
+            ["item", ["var", "kwargs"], "namespace_name"]
+          ],
+          ["let", "bucket_name", ["item", ["var", "kwargs"], "bucket_name"]],
+          [
+            "let",
+            "retention_rule_id",
+            ["item", ["var", "kwargs"], "retention_rule_id"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "namespace_name"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "namespace_name"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --namespace-name cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "bucket_name"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "bucket_name"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --bucket-name cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "retention_rule_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "retention_rule_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --retention-rule-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "details", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "displayName",
+                ["item", ["var", "kwargs"], "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "time_amount"], null],
+            [
+              [
+                "if",
+                ["cmp", "==", ["item", ["var", "kwargs"], "time_amount"], ""],
+                [["set", ["var", "details"], "duration", null]],
+                [
+                  [
+                    "tryMulti",
+                    [
+                      [
+                        "let",
+                        "timeAmount",
+                        [
+                          "fn",
+                          "int",
+                          ["item", ["var", "kwargs"], "time_amount"]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "ValueError",
+                        null,
+                        [
+                          [
+                            "raise",
+                            "raise click.BadParameter(kwargs['time_amount'] + ' is not a valid integer')",
+                            "BadParameter",
+                            [
+                              "bin",
+                              "+",
+                              ["item", ["var", "kwargs"], "time_amount"],
+                              " is not a valid integer"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    "let",
+                    "duration",
+                    ["dict", ["timeAmount", ["var", "timeAmount"]]]
+                  ],
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "isnot",
+                      ["item", ["var", "kwargs"], "time_unit"],
+                      null
+                    ],
+                    [
+                      [
+                        "set",
+                        ["var", "duration"],
+                        "timeUnit",
+                        [
+                          "call",
+                          "upper",
+                          [
+                            "fn",
+                            "str",
+                            ["item", ["var", "kwargs"], "time_unit"]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "usage",
+                        "Parameter --time-unit is required when --time-amount is specified"
+                      ]
+                    ]
+                  ],
+                  [
+                    "set",
+                    ["var", "details"],
+                    "duration",
+                    ["fn", "parse", "duration", ["var", "duration"]]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "time_rule_locked"],
+              null
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["item", ["var", "kwargs"], "time_rule_locked"],
+                  ""
+                ],
+                [["set", ["var", "details"], "timeRuleLocked", null]],
+                [
+                  [
+                    "set",
+                    ["var", "details"],
+                    "timeRuleLocked",
+                    [
+                      "fn",
+                      "cliDatetimeConvert",
+                      ["item", ["var", "kwargs"], "time_rule_locked"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["let", "args", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "if_match"], null],
+            [
+              [
+                "set",
+                ["var", "args"],
+                "if_match",
+                ["item", ["var", "kwargs"], "if_match"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "args"],
+            "opc_client_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "object_storage", "object_storage"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["namespace_name", ["var", "namespace_name"]],
+                ["bucket_name", ["var", "bucket_name"]],
+                ["retention_rule_id", ["var", "retention_rule_id"]],
+                ["update_retention_rule_details", ["var", "details"]]
+              ],
+              ["var", "args"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "object_storage.object_storage",
+          "method": "update_retention_rule",
+          "http": "PUT",
+          "path": "/n/{namespaceName}/b/{bucketName}/retentionRules/{retentionRuleId}",
+          "positionalArgs": [
+            "namespace_name",
+            "bucket_name",
+            "retention_rule_id",
+            "update_retention_rule_details"
+          ],
+          "pathParams": {
+            "namespaceName": "namespace_name",
+            "bucketName": "bucket_name",
+            "retentionRuleId": "retention_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-client-request-id": {
+              "arg": "opc_client_request_id"
+            }
+          },
+          "body": "update_retention_rule_details",
+          "responseType": "RetentionRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",

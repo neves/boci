@@ -528,10 +528,21 @@ async function main(io: Invocation): Promise<void> {
     }
   }
   const values: Record<string, unknown> = {};
+  const paramSources: Record<
+    string,
+    "COMMANDLINE" | "DEFAULT" | "DEFAULT_MAP" | "ENVIRONMENT"
+  > = {};
   let osObjectGetOutputFile: OutputFileHandle | undefined;
   try {
     for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
       if (p.name === "from_json") continue;
+      if (parsed.opts[p.name] !== undefined) {
+        paramSources[p.name] = "COMMANDLINE";
+      } else if (p.name in fromJsonDefaults) {
+        paramSources[p.name] = "DEFAULT_MAP";
+      } else {
+        paramSources[p.name] = "DEFAULT";
+      }
       const rawVal =
         parsed.opts[p.name] !== undefined
           ? parsed.opts[p.name]
@@ -644,7 +655,7 @@ async function main(io: Invocation): Promise<void> {
     const http = specCmd.operation?.http ?? "";
     const engineRoute =
       (key === "ns get" && name === "os") ||
-      (isImplemented(`${name} ${key}`, specCmd) &&
+      (isImplemented(canon.join(" "), specCmd) &&
         (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) ||
           Boolean(
             specCmd.program &&
@@ -1501,6 +1512,9 @@ async function main(io: Invocation): Promise<void> {
                 ? wrapperRootValues.max_attempts
                 : null,
             writtenFiles: new Set<number>(),
+            paramSources,
+            regions: index.regions,
+            datetime: index.datetime,
           },
           stdin,
         );

@@ -3048,4 +3048,81 @@ print(json.dumps({"ok": True, "stmts": len(prog)}))
     const parsed = JSON.parse(new TextDecoder().decode(res.stdout));
     expect(parsed.ok).toBe(true);
   });
+
+  test("batch 9 primitives: parameter source, regions, bytes/rawStream, bytearray/BytesIO, CliDatetime, setClientRegion, raiseMulti", () => {
+    const regions = {
+      regions: ["us-phoenix-1", "us-ashburn-1", "us-langley-1"],
+      shortNames: { phx: "us-phoenix-1", iad: "us-ashburn-1" },
+      regionRealms: {
+        "us-phoenix-1": "oc1",
+        "us-ashburn-1": "oc1",
+        "us-langley-1": "oc2",
+      },
+      realms: { oc1: "oraclecloud.com", oc2: "oraclegovcloud.com" },
+      serviceEndpoints: {},
+      domainFormat: "https://{service}.{region}.{secondLevelDomain}",
+    };
+    const out = runProgram(
+      [
+        ["let", "src1", ["fn", "getParameterSource", "auth_id"]],
+        ["let", "src2", ["fn", "getParameterSource", "missing"]],
+        ["let", "r1", ["fn", "isRegion", "us-phoenix-1"]],
+        ["let", "r2", ["fn", "isRegion", "phx"]],
+        ["let", "r3", ["fn", "isRegion", "nope"]],
+        ["let", "rlm1", ["fn", "getRealmFromRegion", "us-langley-1"]],
+        ["let", "rlm2", ["fn", "getRealmFromRegion", "phx"]],
+        ["let", "buf", ["bytes", ""]],
+        ["aug", "+", "buf", ["bytes", "aGVsbG8="]],
+        ["let", "ba", ["fn", "bytearray", ["var", "buf"]]],
+        ["let", "bio", ["fn", "bytesIO", ["var", "ba"]]],
+        [
+          "let",
+          "txt",
+          ["call", "decode", ["call", "read", ["var", "bio"]], "utf-8"],
+        ],
+        [
+          "invoke",
+          [
+            ["src1", ["var", "src1"]],
+            ["src2", ["var", "src2"]],
+            ["r1", ["var", "r1"]],
+            ["r2", ["var", "r2"]],
+            ["r3", ["var", "r3"]],
+            ["rlm1", ["var", "rlm1"]],
+            ["rlm2", ["var", "rlm2"]],
+            ["txt", ["var", "txt"]],
+          ],
+          null,
+        ],
+      ],
+      {},
+      [],
+      (_n, v) => v,
+      [],
+      undefined,
+      {
+        paramSources: { auth_id: "COMMANDLINE" },
+        regions,
+      },
+    );
+    expect(out.kwargs).toEqual({
+      src1: "COMMANDLINE",
+      src2: "DEFAULT",
+      r1: true,
+      r2: false,
+      r3: false,
+      rlm1: "oc2",
+      rlm2: "oc1",
+      txt: "hello",
+    });
+
+    expect(() =>
+      runProgram(
+        [["raiseMulti", "raise Exception('a', 'b')", "Exception", "a", "b"]],
+        {},
+        [],
+        (_n, v) => v,
+      ),
+    ).toThrow("('a', 'b')");
+  });
 });

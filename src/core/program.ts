@@ -11,12 +11,18 @@ import { expandHomeDir } from "../utils/expandHomeDir.ts";
 import { decodePythonUtf8 } from "../utils/utf8.ts";
 import { isZipBuffer } from "../utils/zip.ts";
 import { inheritedDiscriminator, type Model, type Models } from "./camelize.ts";
-import type { TypedParam } from "./convert.ts";
+import type { DatetimeSpec, TypedParam } from "./convert.ts";
+import {
+  BadParameter,
+  convertCliDatetime,
+  pyRepr,
+  TimestampRangeError,
+} from "./convert.ts";
+import type { RegionsSpec } from "./endpoint.ts";
 import type { OperationResult } from "./operation.ts";
 import { renderModel } from "./output.ts";
 import { expandVars } from "./rc.ts";
 import { kwarg, truthy } from "./checks.ts";
-import { pyRepr } from "./convert.ts";
 
 export type Expr = null | boolean | number | string | Expr[];
 export type Statement = (string | Expr | Statement[])[];
@@ -563,10 +569,10 @@ class ProgramBoundMethod {
   ) {}
 }
 
-/** OCI SDK retry strategy / builder (`DEFAULT_RETRY_STRATEGY`, `RetryStrategyBuilder`). */
+/** OCI SDK retry strategy / builder (`DEFAULT_RETRY_STRATEGY`, `NoneRetryStrategy`, `RetryStrategyBuilder`). */
 class ProgramRetryStrategy {
   constructor(
-    readonly mode: "default" | "builder",
+    readonly mode: "default" | "builder" | "none",
     readonly opts: Dict = {},
   ) {}
 }
@@ -649,6 +655,12 @@ export type ProgramContext = {
   echoCount?: number;
   sleepCount?: number;
   writtenFiles?: Set<number>;
+  paramSources?: Record<
+    string,
+    "COMMANDLINE" | "DEFAULT" | "DEFAULT_MAP" | "ENVIRONMENT"
+  >;
+  regions?: RegionsSpec;
+  datetime?: DatetimeSpec;
 };
 
 /**
@@ -2050,6 +2062,13 @@ export function runProgram(
           break;
       }
     } else if (obj instanceof ProgramObject) {
+      if (obj.kind === "http.raw" && method === "rawStream") {
+        const resp = obj.fields._response;
+        if (resp instanceof ProgramHttpResponse) {
+          const size = typeof args[0] === "number" ? args[0] : 65536;
+          return resp.iterContent(size);
+        }
+      }
       const key = args[0] as string;
       switch (method) {
         case "get":
@@ -2509,9 +2528,56 @@ export function runProgram(
         );
       }
       case "retryStrategy":
-        return new ProgramRetryStrategy("default", {});
+        return new ProgramRetryStrategy(a === "none" ? "none" : "default", {});
       case "retryStrategyBuilder":
         return new ProgramRetryStrategy("builder", isDict(a) ? { ...a } : {});
+      case "getParameterSource":
+        return context.paramSources?.[String(a)] ?? "DEFAULT";
+      case "isRegion": {
+        if (typeof a !== "string" || !context.regions) return false;
+        const lower = a.toLowerCase();
+        if (lower in context.regions.shortNames) return false;
+        return context.regions.regions.includes(lower);
+      }
+      case "getRealmFromRegion": {
+        if (typeof a !== "string" || !context.regions) return "oc1";
+        const lower = a.toLowerCase();
+        const full = context.regions.shortNames[lower] ?? lower;
+        if (!context.regions.regions.includes(full)) return "oc1";
+        return context.regions.regionRealms[full] ?? "oc1";
+      }
+      case "bytearray": {
+        if (args.length === 0) return new Uint8Array(0);
+        if (a instanceof Uint8Array) return new Uint8Array(a);
+        if (typeof a === "string") return new TextEncoder().encode(a);
+        if (typeof a === "number" && Number.isInteger(a) && a >= 0)
+          return new Uint8Array(a);
+        if (Array.isArray(a) && a.every((x) => typeof x === "number"))
+          return Uint8Array.from(a as number[]);
+        throw new ProgramUnsupported("bytearray()");
+      }
+      case "bytesIO": {
+        if (args.length === 0 || a === null || a === undefined)
+          return new ProgramFile("rb", new Uint8Array(0));
+        if (a instanceof Uint8Array)
+          return new ProgramFile("rb", new Uint8Array(a));
+        if (typeof a === "string")
+          return new ProgramFile("rb", new TextEncoder().encode(a));
+        throw new ProgramUnsupported("io.BytesIO()");
+      }
+      case "cliDatetimeConvert": {
+        try {
+          return convertCliDatetime(pyStr(a), context.datetime);
+        } catch (err) {
+          if (err instanceof BadParameter) {
+            throw new ProgramRaise("BadParameter", err.message);
+          }
+          if (err instanceof TimestampRangeError) {
+            throw new ProgramRaise("ValueError", err.message);
+          }
+          throw err;
+        }
+      }
       case "simpleResponse": {
         const hdrs =
           b instanceof ProgramHeaders ||
@@ -3174,6 +3240,17 @@ export function runProgram(
     if (!Array.isArray(e)) return e;
     const [op, ...rest] = e as [string, ...Expr[]];
     switch (op) {
+      case "bytes":
+        return new Uint8Array(Buffer.from(rest[0] as string, "base64"));
+      case "setClientRegion": {
+        const clientObj = evaluate(rest[0] as Expr);
+        const region = evaluate(rest[1] as Expr);
+        if (!(clientObj instanceof ProgramObject) || typeof region !== "string")
+          throw new ProgramUnsupported("set_region");
+        clientObj.fields.region = region;
+        clientObj.fields.endpoint = null;
+        return null;
+      }
       case "var": {
         const name = rest[0] as string;
         if (!(name in env)) throw new ProgramUnsupported(`NameError: ${name}`);
@@ -3252,6 +3329,9 @@ export function runProgram(
           if (attr === "headers") return obj.headers;
           if (attr === "text") return obj.text;
           if (attr === "content") return obj.content;
+          if (attr === "raw") {
+            return new ProgramObject("http.raw", { _response: obj });
+          }
           if (attr === "request") {
             return new ProgramObject("http.request", {
               url: obj.requestUrl,
@@ -3787,6 +3867,12 @@ export function runProgram(
     }
     if (opName === "+" && typeof a === "string" && typeof b === "string")
       return a + b;
+    if (opName === "+" && a instanceof Uint8Array && b instanceof Uint8Array) {
+      const merged = new Uint8Array(a.length + b.length);
+      merged.set(a, 0);
+      merged.set(b, a.length);
+      return merged;
+    }
     if (opName === "%" && typeof a === "string") return pyPercentFormat(a, b);
     if (opName === "*" && typeof a === "string" && typeof b === "number")
       return b <= 0 ? "" : a.repeat(Math.trunc(b));
@@ -4139,6 +4225,14 @@ export function runProgram(
           const arg = pyStr(evaluate(rest[2] as Expr));
           // str(KeyError(x)) is repr(x).
           throw new ProgramRaise(cls, cls === "KeyError" ? pyRepr(arg) : arg);
+        }
+        case "raiseMulti": {
+          const cls = rest[1] as string;
+          const vals = rest
+            .slice(2)
+            .map((argExpr) => evaluate(argExpr as Expr));
+          const msg = `(${vals.map((v) => (typeof v === "string" ? pyRepr(v) : pyStr(v))).join(", ")})`;
+          throw new ProgramRaise(cls, msg);
         }
         case "render": {
           const res = evaluate(rest[0] as Expr);

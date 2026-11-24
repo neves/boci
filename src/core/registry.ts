@@ -331,20 +331,7 @@ const IMPLEMENTED = new Set<string>([
 ]);
 
 // Generated and Tier A commands that don't match the Reference CLI; each entry includes its reason.
-export const EXCLUDED = new Map<string, string>([
-  // Reference CLI ignores --operation-name and sends the fixed SDK operation name;
-  // the generated path binding cannot represent that command-specific behavior.
-  [
-    "ocvs sddc retrieve-sddc-operation-status",
-    "Reference CLI sends a fixed operation name",
-  ],
-  // Tier A wrapper the Reference CLI can't run: the delegated generated command rejects
-  // the injected `operation` kwarg with a TypeError before any request.
-  [
-    "resource-manager job create-plan-rollback-job",
-    "Reference delegate rejects the injected operation argument",
-  ],
-]);
+export const EXCLUDED = new Map<string, string>([]);
 
 export type Command = ServiceSpec["commands"][string] & {
   bindings?: Record<string, unknown>[];
@@ -438,11 +425,12 @@ export function isImplemented(key: string, command?: Command): boolean {
 export async function implementedLookup(
   keys: Iterable<string>,
 ): Promise<(key: string) => boolean> {
-  const { services } = await loadIndex();
+  const { services, nonServiceCommands } = await loadIndex();
+  const nonService = new Set(nonServiceCommands);
   const specs = new Map<string, ServiceSpec>();
   for (const key of keys) {
     const service = key.split(" ")[0] ?? "";
-    if (services[service] && !specs.has(service))
+    if ((services[service] || nonService.has(service)) && !specs.has(service))
       specs.set(service, await loadService(service));
   }
   return (key) => {

@@ -28,7 +28,12 @@ import { Exit, type Invocation } from "../lib/io.ts";
 import { pyStrip } from "../lib/configparser.ts";
 import { failingCheck, type UsageCheck } from "./checks.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
-import { ProgramFile, ProgramRaise, ProgramUnsupported } from "./program.ts";
+import {
+  ProgramFile,
+  ProgramHttpResponse,
+  ProgramRaise,
+  ProgramUnsupported,
+} from "./program.ts";
 import {
   SecurityTokenDecodeError,
   SecurityTokenKeyError,
@@ -70,6 +75,8 @@ export type OperationResult = {
   /** The last response and its body. */
   response: Response;
   raw: string;
+  /** Raw bytes when responseType is "stream". */
+  bytes?: Uint8Array;
   /** --all was given. */
   allPages: boolean;
   /** With --all on a list operation, every page's items in order. */
@@ -928,6 +935,11 @@ export async function callOperation(
   });
   const pathParams: Record<string, string> = {};
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const fixed = operation.fixedPathParams?.[name];
+    if (fixed !== undefined) {
+      pathParams[name] = fixed;
+      continue;
+    }
     const value = boundValue(arg);
     if (value === undefined || value === null || isBlank(value)) {
       io.err(
@@ -1089,6 +1101,26 @@ export function bindSdkArgs(
 /** Decode an SDK operation's response body into its `.data` value. */
 export function parseSdkResponseData(result: OperationResult): unknown {
   if (!result.response.ok || !result.operation.responseType) return null;
+  if (
+    result.operation.responseType === "stream" &&
+    result.bytes !== undefined
+  ) {
+    const reason =
+      result.response.statusText ||
+      HTTP_REASON_PHRASES[result.response.status] ||
+      "";
+    const text = new TextDecoder("utf-8", { fatal: false }).decode(
+      result.bytes,
+    );
+    return new ProgramHttpResponse(
+      result.response.status,
+      reason,
+      result.response.headers,
+      result.bytes,
+      text,
+      result.url.toString(),
+    );
+  }
   if (result.raw.trim().length === 0) {
     // Python SDK deserializes an empty 200 body into an empty model instance when a model
     // responseType is declared (all attributes default to None).
@@ -1159,6 +1191,11 @@ export async function callSdkOperation(
   });
   const pathParams: Record<string, string> = {};
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
+    const fixed = operation.fixedPathParams?.[name];
+    if (fixed !== undefined) {
+      pathParams[name] = fixed;
+      continue;
+    }
     const value = sdkArgs[arg];
     if (value !== undefined && value !== null) pathParams[name] = String(value);
   }
@@ -1208,6 +1245,7 @@ export async function callSdkOperation(
     operation.headerParams?.["opc-request-id"] !== undefined
       ? "opc-request-id"
       : "opc-client-request-id";
+  const isStreamResponse = operation.responseType === "stream";
   const sent = await sendServiceRequest(io, sc, {
     method: operation.http,
     pathTemplate: operation.path,
@@ -1217,13 +1255,19 @@ export async function callSdkOperation(
     body: requestBody,
     requestIdHeader,
     enforceContentHeaders: operation.enforce_content_headers,
+    ...(isStreamResponse ? { rawResponse: true } : {}),
   });
+  const bytes =
+    isStreamResponse && sent.response.ok
+      ? new Uint8Array(await sent.response.arrayBuffer())
+      : undefined;
   return {
     operation,
     responseModels: spec.models?.[operation.client.split(".")[0]!],
     url: sent.url,
     response: sent.response,
     raw: sent.raw,
+    ...(bytes !== undefined ? { bytes } : {}),
     allPages: false,
     pageItems: [],
     targetService: sc.targetService,
@@ -1530,12 +1574,10 @@ export async function callRawSessionRequest(
       await Bun.sleep(delay);
       continue;
     }
-    if (attempt >= maxAttempts || !retryableResponse(response, text)) break;
-    const delay = Math.min(
-      1000 * 2 ** (attempt - 1) + Math.random() * 1000,
-      30000,
-    );
-    await Bun.sleep(delay);
+    // Python's requests.Session.request returns the Response directly for any HTTP status
+    // (never raising oci.exceptions.ServiceError), so retry_strategy only retries on
+    // connection/transport errors, never on 4xx/5xx HTTP responses.
+    break;
   }
   const reason =
     response.statusText || HTTP_REASON_PHRASES[response.status] || "";

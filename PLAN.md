@@ -185,10 +185,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `bv volume create`
 - [x] `network remote-peering-connection connect`
 - [x] `network vnic assign-ipv6`
-- [ ] `network vnic assign-private-ip`
+- [x] `network vnic assign-private-ip`
 - [x] `network vnic unassign-ipv6`
 - [x] `network vnic unassign-private-ip`
-- [ ] `raw-request`
+- [x] `raw-request`
 
 ### Database, Functions, Resource Manager, KMS and Artifacts
 
@@ -226,9 +226,9 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `fn function update container-function`
 - [x] `fn function update pbf-function`
 - [x] `resource-manager job create-import-tf-state-job`
-- [ ] `resource-manager job create-plan-rollback-job`
+- [x] `resource-manager job create-plan-rollback-job`
 - [x] `resource-manager job get-job-logs`
-- [ ] `resource-manager stack copy`
+- [x] `resource-manager stack copy`
 - [x] `resource-manager stack create`
 - [x] `resource-manager stack update`
 - [x] `kms management key-version cancel-deletion`
@@ -280,14 +280,14 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `identity-domains apps list`
 - [x] `identity-domains groups list`
 - [x] `identity-domains users list`
-- [ ] `iot digital-twin-instance update`
+- [x] `iot digital-twin-instance update`
 - [x] `media-services media-stream stream-distribution-channel generate-session-token`
 - [x] `model-deployment inference-result predict`
 - [x] `mysql db-system start`
 - [x] `mysql db-system stop`
 - [x] `network-firewall service create`
 - [x] `network-firewall service update`
-- [ ] `ocvs sddc retrieve-sddc-operation-status`
+- [x] `ocvs sddc retrieve-sddc-operation-status`
 - [ ] Object Storage namespace lookup when `--namespace` is omitted. Cover the Engine path using the `GET /n` recording pattern from `os object copy`.
 - [ ] `os bucket delete`
 - [x] `os multipart abort`
@@ -296,7 +296,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `os object list-object-versions`
 - [x] `os object restore`
 - [ ] `os object restore-status`
-- [ ] `os retention-rule update`
+- [x] `os retention-rule update`
 - [ ] `profile diagnose`
 - [ ] `profile list`
 - [x] `rover create-master-key-policy`
@@ -357,7 +357,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `setup instance-principal`
 - [ ] `setup oci-cli-rc`
 - [ ] `setup pkcs11-auth`
-- [ ] `support incident put-attachment`
+- [x] `support incident put-attachment`
 - [x] `waas policy-config update`
 
 ### File transfers, streaming and bulk operations

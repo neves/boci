@@ -77173,6 +77173,787 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "vnic_id", ["call", "pop", ["var", "kwargs"], "vnic_id"]],
+          ["let", "vlan_id", ["call", "pop", ["var", "kwargs"], "vlan_id"]],
+          [
+            "let",
+            "ip_address",
+            ["call", "pop", ["var", "kwargs"], "ip_address"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "hostname_label",
+            ["call", "pop", ["var", "kwargs"], "hostname_label"]
+          ],
+          [
+            "let",
+            "unassign_if_already_assigned",
+            ["call", "pop", ["var", "kwargs"], "unassign_if_already_assigned"]
+          ],
+          [
+            "let",
+            "cidr_prefix_length",
+            ["call", "pop", ["var", "kwargs"], "cidr_prefix_length"]
+          ],
+          [
+            "let",
+            "ipv4_subnet_cidr_at_creation",
+            ["call", "pop", ["var", "kwargs"], "ipv4_subnet_cidr_at_creation"]
+          ],
+          [
+            "let",
+            "route_table_id",
+            ["call", "pop", ["var", "kwargs"], "route_table_id"]
+          ],
+          ["let", "lifetime", ["call", "pop", ["var", "kwargs"], "lifetime"]],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          ["checkNoExtraKwargs", "assign_private_ip"],
+          [
+            "let",
+            "networking_client",
+            ["fn", "client", "core", "virtual_network"]
+          ],
+          ["let", "assign_private_ip_request_body", ["dict"]],
+          ["let", "is_ip_reassignment", false],
+          [
+            "let",
+            "vlan_id",
+            [
+              "evalBlock",
+              [
+                ["let", "_pre_strip.string", ["var", "vlan_id"]],
+                [
+                  "if",
+                  ["cmp", "is", ["var", "_pre_strip.string"], null],
+                  [["return", ""]],
+                  [
+                    [
+                      "if",
+                      ["fn", "isstr", ["var", "_pre_strip.string"]],
+                      [
+                        [
+                          "return",
+                          ["call", "strip", ["var", "_pre_strip.string"]]
+                        ]
+                      ],
+                      [
+                        [
+                          "usage",
+                          [
+                            "call",
+                            "format",
+                            "Unexpected format for string  {} ",
+                            ["var", "_pre_strip.string"]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "vnic_id",
+            [
+              "evalBlock",
+              [
+                ["let", "_pre_strip$1.string", ["var", "vnic_id"]],
+                [
+                  "if",
+                  ["cmp", "is", ["var", "_pre_strip$1.string"], null],
+                  [["return", ""]],
+                  [
+                    [
+                      "if",
+                      ["fn", "isstr", ["var", "_pre_strip$1.string"]],
+                      [
+                        [
+                          "return",
+                          ["call", "strip", ["var", "_pre_strip$1.string"]]
+                        ]
+                      ],
+                      [
+                        [
+                          "usage",
+                          [
+                            "call",
+                            "format",
+                            "Unexpected format for string  {} ",
+                            ["var", "_pre_strip$1.string"]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "not",
+              ["fn", "any", ["list", ["var", "vlan_id"], ["var", "vnic_id"]]]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --vnic-id AND --vlan-id both cannot be whitespace or empty string. You have to specify one and ONLY one of these"
+              ]
+            ],
+            [
+              [
+                "if",
+                ["fn", "all", ["list", ["var", "vlan_id"], ["var", "vnic_id"]]],
+                [
+                  [
+                    "usage",
+                    "Parameter --vnic-id AND --vlan-id both cannot be specified at the same time. You have to specify one and ONLY one of these"
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["var", "vlan_id"],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "ip_address"], null],
+                [
+                  [
+                    "let",
+                    "list_private_ips_response",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "networking_client"],
+                      [],
+                      [
+                        ["ip_address", ["var", "ip_address"]],
+                        ["vlan_id", ["var", "vlan_id"]]
+                      ],
+                      null
+                    ]
+                  ],
+                  [
+                    "let",
+                    "list_private_ips_response_data",
+                    ["attr", "data", ["var", "list_private_ips_response"]]
+                  ],
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "isnot",
+                      ["var", "list_private_ips_response_data"],
+                      null
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "==",
+                          [
+                            "fn",
+                            "len",
+                            ["var", "list_private_ips_response_data"]
+                          ],
+                          1
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "attr",
+                                "vlan_id",
+                                [
+                                  "item",
+                                  ["var", "list_private_ips_response_data"],
+                                  0
+                                ]
+                              ],
+                              ["var", "vlan_id"]
+                            ],
+                            [
+                              [
+                                "do",
+                                [
+                                  "fn",
+                                  "echo",
+                                  [
+                                    "call",
+                                    "format",
+                                    "Taking no action as IP address {} is already assigned to VLAN {}",
+                                    ["var", "ip_address"],
+                                    ["var", "vlan_id"]
+                                  ],
+                                  null,
+                                  true,
+                                  true
+                                ]
+                              ],
+                              ["return", null]
+                            ],
+                            []
+                          ]
+                        ],
+                        []
+                      ]
+                    ],
+                    []
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "vlanId",
+                ["var", "vlan_id"]
+              ]
+            ],
+            [
+              [
+                "let",
+                "vnic",
+                [
+                  "attr",
+                  "data",
+                  [
+                    "sdk",
+                    1,
+                    ["var", "networking_client"],
+                    [["var", "vnic_id"]],
+                    [],
+                    null
+                  ]
+                ]
+              ],
+              ["let", "subnet_id", ["attr", "subnet_id", ["var", "vnic"]]],
+              [
+                "if",
+                ["cmp", "isnot", ["var", "ip_address"], null],
+                [
+                  [
+                    "let",
+                    "list_private_ips_response",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "networking_client"],
+                      [],
+                      [
+                        ["ip_address", ["var", "ip_address"]],
+                        ["subnet_id", ["var", "subnet_id"]]
+                      ],
+                      null
+                    ]
+                  ],
+                  [
+                    "let",
+                    "list_private_ips_response_data",
+                    ["attr", "data", ["var", "list_private_ips_response"]]
+                  ],
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "isnot",
+                      ["var", "list_private_ips_response_data"],
+                      null
+                    ],
+                    [
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "==",
+                          [
+                            "fn",
+                            "len",
+                            ["var", "list_private_ips_response_data"]
+                          ],
+                          1
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "attr",
+                                "vnic_id",
+                                [
+                                  "item",
+                                  ["var", "list_private_ips_response_data"],
+                                  0
+                                ]
+                              ],
+                              ["var", "vnic_id"]
+                            ],
+                            [
+                              [
+                                "do",
+                                [
+                                  "fn",
+                                  "echo",
+                                  [
+                                    "call",
+                                    "format",
+                                    "Taking no action as IP address {} is already assigned to VNIC {}",
+                                    ["var", "ip_address"],
+                                    ["var", "vnic_id"]
+                                  ],
+                                  null,
+                                  true,
+                                  true
+                                ]
+                              ],
+                              ["return", null]
+                            ],
+                            []
+                          ],
+                          [
+                            "if",
+                            ["not", ["var", "unassign_if_already_assigned"]],
+                            [
+                              [
+                                "exit",
+                                [
+                                  "call",
+                                  "format",
+                                  "IP address {} is already assigned to a different VNIC: {}. To reassign it, re-run this command with the --unassign-if-already-assigned option",
+                                  ["var", "ip_address"],
+                                  [
+                                    "attr",
+                                    "vnic_id",
+                                    [
+                                      "item",
+                                      ["var", "list_private_ips_response_data"],
+                                      0
+                                    ]
+                                  ]
+                                ]
+                              ]
+                            ],
+                            []
+                          ],
+                          ["let", "is_ip_reassignment", true]
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              ">",
+                              [
+                                "fn",
+                                "len",
+                                ["var", "list_private_ips_response_data"]
+                              ],
+                              1
+                            ],
+                            [
+                              [
+                                "exit",
+                                [
+                                  "call",
+                                  "format",
+                                  "IP address {} appeared {} times in subnet with OCID {}. It is expected to appear at most once (Request ID: {})",
+                                  ["var", "ip_address"],
+                                  [
+                                    "fn",
+                                    "len",
+                                    ["var", "list_private_ips_response_data"]
+                                  ],
+                                  ["var", "subnet_id"],
+                                  [
+                                    "attr",
+                                    "request_id",
+                                    ["var", "list_private_ips_response"]
+                                  ]
+                                ]
+                              ]
+                            ],
+                            []
+                          ]
+                        ]
+                      ]
+                    ],
+                    []
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "vnicId",
+                ["var", "vnic_id"]
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["var", "hostname_label"], null],
+                [
+                  [
+                    "set",
+                    ["var", "assign_private_ip_request_body"],
+                    "hostnameLabel",
+                    ["var", "hostname_label"]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "route_table_id"], null],
+            [
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "routeTableId",
+                ["var", "route_table_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifetime"], null],
+            [
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "lifetime",
+                ["var", "lifetime"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "route_table_id"], null],
+            [
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "routeTableId",
+                ["var", "route_table_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifetime"], null],
+            [
+              [
+                "set",
+                ["var", "assign_private_ip_request_body"],
+                "lifetime",
+                ["var", "lifetime"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "is_ip_reassignment"]],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "ip_address"], null],
+                [
+                  [
+                    "set",
+                    ["var", "assign_private_ip_request_body"],
+                    "ipAddress",
+                    ["var", "ip_address"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["var", "cidr_prefix_length"], null],
+                [
+                  [
+                    "set",
+                    ["var", "assign_private_ip_request_body"],
+                    "cidrPrefixLength",
+                    ["var", "cidr_prefix_length"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["var", "ipv4_subnet_cidr_at_creation"], null],
+                [
+                  [
+                    "set",
+                    ["var", "assign_private_ip_request_body"],
+                    "ipv4SubnetCidrAtCreation",
+                    ["var", "ipv4_subnet_cidr_at_creation"]
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  2,
+                  ["var", "networking_client"],
+                  [["var", "assign_private_ip_request_body"]],
+                  [],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  3,
+                  ["var", "networking_client"],
+                  [
+                    [
+                      "attr",
+                      "id",
+                      ["item", ["var", "list_private_ips_response_data"], 0]
+                    ],
+                    ["var", "assign_private_ip_request_body"]
+                  ],
+                  [],
+                  null
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "private_ip_id",
+            ["attr", "id", ["attr", "data", ["var", "result"]]]
+          ],
+          [
+            "let",
+            "get_private_id_result",
+            [
+              "sdk",
+              4,
+              ["var", "networking_client"],
+              [["var", "private_ip_id"]],
+              [],
+              null
+            ]
+          ],
+          ["render", ["var", "get_private_id_result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.virtual_network",
+          "method": "list_private_ips",
+          "http": "GET",
+          "path": "/privateIps",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "ipAddress": {
+              "arg": "ip_address"
+            },
+            "subnetId": {
+              "arg": "subnet_id"
+            },
+            "vnicId": {
+              "arg": "vnic_id"
+            },
+            "ipState": {
+              "arg": "ip_state"
+            },
+            "lifetime": {
+              "arg": "lifetime"
+            },
+            "vlanId": {
+              "arg": "vlan_id"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[PrivateIp]"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "get_vnic",
+          "http": "GET",
+          "path": "/vnics/{vnicId}",
+          "positionalArgs": ["vnic_id"],
+          "pathParams": {
+            "vnicId": "vnic_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Vnic"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "create_private_ip",
+          "http": "POST",
+          "path": "/privateIps",
+          "positionalArgs": ["create_private_ip_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_private_ip_details",
+          "responseType": "PrivateIp"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "update_private_ip",
+          "http": "PUT",
+          "path": "/privateIps/{privateIpId}",
+          "positionalArgs": ["private_ip_id", "update_private_ip_details"],
+          "pathParams": {
+            "privateIpId": "private_ip_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "update_private_ip_details",
+          "responseType": "PrivateIp"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "get_private_ip",
+          "http": "GET",
+          "path": "/privateIps/{privateIpId}",
+          "positionalArgs": ["private_ip_id"],
+          "pathParams": {
+            "privateIpId": "private_ip_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "PrivateIp"
+        }
+      ],
       "params": [
         {
           "kind": "option",

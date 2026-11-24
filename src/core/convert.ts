@@ -140,6 +140,8 @@ function convertOne(
       return ciChoice(p, value);
     case "oci_cli.custom_types.cli_datetime.CliDatetime":
       return toDatetime(p, value, datetime);
+    case "services.iot.src.oci_cli_iot.iot_cli_extended.NullableAuthId":
+      return value.toLowerCase() === "null" ? null : value;
     default:
       return value; // text, complex type (JSON parsed later), from-json, file, path
   }
@@ -206,6 +208,31 @@ function ciChoice(p: TypedParam, value: string): string {
 }
 
 // ---------------------------------------------------------------- datetime
+
+/** oci_cli.custom_types.cli_datetime.CliDatetime.convert → RFC 3339 UTC with microseconds. */
+export function convertCliDatetime(
+  value: string,
+  spec?: DatetimeSpec,
+  rounding?: string,
+): string {
+  return toDatetime(
+    {
+      kind: "option",
+      name: "",
+      opts: [],
+      secondaryOpts: [],
+      multiple: false,
+      count: false,
+      nargs: 1,
+      isFlag: false,
+      type: "datetime",
+      typeClass: "oci_cli.custom_types.cli_datetime.CliDatetime",
+      ...(rounding ? { datetimeRounding: rounding } : {}),
+    },
+    value,
+    spec,
+  );
+}
 
 /** oci_cli.custom_types.cli_datetime.CliDatetime.convert → RFC 3339 UTC with microseconds. */
 function toDatetime(p: TypedParam, value: string, spec?: DatetimeSpec): string {

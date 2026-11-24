@@ -119,8 +119,64 @@ function maskExecCredential(s: string): string {
   );
 }
 
+/**
+ * Normalize a `raw-request` JSON envelope on stdout: mask the server's dynamic `Date`
+ * response header and lowercase response header keys (WHATWG Fetch lowercases `Headers`,
+ * while Python `requests` preserves wire casing; see DIVERGENCES.md).
+ */
+function maskRawRequest(s: string): string {
+  if (!s.includes('"headers":') || !s.includes('"status":')) return s;
+  try {
+    const parsed: unknown = JSON.parse(s);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      return s;
+    }
+    const obj = parsed as Record<string, unknown>;
+    const keys = Object.keys(obj).sort();
+    if (
+      keys.length !== 3 ||
+      keys[0] !== "data" ||
+      keys[1] !== "headers" ||
+      keys[2] !== "status" ||
+      typeof obj.status !== "string" ||
+      !/^\d{3}\b/.test(obj.status) ||
+      typeof obj.headers !== "object" ||
+      obj.headers === null ||
+      Array.isArray(obj.headers)
+    ) {
+      return s;
+    }
+    const normalizedHeaders: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(
+      obj.headers as Record<string, unknown>,
+    )) {
+      const lower = k.toLowerCase();
+      normalizedHeaders[lower] =
+        lower === "date" && typeof v === "string"
+          ? v.replace(
+              /^[A-Za-z]{3}, \d{2} [A-Za-z]{3} \d{4} \d{2}:\d{2}:\d{2} GMT$/,
+              "<http-date>",
+            )
+          : v;
+    }
+    const sortedHeaders = Object.fromEntries(
+      Object.entries(normalizedHeaders).sort(([a], [b]) => a.localeCompare(b)),
+    );
+    const trailing = s.endsWith("\n") ? "\n" : "";
+    return `${JSON.stringify({ data: obj.data, headers: sortedHeaders, status: obj.status }, null, 2)}${trailing}`;
+  } catch {
+    return s;
+  }
+}
+
 export function applyMasks(s: string): string {
-  return maskExecCredential(
-    OUTPUT_MASKS.reduce((acc, [re, to]) => acc.replace(re, to), s),
+  return maskRawRequest(
+    maskExecCredential(
+      OUTPUT_MASKS.reduce((acc, [re, to]) => acc.replace(re, to), s),
+    ),
   );
 }

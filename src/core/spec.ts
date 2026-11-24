@@ -21,6 +21,7 @@ export type OperationSpec = {
   responseType?: string;
   queryParams: Record<string, { arg?: string; collectionFormat?: string }>;
   pathParams?: Record<string, string>;
+  fixedPathParams?: Record<string, string>;
   headerParams?: Record<string, { arg?: string; value?: string }>;
   body?: string;
   enforce_content_headers?: boolean;

@@ -4821,6 +4821,383 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "digital_twin_instance_id",
+            ["item", ["var", "kwargs"], "digital_twin_instance_id"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "digital_twin_instance_id"]],
+              ["not", ["call", "strip", ["var", "digital_twin_instance_id"]]]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --digital-twin-instance-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "force"]],
+              [
+                "fn",
+                "any",
+                [
+                  "map",
+                  ["list", "gateways", "freeform_tags", "defined_tags"],
+                  "name",
+                  ["item", ["var", "kwargs"], ["var", "name"]]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "not",
+                  [
+                    "fn",
+                    "confirm",
+                    "WARNING: Updates to gateways and freeform-tags and defined-tags will replace any existing values. Are you sure you want to continue?"
+                  ]
+                ],
+                [["abort"]],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "request_kwargs",
+            [
+              "dict",
+              [
+                "opc_request_id",
+                ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "if_match"], null],
+            [
+              [
+                "set",
+                ["var", "request_kwargs"],
+                "if_match",
+                ["item", ["var", "kwargs"], "if_match"]
+              ]
+            ],
+            []
+          ],
+          ["let", "details", ["dict"]],
+          [
+            "let",
+            "scalar_fields",
+            [
+              "dict",
+              ["connectivity_type", "connectivityType"],
+              ["external_key", "externalKey"],
+              ["display_name", "displayName"],
+              ["description", "description"],
+              ["digital_twin_adapter_id", "digitalTwinAdapterId"],
+              ["digital_twin_model_id", "digitalTwinModelId"],
+              ["digital_twin_model_spec_uri", "digitalTwinModelSpecUri"]
+            ]
+          ],
+          [
+            "for",
+            ["parameter_name", "payload_name"],
+            ["call", "items", ["var", "scalar_fields"]],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], ["var", "parameter_name"]],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "details"],
+                    ["var", "payload_name"],
+                    ["item", ["var", "kwargs"], ["var", "parameter_name"]]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["fn", "getParameterSource", "auth_id"],
+              "DEFAULT"
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "authId",
+                ["item", ["var", "kwargs"], "auth_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "for",
+            ["parameter_name", "payload_name"],
+            [
+              "list",
+              ["list", "gateways", "gateways"],
+              ["list", "freeform_tags", "freeformTags"],
+              ["list", "defined_tags", "definedTags"]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], ["var", "parameter_name"]],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "details"],
+                    ["var", "payload_name"],
+                    [
+                      "fn",
+                      "parse",
+                      ["var", "parameter_name"],
+                      ["item", ["var", "kwargs"], ["var", "parameter_name"]]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          ["let", "client", ["fn", "client", "iot", "iot"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                [
+                  "digital_twin_instance_id",
+                  ["var", "digital_twin_instance_id"]
+                ],
+                ["update_digital_twin_instance_details", ["var", "details"]]
+              ],
+              ["var", "request_kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "isnot",
+                      ["item", ["var", "kwargs"], "max_wait_seconds"],
+                      null
+                    ],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["item", ["var", "kwargs"], "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "isnot",
+                      ["item", ["var", "kwargs"], "wait_interval_seconds"],
+                      null
+                    ],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["item", ["var", "kwargs"], "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["item", ["var", "kwargs"], "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["item", ["var", "kwargs"], "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "iot.iot",
+          "method": "update_digital_twin_instance",
+          "http": "PUT",
+          "path": "/digitalTwinInstances/{digitalTwinInstanceId}",
+          "positionalArgs": [
+            "digital_twin_instance_id",
+            "update_digital_twin_instance_details"
+          ],
+          "pathParams": {
+            "digitalTwinInstanceId": "digital_twin_instance_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "update_digital_twin_instance_details",
+          "responseType": "DigitalTwinInstance"
+        },
+        {
+          "client": "iot.iot",
+          "method": "get_digital_twin_instance",
+          "http": "GET",
+          "path": "/digitalTwinInstances/{digitalTwinInstanceId}",
+          "positionalArgs": ["digital_twin_instance_id"],
+          "pathParams": {
+            "digitalTwinInstanceId": "digital_twin_instance_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DigitalTwinInstance"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -82,6 +82,17 @@ def sdk_operation(client_cls, method: str) -> dict:
         "queryParams": {},
         "headerParams": {},
     }
+    const_locals = {}
+    for st in fn.body:
+        if (
+            isinstance(st, ast.Assign)
+            and len(st.targets) == 1
+            and isinstance(st.targets[0], ast.Name)
+        ):
+            if st.targets[0].id == "path_params":
+                break
+            if isinstance(st.value, ast.Constant) and isinstance(st.value.value, str):
+                const_locals[st.targets[0].id] = st.value.value
     for target, key in (("path_params", "pathParams"), ("query_params", "queryParams"), ("header_params", "headerParams")):
         d = _first_dict(fn, target)
         if d is None:
@@ -89,6 +100,13 @@ def sdk_operation(client_cls, method: str) -> dict:
         for k, v in zip(d.keys, d.values):
             if isinstance(k, ast.Constant):
                 out[key][k.value] = _param_value(v)
+    fixed_path = {
+        k: const_locals[v["arg"]]
+        for k, v in out["pathParams"].items()
+        if v.get("arg") in const_locals
+    }
+    if fixed_path:
+        out["fixedPathParams"] = fixed_path
     out["pathParams"] = {k: v.get("arg") for k, v in out["pathParams"].items()}
     # Constant keyword arguments to call_api (response_type, enforce_content_headers, ...) and body.
     for node in ast.walk(fn):
@@ -398,6 +416,31 @@ def custom_delegate(callback, client_map, custom_params):
         if value in renames:
             operation["pathParams"][key] = renames[value]
     generated_params = {p.name for p in getattr(obj, "params", [])}
+    # If the wrapper forwards kwargs that the delegate doesn't accept (e.g. a broken
+    # delegate target in oci-cli like resource-manager job create-plan-rollback-job),
+    # fall back to Tier B so the compiled program reproduces the delegate's TypeError.
+    if any(kw.arg is None for kw in call.keywords):
+        dropped = set(renames.values())
+        for node in ast.walk(ast.Module(body=fn.body[:-1], type_ignores=[])):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "pop"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "kwargs"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[0].value, str)
+            ):
+                dropped.add(node.args[0].value)
+            elif _kwargs_del(node):
+                for t in node.targets:
+                    c = _subscript_chain(t)
+                    if c:
+                        dropped.add(c[1][0])
+        forwarded = (custom_params - dropped - {"help"}) | set(renames.keys()) | set(constants.keys())
+        if forwarded - generated_params:
+            return "B", None
     bindings = command_bindings(delegated_callback, operation["method"], generated_params)
     for binding in bindings:
         name = binding.get("param")

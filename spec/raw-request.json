@@ -76,6 +76,336 @@
       "callback": "oci_cli.raw_request_cli.make_raw_request",
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "target_uri",
+            ["call", "pop", ["var", "kwargs"], "target_uri"]
+          ],
+          [
+            "let",
+            "http_method",
+            ["call", "pop", ["var", "kwargs"], "http_method"]
+          ],
+          [
+            "let",
+            "request_body",
+            ["call", "pop", ["var", "kwargs"], "request_body"]
+          ],
+          [
+            "let",
+            "request_headers",
+            ["call", "pop", ["var", "kwargs"], "request_headers"]
+          ],
+          ["checkNoExtraKwargs", "make_raw_request"],
+          ["let", "_make_raw_request.target_uri", ["var", "target_uri"]],
+          ["let", "_make_raw_request.http_method", ["var", "http_method"]],
+          ["let", "_make_raw_request.request_body", ["var", "request_body"]],
+          [
+            "let",
+            "_make_raw_request.request_headers",
+            ["var", "request_headers"]
+          ],
+          [
+            "if",
+            ["item", ["fn", "ctxObj"], "endpoint"],
+            [
+              [
+                "usage",
+                "The --endpoint parameter cannot be specified with this command"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "==", ["item", ["fn", "ctxObj"], "output"], "table"],
+            [
+              [
+                "usage",
+                "The table output format is not supported with this command"
+              ]
+            ],
+            []
+          ],
+          ["if", ["item", ["fn", "ctxObj"], "debug"], [], []],
+          [
+            "let",
+            "_make_raw_request.jmespath_expression",
+            ["fn", "jmespathFromContext"]
+          ],
+          ["let", "_make_raw_request.parsed_request_body", null],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "_make_raw_request.request_body"], null],
+            [
+              ["let", "_make_raw_request.parsed_request_body", ""],
+              [
+                "if",
+                [
+                  "cmp",
+                  "!=",
+                  ["call", "strip", ["var", "_make_raw_request.request_body"]],
+                  ""
+                ],
+                [
+                  [
+                    "let",
+                    "_make_raw_request.request_body_as_dict",
+                    [
+                      "fn",
+                      "parse",
+                      "request_body",
+                      ["var", "_make_raw_request.request_body"],
+                      "camelize_keys",
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "_make_raw_request.parsed_request_body",
+                    [
+                      "fn",
+                      "dumps",
+                      ["var", "_make_raw_request.request_body_as_dict"]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "_make_raw_request.additional_headers", ["dict"]],
+          [
+            "if",
+            ["var", "_make_raw_request.request_headers"],
+            [
+              [
+                "let",
+                "_make_raw_request.additional_headers",
+                [
+                  "fn",
+                  "parse",
+                  "request_headers",
+                  ["var", "_make_raw_request.request_headers"],
+                  "camelize_keys",
+                  false
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "_make_raw_request.retry_strategy",
+            ["fn", "retryStrategy", "default"]
+          ],
+          [
+            "if",
+            ["item", ["fn", "ctxObj"], "max_attempts"],
+            [
+              [
+                "let",
+                "_make_raw_request.retry_strategy",
+                [
+                  "retryBuilderMethod",
+                  "get_retry_strategy",
+                  [
+                    "retryBuilderMethod",
+                    "add_service_error_check",
+                    [
+                      "retryBuilderMethod",
+                      "add_total_elapsed_time",
+                      [
+                        "retryBuilderMethod",
+                        "add_max_attempts",
+                        ["fn", "retryStrategyBuilder", ["dict"]],
+                        [],
+                        [
+                          [
+                            "max_attempts",
+                            ["item", ["fn", "ctxObj"], "max_attempts"]
+                          ]
+                        ]
+                      ],
+                      [],
+                      [["total_elapsed_time_seconds", 600]]
+                    ],
+                    [],
+                    [
+                      [
+                        "service_error_retry_config",
+                        [
+                          "dict",
+                          ["-1", ["list"]],
+                          ["409", ["list", "IncorrectState", "LockConflict"]],
+                          ["429", ["list"]]
+                        ]
+                      ],
+                      ["service_error_retry_on_any_5xx", true]
+                    ]
+                  ],
+                  [],
+                  []
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["fn", "ctxObj"], "no_retry"],
+            [
+              [
+                "let",
+                "_make_raw_request.retry_strategy",
+                ["fn", "retryStrategy", "none"]
+              ]
+            ],
+            []
+          ],
+          [
+            "withSession",
+            "_make_raw_request.requests_session",
+            ["fn", "rawSession"],
+            [
+              [
+                "let",
+                "_make_raw_request.response",
+                [
+                  "retryCall",
+                  ["var", "_make_raw_request.retry_strategy"],
+                  [
+                    [
+                      "attr",
+                      "request",
+                      ["var", "_make_raw_request.requests_session"]
+                    ]
+                  ],
+                  [
+                    ["method", ["var", "_make_raw_request.http_method"]],
+                    ["url", ["var", "_make_raw_request.target_uri"]],
+                    ["data", ["var", "_make_raw_request.parsed_request_body"]],
+                    ["headers", ["var", "_make_raw_request.additional_headers"]]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "let",
+                "_make_raw_request.result_dict",
+                [
+                  "dict",
+                  [
+                    "status",
+                    [
+                      "call",
+                      "format",
+                      "{} {}",
+                      [
+                        "attr",
+                        "status_code",
+                        ["var", "_make_raw_request.response"]
+                      ],
+                      ["attr", "reason", ["var", "_make_raw_request.response"]]
+                    ]
+                  ],
+                  [
+                    "headers",
+                    [
+                      "dictcomp",
+                      [
+                        "call",
+                        "items",
+                        [
+                          "attr",
+                          "headers",
+                          ["var", "_make_raw_request.response"]
+                        ]
+                      ],
+                      ["_make_raw_request.key", "_make_raw_request.value"],
+                      ["var", "_make_raw_request.key"],
+                      ["var", "_make_raw_request.value"],
+                      []
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "tryMulti",
+                [
+                  [
+                    "let",
+                    "_make_raw_request.dict_from_response_body",
+                    ["call", "json", ["var", "_make_raw_request.response"]]
+                  ],
+                  [
+                    "if",
+                    ["var", "_make_raw_request.jmespath_expression"],
+                    [
+                      [
+                        "set",
+                        ["var", "_make_raw_request.result_dict"],
+                        "data",
+                        [
+                          "call",
+                          "search",
+                          ["var", "_make_raw_request.jmespath_expression"],
+                          ["var", "_make_raw_request.dict_from_response_body"]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "set",
+                        ["var", "_make_raw_request.result_dict"],
+                        "data",
+                        ["var", "_make_raw_request.dict_from_response_body"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "ValueError",
+                    null,
+                    [
+                      [
+                        "set",
+                        ["var", "_make_raw_request.result_dict"],
+                        "data",
+                        ["attr", "text", ["var", "_make_raw_request.response"]]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "do",
+                [
+                  "fn",
+                  "print",
+                  [
+                    "list",
+                    [
+                      "fn",
+                      "prettyPrintFormat",
+                      ["var", "_make_raw_request.result_dict"]
+                    ]
+                  ],
+                  null,
+                  null,
+                  null
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true,
+        "rawRequests": true
+      },
       "params": [
         {
           "kind": "option",

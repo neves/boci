@@ -37,6 +37,12 @@ const outputOptions = (ctx: CustomCommandContext) => ({
   rc: ctx.rc,
 });
 
+const computeHandler: CustomCommandHandler = async (ctx) => {
+  const { runComputeInstanceListVnics } =
+    await import("../commands/compute/list_vnics.ts");
+  await runComputeInstanceListVnics(ctx);
+};
+
 function lazyOsOutput<T>(
   load: () => Promise<T>,
   pick: (m: T) => (io: Invocation, opts: OsObjectPutOptions) => Promise<void>,
@@ -57,6 +63,7 @@ function lazyOsOutput<T>(
 
 /** Single source of truth for Custom OCI Leaf command handlers, loaded lazily on dispatch. */
 export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
+  ["compute instance list-vnics", computeHandler],
   [
     "profile current",
     async (ctx) => {

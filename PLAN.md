@@ -157,7 +157,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 
 ### Compute, Kubernetes, IAM, Block Volume, Networking and raw requests
 
-- [ ] `compute instance list-vnics`
+- [x] `compute instance list-vnics`
 - [ ] `compute instance attach-vnic`
 - [ ] `compute instance action`
 - [ ] `compute instance change-compartment`

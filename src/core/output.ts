@@ -190,7 +190,7 @@ function sortJson(value: unknown): unknown {
   return value;
 }
 
-function renderModel(
+export function renderModel(
   value: unknown,
   type: string,
   models?: Models[string],

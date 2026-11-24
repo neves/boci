@@ -149,6 +149,25 @@ def _label(e, clients, local_names, module_globals=None):
 COMPOUND = (ast.If, ast.For, ast.While, ast.With, ast.Try)
 
 
+class _LoopExits(ast.NodeTransformer):
+    """`break`/`continue` of the removed loop become `pass`; nested loops keep theirs."""
+
+    def visit_Break(self, node):
+        return ast.copy_location(ast.Pass(), node)
+
+    visit_Continue = visit_Break
+
+    def visit_For(self, node):
+        return node
+
+    visit_AsyncFor = visit_While = visit_For
+
+    def visit_FunctionDef(self, node):
+        return node
+
+    visit_AsyncFunctionDef = visit_Lambda = visit_FunctionDef
+
+
 def _stand_in(node):
     """What replaces a blamed node so the rest of the wrapper can still be compiled."""
     if isinstance(node, COMPOUND):
@@ -156,7 +175,9 @@ def _stand_in(node):
         for h in getattr(node, "handlers", []):
             body += h.body
         body += list(getattr(node, "finalbody", []))
-        return [ast.Pass() if isinstance(s, (ast.Break, ast.Continue)) else s for s in body] or [ast.Pass()]
+        if isinstance(node, (ast.For, ast.While)):
+            body = [_LoopExits().visit(s) for s in body]
+        return body or [ast.Pass()]
     if isinstance(node, ast.stmt):
         return [ast.Pass()]
     if isinstance(node, ast.expr):

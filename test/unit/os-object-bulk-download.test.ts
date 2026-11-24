@@ -9,7 +9,7 @@ import {
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { buildBulkDownloadFilter, pyDirname } from "../../src/commands/os.ts";
-import { setPosixMode } from "../../src/utils/posixMode.ts";
+import { setPosixMode } from "../../src/lib/posixMode.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object bulk-download", () => {

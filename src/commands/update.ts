@@ -7,7 +7,7 @@ import {
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { Exit, type Invocation } from "../lib/io.ts";
-import { setPosixMode } from "../utils/posixMode.ts";
+import { setPosixMode } from "../lib/posixMode.ts";
 import { helpWidth } from "../core/help/formatter.ts";
 import { commandHelp } from "../core/help/render.ts";
 import type { HelpDoc } from "../core/spec.ts";

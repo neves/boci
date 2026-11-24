@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 import { resolve } from "node:path";
 import type { Invocation } from "../lib/io.ts";
-import { getPosixMode } from "../utils/posixMode.ts";
+import { getPosixMode } from "../lib/posixMode.ts";
 import { BadParameter, pyRepr } from "./convert.ts";
 import { ProgramFile } from "./program.ts";
 

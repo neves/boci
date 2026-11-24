@@ -17,7 +17,7 @@ import {
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { expandUser } from "../core/config.ts";
-import { setPosixMode } from "../utils/posixMode.ts";
+import { setPosixMode } from "../lib/posixMode.ts";
 import {
   ConfigParserError,
   formatParsedConfig,

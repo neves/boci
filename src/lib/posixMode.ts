@@ -5,6 +5,7 @@ import {
   readFileSync,
   realpathSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -29,6 +30,30 @@ function winModeFilePath(targetPath: string): string {
   return join(WIN_MODES_DIR, `${hash}.mode`);
 }
 
+function filesystemIdentity(path: string) {
+  const st = statSync(path);
+  return {
+    dev: st.dev,
+    ino: st.ino,
+    birthtimeMs: st.birthtimeMs,
+    directory: st.isDirectory(),
+  };
+}
+
+function sameIdentity(
+  left: ReturnType<typeof filesystemIdentity>,
+  right: unknown,
+): boolean {
+  if (!right || typeof right !== "object") return false;
+  const identity = right as ReturnType<typeof filesystemIdentity>;
+  return (
+    left.dev === identity.dev &&
+    left.ino === identity.ino &&
+    left.birthtimeMs === identity.birthtimeMs &&
+    left.directory === identity.directory
+  );
+}
+
 /**
  * Set POSIX permission bits (`mode & 0o777`) on `path`.
  * On Windows, where NTFS/libuv `stat().mode` always reports `0o666`/`0o444`,
@@ -37,12 +62,16 @@ function winModeFilePath(targetPath: string): string {
  */
 export function setPosixMode(path: string, mode: number): void {
   const masked = mode & 0o777;
+  chmodSync(path, masked);
   if (process.platform !== "win32") {
-    chmodSync(path, masked);
     return;
   }
-  statSync(path);
-  writeFileSync(winModeFilePath(path), String(masked), "utf8");
+  const identity = filesystemIdentity(path);
+  writeFileSync(
+    winModeFilePath(path),
+    JSON.stringify({ mode: masked, identity }),
+    "utf8",
+  );
 }
 
 /**
@@ -54,9 +83,16 @@ export function getPosixMode(path: string): number {
     return st.mode & 0o777;
   }
   try {
-    const raw = readFileSync(winModeFilePath(path), "utf8").trim();
-    const parsed = Number(raw);
-    if (Number.isFinite(parsed)) return parsed & 0o777;
+    const sidecarPath = winModeFilePath(path);
+    const record = JSON.parse(readFileSync(sidecarPath, "utf8")) as {
+      mode?: unknown;
+      identity?: unknown;
+    };
+    if (sameIdentity(filesystemIdentity(path), record.identity)) {
+      const parsed = Number(record.mode);
+      if (Number.isFinite(parsed)) return parsed & 0o777;
+    }
+    unlinkSync(sidecarPath);
   } catch {
     // No recorded mode on Windows: fall back to user-only defaults.
   }

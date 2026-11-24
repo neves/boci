@@ -5,7 +5,7 @@ import { mkdir, mkdtemp, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildZip } from "../../src/lib/zip.ts";
-import { setPosixMode } from "../../src/utils/posixMode.ts";
+import { setPosixMode } from "../../src/lib/posixMode.ts";
 
 export const FAKE = {
   tenancy:

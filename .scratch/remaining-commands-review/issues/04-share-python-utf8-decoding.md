@@ -6,6 +6,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] A leading UTF-8 BOM survives both text-file reading and explicit byte decoding, as shown in the resulting request or output.
-- [ ] Malformed UTF-8 still raises the corresponding error on both paths.
-- [ ] Text-mode newline handling remains specific to file reads.
+- [x] A leading UTF-8 BOM survives both text-file reading and explicit byte decoding, as shown in the resulting request or output.
+- [x] Malformed UTF-8 still raises the corresponding error on both paths.
+- [x] Text-mode newline handling remains specific to file reads.

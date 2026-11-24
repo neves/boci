@@ -31,6 +31,8 @@ import {
 import { Exit, type Invocation } from "../lib/io.ts";
 import { validateClickFileForRead } from "../core/click-file.ts";
 import { loadPrivateKey, MissingPrivateKeyPassphrase } from "../core/signer.ts";
+import { readConfigFile } from "../utils/configFile.ts";
+import { normalizePosixPath } from "../utils/posixPath.ts";
 
 export const DEFAULT_KEY_NAME = "oci_api_key";
 export const DEFAULT_DIRECTORY = "~/.oci";
@@ -525,14 +527,12 @@ async function promptForConfigLocation(
       },
     },
   );
-  const configLocation = resolve(io.cwd, rawLocation).replaceAll("\\", "/");
+  const configLocation = normalizePosixPath(resolve(io.cwd, rawLocation));
 
-  if (existsSync(configLocation)) {
+  const existingConfig = readConfigFile(configLocation);
+  if (existingConfig !== null) {
     try {
-      const parsed = parseConfig(
-        readFileSync(configLocation, "utf8"),
-        configLocation,
-      );
+      const parsed = parseConfig(existingConfig, configLocation);
       if (
         await confirmClick(
           io,
@@ -696,22 +696,7 @@ export function removeProfileFromConfig(
   displayConfigPath: string,
   profileNameToTerminate: string,
 ): void {
-  let text: string | undefined;
-  try {
-    if (!isDirSync(diskConfigPath)) {
-      text = readFileSync(diskConfigPath, "utf8");
-    }
-  } catch (e) {
-    const code = (e as NodeJS.ErrnoException | null)?.code;
-    if (
-      code !== "ENOENT" &&
-      code !== "ENOTDIR" &&
-      code !== "EISDIR" &&
-      code !== "EACCES"
-    ) {
-      throw e;
-    }
-  }
+  const text = readConfigFile(diskConfigPath) ?? undefined;
   if (profileNameToTerminate === DEFAULT_PROFILE_NAME) {
     const parsed =
       text !== undefined
@@ -782,10 +767,7 @@ export async function runSetupConfig(
       "Enter a directory for your keys to be created",
       { default: defaultDir },
     );
-    const keyLocation = resolve(
-      io.cwd,
-      expandUser(rawKeyDir, io.env),
-    ).replaceAll("\\", "/");
+    const keyLocation = resolve(io.cwd, expandUser(rawKeyDir, io.env));
     if (!existsSync(keyLocation)) {
       createDirectory(keyLocation);
     }
@@ -794,9 +776,8 @@ export async function runSetupConfig(
     const keyName = await promptClick(io, stdin, "Enter a name for your key", {
       default: DEFAULT_KEY_NAME,
     });
-    const publicPath = pyPathJoin(
-      keyLocation,
-      `${keyName}${PUBLIC_KEY_FILENAME_SUFFIX}`,
+    const publicPath = normalizePosixPath(
+      pyPathJoin(keyLocation, `${keyName}${PUBLIC_KEY_FILENAME_SUFFIX}`),
     );
     if (
       !(await writePublicKeyToFile(
@@ -813,9 +794,8 @@ export async function runSetupConfig(
     }
 
     keyPassphrase = await promptForPassphrase(io, stdin);
-    privateKeyFile = pyPathJoin(
-      keyLocation,
-      `${keyName}${PRIVATE_KEY_FILENAME_SUFFIX}`,
+    privateKeyFile = normalizePosixPath(
+      pyPathJoin(keyLocation, `${keyName}${PRIVATE_KEY_FILENAME_SUFFIX}`),
     );
     if (
       !(await writePrivateKeyToFile(
@@ -843,7 +823,7 @@ export async function runSetupConfig(
         valueProc: (filename) => validatePrivateKeyFile(io, filename),
       },
     );
-    privateKeyFile = resolve(io.cwd, validated.filename).replaceAll("\\", "/");
+    privateKeyFile = normalizePosixPath(resolve(io.cwd, validated.filename));
 
     if (!readFileSync(privateKeyFile, "utf8").endsWith(PRIVATE_KEY_LABEL)) {
       const warning =
@@ -921,12 +901,12 @@ function pyRealpath(rawPath: string, cwd: string): string {
     try {
       const real = realpathSync(current);
       const out = tail.length ? join(real, ...tail.reverse()) : real;
-      return out.replaceAll("\\", "/");
+      return normalizePosixPath(out);
     } catch {
       const parent = dirname(current);
       if (parent === current) {
         const out = tail.length ? join(current, ...tail.reverse()) : current;
-        return out.replaceAll("\\", "/");
+        return normalizePosixPath(out);
       }
       tail.push(basename(current));
       current = parent;

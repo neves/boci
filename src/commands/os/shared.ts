@@ -21,6 +21,7 @@ import {
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
 import { writeAllBytes } from "../../utils/byte-writer.ts";
+import { normalizePosixPath } from "../../utils/posixPath.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
@@ -622,9 +623,9 @@ function dirIdentityKey(
   st: { dev: number | bigint; ino: number | bigint },
 ): string {
   try {
-    return `${st.dev}:${st.ino}:${realpathSync(resolvedPath).replaceAll("\\", "/").toLowerCase()}`;
+    return `${st.dev}:${st.ino}:${normalizePosixPath(realpathSync(resolvedPath)).toLowerCase()}`;
   } catch {
-    return `${st.dev}:${st.ino}:${resolvedPath.replaceAll("\\", "/").toLowerCase()}`;
+    return `${st.dev}:${st.ino}:${normalizePosixPath(resolvedPath).toLowerCase()}`;
   }
 }
 

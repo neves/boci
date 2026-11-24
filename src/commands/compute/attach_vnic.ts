@@ -1,7 +1,6 @@
 import type { CustomCommandContext } from "../../core/registry.ts";
-import type { GeneratedCommand } from "../../core/operation.ts";
 import type { OperationSpec } from "../../core/spec.ts";
-import { callComputeOperation } from "./shared.ts";
+import { runComputeOperation } from "./shared.ts";
 
 const attachmentOperation: OperationSpec = {
   client: "core.compute",
@@ -29,23 +28,14 @@ const bodyBindings = [
 export async function runComputeInstanceAttachVnic(
   ctx: CustomCommandContext,
 ): Promise<void> {
-  const wrapper = ctx.spec.commands["instance attach-vnic"];
-  if (!wrapper) throw new Error("Missing compute instance attach-vnic spec");
-  const command: GeneratedCommand = {
-    params: wrapper.params,
-    complexTypes: wrapper.complexTypes,
-    operation: attachmentOperation,
-    bindings: bodyBindings.map(([param, key]) => ({
+  await runComputeOperation(
+    ctx,
+    "instance attach-vnic",
+    attachmentOperation,
+    bodyBindings.map(([param, key]) => ({
       target: "body",
       param,
       key,
     })),
-  };
-  await callComputeOperation(
-    ctx,
-    "compute",
-    "instance attach-vnic",
-    ctx.values,
-    command,
   );
 }

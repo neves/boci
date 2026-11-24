@@ -73,6 +73,14 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
     },
   ],
   [
+    "compute instance action",
+    async (ctx) => {
+      const { runComputeInstanceAction } =
+        await import("../commands/compute/instance_action.ts");
+      await runComputeInstanceAction(ctx);
+    },
+  ],
+  [
     "profile current",
     async (ctx) => {
       const { runProfileCurrent } = await import("../commands/profile.ts");

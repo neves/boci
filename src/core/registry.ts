@@ -89,6 +89,14 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
     },
   ],
   [
+    "compute instance detach-vnic",
+    async (ctx) => {
+      const { runComputeInstanceDetachVnic } =
+        await import("../commands/compute/detach_vnic.ts");
+      await runComputeInstanceDetachVnic(ctx);
+    },
+  ],
+  [
     "profile current",
     async (ctx) => {
       const { runProfileCurrent } = await import("../commands/profile.ts");

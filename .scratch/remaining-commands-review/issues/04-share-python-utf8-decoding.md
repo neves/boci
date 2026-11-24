@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] A leading UTF-8 BOM survives both text-file reading and explicit byte decoding, as shown in the resulting request or output.
 - [x] Malformed UTF-8 still raises the corresponding error on both paths.

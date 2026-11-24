@@ -109,7 +109,7 @@ test("response subtype discriminator is inherited through named models", () => {
     { rc },
   );
   expect(JSON.parse(out.join(""))).toEqual({
-    data: [{ kind: "SPECIAL", "special-value": "yes" }],
+    data: [{ kind: "SPECIAL", specialValue: "yes" }],
   });
   const missing = invocation();
   printResult(
@@ -118,7 +118,7 @@ test("response subtype discriminator is inherited through named models", () => {
     { rc },
   );
   expect(JSON.parse(missing.out.join(""))).toEqual({
-    data: [{ kind: null, "special-value": "yes" }],
+    data: [{ specialValue: "yes" }],
   });
 });
 

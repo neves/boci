@@ -85,7 +85,11 @@ export function renderCommandFile(t: Triage, params?: SpecParam[]): string {
     if (isList) {
       lines.push(
         `  const command = sdkCommand(ctx, ${JSON.stringify(path)}, ${constName});`,
-        `  await renderListPages(ctx, ${JSON.stringify(path)}, ctx.values, command);`,
+        `  await renderListPages(ctx, ${JSON.stringify(path)}, ctx.values, command${
+          (t.helpers ?? []).some((h) => h.endsWith("_multiple_keys"))
+            ? ", { multipleKeys: true }"
+            : ""
+        });`,
       );
     } else {
       lines.push(

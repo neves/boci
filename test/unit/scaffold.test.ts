@@ -89,6 +89,34 @@ describe("scaffold-lib", () => {
     expect(out).not.toContain("renderListPages");
   });
 
+  test("renderCommandFile pages like the wrapper's list helper", () => {
+    const list = (helper: string) =>
+      renderCommandFile({
+        key: "artifacts container image list",
+        helpers: [helper],
+        sdkCalls: [
+          {
+            client: "artifacts.artifacts",
+            method: "list_container_images",
+            line: 1,
+            operation: {
+              client: "artifacts.artifacts",
+              method: "list_container_images",
+              http: "GET",
+              path: "/container/images",
+              queryParams: {},
+            },
+          },
+        ],
+      });
+    expect(list("cli_util.list_call_get_all_results_multiple_keys")).toContain(
+      "ctx.values, command, { multipleKeys: true });",
+    );
+    expect(list("cli_util.list_call_get_all_results")).toContain(
+      "ctx.values, command);",
+    );
+  });
+
   test("registerCustomHandler is idempotent", () => {
     const base = `export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([\n]);\n`;
     const first = registerCustomHandler(

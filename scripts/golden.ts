@@ -11,6 +11,7 @@ import {
   type Golden,
   type ParityCase,
   caseHash,
+  withBrowserCallbackPort,
   goldenPath,
   loadCases,
   loadGolden,
@@ -72,7 +73,9 @@ async function work(launch: Launcher) {
   while (next < todo.length) {
     const c = todo[next++];
     if (!c) break;
-    const run = await runCli(CLIS.oci, c.argv, c, launch);
+    const run = await withBrowserCallbackPort(c, () =>
+      runCli(CLIS.oci, c.argv, c, launch),
+    );
     const golden: Golden = {
       caseHash: caseHash(c),
       referenceVersion,

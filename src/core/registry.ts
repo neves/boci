@@ -261,6 +261,22 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
     },
   ],
   [
+    "setup bootstrap",
+    async (ctx) => {
+      const { runSetupBootstrap } =
+        await import("../commands/setup/bootstrap.ts");
+      await runSetupBootstrap(ctx);
+    },
+  ],
+  [
+    "setup pkcs11-auth",
+    async (ctx) => {
+      const { runSetupPkcs11Auth } =
+        await import("../commands/setup/pkcs11-auth.ts");
+      await runSetupPkcs11Auth(ctx);
+    },
+  ],
+  [
     "setup instance-principal",
     async (ctx) => {
       const { runSetupInstancePrincipal } =

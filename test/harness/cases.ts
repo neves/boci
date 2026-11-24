@@ -122,3 +122,21 @@ export async function loadGolden(c: ParityCase): Promise<Golden | undefined> {
   const file = Bun.file(goldenPath(c.id));
   return (await file.exists()) ? ((await file.json()) as Golden) : undefined;
 }
+
+// The reference and boci both bind the fixed browser callback port.
+let browserCallbackDone = Promise.resolve();
+export async function withBrowserCallbackPort<T>(
+  c: ParityCase,
+  run: () => Promise<T>,
+): Promise<T> {
+  if (c.key !== "setup bootstrap") return run();
+  const previous = browserCallbackDone;
+  const { promise, resolve } = Promise.withResolvers<void>();
+  browserCallbackDone = promise;
+  await previous;
+  try {
+    return await run();
+  } finally {
+    resolve();
+  }
+}

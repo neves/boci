@@ -1,0 +1,123 @@
+[
+  {
+    "id": "setup-pkcs11-auth-defaults",
+    "key": "setup pkcs11-auth",
+    "argv": [
+      "setup",
+      "pkcs11-auth",
+      "--region",
+      "us-phoenix-1",
+      "--profile-name",
+      "HSM",
+      "--use-default-pkcs11-options",
+      "--config-file",
+      "{home}/custom/config",
+      "--cli-rc-file",
+      "{home}/custom/rc",
+      "--user-ocid",
+      "ocid1.user.oc1..testuser",
+      "--tenancy-ocid",
+      "ocid1.tenancy.oc1..testtenancy"
+    ],
+    "expect": {
+      "files": {
+        "custom/config": "\n\n[HSM]\nuser=ocid1.user.oc1..testuser\ntenancy=ocid1.tenancy.oc1..testtenancy\nregion=us-phoenix-1\n",
+        "custom/rc": null
+      },
+      "fileModes": {
+        "custom": 448,
+        "custom/config": 384
+      }
+    }
+  },
+  {
+    "id": "setup-pkcs11-auth-interactive",
+    "key": "setup pkcs11-auth",
+    "argv": ["setup", "pkcs11-auth", "--region", "us-phoenix-1"],
+    "stdin": "bad\nocid1.user.oc1..testuser\nocid1.tenancy.oc1..testtenancy\n slot-a \ntoken-b\n\n/opt/test.so\n",
+    "sandbox": {
+      "noConfig": true
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "\n\n[DEFAULT]\nuser=ocid1.user.oc1..testuser\ntenancy=ocid1.tenancy.oc1..testtenancy\nregion=us-phoenix-1\n",
+        ".oci/oci_cli_rc": "[DEFAULT]\npkcs11_slot_label = slot-a\npkcs11_token_label = token-b\npkcs11_module_path = /opt/test.so\n\n"
+      },
+      "fileModes": {
+        ".oci/oci_cli_rc": 384
+      }
+    }
+  },
+  {
+    "id": "setup-pkcs11-auth-replace",
+    "key": "setup pkcs11-auth",
+    "argv": [
+      "setup",
+      "pkcs11-auth",
+      "--region",
+      "us-phoenix-1",
+      "--profile-name",
+      "HSM",
+      "--user-ocid",
+      "ocid1.user.oc1..testuser",
+      "--tenancy-ocid",
+      "ocid1.tenancy.oc1..testtenancy"
+    ],
+    "stdin": "y\n\n01\n\n1234\nkey\n\n",
+    "sandbox": {
+      "files": {
+        ".oci/config": "[HSM]\nold=stale\n[OTHER]\nregion=us-ashburn-1\n",
+        ".oci/oci_cli_rc": "[HSM]\npkcs11_slot_label = old\nCustom = 100%\n"
+      }
+    },
+    "expect": {
+      "files": {
+        ".oci/config": "[OTHER]\nregion = us-ashburn-1\n\n\n\n[HSM]\nuser=ocid1.user.oc1..testuser\ntenancy=ocid1.tenancy.oc1..testtenancy\nregion=us-phoenix-1\n",
+        ".oci/oci_cli_rc": "[HSM]\nCustom = 100%\npkcs11_key_id = 01\npkcs11_token_serial_number = 1234\npkcs11_key_id_override = key\n\n"
+      }
+    }
+  },
+  {
+    "id": "setup-pkcs11-auth-cancel",
+    "key": "setup pkcs11-auth",
+    "argv": [
+      "setup",
+      "pkcs11-auth",
+      "--region",
+      "us-phoenix-1",
+      "--profile-name",
+      "DEFAULT",
+      "--user-ocid",
+      "ocid1.user.oc1..testuser",
+      "--tenancy-ocid",
+      "ocid1.tenancy.oc1..testtenancy"
+    ],
+    "stdin": "\n"
+  },
+  {
+    "id": "setup-pkcs11-auth-invalid-profile",
+    "key": "setup pkcs11-auth",
+    "argv": [
+      "setup",
+      "pkcs11-auth",
+      "--region",
+      "us-phoenix-1",
+      "--profile-name",
+      "../bad"
+    ]
+  },
+  {
+    "id": "setup-pkcs11-auth-invalid-ocid",
+    "key": "setup pkcs11-auth",
+    "argv": [
+      "setup",
+      "pkcs11-auth",
+      "--region",
+      "us-phoenix-1",
+      "--profile-name",
+      "HSM",
+      "--user-ocid",
+      "bad"
+    ]
+  }
+]

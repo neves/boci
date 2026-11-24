@@ -352,11 +352,11 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `rover station-cluster show`
 - [x] `rover station-cluster update`
 - [x] `session terminate`
-- [ ] `setup bootstrap`
+- [x] `setup bootstrap`
 - [x] `setup find-installations`
 - [x] `setup instance-principal`
 - [x] `setup oci-cli-rc`
-- [ ] `setup pkcs11-auth`
+- [x] `setup pkcs11-auth`
 - [x] `support incident put-attachment`
 - [x] `waas policy-config update`
 

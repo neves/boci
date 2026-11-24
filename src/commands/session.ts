@@ -1038,7 +1038,7 @@ function parsePythonInt(io: Invocation, value: string): number {
 }
 
 /** Port of `cli_setup.prompt_session_for_profile`. */
-async function promptSessionForProfile(
+export async function promptSessionForProfile(
   io: Invocation,
   stdin: StdinReader,
   defaultConfigLocation: string,
@@ -1077,7 +1077,7 @@ async function promptSessionForProfile(
 }
 
 /** Port of `cli_setup_bootstrap.create_user_session`. */
-async function createBrowserUserSession(
+export async function createBrowserUserSession(
   io: Invocation,
   stdin: StdinReader,
   opts: {
@@ -1248,8 +1248,8 @@ async function createBrowserUserSession(
   }
 }
 
-/** Port of `cli_setup_bootstrap.persist_user_session` for `session authenticate`. */
-async function persistUserSession(
+/** Port of `cli_setup_bootstrap.persist_user_session` for browser bootstrap and session authentication. */
+export async function persistUserSession(
   io: Invocation,
   stdin: StdinReader,
   userSession: UserSession,
@@ -1258,7 +1258,8 @@ async function persistUserSession(
     configLocation?: string;
     tokenLocation?: string;
     usePassphrase: boolean;
-    persistOnlyPublicKey: boolean;
+    persistOnlyPublicKey?: boolean;
+    bootstrap?: boolean;
   },
 ): Promise<{ profileName: string; configLocation: string }> {
   const defaultOciDir = `${expandUser("~", io.env).replace(/[\\/]+$/, "")}/.oci`;
@@ -1291,7 +1292,7 @@ async function persistUserSession(
   applyUserOnlyAccessPermissions(publicKeyFilePath);
 
   let keyPassphrase: string | null = null;
-  if (opts.usePassphrase) {
+  if (opts.bootstrap || opts.usePassphrase) {
     keyPassphrase = await promptForPassphrase(io, stdin, true);
   }
 
@@ -1303,14 +1304,17 @@ async function persistUserSession(
     applyUserOnlyAccessPermissions(privateKeyFilePath);
   }
 
-  const tokenFilePath = `${sessionAuthLocation}/token`;
-  writeFileSync(tokenFilePath, userSession.token, "utf8");
-  applyUserOnlyAccessPermissions(tokenFilePath);
+  const tokenFilePath = opts.bootstrap ? null : `${sessionAuthLocation}/token`;
+  if (tokenFilePath) {
+    writeFileSync(tokenFilePath, userSession.token, "utf8");
+    applyUserOnlyAccessPermissions(tokenFilePath);
+  }
 
   const resolvedConfigPath = resolve(io.cwd, configLocation);
   removeProfileFromConfig(resolvedConfigPath, configLocation, profileName);
 
   if (
+    !opts.bootstrap &&
     keyPassphrase &&
     !(await confirmClick(
       io,
@@ -1324,7 +1328,7 @@ async function persistUserSession(
   }
 
   writeConfig(resolvedConfigPath, {
-    userId: null,
+    userId: opts.bootstrap ? userSession.userOcid : null,
     fingerprint: userSession.fingerprint,
     keyFile: opts.persistOnlyPublicKey
       ? "Update_private_key_path"

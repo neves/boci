@@ -48,6 +48,29 @@ function body(text: string): unknown {
   }
 }
 
+/** Bootstrap authenticates with the same generated RSA key it uploads. */
+export function bootstrapPublicKey(req: CapturedRequest): string | undefined {
+  if (
+    req.method !== "POST" ||
+    !req.path.endsWith("/apiKeys") ||
+    !req.headers.authorization?.includes('keyId="ST$')
+  )
+    return;
+  try {
+    const { key } = JSON.parse(req.body);
+    const parsed = createPublicKey(key);
+    if (
+      parsed.asymmetricKeyType === "rsa" &&
+      parsed.asymmetricKeyDetails?.modulusLength === 2048 &&
+      parsed.asymmetricKeyDetails.publicExponent === 65537n
+    ) {
+      return key;
+    }
+  } catch {
+    // Leave malformed keys visible to the comparison.
+  }
+}
+
 function normalizeRequest(req: CapturedRequest): NormalizedRequest {
   const headers: Record<string, string> = {};
   let authorization: Authorization | undefined;
@@ -55,7 +78,14 @@ function normalizeRequest(req: CapturedRequest): NormalizedRequest {
     if (k === "authorization") authorization = parseAuthorization(v);
     else if (!(k in IGNORED_REQUEST_HEADERS)) headers[k] = v;
   }
-  const payload = body(req.body);
+  const payload = bootstrapPublicKey(req)
+    ? {
+        json: {
+          ...JSON.parse(req.body),
+          key: "<generated bootstrap public key>",
+        },
+      }
+    : body(req.body);
   if (
     req.path === "/v1/actions/generateScopedAccessToken" &&
     typeof payload === "object" &&

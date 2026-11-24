@@ -35,6 +35,7 @@ export function parseConfig(
   text: string,
   fpname: string,
   defaultSection = DEFAULT_SECTION,
+  optionTransform = (option: string) => option.toLowerCase(),
 ): ParsedConfig {
   const defaults = new Map<string, string[] | null>();
   const sections = new Map<string, Map<string, string[] | null>>();
@@ -111,7 +112,7 @@ export function parseConfig(
       if (opt) {
         const raw = opt.groups?.option as string;
         if (!raw) parsingError = addError(parsingError, fpname, lineno, line);
-        optname = raw.replace(/\s+$/u, "").toLowerCase();
+        optname = optionTransform(raw.replace(/\s+$/u, ""));
         const key = `${sectname}\u0000${optname}`;
         if (added.has(key)) {
           throw new ConfigParserError(

@@ -1,0 +1,194 @@
+[
+  {
+    "id": "setup-bootstrap-invalid-region",
+    "key": "setup bootstrap",
+    "argv": ["setup", "bootstrap", "--region", "not-a-region"]
+  },
+  {
+    "id": "setup-bootstrap-aborted-region-prompt",
+    "key": "setup bootstrap",
+    "argv": ["setup", "bootstrap"],
+    "stdin": ""
+  },
+  {
+    "id": "setup-bootstrap-upload",
+    "key": "setup bootstrap",
+    "argv": [
+      "setup",
+      "bootstrap",
+      "--region",
+      "us-phoenix-1",
+      "--profile-name",
+      "BOOT",
+      "--config-location",
+      "{home}/.oci/bootstrap"
+    ],
+    "stdin": "N/A\nN/A\n",
+    "httpsProxy": true,
+    "env": {
+      "BROWSER": "{home}/browser"
+    },
+    "sandbox": {
+      "files": {
+        "browser": "#!/bin/sh\ncurl --fail --silent --max-time 3 \"http://127.0.0.1:8181/token?security_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvY2lkMS51c2VyLm9jMS4udGVzdHVzZXIiLCJ0ZW5hbnQiOiJvY2lkMS50ZW5hbmN5Lm9jMS4udGVzdHRlbmFuY3kiLCJleHAiOjQxMDI0NDQ4MDB9.sig\" </dev/null >/dev/null 2>&1 &\n"
+      },
+      "fileModes": {
+        "browser": 448
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "regionName": "us-phoenix-1",
+            "isHomeRegion": false
+          },
+          {
+            "regionName": "us-ashburn-1",
+            "isHomeRegion": true
+          }
+        ]
+      },
+      {
+        "status": 200
+      }
+    ],
+    "expect": {
+      "requests": 2,
+      "files": {
+        ".oci/sessions/BOOT/token": null
+      },
+      "fileModes": {
+        ".oci/bootstrap": 384,
+        ".oci/sessions/BOOT": 448,
+        ".oci/sessions/BOOT/oci_api_key.pem": 384,
+        ".oci/sessions/BOOT/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-bootstrap-replace-key",
+    "key": "setup bootstrap",
+    "argv": ["setup", "bootstrap", "--region", "us-phoenix-1"],
+    "stdin": "00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff\n00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff\nBOOT\ntest-passphrase\ntest-passphrase\n",
+    "httpsProxy": true,
+    "env": {
+      "BROWSER": "{home}/browser"
+    },
+    "sandbox": {
+      "files": {
+        "browser": "#!/bin/sh\ncurl --fail --silent --max-time 3 \"http://127.0.0.1:8181/token?security_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvY2lkMS51c2VyLm9jMS4udGVzdHVzZXIiLCJ0ZW5hbnQiOiJvY2lkMS50ZW5hbmN5Lm9jMS4udGVzdHRlbmFuY3kiLCJleHAiOjQxMDI0NDQ4MDB9.sig\" </dev/null >/dev/null 2>&1 &\n"
+      },
+      "fileModes": {
+        "browser": 448
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "regionName": "us-phoenix-1",
+            "isHomeRegion": false
+          },
+          {
+            "regionName": "us-ashburn-1",
+            "isHomeRegion": true
+          }
+        ]
+      },
+      {
+        "status": 409,
+        "body": {
+          "code": "ApiKeyLimitExceeded",
+          "message": "Fixture limit"
+        }
+      },
+      {
+        "body": [
+          {
+            "fingerprint": "00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff",
+            "timeCreated": "2026-01-02T03:04:05Z"
+          }
+        ]
+      },
+      {
+        "status": 204
+      },
+      {
+        "status": 200
+      }
+    ],
+    "expect": {
+      "requests": 5,
+      "files": {
+        ".oci/sessions/BOOT/token": null
+      },
+      "fileModes": {
+        ".oci/config": 384,
+        ".oci/sessions/BOOT": 448,
+        ".oci/sessions/BOOT/oci_api_key.pem": 384,
+        ".oci/sessions/BOOT/oci_api_key_public.pem": 384
+      }
+    }
+  },
+  {
+    "id": "setup-bootstrap-upload-denied",
+    "key": "setup bootstrap",
+    "argv": [
+      "setup",
+      "bootstrap",
+      "--region",
+      "us-phoenix-1",
+      "--profile-name",
+      "BOOT",
+      "--config-location",
+      "{home}/.oci/bootstrap"
+    ],
+    "httpsProxy": true,
+    "env": {
+      "BROWSER": "{home}/browser"
+    },
+    "sandbox": {
+      "files": {
+        "browser": "#!/bin/sh\ncurl --fail --silent --max-time 3 \"http://127.0.0.1:8181/token?security_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvY2lkMS51c2VyLm9jMS4udGVzdHVzZXIiLCJ0ZW5hbnQiOiJvY2lkMS50ZW5hbmN5Lm9jMS4udGVzdHRlbmFuY3kiLCJleHAiOjQxMDI0NDQ4MDB9.sig\" </dev/null >/dev/null 2>&1 &\n"
+      },
+      "fileModes": {
+        "browser": 448
+      }
+    },
+    "replies": [
+      {
+        "status": 200,
+        "body": [
+          {
+            "regionName": "us-phoenix-1",
+            "isHomeRegion": false
+          },
+          {
+            "regionName": "us-ashburn-1",
+            "isHomeRegion": true
+          }
+        ]
+      },
+      {
+        "status": 403,
+        "body": {
+          "code": "NotAuthorized",
+          "message": "Permission denied"
+        }
+      }
+    ],
+    "expect": {
+      "exitCode": 1,
+      "requests": 2,
+      "stderrContains": "ServiceError:",
+      "files": {
+        ".oci/bootstrap": null,
+        ".oci/sessions/BOOT/oci_api_key.pem": null
+      }
+    },
+    "requestOnly": true
+  }
+]

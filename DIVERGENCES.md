@@ -107,6 +107,22 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **Why:** reproducing an interpreter traceback with `<exception str() failed>` and local site-packages paths is meaningless; both fail with exit 1 after sending the same `POST /v1/token/upst/actions/GenerateUpst` request and report the service error details.
 - **State:** accepted
 
+### Browser launch feedback for `setup bootstrap` and `session authenticate`
+
+- **Invocation:** Run browser authentication with a `BROWSER` command that starts and exits with an error.
+- **Reference CLI:** Python's browser helper can observe the launcher exit and print the manual-open message.
+- **boci:** The detached launcher reports successful process creation. The authorization URL is still printed for manual use.
+- **Why:** The CLI must keep listening for the login callback even when the browser process remains open.
+- **State:** accepted
+
+### `setup bootstrap`: unrecovered Identity API errors
+
+- **Invocation:** Run `oci setup bootstrap` through browser sign-in and receive a service error from Identity that the command cannot recover from.
+- **Reference CLI:** Exits 1 with the Python `ServiceException` traceback described above for `session authenticate`.
+- **boci:** Exits 1 with the standard `ServiceError` JSON envelope on stderr.
+- **Why:** The envelope preserves the request and service details in a format consistent with other commands.
+- **State:** accepted
+
 ### Root `--help`: trailing `boci Extensions` section
 
 - **Invocation:** `oci --help` (and `-h`, `-?`, or no arguments)

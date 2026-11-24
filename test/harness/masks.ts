@@ -57,6 +57,16 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
     "MultipartUploadError embeds the local OS kernel/platform version",
   ],
   [
+    /(&nonce=)[a-f0-9-]{36}(&scope=openid&public_key=)[A-Za-z0-9_%=-]+(&redirect_uri=)/g,
+    "$1<nonce>$2<public-key>$3",
+    "browser login generates a fresh nonce and RSA key pair",
+  ],
+  [
+    /Uploaded new API key with fingerprint: [0-9a-f]{2}(?::[0-9a-f]{2}){15}/g,
+    "Uploaded new API key with fingerprint: <fingerprint>",
+    "setup bootstrap uploads a fresh RSA key pair",
+  ],
+  [
     /Public key fingerprint: [0-9a-f]{2}(?::[0-9a-f]{2}){15}/g,
     "Public key fingerprint: <fingerprint>",
     "setup keys generates a random RSA key pair per invocation",

@@ -13,6 +13,7 @@ import {
 } from "../../scripts/verify-lib.ts";
 import {
   caseHash,
+  withBrowserCallbackPort,
   includeGeneratedCases,
   isGeneratedCaseFile,
   loadCasesWithFiles,
@@ -20,6 +21,7 @@ import {
   RESULTS_FILE,
 } from "../harness/cases.ts";
 import {
+  bootstrapPublicKey,
   normalizeRun,
   remask,
   requestOnlyMismatch,
@@ -200,7 +202,11 @@ async function runParityCase(c: (typeof cases)[number]) {
       record(c.key, true);
       return;
     }
-    const verifyKey = run.sessionPublicKey ?? publicKey;
+    const bootstrapKey =
+      c.key === "setup bootstrap"
+        ? run.requests.map(bootstrapPublicKey).find(Boolean)
+        : undefined;
+    const verifyKey = bootstrapKey ?? run.sessionPublicKey ?? publicKey;
     for (const req of run.requests) {
       if (req.headers.authorization?.startsWith("Signature "))
         expect(
@@ -245,7 +251,11 @@ async function runParityCase(c: (typeof cases)[number]) {
 describe.concurrent("parity", () => {
   for (const c of cases) {
     const implemented = isImplemented(c.key);
-    test.skipIf(!implemented)(`${c.id} (${c.key})`, () => runParityCase(c));
+    test.skipIf(!implemented)(
+      `${c.id} (${c.key})`,
+      () => withBrowserCallbackPort(c, () => runParityCase(c)),
+      c.key === "setup bootstrap" ? 30_000 : undefined,
+    );
     if (!implemented) record(c.key, false);
   }
 });

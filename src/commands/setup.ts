@@ -17,6 +17,8 @@ import {
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { expandUser } from "../core/config.ts";
+import { lookupDefault, rcDefaults } from "../core/rc.ts";
+import type { CustomCommandContext } from "../core/registry.ts";
 import { setPosixMode } from "../lib/posixMode.ts";
 import {
   ConfigParserError,
@@ -189,12 +191,15 @@ export async function promptClick<T = string>(
   opts: {
     default?: string;
     hideInput?: boolean;
+    showDefault?: boolean;
     wrapExceptions?: boolean;
     valueProc?: (value: string) => T | Promise<T>;
   } = {},
 ): Promise<T> {
   const prompt =
-    opts.default !== undefined ? `${text} [${opts.default}]: ` : `${text}: `;
+    opts.default !== undefined && opts.showDefault !== false
+      ? `${text} [${opts.default}]: `
+      : `${text}: `;
   const hideInput = opts.hideInput === true;
   const wrapExceptions = opts.wrapExceptions === true;
 
@@ -431,7 +436,7 @@ export async function runSetupKeys(
   io.out(UPLOAD_PUBLIC_KEY_INSTRUCTIONS);
 }
 
-function validateProfileName(
+export function validateProfileName(
   profileName: string,
   usageError: (message: string) => never,
 ): void {
@@ -450,7 +455,7 @@ function validateProfileName(
   }
 }
 
-function validateOcid(ocid: string): string {
+export function validateOcid(ocid: string): string {
   if (!OCID_PATTERN.test(ocid)) {
     throw new BadParameter(
       "Invalid OCID format. Instructions to find OCIDs: https://docs.cloud.oracle.com/Content/API/Concepts/apisigningkey.htm#Other",
@@ -585,6 +590,24 @@ async function promptForConfigLocation(
   }
 
   return { configLocation, profileName: DEFAULT_PROFILE_NAME };
+}
+
+export function setupRegion(
+  ctx: CustomCommandContext,
+  command: string,
+): string | undefined {
+  const regionOption = { name: "region", opts: ["--region"] };
+  return (
+    (typeof ctx.rootValues.region === "string" && ctx.rootValues.region) ||
+    ctx.io.env.OCI_CLI_REGION ||
+    lookupDefault(
+      rcDefaults(ctx.rc, ctx.settings.profile),
+      ctx.rc,
+      ["setup", command],
+      regionOption,
+    ) ||
+    undefined
+  );
 }
 
 export async function promptForRegion(

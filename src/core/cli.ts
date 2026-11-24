@@ -703,7 +703,7 @@ async function main(io: Invocation): Promise<void> {
                 index,
               };
               const result = await callOperation(io, nsCall);
-              printResult(io, result, { rc });
+              if (!result.response.ok) printResult(io, result, { rc });
               return String(JSON.parse(result.raw));
             },
           },

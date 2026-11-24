@@ -19,7 +19,7 @@ import {
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
-import { writeAllBytes } from "../../core/byte-writer.ts";
+import { writeAllBytes } from "../../utils/byte-writer.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,

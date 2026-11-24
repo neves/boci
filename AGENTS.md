@@ -6,6 +6,7 @@ A Bun drop-in for Oracle's `oci` CLI. Read [GLOSSARY.md](GLOSSARY.md) for vocabu
 
 - The Reference CLI is `oci-cli==3.96.3` on Python 3.12, installed with `uv tool install --python 3.12 oci-cli==3.96.3`. Its behavior defines correct. Never "improve" on it.
 - Bun-native code (use the `bun` skill). No runtime dependencies except a JMESPath library. No OCI SDK.
+- Put reusable code specific to boci in `src/lib/`. Put generic helpers that can be reused outside boci in `src/utils/`.
 - Checks: `bun run verify` (`bun fmt --check`, `bun check`, build, then `bun test` with every Parity case, generated ones included, against the compiled `dist/boci`; quiet). Add `bun lint` once the installed Bun has it.
 - Default `bun test` (unit tests + hand-written Parity cases, ~10 s) is offline and fast: never let it touch the network or the real `~/.oci`. Generated cases (`test/parity/cases/generated-*.json`) run only with `BOCI_PARITY_ALL=1`.
 - Live calls only through `bun run parity:live`, which reads `.env.test` (`BOCI_TEST_PROFILE=<your profile>`). Live tests may:

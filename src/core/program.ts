@@ -5,6 +5,7 @@
  * command's kwargs, which the Engine then binds to the request like any Generated command.
  */
 import { basename } from "node:path";
+import { decodePythonUtf8 } from "../utils/utf8.ts";
 import type { TypedParam } from "./convert.ts";
 import { kwarg, truthy } from "./checks.ts";
 import { pyRepr } from "./convert.ts";
@@ -88,13 +89,6 @@ class ProgramTarget {
  * newlines, like Python's `open(path, "r")`; a second read returns "" (the file is
  * consumed). Write modes are only passed through to the generated command.
  */
-/** Python's UTF-8 decoder is strict and preserves an initial BOM as U+FEFF. */
-function decodePythonUtf8(data: Uint8Array): string {
-  return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
-    data,
-  );
-}
-
 export class ProgramFile {
   private consumed = false;
   constructor(

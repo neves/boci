@@ -4,7 +4,7 @@ import { closeSync, openSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Invocation } from "../lib/io.ts";
 import { Exit } from "../lib/io.ts";
-import { writeAllBytes } from "./byte-writer.ts";
+import { writeAllBytes } from "../utils/byte-writer.ts";
 
 /**
  * Write a successful response's body to `path` (`-` is stdout). Like the generated code,

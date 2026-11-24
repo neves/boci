@@ -236,6 +236,7 @@ export function replaceBinary(
       } catch {
         // On Windows the running process may still hold a lock on .old until exit.
       }
+      setPosixMode(execPath, 0o755);
     } else {
       setPosixMode(tmpPath, 0o755);
       renameSync(tmpPath, execPath);

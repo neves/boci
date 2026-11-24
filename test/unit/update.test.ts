@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { Exit, type Invocation } from "../../src/lib/io.ts";
-import { runUpdate } from "../../src/commands/update.ts";
+import { replaceBinary, runUpdate } from "../../src/commands/update.ts";
 import { getPosixMode } from "../../src/utils/posixMode.ts";
 
 function captureInvocation(
@@ -143,6 +143,20 @@ function sha256Hex(data: Uint8Array): string {
 }
 
 describe("boci update download, verify, and replace", () => {
+  test("records executable mode when replacing binary on Windows", () => {
+    const dir = mkdtempSync(join(tmpdir(), "boci-update-win32-"));
+    try {
+      const bin = join(dir, "boci.exe");
+      writeFileSync(bin, "old-bin");
+      replaceBinary(bin, new TextEncoder().encode("new-bin"), "win32");
+      expect(readFileSync(bin, "utf8")).toBe("new-bin");
+      expect(getPosixMode(bin) & 0o111).toBeGreaterThan(0);
+      expect(readdirSync(dir)).toEqual(["boci.exe"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test("downloads, verifies SHA256SUMS, and atomically replaces binary on POSIX", async () => {
     const dir = mkdtempSync(join(tmpdir(), "boci-update-"));
     try {

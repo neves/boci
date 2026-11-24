@@ -30,7 +30,14 @@ export async function runComputeInstanceDetachVnic(
 ): Promise<void> {
   if (ctx.values.force !== true) {
     ctx.io.out("Are you sure you want to delete this resource? [y/N]: ");
-    throw new Exit(1);
+    const answer = await ctx.io.readLine?.();
+    if (
+      answer?.trim().toLowerCase() !== "y" &&
+      answer?.trim().toLowerCase() !== "yes"
+    ) {
+      ctx.io.err("Abort: \n");
+      throw new Exit(1);
+    }
   }
   const listed = await callComputeOperation(
     ctx,

@@ -1,11 +1,95 @@
-// `bun run verify`: every check the loop needs before a commit, with quiet output.
+// `bun run verify [--full]`: every check the loop needs before a commit, with quiet output.
 // It keeps a live terminal status showing finished, running, and queued checks. One line per
 // passing step; a failing step prints its (tail-capped) output. All steps run even if one
-// fails, so a single run reports every problem. Parity runs against the freshly compiled
-// binary (hand-written cases and a sample of generated ones spawn it; the rest run
-// in-process, see test/parity/parity.test.ts) and includes the generated parity cases that
-// the default `bun test` skips.
+// fails, so a single run reports every problem. By default, test execution is scoped to the
+// unit tests and parity cases affected by the current git changes (while merging results into
+// test/parity/results.json); `--full` or `CI=true` runs the entire suite.
+import { join } from "node:path";
+import { parseArgs } from "util";
+import { RESULTS_FILE } from "../test/harness/cases.ts";
+import { planVerification } from "./verify-lib.ts";
+
+const ROOT = join(import.meta.dir, "..");
 const MAX_LINES = 150;
+
+const { values } = parseArgs({
+  args: Bun.argv.slice(2),
+  options: {
+    full: { type: "boolean", default: false },
+  },
+});
+
+function gitLines(args: string[]): string[] {
+  const res = Bun.spawnSync(["git", ...args], {
+    cwd: ROOT,
+    stdout: "pipe",
+    stderr: "ignore",
+  });
+  if (res.exitCode !== 0) return [];
+  return new TextDecoder()
+    .decode(res.stdout)
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function gitText(args: string[]): string {
+  const res = Bun.spawnSync(["git", ...args], {
+    cwd: ROOT,
+    stdout: "pipe",
+    stderr: "ignore",
+  });
+  if (res.exitCode !== 0) return "";
+  return new TextDecoder().decode(res.stdout);
+}
+
+function detectChanges(): { files: string[]; registryDiff: string } {
+  const uncommitted = [
+    ...gitLines(["diff", "--name-only", "HEAD"]),
+    ...gitLines(["ls-files", "--others", "--exclude-standard"]),
+  ];
+  if (uncommitted.length > 0) {
+    return {
+      files: [...new Set(uncommitted)],
+      registryDiff: gitText([
+        "diff",
+        "-U0",
+        "HEAD",
+        "--",
+        "src/core/registry.ts",
+      ]),
+    };
+  }
+  const headCommit = gitLines(["diff", "--name-only", "HEAD~1", "HEAD"]);
+  return {
+    files: headCommit,
+    registryDiff: gitText([
+      "diff",
+      "-U0",
+      "HEAD~1",
+      "HEAD",
+      "--",
+      "src/core/registry.ts",
+    ]),
+  };
+}
+
+const forceFull =
+  values.full ||
+  Bun.env.BOCI_VERIFY_FULL === "1" ||
+  Boolean(Bun.env.CI) ||
+  Boolean(Bun.env.GITHUB_ACTIONS);
+
+const hasResultsFile = await Bun.file(RESULTS_FILE).exists();
+const { files: changedFiles, registryDiff } = forceFull
+  ? { files: [], registryDiff: "" }
+  : detectChanges();
+
+const plan = planVerification(changedFiles, {
+  full: forceFull,
+  hasResultsFile,
+  registryDiff,
+});
 
 type Step = { name: string; cmd: string[]; env?: Record<string, string> };
 type Result = {
@@ -14,16 +98,57 @@ type Result = {
   ms: number;
   output: string;
 };
+
 const steps: Step[] = [
   { name: "fmt", cmd: ["bun", "fmt", "--check"] },
   { name: "check", cmd: ["bun", "check"] },
-  { name: "build", cmd: ["bun", "run", "build"] },
-  {
+];
+
+if (plan.needsBuild) {
+  steps.push({ name: "build", cmd: ["bun", "run", "build"] });
+}
+
+if (plan.mode === "full") {
+  steps.push({
     name: "test",
     cmd: ["bun", "test", "--only-failures"],
     env: { BOCI_BIN: "dist/boci", BOCI_PARITY_ALL: "1" },
-  },
-];
+  });
+} else {
+  const testTargets: string[] = [];
+  if (plan.allUnitTests) {
+    testTargets.push("test/unit");
+  } else {
+    testTargets.push(...plan.unitFiles);
+  }
+  if (plan.mode !== "none") {
+    testTargets.push("test/parity/parity.test.ts");
+  }
+  if (testTargets.length > 0) {
+    steps.push({
+      name: "test",
+      cmd: ["bun", "test", "--only-failures", ...testTargets],
+      env: {
+        BOCI_BIN: "dist/boci",
+        BOCI_PARITY_ALL: "1",
+        BOCI_PARITY_MODE: plan.mode,
+        BOCI_VERIFY_MERGE_RESULTS: "1",
+        ...(plan.parityFiles.length
+          ? { BOCI_PARITY_FILES: plan.parityFiles.join(",") }
+          : {}),
+        ...(plan.parityIds.length
+          ? { BOCI_PARITY_IDS: plan.parityIds.join(",") }
+          : {}),
+        ...(plan.parityServices.length
+          ? { BOCI_PARITY_SERVICES: plan.parityServices.join(",") }
+          : {}),
+        ...(plan.parityKeys.length
+          ? { BOCI_PARITY_KEYS: plan.parityKeys.join(",") }
+          : {}),
+      },
+    });
+  }
+}
 
 const startedAt = performance.now();
 const running = new Map<string, number>();
@@ -151,7 +276,7 @@ async function run(step: Step) {
 
 // fmt and check are fast and independent; the test suite runs after them.
 console.log(
-  `verify: ${steps.length} checks (${steps.map((step) => step.name).join(", ")})`,
+  `verify: ${steps.length} checks (${steps.map((step) => step.name).join(", ")}) [${plan.mode}: ${plan.reason}]`,
 );
 const heartbeat = setInterval(showProgress, 1_000);
 await Promise.all(steps.slice(0, 2).map(run));

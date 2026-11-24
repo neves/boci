@@ -7,9 +7,15 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { implementedLookup } from "../../src/core/registry.ts";
 import {
+  computeSpawnSample,
+  type ParityMode,
+  selectParityCases,
+} from "../../scripts/verify-lib.ts";
+import {
   caseHash,
   includeGeneratedCases,
-  loadCases,
+  isGeneratedCaseFile,
+  loadCasesWithFiles,
   loadGolden,
   RESULTS_FILE,
 } from "../harness/cases.ts";
@@ -23,7 +29,40 @@ import { createPublicKey } from "node:crypto";
 import { CLIS, runCli, runInProcess } from "../harness/runner.ts";
 import { disposeSharedSandboxes } from "../harness/sandbox.ts";
 
-const cases = await loadCases({ generated: includeGeneratedCases() });
+const parityMode =
+  (Bun.env.BOCI_PARITY_MODE as ParityMode | undefined) ?? "full";
+const mergeResults = Bun.env.BOCI_VERIFY_MERGE_RESULTS === "1";
+const resultsFile = Bun.file(RESULTS_FILE);
+const prevResults: Record<string, { pass: boolean }> | undefined =
+  mergeResults && (await resultsFile.exists())
+    ? ((await resultsFile.json()) as Record<string, { pass: boolean }>)
+    : undefined;
+
+const allWithFiles = await loadCasesWithFiles({
+  generated: includeGeneratedCases(),
+});
+const allCases = allWithFiles.map((e) => e.case);
+const splitCsv = (val?: string) =>
+  val
+    ? val
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+const scopeFiles = new Set(splitCsv(Bun.env.BOCI_PARITY_FILES));
+
+const cases =
+  parityMode === "full"
+    ? allCases
+    : selectParityCases(allWithFiles, {
+        mode: parityMode,
+        files: scopeFiles,
+        ids: splitCsv(Bun.env.BOCI_PARITY_IDS),
+        services: splitCsv(Bun.env.BOCI_PARITY_SERVICES),
+        keys: splitCsv(Bun.env.BOCI_PARITY_KEYS),
+        prevResults,
+      });
+
 const isImplemented = await implementedLookup(cases.map((c) => c.key));
 const runnableCases = cases.filter((c) => isImplemented(c.key));
 const missingCases = cases.length - runnableCases.length;
@@ -42,16 +81,27 @@ const results: Record<string, { pass: boolean }> = {};
 // Against a binary (BOCI_BIN: verify, test:dist), the binary itself stays under test: every
 // hand-written case spawns it (real exit codes and stdio), plus the first generated case of
 // each kind per service (its embedded spec); the other generated cases exercise the same
-// code paths in-process. BOCI_PARITY_SPAWN=all spawns every case (test:dist).
+// code paths in-process. In `sample` mode (core engine iteration), unmodified hand-written
+// case files spawn their first case and run the rest in-process. BOCI_PARITY_SPAWN=all
+// spawns every case (test:dist).
 const spawnAll = Bun.env.BOCI_PARITY_SPAWN === "all";
 const spawnSample = new Set<string>();
 if (Bun.env.BOCI_BIN) {
-  const seen = new Set<string>();
-  for (const c of cases) {
-    const kind = /^generated-(get|request)-/.exec(c.id)?.[1];
-    const group = kind ? `${kind} ${c.key.split(" ")[0]}` : c.id;
-    if (!seen.has(group)) spawnSample.add(c.id);
-    seen.add(group);
+  if (parityMode === "sample") {
+    const seenGroups = new Set<string>();
+    for (const { file, case: c } of allWithFiles) {
+      if (scopeFiles.has(file)) {
+        spawnSample.add(c.id);
+        continue;
+      }
+      const group = isGeneratedCaseFile(file)
+        ? `gen ${c.key.split(" ")[0]}`
+        : `file ${file}`;
+      if (!seenGroups.has(group)) spawnSample.add(c.id);
+      seenGroups.add(group);
+    }
+  } else {
+    for (const id of computeSpawnSample(cases)) spawnSample.add(id);
   }
 }
 /** A relative path would resolve against the sandbox in both modes, but keep it honest. */
@@ -202,13 +252,26 @@ describe.concurrent("parity", () => {
 
 afterAll(async () => {
   try {
-    // results.json is derived and untracked (read by `bun run status`). Only a run of every
-    // case rewrites it, so a partial run (default `bun test`, `-t`) can't leave stale passes.
+    // results.json is derived and untracked (read by `bun run status`). A full run rewrites
+    // it completely; a scoped/sample run from `bun run verify` merges updated key results.
     if (includeGeneratedCases() && completed === runnableCases.length) {
-      const sorted = Object.fromEntries(
-        Object.entries(results).sort(([a], [b]) => a.localeCompare(b)),
-      );
-      await Bun.write(RESULTS_FILE, `${JSON.stringify(sorted, null, 2)}\n`);
+      let outResults = results;
+      if (parityMode !== "full" && prevResults) {
+        const validKeys = new Set(allCases.map((c) => c.key));
+        outResults = {};
+        for (const [k, v] of Object.entries(prevResults)) {
+          if (validKeys.has(k)) outResults[k] = v;
+        }
+        for (const [k, v] of Object.entries(results)) {
+          outResults[k] = v;
+        }
+      }
+      if (parityMode === "full" || prevResults) {
+        const sorted = Object.fromEntries(
+          Object.entries(outResults).sort(([a], [b]) => a.localeCompare(b)),
+        );
+        await Bun.write(RESULTS_FILE, `${JSON.stringify(sorted, null, 2)}\n`);
+      }
     }
   } finally {
     await disposeSharedSandboxes();

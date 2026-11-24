@@ -82,24 +82,38 @@ export const isGeneratedCaseFile = (file: string) =>
 /** Generated cases run only when this is set (`bun run verify` sets it). */
 export const includeGeneratedCases = () => Bun.env.BOCI_PARITY_ALL === "1";
 
-export async function loadCases({ generated = true } = {}): Promise<
-  ParityCase[]
+export type ParityCaseWithFile = {
+  file: string;
+  case: ParityCase;
+};
+
+export async function loadCasesWithFiles({ generated = true } = {}): Promise<
+  ParityCaseWithFile[]
 > {
-  const cases: ParityCase[] = [];
+  const cases: ParityCaseWithFile[] = [];
   for await (const file of new Bun.Glob("**/*.json").scan(CASES_DIR)) {
     if (!generated && isGeneratedCaseFile(file)) continue;
-    cases.push(
-      ...((await Bun.file(join(CASES_DIR, file)).json()) as ParityCase[]),
-    );
+    const loaded = (await Bun.file(
+      join(CASES_DIR, file),
+    ).json()) as ParityCase[];
+    for (const c of loaded) {
+      cases.push({ file, case: c });
+    }
   }
   const seen = new Set<string>();
-  for (const c of cases) {
+  for (const { case: c } of cases) {
     if (seen.has(c.id)) throw new Error(`duplicate parity case id: ${c.id}`);
     if (!/^[\w.-]+$/.test(c.id))
       throw new Error(`parity case id not filename-safe: ${c.id}`);
     seen.add(c.id);
   }
-  return cases.sort((a, b) => a.id.localeCompare(b.id));
+  return cases.sort((a, b) => a.case.id.localeCompare(b.case.id));
+}
+
+export async function loadCases({ generated = true } = {}): Promise<
+  ParityCase[]
+> {
+  return (await loadCasesWithFiles({ generated })).map((entry) => entry.case);
 }
 
 export const goldenPath = (id: string) => join(GOLDEN_DIR, `${id}.json`);

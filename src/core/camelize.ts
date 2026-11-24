@@ -60,8 +60,7 @@ function subtype(
   payload: Record<string, unknown>,
 ): Model | undefined {
   const models = keys.models?.[def.module] ?? {};
-  let disc = model.discriminator;
-  if (typeof disc === "string") disc = models[disc]?.discriminator;
+  const disc = inheritedDiscriminator(models, model);
   if (disc === undefined || typeof disc === "string") return undefined;
   const camelized: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(payload)) camelized[camelize(k)] = v;
@@ -73,6 +72,20 @@ function subtype(
       ? (disc.values[value] as string)
       : disc.fallback;
   return models[name];
+}
+
+/** Resolve get_subtype metadata up the model inheritance chain. */
+export function inheritedDiscriminator(
+  models: Record<string, Model>,
+  model: Model,
+): Exclude<Model["discriminator"], string | undefined> | undefined {
+  let disc = model.discriminator;
+  const seen = new Set<string>();
+  while (typeof disc === "string" && !seen.has(disc)) {
+    seen.add(disc);
+    disc = models[disc]?.discriminator;
+  }
+  return typeof disc === "string" ? undefined : disc;
 }
 
 /** make_dict_keys_camel_case(obj, parameter_name, complex_parameter_type). */

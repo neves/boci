@@ -1,11 +1,85 @@
 import { describe, expect, test } from "bun:test";
-import { chmodSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { buildBulkDownloadFilter, pyDirname } from "../../src/commands/os.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object bulk-download", () => {
+  test("writes binary single-part bodies and reports directory and failed GET outcomes", async () => {
+    await using sb = await createSandbox();
+    const dlDir = join(sb.home, "dl");
+    mkdirSync(join(dlDir, "directory.bin"), { recursive: true });
+    const fixture = new Uint8Array([0x00, 0xff, 0x80, 0x42]);
+    using server = Bun.serve({
+      port: 0,
+      hostname: "127.0.0.1",
+      fetch(req) {
+        const url = new URL(req.url);
+        if (req.method === "GET" && url.pathname === "/n/myns/b/mybucket/o") {
+          return Response.json({
+            objects: [
+              { name: "binary.bin", size: fixture.length },
+              { name: "directory.bin", size: 1 },
+              { name: "failed.bin", size: 1 },
+            ],
+          });
+        }
+        if (req.method === "GET" && url.pathname.endsWith("/o/binary.bin"))
+          return new Response(fixture);
+        if (req.method === "GET" && url.pathname.endsWith("/o/failed.bin"))
+          return new Response("missing", { status: 404 });
+        if (req.method === "GET" && url.pathname.endsWith("/o/directory.bin"))
+          return new Response(new Uint8Array([1]));
+        return new Response("unexpected", { status: 404 });
+      },
+    });
+    let stdout = "";
+    let stderr = "";
+    const code = await run({
+      argv: [
+        "--endpoint",
+        `http://127.0.0.1:${server.port}`,
+        "--no-retry",
+        "os",
+        "object",
+        "bulk-download",
+        "-ns",
+        "myns",
+        "-bn",
+        "mybucket",
+        "--download-dir",
+        dlDir,
+        "--overwrite",
+      ],
+      env: sb.env,
+      cwd: sb.home,
+      out: (s) => {
+        stdout += s;
+      },
+      err: (s) => {
+        stderr += s;
+      },
+      isTTY: () => false,
+      columns: () => 80,
+    });
+    expect(code).toBe(1);
+    expect(
+      new Uint8Array(await Bun.file(join(dlDir, "binary.bin")).arrayBuffer()),
+    ).toEqual(fixture);
+    expect(JSON.parse(stdout.trim())["download-failures"]).toMatchObject({
+      "failed.bin": expect.any(String),
+    });
+    expect(statSync(join(dlDir, "directory.bin")).isDirectory()).toBe(true);
+    expect(stderr).toContain("failed.bin");
+  });
+
   test("pyDirname matches Python posixpath.dirname", () => {
     expect(pyDirname("dest/sub/")).toBe("dest/sub");
     expect(pyDirname("dest/sub/file.txt")).toBe("dest/sub");

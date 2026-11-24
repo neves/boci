@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Both commands write the same binary fixture byte for byte.
-- [ ] An existing directory at the destination and an unsuccessful GET retain each command’s established behavior, including diagnostics and exit status.
+- [x] Both commands write the same binary fixture byte for byte.
+- [x] An existing directory at the destination and an unsuccessful GET retain each command’s established behavior, including diagnostics and exit status.

@@ -78,7 +78,7 @@ export function normalizeRun(run: Run): NormalizedRun {
 
 /** Re-apply the current output masks to a stored observation (goldens predate new masks). */
 export function remask(run: NormalizedRun): NormalizedRun {
-  return { ...run, stdout: mask(run.stdout), stderr: mask(run.stderr) };
+  return { ...run, stdout: mask(run.stdout), stderr: maskStderr(run.stderr) };
 }
 
 /** boci's exit status and stderr marker for a command it has no implementation for. */

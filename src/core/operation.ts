@@ -12,7 +12,7 @@ import {
 } from "./connection-timeout.ts";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { getPosixMode } from "../utils/posixMode.ts";
+import { getPosixMode } from "../lib/posixMode.ts";
 import { randomBytes, type KeyObject } from "node:crypto";
 import {
   type Config,

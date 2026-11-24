@@ -8,7 +8,7 @@ import {
   translateConfigFilepathsToPrefix,
 } from "../../src/commands/session.ts";
 import { buildZip, readZip } from "../../src/lib/zip.ts";
-import { setPosixMode } from "../../src/utils/posixMode.ts";
+import { setPosixMode } from "../../src/lib/posixMode.ts";
 
 async function runExport(
   argv: string[],

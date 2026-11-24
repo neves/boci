@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { applyUserOnlyAccessPermissions } from "../../src/commands/setup.ts";
-import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode, setPosixMode } from "../../src/lib/posixMode.ts";
 
 async function runSetup(argv: string[], home: string) {
   let stdout = "";

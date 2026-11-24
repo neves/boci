@@ -9,7 +9,7 @@ import {
   publicKeyToFingerprint,
 } from "../../src/commands/setup.ts";
 import { loadPrivateKey } from "../../src/core/signer.ts";
-import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode, setPosixMode } from "../../src/lib/posixMode.ts";
 
 async function runKeys(argv: string[], home: string, stdin?: string) {
   let stdout = "";

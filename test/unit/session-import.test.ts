@@ -6,7 +6,7 @@ import { run } from "../../src/core/cli.ts";
 import { formatParsedConfig, parseConfig } from "../../src/lib/configparser.ts";
 import { removeProfileFromConfig } from "../../src/commands/setup.ts";
 import { buildZip } from "../../src/lib/zip.ts";
-import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode, setPosixMode } from "../../src/lib/posixMode.ts";
 
 async function runCliInHome(
   argv: string[],

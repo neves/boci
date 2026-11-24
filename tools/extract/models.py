@@ -106,6 +106,19 @@ def _collect(pending, pool, mappings):
             pending += [(module, c) for c in [*disc["values"].values(), disc["fallback"]]]
         pool.setdefault(module, {})[name] = model
 
+def collect_model_refs(refs, pool: dict) -> None:
+    """Add SDK models referenced by compiled program model constructors to pool[module][class]."""
+    pending = sorted(set(refs))
+    if not pending:
+        return
+    mappings = {}
+    for module, _ in pending:
+        if module not in mappings:
+            sdk_models = importlib.import_module(f"oci.{module}.models")
+            mappings[module] = getattr(sdk_models, f"{module}_type_mapping")
+    _collect(pending, pool, mappings)
+
+
 def collect_responses(commands, clients, pool):
     """Walk the response models of every callable operation, including waiter getters."""
     operations = [target.get("operation", {}) for command in commands.values()

@@ -110445,6 +110445,1276 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "create_database_details",
+            ["model", "database", "CreateDatabaseDetails", [], [], null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "datasafe_registration_details", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "datasafe_registration_details"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "data_safe_registration_details",
+                [
+                  "fn",
+                  "parse",
+                  "datasafe_registration_details",
+                  ["item", ["var", "kwargs"], "datasafe_registration_details"]
+                ],
+                "create_database_details.data_safe_registration_details = cli_util.parse_json_parameter('datasafe_registration_details', kwargs['datasafe_registration_details'])"
+              ],
+              [
+                "do",
+                [
+                  "call",
+                  "pop",
+                  ["var", "kwargs"],
+                  "datasafe_registration_details"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "msu_details", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "msu_details"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "managed_software_update_details",
+                ["item", ["var", "kwargs"], "msu_details"],
+                "create_database_details.managed_software_update_details = kwargs['msu_details']"
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "msu_details"]],
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "vm_cluster_id", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "vm_cluster_id"]
+                ],
+                [
+                  [
+                    "setAttr",
+                    ["var", "create_database_details"],
+                    "vm_cluster_id",
+                    ["item", ["var", "kwargs"], "vm_cluster_id"],
+                    "create_database_details.vm_cluster_id = kwargs['vm_cluster_id']"
+                  ]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Missing a required parameter. --vm-cluster-id must be specified for managed software updates",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  [
+                    "cmp",
+                    "is",
+                    ["item", ["var", "kwargs"], "db_home_id"],
+                    null
+                  ],
+                  ["cmp", "is", ["item", ["var", "kwargs"], "db_version"], null]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Missing a required parameter. Either --db-home-id or --db-version must be specified.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_system_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_system_id"]
+            ],
+            [
+              [
+                "let",
+                "create_db_home_details",
+                [
+                  "model",
+                  "database",
+                  "CreateDbHomeWithDbSystemIdDetails",
+                  [["source", "NONE"]],
+                  [],
+                  null
+                ]
+              ],
+              [
+                "setAttr",
+                ["var", "create_db_home_details"],
+                "db_system_id",
+                ["item", ["var", "kwargs"], "db_system_id"],
+                "create_db_home_details.db_system_id = kwargs['db_system_id']"
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "vm_cluster_id", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "vm_cluster_id"]
+                ],
+                [
+                  [
+                    "let",
+                    "create_db_home_details",
+                    [
+                      "model",
+                      "database",
+                      "CreateDbHomeWithVmClusterIdDetails",
+                      [["source", "VM_CLUSTER_NEW"]],
+                      [],
+                      null
+                    ]
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "create_db_home_details"],
+                    "vm_cluster_id",
+                    ["item", ["var", "kwargs"], "vm_cluster_id"],
+                    "create_db_home_details.vm_cluster_id = kwargs['vm_cluster_id']"
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "create_db_home_details"],
+                    "is_unified_auditing_enabled",
+                    ["item", ["var", "kwargs"], "is_unified_auditing_enabled"],
+                    "create_db_home_details.is_unified_auditing_enabled = kwargs['is_unified_auditing_enabled']"
+                  ]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Missing a required parameter. Either --db-system-id or --vm-cluster-id must be specified.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_older_version_acknowledged", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_older_version_acknowledged"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_details"],
+                "is_older_version_acknowledged",
+                ["item", ["var", "kwargs"], "is_older_version_acknowledged"],
+                "create_db_home_details.is_older_version_acknowledged = kwargs['is_older_version_acknowledged']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_software_image_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "database_software_image_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_details"],
+                "database_software_image_id",
+                ["item", ["var", "kwargs"], "database_software_image_id"],
+                "create_db_home_details.database_software_image_id = kwargs['database_software_image_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_desupported_version", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_desupported_version"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_details"],
+                "is_desupported_version",
+                ["item", ["var", "kwargs"], "is_desupported_version"],
+                "create_db_home_details.is_desupported_version = kwargs['is_desupported_version']"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "db_backup_config",
+            ["model", "database", "DbBackupConfig", [], [], null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "admin_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "admin_password",
+                ["item", ["var", "kwargs"], "admin_password"],
+                "create_database_details.admin_password = kwargs['admin_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "tde_wallet_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "tde_wallet_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "tde_wallet_password",
+                ["item", ["var", "kwargs"], "tde_wallet_password"],
+                "create_database_details.tde_wallet_password = kwargs['tde_wallet_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "character_set", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "character_set"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "character_set",
+                ["item", ["var", "kwargs"], "character_set"],
+                "create_database_details.character_set = kwargs['character_set']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "db_name",
+                ["item", ["var", "kwargs"], "db_name"],
+                "create_database_details.db_name = kwargs['db_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_unique_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_unique_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "db_unique_name",
+                ["item", ["var", "kwargs"], "db_unique_name"],
+                "create_database_details.db_unique_name = kwargs['db_unique_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "sid_prefix", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "sid_prefix"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "sid_prefix",
+                ["item", ["var", "kwargs"], "sid_prefix"],
+                "create_database_details.sid_prefix = kwargs['sid_prefix']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_workload", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_workload"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "db_workload",
+                ["item", ["var", "kwargs"], "db_workload"],
+                "create_database_details.db_workload = kwargs['db_workload']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "backup_destination", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "backup_destination"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "db_backup_config"],
+                "backup_destination_details",
+                [
+                  "fn",
+                  "parse",
+                  "backup_destination_details",
+                  ["item", ["var", "kwargs"], "backup_destination"]
+                ],
+                "db_backup_config.backup_destination_details = cli_util.parse_json_parameter('backup_destination_details', kwargs['backup_destination'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ncharacter_set", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "ncharacter_set"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "ncharacter_set",
+                ["item", ["var", "kwargs"], "ncharacter_set"],
+                "create_database_details.ncharacter_set = kwargs['ncharacter_set']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pdb_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "pdb_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "pdb_name",
+                ["item", ["var", "kwargs"], "pdb_name"],
+                "create_database_details.pdb_name = kwargs['pdb_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "defined_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "defined_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "defined_tags",
+                [
+                  "fn",
+                  "parse",
+                  "defined_tags",
+                  ["item", ["var", "kwargs"], "defined_tags"]
+                ],
+                "create_database_details.defined_tags = cli_util.parse_json_parameter('defined_tags', kwargs['defined_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "freeform_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "freeform_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "freeform_tags",
+                [
+                  "fn",
+                  "parse",
+                  "freeform_tags",
+                  ["item", ["var", "kwargs"], "freeform_tags"]
+                ],
+                "create_database_details.freeform_tags = cli_util.parse_json_parameter('freeform_tags', kwargs['freeform_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "vault_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "vault_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_database_details"],
+                "vaultId",
+                ["item", ["var", "kwargs"], "vault_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "kms_key_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "kms_key_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_database_details"],
+                "kmsKeyId",
+                ["item", ["var", "kwargs"], "kms_key_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "kms_key_version_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "kms_key_version_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "create_database_details"],
+                "kmsKeyVersionId",
+                ["item", ["var", "kwargs"], "kms_key_version_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "database_storage_size_details",
+            ["model", "database", "DatabaseStorageSizeDetails", [], [], null]
+          ],
+          ["let", "include_storage_details", false],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "data_storage_size_in_gbs", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "data_storage_size_in_gbs"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_storage_size_details"],
+                "data_storage_size_in_gbs",
+                ["item", ["var", "kwargs"], "data_storage_size_in_gbs"],
+                "database_storage_size_details.data_storage_size_in_gbs = kwargs['data_storage_size_in_gbs']"
+              ],
+              ["let", "include_storage_details", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "reco_storage_size_in_gbs", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "reco_storage_size_in_gbs"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_storage_size_details"],
+                "reco_storage_size_in_gbs",
+                ["item", ["var", "kwargs"], "reco_storage_size_in_gbs"],
+                "database_storage_size_details.reco_storage_size_in_gbs = kwargs['reco_storage_size_in_gbs']"
+              ],
+              ["let", "include_storage_details", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "include_storage_details"],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "storage_size_details",
+                ["var", "database_storage_size_details"],
+                "create_database_details.storage_size_details = database_storage_size_details"
+              ]
+            ],
+            []
+          ],
+          ["let", "_encryption_key_location_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "hsm_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "hsm_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_encryption_key_location_details"],
+                "providerType",
+                "EXTERNAL"
+              ],
+              [
+                "set",
+                ["var", "_encryption_key_location_details"],
+                "hsmPassword",
+                ["item", ["var", "kwargs"], "hsm_password"]
+              ],
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "encryption_key_location_details",
+                ["var", "_encryption_key_location_details"],
+                "create_database_details.encryption_key_location_details = _encryption_key_location_details"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "auto-backup-window", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "auto-backup-window"],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                null
+              ]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "db_backup_config"],
+                "auto_backup_enabled",
+                ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                "db_backup_config.auto_backup_enabled = kwargs['auto_backup_enabled']"
+              ],
+              [
+                "setAttr",
+                ["var", "db_backup_config"],
+                "auto_backup_window",
+                ["item", ["var", "kwargs"], "auto-backup-window"],
+                "db_backup_config.auto_backup_window = kwargs['auto-backup-window']"
+              ],
+              ["del", ["var", "kwargs"], "auto-backup-window"]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "zero_data_loss_enabled"],
+              null
+            ],
+            [
+              [
+                "let",
+                "backup_details_list",
+                [
+                  "call",
+                  "setdefault",
+                  ["var", "db_backup_config"],
+                  "backupDestinationDetails",
+                  ["list"]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["var", "backup_details_list"]],
+                [
+                  [
+                    "do",
+                    ["call", "append", ["var", "backup_details_list"], ["dict"]]
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["item", ["var", "backup_details_list"], 0],
+                "isZeroDataLossEnabled",
+                ["item", ["var", "kwargs"], "zero_data_loss_enabled"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                null
+              ],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "recovery_window_in_days"],
+                null
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                  null
+                ],
+                [
+                  [
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "auto_backup_enabled",
+                    ["item", ["var", "kwargs"], "auto_backup_enabled"],
+                    "db_backup_config.auto_backup_enabled = kwargs['auto_backup_enabled']"
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "recovery_window_in_days"],
+                  null
+                ],
+                [
+                  [
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "recoveryWindowInDays",
+                    ["item", ["var", "kwargs"], "recovery_window_in_days"],
+                    "db_backup_config.recoveryWindowInDays = kwargs['recovery_window_in_days']"
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "auto_backup_window"],
+                  null
+                ],
+                [
+                  [
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "autoBackupWindow",
+                    ["item", ["var", "kwargs"], "auto_backup_window"],
+                    "db_backup_config.autoBackupWindow = kwargs['auto_backup_window']"
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "auto_full_backup_day"],
+                  null
+                ],
+                [
+                  [
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "autoFullBackupDay",
+                    ["item", ["var", "kwargs"], "auto_full_backup_day"],
+                    "db_backup_config.autoFullBackupDay = kwargs['auto_full_backup_day']"
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "auto_full_backup_window"],
+                  null
+                ],
+                [
+                  [
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "autoFullBackupWindow",
+                    ["item", ["var", "kwargs"], "auto_full_backup_window"],
+                    "db_backup_config.autoFullBackupWindow = kwargs['auto_full_backup_window']"
+                  ]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "run_immediate_full_backup"],
+                  null
+                ],
+                [
+                  [
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "runImmediateFullBackup",
+                    ["item", ["var", "kwargs"], "run_immediate_full_backup"],
+                    "db_backup_config.runImmediateFullBackup = kwargs['run_immediate_full_backup']"
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "setAttr",
+            ["var", "create_database_details"],
+            "db_backup_config",
+            ["var", "db_backup_config"],
+            "create_database_details.db_backup_config = db_backup_config"
+          ],
+          ["del", ["var", "kwargs"], "auto_backup_enabled"],
+          ["del", ["var", "kwargs"], "recovery_window_in_days"],
+          ["del", ["var", "kwargs"], "backup_destination"],
+          ["del", ["var", "kwargs"], "vault_id"],
+          ["del", ["var", "kwargs"], "kms_key_id"],
+          ["del", ["var", "kwargs"], "kms_key_version_id"],
+          ["del", ["var", "kwargs"], "auto_backup_window"],
+          ["del", ["var", "kwargs"], "auto_full_backup_day"],
+          ["del", ["var", "kwargs"], "auto_full_backup_window"],
+          ["del", ["var", "kwargs"], "run_immediate_full_backup"],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "zero_data_loss_enabled", null]
+          ],
+          [
+            "setAttr",
+            ["var", "create_db_home_details"],
+            "database",
+            ["var", "create_database_details"],
+            "create_db_home_details.database = create_database_details"
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_version", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_version"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_details"],
+                "db_version",
+                ["item", ["var", "kwargs"], "db_version"],
+                "create_db_home_details.db_version = kwargs['db_version']"
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "let",
+            "create_new_database_details",
+            [
+              "model",
+              "database",
+              "CreateNewDatabaseDetails",
+              [["source", "NONE"]],
+              [],
+              null
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "db_home_id"], null],
+            [
+              [
+                "setAttr",
+                ["var", "create_new_database_details"],
+                "db_home_id",
+                ["item", ["var", "kwargs"], "db_home_id"],
+                "create_new_database_details.db_home_id = kwargs['db_home_id']"
+              ],
+              [
+                "setAttr",
+                ["var", "create_new_database_details"],
+                "database",
+                ["var", "create_database_details"],
+                "create_new_database_details.database = create_database_details"
+              ],
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  0,
+                  ["var", "client"],
+                  [["var", "create_new_database_details"]],
+                  [],
+                  null
+                ]
+              ],
+              ["let", "db_home_id", ["item", ["var", "kwargs"], "db_home_id"]],
+              [
+                "let",
+                "compartment_id",
+                ["attr", "compartment_id", ["attr", "data", ["var", "result"]]]
+              ]
+            ],
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [["var", "create_db_home_details"]],
+                  [],
+                  null
+                ]
+              ],
+              [
+                "let",
+                "db_home_id",
+                ["attr", "id", ["attr", "data", ["var", "result"]]]
+              ],
+              [
+                "let",
+                "compartment_id",
+                ["attr", "compartment_id", ["attr", "data", ["var", "result"]]]
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          2,
+                          ["var", "client"],
+                          [["var", "db_home_id"]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "tryMulti",
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  3,
+                  ["var", "client"],
+                  [],
+                  [
+                    ["db_home_id", ["var", "db_home_id"]],
+                    ["compartment_id", ["var", "compartment_id"]]
+                  ],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "ServiceError",
+                null,
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "format",
+                        "Successfully created database but failed to retrieve metadata. You can view the status of databases in this DB system by executing: oci db database list -c {comp_id} --db-system-id {db_sys_id} ",
+                        [],
+                        [
+                          ["comp_id", ["var", "compartment_id"]],
+                          [
+                            "db_sys_id",
+                            ["item", ["var", "kwargs"], "db_system_id"]
+                          ]
+                        ],
+                        null
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ]
+          ],
+          ["let", "database", ["item", ["attr", "data", ["var", "result"]], 0]],
+          ["renderData", ["var", "database"], null, false, true]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "create_database",
+          "http": "POST",
+          "path": "/databases",
+          "positionalArgs": ["create_new_database_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-dry-run": {
+              "arg": "opc_dry_run"
+            }
+          },
+          "body": "create_new_database_details",
+          "responseType": "Database"
+        },
+        {
+          "client": "database.database",
+          "method": "create_db_home",
+          "http": "POST",
+          "path": "/dbHomes",
+          "positionalArgs": ["create_db_home_with_db_system_id_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_db_home_with_db_system_id_details",
+          "responseType": "DbHome"
+        },
+        {
+          "client": "database.database",
+          "method": "get_db_home",
+          "http": "GET",
+          "path": "/dbHomes/{dbHomeId}",
+          "positionalArgs": ["db_home_id"],
+          "pathParams": {
+            "dbHomeId": "db_home_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "DbHome"
+        },
+        {
+          "client": "database.database",
+          "method": "list_databases",
+          "http": "GET",
+          "path": "/databases",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "dbHomeId": {
+              "arg": "db_home_id"
+            },
+            "systemId": {
+              "arg": "system_id"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "dbName": {
+              "arg": "db_name"
+            },
+            "managedAutoFailover": {
+              "arg": "managed_auto_failover"
+            },
+            "failoverTargets": {
+              "arg": "failover_targets"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[DatabaseSummary]"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -112869,6 +114139,522 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          ["let", "kwargs_for_client", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs_for_client"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "create_database_details",
+            [
+              "model",
+              "database",
+              "CreateDatabaseFromAnotherDatabaseDetails",
+              [],
+              [],
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "datasafe_registration_details", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "datasafe_registration_details"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "data_safe_registration_details",
+                [
+                  "fn",
+                  "parse",
+                  "datasafe_registration_details",
+                  ["item", ["var", "kwargs"], "datasafe_registration_details"]
+                ],
+                "create_database_details.data_safe_registration_details = cli_util.parse_json_parameter('datasafe_registration_details', kwargs['datasafe_registration_details'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "admin_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "admin_password",
+                ["item", ["var", "kwargs"], "admin_password"],
+                "create_database_details.admin_password = kwargs['admin_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "database_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "database_id",
+                ["item", ["var", "kwargs"], "database_id"],
+                "create_database_details.database_id = kwargs['database_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "backup_tde_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "backup_tde_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "backup_tde_password",
+                ["item", ["var", "kwargs"], "backup_tde_password"],
+                "create_database_details.backup_tde_password = kwargs['backup_tde_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "db_name",
+                ["item", ["var", "kwargs"], "db_name"],
+                "create_database_details.db_name = kwargs['db_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "sid_prefix", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "sid_prefix"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "sid_prefix",
+                ["item", ["var", "kwargs"], "sid_prefix"],
+                "create_database_details.sid_prefix = kwargs['sid_prefix']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "freeform_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "freeform_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "freeform_tags",
+                [
+                  "fn",
+                  "parse",
+                  "freeform_tags",
+                  ["item", ["var", "kwargs"], "freeform_tags"]
+                ],
+                "create_database_details.freeform_tags = cli_util.parse_json_parameter('freeform_tags', kwargs['freeform_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "defined_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "defined_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "defined_tags",
+                [
+                  "fn",
+                  "parse",
+                  "defined_tags",
+                  ["item", ["var", "kwargs"], "defined_tags"]
+                ],
+                "create_database_details.defined_tags = cli_util.parse_json_parameter('defined_tags', kwargs['defined_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "recovery_appliance_vpc_password",
+                ["var", "kwargs"]
+              ],
+              ["item", ["var", "kwargs"], "recovery_appliance_vpc_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "recovery_appliance_vpc_password",
+                ["item", ["var", "kwargs"], "recovery_appliance_vpc_password"],
+                "create_database_details.recovery_appliance_vpc_password = kwargs['recovery_appliance_vpc_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "source_encryption_key_location_details",
+                ["var", "kwargs"]
+              ],
+              [
+                "item",
+                ["var", "kwargs"],
+                "source_encryption_key_location_details"
+              ]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "source_encryption_key_location_details",
+                [
+                  "fn",
+                  "parse",
+                  "source_encryption_key_location_details",
+                  [
+                    "item",
+                    ["var", "kwargs"],
+                    "source_encryption_key_location_details"
+                  ]
+                ],
+                "create_database_details.source_encryption_key_location_details = cli_util.parse_json_parameter('source_encryption_key_location_details', kwargs['source_encryption_key_location_details'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "point_in_time_recovery_timestamp",
+                ["var", "kwargs"]
+              ],
+              ["item", ["var", "kwargs"], "point_in_time_recovery_timestamp"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "time_stamp_for_point_in_time_recovery",
+                ["item", ["var", "kwargs"], "point_in_time_recovery_timestamp"],
+                "create_database_details.time_stamp_for_point_in_time_recovery = kwargs['point_in_time_recovery_timestamp']"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "_details",
+            [
+              "dict",
+              ["dbHomeId", ["item", ["var", "kwargs"], "db_home_id"]],
+              ["database", ["var", "create_database_details"]],
+              ["source", "DATABASE"]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "db_version"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dbVersion",
+                ["item", ["var", "kwargs"], "db_version"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "kms_key_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "kmsKeyId",
+                ["item", ["var", "kwargs"], "kms_key_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "kms_key_version_id"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "kmsKeyVersionId",
+                ["item", ["var", "kwargs"], "kms_key_version_id"]
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_new_database_details", ["var", "_details"]]],
+              ["var", "kwargs_for_client"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "create_database",
+          "http": "POST",
+          "path": "/databases",
+          "positionalArgs": ["create_new_database_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-dry-run": {
+              "arg": "opc_dry_run"
+            }
+          },
+          "body": "create_new_database_details",
+          "responseType": "Database"
+        },
+        {
+          "client": "database.database",
+          "method": "get_database",
+          "http": "GET",
+          "path": "/databases/{databaseId}",
+          "positionalArgs": ["database_id"],
+          "pathParams": {
+            "databaseId": "database_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Database"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -113800,6 +115586,782 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_system_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_system_id"]
+            ],
+            [
+              [
+                "let",
+                "create_db_home_with_system_details",
+                [
+                  "model",
+                  "database",
+                  "CreateDbHomeWithDbSystemIdFromBackupDetails",
+                  [["source", "DB_BACKUP"]],
+                  [],
+                  null
+                ]
+              ],
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "db_system_id",
+                ["item", ["var", "kwargs"], "db_system_id"],
+                "create_db_home_with_system_details.db_system_id = kwargs['db_system_id']"
+              ],
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "source",
+                "DB_BACKUP",
+                "create_db_home_with_system_details.source = 'DB_BACKUP'"
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "vm_cluster_id", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "vm_cluster_id"]
+                ],
+                [
+                  [
+                    "let",
+                    "create_db_home_with_system_details",
+                    [
+                      "model",
+                      "database",
+                      "CreateDbHomeWithVmClusterIdFromBackupDetails",
+                      [["source", "VM_CLUSTER_BACKUP"]],
+                      [],
+                      null
+                    ]
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "create_db_home_with_system_details"],
+                    "vm_cluster_id",
+                    ["item", ["var", "kwargs"], "vm_cluster_id"],
+                    "create_db_home_with_system_details.vm_cluster_id = kwargs['vm_cluster_id']"
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "create_db_home_with_system_details"],
+                    "source",
+                    "VM_CLUSTER_BACKUP",
+                    "create_db_home_with_system_details.source = 'VM_CLUSTER_BACKUP'"
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "create_db_home_with_system_details"],
+                    "is_unified_auditing_enabled",
+                    ["item", ["var", "kwargs"], "is_unified_auditing_enabled"],
+                    "create_db_home_with_system_details.is_unified_auditing_enabled = kwargs['is_unified_auditing_enabled']"
+                  ]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Missing a required parameter. Either --db-system-id or --vm-cluster-id must be specified.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "create_database_details",
+            [
+              "model",
+              "database",
+              "CreateDatabaseFromBackupDetails",
+              [],
+              [],
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "datasafe_registration_details", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "datasafe_registration_details"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "data_safe_registration_details",
+                [
+                  "fn",
+                  "parse",
+                  "datasafe_registration_details",
+                  ["item", ["var", "kwargs"], "datasafe_registration_details"]
+                ],
+                "create_database_details.data_safe_registration_details = cli_util.parse_json_parameter('datasafe_registration_details', kwargs['datasafe_registration_details'])"
+              ],
+              [
+                "do",
+                [
+                  "call",
+                  "pop",
+                  ["var", "kwargs"],
+                  "datasafe_registration_details"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "admin_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "admin_password",
+                ["item", ["var", "kwargs"], "admin_password"],
+                "create_database_details.admin_password = kwargs['admin_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "backup_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "backup_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "backup_id",
+                ["item", ["var", "kwargs"], "backup_id"],
+                "create_database_details.backup_id = kwargs['backup_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "backup_tde_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "backup_tde_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "backup_tde_password",
+                ["item", ["var", "kwargs"], "backup_tde_password"],
+                "create_database_details.backup_tde_password = kwargs['backup_tde_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "db_name",
+                ["item", ["var", "kwargs"], "db_name"],
+                "create_database_details.db_name = kwargs['db_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_unique_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_unique_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "db_unique_name",
+                ["item", ["var", "kwargs"], "db_unique_name"],
+                "create_database_details.db_unique_name = kwargs['db_unique_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "sid_prefix", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "sid_prefix"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "sid_prefix",
+                ["item", ["var", "kwargs"], "sid_prefix"],
+                "create_database_details.sid_prefix = kwargs['sid_prefix']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "freeform_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "freeform_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "freeform_tags",
+                [
+                  "fn",
+                  "parse",
+                  "freeform_tags",
+                  ["item", ["var", "kwargs"], "freeform_tags"]
+                ],
+                "create_database_details.freeform_tags = cli_util.parse_json_parameter('freeform_tags', kwargs['freeform_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "defined_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "defined_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "defined_tags",
+                [
+                  "fn",
+                  "parse",
+                  "defined_tags",
+                  ["item", ["var", "kwargs"], "defined_tags"]
+                ],
+                "create_database_details.defined_tags = cli_util.parse_json_parameter('defined_tags', kwargs['defined_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_software_image_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "database_software_image_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "database_software_image_id",
+                ["item", ["var", "kwargs"], "database_software_image_id"],
+                "create_db_home_with_system_details.database_software_image_id = kwargs['database_software_image_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_desupported_version", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_desupported_version"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "is_desupported_version",
+                ["item", ["var", "kwargs"], "is_desupported_version"],
+                "create_db_home_with_system_details.is_desupported_version = kwargs['is_desupported_version']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_older_version_acknowledged", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_older_version_acknowledged"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "is_older_version_acknowledged",
+                ["item", ["var", "kwargs"], "is_older_version_acknowledged"],
+                "create_db_home_with_system_details.is_older_version_acknowledged = kwargs['is_older_version_acknowledged']"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "database_storage_size_details",
+            ["model", "database", "DatabaseStorageSizeDetails", [], [], null]
+          ],
+          ["let", "include_storage_details", false],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "data_storage_size_in_gbs", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "data_storage_size_in_gbs"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_storage_size_details"],
+                "data_storage_size_in_gbs",
+                ["item", ["var", "kwargs"], "data_storage_size_in_gbs"],
+                "database_storage_size_details.data_storage_size_in_gbs = kwargs['data_storage_size_in_gbs']"
+              ],
+              ["let", "include_storage_details", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "reco_storage_size_in_gbs", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "reco_storage_size_in_gbs"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_storage_size_details"],
+                "reco_storage_size_in_gbs",
+                ["item", ["var", "kwargs"], "reco_storage_size_in_gbs"],
+                "database_storage_size_details.reco_storage_size_in_gbs = kwargs['reco_storage_size_in_gbs']"
+              ],
+              ["let", "include_storage_details", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "include_storage_details"],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "storage_size_details",
+                ["var", "database_storage_size_details"],
+                "create_database_details.storage_size_details = database_storage_size_details"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "msu_details", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "msu_details"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "managed_software_update_details",
+                ["item", ["var", "kwargs"], "msu_details"],
+                "create_database_details.managed_software_update_details = kwargs['msu_details']"
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "msu_details"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "vm_cluster_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "vm_cluster_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "vm_cluster_id",
+                ["item", ["var", "kwargs"], "vm_cluster_id"],
+                "create_database_details.vm_cluster_id = kwargs['vm_cluster_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "setAttr",
+            ["var", "create_db_home_with_system_details"],
+            "database",
+            ["var", "create_database_details"],
+            "create_db_home_with_system_details.database = create_database_details"
+          ],
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [["var", "create_db_home_with_system_details"]],
+              [],
+              null
+            ]
+          ],
+          [
+            "let",
+            "db_home_id",
+            ["attr", "id", ["attr", "data", ["var", "result"]]]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["attr", "compartment_id", ["attr", "data", ["var", "result"]]]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["var", "db_home_id"]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "tryMulti",
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  2,
+                  ["var", "client"],
+                  [],
+                  [
+                    ["db_home_id", ["var", "db_home_id"]],
+                    ["compartment_id", ["var", "compartment_id"]]
+                  ],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "ServiceError",
+                null,
+                [
+                  ["let", "target_option", "--db-system-id"],
+                  [
+                    "let",
+                    "target_id",
+                    ["call", "get", ["var", "kwargs"], "db_system_id"]
+                  ],
+                  [
+                    "if",
+                    ["not", ["var", "target_id"]],
+                    [
+                      ["let", "target_option", "--vm-cluster-id"],
+                      [
+                        "let",
+                        "target_id",
+                        ["call", "get", ["var", "kwargs"], "vm_cluster_id"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "format",
+                        "Failed retrieving database info after successfully creation.  You can view the status of databases by executing: oci db database list -c {comp_id} {target_option} {target_id} ",
+                        [],
+                        [
+                          ["comp_id", ["var", "compartment_id"]],
+                          ["target_option", ["var", "target_option"]],
+                          ["target_id", ["var", "target_id"]]
+                        ],
+                        null
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ]
+          ],
+          ["let", "database", ["item", ["attr", "data", ["var", "result"]], 0]],
+          ["renderData", ["var", "database"], null, false, true]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "create_db_home",
+          "http": "POST",
+          "path": "/dbHomes",
+          "positionalArgs": ["create_db_home_with_db_system_id_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_db_home_with_db_system_id_details",
+          "responseType": "DbHome"
+        },
+        {
+          "client": "database.database",
+          "method": "get_db_home",
+          "http": "GET",
+          "path": "/dbHomes/{dbHomeId}",
+          "positionalArgs": ["db_home_id"],
+          "pathParams": {
+            "dbHomeId": "db_home_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "DbHome"
+        },
+        {
+          "client": "database.database",
+          "method": "list_databases",
+          "http": "GET",
+          "path": "/databases",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "dbHomeId": {
+              "arg": "db_home_id"
+            },
+            "systemId": {
+              "arg": "system_id"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "dbName": {
+              "arg": "db_name"
+            },
+            "managedAutoFailover": {
+              "arg": "managed_auto_failover"
+            },
+            "failoverTargets": {
+              "arg": "failover_targets"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[DatabaseSummary]"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -114420,6 +116982,791 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "create_database_details",
+            [
+              "model",
+              "database",
+              "CreateDatabaseFromAnotherDatabaseDetails",
+              [],
+              [],
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "datasafe_registration_details", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "datasafe_registration_details"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "data_safe_registration_details",
+                [
+                  "fn",
+                  "parse",
+                  "datasafe_registration_details",
+                  ["item", ["var", "kwargs"], "datasafe_registration_details"]
+                ],
+                "create_database_details.data_safe_registration_details = cli_util.parse_json_parameter('datasafe_registration_details', kwargs['datasafe_registration_details'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_system_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_system_id"]
+            ],
+            [
+              [
+                "let",
+                "create_db_home_with_system_details",
+                [
+                  "model",
+                  "database",
+                  "CreateDbHomeWithDbSystemIdFromDatabaseDetails",
+                  [["source", "DATABASE"]],
+                  [],
+                  null
+                ]
+              ],
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "db_system_id",
+                ["item", ["var", "kwargs"], "db_system_id"],
+                "create_db_home_with_system_details.db_system_id = kwargs['db_system_id']"
+              ],
+              ["let", "source", "DATABASE"]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "vm_cluster_id", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "vm_cluster_id"]
+                ],
+                [
+                  [
+                    "let",
+                    "create_db_home_with_system_details",
+                    [
+                      "model",
+                      "database",
+                      "CreateDbHomeWithVmClusterIdFromDatabaseDetails",
+                      [["source", "VM_CLUSTER_DATABASE"]],
+                      [],
+                      null
+                    ]
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "create_db_home_with_system_details"],
+                    "vm_cluster_id",
+                    ["item", ["var", "kwargs"], "vm_cluster_id"],
+                    "create_db_home_with_system_details.vm_cluster_id = kwargs['vm_cluster_id']"
+                  ],
+                  ["let", "source", "VM_CLUSTER_DATABASE"]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Missing a required parameter. Either --db-system-id or --vm-cluster-id must be specified.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "admin_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "admin_password",
+                ["item", ["var", "kwargs"], "admin_password"],
+                "create_database_details.admin_password = kwargs['admin_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "database_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "database_id",
+                ["item", ["var", "kwargs"], "database_id"],
+                "create_database_details.database_id = kwargs['database_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "backup_tde_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "backup_tde_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "backup_tde_password",
+                ["item", ["var", "kwargs"], "backup_tde_password"],
+                "create_database_details.backup_tde_password = kwargs['backup_tde_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "db_name",
+                ["item", ["var", "kwargs"], "db_name"],
+                "create_database_details.db_name = kwargs['db_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "sid_prefix", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "sid_prefix"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "sid_prefix",
+                ["item", ["var", "kwargs"], "sid_prefix"],
+                "create_database_details.sid_prefix = kwargs['sid_prefix']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "recovery_appliance_vpc_password",
+                ["var", "kwargs"]
+              ],
+              ["item", ["var", "kwargs"], "recovery_appliance_vpc_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "recovery_appliance_vpc_password",
+                ["item", ["var", "kwargs"], "recovery_appliance_vpc_password"],
+                "create_database_details.recovery_appliance_vpc_password = kwargs['recovery_appliance_vpc_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "source_encryption_key_location_details",
+                ["var", "kwargs"]
+              ],
+              [
+                "item",
+                ["var", "kwargs"],
+                "source_encryption_key_location_details"
+              ]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "source_encryption_key_location_details",
+                [
+                  "fn",
+                  "parse",
+                  "source_encryption_key_location_details",
+                  [
+                    "item",
+                    ["var", "kwargs"],
+                    "source_encryption_key_location_details"
+                  ]
+                ],
+                "create_database_details.source_encryption_key_location_details = cli_util.parse_json_parameter('source_encryption_key_location_details', kwargs['source_encryption_key_location_details'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "in",
+                "point_in_time_recovery_timestamp",
+                ["var", "kwargs"]
+              ],
+              ["item", ["var", "kwargs"], "point_in_time_recovery_timestamp"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_database_details"],
+                "time_stamp_for_point_in_time_recovery",
+                ["item", ["var", "kwargs"], "point_in_time_recovery_timestamp"],
+                "create_database_details.time_stamp_for_point_in_time_recovery = kwargs['point_in_time_recovery_timestamp']"
+              ]
+            ],
+            []
+          ],
+          [
+            "setAttr",
+            ["var", "create_db_home_with_system_details"],
+            "database",
+            ["var", "create_database_details"],
+            "create_db_home_with_system_details.database = create_database_details"
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_software_image_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "database_software_image_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "database_software_image_id",
+                ["item", ["var", "kwargs"], "database_software_image_id"],
+                "create_db_home_with_system_details.database_software_image_id = kwargs['database_software_image_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "kms_key_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "kms_key_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "kms_key_id",
+                ["item", ["var", "kwargs"], "kms_key_id"],
+                "create_db_home_with_system_details.kms_key_id = kwargs['kms_key_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "kms_key_version_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "kms_key_version_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "kms_key_version_id",
+                ["item", ["var", "kwargs"], "kms_key_version_id"],
+                "create_db_home_with_system_details.kms_key_version_id = kwargs['kms_key_version_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "freeform_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "freeform_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "freeform_tags",
+                [
+                  "fn",
+                  "parse",
+                  "freeform_tags",
+                  ["item", ["var", "kwargs"], "freeform_tags"]
+                ],
+                "create_db_home_with_system_details.freeform_tags = cli_util.parse_json_parameter('freeform_tags', kwargs['freeform_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "defined_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "defined_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "defined_tags",
+                [
+                  "fn",
+                  "parse",
+                  "defined_tags",
+                  ["item", ["var", "kwargs"], "defined_tags"]
+                ],
+                "create_db_home_with_system_details.defined_tags = cli_util.parse_json_parameter('defined_tags', kwargs['defined_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_desupported_version", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_desupported_version"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "is_desupported_version",
+                ["item", ["var", "kwargs"], "is_desupported_version"],
+                "create_db_home_with_system_details.is_desupported_version = kwargs['is_desupported_version']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "is_unified_auditing_enabled"],
+              null
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "is_unified_auditing_enabled",
+                ["item", ["var", "kwargs"], "is_unified_auditing_enabled"],
+                "create_db_home_with_system_details.is_unified_auditing_enabled = kwargs['is_unified_auditing_enabled']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "is_older_version_acknowledged"],
+              null
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_db_home_with_system_details"],
+                "is_older_version_acknowledged",
+                ["item", ["var", "kwargs"], "is_older_version_acknowledged"],
+                "create_db_home_with_system_details.is_older_version_acknowledged = kwargs['is_older_version_acknowledged']"
+              ]
+            ],
+            []
+          ],
+          [
+            "setAttr",
+            ["var", "create_db_home_with_system_details"],
+            "source",
+            ["var", "source"],
+            "create_db_home_with_system_details.source = source"
+          ],
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                [
+                  "create_db_home_with_db_system_id_details",
+                  ["var", "create_db_home_with_system_details"]
+                ]
+              ],
+              null
+            ]
+          ],
+          [
+            "let",
+            "db_home_id",
+            ["attr", "id", ["attr", "data", ["var", "result"]]]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["attr", "compartment_id", ["attr", "data", ["var", "result"]]]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["var", "db_home_id"]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "tryMulti",
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  2,
+                  ["var", "client"],
+                  [],
+                  [
+                    ["db_home_id", ["var", "db_home_id"]],
+                    ["compartment_id", ["var", "compartment_id"]]
+                  ],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "ServiceError",
+                null,
+                [
+                  ["let", "target_option", "--db-system-id"],
+                  [
+                    "let",
+                    "target_id",
+                    ["call", "get", ["var", "kwargs"], "db_system_id"]
+                  ],
+                  [
+                    "if",
+                    ["not", ["var", "target_id"]],
+                    [
+                      ["let", "target_option", "--vm-cluster-id"],
+                      [
+                        "let",
+                        "target_id",
+                        ["call", "get", ["var", "kwargs"], "vm_cluster_id"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "format",
+                        "Failed retrieving database info after successfully creation.  You can view the status of databases by executing: oci db database list -c {comp_id} {target_option} {target_id} ",
+                        [],
+                        [
+                          ["comp_id", ["var", "compartment_id"]],
+                          ["target_option", ["var", "target_option"]],
+                          ["target_id", ["var", "target_id"]]
+                        ],
+                        null
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ]
+          ],
+          ["let", "database", ["item", ["attr", "data", ["var", "result"]], 0]],
+          ["renderData", ["var", "database"], null, false, true]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "create_db_home",
+          "http": "POST",
+          "path": "/dbHomes",
+          "positionalArgs": ["create_db_home_with_db_system_id_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_db_home_with_db_system_id_details",
+          "responseType": "DbHome"
+        },
+        {
+          "client": "database.database",
+          "method": "get_db_home",
+          "http": "GET",
+          "path": "/dbHomes/{dbHomeId}",
+          "positionalArgs": ["db_home_id"],
+          "pathParams": {
+            "dbHomeId": "db_home_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "DbHome"
+        },
+        {
+          "client": "database.database",
+          "method": "list_databases",
+          "http": "GET",
+          "path": "/databases",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "dbHomeId": {
+              "arg": "db_home_id"
+            },
+            "systemId": {
+              "arg": "system_id"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "dbName": {
+              "arg": "db_name"
+            },
+            "managedAutoFailover": {
+              "arg": "managed_auto_failover"
+            },
+            "failoverTargets": {
+              "arg": "failover_targets"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[DatabaseSummary]"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -115334,6 +118681,632 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "dbHomeId",
+            ["item", ["var", "kwargs"], "db_home_id"]
+          ],
+          [
+            "let",
+            "create_standby_details",
+            ["model", "database", "CreateStandbyDetails", [], [], null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "database_admin_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "database_admin_password",
+                ["item", ["var", "kwargs"], "database_admin_password"],
+                "create_standby_details.database_admin_password = kwargs['database_admin_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_unique_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_unique_name"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "db_unique_name",
+                ["item", ["var", "kwargs"], "db_unique_name"],
+                "create_standby_details.db_unique_name = kwargs['db_unique_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "protection_mode", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "protection_mode"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "protection_mode",
+                ["item", ["var", "kwargs"], "protection_mode"],
+                "create_standby_details.protection_mode = kwargs['protection_mode']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "transport_type", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "transport_type"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "transport_type",
+                ["item", ["var", "kwargs"], "transport_type"],
+                "create_standby_details.transport_type = kwargs['transport_type']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_active_data_guard_enabled", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_active_data_guard_enabled"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "is_active_data_guard_enabled",
+                ["item", ["var", "kwargs"], "is_active_data_guard_enabled"],
+                "create_standby_details.is_active_data_guard_enabled = kwargs['is_active_data_guard_enabled']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "source_database_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "source_database_id"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "source_database_id",
+                ["item", ["var", "kwargs"], "source_database_id"],
+                "create_standby_details.source_database_id = kwargs['source_database_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "source_tde_wallet_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "source_tde_wallet_password"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "source_tde_wallet_password",
+                ["item", ["var", "kwargs"], "source_tde_wallet_password"],
+                "create_standby_details.source_tde_wallet_password = kwargs['source_tde_wallet_password']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "sid_prefix", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "sid_prefix"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "sid_prefix",
+                ["item", ["var", "kwargs"], "sid_prefix"],
+                "create_standby_details.sid_prefix = kwargs['sid_prefix']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "freeform_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "freeform_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "freeform_tags",
+                [
+                  "fn",
+                  "parse",
+                  "freeform_tags",
+                  ["item", ["var", "kwargs"], "freeform_tags"]
+                ],
+                "create_standby_details.freeform_tags = cli_util.parse_json_parameter('freeform_tags', kwargs['freeform_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "defined_tags", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "defined_tags"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "defined_tags",
+                [
+                  "fn",
+                  "parse",
+                  "defined_tags",
+                  ["item", ["var", "kwargs"], "defined_tags"]
+                ],
+                "create_standby_details.defined_tags = cli_util.parse_json_parameter('defined_tags', kwargs['defined_tags'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "database_storage_size_details",
+            ["model", "database", "DatabaseStorageSizeDetails", [], [], null]
+          ],
+          ["let", "include_storage_details", false],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "data_storage_size_in_gbs", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "data_storage_size_in_gbs"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_storage_size_details"],
+                "data_storage_size_in_gbs",
+                ["item", ["var", "kwargs"], "data_storage_size_in_gbs"],
+                "database_storage_size_details.data_storage_size_in_gbs = kwargs['data_storage_size_in_gbs']"
+              ],
+              ["let", "include_storage_details", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "reco_storage_size_in_gbs", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "reco_storage_size_in_gbs"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_storage_size_details"],
+                "reco_storage_size_in_gbs",
+                ["item", ["var", "kwargs"], "reco_storage_size_in_gbs"],
+                "database_storage_size_details.reco_storage_size_in_gbs = kwargs['reco_storage_size_in_gbs']"
+              ],
+              ["let", "include_storage_details", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "include_storage_details"],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "storage_size_details",
+                ["var", "database_storage_size_details"],
+                "create_standby_details.storage_size_details = database_storage_size_details"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "database_auto_failover_details",
+            ["model", "database", "AutoFailoverConfiguration", [], [], null]
+          ],
+          ["let", "auto_failover_config_present", false],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "manage_auto_failover", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "manage_auto_failover"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_auto_failover_details"],
+                "managed_auto_failover",
+                ["item", ["var", "kwargs"], "manage_auto_failover"],
+                "database_auto_failover_details.managed_auto_failover = kwargs['manage_auto_failover']"
+              ],
+              ["let", "auto_failover_config_present", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "auto_failover_targets", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "auto_failover_targets"]
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "database_auto_failover_details"],
+                "failover_targets",
+                [
+                  "call",
+                  "split",
+                  ["item", ["var", "kwargs"], "auto_failover_targets"],
+                  ","
+                ],
+                "database_auto_failover_details.failover_targets = kwargs['auto_failover_targets'].split(',')"
+              ],
+              ["let", "auto_failover_config_present", true]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["var", "auto_failover_config_present"],
+            [
+              [
+                "setAttr",
+                ["var", "create_standby_details"],
+                "auto_failover_configuration",
+                ["var", "database_auto_failover_details"],
+                "create_standby_details.auto_failover_configuration = database_auto_failover_details"
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "_details"],
+            "database",
+            ["var", "create_standby_details"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_version", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_version"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dbVersion",
+                ["item", ["var", "kwargs"], "db_version"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "kms_key_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "kms_key_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "kmsKeyId",
+                ["item", ["var", "kwargs"], "kms_key_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "kms_key_version_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "kms_key_version_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "kmsKeyVersionId",
+                ["item", ["var", "kwargs"], "kms_key_version_id"]
+              ]
+            ],
+            []
+          ],
+          ["set", ["var", "_details"], "source", "DATAGUARD"],
+          ["let", "client", ["fn", "client", "database", "database"]],
+          ["let", "create_new_database_details", ["var", "_details"]],
+          ["let", "opc_dry_run_args", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "opc_dry_run", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "opc_dry_run"]
+            ],
+            [
+              [
+                "set",
+                ["var", "opc_dry_run_args"],
+                "opc_dry_run",
+                ["item", ["var", "kwargs"], "opc_dry_run"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [["var", "create_new_database_details"]],
+              [],
+              ["var", "opc_dry_run_args"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["attr", "id", ["attr", "data", ["var", "result"]]],
+              null
+            ],
+            [["render", ["var", "result"]]],
+            [
+              [
+                "setAttr",
+                ["var", "result"],
+                "data",
+                null,
+                "result.data = None"
+              ],
+              ["render", ["var", "result"]]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "create_database",
+          "http": "POST",
+          "path": "/databases",
+          "positionalArgs": ["create_new_database_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-dry-run": {
+              "arg": "opc_dry_run"
+            }
+          },
+          "body": "create_new_database_details",
+          "responseType": "Database"
+        },
+        {
+          "client": "database.database",
+          "method": "get_database",
+          "http": "GET",
+          "path": "/databases/{databaseId}",
+          "positionalArgs": ["database_id"],
+          "pathParams": {
+            "databaseId": "database_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Database"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -121041,6 +125014,343 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "if",
+            [
+              "or",
+              [
+                "and",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "one_off_patches"],
+                  null
+                ],
+                [
+                  "or",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "database_software_image_id"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "patch_id"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "patch_action"],
+                    null
+                  ]
+                ]
+              ],
+              [
+                "and",
+                [
+                  "cmp",
+                  "isnot",
+                  ["item", ["var", "kwargs"], "database_software_image_id"],
+                  null
+                ],
+                [
+                  "or",
+                  [
+                    "cmp",
+                    "is",
+                    ["item", ["var", "kwargs"], "patch_action"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "one_off_patches"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "patch_id"],
+                    null
+                  ]
+                ]
+              ],
+              [
+                "and",
+                ["cmp", "isnot", ["item", ["var", "kwargs"], "patch_id"], null],
+                [
+                  "or",
+                  [
+                    "cmp",
+                    "is",
+                    ["item", ["var", "kwargs"], "patch_action"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "one_off_patches"],
+                    null
+                  ],
+                  [
+                    "cmp",
+                    "isnot",
+                    ["item", ["var", "kwargs"], "database_software_image_id"],
+                    null
+                  ]
+                ]
+              ],
+              [
+                "and",
+                ["cmp", "is", ["item", ["var", "kwargs"], "patch_id"], null],
+                [
+                  "cmp",
+                  "is",
+                  ["item", ["var", "kwargs"], "one_off_patches"],
+                  null
+                ],
+                [
+                  "cmp",
+                  "is",
+                  ["item", ["var", "kwargs"], "database_software_image_id"],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "do",
+                [
+                  "fn",
+                  "echo",
+                  "Please specify one of the three options. 1. '--one-off-patches',  2. '--database-software-image-id and --patch-action' or 3. '--patch-id and --patch-action'.",
+                  ["fn", "stderr"],
+                  true,
+                  false
+                ]
+              ],
+              ["exit", 1]
+            ],
+            []
+          ],
+          [
+            "let",
+            "response",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [["item", ["var", "kwargs"], "database_id"]],
+              [],
+              null
+            ]
+          ],
+          [
+            "let",
+            "db_home_id",
+            ["attr", "db_home_id", ["attr", "data", ["var", "response"]]]
+          ],
+          [
+            "let",
+            "update_db_home_details",
+            ["model", "database", "UpdateDbHomeDetails", [], [], null]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "database_software_image_id"],
+                null
+              ],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "patch_action"],
+                null
+              ]
+            ],
+            [
+              [
+                "let",
+                "patch_details",
+                ["model", "database", "PatchDetails", [], [], null]
+              ],
+              [
+                "setAttr",
+                ["var", "patch_details"],
+                "action",
+                ["item", ["var", "kwargs"], "patch_action"],
+                "patch_details.action = kwargs['patch_action']"
+              ],
+              [
+                "setAttr",
+                ["var", "patch_details"],
+                "database_software_image_id",
+                ["item", ["var", "kwargs"], "database_software_image_id"],
+                "patch_details.database_software_image_id = kwargs['database_software_image_id']"
+              ],
+              [
+                "setAttr",
+                ["var", "update_db_home_details"],
+                "db_version",
+                ["var", "patch_details"],
+                "update_db_home_details.db_version = patch_details"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "one_off_patches"],
+              null
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "update_db_home_details"],
+                "one_off_patches",
+                [
+                  "fn",
+                  "parse",
+                  "one_off_patches",
+                  ["item", ["var", "kwargs"], "one_off_patches"]
+                ],
+                "update_db_home_details.one_off_patches = cli_util.parse_json_parameter('one_off_patches', kwargs['one_off_patches'])"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["item", ["var", "kwargs"], "patch_id"], null],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "patch_action"],
+                null
+              ]
+            ],
+            [
+              [
+                "let",
+                "patch_details",
+                ["model", "database", "PatchDetails", [], [], null]
+              ],
+              [
+                "setAttr",
+                ["var", "patch_details"],
+                "action",
+                ["item", ["var", "kwargs"], "patch_action"],
+                "patch_details.action = kwargs['patch_action']"
+              ],
+              [
+                "setAttr",
+                ["var", "patch_details"],
+                "patch_id",
+                ["item", ["var", "kwargs"], "patch_id"],
+                "patch_details.patch_id = kwargs['patch_id']"
+              ],
+              [
+                "setAttr",
+                ["var", "update_db_home_details"],
+                "db_version",
+                ["var", "patch_details"],
+                "update_db_home_details.db_version = patch_details"
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "sdk",
+              1,
+              ["var", "client"],
+              [
+                ["var", "db_home_id"],
+                ["var", "update_db_home_details"]
+              ],
+              [],
+              null
+            ]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [["item", ["var", "kwargs"], "database_id"]],
+              [],
+              null
+            ]
+          ],
+          ["let", "database", ["attr", "data", ["var", "result"]]],
+          ["renderData", ["var", "database"], null, false, true]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "get_database",
+          "http": "GET",
+          "path": "/databases/{databaseId}",
+          "positionalArgs": ["database_id"],
+          "pathParams": {
+            "databaseId": "database_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Database"
+        },
+        {
+          "client": "database.database",
+          "method": "update_db_home",
+          "http": "PUT",
+          "path": "/dbHomes/{dbHomeId}",
+          "positionalArgs": ["db_home_id", "update_db_home_details"],
+          "pathParams": {
+            "dbHomeId": "db_home_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "update_db_home_details",
+          "responseType": "DbHome"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -130380,6 +134690,526 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_system_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_system_id"]
+            ],
+            [
+              [
+                "let",
+                "db_home_details",
+                [
+                  "model",
+                  "database",
+                  "CreateDbHomeWithDbSystemIdDetails",
+                  [["source", "NONE"]],
+                  [],
+                  null
+                ]
+              ],
+              [
+                "setAttr",
+                ["var", "db_home_details"],
+                "db_system_id",
+                ["item", ["var", "kwargs"], "db_system_id"],
+                "db_home_details.db_system_id = kwargs['db_system_id']"
+              ],
+              [
+                "let",
+                "get_db_system_response",
+                [
+                  "sdk",
+                  0,
+                  ["var", "client"],
+                  [["item", ["var", "kwargs"], "db_system_id"]],
+                  [],
+                  null
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "vm_cluster_id", ["var", "kwargs"]],
+                  ["item", ["var", "kwargs"], "vm_cluster_id"]
+                ],
+                [
+                  [
+                    "let",
+                    "vm_cluster_id",
+                    ["item", ["var", "kwargs"], "vm_cluster_id"]
+                  ],
+                  [
+                    "let",
+                    "db_home_details",
+                    [
+                      "model",
+                      "database",
+                      "CreateDbHomeWithVmClusterIdDetails",
+                      [["source", "VM_CLUSTER_NEW"]],
+                      [],
+                      null
+                    ]
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "db_home_details"],
+                    "vm_cluster_id",
+                    ["var", "vm_cluster_id"],
+                    "db_home_details.vm_cluster_id = vm_cluster_id"
+                  ],
+                  [
+                    "setAttr",
+                    ["var", "db_home_details"],
+                    "is_unified_auditing_enabled",
+                    ["item", ["var", "kwargs"], "is_unified_auditing_enabled"],
+                    "db_home_details.is_unified_auditing_enabled = kwargs['is_unified_auditing_enabled']"
+                  ],
+                  [
+                    "if",
+                    [
+                      "or",
+                      ["cmp", "in", "cloudvmcluster", ["var", "vm_cluster_id"]],
+                      ["cmp", "in", "dbsystem", ["var", "vm_cluster_id"]]
+                    ],
+                    [
+                      [
+                        "let",
+                        "get_db_system_response",
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["var", "vm_cluster_id"]],
+                          [],
+                          null
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "let",
+                        "get_db_system_response",
+                        [
+                          "sdk",
+                          2,
+                          ["var", "client"],
+                          [["var", "vm_cluster_id"]],
+                          [],
+                          null
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Missing a required parameter. Either --db-system-id or --vm-cluster-id must be specified.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "db_version"], null],
+            [
+              [
+                "setAttr",
+                ["var", "db_home_details"],
+                "db_version",
+                ["item", ["var", "kwargs"], "db_version"],
+                "db_home_details.db_version = kwargs['db_version']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "database_software_image_id"],
+              null
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "db_home_details"],
+                "database_software_image_id",
+                ["item", ["var", "kwargs"], "database_software_image_id"],
+                "db_home_details.database_software_image_id = kwargs['database_software_image_id']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "display_name"], null],
+            [
+              [
+                "setAttr",
+                ["var", "db_home_details"],
+                "display_name",
+                ["item", ["var", "kwargs"], "display_name"],
+                "db_home_details.display_name = kwargs['display_name']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "is_desupported_version"],
+              null
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "db_home_details"],
+                "is_desupported_version",
+                ["item", ["var", "kwargs"], "is_desupported_version"],
+                "db_home_details.is_desupported_version = kwargs['is_desupported_version']"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "is_older_version_acknowledged"],
+              null
+            ],
+            [
+              [
+                "setAttr",
+                ["var", "db_home_details"],
+                "is_older_version_acknowledged",
+                ["item", ["var", "kwargs"], "is_older_version_acknowledged"],
+                "db_home_details.is_older_version_acknowledged = kwargs['is_older_version_acknowledged']"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "db_system_shape",
+            [
+              "attr",
+              "shape",
+              ["attr", "data", ["var", "get_db_system_response"]]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "in", "Exadata", ["var", "db_system_shape"]],
+            [
+              [
+                "let",
+                "result",
+                [
+                  "sdk",
+                  3,
+                  ["var", "client"],
+                  [["var", "db_home_details"]],
+                  [],
+                  null
+                ]
+              ],
+              [
+                "if",
+                ["var", "wait_for_state"],
+                [
+                  [
+                    "tryMulti",
+                    [
+                      ["let", "wait_period_kwargs", ["dict"]],
+                      [
+                        "if",
+                        ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                        [
+                          [
+                            "set",
+                            ["var", "wait_period_kwargs"],
+                            "max_wait_seconds",
+                            ["var", "max_wait_seconds"]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "isnot",
+                          ["var", "wait_interval_seconds"],
+                          null
+                        ],
+                        [
+                          [
+                            "set",
+                            ["var", "wait_period_kwargs"],
+                            "max_interval_seconds",
+                            ["var", "wait_interval_seconds"]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          [
+                            "call",
+                            "format",
+                            "Action completed. Waiting until the resource has entered state: {}",
+                            ["var", "wait_for_state"]
+                          ],
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      [
+                        "let",
+                        "result",
+                        [
+                          "waitUntil",
+                          [
+                            ["var", "client"],
+                            [
+                              "sdk",
+                              4,
+                              ["var", "client"],
+                              [
+                                [
+                                  "attr",
+                                  "id",
+                                  ["attr", "data", ["var", "result"]]
+                                ]
+                              ],
+                              [],
+                              null
+                            ],
+                            "lifecycle_state",
+                            ["var", "wait_for_state"]
+                          ],
+                          [],
+                          ["var", "wait_period_kwargs"]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "MaximumWaitTimeExceeded",
+                        "e",
+                        [
+                          [
+                            "do",
+                            [
+                              "fn",
+                              "echo",
+                              "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                              ["fn", "stderr"],
+                              true,
+                              false
+                            ]
+                          ],
+                          ["render", ["var", "result"]],
+                          ["exit", 2]
+                        ]
+                      ],
+                      [
+                        "Exception",
+                        null,
+                        [
+                          [
+                            "do",
+                            [
+                              "fn",
+                              "echo",
+                              "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                              ["fn", "stderr"],
+                              true,
+                              false
+                            ]
+                          ],
+                          ["render", ["var", "result"]],
+                          ["reraise"]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              ["render", ["var", "result"]]
+            ],
+            [
+              [
+                "do",
+                [
+                  "fn",
+                  "echo",
+                  "Cannot create a DB Home for Db systems with non Exadata shapes.",
+                  ["fn", "stderr"],
+                  true,
+                  false
+                ]
+              ],
+              ["exit", 1]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "get_db_system",
+          "http": "GET",
+          "path": "/dbSystems/{dbSystemId}",
+          "positionalArgs": ["db_system_id"],
+          "pathParams": {
+            "dbSystemId": "db_system_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "DbSystem"
+        },
+        {
+          "client": "database.database",
+          "method": "get_cloud_vm_cluster",
+          "http": "GET",
+          "path": "/cloudVmClusters/{cloudVmClusterId}",
+          "positionalArgs": ["cloud_vm_cluster_id"],
+          "pathParams": {
+            "cloudVmClusterId": "cloud_vm_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "CloudVmCluster"
+        },
+        {
+          "client": "database.database",
+          "method": "get_vm_cluster",
+          "http": "GET",
+          "path": "/vmClusters/{vmClusterId}",
+          "positionalArgs": ["vm_cluster_id"],
+          "pathParams": {
+            "vmClusterId": "vm_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "VmCluster"
+        },
+        {
+          "client": "database.database",
+          "method": "create_db_home",
+          "http": "POST",
+          "path": "/dbHomes",
+          "positionalArgs": ["create_db_home_with_db_system_id_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_db_home_with_db_system_id_details",
+          "responseType": "DbHome"
+        },
+        {
+          "client": "database.database",
+          "method": "get_db_home",
+          "http": "GET",
+          "path": "/dbHomes/{dbHomeId}",
+          "positionalArgs": ["db_home_id"],
+          "pathParams": {
+            "dbHomeId": "db_home_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "DbHome"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -210460,6 +215290,89 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "let",
+            "patch_details",
+            ["model", "database", "PatchDetails", [], [], null]
+          ],
+          [
+            "setAttr",
+            ["var", "patch_details"],
+            "action",
+            ["item", ["var", "kwargs"], "patch_action"],
+            "patch_details.action = kwargs['patch_action']"
+          ],
+          [
+            "setAttr",
+            ["var", "patch_details"],
+            "patch_id",
+            ["item", ["var", "kwargs"], "patch_id"],
+            "patch_details.patch_id = kwargs['patch_id']"
+          ],
+          [
+            "let",
+            "update_db_system_details",
+            ["model", "database", "UpdateDbSystemDetails", [], [], null]
+          ],
+          [
+            "setAttr",
+            ["var", "update_db_system_details"],
+            "version",
+            ["var", "patch_details"],
+            "update_db_system_details.version = patch_details"
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [
+                ["item", ["var", "kwargs"], "db_system_id"],
+                ["var", "update_db_system_details"]
+              ],
+              [],
+              null
+            ]
+          ],
+          ["let", "db_system", ["attr", "data", ["var", "result"]]],
+          ["renderData", ["var", "db_system"], null, false, true]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "update_db_system",
+          "http": "PUT",
+          "path": "/dbSystems/{dbSystemId}",
+          "positionalArgs": ["db_system_id", "update_db_system_details"],
+          "pathParams": {
+            "dbSystemId": "db_system_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-dry-run": {
+              "arg": "opc_dry_run"
+            }
+          },
+          "body": "update_db_system_details",
+          "responseType": "DbSystem"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -227721,6 +232634,38 @@
           "fallback": "ConvertToPdbTargetBase"
         }
       },
+      "CreateCloneDatabaseFromDatabase": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["db_version", "str", "dbVersion"],
+          ["source", "str", "source"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database", "CloneDatabaseDetails", "database"]
+        ],
+        "discriminator": "CreateDatabaseBase"
+      },
+      "CreateDatabaseBase": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["db_version", "str", "dbVersion"],
+          ["source", "str", "source"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"]
+        ],
+        "discriminator": {
+          "field": "source",
+          "values": {
+            "NONE": "CreateNewDatabaseDetails",
+            "DATAGUARD": "CreateStandByDatabaseDetails",
+            "DB_CLONE": "CreateCloneDatabaseFromDatabase",
+            "DATABASE": "CreateDatabaseFromDatabase",
+            "DB_SNAPSHOT": "CreateDatabaseFromSnapshot",
+            "DB_BACKUP": "CreateDatabaseFromBackup"
+          },
+          "fallback": "CreateDatabaseBase"
+        }
+      },
       "CreateDatabaseDetails": {
         "attributes": [
           ["db_name", "str", "dbName"],
@@ -227837,6 +232782,17 @@
           ]
         ]
       },
+      "CreateDatabaseFromBackup": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["db_version", "str", "dbVersion"],
+          ["source", "str", "source"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database", "CreateDatabaseFromBackupDetails", "database"]
+        ],
+        "discriminator": "CreateDatabaseBase"
+      },
       "CreateDatabaseFromBackupDetails": {
         "attributes": [
           ["backup_id", "str", "backupId"],
@@ -227876,6 +232832,17 @@
           ]
         ]
       },
+      "CreateDatabaseFromDatabase": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["db_version", "str", "dbVersion"],
+          ["source", "str", "source"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database", "CreateDatabaseFromAnotherDatabaseDetails", "database"]
+        ],
+        "discriminator": "CreateDatabaseBase"
+      },
       "CreateDatabaseFromDbSystemDetails": {
         "attributes": [
           ["admin_password", "str", "adminPassword"],
@@ -227886,6 +232853,17 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
         ]
+      },
+      "CreateDatabaseFromSnapshot": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["db_version", "str", "dbVersion"],
+          ["source", "str", "source"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database", "CreateDatabaseFromSnapshotDetails", "database"]
+        ],
+        "discriminator": "CreateDatabaseBase"
       },
       "CreateDatabaseFromSnapshotDetails": {
         "attributes": [
@@ -227925,6 +232903,36 @@
             "dataSafeRegistrationDetails"
           ]
         ]
+      },
+      "CreateDbHomeBase": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database_software_image_id", "str", "databaseSoftwareImageId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["source", "str", "source"],
+          ["is_desupported_version", "bool", "isDesupportedVersion"],
+          [
+            "is_older_version_acknowledged",
+            "bool",
+            "isOlderVersionAcknowledged"
+          ],
+          ["is_unified_auditing_enabled", "bool", "isUnifiedAuditingEnabled"]
+        ],
+        "discriminator": {
+          "field": "source",
+          "values": {
+            "DATABASE": "CreateDbHomeWithDbSystemIdFromDatabaseDetails",
+            "DB_BACKUP": "CreateDbHomeWithDbSystemIdFromBackupDetails",
+            "VM_CLUSTER_DATABASE": "CreateDbHomeWithVmClusterIdFromDatabaseDetails",
+            "VM_CLUSTER_BACKUP": "CreateDbHomeWithVmClusterIdFromBackupDetails",
+            "NONE": "CreateDbHomeWithDbSystemIdDetails",
+            "VM_CLUSTER_NEW": "CreateDbHomeWithVmClusterIdDetails"
+          },
+          "fallback": "CreateDbHomeBase"
+        }
       },
       "CreateDbHomeDetails": {
         "attributes": [
@@ -227969,6 +232977,145 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
         ]
+      },
+      "CreateDbHomeWithDbSystemIdDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database_software_image_id", "str", "databaseSoftwareImageId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["source", "str", "source"],
+          ["is_desupported_version", "bool", "isDesupportedVersion"],
+          [
+            "is_older_version_acknowledged",
+            "bool",
+            "isOlderVersionAcknowledged"
+          ],
+          ["is_unified_auditing_enabled", "bool", "isUnifiedAuditingEnabled"],
+          ["db_system_id", "str", "dbSystemId"],
+          ["db_version", "str", "dbVersion"],
+          ["database", "CreateDatabaseDetails", "database"]
+        ],
+        "discriminator": "CreateDbHomeBase"
+      },
+      "CreateDbHomeWithDbSystemIdFromBackupDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database_software_image_id", "str", "databaseSoftwareImageId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["source", "str", "source"],
+          ["is_desupported_version", "bool", "isDesupportedVersion"],
+          [
+            "is_older_version_acknowledged",
+            "bool",
+            "isOlderVersionAcknowledged"
+          ],
+          ["is_unified_auditing_enabled", "bool", "isUnifiedAuditingEnabled"],
+          ["db_system_id", "str", "dbSystemId"],
+          ["database", "CreateDatabaseFromBackupDetails", "database"]
+        ],
+        "discriminator": "CreateDbHomeBase"
+      },
+      "CreateDbHomeWithDbSystemIdFromDatabaseDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database_software_image_id", "str", "databaseSoftwareImageId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["source", "str", "source"],
+          ["is_desupported_version", "bool", "isDesupportedVersion"],
+          [
+            "is_older_version_acknowledged",
+            "bool",
+            "isOlderVersionAcknowledged"
+          ],
+          ["is_unified_auditing_enabled", "bool", "isUnifiedAuditingEnabled"],
+          ["db_system_id", "str", "dbSystemId"],
+          ["database", "CreateDatabaseFromAnotherDatabaseDetails", "database"]
+        ],
+        "discriminator": "CreateDbHomeBase"
+      },
+      "CreateDbHomeWithVmClusterIdDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database_software_image_id", "str", "databaseSoftwareImageId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["source", "str", "source"],
+          ["is_desupported_version", "bool", "isDesupportedVersion"],
+          [
+            "is_older_version_acknowledged",
+            "bool",
+            "isOlderVersionAcknowledged"
+          ],
+          ["is_unified_auditing_enabled", "bool", "isUnifiedAuditingEnabled"],
+          ["vm_cluster_id", "str", "vmClusterId"],
+          ["db_version", "str", "dbVersion"],
+          ["database", "CreateDatabaseDetails", "database"]
+        ],
+        "discriminator": "CreateDbHomeBase"
+      },
+      "CreateDbHomeWithVmClusterIdFromBackupDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database_software_image_id", "str", "databaseSoftwareImageId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["source", "str", "source"],
+          ["is_desupported_version", "bool", "isDesupportedVersion"],
+          [
+            "is_older_version_acknowledged",
+            "bool",
+            "isOlderVersionAcknowledged"
+          ],
+          ["is_unified_auditing_enabled", "bool", "isUnifiedAuditingEnabled"],
+          ["vm_cluster_id", "str", "vmClusterId"],
+          ["database", "CreateDatabaseFromBackupDetails", "database"]
+        ],
+        "discriminator": "CreateDbHomeBase"
+      },
+      "CreateDbHomeWithVmClusterIdFromDatabaseDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database_software_image_id", "str", "databaseSoftwareImageId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["source", "str", "source"],
+          ["is_desupported_version", "bool", "isDesupportedVersion"],
+          [
+            "is_older_version_acknowledged",
+            "bool",
+            "isOlderVersionAcknowledged"
+          ],
+          ["is_unified_auditing_enabled", "bool", "isUnifiedAuditingEnabled"],
+          ["vm_cluster_id", "str", "vmClusterId"],
+          ["database", "CreateDatabaseFromAnotherDatabaseDetails", "database"]
+        ],
+        "discriminator": "CreateDbHomeBase"
+      },
+      "CreateNewDatabaseDetails": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["db_version", "str", "dbVersion"],
+          ["source", "str", "source"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database", "CreateDatabaseDetails", "database"]
+        ],
+        "discriminator": "CreateDatabaseBase"
       },
       "CreatePluggableDatabaseCreationTypeDetails": {
         "attributes": [["creation_type", "str", "creationType"]],
@@ -228036,6 +233183,17 @@
       },
       "CreatePluggableDatabaseRefreshableCloneDetails": {
         "attributes": [["is_refreshable_clone", "bool", "isRefreshableClone"]]
+      },
+      "CreateStandByDatabaseDetails": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["db_version", "str", "dbVersion"],
+          ["source", "str", "source"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["database", "CreateStandbyDetails", "database"]
+        ],
+        "discriminator": "CreateDatabaseBase"
       },
       "CreateStandbyDetails": {
         "attributes": [
@@ -231759,6 +236917,46 @@
             "bool",
             "isOlderVersionAcknowledgmentRequired"
           ]
+        ]
+      },
+      "UpdateDbHomeDetails": {
+        "attributes": [
+          ["db_version", "PatchDetails", "dbVersion"],
+          ["one_off_patches", "list[str]", "oneOffPatches"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "UpdateDbSystemDetails": {
+        "attributes": [
+          ["cpu_core_count", "int", "cpuCoreCount"],
+          ["version", "PatchDetails", "version"],
+          ["ssh_public_keys", "list[str]", "sshPublicKeys"],
+          ["data_storage_size_in_gbs", "int", "dataStorageSizeInGBs"],
+          ["reco_storage_size_in_gbs", "int", "recoStorageSizeInGBs"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ],
+          ["shape", "str", "shape"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["backup_network_nsg_ids", "list[str]", "backupNetworkNsgIds"],
+          ["license_model", "str", "licenseModel"],
+          [
+            "maintenance_window_details",
+            "MaintenanceWindow",
+            "maintenanceWindowDetails"
+          ],
+          [
+            "data_collection_options",
+            "DataCollectionOptions",
+            "dataCollectionOptions"
+          ],
+          ["compute_model", "str", "computeModel"],
+          ["compute_count", "int", "computeCount"]
         ]
       },
       "UpdateDetails": {

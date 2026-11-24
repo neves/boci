@@ -120,8 +120,10 @@ export async function createSandbox(
   }
   for (const [rel, entries] of Object.entries(options.zipFiles ?? {})) {
     const path = `${home}/${rel}`;
+    const mtime = new Date(Date.UTC(2025, 0, 1, 0, 0, 0));
     const zipEntries = Object.entries(entries).map(([name, content]) => ({
       name,
+      mtime,
       data: Buffer.from(
         content
           .replaceAll("{home}", home)

@@ -200,20 +200,20 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `db data-guard-association reinstate`
 - [x] `db data-guard-association switchover`
 - [x] `db data-guard-association update`
-- [ ] `db database create`
-- [ ] `db database create-database-from-database`
-- [ ] `db database create-from-backup`
-- [ ] `db database create-from-database`
-- [ ] `db database create-standby-database`
+- [x] `db database create`
+- [x] `db database create-database-from-database`
+- [x] `db database create-from-backup`
+- [x] `db database create-from-database`
+- [x] `db database create-standby-database`
 - [x] `db database delete`
 - [x] `db database list`
-- [ ] `db database patch`
-- [ ] `db db-home create`
+- [x] `db database patch`
+- [x] `db db-home create`
 - [x] `db patch get by-database`
 - [x] `db patch list by-database`
 - [x] `db patch-history get by-database`
 - [x] `db patch-history list by-database`
-- [ ] `db system patch`
+- [x] `db system patch`
 - [ ] `fn function invoke`
 - [x] `fn function create archive-function direct-archive fn-update-runtime-config`
 - [x] `fn function create archive-function direct-archive manual-runtime-config`
@@ -229,8 +229,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `resource-manager job create-plan-rollback-job`
 - [x] `resource-manager job get-job-logs`
 - [ ] `resource-manager stack copy`
-- [ ] `resource-manager stack create`
-- [ ] `resource-manager stack update`
+- [x] `resource-manager stack create`
+- [x] `resource-manager stack update`
 - [x] `kms management key-version cancel-deletion`
 - [x] `kms management key-version create`
 - [x] `kms management key-version schedule-deletion`
@@ -270,8 +270,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `data-science pipeline list`
 - [x] `data-science pipeline-run list`
 - [x] `database-management managed-database get-awr-db-report`
-- [ ] `dbtools-runtime connection execute-sql async`
-- [ ] `dbtools-runtime connection execute-sql sync`
+- [x] `dbtools-runtime connection execute-sql async`
+- [x] `dbtools-runtime connection execute-sql sync`
 - [x] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec create default`
 - [x] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec update default`
 - [x] `devops project summarize-project-analytics`
@@ -299,7 +299,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `os retention-rule update`
 - [ ] `profile diagnose`
 - [ ] `profile list`
-- [ ] `rover create-master-key-policy`
+- [x] `rover create-master-key-policy`
 - [ ] `rover device data-sync task cancel`
 - [ ] `rover device data-sync task get`
 - [ ] `rover device data-sync task get-snapshot`
@@ -320,20 +320,20 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `rover device system-upgrade get-import-history`
 - [ ] `rover device system-upgrade get-import-status`
 - [x] `rover node add-workload`
-- [ ] `rover node create`
+- [x] `rover node create`
 - [x] `rover node delete`
-- [ ] `rover node delete-workload`
+- [x] `rover node delete-workload`
 - [x] `rover node get-certificate`
 - [x] `rover node list-workload`
 - [x] `rover node request-approval`
-- [ ] `rover node setup-identity`
+- [x] `rover node setup-identity`
 - [x] `rover node show`
 - [x] `rover node update`
 - [x] `rover standalone-cluster add-workload`
 - [x] `rover standalone-cluster change-compartment`
-- [ ] `rover standalone-cluster create`
+- [x] `rover standalone-cluster create`
 - [x] `rover standalone-cluster delete`
-- [ ] `rover standalone-cluster delete-workload`
+- [x] `rover standalone-cluster delete-workload`
 - [x] `rover standalone-cluster get-certificate`
 - [x] `rover standalone-cluster list-workloads`
 - [x] `rover standalone-cluster request-approval`
@@ -342,9 +342,9 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `rover standalone-cluster update`
 - [x] `rover station-cluster add-workload`
 - [x] `rover station-cluster change-compartment`
-- [ ] `rover station-cluster create`
+- [x] `rover station-cluster create`
 - [x] `rover station-cluster delete`
-- [ ] `rover station-cluster delete-workload`
+- [x] `rover station-cluster delete-workload`
 - [x] `rover station-cluster get-certificate`
 - [x] `rover station-cluster list-workloads`
 - [x] `rover station-cluster request-approval`

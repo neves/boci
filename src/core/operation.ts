@@ -58,6 +58,8 @@ export type OperationCall = {
   /** The command's Service: its SDK clients name the endpoint templates. */
   spec: Pick<ServiceSpec, "clients" | "models">;
   index: Pick<Index, "regions">;
+  /** Shared stdin reader when invoked after wrapper prompts. */
+  stdin?: StdinReader;
 };
 
 export type OperationResult = {
@@ -871,6 +873,7 @@ export async function callOperation(
       io,
       "Are you sure you want to delete this resource?",
       false,
+      call.stdin,
     );
     if (!confirmed) {
       io.err("Abort: \n");
@@ -886,6 +889,7 @@ export async function callOperation(
         io,
         `WARNING: Updates to ${names} will replace any existing values. Are you sure you want to continue?`,
         false,
+        call.stdin,
       );
       if (!confirmed) {
         io.err("Abort: \n");
@@ -1226,6 +1230,134 @@ export async function callSdkOperation(
   };
 }
 
+export type BaseClientApiCall = {
+  operation: OperationSpec;
+  resourcePath: string;
+  method: string;
+  pathParams?: Record<string, unknown> | null;
+  queryParams?: Record<string, unknown> | [string, unknown][] | null;
+  headerParams?: Record<string, unknown> | null;
+  body?: unknown;
+  responseType?: string | null;
+  enforceContentHeaders?: boolean;
+  operationName?: string | null;
+  rootValues: Record<string, unknown>;
+  settings: ClientSettings;
+  spec: Pick<ServiceSpec, "clients" | "models">;
+  index: Pick<Index, "regions">;
+};
+
+/**
+ * Execute `client.base_client.call_api(...)` from a compiled Tier B/C program.
+ */
+export async function callBaseClientApi(
+  io: Invocation,
+  call: BaseClientApiCall,
+): Promise<OperationResult> {
+  const {
+    operation,
+    resourcePath,
+    method,
+    pathParams: rawPathParams,
+    queryParams: rawQueryParams,
+    headerParams: rawHeaderParams,
+    body,
+    responseType,
+    enforceContentHeaders,
+    operationName,
+    rootValues,
+    settings,
+    spec,
+    index,
+  } = call;
+  const httpMethod = method.toUpperCase();
+  let requestBody: string | Uint8Array = "";
+  if (body !== undefined && body !== null) {
+    if (body instanceof ProgramFile) {
+      requestBody = body.read();
+    } else if (body instanceof Uint8Array || typeof body === "string") {
+      requestBody = body;
+    } else {
+      requestBody = serializeRequestJson(body);
+    }
+  }
+  const client = spec.clients[operation.client] as Record<string, unknown>;
+  const sc = await createServiceClient(io, {
+    client,
+    values: {},
+    rootValues,
+    settings,
+    index,
+  });
+  const pathParams: Record<string, string> = {};
+  if (rawPathParams) {
+    for (const [k, v] of Object.entries(rawPathParams)) {
+      if (v !== undefined && v !== null) pathParams[k] = String(v);
+    }
+  }
+  const queryParams: [string, string][] = [];
+  if (Array.isArray(rawQueryParams)) {
+    for (const pair of rawQueryParams) {
+      if (
+        Array.isArray(pair) &&
+        pair.length === 2 &&
+        pair[1] !== undefined &&
+        pair[1] !== null
+      ) {
+        queryParams.push([String(pair[0]), String(pair[1])]);
+      }
+    }
+  } else if (rawQueryParams) {
+    for (const [k, v] of Object.entries(rawQueryParams)) {
+      if (v === undefined || v === null) continue;
+      if (Array.isArray(v)) {
+        for (const elem of v) {
+          if (elem !== undefined && elem !== null)
+            queryParams.push([k, String(elem)]);
+        }
+      } else {
+        queryParams.push([k, String(v)]);
+      }
+    }
+  }
+  const headers: Record<string, string> = {};
+  if (rawHeaderParams) {
+    for (const [k, v] of Object.entries(rawHeaderParams)) {
+      if (v !== undefined && v !== null) {
+        headers[k.toLowerCase()] = String(v);
+      }
+    }
+  }
+  const syntheticOp: OperationSpec = {
+    ...operation,
+    http: httpMethod,
+    path: resourcePath,
+    method: operationName ?? "call_api",
+    responseType: responseType ?? undefined,
+    enforce_content_headers: enforceContentHeaders ?? true,
+  };
+  const sent = await sendServiceRequest(io, sc, {
+    method: httpMethod,
+    pathTemplate: resourcePath,
+    pathParams,
+    queryParams,
+    headers,
+    body: requestBody,
+    requestIdHeader: "opc-request-id",
+    enforceContentHeaders: enforceContentHeaders ?? true,
+  });
+  return {
+    operation: syntheticOp,
+    responseModels: spec.models?.[operation.client.split(".")[0]!],
+    url: sent.url,
+    response: sent.response,
+    raw: sent.raw,
+    allPages: false,
+    pageItems: [],
+    targetService: sc.targetService,
+  };
+}
+
 function timeoutSecondsFor(value: unknown): number | undefined {
   const seconds = Number(value);
   if (Number.isFinite(seconds) && seconds > 0) return seconds;
@@ -1297,11 +1429,17 @@ export async function confirmUnderWrapExceptions(
   text: string,
   defaultValue: boolean,
   stdin: StdinReader = createStdinReader(io),
+  promptSuffix = ": ",
+  showDefault = true,
+  toStderr = false,
 ): Promise<boolean> {
-  const suffix = defaultValue ? "[Y/n]: " : "[y/N]: ";
-  const prompt = `${text} ${suffix}`;
+  const suffix = showDefault
+    ? ` ${defaultValue ? "[Y/n]" : "[y/N]"}${promptSuffix}`
+    : promptSuffix;
+  const prompt = `${text}${suffix}`;
+  const out = toStderr ? io.err : io.out;
   while (true) {
-    io.out(prompt);
+    out(prompt);
     const line = await stdin.readLine();
     if (line === null) {
       io.err("Abort: \n");
@@ -1311,7 +1449,7 @@ export async function confirmUnderWrapExceptions(
     if (normalized === "y" || normalized === "yes") return true;
     if (normalized === "n" || normalized === "no") return false;
     if (normalized === "") return defaultValue;
-    io.out("Error: invalid input\n");
+    out("Error: invalid input\n");
   }
 }
 

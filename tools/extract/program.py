@@ -58,7 +58,7 @@ import textwrap
 METHODS = {
     "get", "pop", "append", "insert", "extend", "setdefault", "split", "upper", "lower", "strip", "update",
     "read", "write", "close", "rstrip", "decode", "keys", "join", "format", "items",
-    "startswith", "endswith", "replace", "find",
+    "startswith", "endswith", "replace", "find", "search",
 }
 FUNCTIONS = {
     "json.dumps": "dumps",
@@ -76,6 +76,7 @@ FUNCTIONS = {
     "max": "max",
     "any": "any",
     "all": "all",
+    "range": "range",
     "b64encode": "b64encode",
     "base64.b64encode": "b64encode",
     "json_skeleton_utils.remove_json_skeleton_params_from_dict": "removeSkeleton",
@@ -87,10 +88,12 @@ FUNCTIONS = {
     "os.path.exists": "exists",
     "os.path.isfile": "isfile",
     "os.path.abspath": "abspath",
+    "os.path.dirname": "dirname",
     "os.path.expanduser": "expanduser",
     "os.path.expandvars": "expandvars",
     "zipfile.is_zipfile": "isZipfile",
     "time.sleep": "sleep",
+    "random.choice": "randomChoice",
     "cli_util.to_dict": "toDict",
     "cli_util.formatted_flat_dict": "formattedFlatDict",
 }
@@ -103,6 +106,15 @@ CATCHABLE = {
     "oci.exceptions.ServiceError": "ServiceError",
     "exceptions.ServiceError": "ServiceError",
     "ServiceError": "ServiceError",
+    "oci.exceptions.ConfigFileNotFound": "ConfigFileNotFound",
+    "exceptions.ConfigFileNotFound": "ConfigFileNotFound",
+    "ConfigFileNotFound": "ConfigFileNotFound",
+    "oci.exceptions.ProfileNotFound": "ProfileNotFound",
+    "exceptions.ProfileNotFound": "ProfileNotFound",
+    "ProfileNotFound": "ProfileNotFound",
+    "oci.exceptions.InvalidKeyFilePath": "InvalidKeyFilePath",
+    "exceptions.InvalidKeyFilePath": "InvalidKeyFilePath",
+    "InvalidKeyFilePath": "InvalidKeyFilePath",
     "ValueError": "ValueError",
     "json.JSONDecodeError": "JSONDecodeError",
     "json.decoder.JSONDecodeError": "JSONDecodeError",
@@ -175,7 +187,12 @@ ISINSTANCE_TYPES = {
     "bool": "bool",
     "float": "float",
     "bytes": "bytes",
+    "click.utils.LazyFile": "file",
+    "LazyFile": "file",
+    "Exception": "Exception",
 }
+_MISSING = object()
+_NO_INLINE_MODULES = frozenset({"os", "sys"})
 
 
 class Unsupported(Exception):
@@ -287,6 +304,86 @@ class Compiler:
             )
         return False
 
+    def _is_mod_fn(self, func, mod_name, fn_name, scope):
+        ok, obj = self._resolve_global_obj(func, scope)
+        return (
+            ok
+            and callable(obj)
+            and getattr(obj, "__module__", None) == mod_name
+            and getattr(obj, "__name__", None) == fn_name
+        )
+
+    def _resolve_global_obj(self, node, scope):
+        attrs = []
+        cur = node
+        while isinstance(cur, ast.Attribute):
+            attrs.insert(0, cur.attr)
+            cur = cur.value
+        if not isinstance(cur, ast.Name) or cur.id in scope or cur.id in self.locals:
+            return False, None
+        obj = self.globals.get(cur.id, _MISSING)
+        if obj is _MISSING:
+            return False, None
+        for attr in attrs:
+            obj = getattr(obj, attr, _MISSING)
+            if obj is _MISSING:
+                return False, None
+        return True, obj
+
+    def _resolve_sdk_model(self, func, scope):
+        ok, cls = self._resolve_global_obj(func, scope)
+        if not ok or not inspect.isclass(cls):
+            return None
+        mod = getattr(cls, "__module__", "") or ""
+        if not mod.startswith("oci.") or ".models." not in mod:
+            return None
+        try:
+            inst = cls()
+        except Exception:  # noqa: BLE001
+            return None
+        attr_map = getattr(inst, "attribute_map", None)
+        swagger_types = getattr(inst, "swagger_types", None)
+        if not isinstance(attr_map, dict) or not isinstance(swagger_types, dict):
+            return None
+        sdk_module = mod.split(".")[1]
+        defaults = []
+        for snake in attr_map:
+            val = getattr(inst, snake, None)
+            if val is not None:
+                defaults.append([snake, self.constant(val)])
+        return sdk_module, cls.__name__, defaults
+
+    def _compile_prompt_type(self, node, scope):
+        if isinstance(node, ast.Constant) and node.value is None:
+            return None
+        dotted = _dotted(node)
+        mapping = {
+            "int": "int",
+            "click.INT": "int",
+            "float": "float",
+            "click.FLOAT": "float",
+            "bool": "bool",
+            "click.BOOL": "bool",
+            "str": "str",
+            "click.STRING": "str",
+        }
+        if dotted in mapping:
+            return mapping[dotted]
+        if (
+            isinstance(node, ast.Call)
+            and _dotted(node.func) == "click.Choice"
+            and len(node.args) == 1
+            and not any(isinstance(a, ast.Starred) for a in node.args)
+        ):
+            case_sensitive = True
+            for kw in node.keywords:
+                if kw.arg == "case_sensitive":
+                    case_sensitive = self.expr(kw.value, scope)
+                else:
+                    raise Unsupported("click.Choice keywords")
+            return ["choice", self.expr(node.args[0], scope), case_sensitive]
+        raise Unsupported("click.prompt type")
+
     def _is_ctx_invoke(self, func, scope):
         return (
             isinstance(func, ast.Attribute)
@@ -373,8 +470,13 @@ class Compiler:
         if isinstance(st, ast.Assign):
             if len(st.targets) == 1:
                 if isinstance(st.targets[0], ast.Attribute):
-                    # Setting an attribute on an object (e.g. `result.data = data`); on a plain
-                    # dict the Engine stops like Python's AttributeError.
+                    if (
+                        isinstance(st.targets[0].value, ast.Name)
+                        and self.name(st.targets[0].value.id, scope) == "ctx"
+                    ):
+                        return [["setCtxAttr", st.targets[0].attr, self.expr(st.value, scope)]]
+                    # Setting an attribute on an object (e.g. `result.data = data`, `model.attr = x`);
+                    # on a plain dict the Engine stops like Python's AttributeError.
                     try:
                         target_obj = self.expr(st.targets[0].value, scope)
                         value = self.expr(st.value, scope)
@@ -1036,8 +1138,35 @@ class Compiler:
                 target = self.resolve(node)
                 if target is not None:
                     return ["target", self.target_index(target)]
+                root_obj = self.globals.get(base.id, _MISSING)
+                root_mod = getattr(root_obj, "__name__", None) if inspect.ismodule(root_obj) else None
+                if root_mod not in _NO_INLINE_MODULES:
+                    ok, val = self._resolve_global_obj(node, scope)
+                    if ok:
+                        try:
+                            return self.constant(val)
+                        except Unsupported:
+                            pass
                 raise Unsupported("attribute")
             return ["attr", node.attr, self.expr(node.value, scope)]
+        if isinstance(node, ast.JoinedStr):
+            parts = []
+            for part in node.values:
+                if isinstance(part, ast.Constant) and isinstance(part.value, str):
+                    parts.append(part.value)
+                elif isinstance(part, ast.FormattedValue):
+                    parts.append(self.expr(part, scope))
+                else:
+                    raise Unsupported("f-string")
+            if all(isinstance(p, str) for p in parts):
+                return "".join(parts)
+            return ["fstr", *parts]
+        if isinstance(node, ast.FormattedValue):
+            conv = {-1: None, 115: "s", 114: "r", 97: "a"}.get(node.conversion)
+            if node.conversion not in (-1, 115, 114, 97):
+                raise Unsupported("f-string conversion")
+            spec = self.expr(node.format_spec, scope) if node.format_spec is not None else None
+            return ["fmtVal", self.expr(node.value, scope), conv, spec]
         if isinstance(node, ast.UnaryOp):
             if isinstance(node.op, ast.Not):
                 return ["not", self.expr(node.operand, scope)]
@@ -1093,7 +1222,195 @@ class Compiler:
                 client_pair = self.clients.get(self.name(node.func.value.id, scope))
                 if client_pair is not None:
                     return self.sdk_call(client_pair, node, scope)
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "call_api"
+                and isinstance(node.func.value, ast.Attribute)
+                and node.func.value.attr == "base_client"
+                and isinstance(node.func.value.value, ast.Name)
+            ):
+                client_pair = self.clients.get(self.name(node.func.value.value.id, scope))
+                if client_pair is not None:
+                    if any(isinstance(a, ast.Starred) for a in node.args):
+                        raise Unsupported("call_api *args")
+                    pos = [self.expr(a, scope) for a in node.args]
+                    keywords = []
+                    star = None
+                    for kw in node.keywords:
+                        if kw.arg is None:
+                            if star is not None:
+                                raise Unsupported("two **")
+                            star = self.expr(kw.value, scope)
+                        else:
+                            keywords.append([kw.arg, self.expr(kw.value, scope)])
+                    op_index = self.sdk_call_index(*client_pair, "__call_api__")
+                    return ["callApi", op_index, self.expr(node.func.value.value, scope), pos, keywords, star]
             dotted = _dotted(node.func)
+            if dotted == "oci.config.from_file" or self._is_mod_fn(node.func, "oci.config", "from_file", scope):
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 2:
+                    raise Unsupported("call oci.config.from_file")
+                file_loc = self.expr(node.args[0], scope) if len(node.args) >= 1 else None
+                profile_name = self.expr(node.args[1], scope) if len(node.args) >= 2 else None
+                seen = set()
+                if len(node.args) >= 1:
+                    seen.add("file_location")
+                if len(node.args) >= 2:
+                    seen.add("profile_name")
+                for kw in node.keywords:
+                    if kw.arg not in ("file_location", "profile_name") or kw.arg in seen:
+                        raise Unsupported("call keywords")
+                    seen.add(kw.arg)
+                    if kw.arg == "file_location":
+                        file_loc = self.expr(kw.value, scope)
+                    else:
+                        profile_name = self.expr(kw.value, scope)
+                return ["fn", "configFromFile", file_loc, profile_name]
+            if self._is_cli_util_fn(node.func, "build_config"):
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 1:
+                    raise Unsupported("call cli_util.build_config")
+                arg_node = node.args[0] if len(node.args) == 1 else None
+                for kw in node.keywords:
+                    if kw.arg == "command_args" and arg_node is None:
+                        arg_node = kw.value
+                    else:
+                        raise Unsupported("call keywords")
+                if arg_node is None:
+                    raise Unsupported("call cli_util.build_config")
+                return ["fn", "buildConfig", self.expr(arg_node, scope)]
+            if self._is_cli_util_fn(node.func, "get_jmespath_expression_from_context"):
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 1:
+                    raise Unsupported("call cli_util.get_jmespath_expression_from_context")
+                ctx_node = node.args[0] if len(node.args) == 1 else None
+                for kw in node.keywords:
+                    if kw.arg == "ctx" and ctx_node is None:
+                        ctx_node = kw.value
+                    else:
+                        raise Unsupported("call keywords")
+                if not (isinstance(ctx_node, ast.Name) and self.name(ctx_node.id, scope) == "ctx"):
+                    raise Unsupported("call cli_util.get_jmespath_expression_from_context")
+                return ["fn", "jmespathFromContext"]
+            if dotted == "click.prompt":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 10:
+                    raise Unsupported("call click.prompt")
+                prompt_slots = [
+                    "text", "default", "hide_input", "confirmation_prompt", "type",
+                    "value_proc", "prompt_suffix", "show_default", "err", "show_choices",
+                ]
+                bound_p = {}
+                for idx, a in enumerate(node.args):
+                    bound_p[prompt_slots[idx]] = a
+                for kw in node.keywords:
+                    if kw.arg not in prompt_slots or kw.arg in bound_p:
+                        raise Unsupported("call keywords")
+                    bound_p[kw.arg] = kw.value
+                if "text" not in bound_p or "value_proc" in bound_p:
+                    raise Unsupported("call click.prompt")
+                text_expr = self.expr(bound_p["text"], scope)
+                has_default = "default" in bound_p
+                default_expr = self.expr(bound_p["default"], scope) if has_default else None
+                hide_expr = self.expr(bound_p["hide_input"], scope) if "hide_input" in bound_p else False
+                conf_expr = self.expr(bound_p["confirmation_prompt"], scope) if "confirmation_prompt" in bound_p else False
+                type_spec = self._compile_prompt_type(bound_p["type"], scope) if "type" in bound_p else None
+                suffix_expr = self.expr(bound_p["prompt_suffix"], scope) if "prompt_suffix" in bound_p else ": "
+                show_def_expr = self.expr(bound_p["show_default"], scope) if "show_default" in bound_p else True
+                err_expr = self.expr(bound_p["err"], scope) if "err" in bound_p else False
+                return [
+                    "fn", "prompt", text_expr, has_default, default_expr,
+                    hide_expr, conf_expr, type_spec, suffix_expr, show_def_expr, err_expr,
+                ]
+            if dotted == "click.confirm":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 6:
+                    raise Unsupported("call click.confirm")
+                confirm_slots = ["text", "default", "abort", "prompt_suffix", "show_default", "err"]
+                bound_c = {}
+                for idx, a in enumerate(node.args):
+                    bound_c[confirm_slots[idx]] = a
+                for kw in node.keywords:
+                    if kw.arg not in confirm_slots or kw.arg in bound_c:
+                        raise Unsupported("call keywords")
+                    bound_c[kw.arg] = kw.value
+                if "text" not in bound_c:
+                    raise Unsupported("call click.confirm")
+                text_expr = self.expr(bound_c["text"], scope)
+                if len(bound_c) == 1:
+                    return ["fn", "confirm", text_expr]
+                return [
+                    "fn", "confirm", text_expr,
+                    self.expr(bound_c["default"], scope) if "default" in bound_c else False,
+                    self.expr(bound_c["abort"], scope) if "abort" in bound_c else False,
+                    self.expr(bound_c["prompt_suffix"], scope) if "prompt_suffix" in bound_c else ": ",
+                    self.expr(bound_c["show_default"], scope) if "show_default" in bound_c else True,
+                    self.expr(bound_c["err"], scope) if "err" in bound_c else False,
+                ]
+            if dotted == "round":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 2:
+                    raise Unsupported("call round")
+                num_node = node.args[0] if len(node.args) >= 1 else None
+                ndigits_node = node.args[1] if len(node.args) >= 2 else None
+                for kw in node.keywords:
+                    if kw.arg == "number" and num_node is None:
+                        num_node = kw.value
+                    elif kw.arg == "ndigits" and ndigits_node is None:
+                        ndigits_node = kw.value
+                    else:
+                        raise Unsupported("call keywords")
+                if num_node is None:
+                    raise Unsupported("call round")
+                if ndigits_node is None:
+                    return ["fn", "round", self.expr(num_node, scope)]
+                return ["fn", "round", self.expr(num_node, scope), self.expr(ndigits_node, scope)]
+            if dotted == "sorted":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) != 1:
+                    raise Unsupported("call sorted")
+                iter_expr = self.expr(node.args[0], scope)
+                key_fn = None
+                reverse_expr = False
+                seen = set()
+                for kw in node.keywords:
+                    if kw.arg not in ("key", "reverse") or kw.arg in seen:
+                        raise Unsupported("call keywords")
+                    seen.add(kw.arg)
+                    if kw.arg == "reverse":
+                        reverse_expr = self.expr(kw.value, scope)
+                    else:
+                        if isinstance(kw.value, ast.Constant) and kw.value.value is None:
+                            key_fn = None
+                        else:
+                            kd = _dotted(kw.value)
+                            mapped_k = FUNCTIONS.get(kd) if kd else None
+                            if mapped_k is not None:
+                                key_fn = mapped_k
+                            else:
+                                # Blame the key node directly (e.g. Lambda).
+                                self.expr(kw.value, scope)
+                                raise Unsupported("call sorted key")
+                return ["fn", "sorted", iter_expr, key_fn, reverse_expr]
+            if dotted == "json.dumps":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) != 1:
+                    raise Unsupported("call json.dumps")
+                obj_expr = self.expr(node.args[0], scope)
+                if not node.keywords:
+                    return ["fn", "dumps", obj_expr]
+                if (
+                    len(node.keywords) == 1
+                    and node.keywords[0].arg == "sort_keys"
+                    and isinstance(node.keywords[0].value, ast.Constant)
+                    and node.keywords[0].value.value is True
+                ):
+                    return ["fn", "dumpsSorted", obj_expr]
+                allowed_dumps = {"sort_keys", "indent", "separators", "ensure_ascii"}
+                opts = {}
+                for kw in node.keywords:
+                    if kw.arg not in allowed_dumps or kw.arg in opts:
+                        raise Unsupported("call keywords")
+                    opts[kw.arg] = self.expr(kw.value, scope)
+                return [
+                    "fn", "dumpsOpts", obj_expr,
+                    opts.get("indent", None),
+                    opts.get("sort_keys", False),
+                    opts.get("separators", None),
+                    opts.get("ensure_ascii", True),
+                ]
             if dotted == "click.style":
                 if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 12:
                     raise Unsupported("call click.style")
@@ -1247,10 +1564,22 @@ class Compiler:
             helper = self._resolve_helper(node.func, scope)
             if helper is not None:
                 return self.inline(node, scope, as_expr=True, helper=helper)
-            if node.keywords and not (
-                dotted == "json.dumps"
-                and all(k.arg == "sort_keys" for k in node.keywords)
-            ):
+            sdk_model = self._resolve_sdk_model(node.func, scope)
+            if sdk_model is not None:
+                if node.args:
+                    raise Unsupported("model positional args")
+                sdk_module, model_name, defaults = sdk_model
+                keywords = []
+                star = None
+                for kw in node.keywords:
+                    if kw.arg is None:
+                        if star is not None:
+                            raise Unsupported("two **")
+                        star = self.expr(kw.value, scope)
+                    else:
+                        keywords.append([kw.arg, self.expr(kw.value, scope)])
+                return ["model", sdk_module, model_name, defaults, keywords, star]
+            if node.keywords:
                 raise Unsupported("call keywords")
             if dotted == "isinstance" and len(node.args) == 2:
                 type_arg = node.args[1]

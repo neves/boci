@@ -31,15 +31,15 @@ const METHOD_DEFLATE = 8;
 const FLAG_UTF8 = 0x0800;
 
 function dosDateTime(date: Date): { dosTime: number; dosDate: number } {
-  const year = Math.max(1980, date.getFullYear());
+  const year = Math.max(1980, date.getUTCFullYear());
   const dosTime =
-    ((date.getHours() & 0x1f) << 11) |
-    ((date.getMinutes() & 0x3f) << 5) |
-    ((date.getSeconds() >> 1) & 0x1f);
+    ((date.getUTCHours() & 0x1f) << 11) |
+    ((date.getUTCMinutes() & 0x3f) << 5) |
+    ((date.getUTCSeconds() >> 1) & 0x1f);
   const dosDate =
     (((year - 1980) & 0x7f) << 9) |
-    (((date.getMonth() + 1) & 0x0f) << 5) |
-    (date.getDate() & 0x1f);
+    (((date.getUTCMonth() + 1) & 0x0f) << 5) |
+    (date.getUTCDate() & 0x1f);
   return { dosTime, dosDate };
 }
 

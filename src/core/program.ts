@@ -6,10 +6,11 @@
  */
 import { randomUUID } from "node:crypto";
 import { basename, resolve } from "node:path";
+import { applyQuery } from "../lib/query.ts";
 import { expandHomeDir } from "../utils/expandHomeDir.ts";
 import { decodePythonUtf8 } from "../utils/utf8.ts";
 import { isZipBuffer } from "../utils/zip.ts";
-import { inheritedDiscriminator, type Model } from "./camelize.ts";
+import { inheritedDiscriminator, type Model, type Models } from "./camelize.ts";
 import type { TypedParam } from "./convert.ts";
 import type { OperationResult } from "./operation.ts";
 import { renderModel } from "./output.ts";
@@ -37,10 +38,49 @@ export class ProgramRaise extends Error {
 }
 
 /**
- * `click.confirm(text)` with no answer yet: the caller asks, then runs the program again
+ * `click.confirm(text, ...)` with no answer yet: the caller asks, then runs the program again
  * with the answers so far (a program is a pure function of its kwargs and answers).
  */
-export class ProgramConfirm extends Error {}
+export class ProgramConfirm extends Error {
+  constructor(
+    text: string,
+    readonly defaultValue = false,
+    readonly abort = false,
+    readonly promptSuffix = ": ",
+    readonly showDefault = true,
+    readonly toStderr = false,
+  ) {
+    super(text);
+  }
+}
+
+export type PromptChoiceSpec = {
+  kind: "choice";
+  choices: string[];
+  caseSensitive: boolean;
+};
+
+export type PromptTypeSpec =
+  "str" | "int" | "float" | "bool" | PromptChoiceSpec | null;
+
+/**
+ * `click.prompt(text, ...)` with no answer yet: answered like ProgramConfirm.
+ */
+export class ProgramPrompt extends Error {
+  constructor(
+    readonly text: string,
+    readonly hasDefault: boolean,
+    readonly defaultValue: unknown,
+    readonly hideInput: boolean,
+    readonly confirmationPrompt: boolean,
+    readonly typeSpec: PromptTypeSpec,
+    readonly promptSuffix: string,
+    readonly showDefault: boolean,
+    readonly toStderr: boolean,
+  ) {
+    super(text);
+  }
+}
 
 /**
  * `click.prompt(text, hide_input=True, confirmation_prompt=True)` with no answer yet:
@@ -48,8 +88,8 @@ export class ProgramConfirm extends Error {}
  */
 export class ProgramSecret extends Error {}
 
-/** What a program has been answered so far: click.confirm's booleans, prompts' strings. */
-export type ProgramAnswer = boolean | string;
+/** What a program has been answered so far: click.confirm's booleans, prompts' strings/numbers. */
+export type ProgramAnswer = boolean | string | number;
 
 /** `ctx.abort()` in the wrapper. */
 export class ProgramAbort extends Error {}
@@ -110,6 +150,7 @@ export type ProgramSdkCallRecord = {
   posArgs: unknown[];
   kwArgs: Dict;
   region?: string;
+  endpoint?: string | null;
 };
 
 type ModelMeta = {
@@ -272,8 +313,33 @@ export class ProgramSdkCall extends Error {
     readonly posArgs: unknown[],
     readonly kwArgs: Dict,
     readonly region?: string,
+    readonly endpoint?: string | null,
   ) {
     super(`sdk[${opIndex}]`);
+  }
+}
+
+/**
+ * `client.base_client.call_api(...)` before the Engine has executed that raw API call:
+ * the caller sends the HTTP request, appends a ProgramResponse (or error) to
+ * `context.sdkResults`, and replays.
+ */
+export class ProgramCallApi extends Error {
+  constructor(
+    readonly opIndex: number,
+    readonly resourcePath: string,
+    readonly method: string,
+    readonly pathParams: Dict | null,
+    readonly queryParams: Dict | [string, unknown][] | null,
+    readonly headerParams: Dict | null,
+    readonly body: unknown,
+    readonly responseType: string | null,
+    readonly enforceContentHeaders: boolean,
+    readonly operationName: string | null,
+    readonly region?: string,
+    readonly endpoint?: string | null,
+  ) {
+    super(`callApi[${opIndex}]`);
   }
 }
 
@@ -367,6 +433,7 @@ export class ProgramListCall extends Error {
     readonly region?: string,
     readonly recordLimit?: unknown,
     readonly pageSize?: unknown,
+    readonly endpoint?: string | null,
   ) {
     super(`listCall[${mode}:${opIndex}]`);
   }
@@ -391,17 +458,107 @@ export type ProgramContext = {
   auth?: string | null;
   enableDualStack?: boolean;
   regionOverride?: string | null;
+  query?: string | null;
+  output?: string | null;
+  debug?: boolean;
+  noRetry?: boolean;
+  maxAttempts?: number | null;
   defaultMap?: Dict | null;
   env?: Record<string, string | undefined>;
+  models?: Models;
+  configFromFile?: (fileLocation?: string, profileName?: string) => Dict;
+  buildConfig?: (commandArgs: Dict) => Dict;
+  resolveQuery?: () => string | null;
   loadContextDefaults?: () => Dict;
   sdkResults?: ProgramSdkOutcome[];
   listResults?: ProgramSdkOutcome[];
   waitResults?: ProgramSdkOutcome[];
+  randomChoices?: unknown[];
   renderedCount?: number;
   echoCount?: number;
   sleepCount?: number;
   writtenFiles?: Set<number>;
 };
+
+/**
+ * An instantiated OCI SDK model (`oci.<service>.models.<Model>(...)`): Python code reads
+ * and writes `snake_case` attributes, and JSON serialization maps non-None fields to wire
+ * `camelCase` keys via `attribute_map` (from `spec.models`).
+ */
+export class ProgramModel {
+  readonly attrMap = new Map<string, string>();
+  readonly attrs: Dict = {};
+
+  constructor(
+    readonly module: string,
+    readonly name: string,
+    readonly model: Model | undefined,
+    defaults: [string, unknown][] = [],
+  ) {
+    if (model) {
+      for (const [snake, , camel] of model.attributes) {
+        this.attrMap.set(snake, camel);
+      }
+    }
+    for (const [snake, val] of defaults) {
+      this.attrs[snake] = val;
+    }
+  }
+
+  getAttr(attr: string): unknown {
+    if (attr in this.attrs) return this.attrs[attr];
+    if (this.attrMap.has(attr)) return null;
+    throw new ProgramRaise(
+      "AttributeError",
+      `'${this.name}' object has no attribute '${attr}'`,
+    );
+  }
+
+  setAttr(attr: string, value: unknown): void {
+    this.attrs[attr] = value;
+  }
+
+  toWireDict(): Dict {
+    const out: Dict = {};
+    if (this.attrMap.size > 0) {
+      for (const [snake, wire] of this.attrMap) {
+        const val = this.attrs[snake];
+        if (val !== undefined && val !== null) {
+          out[wire] = serializeModelValue(val);
+        }
+      }
+    } else {
+      for (const [k, val] of Object.entries(this.attrs)) {
+        if (val !== undefined && val !== null) {
+          out[snakeToCamel(k)] = serializeModelValue(val);
+        }
+      }
+    }
+    return out;
+  }
+
+  toJSON(): Dict {
+    return this.toWireDict();
+  }
+}
+
+function serializeModelValue(v: unknown): unknown {
+  if (v instanceof ProgramModel) return v.toWireDict();
+  if (Array.isArray(v)) return v.map(serializeModelValue);
+  if (isDict(v)) {
+    const out: Dict = {};
+    for (const [k, val] of Object.entries(v)) {
+      out[k] = serializeModelValue(val);
+    }
+    return out;
+  }
+  return v;
+}
+
+/** A compiled JMESPath expression returned by `cli_util.get_jmespath_expression_from_context(ctx)`. */
+class ProgramJmespath {
+  constructor(readonly expression: string) {}
+}
 
 /**
  * An object only some keys of which a program reads: `ctx.obj` (its 'config', a KeyError
@@ -517,6 +674,8 @@ const isDict = (v: unknown): v is Dict =>
   !(v instanceof ProgramObject) &&
   !(v instanceof ProgramResponse) &&
   !(v instanceof ProgramHeaders) &&
+  !(v instanceof ProgramModel) &&
+  !(v instanceof ProgramJmespath) &&
   !(v instanceof Error) &&
   !(v instanceof Uint8Array);
 
@@ -526,7 +685,9 @@ const pyTruthy = (v: unknown): boolean => {
     v instanceof ProgramResponse ||
     v instanceof ProgramObject ||
     v instanceof ProgramFile ||
-    v instanceof ProgramTarget
+    v instanceof ProgramTarget ||
+    v instanceof ProgramModel ||
+    v instanceof ProgramJmespath
   )
     return true;
   if (isDict(v) && modelMeta.has(v)) return true;
@@ -544,6 +705,17 @@ export function toDictValue(v: unknown, snakeCase = false): unknown {
   )
     return v;
   if (v instanceof ProgramHeaders) return Object.fromEntries(v.entries());
+  if (v instanceof ProgramModel) {
+    const out: Dict = {};
+    const keys =
+      v.attrMap.size > 0 ? [...v.attrMap.keys()] : Object.keys(v.attrs);
+    for (const snake of keys) {
+      const key = snakeCase ? snake : snake.replaceAll("_", "-");
+      const val = snake in v.attrs ? v.attrs[snake] : null;
+      out[key] = toDictValue(val, snakeCase);
+    }
+    return out;
+  }
   if (Array.isArray(v)) return v.map((elem) => toDictValue(elem, snakeCase));
   if (isDict(v)) {
     const meta = modelMeta.get(v);
@@ -579,6 +751,18 @@ function stripChars(s: string, chars: string, left: boolean): string {
 
 function pyEq(a: unknown, b: unknown): boolean {
   if (a === b) return true;
+  if (a instanceof ProgramModel && b instanceof ProgramModel) {
+    if (a.module !== b.module || a.name !== b.name) return false;
+    const keys = new Set([
+      ...a.attrMap.keys(),
+      ...Object.keys(a.attrs),
+      ...Object.keys(b.attrs),
+    ]);
+    for (const k of keys) {
+      if (!pyEq(a.attrs[k] ?? null, b.attrs[k] ?? null)) return false;
+    }
+    return true;
+  }
   if (Array.isArray(a) && Array.isArray(b))
     return a.length === b.length && a.every((x, i) => pyEq(x, b[i]));
   if (isDict(a) && isDict(b)) {
@@ -605,6 +789,9 @@ function pyStr(v: unknown): string {
   if (v === true) return "True";
   if (v === false) return "False";
   if (typeof v === "string" || typeof v === "number") return String(v);
+  if (v instanceof ProgramModel) {
+    return JSON.stringify(sortKeys(toDictValue(v, true)), null, 2);
+  }
   // `except Exception as e: ... str(e)`
   if (v instanceof ProgramRaise) return v.message;
   if (Array.isArray(v)) {
@@ -677,9 +864,11 @@ const MAX_WHILE_ITERATIONS = 10_000;
 function isSuspension(e: unknown): boolean {
   return (
     e instanceof ProgramConfirm ||
+    e instanceof ProgramPrompt ||
     e instanceof ProgramSecret ||
     e instanceof ProgramLookup ||
     e instanceof ProgramSdkCall ||
+    e instanceof ProgramCallApi ||
     e instanceof ProgramListCall ||
     e instanceof ProgramWaitUntil ||
     e instanceof ProgramRender ||
@@ -914,6 +1103,8 @@ function formatTraverse(base: unknown, path: string): unknown {
         else if (attr === "headers") cur = cur.headers;
         else if (attr === "request_id") cur = cur.requestId;
         else throw new ProgramUnsupported(`format attr .${attr}`);
+      } else if (cur instanceof ProgramModel) {
+        cur = cur.getAttr(attr);
       } else if (isDict(cur)) {
         cur = modelAttr(cur, attr);
       } else {
@@ -945,7 +1136,364 @@ function formatTraverse(base: unknown, path: string): unknown {
   return cur;
 }
 
-/** Python `str.format` with positional/keyword fields and `!s`/`!r`/`!a` conversions. */
+function groupDigits(digits: string, sep: string, size: number): string {
+  const out: string[] = [];
+  for (let i = digits.length; i > 0; i -= size) {
+    out.push(digits.slice(Math.max(0, i - size), i));
+  }
+  return out.reverse().join(sep);
+}
+
+function padFormatted(
+  prefix: string,
+  body: string,
+  width: number,
+  fill: string,
+  align: string,
+): string {
+  const total = prefix.length + body.length;
+  if (total >= width) return prefix + body;
+  const pad = width - total;
+  if (align === "<") return prefix + body + fill.repeat(pad);
+  if (align === ">") return fill.repeat(pad) + prefix + body;
+  if (align === "=") return prefix + fill.repeat(pad) + body;
+  // Center (`^`): Python puts the extra fill char on the right when odd.
+  const left = Math.floor(pad / 2);
+  const right = pad - left;
+  return fill.repeat(left) + prefix + body + fill.repeat(right);
+}
+
+/** Python format specification mini-language for f-strings and `str.format`. */
+function pyFormatValue(
+  rawVal: unknown,
+  conversion: string | null | undefined,
+  spec: string | null | undefined,
+): string {
+  let val = rawVal;
+  if (conversion === "s") val = pyStr(val);
+  else if (conversion === "r" || conversion === "a") val = pyElemRepr(val);
+  const s = spec ?? "";
+  if (s === "") return typeof val === "string" ? val : pyStr(val);
+
+  const m =
+    /^(?:(.)?([<>=^]))?([+\- ])?(z)?(#)?(0)?(\d+)?([_,])?(?:\.(\d+))?([bcdeEfFgGnosxX%])?$/.exec(
+      s,
+    );
+  if (!m) throw new ProgramUnsupported(`format spec ${s}`);
+  const [
+    ,
+    rawFill,
+    rawAlign,
+    sign,
+    ,
+    alt,
+    zero,
+    rawWidth,
+    grouping,
+    rawPrec,
+    typeChar,
+  ] = m;
+  const width = rawWidth ? Number.parseInt(rawWidth, 10) : 0;
+  const prec = rawPrec !== undefined ? Number.parseInt(rawPrec, 10) : undefined;
+
+  const isNum = typeof val === "number" || typeof val === "boolean";
+  const effectiveType =
+    typeChar ?? (typeof val === "string" ? "s" : isNum ? "" : "s");
+
+  if (effectiveType === "s") {
+    if (sign || alt || zero || grouping)
+      throw new ProgramRaise(
+        "ValueError",
+        `Invalid format specifier '${s}' for object of type 'str'`,
+      );
+    let text = typeof val === "string" ? val : pyStr(val);
+    if (prec !== undefined) text = text.slice(0, prec);
+    const fill = rawFill ?? " ";
+    const align = rawAlign ?? "<";
+    if (align === "=")
+      throw new ProgramRaise(
+        "ValueError",
+        "'=' alignment not allowed in string format specifier",
+      );
+    return padFormatted("", text, width, fill, align);
+  }
+
+  if (!isNum) {
+    throw new ProgramRaise(
+      "ValueError",
+      `Unknown format code '${effectiveType}' for object`,
+    );
+  }
+  const num = typeof val === "boolean" ? (val ? 1 : 0) : (val as number);
+  const fill = rawFill ?? (zero ? "0" : " ");
+  const align = rawAlign ?? (zero ? "=" : ">");
+
+  const signStr =
+    num < 0 || Object.is(num, -0)
+      ? "-"
+      : sign === "+"
+        ? "+"
+        : sign === " "
+          ? " "
+          : "";
+  const abs = Math.abs(num);
+
+  if (
+    effectiveType === "d" ||
+    effectiveType === "b" ||
+    effectiveType === "o" ||
+    effectiveType === "x" ||
+    effectiveType === "X" ||
+    effectiveType === "c" ||
+    (effectiveType === "" && Number.isInteger(num) && prec === undefined)
+  ) {
+    if (effectiveType === "c") {
+      return padFormatted(
+        "",
+        String.fromCodePoint(Math.trunc(num)),
+        width,
+        fill,
+        align,
+      );
+    }
+    if (!Number.isInteger(num)) {
+      throw new ProgramRaise(
+        "ValueError",
+        `Unknown format code '${effectiveType}' for object of type 'float'`,
+      );
+    }
+    const radix =
+      effectiveType === "b"
+        ? 2
+        : effectiveType === "o"
+          ? 8
+          : effectiveType === "x" || effectiveType === "X"
+            ? 16
+            : 10;
+    let digits = abs.toString(radix);
+    if (effectiveType === "X") digits = digits.toUpperCase();
+    if (grouping) {
+      const gSize = radix === 10 ? 3 : 4;
+      digits = groupDigits(digits, grouping, gSize);
+    }
+    const altPrefix = alt
+      ? effectiveType === "b"
+        ? "0b"
+        : effectiveType === "o"
+          ? "0o"
+          : effectiveType === "x"
+            ? "0x"
+            : effectiveType === "X"
+              ? "0X"
+              : ""
+      : "";
+    return padFormatted(signStr + altPrefix, digits, width, fill, align);
+  }
+
+  // Float formatting: f, F, e, E, g, G, %, or default float
+  let body: string;
+  if (effectiveType === "f" || effectiveType === "F") {
+    const p = prec ?? 6;
+    body = abs.toFixed(p);
+    if (alt && p === 0) body += ".";
+  } else if (effectiveType === "%") {
+    const p = prec ?? 6;
+    body = `${(abs * 100).toFixed(p)}%`;
+  } else if (effectiveType === "e" || effectiveType === "E") {
+    const p = prec ?? 6;
+    body = abs.toExponential(p).replace(/e([+-])(\d)$/, "e$10$2");
+    if (effectiveType === "E") body = body.toUpperCase();
+  } else if (
+    effectiveType === "g" ||
+    effectiveType === "G" ||
+    effectiveType === ""
+  ) {
+    const p = Math.max(1, prec ?? 6);
+    body =
+      effectiveType === "" && prec === undefined
+        ? String(abs)
+        : Number(abs.toPrecision(p)).toString();
+    if (effectiveType === "G") body = body.toUpperCase();
+  } else {
+    throw new ProgramUnsupported(`format type ${effectiveType}`);
+  }
+  if (grouping) {
+    const dot = body.indexOf(".");
+    const intPart = dot >= 0 ? body.slice(0, dot) : body;
+    const restPart = dot >= 0 ? body.slice(dot) : "";
+    body = groupDigits(intPart, grouping, 3) + restPart;
+  }
+  return padFormatted(signStr, body, width, fill, align);
+}
+
+/** Python `%` string formatting (`"%3.1f %s" % (num, x)`). */
+function pyPercentFormat(template: string, rhs: unknown): string {
+  const args = Array.isArray(rhs) ? rhs : [rhs];
+  let idx = 0;
+  return template.replace(
+    /%%|%([#0\- +]*)(\d+)?(?:\.(\d+))?([diouxXeEfFgGcrsa])/g,
+    (m, flags = "", width = "", prec = "", conv) => {
+      if (m === "%%") return "%";
+      if (idx >= args.length)
+        throw new ProgramRaise(
+          "TypeError",
+          "not enough arguments for format string",
+        );
+      const val = args[idx++];
+      const align = flags.includes("-") ? "<" : "";
+      const sign = flags.includes("+") ? "+" : flags.includes(" ") ? " " : "";
+      const alt = flags.includes("#") ? "#" : "";
+      const zero = flags.includes("0") && !align ? "0" : "";
+      const dotPrec = prec !== "" ? `.${prec}` : "";
+      if (conv === "r")
+        return pyFormatValue(val, "r", `${align}${width}${dotPrec}s`);
+      if (conv === "a")
+        return pyFormatValue(val, "a", `${align}${width}${dotPrec}s`);
+      const mapped = conv === "i" || conv === "u" ? "d" : conv;
+      return pyFormatValue(
+        val,
+        null,
+        `${align}${sign}${alt}${zero}${width}${dotPrec}${mapped}`,
+      );
+    },
+  );
+}
+
+/** Python `round(number[, ndigits])` with round-half-to-even (banker's rounding). */
+function pyRound(args: unknown[]): number {
+  if (args.length < 1 || args.length > 2)
+    throw new ProgramUnsupported("round() args");
+  const raw = args[0];
+  if (typeof raw !== "number" && typeof raw !== "boolean")
+    throw new ProgramRaise("TypeError", "type doesn't define __round__ method");
+  const x = typeof raw === "boolean" ? (raw ? 1 : 0) : raw;
+  const roundHalfEven = (n: number): number => {
+    const f = Math.floor(n);
+    const d = n - f;
+    if (d > 0.5) return f + 1;
+    if (d < 0.5) return f;
+    return f % 2 === 0 ? f : f + 1;
+  };
+  if (args.length === 1 || args[1] === null || args[1] === undefined) {
+    return roundHalfEven(x);
+  }
+  const ndigits = args[1];
+  if (typeof ndigits !== "number" || !Number.isInteger(ndigits))
+    throw new ProgramRaise("TypeError", "'ndigits' must be an integer");
+  const factor = 10 ** ndigits;
+  return roundHalfEven(x * factor) / factor;
+}
+
+/** Python `range(stop)` / `range(start, stop[, step])`. */
+function pyRange(args: unknown[]): number[] {
+  if (args.length < 1 || args.length > 3)
+    throw new ProgramUnsupported("range() args");
+  const toInt = (v: unknown): number => {
+    if (typeof v === "boolean") return v ? 1 : 0;
+    if (typeof v === "number" && Number.isInteger(v)) return v;
+    throw new ProgramRaise(
+      "TypeError",
+      "'range' object requires integer arguments",
+    );
+  };
+  let start = 0;
+  let stop: number;
+  let step = 1;
+  if (args.length === 1) {
+    stop = toInt(args[0]);
+  } else if (args.length === 2) {
+    start = toInt(args[0]);
+    stop = toInt(args[1]);
+  } else {
+    start = toInt(args[0]);
+    stop = toInt(args[1]);
+    step = toInt(args[2]);
+  }
+  if (step === 0)
+    throw new ProgramRaise("ValueError", "range() arg 3 must not be zero");
+  const count =
+    step > 0
+      ? Math.max(0, Math.ceil((stop - start) / step))
+      : Math.max(0, Math.ceil((start - stop) / -step));
+  if (count > 1_000_000) throw new ProgramUnsupported("range() too large");
+  const out: number[] = [];
+  for (let i = 0; i < count; i++) out.push(start + i * step);
+  return out;
+}
+
+/** Python `posixpath.dirname(p)`. */
+function pyDirname(p: string): string {
+  const i = p.lastIndexOf("/") + 1;
+  let head = p.slice(0, i);
+  if (head && head !== "/".repeat(head.length)) {
+    head = head.replace(/\/+$/, "");
+  }
+  return head;
+}
+
+/** Python `json.dumps` with `indent`, `sort_keys`, `separators`, and `ensure_ascii`. */
+function pyDumpsOpts(
+  val: unknown,
+  indent: unknown,
+  sortKeysFlag: unknown,
+  separators: unknown,
+  ensureAscii: unknown,
+): string {
+  const prepared = pyTruthy(sortKeysFlag) ? sortKeys(val) : val;
+  const hasIndent = indent !== null && indent !== undefined;
+  const indentStr =
+    typeof indent === "number"
+      ? " ".repeat(Math.max(0, Math.trunc(indent)))
+      : typeof indent === "string"
+        ? indent
+        : "";
+  let itemSep = hasIndent ? "," : ", ";
+  let keySep = ": ";
+  if (Array.isArray(separators) && separators.length === 2) {
+    itemSep = String(separators[0]);
+    keySep = String(separators[1]);
+  }
+  const escapeAscii = ensureAscii === undefined ? true : pyTruthy(ensureAscii);
+  const encodeStr = (s: string): string => {
+    const raw = JSON.stringify(s);
+    if (!escapeAscii) return raw;
+    return raw.replace(/[^\x00-\x7f]/g, (ch) => {
+      const cp = ch.codePointAt(0)!;
+      if (cp <= 0xffff) return `\\u${cp.toString(16).padStart(4, "0")}`;
+      const off = cp - 0x10000;
+      return `\\u${(0xd800 + (off >> 10)).toString(16)}\\u${(0xdc00 + (off & 0x3ff)).toString(16)}`;
+    });
+  };
+  const render = (v: unknown, depth: number): string => {
+    if (v instanceof ProgramModel) return render(v.toWireDict(), depth);
+    if (v === null || v === undefined) return "null";
+    if (typeof v === "boolean") return v ? "true" : "false";
+    if (typeof v === "number") return Number.isFinite(v) ? String(v) : "null";
+    if (typeof v === "string") return encodeStr(v);
+    if (Array.isArray(v)) {
+      if (v.length === 0) return "[]";
+      if (!hasIndent)
+        return `[${v.map((x) => render(x, depth + 1)).join(itemSep)}]`;
+      const pad = indentStr.repeat(depth + 1);
+      const closePad = indentStr.repeat(depth);
+      return `[\n${v.map((x) => `${pad}${render(x, depth + 1)}`).join(`${itemSep}\n`)}\n${closePad}]`;
+    }
+    if (isDict(v)) {
+      const entries = Object.entries(v);
+      if (entries.length === 0) return "{}";
+      if (!hasIndent) {
+        return `{${entries.map(([k, x]) => `${encodeStr(k)}${keySep}${render(x, depth + 1)}`).join(itemSep)}}`;
+      }
+      const pad = indentStr.repeat(depth + 1);
+      const closePad = indentStr.repeat(depth);
+      return `{\n${entries.map(([k, x]) => `${pad}${encodeStr(k)}${keySep}${render(x, depth + 1)}`).join(`${itemSep}\n`)}\n${closePad}}`;
+    }
+    throw new ProgramUnsupported("json.dumps() value");
+  };
+  return render(prepared, 0);
+}
+
+/** Python `str.format` with positional/keyword fields, conversions, and format specs. */
 function pyFormat(
   template: string,
   args: unknown[],
@@ -960,7 +1508,6 @@ function pyFormat(
     const parsed = /^([^!:]*)(?:!([rsa]))?(?::(.*))?$/.exec(field);
     if (!parsed) throw new ProgramUnsupported(`format field ${m}`);
     const [, fieldExpr = "", conversion, spec] = parsed;
-    if (spec) throw new ProgramUnsupported(`format spec ${m}`);
     let val: unknown;
     const headMatch = /^([^.[]*)(.*)$/.exec(fieldExpr);
     if (!headMatch) throw new ProgramUnsupported(`format field ${m}`);
@@ -984,8 +1531,7 @@ function pyFormat(
       throw new ProgramUnsupported(`format field ${m}`);
     }
     if (tail) val = formatTraverse(val, tail);
-    if (conversion === "r" || conversion === "a") return pyElemRepr(val);
-    return pyStr(val);
+    return pyFormatValue(val, conversion, spec);
   });
 }
 
@@ -1191,6 +1737,7 @@ export function runProgram(
   let renderCalled = 0;
   let echoCalled = 0;
   let sleepCalled = 0;
+  let randomCalled = 0;
   const caught: Error[] = [];
   const ctxObj = new ProgramObject("ctx.obj", {
     request_id: context.requestId ?? null,
@@ -1199,6 +1746,11 @@ export function runProgram(
     profile: context.profile ?? null,
     auth: context.auth ?? null,
     enable_dual_stack: context.enableDualStack ?? false,
+    query: context.query ?? null,
+    output: context.output ?? "json",
+    debug: context.debug ?? false,
+    no_retry: context.noRetry ?? false,
+    max_attempts: context.maxAttempts ?? null,
     ...(context.regionOverride !== undefined && context.regionOverride !== null
       ? { region: context.regionOverride }
       : {}),
@@ -1415,6 +1967,10 @@ export function runProgram(
         obj.close();
         return null;
       }
+    } else if (obj instanceof ProgramJmespath) {
+      if (method === "search" && args.length === 1) {
+        return applyQuery(args[0], obj.expression);
+      }
     } else if (obj instanceof Uint8Array && method === "decode") {
       if (args.length === 0 || /^utf-?8$/i.test(String(args[0])))
         try {
@@ -1447,6 +2003,11 @@ export function runProgram(
         else if (Array.isArray(b)) found = b.some((x) => pyEq(x, a));
         else if (typeof b === "string" && typeof a === "string")
           found = b.includes(a);
+        else if (b === null || b === undefined)
+          throw new ProgramRaise(
+            "TypeError",
+            "argument of type 'NoneType' is not iterable",
+          );
         else throw new ProgramUnsupported("in");
         return op === "in" ? found : !found;
       }
@@ -1471,6 +2032,8 @@ export function runProgram(
         return JSON.stringify(a);
       case "dumpsSorted":
         return JSON.stringify(sortKeys(a));
+      case "dumpsOpts":
+        return pyDumpsOpts(a, b, args[2], args[3], args[4]);
       case "loads": {
         let text: string;
         if (typeof a === "string") text = a;
@@ -1515,6 +2078,80 @@ export function runProgram(
         return pyStr(a);
       case "int":
         return pyInt(args);
+      case "range":
+        return pyRange(args);
+      case "round":
+        return pyRound(args);
+      case "sorted": {
+        const items = [...iterate(a)];
+        const keyFnName = typeof b === "string" ? b : null;
+        const reverse = pyTruthy(args[2] ?? false);
+        const keyed = items.map((item, idx) => ({
+          item,
+          idx,
+          key: keyFnName ? fn(keyFnName, [item]) : item,
+        }));
+        keyed.sort((x, y) => {
+          if (pyEq(x.key, y.key)) return x.idx - y.idx;
+          const lt = compare("<", x.key, y.key);
+          return reverse ? (lt ? 1 : -1) : lt ? -1 : 1;
+        });
+        return keyed.map((k) => k.item);
+      }
+      case "dirname":
+        if (typeof a !== "string")
+          throw new ProgramUnsupported("os.path.dirname()");
+        return pyDirname(a);
+      case "randomChoice": {
+        const seq =
+          typeof a === "string" ? [...a] : Array.isArray(a) ? a : null;
+        if (!seq) throw new ProgramUnsupported("random.choice()");
+        if (seq.length === 0)
+          throw new ProgramRaise(
+            "IndexError",
+            "Cannot choose from an empty sequence",
+          );
+        const i = randomCalled++;
+        if (context.randomChoices && i < context.randomChoices.length) {
+          return context.randomChoices[i];
+        }
+        const picked = seq[Math.floor(Math.random() * seq.length)];
+        context.randomChoices?.push(picked);
+        return picked;
+      }
+      case "configFromFile": {
+        if (!context.configFromFile)
+          throw new ProgramUnsupported("oci.config.from_file()");
+        const fileLoc = a === null || a === undefined ? undefined : String(a);
+        const prof = b === null || b === undefined ? undefined : String(b);
+        return context.configFromFile(fileLoc, prof);
+      }
+      case "buildConfig": {
+        if (!context.buildConfig)
+          throw new ProgramUnsupported("cli_util.build_config()");
+        const cmdArgs =
+          a instanceof ProgramObject ? a.fields : isDict(a) ? a : null;
+        if (!cmdArgs)
+          throw new ProgramUnsupported("cli_util.build_config() arg");
+        return context.buildConfig(cmdArgs);
+      }
+      case "jmespathFromContext": {
+        const rawQuery = context.resolveQuery
+          ? context.resolveQuery()
+          : typeof ctxObj.fields.query === "string"
+            ? ctxObj.fields.query
+            : null;
+        if (!rawQuery) return null;
+        try {
+          applyQuery({}, rawQuery);
+        } catch (err) {
+          throw new ProgramRaise(
+            "Exception",
+            err instanceof Error ? err.message : String(err),
+          );
+        }
+        return new ProgramJmespath(rawQuery);
+      }
       case "bool":
         return pyTruthy(a);
       case "enumerate": {
@@ -1718,15 +2355,23 @@ export function runProgram(
           typeof ctxObj.fields.region === "string"
             ? ctxObj.fields.region
             : undefined;
+        const overrideEndpoint =
+          typeof ctxObj.fields.endpoint === "string"
+            ? ctxObj.fields.endpoint
+            : ctxObj.fields.endpoint === null
+              ? null
+              : undefined;
         const region = overrideRegion ?? context.region?.();
         ctxObj.fields.config = new ProgramObject(
           "config",
           region !== undefined ? { region } : {},
         );
-        return new ProgramObject(
-          `${String(a)}.${String(b)}`,
-          overrideRegion !== undefined ? { region: overrideRegion } : {},
-        );
+        return new ProgramObject(`${String(a)}.${String(b)}`, {
+          ...(overrideRegion !== undefined ? { region: overrideRegion } : {}),
+          ...(overrideEndpoint !== undefined
+            ? { endpoint: overrideEndpoint }
+            : {}),
+        });
       }
       case "namespace":
         if (
@@ -1737,9 +2382,72 @@ export function runProgram(
         if (context.namespace === undefined) throw new ProgramLookup();
         return context.namespace;
       case "confirm": {
+        const defaultVal = args.length >= 2 ? pyTruthy(args[1]) : false;
+        const abort = args.length >= 3 ? pyTruthy(args[2]) : false;
+        const promptSuffix = args.length >= 4 ? pyStr(args[3]) : ": ";
+        const showDefault = args.length >= 5 ? pyTruthy(args[4]) : true;
+        const toStderr = args.length >= 6 ? pyTruthy(args[5]) : false;
+        const i = asked++;
+        if (i < answers.length) {
+          const ans = Boolean(answers[i]);
+          if (!ans && abort) throw new ProgramAbort();
+          return ans;
+        }
+        throw new ProgramConfirm(
+          pyStr(a),
+          defaultVal,
+          abort,
+          promptSuffix,
+          showDefault,
+          toStderr,
+        );
+      }
+      case "prompt": {
+        const [
+          textArg,
+          hasDefaultArg,
+          defaultVal,
+          hideArg,
+          confirmArg,
+          rawTypeSpec,
+          suffixArg,
+          showDefaultArg,
+          errArg,
+        ] = args;
+        let typeSpec: PromptTypeSpec = null;
+        if (
+          rawTypeSpec === "str" ||
+          rawTypeSpec === "int" ||
+          rawTypeSpec === "float" ||
+          rawTypeSpec === "bool"
+        ) {
+          typeSpec = rawTypeSpec;
+        } else if (
+          Array.isArray(rawTypeSpec) &&
+          rawTypeSpec[0] === "choice" &&
+          Array.isArray(rawTypeSpec[1])
+        ) {
+          typeSpec = {
+            kind: "choice",
+            choices: rawTypeSpec[1].map(String),
+            caseSensitive: pyTruthy(rawTypeSpec[2] ?? true),
+          };
+        }
         const i = asked++;
         if (i < answers.length) return answers[i];
-        throw new ProgramConfirm(pyStr(a));
+        throw new ProgramPrompt(
+          pyStr(textArg),
+          pyTruthy(hasDefaultArg),
+          defaultVal,
+          pyTruthy(hideArg),
+          pyTruthy(confirmArg),
+          typeSpec,
+          suffixArg === undefined || suffixArg === null
+            ? ": "
+            : pyStr(suffixArg),
+          showDefaultArg === undefined ? true : pyTruthy(showDefaultArg),
+          pyTruthy(errArg),
+        );
       }
       case "roverSecret": {
         // rover_utils.prompt_for_secrets(secret_type)
@@ -1788,6 +2496,12 @@ export function runProgram(
               return isDict(a);
             case "bytes":
               return a instanceof Uint8Array;
+            case "file":
+              return a instanceof ProgramFile;
+            case "Exception":
+              return (
+                a instanceof ProgramRaise || a instanceof ProgramServiceError
+              );
             default:
               throw new ProgramUnsupported(`isinstance(${t})`);
           }
@@ -1934,8 +2648,133 @@ export function runProgram(
             `'NoneType' object has no attribute '${attr}'`,
           );
         }
+        if (obj instanceof ProgramModel) return obj.getAttr(attr);
         if (isDict(obj)) return modelAttr(obj, attr);
         throw new ProgramUnsupported(`attribute .${attr}`);
+      }
+      case "fstr":
+        return rest
+          .map((part) => {
+            const v = evaluate(part);
+            return typeof v === "string" ? v : pyStr(v);
+          })
+          .join("");
+      case "fmtVal": {
+        const val = evaluate(rest[0] as Expr);
+        const conv = rest[1] as string | null;
+        const rawSpec = rest[2] === null ? null : evaluate(rest[2] as Expr);
+        const spec =
+          rawSpec === null || rawSpec === undefined ? null : pyStr(rawSpec);
+        return pyFormatValue(val, conv, spec);
+      }
+      case "model": {
+        const moduleName = rest[0] as string;
+        const className = rest[1] as string;
+        const defaultPairs = rest[2] as [string, Expr][];
+        const kwPairs = rest[3] as [string, Expr][];
+        const starExpr = rest[4] as Expr | null;
+        const defaults: [string, unknown][] = defaultPairs.map(([k, v]) => [
+          k,
+          evaluate(v),
+        ]);
+        const modelDef = context.models?.[moduleName]?.[className];
+        const instance = new ProgramModel(
+          moduleName,
+          className,
+          modelDef,
+          defaults,
+        );
+        if (starExpr !== null) {
+          const star = evaluate(starExpr);
+          if (!isDict(star))
+            throw new ProgramUnsupported("model ** of a non-dict");
+          for (const [k, v] of Object.entries(star)) instance.setAttr(k, v);
+        }
+        for (const [k, vExpr] of kwPairs) {
+          instance.setAttr(k, evaluate(vExpr));
+        }
+        return instance;
+      }
+      case "callApi": {
+        const opIndex = rest[0] as number;
+        const clientObj = evaluate(rest[1] as Expr);
+        if (!(clientObj instanceof ProgramObject))
+          throw new ProgramUnsupported("call_api on non-client");
+        const pos = (rest[2] as Expr[]).map(evaluate);
+        const kwPairs = rest[3] as [string, Expr][];
+        const starExpr = rest[4] as Expr | null;
+        const kw: Dict = {};
+        if (starExpr !== null) {
+          const star = evaluate(starExpr);
+          if (!isDict(star))
+            throw new ProgramUnsupported("call_api ** of a non-dict");
+          Object.assign(kw, star);
+        }
+        for (const [k, expr] of kwPairs) {
+          if (k in kw)
+            throw new ProgramUnsupported(`duplicate call_api kwarg ${k}`);
+          kw[k] = evaluate(expr);
+        }
+        const argNames = [
+          "resource_path",
+          "method",
+          "path_params",
+          "query_params",
+          "header_params",
+          "body",
+          "response_type",
+          "enforce_content_headers",
+          "allow_control_chars",
+          "enable_strict_url_encoding",
+          "operation_name",
+          "api_reference_link",
+          "required_arguments",
+        ];
+        for (let idx = 0; idx < pos.length; idx++) {
+          const name = argNames[idx];
+          if (!name) throw new ProgramUnsupported("call_api too many args");
+          if (name in kw)
+            throw new ProgramUnsupported(`duplicate call_api arg ${name}`);
+          kw[name] = pos[idx];
+        }
+        if (
+          typeof kw.resource_path !== "string" ||
+          typeof kw.method !== "string"
+        )
+          throw new ProgramUnsupported("call_api resource_path/method");
+        const i = sdkCalled++;
+        const cached = context.sdkResults?.[i];
+        if (cached !== undefined) {
+          if (cached instanceof Error) throw cached;
+          cached.reset();
+          return cached;
+        }
+        const region =
+          typeof clientObj.fields.region === "string"
+            ? clientObj.fields.region
+            : undefined;
+        const endpoint =
+          "endpoint" in clientObj.fields
+            ? (clientObj.fields.endpoint as string | null)
+            : undefined;
+        throw new ProgramCallApi(
+          opIndex,
+          kw.resource_path,
+          kw.method,
+          isDict(kw.path_params) ? kw.path_params : null,
+          isDict(kw.query_params) || Array.isArray(kw.query_params)
+            ? (kw.query_params as Dict | [string, unknown][])
+            : null,
+          isDict(kw.header_params) ? kw.header_params : null,
+          kw.body,
+          typeof kw.response_type === "string" ? kw.response_type : null,
+          kw.enforce_content_headers === undefined
+            ? true
+            : pyTruthy(kw.enforce_content_headers),
+          typeof kw.operation_name === "string" ? kw.operation_name : null,
+          region,
+          endpoint,
+        );
       }
       case "invoke":
         recordInvoke(rest as unknown[]);
@@ -1999,7 +2838,11 @@ export function runProgram(
           typeof clientObj.fields.region === "string"
             ? clientObj.fields.region
             : undefined;
-        throw new ProgramSdkCall(opIndex, pos, kw, region);
+        const endpoint =
+          "endpoint" in clientObj.fields
+            ? (clientObj.fields.endpoint as string | null)
+            : undefined;
+        throw new ProgramSdkCall(opIndex, pos, kw, region, endpoint);
       }
       case "listCall": {
         const mode = rest[0] as "all" | "limit";
@@ -2043,6 +2886,10 @@ export function runProgram(
           typeof clientObj.fields.region === "string"
             ? clientObj.fields.region
             : undefined;
+        const endpoint =
+          "endpoint" in clientObj.fields
+            ? (clientObj.fields.endpoint as string | null)
+            : undefined;
         throw new ProgramListCall(
           mode,
           multipleKeys,
@@ -2051,6 +2898,7 @@ export function runProgram(
           region,
           recordLimit,
           pageSize,
+          endpoint,
         );
       }
       case "waitUntil": {
@@ -2199,6 +3047,7 @@ export function runProgram(
     }
     if (opName === "+" && typeof a === "string" && typeof b === "string")
       return a + b;
+    if (opName === "%" && typeof a === "string") return pyPercentFormat(a, b);
     if (opName === "*" && typeof a === "string" && typeof b === "number")
       return b <= 0 ? "" : a.repeat(Math.trunc(b));
     if (opName === "*" && typeof a === "number" && typeof b === "string")
@@ -2264,8 +3113,8 @@ export function runProgram(
           const obj = evaluate(rest[0] as Expr);
           const key = evaluate(rest[1] as Expr);
           const value = evaluate(rest[2] as Expr);
-          if (obj === ctxObj && typeof key === "string")
-            ctxObj.fields[key] = value;
+          if (obj instanceof ProgramObject && typeof key === "string")
+            obj.fields[key] = value;
           else if (isDict(obj) && typeof key === "string") {
             obj[key] = value;
             markMutated(obj);
@@ -2279,12 +3128,20 @@ export function runProgram(
           const obj = evaluate(rest[0] as Expr);
           const attr = rest[1] as string;
           const value = evaluate(rest[2] as Expr);
+          if (obj instanceof ProgramModel) {
+            obj.setAttr(attr, value);
+            break;
+          }
           if (obj instanceof ProgramResponse && attr === "data") {
             obj.data = value;
             obj.dataOverridden = true;
             break;
           }
           throw new ProgramUnsupported(String(rest[3] ?? `.${attr} =`));
+        }
+        case "setCtxAttr": {
+          evaluate(rest[1] as Expr);
+          break;
         }
         case "aug": {
           const opName = rest[0] as string;

@@ -2,11 +2,13 @@ import { describe, expect, test } from "bun:test";
 import type { TypedParam } from "../../src/core/convert.ts";
 import { bindSdkArgs, type OperationResult } from "../../src/core/operation.ts";
 import {
+  ProgramCallApi,
   ProgramEcho,
   ProgramExit,
   ProgramFile,
   ProgramHeaders,
   ProgramListCall,
+  ProgramPrompt,
   ProgramRaise,
   ProgramRender,
   ProgramRenderData,
@@ -2264,5 +2266,367 @@ print(json.dumps({"n_stmts": len(prog), "n_targets": len(targets)}))
     const parsed = JSON.parse(new TextDecoder().decode(res.stdout));
     expect(parsed.n_targets).toBe(1);
     expect(parsed.n_stmts).toBeGreaterThan(5);
+  });
+
+  test("ProgramModel constructs with defaults, sets/gets snake_case attrs, and serializes non-None wire keys", () => {
+    const models = {
+      database: {
+        CreateDbHomeWithDbSystemIdDetails: {
+          attributes: [
+            ["db_system_id", "str", "dbSystemId"],
+            ["source", "str", "source"],
+            ["display_name", "str", "displayName"],
+            ["database", "CreateDatabaseDetails", "database"],
+          ] as [string, string, string][],
+        },
+        CreateDatabaseDetails: {
+          attributes: [
+            ["db_name", "str", "dbName"],
+            ["admin_password", "str", "adminPassword"],
+          ] as [string, string, string][],
+        },
+      },
+    };
+    const program: Statement[] = [
+      [
+        "let",
+        "db",
+        [
+          "model",
+          "database",
+          "CreateDatabaseDetails",
+          [],
+          [["db_name", "ORCL"]],
+          null,
+        ],
+      ],
+      [
+        "setAttr",
+        ["var", "db"],
+        "admin_password",
+        "Secret123",
+        "db.admin_password = 'Secret123'",
+      ],
+      [
+        "let",
+        "home",
+        [
+          "model",
+          "database",
+          "CreateDbHomeWithDbSystemIdDetails",
+          [["source", "NONE"]],
+          [],
+          null,
+        ],
+      ],
+      ["setAttr", ["var", "home"], "db_system_id", "ocid1.dbsys..1", ""],
+      ["setAttr", ["var", "home"], "database", ["var", "db"], ""],
+      [
+        "invoke",
+        [
+          ["source", ["attr", "source", ["var", "home"]]],
+          ["missing", ["attr", "display_name", ["var", "home"]]],
+          ["wire", ["fn", "loads", ["fn", "dumps", ["var", "home"]]]],
+        ],
+        null,
+      ],
+    ];
+    const out = runProgram(program, {}, [], parse, [], undefined, { models });
+    expect(out.kwargs?.source).toBe("NONE");
+    expect(out.kwargs?.missing).toBeUndefined(); // None dropped from invoke kwargs
+    expect(out.kwargs?.wire).toEqual({
+      dbSystemId: "ocid1.dbsys..1",
+      source: "NONE",
+      database: {
+        dbName: "ORCL",
+        adminPassword: "Secret123",
+      },
+    });
+  });
+
+  test("f-strings, format specs, % formatting, range, round, sorted, dirname, json.dumps opts, random.choice replay", () => {
+    const program: Statement[] = [
+      [
+        "let",
+        "f1",
+        [
+          "fstr",
+          "hi ",
+          ["fmtVal", "bob", null, ">5s"],
+          " ",
+          ["fmtVal", 42, null, "04d"],
+          " ",
+          ["fmtVal", 3.14159, null, ".2f"],
+        ],
+      ],
+      ["let", "f2", ["call", "format", "| {:^6s} | {:>4d} |", "ok", 7]],
+      ["let", "f3", ["bin", "%", "%3.1f %s", ["list", 2.5, "Mb"]]],
+      ["let", "rng", ["fn", "range", 1, 6, 2]],
+      ["let", "r1", ["fn", "round", 2.5]],
+      ["let", "r2", ["fn", "round", 3.5]],
+      ["let", "r3", ["fn", "round", 3.14159, 2]],
+      ["let", "srt", ["fn", "sorted", ["list", 3, 1, 2], null, true]],
+      ["let", "d1", ["fn", "dirname", "/a/b/c.txt"]],
+      ["let", "d2", ["fn", "dirname", "plain.txt"]],
+      [
+        "let",
+        "j1",
+        ["fn", "dumpsOpts", ["dict", ["b", 1], ["a", 2]], 2, true, null, true],
+      ],
+      [
+        "let",
+        "j2",
+        [
+          "fn",
+          "dumpsOpts",
+          ["dict", ["b", 1], ["a", 2]],
+          null,
+          true,
+          ["list", ",", ":"],
+          true,
+        ],
+      ],
+      ["let", "rc1", ["fn", "randomChoice", "abcdef"]],
+      [
+        "invoke",
+        [
+          ["f1", ["var", "f1"]],
+          ["f2", ["var", "f2"]],
+          ["f3", ["var", "f3"]],
+          ["rng", ["var", "rng"]],
+          ["r1", ["var", "r1"]],
+          ["r2", ["var", "r2"]],
+          ["r3", ["var", "r3"]],
+          ["srt", ["var", "srt"]],
+          ["d1", ["var", "d1"]],
+          ["d2", ["var", "d2"]],
+          ["j1", ["var", "j1"]],
+          ["j2", ["var", "j2"]],
+          ["rc1", ["var", "rc1"]],
+        ],
+        null,
+      ],
+    ];
+    const randomChoices: unknown[] = [];
+    const out1 = runProgram(program, {}, [], parse, [], undefined, {
+      randomChoices,
+    });
+    const out2 = runProgram(program, {}, [], parse, [], undefined, {
+      randomChoices,
+    });
+    expect(out1.kwargs?.f1).toBe("hi   bob 0042 3.14");
+    expect(out1.kwargs?.f2).toBe("|   ok   |    7 |");
+    expect(out1.kwargs?.f3).toBe("2.5 Mb");
+    expect(out1.kwargs?.rng).toEqual([1, 3, 5]);
+    expect(out1.kwargs?.r1).toBe(2); // Python banker's rounding
+    expect(out1.kwargs?.r2).toBe(4);
+    expect(out1.kwargs?.r3).toBe(3.14);
+    expect(out1.kwargs?.srt).toEqual([3, 2, 1]);
+    expect(out1.kwargs?.d1).toBe("/a/b");
+    expect(out1.kwargs?.d2).toBe("");
+    expect(out1.kwargs?.j1).toBe('{\n  "a": 2,\n  "b": 1\n}');
+    expect(out1.kwargs?.j2).toBe('{"a":2,"b":1}');
+    expect(out1.kwargs?.rc1).toBe(out2.kwargs?.rc1);
+  });
+
+  test("click.prompt, oci.config.from_file, cli_util.build_config, jmespath, and base_client.call_api", () => {
+    const program: Statement[] = [
+      ["let", "cfg", ["fn", "configFromFile", "~/.oci/config", "DEFAULT"]],
+      ["let", "bcfg", ["fn", "buildConfig", ["fn", "ctxObj"]]],
+      ["let", "jp", ["fn", "jmespathFromContext"]],
+      [
+        "let",
+        "choice",
+        [
+          "fn",
+          "prompt",
+          "Enter number",
+          false,
+          null,
+          false,
+          false,
+          "int",
+          ": ",
+          true,
+          false,
+        ],
+      ],
+      ["setCtxAttr", "endpoint", null],
+      ["set", ["fn", "ctxObj"], "endpoint", null],
+      [
+        "let",
+        "client",
+        ["fn", "client", "database_tools_runtime", "database_tools_runtime"],
+      ],
+      [
+        "let",
+        "res",
+        [
+          "callApi",
+          0,
+          ["var", "client"],
+          [],
+          [
+            ["resource_path", "/x"],
+            ["method", "POST"],
+            ["body", ["dict", ["k", ["var", "choice"]]]],
+            ["response_type", "object"],
+          ],
+          null,
+        ],
+      ],
+      [
+        "invoke",
+        [
+          ["tenancy", ["item", ["var", "cfg"], "tenancy"]],
+          ["region", ["item", ["var", "bcfg"], "region"]],
+          [
+            "picked",
+            ["call", "search", ["var", "jp"], ["attr", "data", ["var", "res"]]],
+          ],
+        ],
+        null,
+      ],
+    ];
+    const ctx = {
+      configFromFile: () => ({ tenancy: "ocid1.tenancy..t1" }),
+      buildConfig: () => ({ region: "us-ashburn-1" }),
+      resolveQuery: () => "items[0].name",
+      endpoint: "https://override.example",
+    };
+    let thrown: unknown;
+    try {
+      runProgram(program, {}, [], parse, [], undefined, ctx);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(ProgramPrompt);
+    expect((thrown as ProgramPrompt).typeSpec).toBe("int");
+
+    let apiThrown: unknown;
+    try {
+      runProgram(program, {}, [], parse, [2], undefined, ctx);
+    } catch (e) {
+      apiThrown = e;
+    }
+    expect(apiThrown).toBeInstanceOf(ProgramCallApi);
+    const api = apiThrown as ProgramCallApi;
+    expect(api.resourcePath).toBe("/x");
+    expect(api.method).toBe("POST");
+    expect(api.body).toEqual({ k: 2 });
+    expect(api.endpoint).toBeNull();
+
+    const resp = new ProgramResponse(
+      {
+        operation: {
+          client: "database_tools_runtime.database_tools_runtime",
+          method: "exec",
+          http: "POST",
+          path: "/x",
+          queryParams: {},
+        },
+        url: new URL("https://example.invalid/x"),
+        response: new Response(JSON.stringify({ items: [{ name: "alpha" }] }), {
+          status: 200,
+        }),
+        raw: JSON.stringify({ items: [{ name: "alpha" }] }),
+        allPages: false,
+        pageItems: [],
+      },
+      { items: [{ name: "alpha" }] },
+    );
+    const out = runProgram(program, {}, [], parse, [2], undefined, {
+      ...ctx,
+      sdkResults: [resp],
+    });
+    expect(out.kwargs).toEqual({
+      tenancy: "ocid1.tenancy..t1",
+      region: "us-ashburn-1",
+      picked: "alpha",
+    });
+  });
+
+  test("program.py compiles Batch 7 features: models, constants, f-strings, builtins, prompt, config, jmespath, call_api", () => {
+    const py = `
+import ast, json, sys, types
+sys.path.insert(0, "tools/extract")
+import program
+
+class FakeModel:
+    __module__ = "oci.database.models.fake_model"
+    CONST_VAL = "ZIP_UPLOAD"
+    def __init__(self, **kwargs):
+        self.swagger_types = {"source": "str", "db_name": "str"}
+        self.attribute_map = {"source": "source", "db_name": "dbName"}
+        self.source = kwargs.get("source", "NONE")
+        self.db_name = kwargs.get("db_name", None)
+
+oci_mod = types.ModuleType("oci")
+oci_db = types.ModuleType("oci.database")
+oci_db_models = types.ModuleType("oci.database.models")
+oci_db_models.FakeModel = FakeModel
+oci_db.models = oci_db_models
+oci_mod.database = oci_db
+
+oci_cfg = types.ModuleType("oci.config")
+def from_file(file_location=None, profile_name=None): pass
+from_file.__module__ = "oci.config"
+oci_cfg.from_file = from_file
+oci_mod.config = oci_cfg
+
+cli_util = types.ModuleType("oci_cli.cli_util")
+def build_config(x): pass
+build_config.__module__ = "oci_cli.cli_util"
+def get_jmespath_expression_from_context(ctx): pass
+get_jmespath_expression_from_context.__module__ = "oci_cli.cli_util"
+cli_util.build_config = build_config
+cli_util.get_jmespath_expression_from_context = get_jmespath_expression_from_context
+
+mod = types.ModuleType("services.demo.cli_extended")
+mod.oci = oci_mod
+mod.cli_util = cli_util
+mod.string = __import__("string")
+
+src = """
+def batch7_wrapper(ctx, **kwargs):
+    m = oci.database.models.FakeModel(db_name="ORCL")
+    m.source = oci.database.models.FakeModel.CONST_VAL
+    cfg = oci.config.from_file(file_location=ctx.obj['config_file'], profile_name=ctx.obj['profile'])
+    bcfg = cli_util.build_config(ctx.obj)
+    jp = cli_util.get_jmespath_expression_from_context(ctx)
+    n = click.prompt("Enter", type=int)
+    s = f"val={n:02d} {round(1.234, 1)}"
+    xs = [random.choice(string.ascii_lowercase) for _ in range(4)]
+    ys = sorted(xs, reverse=True)
+    d = os.path.dirname("/a/b/c")
+    j = json.dumps({"s": s, "d": d}, indent=2)
+    ctx.endpoint = None
+    client = cli_util.build_client("database", "database", ctx)
+    res = client.base_client.call_api(resource_path="/x", method="POST", body=m, response_type="object")
+    if jp:
+        x = jp.search(res.data)
+    cli_util.render_response(res, ctx)
+"""
+exec(compile(src, "<demo>", "exec"), mod.__dict__)
+mod.batch7_wrapper.__module__ = mod.__name__
+tree = ast.parse(src)
+ast_map = {mod.__dict__[n.name]: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+orig_fn_ast = program._fn_ast
+program._fn_ast = lambda fn: ast_map.get(fn) or orig_fn_ast(fn)
+orig_import = program.importlib.import_module
+program.importlib.import_module = lambda name: mod if name == mod.__name__ else orig_import(name)
+
+prog, targets, sdk_calls = program.compile_wrapper(mod.batch7_wrapper)
+assert prog is not None, program.why_unsupported(mod.batch7_wrapper)
+assert sdk_calls == [("database", "database", "__call_api__")], sdk_calls
+print(json.dumps({"ok": True, "stmts": len(prog)}))
+`;
+    const res = Bun.spawnSync(["python3", "-c", py], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    expect(res.exitCode, new TextDecoder().decode(res.stderr)).toBe(0);
+    const parsed = JSON.parse(new TextDecoder().decode(res.stdout));
+    expect(parsed.ok).toBe(true);
   });
 });

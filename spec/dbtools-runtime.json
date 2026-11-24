@@ -1404,6 +1404,725 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["loadContextDefaults"],
+          [
+            "if",
+            [
+              "or",
+              ["call", "get", ["fn", "ctxObj"], "generate_param_json_input"],
+              [
+                "call",
+                "get",
+                ["fn", "ctxObj"],
+                "generate_full_command_json_input"
+              ]
+            ],
+            [["return", null]],
+            []
+          ],
+          [
+            "let",
+            "connection_id",
+            ["item", ["var", "kwargs"], "connection_id"]
+          ],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "get", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "get", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "get", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "request_output",
+            ["call", "pop", ["var", "kwargs"], "request_output", null]
+          ],
+          [
+            "let",
+            "output_time_of_deletion",
+            ["call", "pop", ["var", "kwargs"], "output_time_of_deletion", null]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "request_output"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "output_parameterconflict",
+                ["fn", "parse", "request_output", ["var", "request_output"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "request_output"], null],
+              ["cmp", "isnot", ["var", "output_time_of_deletion"], null]
+            ],
+            [
+              [
+                "set",
+                ["item", ["var", "kwargs"], "output_parameterconflict"],
+                "timeOfDeletion",
+                ["var", "output_time_of_deletion"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "parsed_input",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_set_execute_sql_response_format_defaults.input_details",
+                  [
+                    "fn",
+                    "parse",
+                    "request_input",
+                    ["item", ["var", "kwargs"], "request_input"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "not",
+                    [
+                      "fn",
+                      "isinstance",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.input_details"
+                      ],
+                      "dict"
+                    ]
+                  ],
+                  [
+                    [
+                      "return",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.input_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "let",
+                  "_set_execute_sql_response_format_defaults.response_format",
+                  [
+                    "call",
+                    "get",
+                    [
+                      "var",
+                      "_set_execute_sql_response_format_defaults.input_details"
+                    ],
+                    "responseFormat"
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "not",
+                    [
+                      "fn",
+                      "isinstance",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.response_format"
+                      ],
+                      "dict"
+                    ]
+                  ],
+                  [
+                    [
+                      "return",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.input_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "for",
+                  "_set_execute_sql_response_format_defaults.field_name",
+                  [
+                    "list",
+                    "resultSetMetaData",
+                    "statementInformation",
+                    "statementText",
+                    "binds",
+                    "result",
+                    "response"
+                  ],
+                  [
+                    [
+                      "do",
+                      [
+                        "call",
+                        "setdefault",
+                        [
+                          "var",
+                          "_set_execute_sql_response_format_defaults.response_format"
+                        ],
+                        [
+                          "var",
+                          "_set_execute_sql_response_format_defaults.field_name"
+                        ],
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "return",
+                  [
+                    "var",
+                    "_set_execute_sql_response_format_defaults.input_details"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["let", "kwargs_for_call", ["dict"]],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "if_match"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs_for_call"],
+                "if_match",
+                ["call", "get", ["var", "kwargs"], "if_match"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs_for_call"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "details",
+            [
+              "dict",
+              ["type", "ASYNCHRONOUS"],
+              ["input", ["var", "parsed_input"]]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "timeout_in_seconds"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "timeoutInSeconds",
+                ["call", "get", ["var", "kwargs"], "timeout_in_seconds"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "output_parameterconflict"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "output",
+                ["call", "get", ["var", "kwargs"], "output_parameterconflict"]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "database_tools_runtime", "database_tools_runtime"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.client",
+                  ["var", "client"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.connection_id",
+                  ["var", "connection_id"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.details",
+                  ["var", "details"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.kwargs_for_call",
+                  ["var", "kwargs_for_call"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.operation_name",
+                  "execute_sql_database_tools_connection"
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.path",
+                  [
+                    "format",
+                    "/databaseToolsConnections/{databaseToolsConnectionId}/actions/executeSql",
+                    [],
+                    [
+                      [
+                        "databaseToolsConnectionId",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.connection_id"
+                        ]
+                      ]
+                    ],
+                    null
+                  ]
+                ],
+                [
+                  "return",
+                  [
+                    "callApi",
+                    0,
+                    [
+                      "var",
+                      "_execute_sql_database_tools_connection_without_response_model.client"
+                    ],
+                    [],
+                    [
+                      [
+                        "resource_path",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.path"
+                        ]
+                      ],
+                      ["method", "POST"],
+                      [
+                        "header_params",
+                        [
+                          "dict",
+                          ["accept", "application/json"],
+                          ["content-type", "application/json"],
+                          [
+                            "opc-request-id",
+                            [
+                              "call",
+                              "get",
+                              [
+                                "var",
+                                "_execute_sql_database_tools_connection_without_response_model.kwargs_for_call"
+                              ],
+                              "opc_request_id"
+                            ]
+                          ],
+                          [
+                            "if-match",
+                            [
+                              "call",
+                              "get",
+                              [
+                                "var",
+                                "_execute_sql_database_tools_connection_without_response_model.kwargs_for_call"
+                              ],
+                              "if_match"
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "body",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.details"
+                        ]
+                      ],
+                      ["response_type", "object"],
+                      ["allow_control_chars", false],
+                      [
+                        "operation_name",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.operation_name"
+                        ]
+                      ],
+                      [
+                        "required_arguments",
+                        ["list", "databaseToolsConnectionId"]
+                      ],
+                      ["enforce_content_headers", true]
+                    ],
+                    null
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.client",
+            ["var", "client"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.result",
+            ["var", "result"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.wait_for_state",
+            ["var", "wait_for_state"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.max_wait_seconds",
+            ["var", "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.wait_interval_seconds",
+            ["var", "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.result",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.client",
+                  ["var", "_render_async_execute_sql_response.client"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.result",
+                  ["var", "_render_async_execute_sql_response.result"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.wait_for_state",
+                  ["var", "_render_async_execute_sql_response.wait_for_state"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.max_wait_seconds",
+                  ["var", "_render_async_execute_sql_response.max_wait_seconds"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.wait_interval_seconds",
+                  [
+                    "var",
+                    "_render_async_execute_sql_response.wait_interval_seconds"
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "not",
+                    ["var", "_wait_on_work_request_if_needed.wait_for_state"]
+                  ],
+                  [
+                    [
+                      "return",
+                      ["var", "_wait_on_work_request_if_needed.result"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "tryMulti",
+                  [
+                    [
+                      "let",
+                      "_wait_on_work_request_if_needed.wait_period_kwargs",
+                      ["dict"]
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "isnot",
+                        [
+                          "var",
+                          "_wait_on_work_request_if_needed.max_wait_seconds"
+                        ],
+                        null
+                      ],
+                      [
+                        [
+                          "set",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_period_kwargs"
+                          ],
+                          "max_wait_seconds",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.max_wait_seconds"
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "isnot",
+                        [
+                          "var",
+                          "_wait_on_work_request_if_needed.wait_interval_seconds"
+                        ],
+                        null
+                      ],
+                      [
+                        [
+                          "set",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_period_kwargs"
+                          ],
+                          "max_interval_seconds",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_interval_seconds"
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "notin",
+                        "opc-work-request-id",
+                        [
+                          "attr",
+                          "headers",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ]
+                      ],
+                      [
+                        [
+                          "do",
+                          [
+                            "fn",
+                            "echo",
+                            "Encountered error while waiting for work request to enter the specified state. Outputting last known resource state",
+                            null,
+                            true,
+                            false
+                          ]
+                        ],
+                        [
+                          "render",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ],
+                        [
+                          "return",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "do",
+                      [
+                        "fn",
+                        "echo",
+                        [
+                          "call",
+                          "format",
+                          "Action completed. Waiting until the work request has entered state: {}",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_for_state"
+                          ]
+                        ],
+                        ["fn", "stderr"],
+                        true,
+                        false
+                      ]
+                    ],
+                    [
+                      "return",
+                      [
+                        "waitUntil",
+                        [
+                          ["var", "_wait_on_work_request_if_needed.client"],
+                          [
+                            "sdk",
+                            1,
+                            ["var", "_wait_on_work_request_if_needed.client"],
+                            [
+                              [
+                                "item",
+                                [
+                                  "attr",
+                                  "headers",
+                                  [
+                                    "var",
+                                    "_wait_on_work_request_if_needed.result"
+                                  ]
+                                ],
+                                "opc-work-request-id"
+                              ]
+                            ],
+                            [],
+                            null
+                          ],
+                          "status",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_for_state"
+                          ]
+                        ],
+                        [],
+                        [
+                          "var",
+                          "_wait_on_work_request_if_needed.wait_period_kwargs"
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "MaximumWaitTimeExceeded",
+                      null,
+                      [
+                        [
+                          "do",
+                          [
+                            "fn",
+                            "echo",
+                            "Failed to wait until the work request entered the specified state. Outputting last known resource state",
+                            ["fn", "stderr"],
+                            true,
+                            false
+                          ]
+                        ],
+                        [
+                          "render",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ],
+                        ["exit", 2]
+                      ]
+                    ],
+                    [
+                      "Exception",
+                      null,
+                      [
+                        [
+                          "do",
+                          [
+                            "fn",
+                            "echo",
+                            "Encountered error while waiting for work request to enter the specified state. Outputting last known resource state",
+                            ["fn", "stderr"],
+                            true,
+                            false
+                          ]
+                        ],
+                        [
+                          "render",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ],
+                        ["reraise"]
+                      ]
+                    ]
+                  ]
+                ],
+                ["return", ["var", "_wait_on_work_request_if_needed.result"]]
+              ]
+            ]
+          ],
+          ["render", ["var", "_render_async_execute_sql_response.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database_tools_runtime.database_tools_runtime",
+          "method": "__call_api__",
+          "http": "",
+          "path": "",
+          "queryParams": {}
+        },
+        {
+          "client": "database_tools_runtime.database_tools_runtime",
+          "method": "get_work_request",
+          "http": "GET",
+          "path": "/workRequests/{workRequestId}",
+          "positionalArgs": ["work_request_id"],
+          "pathParams": {
+            "workRequestId": "work_request_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "WorkRequest"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -1676,6 +2395,649 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["loadContextDefaults"],
+          [
+            "if",
+            [
+              "or",
+              ["call", "get", ["fn", "ctxObj"], "generate_param_json_input"],
+              [
+                "call",
+                "get",
+                ["fn", "ctxObj"],
+                "generate_full_command_json_input"
+              ]
+            ],
+            [["return", null]],
+            []
+          ],
+          [
+            "let",
+            "connection_id",
+            ["item", ["var", "kwargs"], "connection_id"]
+          ],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "get", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "get", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "get", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "parsed_input",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_set_execute_sql_response_format_defaults.input_details",
+                  [
+                    "fn",
+                    "parse",
+                    "request_input",
+                    ["item", ["var", "kwargs"], "request_input"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "not",
+                    [
+                      "fn",
+                      "isinstance",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.input_details"
+                      ],
+                      "dict"
+                    ]
+                  ],
+                  [
+                    [
+                      "return",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.input_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "let",
+                  "_set_execute_sql_response_format_defaults.response_format",
+                  [
+                    "call",
+                    "get",
+                    [
+                      "var",
+                      "_set_execute_sql_response_format_defaults.input_details"
+                    ],
+                    "responseFormat"
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "not",
+                    [
+                      "fn",
+                      "isinstance",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.response_format"
+                      ],
+                      "dict"
+                    ]
+                  ],
+                  [
+                    [
+                      "return",
+                      [
+                        "var",
+                        "_set_execute_sql_response_format_defaults.input_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "for",
+                  "_set_execute_sql_response_format_defaults.field_name",
+                  [
+                    "list",
+                    "resultSetMetaData",
+                    "statementInformation",
+                    "statementText",
+                    "binds",
+                    "result",
+                    "response"
+                  ],
+                  [
+                    [
+                      "do",
+                      [
+                        "call",
+                        "setdefault",
+                        [
+                          "var",
+                          "_set_execute_sql_response_format_defaults.response_format"
+                        ],
+                        [
+                          "var",
+                          "_set_execute_sql_response_format_defaults.field_name"
+                        ],
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "return",
+                  [
+                    "var",
+                    "_set_execute_sql_response_format_defaults.input_details"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["let", "kwargs_for_call", ["dict"]],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "if_match"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs_for_call"],
+                "if_match",
+                ["call", "get", ["var", "kwargs"], "if_match"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs_for_call"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "details",
+            [
+              "dict",
+              ["type", "SYNCHRONOUS"],
+              ["input", ["var", "parsed_input"]]
+            ]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "database_tools_runtime", "database_tools_runtime"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.client",
+                  ["var", "client"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.connection_id",
+                  ["var", "connection_id"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.details",
+                  ["var", "details"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.kwargs_for_call",
+                  ["var", "kwargs_for_call"]
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.operation_name",
+                  "execute_sql_database_tools_connection"
+                ],
+                [
+                  "let",
+                  "_execute_sql_database_tools_connection_without_response_model.path",
+                  [
+                    "format",
+                    "/databaseToolsConnections/{databaseToolsConnectionId}/actions/executeSql",
+                    [],
+                    [
+                      [
+                        "databaseToolsConnectionId",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.connection_id"
+                        ]
+                      ]
+                    ],
+                    null
+                  ]
+                ],
+                [
+                  "return",
+                  [
+                    "callApi",
+                    0,
+                    [
+                      "var",
+                      "_execute_sql_database_tools_connection_without_response_model.client"
+                    ],
+                    [],
+                    [
+                      [
+                        "resource_path",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.path"
+                        ]
+                      ],
+                      ["method", "POST"],
+                      [
+                        "header_params",
+                        [
+                          "dict",
+                          ["accept", "application/json"],
+                          ["content-type", "application/json"],
+                          [
+                            "opc-request-id",
+                            [
+                              "call",
+                              "get",
+                              [
+                                "var",
+                                "_execute_sql_database_tools_connection_without_response_model.kwargs_for_call"
+                              ],
+                              "opc_request_id"
+                            ]
+                          ],
+                          [
+                            "if-match",
+                            [
+                              "call",
+                              "get",
+                              [
+                                "var",
+                                "_execute_sql_database_tools_connection_without_response_model.kwargs_for_call"
+                              ],
+                              "if_match"
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "body",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.details"
+                        ]
+                      ],
+                      ["response_type", "object"],
+                      ["allow_control_chars", false],
+                      [
+                        "operation_name",
+                        [
+                          "var",
+                          "_execute_sql_database_tools_connection_without_response_model.operation_name"
+                        ]
+                      ],
+                      [
+                        "required_arguments",
+                        ["list", "databaseToolsConnectionId"]
+                      ],
+                      ["enforce_content_headers", true]
+                    ],
+                    null
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.client",
+            ["var", "client"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.result",
+            ["var", "result"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.wait_for_state",
+            ["var", "wait_for_state"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.max_wait_seconds",
+            ["var", "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.wait_interval_seconds",
+            ["var", "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "_render_async_execute_sql_response.result",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.client",
+                  ["var", "_render_async_execute_sql_response.client"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.result",
+                  ["var", "_render_async_execute_sql_response.result"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.wait_for_state",
+                  ["var", "_render_async_execute_sql_response.wait_for_state"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.max_wait_seconds",
+                  ["var", "_render_async_execute_sql_response.max_wait_seconds"]
+                ],
+                [
+                  "let",
+                  "_wait_on_work_request_if_needed.wait_interval_seconds",
+                  [
+                    "var",
+                    "_render_async_execute_sql_response.wait_interval_seconds"
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "not",
+                    ["var", "_wait_on_work_request_if_needed.wait_for_state"]
+                  ],
+                  [
+                    [
+                      "return",
+                      ["var", "_wait_on_work_request_if_needed.result"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "tryMulti",
+                  [
+                    [
+                      "let",
+                      "_wait_on_work_request_if_needed.wait_period_kwargs",
+                      ["dict"]
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "isnot",
+                        [
+                          "var",
+                          "_wait_on_work_request_if_needed.max_wait_seconds"
+                        ],
+                        null
+                      ],
+                      [
+                        [
+                          "set",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_period_kwargs"
+                          ],
+                          "max_wait_seconds",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.max_wait_seconds"
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "isnot",
+                        [
+                          "var",
+                          "_wait_on_work_request_if_needed.wait_interval_seconds"
+                        ],
+                        null
+                      ],
+                      [
+                        [
+                          "set",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_period_kwargs"
+                          ],
+                          "max_interval_seconds",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_interval_seconds"
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "notin",
+                        "opc-work-request-id",
+                        [
+                          "attr",
+                          "headers",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ]
+                      ],
+                      [
+                        [
+                          "do",
+                          [
+                            "fn",
+                            "echo",
+                            "Encountered error while waiting for work request to enter the specified state. Outputting last known resource state",
+                            null,
+                            true,
+                            false
+                          ]
+                        ],
+                        [
+                          "render",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ],
+                        [
+                          "return",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ]
+                      ],
+                      []
+                    ],
+                    [
+                      "do",
+                      [
+                        "fn",
+                        "echo",
+                        [
+                          "call",
+                          "format",
+                          "Action completed. Waiting until the work request has entered state: {}",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_for_state"
+                          ]
+                        ],
+                        ["fn", "stderr"],
+                        true,
+                        false
+                      ]
+                    ],
+                    [
+                      "return",
+                      [
+                        "waitUntil",
+                        [
+                          ["var", "_wait_on_work_request_if_needed.client"],
+                          [
+                            "sdk",
+                            1,
+                            ["var", "_wait_on_work_request_if_needed.client"],
+                            [
+                              [
+                                "item",
+                                [
+                                  "attr",
+                                  "headers",
+                                  [
+                                    "var",
+                                    "_wait_on_work_request_if_needed.result"
+                                  ]
+                                ],
+                                "opc-work-request-id"
+                              ]
+                            ],
+                            [],
+                            null
+                          ],
+                          "status",
+                          [
+                            "var",
+                            "_wait_on_work_request_if_needed.wait_for_state"
+                          ]
+                        ],
+                        [],
+                        [
+                          "var",
+                          "_wait_on_work_request_if_needed.wait_period_kwargs"
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "MaximumWaitTimeExceeded",
+                      null,
+                      [
+                        [
+                          "do",
+                          [
+                            "fn",
+                            "echo",
+                            "Failed to wait until the work request entered the specified state. Outputting last known resource state",
+                            ["fn", "stderr"],
+                            true,
+                            false
+                          ]
+                        ],
+                        [
+                          "render",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ],
+                        ["exit", 2]
+                      ]
+                    ],
+                    [
+                      "Exception",
+                      null,
+                      [
+                        [
+                          "do",
+                          [
+                            "fn",
+                            "echo",
+                            "Encountered error while waiting for work request to enter the specified state. Outputting last known resource state",
+                            ["fn", "stderr"],
+                            true,
+                            false
+                          ]
+                        ],
+                        [
+                          "render",
+                          ["var", "_wait_on_work_request_if_needed.result"]
+                        ],
+                        ["reraise"]
+                      ]
+                    ]
+                  ]
+                ],
+                ["return", ["var", "_wait_on_work_request_if_needed.result"]]
+              ]
+            ]
+          ],
+          ["render", ["var", "_render_async_execute_sql_response.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database_tools_runtime.database_tools_runtime",
+          "method": "__call_api__",
+          "http": "",
+          "path": "",
+          "queryParams": {}
+        },
+        {
+          "client": "database_tools_runtime.database_tools_runtime",
+          "method": "get_work_request",
+          "http": "GET",
+          "path": "/workRequests/{workRequestId}",
+          "positionalArgs": ["work_request_id"],
+          "pathParams": {
+            "workRequestId": "work_request_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "WorkRequest"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5079,11 +6441,11 @@
           ],
           [
             "--http-port INTEGER",
-            "Specifies the HTTP listen port. 0 disables HTTP. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024\u201365535) is recommended."
+            "Specifies the HTTP listen port. 0 disables HTTP. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024–65535) is recommended."
           ],
           [
             "--https-port INTEGER",
-            "Specifies the HTTPS listen port. 0 disables HTTPS. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024\u201365535) is recommended. ORDS will use a self-signed certificate if a certificate bundle is not provided."
+            "Specifies the HTTPS listen port. 0 disables HTTPS. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024–65535) is recommended. ORDS will use a self-signed certificate if a certificate bundle is not provided."
           ],
           [
             "--certificate-bundle COMPLEX TYPE",
@@ -5542,7 +6904,7 @@
           ],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information. [required]"
+            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information. [required]"
           ],
           [
             "--pool-route-value TEXT",
@@ -6819,7 +8181,7 @@
           ["--pool-key TEXT", "The key of the pool config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information."
+            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information."
           ],
           [
             "--pool-route-value TEXT",
@@ -7438,7 +8800,7 @@
           ["--pool-key TEXT", "The key of the pool config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information. [required]"
+            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information. [required]"
           ],
           [
             "--content TEXT",
@@ -8484,7 +9846,7 @@
           ["--api-spec-key TEXT", "The key of the API spec config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information."
+            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information."
           ],
           [
             "--content TEXT",
@@ -8766,7 +10128,7 @@
           ["--pool-key TEXT", "The key of the pool config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information. [required]"
+            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information. [required]"
           ],
           [
             "--database-object-name TEXT",
@@ -10641,7 +12003,7 @@
           ],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information."
+            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information."
           ],
           ["--database-object-name TEXT", "The name of the database object."],
           [

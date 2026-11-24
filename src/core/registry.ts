@@ -367,7 +367,10 @@ function programmed(command: Command): boolean {
 const SDK_METHODS = new Set(["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"]);
 
 function sdkOperationSupported(operation: Command["operation"]): boolean {
-  return Boolean(operation && SDK_METHODS.has(operation.http));
+  return Boolean(
+    operation &&
+    (SDK_METHODS.has(operation.http) || operation.method === "__call_api__"),
+  );
 }
 
 /**

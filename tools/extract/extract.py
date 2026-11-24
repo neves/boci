@@ -249,6 +249,16 @@ def flatten(cmd: click.Command, path: list, groups: dict, commands: dict, ctx: c
         commands[key] = entry
 
 
+def _program_model_refs(node, out: set) -> None:
+    if not isinstance(node, list) or not node:
+        return
+    if node[0] == "model" and len(node) >= 3 and isinstance(node[1], str) and isinstance(node[2], str):
+        out.add((node[1], node[2]))
+    for child in node:
+        if isinstance(child, list):
+            _program_model_refs(child, out)
+
+
 def wrapper_program(callback, client_map) -> dict | None:
     """A Tier B or Tier C wrapper compiled to a program over kwargs, with the generated
     commands it invokes and/or direct SDK operations it calls. For ctx.invoke targets,
@@ -267,9 +277,19 @@ def wrapper_program(callback, client_map) -> dict | None:
 
             dynamic_loader.load_service_dir(spec_name)
         cls = client_map.get(spec_name, {}).get(service_name)
+        if method == "__call_api__":
+            if cls is None:
+                return None
+            sdk_ops.append({"client": f"{spec_name}.{service_name}", "method": "__call_api__", "http": "", "path": "", "queryParams": {}})
+            continue
         if cls is None or not callable(getattr(cls, method, None)):
             return None
         sdk_ops.append({"client": f"{spec_name}.{service_name}", **sdk.sdk_operation(cls, method)})
+    if MODELS is not None:
+        model_refs = set()
+        _program_model_refs(program, model_refs)
+        if model_refs:
+            models.collect_model_refs(model_refs, MODELS)
     wrapped = any(
         ast.unparse(d) in ("cli_util.wrap_exceptions", "wrap_exceptions")
         or (

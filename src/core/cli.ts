@@ -16,6 +16,7 @@ import { dirname, join, resolve } from "node:path";
 import { checkFileAccessibility } from "../lib/accessibility.ts";
 import { isZipBuffer } from "../utils/zip.ts";
 import {
+  ConfigError,
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,
   expandUser,
@@ -77,11 +78,13 @@ import {
   ProgramFile,
   type ProgramFiles,
   ProgramAbort,
+  ProgramCallApi,
   ProgramConfirm,
   ProgramEcho,
   ProgramExit,
   ProgramHeaders,
   ProgramListCall,
+  ProgramPrompt,
   ProgramSecret,
   ProgramSleep,
   type ProgramAnswer,
@@ -102,8 +105,10 @@ import {
 import {
   type GeneratedCommand,
   type OperationResult,
+  applyConfigEnvVars,
   usageCheckFailure,
   tierBCheckFailure,
+  callBaseClientApi,
   callOperation,
   callSdkOperation,
   confirmUnderWrapExceptions,
@@ -116,6 +121,7 @@ import {
   type StdinReader,
   createStdinReader,
   promptHiddenConfirmed,
+  readHiddenLine,
 } from "./stdin.ts";
 import { writeDownload } from "./download.ts";
 
@@ -697,6 +703,7 @@ async function main(io: Invocation): Promise<void> {
     if (engineRoute) {
       let command: GeneratedCommand = specCmd;
       let callValues = values;
+      let stdin: StdinReader | undefined;
       const output: OutputOptions = {
         query: rootValues.query,
         output: rootValues.output,
@@ -704,7 +711,7 @@ async function main(io: Invocation): Promise<void> {
         rc,
       };
       if (specCmd.program) {
-        const stdin = createStdinReader(io);
+        stdin = createStdinReader(io);
         const wrapperRootValues: Record<string, unknown> = { ...rootValues };
         const wrapperSettings: RootSettings = { ...settings };
         const wrapperOutput: OutputOptions = { ...output };
@@ -905,13 +912,17 @@ async function main(io: Invocation): Promise<void> {
               if (!result.response.ok) printResult(io, result, { rc });
               return String(JSON.parse(result.raw));
             },
-            sdkCall: async (opIndex, posArgs, kwArgs, region) => {
+            sdkCall: async (opIndex, posArgs, kwArgs, region, endpoint) => {
               const op = specCmd.sdkOperations?.[opIndex];
               if (!op) throw new ProgramUnsupported(`sdk[${opIndex}]`);
-              const callRootValues =
-                region !== undefined
-                  ? { ...wrapperRootValues, region }
-                  : wrapperRootValues;
+              const callRootValues: Record<string, unknown> = {
+                ...wrapperRootValues,
+              };
+              if (region !== undefined) callRootValues.region = region;
+              if (endpoint !== undefined) {
+                if (endpoint === null) delete callRootValues.endpoint;
+                else callRootValues.endpoint = endpoint;
+              }
               const result = await callSdkOperation(io, {
                 operation: op,
                 posArgs,
@@ -927,15 +938,52 @@ async function main(io: Invocation): Promise<void> {
                 posArgs,
                 kwArgs,
                 region,
+                endpoint,
               });
+            },
+            callApi: async (call) => {
+              const op = specCmd.sdkOperations?.[call.opIndex];
+              if (!op) throw new ProgramUnsupported(`callApi[${call.opIndex}]`);
+              const callRootValues: Record<string, unknown> = {
+                ...wrapperRootValues,
+              };
+              if (call.region !== undefined)
+                callRootValues.region = call.region;
+              if (call.endpoint !== undefined) {
+                if (call.endpoint === null) delete callRootValues.endpoint;
+                else callRootValues.endpoint = call.endpoint;
+              }
+              const result = await callBaseClientApi(io, {
+                operation: op,
+                resourcePath: call.resourcePath,
+                method: call.method,
+                pathParams: call.pathParams,
+                queryParams: call.queryParams,
+                headerParams: call.headerParams,
+                body: call.body,
+                responseType: call.responseType,
+                enforceContentHeaders: call.enforceContentHeaders,
+                operationName: call.operationName,
+                rootValues: callRootValues,
+                settings: wrapperSettings,
+                spec,
+                index,
+              });
+              if (!result.response.ok) return new ProgramServiceError(result);
+              return new ProgramResponse(result, parseSdkResponseData(result));
             },
             listCall: async (call) => {
               const op = specCmd.sdkOperations?.[call.opIndex];
               if (!op) throw new ProgramUnsupported(`sdk[${call.opIndex}]`);
-              const callRootValues =
-                call.region !== undefined
-                  ? { ...wrapperRootValues, region: call.region }
-                  : wrapperRootValues;
+              const callRootValues: Record<string, unknown> = {
+                ...wrapperRootValues,
+              };
+              if (call.region !== undefined)
+                callRootValues.region = call.region;
+              if (call.endpoint !== undefined) {
+                if (call.endpoint === null) delete callRootValues.endpoint;
+                else callRootValues.endpoint = call.endpoint;
+              }
               return paginateSdkList({
                 mode: call.mode,
                 multipleKeys: call.multipleKeys,
@@ -962,6 +1010,7 @@ async function main(io: Invocation): Promise<void> {
                       posArgs: [],
                       kwArgs: pageKwArgs,
                       region: call.region,
+                      endpoint: call.endpoint,
                     },
                   );
                 },
@@ -973,10 +1022,15 @@ async function main(io: Invocation): Promise<void> {
                 throw new ProgramUnsupported("wait_until without sdk call");
               const op = specCmd.sdkOperations?.[call.opIndex];
               if (!op) throw new ProgramUnsupported(`sdk[${call.opIndex}]`);
-              const callRootValues =
-                call.region !== undefined
-                  ? { ...wrapperRootValues, region: call.region }
-                  : wrapperRootValues;
+              const callRootValues: Record<string, unknown> = {
+                ...wrapperRootValues,
+              };
+              if (call.region !== undefined)
+                callRootValues.region = call.region;
+              if (call.endpoint !== undefined) {
+                if (call.endpoint === null) delete callRootValues.endpoint;
+                else callRootValues.endpoint = call.endpoint;
+              }
               const outcome = await waitUntilResponse({
                 initial: wait.response.result,
                 property: wait.property,
@@ -1044,6 +1098,119 @@ async function main(io: Invocation): Promise<void> {
           {
             region: undefined,
             env: io.env,
+            models: spec.models,
+            randomChoices: [],
+            configFromFile: (fileLocation, profileName) => {
+              try {
+                return {
+                  ...fromFile(
+                    fileLocation ?? DEFAULT_LOCATION,
+                    profileName ?? DEFAULT_PROFILE,
+                    io.env,
+                    io.cwd,
+                  ),
+                };
+              } catch (err) {
+                if (err instanceof ConfigError) {
+                  throw new ProgramRaise(err.type, err.message);
+                }
+                throw err;
+              }
+            },
+            buildConfig: (commandArgs) => {
+              const auth =
+                typeof commandArgs.auth === "string" ? commandArgs.auth : null;
+              const configFile =
+                typeof commandArgs.config_file === "string"
+                  ? commandArgs.config_file
+                  : DEFAULT_LOCATION;
+              const profile =
+                typeof commandArgs.profile === "string"
+                  ? commandArgs.profile
+                  : DEFAULT_PROFILE;
+              const envHasAll = Boolean(
+                io.env.OCI_CLI_USER &&
+                io.env.OCI_CLI_FINGERPRINT &&
+                io.env.OCI_CLI_TENANCY &&
+                io.env.OCI_CLI_REGION &&
+                (io.env.OCI_CLI_KEY_FILE || io.env.OCI_CLI_KEY_CONTENT),
+              );
+              let cfg: Record<string, unknown>;
+              if (envHasAll) {
+                cfg = {
+                  log_requests: false,
+                  additional_user_agent: "",
+                  pass_phrase: null,
+                };
+              } else {
+                try {
+                  cfg = {
+                    ...fromFile(configFile, profile, io.env, io.cwd),
+                  };
+                } catch (err) {
+                  if (err instanceof ConfigError) {
+                    if (
+                      (err.type === "ProfileNotFound" ||
+                        err.type === "InvalidKeyFilePath") &&
+                      (auth === "instance_principal" ||
+                        auth === "resource_principal")
+                    ) {
+                      cfg = {
+                        log_requests: false,
+                        additional_user_agent: "",
+                        pass_phrase: null,
+                      };
+                    } else if (
+                      err.type === "ProfileNotFound" ||
+                      err.type === "InvalidKeyFilePath"
+                    ) {
+                      throw new ProgramExit(1, `ERROR: ${err.message}\n`);
+                    } else {
+                      throw new ProgramRaise(err.type, err.message);
+                    }
+                  } else {
+                    throw err;
+                  }
+                }
+              }
+              applyConfigEnvVars(
+                cfg as Record<string, string | boolean | null>,
+                io.env,
+              );
+              if (
+                typeof commandArgs.region === "string" &&
+                commandArgs.region
+              ) {
+                cfg.region = commandArgs.region;
+              } else if (io.env.OCI_CLI_REGION) {
+                cfg.region = io.env.OCI_CLI_REGION;
+              }
+              if (commandArgs.debug) cfg.log_requests = true;
+              if (
+                typeof commandArgs.endpoint === "string" &&
+                commandArgs.endpoint
+              ) {
+                cfg.endpoint = commandArgs.endpoint;
+              } else {
+                delete cfg.endpoint;
+              }
+              return cfg;
+            },
+            resolveQuery: () => {
+              const q = wrapperOutput.query;
+              if (typeof q !== "string" || !q) return null;
+              if (q.startsWith("query://")) {
+                const queryName = q.slice("query://".length);
+                const resolved = rc.cannedQueries[queryName];
+                if (resolved === undefined) {
+                  throw new ProgramUsageError(
+                    `Query ${queryName} is not defined in your OCI CLI configuration file: ${rc.path}`,
+                  );
+                }
+                return resolved;
+              }
+              return q;
+            },
             loadContextDefaults,
             defaultMap:
               Object.keys(fromJsonDefaults).length > 0
@@ -1064,6 +1231,20 @@ async function main(io: Invocation): Promise<void> {
             regionOverride:
               typeof wrapperRootValues.region === "string"
                 ? wrapperRootValues.region
+                : null,
+            query:
+              typeof wrapperRootValues.query === "string"
+                ? wrapperRootValues.query
+                : null,
+            output:
+              typeof wrapperRootValues.output === "string"
+                ? wrapperRootValues.output
+                : "json",
+            debug: Boolean(wrapperRootValues.debug),
+            noRetry: Boolean(wrapperRootValues.no_retry),
+            maxAttempts:
+              typeof wrapperRootValues.max_attempts === "number"
+                ? wrapperRootValues.max_attempts
                 : null,
             writtenFiles: new Set<number>(),
           },
@@ -1098,6 +1279,7 @@ async function main(io: Invocation): Promise<void> {
         settings,
         spec,
         index,
+        stdin,
       };
       const result = await callOperation(io, call);
       const downloadTo = outputBinding(command);
@@ -1225,7 +1407,9 @@ type WrapperLookups = {
     posArgs: unknown[],
     kwArgs: Record<string, unknown>,
     region?: string,
+    endpoint?: string | null,
   ) => Promise<ProgramSdkOutcome>;
+  callApi: (call: ProgramCallApi) => Promise<ProgramSdkOutcome>;
   listCall: (call: ProgramListCall) => Promise<ProgramSdkOutcome>;
   waitUntil: (wait: ProgramWaitUntil) => Promise<ProgramSdkOutcome>;
   render: (response: ProgramResponse) => void;
@@ -1233,6 +1417,120 @@ type WrapperLookups = {
   serviceError: (result: OperationResult) => void;
   sleep: (seconds: number) => Promise<void>;
 };
+
+async function promptForValue(
+  io: Invocation,
+  stdin: StdinReader,
+  e: ProgramPrompt,
+  wrapExceptions: boolean,
+): Promise<ProgramAnswer> {
+  const out = e.toStderr ? io.err : io.out;
+  const defaultPart =
+    e.hasDefault &&
+    e.showDefault &&
+    !e.hideInput &&
+    e.defaultValue !== null &&
+    e.defaultValue !== undefined
+      ? ` [${String(e.defaultValue)}]`
+      : "";
+  const prompt = `${e.text}${defaultPart}${e.promptSuffix}`;
+  if (e.hideInput && e.confirmationPrompt) {
+    return promptHiddenConfirmed(io, stdin, prompt, wrapExceptions);
+  }
+  const convertInput = (
+    raw: string,
+  ): { ok: true; value: ProgramAnswer } | { ok: false; error: string } => {
+    const spec = e.typeSpec;
+    if (spec === null || spec === "str") return { ok: true, value: raw };
+    if (spec === "int") {
+      const cleaned = raw.trim();
+      if (/^[+-]?\d+$/.test(cleaned)) {
+        return { ok: true, value: Number.parseInt(cleaned, 10) };
+      }
+      return {
+        ok: false,
+        error: `${pyRepr(raw)} is not a valid integer.`,
+      };
+    }
+    if (spec === "float") {
+      const cleaned = raw.trim();
+      const num = Number(cleaned);
+      if (cleaned !== "" && Number.isFinite(num)) {
+        return { ok: true, value: num };
+      }
+      return {
+        ok: false,
+        error: `${pyRepr(raw)} is not a valid floating point value.`,
+      };
+    }
+    if (spec === "bool") {
+      const low = raw.trim().toLowerCase();
+      if (["1", "true", "t", "yes", "y", "on"].includes(low))
+        return { ok: true, value: true };
+      if (["0", "false", "f", "no", "n", "off"].includes(low))
+        return { ok: true, value: false };
+      return {
+        ok: false,
+        error: `${pyRepr(raw)} is not a valid boolean.`,
+      };
+    }
+    // choice
+    const match = spec.choices.find((c) =>
+      spec.caseSensitive ? c === raw : c.toLowerCase() === raw.toLowerCase(),
+    );
+    if (match !== undefined) return { ok: true, value: match };
+    return {
+      ok: false,
+      error: `${pyRepr(raw)} is not one of ${spec.choices.map((c) => pyRepr(c)).join(", ")}.`,
+    };
+  };
+  const readOne = async (p: string): Promise<string> => {
+    if (e.hideInput) {
+      return readHiddenLine(io, stdin, p, wrapExceptions);
+    }
+    out(p);
+    const line = await stdin.readLine();
+    if (line === null) {
+      out("\n");
+      io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
+      throw new Exit(1);
+    }
+    return line;
+  };
+  while (true) {
+    const raw = await readOne(prompt);
+    let parsed: ProgramAnswer;
+    if (raw === "") {
+      if (e.hasDefault) {
+        parsed = (
+          typeof e.defaultValue === "number" ||
+          typeof e.defaultValue === "boolean" ||
+          typeof e.defaultValue === "string"
+            ? e.defaultValue
+            : ""
+        ) as ProgramAnswer;
+      } else {
+        continue;
+      }
+    } else {
+      const res = convertInput(raw);
+      if (!res.ok) {
+        out(`Error: ${res.error}\n`);
+        continue;
+      }
+      parsed = res.value;
+    }
+    if (e.confirmationPrompt) {
+      const again = await readOne("Repeat for confirmation: ");
+      const res2 = convertInput(again);
+      if (!res2.ok || res2.value !== parsed) {
+        out("Error: The two entered values do not match.\n");
+        continue;
+      }
+    }
+    return parsed;
+  }
+}
 
 /**
  * Runs a programmed Tier B/C wrapper: executes any direct SDK calls and render_response
@@ -1351,7 +1649,15 @@ async function runWrapper(
     if (e instanceof ProgramConfirm) {
       // click.confirm under wrap_exceptions; then the program runs again, answered.
       if (!program.wrapExceptions) return "unsupported";
-      const yes = await confirmUnderWrapExceptions(io, e.message, false, stdin);
+      const yes = await confirmUnderWrapExceptions(
+        io,
+        e.message,
+        e.defaultValue,
+        stdin,
+        e.promptSuffix,
+        e.showDefault,
+        e.toStderr,
+      );
       return runWrapper(
         io,
         command,
@@ -1360,6 +1666,21 @@ async function runWrapper(
         models,
         lookups,
         [...answers, yes],
+        context,
+        stdin,
+      );
+    }
+    if (e instanceof ProgramPrompt) {
+      if (!program.wrapExceptions) return "unsupported";
+      const ans = await promptForValue(io, stdin, e, program.wrapExceptions);
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        [...answers, ans],
         context,
         stdin,
       );
@@ -1410,11 +1731,36 @@ async function runWrapper(
           e.posArgs,
           e.kwArgs,
           e.region,
+          e.endpoint,
         );
       } catch (sdkErr) {
         if (sdkErr instanceof ProgramUnsupported) return "unsupported";
         if (sdkErr instanceof ProgramRaise) outcome = sdkErr;
         else throw sdkErr;
+      }
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          sdkResults: [...(ctx.sdkResults ?? []), outcome],
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramCallApi) {
+      let outcome: ProgramSdkOutcome;
+      try {
+        outcome = await lookups.callApi(e);
+      } catch (apiErr) {
+        if (apiErr instanceof ProgramUnsupported) return "unsupported";
+        if (apiErr instanceof ProgramRaise) outcome = apiErr;
+        else throw apiErr;
       }
       return runWrapper(
         io,

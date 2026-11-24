@@ -74,14 +74,20 @@ const writeIfAllowed = async (path: string, rel: string, content: string) => {
   return true;
 };
 
-await writeIfAllowed(commandPath, names.file, commandSource);
-await writeIfAllowed(casePath, names.caseFile, caseSource);
+const written: string[] = [];
+if (await writeIfAllowed(commandPath, names.file, commandSource))
+  written.push(commandPath);
+if (await writeIfAllowed(casePath, names.caseFile, caseSource))
+  written.push(casePath);
 if (registry.changed) {
   await Bun.write(registryPath, registry.source);
+  written.push(registryPath);
   console.log(`update src/core/registry.ts`);
 } else {
   console.log(`skip   src/core/registry.ts (already registered)`);
 }
+// The templates are only roughly shaped; `bun run verify` runs `bun fmt --check`.
+if (written.length) await Bun.$`bun fmt ${written}`.cwd(root).quiet();
 
 console.log(
   `\nNext:\n  bun run golden --filter ${names.caseId}\n  bun test test/parity -t '${names.caseId}'`,

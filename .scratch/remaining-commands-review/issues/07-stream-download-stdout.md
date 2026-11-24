@@ -4,8 +4,8 @@
 
 **Blocked by:** 02 — Share binary output across download commands
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] In an offline delayed-response test the consumer receives the first chunk while the server is still withholding the final chunk.
-- [ ] The complete piped output is byte-exact, including non-text bytes.
-- [ ] The writer awaits downstream capacity instead of retaining the full download until command exit.
+- [x] In an offline delayed-response test the consumer receives the first chunk while the server is still withholding the final chunk.
+- [x] The complete piped output is byte-exact, including non-text bytes.
+- [x] The writer awaits downstream capacity instead of retaining the full download until command exit.

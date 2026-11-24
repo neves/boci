@@ -6,5 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] With a missing job artifact file, create-job-artifact reproduces the Reference CLI FileNotFoundError diagnostic and exits 1.
-- [ ] The failure occurs before any service request and without suggesting a fallback.
+- [x] With a missing job artifact file, create-job-artifact reproduces the Reference CLI FileNotFoundError diagnostic and exits 1.
+- [x] The failure occurs before any service request and without suggesting a fallback.
+
+Status: done

@@ -3,6 +3,7 @@
 import { closeSync, openSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Invocation } from "../lib/io.ts";
+import { Exit } from "../lib/io.ts";
 import { writeAllBytes } from "./byte-writer.ts";
 
 /**
@@ -30,7 +31,17 @@ export async function writeDownload(
         else io.out(decoder.decode(chunk, { stream: true }));
         continue;
       }
-      fd ??= openSync(resolve(io.cwd, path), "w");
+      if (fd === undefined) {
+        try {
+          fd = openSync(resolve(io.cwd, path), "w");
+        } catch (error) {
+          if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+            io.err("FileError: No such file or directory\n");
+            throw new Exit(1);
+          }
+          throw error;
+        }
+      }
       writeAllBytes(fd, chunk);
     }
     if (toStdout && !io.outBytes) {

@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] With a nonempty successful response and a missing destination parent, download-package matches the Reference CLI stderr and exit status.
-- [ ] With an empty successful response, the same destination stays unopened and the result matches the golden.
+- [x] With a nonempty successful response and a missing destination parent, download-package matches the Reference CLI stderr and exit status.
+- [x] With an empty successful response, the same destination stays unopened and the result matches the golden.

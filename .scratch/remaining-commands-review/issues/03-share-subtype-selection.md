@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Parity cases for input and output exercise an inherited discriminator and a field unique to the selected subtype.
-- [ ] When a discriminator is missing, each direction retains its Reference CLI behavior.
+- [x] Parity cases for input and output exercise an inherited discriminator and a field unique to the selected subtype.
+- [x] When a discriminator is missing, each direction retains its Reference CLI behavior.

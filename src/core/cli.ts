@@ -1049,7 +1049,11 @@ function programFiles(io: Invocation): ProgramFiles {
             "PermissionError",
             `[Errno 13] Permission denied: ${pyRepr(path)}`,
           );
-        // FileNotFoundError and the like: not modeled.
+        if ((e as NodeJS.ErrnoException).code === "ENOENT")
+          throw new ProgramRaise(
+            "FileNotFoundError",
+            `[Errno 2] No such file or directory: ${pyRepr(path)}`,
+          );
         throw new ProgramUnsupported("open()");
       }
     },

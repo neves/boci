@@ -22,6 +22,7 @@ import {
   type Expr,
   type Statement,
 } from "../../src/core/program.ts";
+import { isZipBuffer } from "../../src/utils/zip.ts";
 import { paginateSdkList } from "../../src/core/pagination.ts";
 import { renderCliData } from "../../src/core/output.ts";
 import { waitUntilResponse } from "../../src/core/waiter.ts";
@@ -1833,5 +1834,435 @@ print(json.dumps({
         defVal: "from-json",
       },
     });
+  });
+
+  test("while loops support break, continue, orelse, response pagination attrs, and iteration cap", () => {
+    const page1 = new ProgramResponse(
+      {
+        response: new Response("[]", { headers: { "opc-next-page": "p2" } }),
+      } as OperationResult,
+      ["a"],
+    );
+    const page2 = new ProgramResponse(
+      {
+        response: new Response("[]"),
+      } as OperationResult,
+      ["b", "c"],
+    );
+    const program: Statement[] = [
+      ["let", "client", ["fn", "client", "core", "virtual_network"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [], [], null]],
+      ["let", "acc", ["attr", "data", ["var", "res"]]],
+      [
+        "while",
+        ["attr", "has_next_page", ["var", "res"]],
+        [
+          ["let", "np", ["attr", "next_page", ["var", "res"]]],
+          [
+            "let",
+            "res",
+            ["sdk", 0, ["var", "client"], [], [["page", ["var", "np"]]], null],
+          ],
+          [
+            "do",
+            [
+              "call",
+              "extend",
+              ["var", "acc"],
+              ["attr", "data", ["var", "res"]],
+            ],
+          ],
+        ],
+        [["do", ["call", "append", ["var", "acc"], "done"]]],
+      ],
+      ["invoke", [["a", ["var", "acc"]]], null],
+    ];
+    const out = runProgram(program, {}, params, parse, [], undefined, {
+      sdkResults: [page1, page2],
+    });
+    expect(out.kwargs).toEqual({ a: ["a", "b", "c", "done"] });
+
+    // Break skips orelse; continue advances cleanly.
+    const loopProgram: Statement[] = [
+      ["let", "i", 0],
+      ["let", "seen", ["list"]],
+      [
+        "while",
+        ["cmp", "<", ["var", "i"], 5],
+        [
+          ["aug", "+", "i", 1],
+          ["if", ["cmp", "==", ["var", "i"], 2], [["continue"]], []],
+          ["do", ["call", "append", ["var", "seen"], ["var", "i"]]],
+          ["if", ["cmp", "==", ["var", "i"], 3], [["break"]], []],
+        ],
+        [["do", ["call", "append", ["var", "seen"], 99]]],
+      ],
+      ["invoke", [["a", ["var", "seen"]]], null],
+    ];
+    expect(runProgram(loopProgram, {}, params, parse).kwargs).toEqual({
+      a: [1, 3],
+    });
+
+    // Safety iteration cap stops runaway loops.
+    expect(() => runProgram([["while", true, []]], {}, params, parse)).toThrow(
+      ProgramUnsupported,
+    );
+  });
+
+  test("tryMulti supports else, finally, tuple handlers, ServiceError attrs, and skips cleanup on suspension", () => {
+    const events: string[] = [];
+    const makeTry = (
+      shouldFail: boolean,
+      excCls = "ValueError",
+    ): Statement[] => [
+      ["let", "log", ["list"]],
+      [
+        "tryMulti",
+        shouldFail
+          ? [["raise", "err", excCls, "boom"]]
+          : [["do", ["call", "append", ["var", "log"], "body"]]],
+        [
+          [
+            ["ValueError", "KeyError"],
+            "e",
+            [
+              [
+                "do",
+                ["call", "append", ["var", "log"], ["fn", "str", ["var", "e"]]],
+              ],
+            ],
+          ],
+        ],
+        [["do", ["call", "append", ["var", "log"], "else"]]],
+        [["do", ["call", "append", ["var", "log"], "finally"]]],
+      ],
+      ["invoke", [["a", ["var", "log"]]], null],
+    ];
+    expect(runProgram(makeTry(false), {}, params, parse).kwargs).toEqual({
+      a: ["body", "else", "finally"],
+    });
+    expect(
+      runProgram(makeTry(true, "ValueError"), {}, params, parse).kwargs,
+    ).toEqual({
+      a: ["boom", "finally"],
+    });
+    expect(
+      runProgram(makeTry(true, "KeyError"), {}, params, parse).kwargs,
+    ).toEqual({
+      a: ["'boom'", "finally"],
+    });
+
+    // ServiceError attribute access inside except handler.
+    const svcErr = new ProgramServiceError({
+      response: new Response(
+        JSON.stringify({ code: "NotFound", message: "missing" }),
+        {
+          status: 404,
+          headers: { "opc-request-id": "req-9" },
+        },
+      ),
+      raw: JSON.stringify({ code: "NotFound", message: "missing" }),
+    } as OperationResult);
+    const svcProgram: Statement[] = [
+      ["let", "client", ["fn", "client", "work_requests", "work_request"]],
+      [
+        "tryMulti",
+        [["let", "r", ["sdk", 0, ["var", "client"], [], [], null]]],
+        [
+          [
+            "ServiceError",
+            "e",
+            [
+              [
+                "invoke",
+                [
+                  ["status", ["attr", "status", ["var", "e"]]],
+                  ["code", ["attr", "code", ["var", "e"]]],
+                  ["msg", ["attr", "message", ["var", "e"]]],
+                ],
+                null,
+              ],
+            ],
+          ],
+        ],
+      ],
+    ];
+    expect(
+      runProgram(svcProgram, {}, params, parse, [], undefined, {
+        sdkResults: [svcErr],
+      }).kwargs,
+    ).toEqual({ status: 404, code: "NotFound", msg: "missing" });
+
+    // Suspension (ProgramSdkCall) bypasses except, else, and finally.
+    const suspendedProgram: Statement[] = [
+      ["let", "client", ["fn", "client", "identity", "identity"]],
+      [
+        "tryMulti",
+        [["let", "r", ["sdk", 0, ["var", "client"], [], [], null]]],
+        [["Exception", null, [["usage", "should-not-catch"]]]],
+        [["usage", "should-not-else"]],
+        [["usage", "should-not-finally"]],
+      ],
+    ];
+    expect(() => runProgram(suspendedProgram, {}, params, parse)).toThrow(
+      ProgramSdkCall,
+    );
+    expect(events).toEqual([]);
+  });
+
+  test("withOpen writes and closes cleanly, reads via json.load, and supports builtins/methods", () => {
+    const written = new Map<string, string>();
+    const fakeFiles = {
+      open(path: string, mode: string) {
+        if (mode.includes("w")) {
+          return new ProgramFile(mode, undefined, path, (bytes) => {
+            written.set(path, new TextDecoder().decode(bytes));
+          });
+        }
+        const content = written.get(path) ?? '{"k": 42}';
+        return new ProgramFile(mode, new TextEncoder().encode(content), path);
+      },
+      exists: (p: string) => written.has(p),
+      isfile: (p: string) => written.has(p),
+      abspath: (p: string) => `/abs/${p}`,
+      isZipfile: (p: string) => p.endsWith(".zip"),
+    };
+    const program: Statement[] = [
+      [
+        "withOpen",
+        "f",
+        ["fn", "open", "out.json", "w"],
+        [
+          ["do", ["call", "write", ["var", "f"], '{"ok":']],
+          ["do", ["call", "write", ["var", "f"], "true}"]],
+        ],
+      ],
+      [
+        "withOpen",
+        "rf",
+        ["fn", "open", "out.json", "r"],
+        [["let", "loaded", ["fn", "load", ["var", "rf"]]]],
+      ],
+      ["let", "nums", ["list", 10, 20]],
+      ["do", ["call", "extend", ["var", "nums"], ["list", 30]]],
+      [
+        "let",
+        "summary",
+        [
+          "dict",
+          ["loaded", ["var", "loaded"]],
+          ["parsed", ["fn", "loads", '{"x":1}']],
+          ["enum", ["fn", "enumerate", ["list", "a", "b"], 1]],
+          ["anyTrue", ["fn", "any", ["list", 0, "", "yes"]]],
+          ["anyFalse", ["fn", "any", ["list", 0, "", null]]],
+          ["allTrue", ["fn", "all", ["list", 1, "x"]]],
+          ["intDec", ["fn", "int", " 42 "]],
+          ["intHex", ["fn", "int", "0xff", 16]],
+          ["minPair", ["fn", "min", 5, 2]],
+          ["minList", ["fn", "min", ["list", 9, 3, 7]]],
+          ["maxPair", ["fn", "max", 5, 2]],
+          ["mapped", ["fn", "list", ["fn", "pyMap", "str", ["var", "nums"]]]],
+          ["found", ["call", "find", "ocid1.test", "ocid"]],
+          ["notFound", ["call", "find", "hello", "ocid"]],
+          ["abs", ["fn", "abspath", "rel.txt"]],
+          ["zipOk", ["fn", "isZipfile", "wallet.zip"]],
+          ["zipNo", ["fn", "isZipfile", "wallet.txt"]],
+          ["styled", ["fn", "clickStyle", "warn", ["dict", ["fg", "yellow"]]]],
+        ],
+      ],
+      ["invoke", [["a", ["var", "summary"]]], null],
+    ];
+    const res = runProgram(program, {}, params, parse, [], fakeFiles);
+    expect(written.get("out.json")).toBe('{"ok":true}');
+    expect(res.kwargs).toEqual({
+      a: {
+        loaded: { ok: true },
+        parsed: { x: 1 },
+        enum: [
+          [1, "a"],
+          [2, "b"],
+        ],
+        anyTrue: true,
+        anyFalse: false,
+        allTrue: true,
+        intDec: 42,
+        intHex: 255,
+        minPair: 2,
+        minList: 3,
+        maxPair: 5,
+        mapped: ["10", "20", "30"],
+        found: 0,
+        notFound: -1,
+        abs: "/abs/rel.txt",
+        zipOk: true,
+        zipNo: false,
+        styled: "\x1b[33mwarn\x1b[0m",
+      },
+    });
+  });
+
+  test("invoke expression assigns result and executes trailing cleanup like _invoke_update", () => {
+    const deleted: string[] = [];
+    const fakeFiles = {
+      open: () => {
+        throw new ProgramUnsupported("open");
+      },
+      exists: () => false,
+      isfile: () => false,
+      deleteFnEndpointCache: (_ctx: Record<string, unknown>, id: string) => {
+        deleted.push(id);
+      },
+    };
+    const program: Statement[] = [
+      ["let", "res", ["invoke", [["function_id", kw("a")]], ["var", "kwargs"]]],
+      ["do", ["fn", "deleteFnEndpointCache", ["fn", "ctxObj"], kw("a")]],
+      ["return", ["var", "res"]],
+    ];
+    const out = runProgram(
+      program,
+      { a: "ocid1.fn.1" },
+      params,
+      parse,
+      [],
+      fakeFiles,
+    );
+    expect(out.kwargs).toEqual({ a: "ocid1.fn.1", function_id: "ocid1.fn.1" });
+    expect(deleted).toEqual(["ocid1.fn.1"]);
+  });
+
+  test("str(sdkModel) and sdkFormattedFlatDict produce snake_case JSON while formattedFlatDict produces hyphenated JSON", () => {
+    const models = {
+      RoverWorkload: {
+        attributes: [
+          ["id", "str", "id"],
+          ["workload_type", "str", "workloadType"],
+        ] as [string, string, string][],
+      },
+    };
+    const resp = new ProgramResponse(
+      {
+        responseModels: models,
+        operation: { responseType: "RoverWorkload" },
+        response: new Response("{}"),
+      } as unknown as OperationResult,
+      { id: "w1", workloadType: "IMAGE" },
+    );
+    const program: Statement[] = [
+      ["let", "client", ["fn", "client", "rover", "rover_node"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [], [], null]],
+      ["let", "w", ["attr", "data", ["var", "res"]]],
+      [
+        "invoke",
+        [
+          ["parsed", ["fn", "loads", ["fn", "str", ["var", "w"]]]],
+          ["sdkFmt", ["fn", "sdkFormattedFlatDict", ["var", "w"]]],
+          ["cliFmt", ["fn", "formattedFlatDict", ["var", "w"]]],
+        ],
+        null,
+      ],
+    ];
+    const out = runProgram(program, {}, params, parse, [], undefined, {
+      sdkResults: [resp],
+    });
+    expect(out.kwargs?.parsed).toEqual({ id: "w1", workload_type: "IMAGE" });
+    expect(out.kwargs?.sdkFmt).toBe(
+      JSON.stringify({ id: "w1", workload_type: "IMAGE" }, null, 2),
+    );
+    expect(out.kwargs?.cliFmt).toBe(
+      JSON.stringify({ id: "w1", "workload-type": "IMAGE" }, null, 2),
+    );
+  });
+
+  test("isZipBuffer detects valid ZIP EOCD records with and without comments", () => {
+    // Minimal empty ZIP (22-byte EOCD).
+    const emptyZip = new Uint8Array(22);
+    emptyZip.set([0x50, 0x4b, 0x05, 0x06], 0);
+    expect(isZipBuffer(emptyZip)).toBe(true);
+
+    // ZIP with 5-byte comment.
+    const commentedZip = new Uint8Array(27);
+    commentedZip.set([0x50, 0x4b, 0x05, 0x06], 0);
+    commentedZip[20] = 5;
+    commentedZip[21] = 0;
+    expect(isZipBuffer(commentedZip)).toBe(true);
+
+    // Mismatched comment length / non-zip data.
+    commentedZip[20] = 4;
+    expect(isZipBuffer(commentedZip)).toBe(false);
+    expect(isZipBuffer(new TextEncoder().encode("not a zip file at all"))).toBe(
+      false,
+    );
+    expect(isZipBuffer(new Uint8Array(10))).toBe(false);
+  });
+
+  test("program.py compiles While, try/else/finally, with open, builtins, and _invoke_update", () => {
+    const py = `
+import ast, json, sys, types
+sys.path.insert(0, "tools/extract")
+import program
+
+class _DummyCmd:
+    def callback(self): pass
+
+oci_util = types.ModuleType("oci.util")
+def formatted_flat_dict(x): return x
+formatted_flat_dict.__module__ = "oci.util"
+oci_util.formatted_flat_dict = formatted_flat_dict
+
+mod = types.ModuleType("services.demo.cli_extended")
+mod.target_cmd = _DummyCmd()
+mod.formatted_flat_dict = formatted_flat_dict
+
+src = """
+def _helper(ctx, kwargs):
+    res = ctx.invoke(target_cmd, **kwargs)
+    return res
+
+def sample_wrapper(ctx, **kwargs):
+    i = int("3")
+    xs = [1]
+    xs.extend([2, 3])
+    while i > 0:
+        i -= 1
+    try:
+        v = json.loads("{}")
+    except (ValueError, KeyError) as e:
+        v = None
+    else:
+        v = min(1, 2)
+    finally:
+        ok = any(x > 0 for x in xs)
+    with open("a.txt", "w") as f:
+        f.write(click.style("hi", fg="yellow"))
+    p = os.path.abspath("a.txt")
+    z = zipfile.is_zipfile(p)
+    pos = "abc".find("b")
+    m = list(map(str, xs))
+    e = list(enumerate(xs, 1))
+    s = formatted_flat_dict(kwargs)
+    _helper(ctx, kwargs)
+"""
+exec(compile(src, "<demo>", "exec"), mod.__dict__)
+mod._helper.__module__ = mod.__name__
+mod.sample_wrapper.__module__ = mod.__name__
+tree = ast.parse(src)
+ast_map = {mod.__dict__[n.name]: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+orig_fn_ast = program._fn_ast
+program._fn_ast = lambda fn: ast_map.get(fn) or orig_fn_ast(fn)
+orig_import = program.importlib.import_module
+program.importlib.import_module = lambda name: mod if name == mod.__name__ else orig_import(name)
+
+prog, targets, sdk_calls = program.compile_wrapper(mod.sample_wrapper)
+assert prog is not None, program.why_unsupported(mod.sample_wrapper)
+print(json.dumps({"n_stmts": len(prog), "n_targets": len(targets)}))
+`;
+    const res = Bun.spawnSync(["python3", "-c", py], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    expect(res.exitCode, new TextDecoder().decode(res.stderr)).toBe(0);
+    const parsed = JSON.parse(new TextDecoder().decode(res.stdout));
+    expect(parsed.n_targets).toBe(1);
+    expect(parsed.n_stmts).toBeGreaterThan(5);
   });
 });

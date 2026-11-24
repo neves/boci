@@ -11476,6 +11476,813 @@
         "files": ["database_wallet"],
         "helpers": ["create_base64encoded_zip"]
       },
+      "program": {
+        "body": [
+          ["let", "database_wallet_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_service_name", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "database_service_name"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "database_wallet_details"],
+                "serviceName",
+                ["item", ["var", "kwargs"], "database_service_name"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "database_service_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_wallet", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "database_wallet"],
+                null
+              ]
+            ],
+            [
+              [
+                "let",
+                "database_wallet",
+                [
+                  "fn",
+                  "expandvars",
+                  [
+                    "fn",
+                    "expanduser",
+                    ["item", ["var", "kwargs"], "database_wallet"]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["fn", "exists", ["var", "database_wallet"]]],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Config source does not exist",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "not",
+                  [
+                    "and",
+                    ["call", "endswith", ["var", "database_wallet"], ".zip"],
+                    ["fn", "isfile", ["var", "database_wallet"]],
+                    ["fn", "isZipfile", ["var", "database_wallet"]]
+                  ]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Database wallet must be a .zip file.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "let",
+                "send_value",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "create_base64encoded_zip.database_wallet",
+                      ["var", "database_wallet"]
+                    ],
+                    [
+                      "if",
+                      [
+                        "and",
+                        [
+                          "call",
+                          "endswith",
+                          ["var", "create_base64encoded_zip.database_wallet"],
+                          ".zip"
+                        ],
+                        [
+                          "fn",
+                          "isfile",
+                          ["var", "create_base64encoded_zip.database_wallet"]
+                        ],
+                        [
+                          "fn",
+                          "isZipfile",
+                          ["var", "create_base64encoded_zip.database_wallet"]
+                        ]
+                      ],
+                      [
+                        [
+                          "withOpen",
+                          "create_base64encoded_zip.zip_file",
+                          [
+                            "fn",
+                            "open",
+                            ["var", "create_base64encoded_zip.database_wallet"],
+                            "rb"
+                          ],
+                          [
+                            [
+                              "return",
+                              [
+                                "call",
+                                "decode",
+                                [
+                                  "fn",
+                                  "b64encode",
+                                  [
+                                    "call",
+                                    "read",
+                                    ["var", "create_base64encoded_zip.zip_file"]
+                                  ]
+                                ],
+                                "utf-8"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["var", "send_value"]],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Internal error: Unable to generate encoded zip",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "database_wallet_details"],
+                "databaseWallet",
+                ["var", "send_value"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_wallet"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "database_wallet_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_wallet_details",
+                ["fn", "dumps", ["var", "database_wallet_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "connection_string", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_connection_string",
+                ["item", ["var", "kwargs"], "connection_string"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "connection_string"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_authentication_details", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_authentication_details",
+                ["item", ["var", "kwargs"], "database_authentication_details"]
+              ],
+              [
+                "do",
+                [
+                  "call",
+                  "pop",
+                  ["var", "kwargs"],
+                  "database_authentication_details"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_connection_type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_connection_type",
+                ["item", ["var", "kwargs"], "database_connection_type"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "database_connection_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_role", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_role",
+                ["item", ["var", "kwargs"], "database_role"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_role"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_type",
+                ["item", ["var", "kwargs"], "database_type"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_type"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "dns_configuration", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_dns_configuration",
+                ["item", ["var", "kwargs"], "dns_configuration"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "dns_configuration"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "is_failure_retried", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_is_failure_retried",
+                ["item", ["var", "kwargs"], "is_failure_retried"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "is_failure_retried"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_query", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_query",
+                ["item", ["var", "kwargs"], "database_query"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_query"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "is_ipv6", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_i_pv6",
+                ["item", ["var", "kwargs"], "is_ipv6"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "is_ipv6"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_wallet", ["var", "kwargs"]],
+            [["do", ["call", "pop", ["var", "kwargs"], "database_wallet"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_service_name", ["var", "kwargs"]],
+            [
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "database_service_name"]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.apm_synthetics.src.oci_cli_apm_synthetic.generated.apmsynthetic_cli.create_monitor_sql_monitor_configuration",
+        "complexTypes": {
+          "vantage-points": "apm_synthetics:list[string]",
+          "script-parameters": "apm_synthetics:list[MonitorScriptParameter]",
+          "availability-configuration": "apm_synthetics:AvailabilityConfiguration",
+          "maintenance-window-schedule": "apm_synthetics:MaintenanceWindowSchedule",
+          "freeform-tags": "apm_synthetics:dict(str, string)",
+          "defined-tags": "apm_synthetics:dict(str, dict(str, object))",
+          "configuration-dns-configuration": "apm_synthetics:DnsConfiguration",
+          "configuration-database-authentication-details": "apm_synthetics:BasicAuthenticationDetails",
+          "configuration-database-wallet-details": "apm_synthetics:DatabaseWalletDetails"
+        },
+        "params": [
+          {
+            "name": "apm_domain_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "monitor_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vantage_points",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "repeat_interval_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "script_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "status",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_run_once",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "script_parameters",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_configuration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "maintenance_window_schedule",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_run_now",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scheduling_policy",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "batch_interval_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_i_pv6",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_is_failure_retried",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_dns_configuration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_query",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_authentication_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_role",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_connection_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_wallet_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "apm_synthetics.apm_synthetic",
+        "method": "create_monitor",
+        "http": "POST",
+        "path": "/monitors",
+        "positionalArgs": ["apm_domain_id", "create_monitor_details"],
+        "pathParams": {},
+        "queryParams": {
+          "apmDomainId": {
+            "arg": "apm_domain_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_monitor_details",
+        "responseType": "Monitor",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["apm_domain_id"],
+          "param": "apm_domain_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["monitorType"],
+          "param": "monitor_type"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["vantagePoints"],
+          "transform": "parse_json_parameter",
+          "param": "vantage_points"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["repeatIntervalInSeconds"],
+          "param": "repeat_interval_in_seconds"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["scriptId"],
+          "param": "script_id",
+          "when": "script_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["status"],
+          "param": "status",
+          "when": "status is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["isRunOnce"],
+          "param": "is_run_once",
+          "when": "is_run_once is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["timeoutInSeconds"],
+          "param": "timeout_in_seconds",
+          "when": "timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["target"],
+          "param": "target",
+          "when": "target is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["scriptParameters"],
+          "transform": "parse_json_parameter",
+          "param": "script_parameters",
+          "when": "script_parameters is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["availabilityConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "availability_configuration",
+          "when": "availability_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["maintenanceWindowSchedule"],
+          "transform": "parse_json_parameter",
+          "param": "maintenance_window_schedule",
+          "when": "maintenance_window_schedule is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["isRunNow"],
+          "param": "is_run_now",
+          "when": "is_run_now is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["schedulingPolicy"],
+          "param": "scheduling_policy",
+          "when": "scheduling_policy is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["batchIntervalInSeconds"],
+          "param": "batch_interval_in_seconds",
+          "when": "batch_interval_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["isIPv6"],
+          "param": "is_i_pv6",
+          "when": "is_i_pv6 is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "isFailureRetried"],
+          "param": "configuration_is_failure_retried",
+          "when": "configuration_is_failure_retried is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "dnsConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_dns_configuration",
+          "when": "configuration_dns_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "databaseType"],
+          "param": "configuration_database_type",
+          "when": "configuration_database_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "query"],
+          "param": "configuration_query",
+          "when": "configuration_query is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "databaseAuthenticationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_database_authentication_details",
+          "when": "configuration_database_authentication_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "databaseRole"],
+          "param": "configuration_database_role",
+          "when": "configuration_database_role is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "databaseConnectionType"],
+          "param": "configuration_database_connection_type",
+          "when": "configuration_database_connection_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "connectionString"],
+          "param": "configuration_connection_string",
+          "when": "configuration_connection_string is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "databaseWalletDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_database_wallet_details",
+          "when": "configuration_database_wallet_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_monitor_details",
+          "key": ["configuration", "configType"],
+          "value": "SQL_CONFIG"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -21842,6 +22649,840 @@
         "files": ["database_wallet"],
         "helpers": ["create_base64encoded_zip"]
       },
+      "program": {
+        "body": [
+          ["let", "database_wallet_details", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_service_name", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "database_service_name"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "database_wallet_details"],
+                "serviceName",
+                ["item", ["var", "kwargs"], "database_service_name"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "database_service_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_wallet", ["var", "kwargs"]],
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "database_wallet"],
+                null
+              ]
+            ],
+            [
+              [
+                "let",
+                "database_wallet",
+                [
+                  "fn",
+                  "expandvars",
+                  [
+                    "fn",
+                    "expanduser",
+                    ["item", ["var", "kwargs"], "database_wallet"]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["fn", "exists", ["var", "database_wallet"]]],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Config source does not exist",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "if",
+                [
+                  "not",
+                  [
+                    "and",
+                    ["call", "endswith", ["var", "database_wallet"], ".zip"],
+                    ["fn", "isfile", ["var", "database_wallet"]],
+                    ["fn", "isZipfile", ["var", "database_wallet"]]
+                  ]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Database wallet must be a .zip file.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "let",
+                "send_value",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "create_base64encoded_zip.database_wallet",
+                      ["var", "database_wallet"]
+                    ],
+                    [
+                      "if",
+                      [
+                        "and",
+                        [
+                          "call",
+                          "endswith",
+                          ["var", "create_base64encoded_zip.database_wallet"],
+                          ".zip"
+                        ],
+                        [
+                          "fn",
+                          "isfile",
+                          ["var", "create_base64encoded_zip.database_wallet"]
+                        ],
+                        [
+                          "fn",
+                          "isZipfile",
+                          ["var", "create_base64encoded_zip.database_wallet"]
+                        ]
+                      ],
+                      [
+                        [
+                          "withOpen",
+                          "create_base64encoded_zip.zip_file",
+                          [
+                            "fn",
+                            "open",
+                            ["var", "create_base64encoded_zip.database_wallet"],
+                            "rb"
+                          ],
+                          [
+                            [
+                              "return",
+                              [
+                                "call",
+                                "decode",
+                                [
+                                  "fn",
+                                  "b64encode",
+                                  [
+                                    "call",
+                                    "read",
+                                    ["var", "create_base64encoded_zip.zip_file"]
+                                  ]
+                                ],
+                                "utf-8"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["var", "send_value"]],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Internal error: Unable to generate encoded zip",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "database_wallet_details"],
+                "databaseWallet",
+                ["var", "send_value"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_wallet"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", ">", ["fn", "len", ["var", "database_wallet_details"]], 0],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_wallet_details",
+                ["fn", "dumps", ["var", "database_wallet_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "connection_string", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_connection_string",
+                ["item", ["var", "kwargs"], "connection_string"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "connection_string"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_authentication_details", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_authentication_details",
+                ["item", ["var", "kwargs"], "database_authentication_details"]
+              ],
+              [
+                "do",
+                [
+                  "call",
+                  "pop",
+                  ["var", "kwargs"],
+                  "database_authentication_details"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_connection_type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_connection_type",
+                ["item", ["var", "kwargs"], "database_connection_type"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "database_connection_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_role", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_role",
+                ["item", ["var", "kwargs"], "database_role"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_role"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_database_type",
+                ["item", ["var", "kwargs"], "database_type"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_type"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "dns_configuration", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_dns_configuration",
+                ["item", ["var", "kwargs"], "dns_configuration"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "dns_configuration"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "is_failure_retried", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_is_failure_retried",
+                ["item", ["var", "kwargs"], "is_failure_retried"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "is_failure_retried"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_query", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "configuration_query",
+                ["item", ["var", "kwargs"], "database_query"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "database_query"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "is_ipv6", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_i_pv6",
+                ["item", ["var", "kwargs"], "is_ipv6"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "is_ipv6"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_wallet", ["var", "kwargs"]],
+            [["do", ["call", "pop", ["var", "kwargs"], "database_wallet"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "database_service_name", ["var", "kwargs"]],
+            [
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "database_service_name"]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.apm_synthetics.src.oci_cli_apm_synthetic.generated.apmsynthetic_cli.update_monitor_sql_monitor_configuration",
+        "complexTypes": {
+          "vantage-points": "apm_synthetics:list[string]",
+          "script-parameters": "apm_synthetics:list[MonitorScriptParameter]",
+          "availability-configuration": "apm_synthetics:AvailabilityConfiguration",
+          "maintenance-window-schedule": "apm_synthetics:MaintenanceWindowSchedule",
+          "freeform-tags": "apm_synthetics:dict(str, string)",
+          "defined-tags": "apm_synthetics:dict(str, dict(str, object))",
+          "configuration-dns-configuration": "apm_synthetics:DnsConfiguration",
+          "configuration-database-authentication-details": "apm_synthetics:BasicAuthenticationDetails",
+          "configuration-database-wallet-details": "apm_synthetics:DatabaseWalletDetails"
+        },
+        "params": [
+          {
+            "name": "apm_domain_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "monitor_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vantage_points",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "script_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "status",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "repeat_interval_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_run_once",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "script_parameters",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_configuration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "maintenance_window_schedule",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_run_now",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scheduling_policy",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "batch_interval_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_i_pv6",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_is_failure_retried",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_dns_configuration",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_query",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_authentication_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_role",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_connection_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "configuration_database_wallet_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "apm_synthetics.apm_synthetic",
+        "method": "update_monitor",
+        "http": "PUT",
+        "path": "/monitors/{monitorId}",
+        "positionalArgs": [
+          "apm_domain_id",
+          "monitor_id",
+          "update_monitor_details"
+        ],
+        "pathParams": {
+          "monitorId": "monitor_id"
+        },
+        "queryParams": {
+          "apmDomainId": {
+            "arg": "apm_domain_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_monitor_details",
+        "responseType": "Monitor",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["apm_domain_id"],
+          "param": "apm_domain_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["monitor_id"],
+          "param": "monitor_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["vantagePoints"],
+          "transform": "parse_json_parameter",
+          "param": "vantage_points",
+          "when": "vantage_points is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["scriptId"],
+          "param": "script_id",
+          "when": "script_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["status"],
+          "param": "status",
+          "when": "status is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["repeatIntervalInSeconds"],
+          "param": "repeat_interval_in_seconds",
+          "when": "repeat_interval_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["isRunOnce"],
+          "param": "is_run_once",
+          "when": "is_run_once is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["timeoutInSeconds"],
+          "param": "timeout_in_seconds",
+          "when": "timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["target"],
+          "param": "target",
+          "when": "target is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["scriptParameters"],
+          "transform": "parse_json_parameter",
+          "param": "script_parameters",
+          "when": "script_parameters is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["availabilityConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "availability_configuration",
+          "when": "availability_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["maintenanceWindowSchedule"],
+          "transform": "parse_json_parameter",
+          "param": "maintenance_window_schedule",
+          "when": "maintenance_window_schedule is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["isRunNow"],
+          "param": "is_run_now",
+          "when": "is_run_now is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["schedulingPolicy"],
+          "param": "scheduling_policy",
+          "when": "scheduling_policy is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["batchIntervalInSeconds"],
+          "param": "batch_interval_in_seconds",
+          "when": "batch_interval_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["isIPv6"],
+          "param": "is_i_pv6",
+          "when": "is_i_pv6 is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "isFailureRetried"],
+          "param": "configuration_is_failure_retried",
+          "when": "configuration_is_failure_retried is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "dnsConfiguration"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_dns_configuration",
+          "when": "configuration_dns_configuration is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "databaseType"],
+          "param": "configuration_database_type",
+          "when": "configuration_database_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "query"],
+          "param": "configuration_query",
+          "when": "configuration_query is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "databaseAuthenticationDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_database_authentication_details",
+          "when": "configuration_database_authentication_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "databaseRole"],
+          "param": "configuration_database_role",
+          "when": "configuration_database_role is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "databaseConnectionType"],
+          "param": "configuration_database_connection_type",
+          "when": "configuration_database_connection_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "connectionString"],
+          "param": "configuration_connection_string",
+          "when": "configuration_connection_string is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "databaseWalletDetails"],
+          "transform": "parse_json_parameter",
+          "param": "configuration_database_wallet_details",
+          "when": "configuration_database_wallet_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_monitor_details",
+          "key": ["configuration", "configType"],
+          "value": "SQL_CONFIG"
+        }
+      ],
       "params": [
         {
           "kind": "option",

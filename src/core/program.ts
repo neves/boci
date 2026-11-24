@@ -5,9 +5,10 @@
  * command's kwargs, which the Engine then binds to the request like any Generated command.
  */
 import { randomUUID } from "node:crypto";
-import { basename } from "node:path";
+import { basename, resolve } from "node:path";
 import { expandHomeDir } from "../utils/expandHomeDir.ts";
 import { decodePythonUtf8 } from "../utils/utf8.ts";
+import { isZipBuffer } from "../utils/zip.ts";
 import { inheritedDiscriminator, type Model } from "./camelize.ts";
 import type { TypedParam } from "./convert.ts";
 import type { OperationResult } from "./operation.ts";
@@ -202,6 +203,14 @@ export class ProgramResponse {
   get requestId(): string | null {
     return this.headers.get("opc-request-id") ?? null;
   }
+
+  get nextPage(): string | null {
+    return this.headers.get("opc-next-page") ?? null;
+  }
+
+  get hasNextPage(): boolean {
+    return this.nextPage !== null;
+  }
 }
 
 /**
@@ -209,8 +218,46 @@ export class ProgramResponse {
  * Catchable by `except ServiceError:` and `except Exception:`.
  */
 export class ProgramServiceError extends Error {
+  private parsedBody?: { code?: string; message?: string } | null;
+
   constructor(readonly result: OperationResult) {
     super(`ServiceError(${result.response.status})`);
+  }
+
+  get status(): number {
+    return this.result.response.status;
+  }
+
+  get headers(): ProgramHeaders {
+    return new ProgramHeaders(this.result.response.headers);
+  }
+
+  get requestId(): string | null {
+    return this.headers.get("opc-request-id") ?? null;
+  }
+
+  private body(): { code?: string; message?: string } | null {
+    if (this.parsedBody !== undefined) return this.parsedBody;
+    try {
+      const parsed = JSON.parse(this.result.raw);
+      this.parsedBody =
+        parsed && typeof parsed === "object" && !Array.isArray(parsed)
+          ? (parsed as { code?: string; message?: string })
+          : null;
+    } catch {
+      this.parsedBody = null;
+    }
+    return this.parsedBody;
+  }
+
+  get code(): string | null {
+    const c = this.body()?.code;
+    return typeof c === "string" ? c : null;
+  }
+
+  get serviceMessage(): string {
+    const m = this.body()?.message;
+    return typeof m === "string" ? m : this.result.raw;
   }
 }
 
@@ -338,6 +385,12 @@ export type ProgramContext = {
   tenancy?: () => string | null;
   namespace?: string;
   requestId?: string | null;
+  endpoint?: string | null;
+  configFile?: string | null;
+  profile?: string | null;
+  auth?: string | null;
+  enableDualStack?: boolean;
+  regionOverride?: string | null;
   defaultMap?: Dict | null;
   env?: Record<string, string | undefined>;
   loadContextDefaults?: () => Dict;
@@ -347,6 +400,7 @@ export type ProgramContext = {
   renderedCount?: number;
   echoCount?: number;
   sleepCount?: number;
+  writtenFiles?: Set<number>;
 };
 
 /**
@@ -373,20 +427,27 @@ class ProgramTarget {
  */
 export class ProgramFile {
   private consumed = false;
+  private closed = false;
+  private readonly chunks: Uint8Array[] = [];
   constructor(
     readonly mode: string,
     private readonly data?: Uint8Array,
     /** The path given on the command line (`-` for stdio), when the file came from one. */
     readonly name?: string,
+    private readonly onClose?: (data: Uint8Array) => void,
   ) {}
 
   /** The same file, unread: each run of a program opens its files afresh. */
   reopen(): ProgramFile {
-    return new ProgramFile(this.mode, this.data, this.name);
+    return new ProgramFile(this.mode, this.data, this.name, this.onClose);
   }
 
   get binary(): boolean {
     return this.mode.includes("b");
+  }
+
+  get writable(): boolean {
+    return /[wax+]/.test(this.mode);
   }
 
   read(): string | Uint8Array {
@@ -402,6 +463,42 @@ export class ProgramFile {
       throw new ProgramUnsupported("UnicodeDecodeError");
     }
     return text.replace(/\r\n?/g, "\n");
+  }
+
+  write(chunk: unknown): number {
+    if (!this.writable)
+      throw new ProgramUnsupported("io.UnsupportedOperation: not writable");
+    if (this.closed)
+      throw new ProgramRaise("ValueError", "I/O operation on closed file.");
+    if (this.binary) {
+      if (!(chunk instanceof Uint8Array))
+        throw new ProgramRaise(
+          "TypeError",
+          "a bytes-like object is required, not 'str'",
+        );
+      this.chunks.push(chunk);
+      return chunk.length;
+    }
+    if (typeof chunk !== "string")
+      throw new ProgramRaise("TypeError", "write() argument must be str");
+    this.chunks.push(new TextEncoder().encode(chunk));
+    return chunk.length;
+  }
+
+  close(): void {
+    if (this.closed) return;
+    if (!this.writable) return;
+    this.closed = true;
+    if (!this.onClose) return;
+    let total = 0;
+    for (const c of this.chunks) total += c.length;
+    const out = new Uint8Array(total);
+    let offset = 0;
+    for (const c of this.chunks) {
+      out.set(c, offset);
+      offset += c.length;
+    }
+    this.onClose(out);
   }
 
   /** `for line in file`: text lines, each with its newline. */
@@ -436,8 +533,8 @@ const pyTruthy = (v: unknown): boolean => {
   return truthy(v);
 };
 
-/** `cli_util.to_dict(obj)`: flatten SDK models to hyphenated dicts, preserve plain dicts/lists. */
-export function toDictValue(v: unknown): unknown {
+/** `cli_util.to_dict(obj)` (hyphenated) or `oci.util.to_dict(obj)` (snake_case). */
+export function toDictValue(v: unknown, snakeCase = false): unknown {
   if (
     v === null ||
     v === undefined ||
@@ -447,12 +544,12 @@ export function toDictValue(v: unknown): unknown {
   )
     return v;
   if (v instanceof ProgramHeaders) return Object.fromEntries(v.entries());
-  if (Array.isArray(v)) return v.map(toDictValue);
+  if (Array.isArray(v)) return v.map((elem) => toDictValue(elem, snakeCase));
   if (isDict(v)) {
     const meta = modelMeta.get(v);
-    if (meta) return renderModel(v, meta.type, meta.models);
+    if (meta) return renderModel(v, meta.type, meta.models, snakeCase);
     return Object.fromEntries(
-      Object.entries(v).map(([k, val]) => [k, toDictValue(val)]),
+      Object.entries(v).map(([k, val]) => [k, toDictValue(val, snakeCase)]),
     );
   }
   return v;
@@ -460,6 +557,9 @@ export function toDictValue(v: unknown): unknown {
 
 /** Python iteration: a list's items, a dict's keys, a str's characters, a file's lines. */
 function iterate(v: unknown): unknown[] {
+  if (v === null || v === undefined) {
+    throw new ProgramRaise("TypeError", "'NoneType' object is not iterable");
+  }
   if (Array.isArray(v)) return v;
   if (v instanceof ProgramHeaders) return v.keys();
   if (isDict(v)) return Object.keys(v);
@@ -517,6 +617,10 @@ function pyStr(v: unknown): string {
     return `[${parts.join(", ")}]`;
   }
   if (isDict(v)) {
+    // OCI SDK models implement __str__/__repr__ as oci.util.formatted_flat_dict(self).
+    if (modelMeta.has(v)) {
+      return JSON.stringify(sortKeys(toDictValue(v, true)), null, 2);
+    }
     const parts = Object.entries(v).map(
       ([k, val]) => `${pyRepr(k)}: ${pyElemRepr(val)}`,
     );
@@ -567,19 +671,223 @@ export function modelAttr(obj: Dict, attr: string): unknown {
   return null;
 }
 
-function matchesException(e: unknown, excType: string): boolean {
+const MAX_WHILE_ITERATIONS = 10_000;
+
+/** Engine replay/stop traps that must bypass Python `except`/`else`/`finally`/`with` cleanup. */
+function isSuspension(e: unknown): boolean {
+  return (
+    e instanceof ProgramConfirm ||
+    e instanceof ProgramSecret ||
+    e instanceof ProgramLookup ||
+    e instanceof ProgramSdkCall ||
+    e instanceof ProgramListCall ||
+    e instanceof ProgramWaitUntil ||
+    e instanceof ProgramRender ||
+    e instanceof ProgramRenderData ||
+    e instanceof ProgramEcho ||
+    e instanceof ProgramSleep ||
+    e instanceof ProgramUnsupported
+  );
+}
+
+function matchesException(e: unknown, excType: string | string[]): boolean {
+  if (Array.isArray(excType))
+    return excType.some((t) => matchesException(e, t));
   if (excType === "Exception")
     return e instanceof ProgramRaise || e instanceof ProgramServiceError;
   if (excType === "ServiceError") return e instanceof ProgramServiceError;
   if (e instanceof ProgramRaise) {
     if (e.cls === excType) return true;
+    if (excType === "ValueError" && e.cls === "JSONDecodeError") return true;
     if (
       excType === "OSError" &&
-      (e.cls === "FileNotFoundError" || e.cls === "PermissionError")
+      (e.cls === "FileNotFoundError" ||
+        e.cls === "FileExistsError" ||
+        e.cls === "IsADirectoryError" ||
+        e.cls === "PermissionError")
     )
       return true;
   }
   return false;
+}
+
+const CLICK_FG_COLORS: Record<string, number> = {
+  black: 30,
+  red: 31,
+  green: 32,
+  yellow: 33,
+  blue: 34,
+  magenta: 35,
+  cyan: 36,
+  white: 37,
+  reset: 39,
+  bright_black: 90,
+  bright_red: 91,
+  bright_green: 92,
+  bright_yellow: 93,
+  bright_blue: 94,
+  bright_magenta: 95,
+  bright_cyan: 96,
+  bright_white: 97,
+};
+
+function clickColorCode(color: unknown, isBg: boolean): string {
+  const offset = isBg ? 10 : 0;
+  if (typeof color === "number" && Number.isInteger(color)) {
+    return `\x1b[${38 + offset};5;${color}m`;
+  }
+  if (typeof color === "string") {
+    const code = CLICK_FG_COLORS[color];
+    if (code === undefined)
+      throw new ProgramRaise("TypeError", `Unknown color ${pyRepr(color)}`);
+    return `\x1b[${code + offset}m`;
+  }
+  if (
+    Array.isArray(color) &&
+    color.length === 3 &&
+    color.every((c) => typeof c === "number" && Number.isInteger(c))
+  ) {
+    return `\x1b[${38 + offset};2;${color[0]};${color[1]};${color[2]}m`;
+  }
+  throw new ProgramUnsupported("click.style color");
+}
+
+function clickStyle(text: unknown, opts: Dict): string {
+  const str = typeof text === "string" ? text : pyStr(text);
+  const bits: string[] = [];
+  if (opts.fg !== undefined && opts.fg !== null)
+    bits.push(clickColorCode(opts.fg, false));
+  if (opts.bg !== undefined && opts.bg !== null)
+    bits.push(clickColorCode(opts.bg, true));
+  const flags: [string, number, number][] = [
+    ["bold", 1, 22],
+    ["dim", 2, 22],
+    ["underline", 4, 24],
+    ["overline", 53, 55],
+    ["italic", 3, 23],
+    ["blink", 5, 25],
+    ["reverse", 7, 27],
+    ["strikethrough", 9, 29],
+  ];
+  for (const [key, on, off] of flags) {
+    if (opts[key] !== undefined && opts[key] !== null) {
+      bits.push(`\x1b[${pyTruthy(opts[key]) ? on : off}m`);
+    }
+  }
+  bits.push(str);
+  const reset = opts.reset === undefined ? true : pyTruthy(opts.reset);
+  if (reset) bits.push("\x1b[0m");
+  return bits.join("");
+}
+
+function pyInt(args: unknown[]): number {
+  if (args.length === 0) return 0;
+  const val = args[0];
+  if (args.length === 1) {
+    if (typeof val === "boolean") return val ? 1 : 0;
+    if (typeof val === "number") {
+      if (!Number.isFinite(val))
+        throw new ProgramRaise("OverflowError", "cannot convert float to int");
+      return Math.trunc(val);
+    }
+    if (typeof val === "string") {
+      const cleaned = val.trim().replace(/_/g, "");
+      if (!/^[+-]?\d+$/.test(cleaned)) {
+        throw new ProgramRaise(
+          "ValueError",
+          `invalid literal for int() with base 10: ${pyRepr(val)}`,
+        );
+      }
+      const n = Number.parseInt(cleaned, 10);
+      if (!Number.isSafeInteger(n))
+        throw new ProgramUnsupported("int() overflow");
+      return n;
+    }
+    throw new ProgramRaise(
+      "TypeError",
+      "int() argument must be a string or a number",
+    );
+  }
+  if (args.length === 2) {
+    const base = args[1];
+    if (typeof val !== "string")
+      throw new ProgramRaise(
+        "TypeError",
+        "int() can't convert non-string with explicit base",
+      );
+    if (
+      typeof base !== "number" ||
+      !Number.isInteger(base) ||
+      (base !== 0 && (base < 2 || base > 36))
+    ) {
+      throw new ProgramRaise(
+        "ValueError",
+        "int() base must be >= 2 and <= 36, or 0",
+      );
+    }
+    let s = val.trim().replace(/_/g, "");
+    let sign = 1;
+    if (s.startsWith("+")) s = s.slice(1);
+    else if (s.startsWith("-")) {
+      sign = -1;
+      s = s.slice(1);
+    }
+    let radix = base;
+    if (radix === 0) {
+      if (s.startsWith("0x") || s.startsWith("0X")) {
+        radix = 16;
+        s = s.slice(2);
+      } else if (s.startsWith("0o") || s.startsWith("0O")) {
+        radix = 8;
+        s = s.slice(2);
+      } else if (s.startsWith("0b") || s.startsWith("0B")) {
+        radix = 2;
+        s = s.slice(2);
+      } else {
+        radix = 10;
+      }
+    } else if (
+      (radix === 16 && (s.startsWith("0x") || s.startsWith("0X"))) ||
+      (radix === 8 && (s.startsWith("0o") || s.startsWith("0O"))) ||
+      (radix === 2 && (s.startsWith("0b") || s.startsWith("0B")))
+    ) {
+      s = s.slice(2);
+    }
+    const validDigits = "0123456789abcdefghijklmnopqrstuvwxyz".slice(0, radix);
+    if (
+      s.length === 0 ||
+      ![...s.toLowerCase()].every((ch) => validDigits.includes(ch))
+    ) {
+      throw new ProgramRaise(
+        "ValueError",
+        `invalid literal for int() with base ${base}: ${pyRepr(val)}`,
+      );
+    }
+    const n = sign * Number.parseInt(s, radix);
+    if (!Number.isSafeInteger(n))
+      throw new ProgramUnsupported("int() overflow");
+    return n;
+  }
+  throw new ProgramUnsupported("int() args");
+}
+
+function pyFind(s: string, args: unknown[]): number {
+  if (args.length < 1 || args.length > 3 || typeof args[0] !== "string")
+    throw new ProgramUnsupported("str.find()");
+  const sub = args[0];
+  const len = s.length;
+  const clamp = (raw: unknown, fallback: number): number => {
+    if (raw === undefined || raw === null) return fallback;
+    if (typeof raw !== "number" || !Number.isInteger(raw))
+      throw new ProgramUnsupported("str.find() index");
+    const i = raw < 0 ? raw + len : raw;
+    return Math.max(0, Math.min(len, i));
+  };
+  const start = clamp(args[1], 0);
+  const end = clamp(args[2], len);
+  if (end < start) return -1;
+  const idx = s.slice(start, end).indexOf(sub);
+  return idx < 0 ? -1 : start + idx;
 }
 
 /** Resolve attribute/index suffixes in a Python format field (e.g. `obj.attr`, `arr[0]`). */
@@ -595,6 +903,15 @@ function formatTraverse(base: unknown, path: string): unknown {
         if (attr === "data") cur = cur.data;
         else if (attr === "headers") cur = cur.headers;
         else if (attr === "status") cur = cur.status;
+        else if (attr === "request_id") cur = cur.requestId;
+        else if (attr === "next_page") cur = cur.nextPage;
+        else if (attr === "has_next_page") cur = cur.hasNextPage;
+        else throw new ProgramUnsupported(`format attr .${attr}`);
+      } else if (cur instanceof ProgramServiceError) {
+        if (attr === "status") cur = cur.status;
+        else if (attr === "code") cur = cur.code;
+        else if (attr === "message") cur = cur.serviceMessage;
+        else if (attr === "headers") cur = cur.headers;
         else if (attr === "request_id") cur = cur.requestId;
         else throw new ProgramUnsupported(`format attr .${attr}`);
       } else if (isDict(cur)) {
@@ -823,6 +1140,9 @@ export type ProgramFiles = {
   open(path: string, mode: string): ProgramFile;
   exists(path: string): boolean;
   isfile(path: string): boolean;
+  abspath?(path: string): string;
+  isZipfile?(path: string): boolean;
+  deleteFnEndpointCache?(ctxObj: Dict, functionId: string): void;
 };
 
 const NO_FILES: ProgramFiles = {
@@ -874,6 +1194,14 @@ export function runProgram(
   const caught: Error[] = [];
   const ctxObj = new ProgramObject("ctx.obj", {
     request_id: context.requestId ?? null,
+    endpoint: context.endpoint ?? null,
+    config_file: context.configFile ?? null,
+    profile: context.profile ?? null,
+    auth: context.auth ?? null,
+    enable_dual_stack: context.enableDualStack ?? false,
+    ...(context.regionOverride !== undefined && context.regionOverride !== null
+      ? { region: context.regionOverride }
+      : {}),
   });
 
   const item = (obj: unknown, key: unknown): unknown => {
@@ -996,6 +1324,12 @@ export function runProgram(
           markMutated(obj);
           return null;
         }
+        case "extend": {
+          if (args.length !== 1) break;
+          obj.push(...iterate(args[0]));
+          markMutated(obj);
+          return null;
+        }
       }
     } else if (typeof obj === "string") {
       switch (method) {
@@ -1071,9 +1405,16 @@ export function runProgram(
           }
           break;
         }
+        case "find":
+          return pyFind(obj, args);
       }
-    } else if (obj instanceof ProgramFile && method === "read") {
-      if (args.length === 0) return obj.read();
+    } else if (obj instanceof ProgramFile) {
+      if (method === "read" && args.length === 0) return obj.read();
+      if (method === "write" && args.length === 1) return obj.write(args[0]);
+      if (method === "close" && args.length === 0) {
+        obj.close();
+        return null;
+      }
     } else if (obj instanceof Uint8Array && method === "decode") {
       if (args.length === 0 || /^utf-?8$/i.test(String(args[0])))
         try {
@@ -1130,6 +1471,35 @@ export function runProgram(
         return JSON.stringify(a);
       case "dumpsSorted":
         return JSON.stringify(sortKeys(a));
+      case "loads": {
+        let text: string;
+        if (typeof a === "string") text = a;
+        else if (a instanceof Uint8Array) {
+          try {
+            text = decodePythonUtf8(a);
+          } catch {
+            throw new ProgramRaise("UnicodeDecodeError", "invalid utf-8");
+          }
+        } else {
+          throw new ProgramRaise(
+            "TypeError",
+            "the JSON object must be str, bytes or bytearray",
+          );
+        }
+        try {
+          return JSON.parse(text);
+        } catch (err) {
+          throw new ProgramRaise(
+            "JSONDecodeError",
+            err instanceof Error ? err.message : "Invalid JSON",
+          );
+        }
+      }
+      case "load": {
+        if (!(a instanceof ProgramFile))
+          throw new ProgramUnsupported("json.load() on non-file");
+        return fn("loads", [a.read()]);
+      }
       case "parse": {
         // cli_util.parse_json_parameter(name, value, default=None, camelize_keys=True)
         const defaultVal = args.length >= 3 ? args[2] : null;
@@ -1143,8 +1513,66 @@ export function runProgram(
           : randomUUID().replaceAll("-", "").toUpperCase();
       case "str":
         return pyStr(a);
+      case "int":
+        return pyInt(args);
       case "bool":
         return pyTruthy(a);
+      case "enumerate": {
+        const items = iterate(a);
+        const start = args.length >= 2 ? args[1] : 0;
+        if (typeof start !== "number" || !Number.isInteger(start))
+          throw new ProgramUnsupported("enumerate() start");
+        return items.map((x, idx) => [start + idx, x]);
+      }
+      case "any":
+        return iterate(a).some((x) => pyTruthy(x));
+      case "all":
+        return iterate(a).every((x) => pyTruthy(x));
+      case "min":
+      case "max": {
+        const items = args.length === 1 ? iterate(a) : args;
+        if (items.length === 0) {
+          throw new ProgramRaise(
+            "ValueError",
+            `${name}() iterable argument is empty`,
+          );
+        }
+        const cmpOp = name === "min" ? "<" : ">";
+        let best = items[0];
+        for (let i = 1; i < items.length; i++) {
+          if (compare(cmpOp, items[i], best)) best = items[i];
+        }
+        return best;
+      }
+      case "pyMap": {
+        if (typeof a !== "string") throw new ProgramUnsupported("map() target");
+        return iterate(b).map((x) => fn(a, [x]));
+      }
+      case "clickStyle":
+        return clickStyle(a, isDict(b) ? b : {});
+      case "abspath":
+        if (typeof a !== "string")
+          throw new ProgramUnsupported("os.path.abspath()");
+        return files.abspath ? files.abspath(a) : resolve(a);
+      case "isZipfile":
+        if (typeof a === "string") {
+          return files.isZipfile ? files.isZipfile(a) : false;
+        }
+        if (a instanceof ProgramFile) {
+          const data = a.reopen().read();
+          return isZipBuffer(
+            data instanceof Uint8Array ? data : new TextEncoder().encode(data),
+          );
+        }
+        return false;
+      case "deleteFnEndpointCache": {
+        const ctxFields =
+          a instanceof ProgramObject ? a.fields : isDict(a) ? a : {};
+        if (typeof b === "string" && files.deleteFnEndpointCache) {
+          files.deleteFnEndpointCache(ctxFields, b);
+        }
+        return null;
+      }
       case "stderr":
         return new ProgramObject("sys.stderr");
       case "stdout":
@@ -1208,8 +1636,12 @@ export function runProgram(
       }
       case "toDict":
         return toDictValue(a);
+      case "sdkToDict":
+        return toDictValue(a, true);
       case "formattedFlatDict":
         return JSON.stringify(sortKeys(toDictValue(a)), null, 2);
+      case "sdkFormattedFlatDict":
+        return JSON.stringify(sortKeys(toDictValue(a, true)), null, 2);
       case "tenancyFromConfig":
         return context.tenancy?.() ?? null;
       case "expanduser":
@@ -1478,9 +1910,22 @@ export function runProgram(
           if (attr === "headers") return obj.headers;
           if (attr === "status") return obj.status;
           if (attr === "request_id") return obj.requestId;
+          if (attr === "next_page") return obj.nextPage;
+          if (attr === "has_next_page") return obj.hasNextPage;
           throw new ProgramRaise(
             "AttributeError",
             `'Response' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj instanceof ProgramServiceError) {
+          if (attr === "status") return obj.status;
+          if (attr === "code") return obj.code;
+          if (attr === "message") return obj.serviceMessage;
+          if (attr === "headers") return obj.headers;
+          if (attr === "request_id") return obj.requestId;
+          throw new ProgramRaise(
+            "AttributeError",
+            `'ServiceError' object has no attribute '${attr}'`,
           );
         }
         if (obj === null || obj === undefined) {
@@ -1492,6 +1937,9 @@ export function runProgram(
         if (isDict(obj)) return modelAttr(obj, attr);
         throw new ProgramUnsupported(`attribute .${attr}`);
       }
+      case "invoke":
+        recordInvoke(rest as unknown[]);
+        return null;
       case "format": {
         const receiver = evaluate(rest[0] as Expr);
         if (typeof receiver !== "string")
@@ -1786,6 +2234,22 @@ export function runProgram(
     throw new ProgramUnsupported(`TypeError: ${opName}`);
   };
 
+  const recordInvoke = (rest: unknown[]): void => {
+    if (invoked) throw new ProgramUnsupported("second invoke");
+    const star = rest[1] === null ? {} : evaluate(rest[1] as Expr);
+    if (!isDict(star)) throw new ProgramUnsupported("** of a non-dict");
+    invoked = { ...star };
+    const picked =
+      rest[2] === undefined || typeof rest[2] === "number"
+        ? (rest[2] ?? 0)
+        : evaluate(rest[2] as Expr);
+    if (!(picked instanceof ProgramTarget) && typeof picked !== "number")
+      throw new ProgramUnsupported("invoke of a non-command");
+    target = typeof picked === "number" ? picked : picked.index;
+    for (const [name, e] of rest[0] as [string, Expr][])
+      invoked[name] = evaluate(e);
+  };
+
   const execute = (statements: Statement[]): void => {
     for (const st of statements) {
       const [op, ...rest] = st as [string, ...unknown[]];
@@ -1899,6 +2363,47 @@ export function runProgram(
             }
           }
           break;
+        case "while": {
+          const test = rest[0] as Expr;
+          const body = rest[1] as Statement[];
+          const orelse = (rest[2] as Statement[] | undefined) ?? [];
+          let iters = 0;
+          let broke = false;
+          while (pyTruthy(evaluate(test))) {
+            if (++iters > MAX_WHILE_ITERATIONS) {
+              throw new ProgramUnsupported(
+                "while loop iteration limit exceeded",
+              );
+            }
+            try {
+              execute(body);
+            } catch (e) {
+              if (e instanceof ProgramBreak) {
+                broke = true;
+                break;
+              }
+              if (e instanceof ProgramContinue) continue;
+              throw e;
+            }
+          }
+          if (!broke && orelse.length > 0) execute(orelse);
+          break;
+        }
+        case "withOpen": {
+          const varName = rest[0] as string | null;
+          const opened = evaluate(rest[1] as Expr);
+          if (!(opened instanceof ProgramFile))
+            throw new ProgramUnsupported("with open() returned non-file");
+          if (varName !== null) env[varName] = opened;
+          try {
+            execute(rest[2] as Statement[]);
+          } catch (e) {
+            if (!isSuspension(e)) opened.close();
+            throw e;
+          }
+          opened.close();
+          break;
+        }
         case "try":
           try {
             execute(rest[0] as Statement[]);
@@ -1914,24 +2419,48 @@ export function runProgram(
             }
           }
           break;
-        case "tryMulti":
+        case "tryMulti": {
+          const body = rest[0] as Statement[];
+          const handlers = rest[1] as [
+            string | string[],
+            string | null,
+            Statement[],
+          ][];
+          const orelse = (rest[2] as Statement[] | undefined) ?? [];
+          const finalbody = (rest[3] as Statement[] | undefined) ?? [];
+          let completedNormally = false;
           try {
-            execute(rest[0] as Statement[]);
-          } catch (e) {
-            const handlers = rest[1] as [string, string | null, Statement[]][];
-            const matched = handlers.find(([excType]) =>
-              matchesException(e, excType),
-            );
-            if (!matched) throw e;
-            if (matched[1] !== null) env[matched[1]] = e;
-            caught.push(e as Error);
             try {
-              execute(matched[2]);
-            } finally {
-              caught.pop();
+              execute(body);
+              completedNormally = true;
+            } catch (e) {
+              if (isSuspension(e)) throw e;
+              const matched = handlers.find(([excType]) =>
+                matchesException(e, excType),
+              );
+              if (!matched) throw e;
+              if (matched[1] !== null) env[matched[1]] = e;
+              caught.push(e as Error);
+              try {
+                execute(matched[2]);
+              } finally {
+                caught.pop();
+              }
             }
+            if (completedNormally && orelse.length > 0) {
+              execute(orelse);
+            }
+          } catch (e) {
+            if (finalbody.length > 0 && !isSuspension(e)) {
+              execute(finalbody);
+            }
+            throw e;
+          }
+          if (finalbody.length > 0) {
+            execute(finalbody);
           }
           break;
+        }
         case "reraise": {
           const active = caught.at(-1);
           if (!active)
@@ -2010,22 +2539,9 @@ export function runProgram(
             nestData,
           );
         }
-        case "invoke": {
-          if (invoked) throw new ProgramUnsupported("second invoke");
-          const star = rest[1] === null ? {} : evaluate(rest[1] as Expr);
-          if (!isDict(star)) throw new ProgramUnsupported("** of a non-dict");
-          invoked = { ...star };
-          const picked =
-            rest[2] === undefined || typeof rest[2] === "number"
-              ? (rest[2] ?? 0)
-              : evaluate(rest[2] as Expr);
-          if (!(picked instanceof ProgramTarget) && typeof picked !== "number")
-            throw new ProgramUnsupported("invoke of a non-command");
-          target = typeof picked === "number" ? picked : picked.index;
-          for (const [name, e] of rest[0] as [string, Expr][])
-            invoked[name] = evaluate(e);
+        case "invoke":
+          recordInvoke(rest);
           break;
-        }
         default:
           throw new ProgramUnsupported(`statement ${op}`);
       }

@@ -1,9 +1,20 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
-import { closeSync, existsSync, readFileSync, statSync } from "node:fs";
-import { resolve } from "node:path";
+import { createHash } from "node:crypto";
+import {
+  appendFileSync,
+  closeSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { checkFileAccessibility } from "../lib/accessibility.ts";
+import { isZipBuffer } from "../utils/zip.ts";
 import {
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,
@@ -1042,6 +1053,19 @@ async function main(io: Invocation): Promise<void> {
               typeof wrapperRootValues.request_id === "string"
                 ? wrapperRootValues.request_id
                 : null,
+            endpoint:
+              typeof wrapperRootValues.endpoint === "string"
+                ? wrapperRootValues.endpoint
+                : null,
+            configFile: wrapperSettings.configFile,
+            profile: wrapperSettings.profile,
+            auth: wrapperSettings.auth,
+            enableDualStack: Boolean(wrapperRootValues.enable_dual_stack),
+            regionOverride:
+              typeof wrapperRootValues.region === "string"
+                ? wrapperRootValues.region
+                : null,
+            writtenFiles: new Set<number>(),
           },
           stdin,
         );
@@ -1052,7 +1076,15 @@ async function main(io: Invocation): Promise<void> {
         // The wrapper returned without invoking a generated command (or finished via SDK calls).
         if (generated === undefined) return;
         command = generated.command;
-        callValues = generated.kwargs;
+        callValues =
+          values.force === true &&
+          (specCmd.params ?? []).some(
+            (p) =>
+              p.name === "force" &&
+              (p as { expose?: boolean }).expose === false,
+          )
+            ? { ...generated.kwargs, force: true }
+            : generated.kwargs;
         const failure = usageCheckFailure(command, callValues);
         if (failure) {
           io.err(`UsageError: ${failure.message}\n`);
@@ -1252,7 +1284,7 @@ async function runWrapper(
             : undefined,
         ),
       answers,
-      programFiles(io),
+      programFiles(io, ctx.writtenFiles),
       ctx,
     );
     if (!kwargs) return undefined;
@@ -1546,15 +1578,91 @@ async function runWrapper(
   }
 }
 
-/** What a wrapper program's `open()` and `os.path.exists()` see: files under the cwd. */
-function programFiles(io: Invocation): ProgramFiles {
+/** What a wrapper program's `open()`, `os.path.*`, and `zipfile.is_zipfile()` see: files under the cwd. */
+function programFiles(
+  io: Invocation,
+  writtenFiles?: Set<number>,
+): ProgramFiles {
+  let writeSeq = 0;
   return {
     open(path, mode) {
-      if (/[wax+]/.test(mode)) throw new ProgramUnsupported("open() to write");
       const resolved = resolve(io.cwd, path);
+      if (/[wax]/.test(mode)) {
+        if (mode.includes("+"))
+          throw new ProgramUnsupported("open() read/write mode");
+        const isExclusive = mode.includes("x");
+        const isAppend = mode.includes("a");
+        const seq = writeSeq++;
+        const alreadyWritten = writtenFiles?.has(seq) ?? false;
+        if (!alreadyWritten) {
+          try {
+            const st = statSync(resolved);
+            if (st.isDirectory()) {
+              throw new ProgramRaise(
+                "IsADirectoryError",
+                `[Errno 21] Is a directory: ${pyRepr(path)}`,
+              );
+            }
+            if (isExclusive) {
+              throw new ProgramRaise(
+                "FileExistsError",
+                `[Errno 17] File exists: ${pyRepr(path)}`,
+              );
+            }
+          } catch (e) {
+            if (e instanceof ProgramRaise) throw e;
+            const code = (e as NodeJS.ErrnoException).code;
+            if (code !== "ENOENT") {
+              if (code === "EACCES")
+                throw new ProgramRaise(
+                  "PermissionError",
+                  `[Errno 13] Permission denied: ${pyRepr(path)}`,
+                );
+              throw new ProgramUnsupported("open()");
+            }
+            if (!existsSync(dirname(resolved))) {
+              throw new ProgramRaise(
+                "FileNotFoundError",
+                `[Errno 2] No such file or directory: ${pyRepr(path)}`,
+              );
+            }
+          }
+        }
+        return new ProgramFile(mode, undefined, path, (bytes) => {
+          if (writtenFiles?.has(seq)) return;
+          try {
+            if (isAppend) appendFileSync(resolved, bytes);
+            else writeFileSync(resolved, bytes);
+            writtenFiles?.add(seq);
+          } catch (e) {
+            const code = (e as NodeJS.ErrnoException).code;
+            if (code === "EACCES")
+              throw new ProgramRaise(
+                "PermissionError",
+                `[Errno 13] Permission denied: ${pyRepr(path)}`,
+              );
+            if (code === "ENOENT")
+              throw new ProgramRaise(
+                "FileNotFoundError",
+                `[Errno 2] No such file or directory: ${pyRepr(path)}`,
+              );
+            if (code === "EISDIR")
+              throw new ProgramRaise(
+                "IsADirectoryError",
+                `[Errno 21] Is a directory: ${pyRepr(path)}`,
+              );
+            throw new ProgramRaise(
+              "OSError",
+              e instanceof Error ? e.message : String(e),
+            );
+          }
+        });
+      }
+      if (mode.includes("+"))
+        throw new ProgramUnsupported("open() read/write mode");
       try {
         checkFileAccessibility(resolved, "r");
-        return new ProgramFile(mode, readFileSync(resolved));
+        return new ProgramFile(mode, readFileSync(resolved), path);
       } catch (e) {
         if ((e as NodeJS.ErrnoException).code === "EACCES")
           throw new ProgramRaise(
@@ -1566,6 +1674,11 @@ function programFiles(io: Invocation): ProgramFiles {
             "FileNotFoundError",
             `[Errno 2] No such file or directory: ${pyRepr(path)}`,
           );
+        if ((e as NodeJS.ErrnoException).code === "EISDIR")
+          throw new ProgramRaise(
+            "IsADirectoryError",
+            `[Errno 21] Is a directory: ${pyRepr(path)}`,
+          );
         throw new ProgramUnsupported("open()");
       }
     },
@@ -1575,6 +1688,95 @@ function programFiles(io: Invocation): ProgramFiles {
         return path !== "" && statSync(resolve(io.cwd, path)).isFile();
       } catch {
         return false;
+      }
+    },
+    abspath: (path) => resolve(io.cwd, path),
+    isZipfile: (path) => {
+      if (!path) return false;
+      try {
+        const resolved = resolve(io.cwd, path);
+        if (!statSync(resolved).isFile()) return false;
+        return isZipBuffer(readFileSync(resolved));
+      } catch {
+        return false;
+      }
+    },
+    deleteFnEndpointCache: (ctxObj, functionId) => {
+      // Mirrors services.functions.src.oci_cli_functions.invoke_endpoint_cache.delete_cached_endpoint.
+      const CACHE_FILE_NAME = "functions-invoke-endpoint-cache.json";
+      const rawCfg = ctxObj.config_file;
+      const expandedCfg = rawCfg
+        ? resolve(
+            io.cwd,
+            expandVars(expandUser(String(rawCfg), io.env), io.env),
+          )
+        : null;
+      const cacheDir = expandedCfg
+        ? dirname(expandedCfg)
+        : join(expandUser("~", io.env), ".oci");
+      const cacheFile = join(cacheDir, CACHE_FILE_NAME);
+      let cacheData: { version?: unknown; entries?: Record<string, unknown> };
+      try {
+        const parsed = JSON.parse(readFileSync(cacheFile, "utf8"));
+        if (
+          !parsed ||
+          typeof parsed !== "object" ||
+          parsed.version !== 1 ||
+          !parsed.entries ||
+          typeof parsed.entries !== "object" ||
+          Array.isArray(parsed.entries)
+        ) {
+          return;
+        }
+        cacheData = parsed;
+      } catch {
+        return;
+      }
+      const toText = (v: unknown) =>
+        v === null || v === undefined
+          ? ""
+          : v === true
+            ? "True"
+            : v === false
+              ? "False"
+              : String(v);
+      const cfg =
+        ctxObj.config &&
+        typeof ctxObj.config === "object" &&
+        "fields" in ctxObj.config
+          ? (ctxObj.config as { fields: Record<string, unknown> }).fields
+          : {};
+      const keyParts: Record<string, string> = {
+        auth: toText(ctxObj.auth),
+        config_file: toText(expandedCfg),
+        enable_dual_stack: toText(ctxObj.enable_dual_stack),
+        endpoint: toText(ctxObj.endpoint || cfg.endpoint),
+        function_id: toText(functionId),
+        profile: toText(ctxObj.profile),
+        region: toText(ctxObj.region || cfg.region),
+      };
+      // Match Python json.dumps(..., sort_keys=True) default separators (", ", ": ").
+      const pyJson = `{${Object.keys(keyParts)
+        .sort()
+        .map((k) => `${JSON.stringify(k)}: ${JSON.stringify(keyParts[k])}`)
+        .join(", ")}}`;
+      const hash = createHash("sha256").update(pyJson).digest("hex");
+      const entries = cacheData.entries!;
+      if (!(hash in entries)) return;
+      delete entries[hash];
+      try {
+        mkdirSync(cacheDir, { recursive: true, mode: 0o700 });
+        const tmp = join(
+          cacheDir,
+          `.${CACHE_FILE_NAME}.${process.pid}.${Date.now()}`,
+        );
+        writeFileSync(
+          tmp,
+          `${JSON.stringify(sortJsonKeys(cacheData), null, 2)}\n`,
+        );
+        renameSync(tmp, cacheFile);
+      } catch {
+        // Cache cleanup is best-effort, matching invoke_endpoint_cache._write_cache.
       }
     },
   };

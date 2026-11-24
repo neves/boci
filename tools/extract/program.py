@@ -56,19 +56,26 @@ import inspect
 import textwrap
 
 METHODS = {
-    "get", "pop", "append", "insert", "setdefault", "split", "upper", "lower", "strip", "update",
-    "read", "rstrip", "decode", "keys", "join", "format", "items",
-    "startswith", "endswith", "replace",
+    "get", "pop", "append", "insert", "extend", "setdefault", "split", "upper", "lower", "strip", "update",
+    "read", "write", "close", "rstrip", "decode", "keys", "join", "format", "items",
+    "startswith", "endswith", "replace", "find",
 }
 FUNCTIONS = {
     "json.dumps": "dumps",
+    "json.loads": "loads",
+    "json.load": "load",
     "cli_util.parse_json_parameter": "parse",
     "cli_util.use_or_generate_request_id": "requestId",
     "use_or_generate_request_id": "requestId",
     "str": "str",
+    "int": "int",
     "len": "len",
     "dict": "dict",
     "bool": "bool",
+    "min": "min",
+    "max": "max",
+    "any": "any",
+    "all": "all",
     "b64encode": "b64encode",
     "base64.b64encode": "b64encode",
     "json_skeleton_utils.remove_json_skeleton_params_from_dict": "removeSkeleton",
@@ -79,8 +86,10 @@ FUNCTIONS = {
     "open": "open",
     "os.path.exists": "exists",
     "os.path.isfile": "isfile",
+    "os.path.abspath": "abspath",
     "os.path.expanduser": "expanduser",
     "os.path.expandvars": "expandvars",
+    "zipfile.is_zipfile": "isZipfile",
     "time.sleep": "sleep",
     "cli_util.to_dict": "toDict",
     "cli_util.formatted_flat_dict": "formattedFlatDict",
@@ -95,10 +104,17 @@ CATCHABLE = {
     "exceptions.ServiceError": "ServiceError",
     "ServiceError": "ServiceError",
     "ValueError": "ValueError",
+    "json.JSONDecodeError": "JSONDecodeError",
+    "json.decoder.JSONDecodeError": "JSONDecodeError",
+    "JSONDecodeError": "JSONDecodeError",
     "KeyError": "KeyError",
     "AttributeError": "AttributeError",
     "TypeError": "TypeError",
+    "IndexError": "IndexError",
+    "ZeroDivisionError": "ZeroDivisionError",
     "FileNotFoundError": "FileNotFoundError",
+    "FileExistsError": "FileExistsError",
+    "IsADirectoryError": "IsADirectoryError",
     "PermissionError": "PermissionError",
     "OSError": "OSError",
 }
@@ -126,6 +142,8 @@ HAND_CODED = {
     "services.object_storage.src.oci_cli_object_storage.objectstorage_cli_extended._get_sse_customer_key_details": "sseCustomerKey",
     # click.prompt(hide_input=True, confirmation_prompt=True) for a Rover secret (ticket 25).
     "services.rover.src.oci_cli_rover.rover_utils.prompt_for_secrets": "roverSecret",
+    # Functions invoke endpoint cache invalidation after update/delete.
+    "services.functions.src.oci_cli_functions.invoke_endpoint_cache.delete_cached_endpoint": "deleteFnEndpointCache",
 }
 BINOP = {
     ast.Add: "+",
@@ -257,6 +275,28 @@ class Compiler:
             )
         return False
 
+    def _is_oci_util_fn(self, func, name):
+        dotted = _dotted(func)
+        if dotted == f"oci.util.{name}":
+            return True
+        if isinstance(func, ast.Name) and func.id == name and func.id not in self.locals:
+            fn = self.globals.get(func.id)
+            return (
+                getattr(fn, "__module__", None) == "oci.util"
+                and getattr(fn, "__name__", None) == name
+            )
+        return False
+
+    def _is_ctx_invoke(self, func, scope):
+        return (
+            isinstance(func, ast.Attribute)
+            and func.attr == "invoke"
+            and (
+                _dotted(func.value) == "ctx"
+                or (isinstance(func.value, ast.Name) and self.name(func.value.id, scope) == "ctx")
+            )
+        )
+
     def _compile_open(self, call, scope):
         if any(isinstance(a, ast.Starred) for a in call.args) or len(call.args) > 2:
             raise Unsupported("call open")
@@ -271,6 +311,12 @@ class Compiler:
                 path_node = kw.value
             elif kw.arg == "mode" and mode_node is None:
                 mode_node = kw.value
+            elif (
+                kw.arg == "encoding"
+                and isinstance(kw.value, ast.Constant)
+                and (kw.value.value is None or (isinstance(kw.value.value, str) and kw.value.value.lower().replace("-", "") == "utf8"))
+            ):
+                continue
             else:
                 raise Unsupported("call open")
         if path_node is None:
@@ -377,6 +423,12 @@ class Compiler:
             else:
                 raise Unsupported("for")
             return [["for", target, self.expr(st.iter, scope), self.stmts(st.body, scope)]]
+        if isinstance(st, ast.While):
+            test = self.expr(st.test, scope)
+            body = self.stmts(st.body, scope)
+            if st.orelse:
+                return [["while", test, body, self.stmts(st.orelse, scope)]]
+            return [["while", test, body]]
         if isinstance(st, ast.Delete):
             out = []
             for t in st.targets:
@@ -385,39 +437,57 @@ class Compiler:
                 out.append(["del", self.expr(t.value, scope), self.expr(t.slice, scope)])
             return out
         if isinstance(st, ast.With):
-            # `with open(path, mode=...) as f:` only; closing the file after is invisible here.
-            if len(st.items) != 1:
+            if not st.items:
                 raise Unsupported("with")
-            item = st.items[0]
-            call = item.context_expr
-            if not (
-                isinstance(call, ast.Call) and _dotted(call.func) == "open"
-                and isinstance(item.optional_vars, ast.Name)
-            ):
-                raise Unsupported("with")
-            try:
-                open_expr = self._compile_open(call, scope)
-            except Unsupported:
-                raise Unsupported("with")
-            return [["let", self.name(item.optional_vars.id, scope), open_expr]] + self.stmts(st.body, scope)
+            items = []
+            for item in st.items:
+                call = item.context_expr
+                if not (
+                    isinstance(call, ast.Call) and _dotted(call.func) == "open"
+                    and (item.optional_vars is None or isinstance(item.optional_vars, ast.Name))
+                ):
+                    raise Unsupported("with")
+                try:
+                    open_expr = self._compile_open(call, scope)
+                except Unsupported:
+                    raise Unsupported("with")
+                var_name = self.name(item.optional_vars.id, scope) if item.optional_vars is not None else None
+                items.append((var_name, open_expr))
+            body = self.stmts(st.body, scope)
+            for var_name, open_expr in reversed(items):
+                body = [["withOpen", var_name, open_expr, body]]
+            return body
         if isinstance(st, ast.Try):
-            if st.orelse or st.finalbody or not st.handlers:
+            if not st.handlers and not st.finalbody:
                 raise Unsupported("try")
             compiled_handlers = []
             for handler in st.handlers:
                 if handler.type is None:
-                    exc_type = "Exception"
+                    exc_types = "Exception"
+                elif isinstance(handler.type, ast.Tuple):
+                    mapped = [CATCHABLE.get(_dotted(elt)) for elt in handler.type.elts]
+                    if not mapped or any(m is None for m in mapped):
+                        raise Unsupported("except")
+                    exc_types = mapped
                 else:
                     dotted = _dotted(handler.type)
-                    exc_type = CATCHABLE.get(dotted)
-                    if exc_type is None:
+                    exc_types = CATCHABLE.get(dotted)
+                    if exc_types is None:
                         raise Unsupported("except")
                 hname = self.name(handler.name, scope) if handler.name else None
-                compiled_handlers.append([exc_type, hname, self.stmts(handler.body, scope)])
+                compiled_handlers.append([exc_types, hname, self.stmts(handler.body, scope)])
             body = self.stmts(st.body, scope)
-            if len(compiled_handlers) == 1 and compiled_handlers[0][0] == "Exception":
+            orelse = self.stmts(st.orelse, scope) if st.orelse else []
+            finalbody = self.stmts(st.finalbody, scope) if st.finalbody else []
+            if (
+                not orelse and not finalbody
+                and len(compiled_handlers) == 1
+                and compiled_handlers[0][0] == "Exception"
+            ):
                 return [["try", body, compiled_handlers[0][1], compiled_handlers[0][2]]]
-            return [["tryMulti", body, compiled_handlers]]
+            if not orelse and not finalbody:
+                return [["tryMulti", body, compiled_handlers]]
+            return [["tryMulti", body, compiled_handlers, orelse, finalbody]]
         if isinstance(st, ast.If):
             test = self.expr(st.test, scope)
             if test is False:
@@ -446,7 +516,7 @@ class Compiler:
             return [["raise", ast.unparse(st)]]
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Call):
             call = st.value
-            if isinstance(call.func, ast.Attribute) and call.func.attr == "invoke" and _dotted(call.func.value) == "ctx":
+            if self._is_ctx_invoke(call.func, scope):
                 return [self.invoke(call, scope)]
             if (
                 self._is_cli_util_fn(call.func, "render_response")
@@ -1009,7 +1079,7 @@ class Compiler:
         if isinstance(node, (ast.List, ast.Tuple)):
             # A tuple only builds dict() pairs here; a list stands in for it.
             return ["list", *(self.expr(e, scope) for e in node.elts)]
-        if isinstance(node, ast.ListComp):
+        if isinstance(node, (ast.ListComp, ast.GeneratorExp)):
             # Comprehension variables don't leak (Python 3), but names are unique enough.
             it, target, conds = self.comprehension(node.generators, scope)
             return ["map", it, target, self.expr(node.elt, scope)] + ([conds] if conds else [])
@@ -1017,11 +1087,60 @@ class Compiler:
             it, target, conds = self.comprehension(node.generators, scope)
             return ["dictcomp", it, target, self.expr(node.key, scope), self.expr(node.value, scope), conds]
         if isinstance(node, ast.Call):
+            if self._is_ctx_invoke(node.func, scope):
+                return self.invoke(node, scope)
             if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
                 client_pair = self.clients.get(self.name(node.func.value.id, scope))
                 if client_pair is not None:
                     return self.sdk_call(client_pair, node, scope)
             dotted = _dotted(node.func)
+            if dotted == "click.style":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 12:
+                    raise Unsupported("call click.style")
+                style_slots = [
+                    "text", "fg", "bg", "bold", "dim", "underline", "overline",
+                    "italic", "blink", "reverse", "strikethrough", "reset",
+                ]
+                bound_style = {}
+                for idx, a in enumerate(node.args):
+                    bound_style[style_slots[idx]] = self.expr(a, scope)
+                for kw in node.keywords:
+                    if kw.arg not in style_slots or kw.arg in bound_style:
+                        raise Unsupported("call keywords")
+                    bound_style[kw.arg] = self.expr(kw.value, scope)
+                if "text" not in bound_style:
+                    raise Unsupported("call click.style")
+                text_expr = bound_style.pop("text")
+                opts_pairs = [[k, v] for k, v in bound_style.items()]
+                return ["fn", "clickStyle", text_expr, ["dict", *opts_pairs]]
+            if dotted == "enumerate":
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 2:
+                    raise Unsupported("call enumerate")
+                iter_node = node.args[0] if len(node.args) >= 1 else None
+                start_node = node.args[1] if len(node.args) >= 2 else None
+                for kw in node.keywords:
+                    if kw.arg == "iterable" and iter_node is None:
+                        iter_node = kw.value
+                    elif kw.arg == "start" and start_node is None:
+                        start_node = kw.value
+                    else:
+                        raise Unsupported("call keywords")
+                if iter_node is None:
+                    raise Unsupported("call enumerate")
+                if start_node is None:
+                    return ["fn", "enumerate", self.expr(iter_node, scope)]
+                return ["fn", "enumerate", self.expr(iter_node, scope), self.expr(start_node, scope)]
+            if dotted == "int" and node.keywords:
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) != 1:
+                    raise Unsupported("call int")
+                if len(node.keywords) != 1 or node.keywords[0].arg != "base":
+                    raise Unsupported("call keywords")
+                return ["fn", "int", self.expr(node.args[0], scope), self.expr(node.keywords[0].value, scope)]
+            if dotted == "map" and not node.keywords and len(node.args) == 2:
+                fn_dotted = _dotted(node.args[0])
+                mapped_fn = FUNCTIONS.get(fn_dotted)
+                if mapped_fn is not None:
+                    return ["fn", "pyMap", mapped_fn, self.expr(node.args[1], scope)]
             if dotted == "cli_util.parse_json_parameter":
                 # parse_json_parameter(name, value, default=None, camelize_keys=True)
                 if len(node.args) < 2 or len(node.args) > 4:
@@ -1174,6 +1293,10 @@ class Compiler:
                 return ["fn", "toDict", self.expr(node.args[0], scope)]
             if self._is_cli_util_fn(node.func, "formatted_flat_dict") and len(node.args) == 1:
                 return ["fn", "formattedFlatDict", self.expr(node.args[0], scope)]
+            if self._is_oci_util_fn(node.func, "to_dict") and len(node.args) == 1:
+                return ["fn", "sdkToDict", self.expr(node.args[0], scope)]
+            if self._is_oci_util_fn(node.func, "formatted_flat_dict") and len(node.args) == 1:
+                return ["fn", "sdkFormattedFlatDict", self.expr(node.args[0], scope)]
             if (
                 self._is_cli_util_fn(node.func, "get_tenancy_from_config")
                 and len(node.args) == 1

@@ -50149,6 +50149,7 @@
             "opc_dry_run",
             ["call", "pop", ["var", "kwargs"], "opc_dry_run"]
           ],
+          ["checkNoExtraKwargs", "delete_autonomous_database_extended"],
           [
             "if",
             [
@@ -99393,6 +99394,10 @@
             "is_older_version_acknowledged",
             ["call", "pop", ["var", "kwargs"], "is_older_version_acknowledged"]
           ],
+          [
+            "checkNoExtraKwargs",
+            "create_data_guard_association_from_existing_db_system"
+          ],
           ["let", "kwargs", ["dict"]],
           ["let", "details", ["dict"]],
           ["set", ["var", "details"], "creationType", ["var", "creation_type"]],
@@ -99981,6 +99986,10 @@
             "let",
             "is_older_version_acknowledged",
             ["call", "pop", ["var", "kwargs"], "is_older_version_acknowledged"]
+          ],
+          [
+            "checkNoExtraKwargs",
+            "create_data_guard_association_from_existing_vm_cluster"
           ],
           ["let", "kwargs", ["dict"]],
           ["let", "details", ["dict"]],
@@ -103888,6 +103897,7 @@
             ["call", "pop", ["var", "kwargs"], "database_admin_password"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "failover_data_guard_association_extended"],
           [
             "if",
             [
@@ -105065,6 +105075,7 @@
             ["call", "pop", ["var", "kwargs"], "database_admin_password"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "reinstate_data_guard_association_extended"],
           [
             "if",
             [
@@ -105595,6 +105606,7 @@
             ["call", "pop", ["var", "kwargs"], "database_admin_password"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "switchover_data_guard_association_extended"],
           [
             "if",
             [
@@ -106155,6 +106167,7 @@
             ["call", "pop", ["var", "kwargs"], "is_active_data_guard_enabled"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "update_data_guard_association"],
           [
             "if",
             [
@@ -118056,6 +118069,419 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "client", ["fn", "client", "database", "database"]],
+          [
+            "if",
+            [
+              "and",
+              [
+                "cmp",
+                "isnot",
+                ["item", ["var", "kwargs"], "db_system_id"],
+                null
+              ],
+              ["cmp", "is", ["item", ["var", "kwargs"], "compartment_id"], null]
+            ],
+            [
+              [
+                "let",
+                "response",
+                [
+                  "sdk",
+                  0,
+                  ["var", "client"],
+                  [["item", ["var", "kwargs"], "db_system_id"]],
+                  [],
+                  null
+                ]
+              ],
+              [
+                "let",
+                "compartment_id",
+                [
+                  "attr",
+                  "compartment_id",
+                  ["attr", "data", ["var", "response"]]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "is",
+                  ["item", ["var", "kwargs"], "compartment_id"],
+                  null
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Could not determine compartment_id from db_system_id and wasn't provided by caller.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["exit", 1]
+                ],
+                [
+                  [
+                    "let",
+                    "compartment_id",
+                    ["item", ["var", "kwargs"], "compartment_id"]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "list_db_home_kw_args",
+            [
+              "dict",
+              ["db_system_id", ["item", ["var", "kwargs"], "db_system_id"]],
+              ["vm_cluster_id", ["item", ["var", "kwargs"], "vm_cluster_id"]]
+            ]
+          ],
+          [
+            "let",
+            "response",
+            [
+              "sdk",
+              1,
+              ["var", "client"],
+              [["var", "compartment_id"]],
+              [],
+              ["var", "list_db_home_kw_args"]
+            ]
+          ],
+          ["let", "db_homes", ["attr", "data", ["var", "response"]]],
+          [
+            "while",
+            ["attr", "has_next_page", ["var", "response"]],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["attr", "next_page", ["var", "response"]],
+                  null
+                ],
+                [
+                  [
+                    "set",
+                    ["var", "list_db_home_kw_args"],
+                    "page",
+                    ["attr", "next_page", ["var", "response"]]
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "response",
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [["var", "compartment_id"]],
+                  [],
+                  ["var", "list_db_home_kw_args"]
+                ]
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["attr", "data", ["var", "response"]], null],
+                [
+                  [
+                    "aug",
+                    "+",
+                    "db_homes",
+                    ["attr", "data", ["var", "response"]]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          ["let", "list_db_kw_args", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "sort_by"], null],
+            [
+              [
+                "set",
+                ["var", "list_db_kw_args"],
+                "sort_by",
+                ["item", ["var", "kwargs"], "sort_by"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "sort_order"], null],
+            [
+              [
+                "set",
+                ["var", "list_db_kw_args"],
+                "sort_order",
+                ["item", ["var", "kwargs"], "sort_order"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["item", ["var", "kwargs"], "lifecycle_state"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "list_db_kw_args"],
+                "lifecycle_state",
+                ["item", ["var", "kwargs"], "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["item", ["var", "kwargs"], "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "list_db_kw_args"],
+                "db_name",
+                ["item", ["var", "kwargs"], "display_name"]
+              ]
+            ],
+            []
+          ],
+          ["let", "databases", ["list"]],
+          [
+            "for",
+            "db_home",
+            ["var", "db_homes"],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["cmp", "in", "limit", ["var", "kwargs"]],
+                  ["cmp", "isnot", ["item", ["var", "kwargs"], "limit"], null],
+                  [
+                    "cmp",
+                    ">=",
+                    ["fn", "len", ["var", "databases"]],
+                    ["fn", "int", ["item", ["var", "kwargs"], "limit"]]
+                  ]
+                ],
+                [["break"]],
+                []
+              ],
+              [
+                "let",
+                "response",
+                [
+                  "sdk",
+                  2,
+                  ["var", "client"],
+                  [],
+                  [
+                    ["compartment_id", ["var", "compartment_id"]],
+                    ["db_home_id", ["attr", "id", ["var", "db_home"]]]
+                  ],
+                  ["var", "list_db_kw_args"]
+                ]
+              ],
+              [
+                "if",
+                ["cmp", "isnot", ["attr", "data", ["var", "response"]], null],
+                [
+                  [
+                    "for",
+                    "database",
+                    ["attr", "data", ["var", "response"]],
+                    [
+                      [
+                        "if",
+                        [
+                          "and",
+                          ["cmp", "in", "limit", ["var", "kwargs"]],
+                          [
+                            "cmp",
+                            "isnot",
+                            ["item", ["var", "kwargs"], "limit"],
+                            null
+                          ],
+                          [
+                            "cmp",
+                            ">=",
+                            ["fn", "len", ["var", "databases"]],
+                            ["fn", "int", ["item", ["var", "kwargs"], "limit"]]
+                          ]
+                        ],
+                        [["break"]],
+                        []
+                      ],
+                      [
+                        "do",
+                        [
+                          "call",
+                          "append",
+                          ["var", "databases"],
+                          ["var", "database"]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          ["renderData", ["var", "databases"], null, false, true]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database.database",
+          "method": "get_db_system",
+          "http": "GET",
+          "path": "/dbSystems/{dbSystemId}",
+          "positionalArgs": ["db_system_id"],
+          "pathParams": {
+            "dbSystemId": "db_system_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "DbSystem"
+        },
+        {
+          "client": "database.database",
+          "method": "list_db_homes",
+          "http": "GET",
+          "path": "/dbHomes",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "dbSystemId": {
+              "arg": "db_system_id"
+            },
+            "vmClusterId": {
+              "arg": "vm_cluster_id"
+            },
+            "backupId": {
+              "arg": "backup_id"
+            },
+            "dbVersion": {
+              "arg": "db_version"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "displayName": {
+              "arg": "display_name"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[DbHomeSummary]"
+        },
+        {
+          "client": "database.database",
+          "method": "list_databases",
+          "http": "GET",
+          "path": "/databases",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "dbHomeId": {
+              "arg": "db_home_id"
+            },
+            "systemId": {
+              "arg": "system_id"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "sortBy": {
+              "arg": "sort_by"
+            },
+            "sortOrder": {
+              "arg": "sort_order"
+            },
+            "lifecycleState": {
+              "arg": "lifecycle_state"
+            },
+            "dbName": {
+              "arg": "db_name"
+            },
+            "managedAutoFailover": {
+              "arg": "managed_auto_failover"
+            },
+            "failoverTargets": {
+              "arg": "failover_targets"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[DatabaseSummary]"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -199814,7 +200240,10 @@
                 ],
                 [
                   [
-                    "raise",
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "autoBackupWindow",
+                    ["item", ["var", "kwargs"], "auto_backup_window"],
                     "db_backup_config.autoBackupWindow = kwargs['auto_backup_window']"
                   ]
                 ],
@@ -199830,7 +200259,10 @@
                 ],
                 [
                   [
-                    "raise",
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "autoFullBackupDay",
+                    ["item", ["var", "kwargs"], "auto_full_backup_day"],
                     "db_backup_config.autoFullBackupDay = kwargs['auto_full_backup_day']"
                   ]
                 ],
@@ -199846,7 +200278,10 @@
                 ],
                 [
                   [
-                    "raise",
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "autoFullBackupWindow",
+                    ["item", ["var", "kwargs"], "auto_full_backup_window"],
                     "db_backup_config.autoFullBackupWindow = kwargs['auto_full_backup_window']"
                   ]
                 ],
@@ -199862,7 +200297,10 @@
                 ],
                 [
                   [
-                    "raise",
+                    "setAttr",
+                    ["var", "db_backup_config"],
+                    "runImmediateFullBackup",
+                    ["item", ["var", "kwargs"], "run_immediate_full_backup"],
                     "db_backup_config.runImmediateFullBackup = kwargs['run_immediate_full_backup']"
                   ]
                 ],

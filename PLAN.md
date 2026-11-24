@@ -183,11 +183,11 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `bv boot-volume create`
 - [x] `bv boot-volume-backup copy`
 - [x] `bv volume create`
-- [ ] `network remote-peering-connection connect`
+- [x] `network remote-peering-connection connect`
 - [x] `network vnic assign-ipv6`
 - [ ] `network vnic assign-private-ip`
-- [ ] `network vnic unassign-ipv6`
-- [ ] `network vnic unassign-private-ip`
+- [x] `network vnic unassign-ipv6`
+- [x] `network vnic unassign-private-ip`
 - [ ] `raw-request`
 
 ### Database, Functions, Resource Manager, KMS and Artifacts
@@ -206,7 +206,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `db database create-from-database`
 - [ ] `db database create-standby-database`
 - [x] `db database delete`
-- [ ] `db database list`
+- [x] `db database list`
 - [ ] `db database patch`
 - [ ] `db db-home create`
 - [x] `db patch get by-database`
@@ -221,10 +221,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `fn function create archive-function object-storage manual-runtime-config`
 - [x] `fn function create container-function`
 - [x] `fn function create pbf-function`
-- [ ] `fn function delete`
-- [ ] `fn function update archive-function`
-- [ ] `fn function update container-function`
-- [ ] `fn function update pbf-function`
+- [x] `fn function delete`
+- [x] `fn function update archive-function`
+- [x] `fn function update container-function`
+- [x] `fn function update pbf-function`
 - [x] `resource-manager job create-import-tf-state-job`
 - [ ] `resource-manager job create-plan-rollback-job`
 - [x] `resource-manager job get-job-logs`
@@ -247,8 +247,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `adm vulnerability-audit create-vulnerability-audit-external-resource-vulnerability-audit-source`
 - [x] `adm vulnerability-audit create-vulnerability-audit-oci-resource-vulnerability-audit-source`
 - [x] `adm vulnerability-audit create-vulnerability-audit-unknown-source-vulnerability-audit-source`
-- [ ] `apm-synthetics monitor create-sql-monitor`
-- [ ] `apm-synthetics monitor update-sql-monitor`
+- [x] `apm-synthetics monitor create-sql-monitor`
+- [x] `apm-synthetics monitor update-sql-monitor`
 - [ ] `audit event list`
 - [x] `cloud-bridge discovery asset-source create`
 - [x] `cloud-bridge discovery asset-source update`
@@ -269,7 +269,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `data-science pipeline head-step-artifact`
 - [x] `data-science pipeline list`
 - [x] `data-science pipeline-run list`
-- [ ] `database-management managed-database get-awr-db-report`
+- [x] `database-management managed-database get-awr-db-report`
 - [ ] `dbtools-runtime connection execute-sql async`
 - [ ] `dbtools-runtime connection execute-sql sync`
 - [x] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec create default`
@@ -293,7 +293,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `os multipart abort`
 - [x] `os object head`
 - [ ] `os object list`
-- [ ] `os object list-object-versions`
+- [x] `os object list-object-versions`
 - [x] `os object restore`
 - [ ] `os object restore-status`
 - [ ] `os retention-rule update`
@@ -319,34 +319,34 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `rover device diagnostics bundle view-summary`
 - [ ] `rover device system-upgrade get-import-history`
 - [ ] `rover device system-upgrade get-import-status`
-- [ ] `rover node add-workload`
+- [x] `rover node add-workload`
 - [ ] `rover node create`
 - [x] `rover node delete`
 - [ ] `rover node delete-workload`
-- [ ] `rover node get-certificate`
-- [ ] `rover node list-workload`
+- [x] `rover node get-certificate`
+- [x] `rover node list-workload`
 - [x] `rover node request-approval`
 - [ ] `rover node setup-identity`
 - [x] `rover node show`
 - [x] `rover node update`
-- [ ] `rover standalone-cluster add-workload`
+- [x] `rover standalone-cluster add-workload`
 - [x] `rover standalone-cluster change-compartment`
 - [ ] `rover standalone-cluster create`
 - [x] `rover standalone-cluster delete`
 - [ ] `rover standalone-cluster delete-workload`
-- [ ] `rover standalone-cluster get-certificate`
-- [ ] `rover standalone-cluster list-workloads`
+- [x] `rover standalone-cluster get-certificate`
+- [x] `rover standalone-cluster list-workloads`
 - [x] `rover standalone-cluster request-approval`
 - [x] `rover standalone-cluster set-secrets`
 - [x] `rover standalone-cluster show`
 - [x] `rover standalone-cluster update`
-- [ ] `rover station-cluster add-workload`
+- [x] `rover station-cluster add-workload`
 - [x] `rover station-cluster change-compartment`
 - [ ] `rover station-cluster create`
 - [x] `rover station-cluster delete`
 - [ ] `rover station-cluster delete-workload`
-- [ ] `rover station-cluster get-certificate`
-- [ ] `rover station-cluster list-workloads`
+- [x] `rover station-cluster get-certificate`
+- [x] `rover station-cluster list-workloads`
 - [x] `rover station-cluster request-approval`
 - [x] `rover station-cluster set-secrets`
 - [x] `rover station-cluster show`

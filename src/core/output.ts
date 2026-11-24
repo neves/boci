@@ -305,6 +305,7 @@ export function renderModel(
   value: unknown,
   type: string,
   models?: Models[string],
+  snakeCase = false,
 ): unknown {
   if (type === "datetime" && typeof value === "string")
     return value.replace(/Z$/, "+00:00");
@@ -312,7 +313,7 @@ export function renderModel(
   if (Array.isArray(value)) {
     const element = /^list\[(.*)\]$/.exec(type)?.[1];
     return element
-      ? value.map((item) => renderModel(item, element, models))
+      ? value.map((item) => renderModel(item, element, models, snakeCase))
       : value;
   }
   const data = value as Record<string, unknown>;
@@ -321,7 +322,7 @@ export function renderModel(
     return Object.fromEntries(
       Object.entries(data).map(([key, item]) => [
         key,
-        renderModel(item, dictValue, models),
+        renderModel(item, dictValue, models, snakeCase),
       ]),
     );
   let model = models?.[type];
@@ -337,7 +338,7 @@ export function renderModel(
   }
   return Object.fromEntries(
     model.attributes.map(([name, fieldType, wire]) => [
-      name.replaceAll("_", "-"),
+      snakeCase ? name : name.replaceAll("_", "-"),
       renderModel(
         model === models?.LoadBalancer &&
           name === "lifecycle_state" &&
@@ -364,6 +365,7 @@ export function renderModel(
               : null,
         fieldType,
         models,
+        snakeCase,
       ),
     ]),
   );

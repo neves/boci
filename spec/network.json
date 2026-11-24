@@ -54,6 +54,15 @@
       "dualStackByDefault": false,
       "serviceName": "virtual_network"
     },
+    "identity.identity": {
+      "class": "oci.identity.identity_client.IdentityClient",
+      "regionalClient": true,
+      "basePath": "/20160918",
+      "endpointTemplate": "https://identity.{region}.oci.{secondLevelDomain}",
+      "endpointTemplatePerRealm": {},
+      "dualStackByDefault": false,
+      "serviceName": "identity"
+    },
     "work_requests.work_request": {
       "class": "oci.work_requests.work_request_client.WorkRequestClient",
       "regionalClient": true,
@@ -54046,6 +54055,168 @@
           "services.core.src.oci_cli_virtual_network.generated.virtualnetwork_cli.connect_remote_peering_connections"
         ]
       },
+      "program": {
+        "body": [
+          [
+            "tryMulti",
+            [
+              ["let", "client", ["fn", "client", "identity", "identity"]],
+              ["let", "result", ["sdk", 0, ["var", "client"], [], [], null]]
+            ],
+            [["Exception", null, []]],
+            [
+              [
+                "let",
+                "region_names",
+                [
+                  "map",
+                  ["attr", "data", ["var", "result"]],
+                  "elem",
+                  ["attr", "name", ["var", "elem"]]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "notin",
+                  ["item", ["var", "kwargs"], "peer_region_name"],
+                  ["var", "region_names"]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Please select one of the following Region names and reissue the command:",
+                      null,
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "for",
+                    "elem",
+                    ["var", "region_names"],
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          ["call", "format", "{}", ["var", "elem"]],
+                          null,
+                          true,
+                          false
+                        ]
+                      ]
+                    ]
+                  ],
+                  ["usage", "Incorrect Peer Region Name given"]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.core.src.oci_cli_virtual_network.generated.virtualnetwork_cli.connect_remote_peering_connections",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "remote_peering_connection_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "peer_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "peer_region_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "core.virtual_network",
+        "method": "connect_remote_peering_connections",
+        "http": "POST",
+        "path": "/remotePeeringConnections/{remotePeeringConnectionId}/actions/connect",
+        "positionalArgs": [
+          "remote_peering_connection_id",
+          "connect_remote_peering_connections_details"
+        ],
+        "pathParams": {
+          "remotePeeringConnectionId": "remote_peering_connection_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "body": "connect_remote_peering_connections_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["remote_peering_connection_id"],
+          "param": "remote_peering_connection_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "connect_remote_peering_connections_details",
+          "key": ["peerId"],
+          "param": "peer_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "connect_remote_peering_connections_details",
+          "key": ["peerRegionName"],
+          "param": "peer_region_name"
+        }
+      ],
+      "sdkOperations": [
+        {
+          "client": "identity.identity",
+          "method": "list_regions",
+          "http": "GET",
+          "path": "/regions",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[Region]"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -77414,6 +77585,241 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "vnic_id", ["call", "pop", ["var", "kwargs"], "vnic_id"]],
+          [
+            "let",
+            "ip_address",
+            ["call", "pop", ["var", "kwargs"], "ip_address"]
+          ],
+          ["checkNoExtraKwargs", "unassign_ipv6"],
+          [
+            "let",
+            "networking_client",
+            ["fn", "client", "core", "virtual_network"]
+          ],
+          [
+            "let",
+            "list_ips_response",
+            [
+              "sdk",
+              0,
+              ["var", "networking_client"],
+              [],
+              [["vnic_id", ["var", "vnic_id"]]],
+              null
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "is", ["attr", "data", ["var", "list_ips_response"]], null],
+            [
+              [
+                "exit",
+                [
+                  "call",
+                  "format",
+                  "No IP addresses found for VNIC {}",
+                  ["var", "vnic_id"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "ip_addresses",
+            ["attr", "data", ["var", "list_ips_response"]]
+          ],
+          [
+            "let",
+            "next_page",
+            ["attr", "next_page", ["var", "list_ips_response"]]
+          ],
+          [
+            "while",
+            ["cmp", "isnot", ["var", "next_page"], null],
+            [
+              [
+                "let",
+                "list_ips_response",
+                [
+                  "sdk",
+                  0,
+                  ["var", "networking_client"],
+                  [],
+                  [
+                    ["ip_address", ["var", "ip_address"]],
+                    ["vnic_id", ["var", "vnic_id"]],
+                    ["page", ["var", "next_page"]]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["attr", "data", ["var", "list_ips_response"]],
+                  null
+                ],
+                [
+                  [
+                    "aug",
+                    "+",
+                    "ip_addresses",
+                    ["attr", "data", ["var", "list_ips_response"]]
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "next_page",
+                ["attr", "next_page", ["var", "list_ips_response"]]
+              ]
+            ]
+          ],
+          ["let", "target_ip_address", null],
+          [
+            "for",
+            "ip",
+            ["var", "ip_addresses"],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["attr", "ip_address", ["var", "ip"]],
+                  ["var", "ip_address"]
+                ],
+                [["let", "target_ip_address", ["var", "ip"]], ["break"]],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "is", ["var", "target_ip_address"], null],
+            [
+              [
+                "exit",
+                [
+                  "call",
+                  "format",
+                  "IP address {} was not found on VNIC {}",
+                  ["var", "ip_address"],
+                  ["var", "vnic_id"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "sdk",
+              1,
+              ["var", "networking_client"],
+              [["attr", "id", ["var", "target_ip_address"]]],
+              [],
+              null
+            ]
+          ],
+          [
+            "do",
+            [
+              "fn",
+              "echo",
+              [
+                "call",
+                "format",
+                "Unassigned IP address {} from VNIC {}",
+                ["var", "ip_address"],
+                ["var", "vnic_id"]
+              ],
+              null,
+              true,
+              true
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.virtual_network",
+          "method": "list_ipv6s",
+          "http": "GET",
+          "path": "/ipv6",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "ipAddress": {
+              "arg": "ip_address"
+            },
+            "subnetId": {
+              "arg": "subnet_id"
+            },
+            "vnicId": {
+              "arg": "vnic_id"
+            },
+            "ipState": {
+              "arg": "ip_state"
+            },
+            "lifetime": {
+              "arg": "lifetime"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "list[Ipv6]"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "delete_ipv6",
+          "http": "DELETE",
+          "path": "/ipv6/{ipv6Id}",
+          "positionalArgs": ["ipv6_id"],
+          "pathParams": {
+            "ipv6Id": "ipv6_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -77529,6 +77935,262 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "vnic_id", ["call", "pop", ["var", "kwargs"], "vnic_id"]],
+          [
+            "let",
+            "ip_address",
+            ["call", "pop", ["var", "kwargs"], "ip_address"]
+          ],
+          ["checkNoExtraKwargs", "unassign_private_ip"],
+          [
+            "let",
+            "networking_client",
+            ["fn", "client", "core", "virtual_network"]
+          ],
+          [
+            "let",
+            "list_private_ips_response",
+            [
+              "sdk",
+              0,
+              ["var", "networking_client"],
+              [],
+              [["vnic_id", ["var", "vnic_id"]]],
+              null
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "is",
+              ["attr", "data", ["var", "list_private_ips_response"]],
+              null
+            ],
+            [
+              [
+                "exit",
+                [
+                  "call",
+                  "format",
+                  "No IP addresses found for VNIC {}",
+                  ["var", "vnic_id"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "private_ip_addresses",
+            ["attr", "data", ["var", "list_private_ips_response"]]
+          ],
+          [
+            "let",
+            "next_page",
+            ["attr", "next_page", ["var", "list_private_ips_response"]]
+          ],
+          [
+            "while",
+            ["cmp", "isnot", ["var", "next_page"], null],
+            [
+              [
+                "let",
+                "list_private_ips_response",
+                [
+                  "sdk",
+                  0,
+                  ["var", "networking_client"],
+                  [],
+                  [
+                    ["vnic_id", ["var", "vnic_id"]],
+                    ["page", ["var", "next_page"]]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["attr", "data", ["var", "list_private_ips_response"]],
+                  null
+                ],
+                [
+                  [
+                    "aug",
+                    "+",
+                    "private_ip_addresses",
+                    ["attr", "data", ["var", "list_private_ips_response"]]
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "next_page",
+                ["attr", "next_page", ["var", "list_private_ips_response"]]
+              ]
+            ]
+          ],
+          ["let", "target_ip_address", null],
+          [
+            "for",
+            "private_ip",
+            ["var", "private_ip_addresses"],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["attr", "ip_address", ["var", "private_ip"]],
+                  ["var", "ip_address"]
+                ],
+                [
+                  ["let", "target_ip_address", ["var", "private_ip"]],
+                  ["break"]
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "is", ["var", "target_ip_address"], null],
+            [
+              [
+                "exit",
+                [
+                  "call",
+                  "format",
+                  "IP address {} was not found on VNIC {}",
+                  ["var", "ip_address"],
+                  ["var", "vnic_id"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["attr", "is_primary", ["var", "target_ip_address"]],
+            [
+              [
+                "exit",
+                [
+                  "call",
+                  "format",
+                  "Taking no action as {} is the primary private IP on VNIC {}",
+                  ["var", "ip_address"],
+                  ["var", "vnic_id"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "sdk",
+              1,
+              ["var", "networking_client"],
+              [["attr", "id", ["var", "target_ip_address"]]],
+              [],
+              null
+            ]
+          ],
+          [
+            "do",
+            [
+              "fn",
+              "echo",
+              [
+                "call",
+                "format",
+                "Unassigned IP address {} from VNIC {}",
+                ["var", "ip_address"],
+                ["var", "vnic_id"]
+              ],
+              null,
+              true,
+              true
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.virtual_network",
+          "method": "list_private_ips",
+          "http": "GET",
+          "path": "/privateIps",
+          "positionalArgs": [],
+          "pathParams": {},
+          "queryParams": {
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "ipAddress": {
+              "arg": "ip_address"
+            },
+            "subnetId": {
+              "arg": "subnet_id"
+            },
+            "vnicId": {
+              "arg": "vnic_id"
+            },
+            "ipState": {
+              "arg": "ip_state"
+            },
+            "lifetime": {
+              "arg": "lifetime"
+            },
+            "vlanId": {
+              "arg": "vlan_id"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[PrivateIp]"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "delete_private_ip",
+          "http": "DELETE",
+          "path": "/privateIps/{privateIpId}",
+          "positionalArgs": ["private_ip_id"],
+          "pathParams": {
+            "privateIpId": "private_ip_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -84035,6 +84697,14 @@
           ["icmp_options", "IcmpOptions", "icmpOptions"],
           ["tcp_options", "TcpOptions", "tcpOptions"],
           ["udp_options", "UdpOptions", "udpOptions"]
+        ]
+      }
+    },
+    "identity": {
+      "Region": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["name", "str", "name"]
         ]
       }
     },

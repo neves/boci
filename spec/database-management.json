@@ -83941,6 +83941,301 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "managed_database_id",
+            ["call", "pop", ["var", "kwargs"], "managed_database_id"]
+          ],
+          ["let", "awr_db_id", ["call", "pop", ["var", "kwargs"], "awr_db_id"]],
+          ["let", "inst_nums", ["call", "pop", ["var", "kwargs"], "inst_nums"]],
+          [
+            "let",
+            "begin_sn_id_greater_than_or_equal_to",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "begin_sn_id_greater_than_or_equal_to"
+            ]
+          ],
+          [
+            "let",
+            "end_sn_id_less_than_or_equal_to",
+            [
+              "call",
+              "pop",
+              ["var", "kwargs"],
+              "end_sn_id_less_than_or_equal_to"
+            ]
+          ],
+          [
+            "let",
+            "time_greater_than_or_equal_to",
+            ["call", "pop", ["var", "kwargs"], "time_greater_than_or_equal_to"]
+          ],
+          [
+            "let",
+            "time_less_than_or_equal_to",
+            ["call", "pop", ["var", "kwargs"], "time_less_than_or_equal_to"]
+          ],
+          [
+            "let",
+            "report_type",
+            ["call", "pop", ["var", "kwargs"], "report_type"]
+          ],
+          [
+            "let",
+            "container_id",
+            ["call", "pop", ["var", "kwargs"], "container_id"]
+          ],
+          [
+            "let",
+            "report_format",
+            ["call", "pop", ["var", "kwargs"], "report_format"]
+          ],
+          ["checkNoExtraKwargs", "get_awr_db_report"],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "managed_database_id"]],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  ["call", "strip", ["var", "managed_database_id"]]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --managed-database-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "awr_db_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "awr_db_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --awr-db-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "isnot", ["var", "inst_nums"], null],
+              ["cmp", ">", ["fn", "len", ["var", "inst_nums"]], 0]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "inst_nums",
+                ["fn", "list", ["fn", "pyMap", "str", ["var", "inst_nums"]]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["var", "begin_sn_id_greater_than_or_equal_to"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "begin_sn_id_greater_than_or_equal_to",
+                ["var", "begin_sn_id_greater_than_or_equal_to"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "end_sn_id_less_than_or_equal_to"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "end_sn_id_less_than_or_equal_to",
+                ["var", "end_sn_id_less_than_or_equal_to"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "time_greater_than_or_equal_to"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "time_greater_than_or_equal_to",
+                ["var", "time_greater_than_or_equal_to"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "time_less_than_or_equal_to"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "time_less_than_or_equal_to",
+                ["var", "time_less_than_or_equal_to"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "report_type"], null],
+            [["set", ["var", "kwargs"], "report_type", ["var", "report_type"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "container_id"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "container_id",
+                ["var", "container_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "report_format"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "report_format",
+                ["var", "report_format"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "database_management", "db_management"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["managed_database_id", ["var", "managed_database_id"]],
+                ["awr_db_id", ["var", "awr_db_id"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database_management.db_management",
+          "method": "get_awr_db_report",
+          "http": "GET",
+          "path": "/managedDatabases/{managedDatabaseId}/awrDbs/{awrDbId}/awrDbReport",
+          "positionalArgs": ["managed_database_id", "awr_db_id"],
+          "pathParams": {
+            "managedDatabaseId": "managed_database_id",
+            "awrDbId": "awr_db_id"
+          },
+          "queryParams": {
+            "instNums": {
+              "arg": "inst_nums",
+              "collectionFormat": "csv"
+            },
+            "beginSnIdGreaterThanOrEqualTo": {
+              "arg": "begin_sn_id_greater_than_or_equal_to"
+            },
+            "endSnIdLessThanOrEqualTo": {
+              "arg": "end_sn_id_less_than_or_equal_to"
+            },
+            "timeGreaterThanOrEqualTo": {
+              "arg": "time_greater_than_or_equal_to"
+            },
+            "timeLessThanOrEqualTo": {
+              "arg": "time_less_than_or_equal_to"
+            },
+            "reportType": {
+              "arg": "report_type"
+            },
+            "containerId": {
+              "arg": "container_id"
+            },
+            "reportFormat": {
+              "arg": "report_format"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-named-credential-id": {
+              "arg": "opc_named_credential_id"
+            }
+          },
+          "responseType": "AwrDbReport"
+        }
+      ],
       "params": [
         {
           "kind": "option",

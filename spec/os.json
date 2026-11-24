@@ -8247,6 +8247,396 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          [
+            "let",
+            "namespace_name",
+            ["call", "pop", ["var", "kwargs"], "namespace_name"]
+          ],
+          [
+            "let",
+            "bucket_name",
+            ["call", "pop", ["var", "kwargs"], "bucket_name"]
+          ],
+          ["let", "prefix", ["call", "pop", ["var", "kwargs"], "prefix"]],
+          ["let", "start", ["call", "pop", ["var", "kwargs"], "start"]],
+          ["let", "end", ["call", "pop", ["var", "kwargs"], "end"]],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "delimiter", ["call", "pop", ["var", "kwargs"], "delimiter"]],
+          ["let", "fields", ["call", "pop", ["var", "kwargs"], "fields"]],
+          [
+            "let",
+            "start_after",
+            ["call", "pop", ["var", "kwargs"], "start_after"]
+          ],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["checkNoExtraKwargs", "list_object_versions"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "and",
+                  ["not", ["var", "all_pages"]],
+                  ["cmp", "is", ["var", "limit"], null]
+                ],
+                [["let", "limit", 100]],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "namespace_name"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "namespace_name"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --namespace-name cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "bucket_name"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "bucket_name"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --bucket-name cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "prefix"], null],
+            [["set", ["var", "kwargs"], "prefix", ["var", "prefix"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "start"], null],
+            [["set", ["var", "kwargs"], "start", ["var", "start"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "end"], null],
+            [["set", ["var", "kwargs"], "end", ["var", "end"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "delimiter"], null],
+            [["set", ["var", "kwargs"], "delimiter", ["var", "delimiter"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "fields"], null],
+            [["set", ["var", "kwargs"], "fields", ["var", "fields"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "start_after"], null],
+            [["set", ["var", "kwargs"], "start_after", ["var", "start_after"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_client_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "object_storage", "object_storage"]
+          ],
+          ["let", "all_items", ["list"]],
+          ["let", "prefixes", ["fn", "list"]],
+          ["let", "remaining_item_count", ["var", "limit"]],
+          ["let", "keep_paginating_for_all", true],
+          ["let", "fetched_at_least_once", false],
+          [
+            "while",
+            [
+              "or",
+              [
+                "and",
+                ["not", ["var", "all_pages"]],
+                [
+                  "or",
+                  ["cmp", ">", ["var", "remaining_item_count"], 0],
+                  ["not", ["var", "fetched_at_least_once"]]
+                ]
+              ],
+              ["and", ["var", "all_pages"], ["var", "keep_paginating_for_all"]]
+            ],
+            [
+              ["let", "fetched_at_least_once", true],
+              [
+                "if",
+                ["var", "all_pages"],
+                [
+                  [
+                    "if",
+                    ["var", "page_size"],
+                    [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                    [["set", ["var", "kwargs"], "limit", 100]]
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    ["var", "page_size"],
+                    [
+                      [
+                        "set",
+                        ["var", "kwargs"],
+                        "limit",
+                        [
+                          "fn",
+                          "min",
+                          ["var", "page_size"],
+                          ["var", "remaining_item_count"]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "set",
+                        ["var", "kwargs"],
+                        "limit",
+                        ["fn", "min", ["var", "remaining_item_count"], 100]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "let",
+                "response",
+                [
+                  "sdk",
+                  0,
+                  ["var", "client"],
+                  [],
+                  [
+                    ["namespace_name", ["var", "namespace_name"]],
+                    ["bucket_name", ["var", "bucket_name"]]
+                  ],
+                  ["var", "kwargs"]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "isnot",
+                  ["attr", "prefixes", ["attr", "data", ["var", "response"]]],
+                  null
+                ],
+                [
+                  [
+                    "for",
+                    "prefix",
+                    ["attr", "prefixes", ["attr", "data", ["var", "response"]]],
+                    [
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "notin",
+                          ["var", "prefix"],
+                          ["var", "prefixes"]
+                        ],
+                        [
+                          [
+                            "do",
+                            [
+                              "call",
+                              "append",
+                              ["var", "prefixes"],
+                              ["var", "prefix"]
+                            ]
+                          ]
+                        ],
+                        []
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ],
+              [
+                "let",
+                "items",
+                ["attr", "items", ["attr", "data", ["var", "response"]]]
+              ],
+              [
+                "let",
+                "next_page",
+                [
+                  "call",
+                  "get",
+                  ["attr", "headers", ["var", "response"]],
+                  "opc-next-page"
+                ]
+              ],
+              [
+                "do",
+                ["call", "extend", ["var", "all_items"], ["var", "items"]]
+              ],
+              [
+                "if",
+                ["var", "next_page"],
+                [
+                  [
+                    "if",
+                    ["var", "remaining_item_count"],
+                    [
+                      [
+                        "aug",
+                        "-",
+                        "remaining_item_count",
+                        ["fn", "len", ["var", "items"]]
+                      ]
+                    ],
+                    []
+                  ],
+                  ["set", ["var", "kwargs"], "page", ["var", "next_page"]]
+                ],
+                [
+                  ["let", "keep_paginating_for_all", false],
+                  ["let", "remaining_item_count", 0]
+                ]
+              ]
+            ]
+          ],
+          ["let", "metadata", ["dict", ["prefixes", ["var", "prefixes"]]]],
+          [
+            "if",
+            [
+              "call",
+              "get",
+              ["attr", "headers", ["var", "response"]],
+              "opc-next-page"
+            ],
+            [
+              [
+                "set",
+                ["var", "metadata"],
+                "opc-next-page",
+                [
+                  "call",
+                  "get",
+                  ["attr", "headers", ["var", "response"]],
+                  "opc-next-page"
+                ]
+              ]
+            ],
+            []
+          ],
+          ["renderData", ["var", "all_items"], ["var", "metadata"], true, true]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "object_storage.object_storage",
+          "method": "list_object_versions",
+          "http": "GET",
+          "path": "/n/{namespaceName}/b/{bucketName}/objectversions",
+          "positionalArgs": ["namespace_name", "bucket_name"],
+          "pathParams": {
+            "namespaceName": "namespace_name",
+            "bucketName": "bucket_name"
+          },
+          "queryParams": {
+            "prefix": {
+              "arg": "prefix"
+            },
+            "start": {
+              "arg": "start"
+            },
+            "end": {
+              "arg": "end"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "delimiter": {
+              "arg": "delimiter"
+            },
+            "fields": {
+              "arg": "fields"
+            },
+            "startAfter": {
+              "arg": "start_after"
+            },
+            "page": {
+              "arg": "page"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-client-request-id": {
+              "arg": "opc_client_request_id"
+            }
+          },
+          "responseType": "ObjectVersionCollection"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18967,6 +19357,26 @@
           ["inclusion_prefixes", "list[str]", "inclusionPrefixes"],
           ["inclusion_patterns", "list[str]", "inclusionPatterns"],
           ["exclusion_patterns", "list[str]", "exclusionPatterns"]
+        ]
+      },
+      "ObjectVersionCollection": {
+        "attributes": [
+          ["items", "list[ObjectVersionSummary]", "items"],
+          ["prefixes", "list[str]", "prefixes"]
+        ]
+      },
+      "ObjectVersionSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["size", "int", "size"],
+          ["md5", "str", "md5"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_modified", "datetime", "timeModified"],
+          ["etag", "str", "etag"],
+          ["storage_tier", "str", "storageTier"],
+          ["archival_state", "str", "archivalState"],
+          ["version_id", "str", "versionId"],
+          ["is_delete_marker", "bool", "isDeleteMarker"]
         ]
       },
       "PreauthenticatedRequest": {

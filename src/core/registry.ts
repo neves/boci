@@ -70,6 +70,30 @@ function lazyOsOutput<T>(
 /** Single source of truth for Custom OCI Leaf command handlers, loaded lazily on dispatch. */
 export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
   [
+    "iam db-token get",
+    async (ctx) => {
+      const { runIamDbTokenGet } =
+        await import("../commands/iam/db_token_get.ts");
+      await runIamDbTokenGet(ctx);
+    },
+  ],
+  [
+    "artifacts container image-signature sign-upload",
+    async (ctx) => {
+      const { runArtifactsContainerImageSignatureSignUpload } =
+        await import("../commands/artifacts/container_image_signature_sign_upload.ts");
+      await runArtifactsContainerImageSignatureSignUpload(ctx);
+    },
+  ],
+  [
+    "artifacts container image-signature get-verify",
+    async (ctx) => {
+      const { runArtifactsContainerImageSignatureGetVerify } =
+        await import("../commands/artifacts/container_image_signature_get_verify.ts");
+      await runArtifactsContainerImageSignatureGetVerify(ctx);
+    },
+  ],
+  [
     "os bucket delete",
     async (ctx) => {
       const { runOsBucketDelete } =
@@ -234,6 +258,14 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
       const { runSessionTerminate } =
         await import("../commands/session/terminate.ts");
       await runSessionTerminate(ctx);
+    },
+  ],
+  [
+    "setup instance-principal",
+    async (ctx) => {
+      const { runSetupInstancePrincipal } =
+        await import("../commands/setup/instance-principal.ts");
+      await runSetupInstancePrincipal(ctx);
     },
   ],
   [

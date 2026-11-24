@@ -1,0 +1,152 @@
+[
+  {
+    "id": "artifacts-container-image-signature-get-verify-paginated",
+    "argv": [
+      "artifacts",
+      "container",
+      "image-signature",
+      "get-verify",
+      "--no-retry",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--compartment-id-in-subtree",
+      "false",
+      "--repo-name",
+      "test",
+      "--image-digest",
+      "sha256:test",
+      "--trusted-keys",
+      "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "httpsProxy": true,
+    "replies": [
+      {
+        "headers": {
+          "opc-next-page": "next"
+        },
+        "body": {
+          "items": [
+            {
+              "kmsKeyId": "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "kmsKeyVersionId": "ocid1.keyversion.oc1.iad.test",
+              "signingAlgorithm": "SHA_256_RSA_PKCS_PSS",
+              "message": "dGVzdA==",
+              "signature": "c2ln"
+            },
+            {
+              "kmsKeyId": "untrusted"
+            }
+          ]
+        }
+      },
+      {
+        "body": {
+          "isSignatureValid": false
+        }
+      },
+      {
+        "body": {
+          "items": [
+            {
+              "kmsKeyId": "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "kmsKeyVersionId": "ocid1.keyversion.oc1.iad.test",
+              "signingAlgorithm": "SHA_256_RSA_PKCS_PSS",
+              "message": "dGVzdA==",
+              "signature": "c2ln"
+            }
+          ]
+        }
+      },
+      {
+        "body": {
+          "isSignatureValid": true
+        }
+      }
+    ],
+    "expect": {
+      "exitCode": 0,
+      "requests": 4
+    },
+    "key": "artifacts container image-signature get-verify"
+  },
+  {
+    "id": "artifacts-container-image-signature-get-verify-no-trusted-keys",
+    "argv": [
+      "artifacts",
+      "container",
+      "image-signature",
+      "get-verify",
+      "--no-retry",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--compartment-id-in-subtree",
+      "false",
+      "--repo-name",
+      "test",
+      "--image-digest",
+      "sha256:test",
+      "--trusted-keys",
+      "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": {
+          "items": [
+            {
+              "kmsKeyId": "untrusted"
+            }
+          ]
+        }
+      }
+    ],
+    "expect": {
+      "exitCode": 1,
+      "requests": 1
+    },
+    "key": "artifacts container image-signature get-verify"
+  },
+  {
+    "id": "artifacts-container-image-signature-get-verify-algorithm",
+    "argv": [
+      "artifacts",
+      "container",
+      "image-signature",
+      "get-verify",
+      "--no-retry",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--compartment-id-in-subtree",
+      "false",
+      "--repo-name",
+      "test",
+      "--image-digest",
+      "sha256:test",
+      "--trusted-keys",
+      "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": {
+          "items": [
+            {
+              "kmsKeyId": "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "kmsKeyVersionId": "ocid1.keyversion.oc1.iad.test",
+              "signingAlgorithm": "ECDSA_SHA_256",
+              "message": "dGVzdA==",
+              "signature": "c2ln"
+            }
+          ]
+        }
+      }
+    ],
+    "expect": {
+      "exitCode": 1,
+      "requests": 1
+    },
+    "key": "artifacts container image-signature get-verify"
+  }
+]

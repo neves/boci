@@ -1,0 +1,104 @@
+[
+  {
+    "id": "artifacts-container-image-signature-sign-upload-success",
+    "argv": [
+      "artifacts",
+      "container",
+      "image-signature",
+      "sign-upload",
+      "--no-retry",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--image-id",
+      "ocid1.containerimage.oc1..test",
+      "--kms-key-version-id",
+      "ocid1.keyversion.oc1.iad.test",
+      "--signing-algorithm",
+      "SHA_256_RSA_PKCS_PSS",
+      "--kms-key-id",
+      "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "--description",
+      "caf\u00e9",
+      "--metadata",
+      "{\"build\":\"123\"}"
+    ],
+    "httpsProxy": true,
+    "replies": [
+      {
+        "body": {
+          "digest": "sha256:test",
+          "repositoryName": "test"
+        }
+      },
+      {
+        "body": {
+          "signature": "c2ln"
+        }
+      },
+      {
+        "body": {
+          "id": "signature-id",
+          "signature": "c2ln",
+          "message": "dGVzdA=="
+        }
+      }
+    ],
+    "expect": {
+      "exitCode": 0,
+      "requests": 3
+    },
+    "key": "artifacts container image-signature sign-upload"
+  },
+  {
+    "id": "artifacts-container-image-signature-sign-upload-bad-key",
+    "argv": [
+      "artifacts",
+      "container",
+      "image-signature",
+      "sign-upload",
+      "--no-retry",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--image-id",
+      "ocid1.containerimage.oc1..test",
+      "--kms-key-version-id",
+      "ocid1.keyversion.oc1.iad.test",
+      "--signing-algorithm",
+      "SHA_256_RSA_PKCS_PSS",
+      "--kms-key-id",
+      "invalid"
+    ],
+    "expect": {
+      "exitCode": 1,
+      "requests": 0
+    },
+    "key": "artifacts container image-signature sign-upload"
+  },
+  {
+    "id": "artifacts-container-image-signature-sign-upload-bad-metadata",
+    "argv": [
+      "artifacts",
+      "container",
+      "image-signature",
+      "sign-upload",
+      "--no-retry",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--image-id",
+      "ocid1.containerimage.oc1..test",
+      "--kms-key-version-id",
+      "ocid1.keyversion.oc1.iad.test",
+      "--signing-algorithm",
+      "SHA_256_RSA_PKCS_PSS",
+      "--kms-key-id",
+      "ocid1.key.oc1.iad.parityvault.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "--metadata",
+      "invalid"
+    ],
+    "expect": {
+      "exitCode": 1,
+      "requests": 0
+    },
+    "key": "artifacts container image-signature sign-upload"
+  }
+]

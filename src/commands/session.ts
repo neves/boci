@@ -1349,13 +1349,14 @@ export async function runSessionAuthenticate(
     rc: Rc;
     index: Pick<Index, "regions">;
     spec?: Pick<ServiceSpec, "commands">;
+    stdin?: ReturnType<typeof createStdinReader>;
     browserPort?: number;
     openBrowserFn?: (url: string, env: Env) => boolean;
   },
 ): Promise<void> {
   const { values, rootValues, rc, index } = opts;
   let effectiveSettings: ClientSettings = { ...opts.settings };
-  const stdin = createStdinReader(io);
+  const stdin = opts.stdin ?? createStdinReader(io);
 
   let region: string | undefined =
     typeof rootValues.region === "string" && rootValues.region

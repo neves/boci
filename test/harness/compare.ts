@@ -1,4 +1,4 @@
-import { createVerify } from "node:crypto";
+import { createPublicKey, createVerify } from "node:crypto";
 // Normalise a Run so the Reference CLI's observation and boci's compare with toEqual.
 import type { CapturedRequest } from "./fake-endpoint.ts";
 import { applyMasks, IGNORED_REQUEST_HEADERS, maskStderr } from "./masks.ts";
@@ -55,13 +55,38 @@ function normalizeRequest(req: CapturedRequest): NormalizedRequest {
     if (k === "authorization") authorization = parseAuthorization(v);
     else if (!(k in IGNORED_REQUEST_HEADERS)) headers[k] = v;
   }
+  const payload = body(req.body);
+  if (
+    req.path === "/v1/actions/generateScopedAccessToken" &&
+    typeof payload === "object" &&
+    payload !== null &&
+    "json" in payload
+  ) {
+    const details = payload.json as { publicKey?: unknown } | null;
+    if (
+      typeof details?.publicKey === "string" &&
+      details.publicKey.startsWith("-----BEGIN PUBLIC KEY-----\n")
+    ) {
+      try {
+        const key = createPublicKey(details.publicKey);
+        if (
+          key.asymmetricKeyType === "rsa" &&
+          key.asymmetricKeyDetails?.modulusLength === 2048 &&
+          key.asymmetricKeyDetails.publicExponent === 65537n
+        )
+          details.publicKey = "<generated DB token public key>";
+      } catch {
+        // Keep invalid keys visible to the comparison.
+      }
+    }
+  }
   return {
     method: req.method,
     path: req.path,
     query: req.query,
     headers,
     authorization,
-    body: body(req.body),
+    body: payload,
   };
 }
 

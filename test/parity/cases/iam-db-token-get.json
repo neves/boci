@@ -1,0 +1,78 @@
+[
+  {
+    "id": "iam-db-token-get-success",
+    "argv": [
+      "iam",
+      "db-token",
+      "get",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "env": {
+      "TZ": "UTC"
+    },
+    "replies": [
+      {
+        "body": {
+          "token": "eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3MDAwMDAwMDB9.c2ln"
+        }
+      }
+    ],
+    "expect": {
+      "exitCode": 0,
+      "requests": 1,
+      "files": {
+        ".oci/db-token/token": "eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3MDAwMDAwMDB9.c2ln"
+      },
+      "fileModes": {
+        ".oci/db-token/token": 384,
+        ".oci/db-token/oci_db_key.pem": 384,
+        ".oci/db-token/oci_db_key_public.pem": 384
+      }
+    },
+    "key": "iam db-token get"
+  },
+  {
+    "id": "iam-db-token-get-bad-scope",
+    "argv": ["iam", "db-token", "get", "--no-retry", "--scope", "invalid"],
+    "expect": {
+      "exitCode": 1,
+      "requests": 0
+    },
+    "key": "iam db-token get"
+  },
+  {
+    "id": "iam-db-token-get-service-error",
+    "key": "iam db-token get",
+    "argv": [
+      "iam",
+      "db-token",
+      "get",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "status": 403,
+        "headers": { "opc-request-id": "db-token-parity" },
+        "body": {
+          "code": "NotAuthorized",
+          "message": "Not allowed"
+        }
+      }
+    ],
+    "expect": {
+      "exitCode": 1,
+      "requests": 1,
+      "files": {
+        ".oci/db-token/token": null,
+        ".oci/db-token/oci_db_key.pem": null
+      },
+      "fileModes": {
+        ".oci/db-token/oci_db_key_public.pem": 384
+      }
+    }
+  }
+]

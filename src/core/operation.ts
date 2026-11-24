@@ -63,6 +63,8 @@ export type OperationCall = {
   /** The command's Service: its SDK clients name the endpoint templates. */
   spec: Pick<ServiceSpec, "clients" | "models">;
   index: Pick<Index, "regions">;
+  /** Reuse an authenticated client across a multi-step wrapper. */
+  serviceClient?: ServiceClient;
   /** Shared stdin reader when invoked after wrapper prompts. */
   stdin?: StdinReader;
 };
@@ -925,14 +927,16 @@ export async function callOperation(
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const hasNoneRetry =
     command.bindings?.some((b) => b.transform === "NoneRetryStrategy") === true;
-  const sc = await createServiceClient(io, {
-    client,
-    values,
-    rootValues,
-    settings,
-    index,
-    noRetry: hasNoneRetry,
-  });
+  const sc =
+    call.serviceClient ??
+    (await createServiceClient(io, {
+      client,
+      values,
+      rootValues,
+      settings,
+      index,
+      noRetry: hasNoneRetry,
+    }));
   const pathParams: Record<string, string> = {};
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
     const fixed = operation.fixedPathParams?.[name];

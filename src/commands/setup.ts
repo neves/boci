@@ -182,7 +182,7 @@ function maskHiddenInput(message: string, value: string): string {
 }
 
 /** Click `click.prompt` subset used by `cli_setup`. */
-async function promptClick<T = string>(
+export async function promptClick<T = string>(
   io: Invocation,
   stdin: StdinReader,
   text: string,
@@ -723,10 +723,11 @@ export async function runSetupConfig(
   io: Invocation,
   opts: {
     regions: RegionsSpec;
+    stdin?: StdinReader;
     usageError: (message: string) => never;
   },
 ): Promise<void> {
-  const stdin = createStdinReader(io);
+  const stdin = opts.stdin ?? createStdinReader(io);
   io.out(GENERATE_OCI_CONFIG_INSTRUCTIONS);
 
   const defaultDir = expandUser(DEFAULT_DIRECTORY, io.env);

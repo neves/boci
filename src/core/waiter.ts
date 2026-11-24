@@ -92,7 +92,8 @@ export async function waitForState(
   initial: OperationResult,
   output: OutputOptions,
 ): Promise<OperationResult> {
-  const states = call.values.wait_for_state;
+  const requested = call.values.wait_for_state;
+  const states = typeof requested === "string" ? [requested] : requested;
   if (!initial.response.ok || !Array.isArray(states) || !states.length)
     return initial;
   const { lifecycleGetter, workRequestClient, client } = initial.operation;
@@ -128,7 +129,7 @@ export async function waitForState(
     states.map((state) => `'${state}'`).join(", ") +
     (states.length === 1 ? "," : "");
   io.err(
-    `Action completed. Waiting until the ${target} has entered state: (${tuple})\n`,
+    `Action completed. Waiting until the ${target} has entered state: ${typeof requested === "string" ? requested : `(${tuple})`}\n`,
   );
   // Generated lifecycle waiters pass result.data.id as the getter's sole positional argument.
   const [pathName, argument] = Object.entries(getter.pathParams ?? {})[0] ?? [];

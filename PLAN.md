@@ -168,7 +168,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `ce cluster generate-token`
 - [x] `iam compartment create`
 - [x] `iam compartment list`
-- [ ] `iam db-token get`
+- [x] `iam db-token get`
 - [x] `iam group add-user`
 - [x] `iam group list-users`
 - [x] `iam group remove-user`
@@ -235,7 +235,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `kms management key-version create`
 - [x] `kms management key-version schedule-deletion`
 - [x] `artifacts container image list`
-- [ ] `artifacts container image-signature get-verify`
+- [x] `artifacts container image-signature get-verify`
 - [x] `artifacts container image-signature list`
 - [x] `artifacts container repository list`
 - [x] `artifacts generic artifact list`
@@ -354,7 +354,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `session terminate`
 - [ ] `setup bootstrap`
 - [x] `setup find-installations`
-- [ ] `setup instance-principal`
+- [x] `setup instance-principal`
 - [x] `setup oci-cli-rc`
 - [ ] `setup pkcs11-auth`
 - [x] `support incident put-attachment`
@@ -362,7 +362,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 
 ### File transfers, streaming and bulk operations
 
-- [ ] `artifacts container image-signature sign-upload`
+- [x] `artifacts container image-signature sign-upload`
 - [x] `compute image export to-object`
 - [x] `compute image export to-object-uri`
 - [x] `compute image import from-object`

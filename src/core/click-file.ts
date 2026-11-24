@@ -104,6 +104,17 @@ export async function openClickFileForProgram(
   if (/[wa]/.test(mode)) return new ProgramFile(mode, undefined, rawPath);
   if (rawPath === "-")
     return new ProgramFile(mode, await readStdinBytes(io), rawPath);
-  validateClickFileForRead(io, rawPath);
-  return new ProgramFile(mode, readFileSync(resolve(io.cwd, rawPath)), rawPath);
+  let fd: number | undefined;
+  try {
+    fd = openSync(resolve(io.cwd, rawPath), "r");
+    if (fstatSync(fd).isDirectory()) {
+      throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
+    }
+    return new ProgramFile(mode, readFileSync(fd), rawPath);
+  } catch (e) {
+    if (e instanceof BadParameter) throw e;
+    throw new BadParameter(`${pyRepr(rawPath)}: ${osErrorReason(e)}`);
+  } finally {
+    if (fd !== undefined) closeSync(fd);
+  }
 }

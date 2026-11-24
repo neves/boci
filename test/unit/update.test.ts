@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { Exit, type Invocation } from "../../src/lib/io.ts";
 import { runUpdate } from "../../src/commands/update.ts";
-import { getPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode } from "../../src/lib/posixMode.ts";
 
 function captureInvocation(
   argv: string[],

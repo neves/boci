@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { getPosixMode } from "../utils/posixMode.ts";
+import { getPosixMode } from "../lib/posixMode.ts";
 import {
   type Config,
   ConfigError,

@@ -21,7 +21,7 @@ import {
   loadPrivateKey,
 } from "../../src/core/signer.ts";
 import { loadIndex, loadService } from "../../src/core/spec.ts";
-import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode, setPosixMode } from "../../src/lib/posixMode.ts";
 import { startFakeEndpoint } from "../harness/fake-endpoint.ts";
 import { FAKE, FAKE_KEY_PEM } from "../harness/sandbox.ts";
 

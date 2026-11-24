@@ -9,7 +9,7 @@ import {
   publicKeyToFingerprint,
 } from "../../src/commands/setup.ts";
 import { loadPrivateKey } from "../../src/core/signer.ts";
-import { getPosixMode, setPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode, setPosixMode } from "../../src/lib/posixMode.ts";
 import { FAKE, FAKE_KEY_PEM } from "../harness/sandbox.ts";
 
 async function runConfig(

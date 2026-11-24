@@ -5,7 +5,7 @@
 // sandbox environment (no spawn, module load or spec parsing per case).
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
-import { getPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode } from "../../src/lib/posixMode.ts";
 import {
   type CapturedRequest,
   type Reply,

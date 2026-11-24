@@ -3,7 +3,7 @@
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
 import { closeSync, existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
-import { getPosixMode } from "../utils/posixMode.ts";
+import { getPosixMode } from "../lib/posixMode.ts";
 import {
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,

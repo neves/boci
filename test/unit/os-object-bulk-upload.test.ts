@@ -7,7 +7,7 @@ import {
   fnmatchToRegex,
   formatBulkProgressLabel,
 } from "../../src/commands/os.ts";
-import { setPosixMode } from "../../src/utils/posixMode.ts";
+import { setPosixMode } from "../../src/lib/posixMode.ts";
 import { createSandbox } from "../harness/sandbox.ts";
 
 describe("os object bulk-upload", () => {

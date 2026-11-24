@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { getPosixMode } from "../../src/utils/posixMode.ts";
+import { getPosixMode } from "../../src/lib/posixMode.ts";
 import { FAKE, createSandbox, fingerprint } from "../harness/sandbox.ts";
 
 test("sandbox writes a config with the fake identity and an isolated HOME", async () => {

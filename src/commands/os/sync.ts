@@ -19,7 +19,7 @@ import {
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
-import { getPosixMode } from "../../utils/posixMode.ts";
+import { getPosixMode } from "../../lib/posixMode.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,

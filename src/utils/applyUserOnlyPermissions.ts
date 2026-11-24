@@ -1,5 +1,5 @@
 import { statSync } from "node:fs";
-import { setPosixMode } from "./posixMode.ts";
+import { setPosixMode } from "../lib/posixMode.ts";
 
 /** Restrict `path` permissions to the current user (`0o600` for files, `0o700` for directories). */
 export function applyUserOnlyPermissions(path: string): void {

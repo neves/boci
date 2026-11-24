@@ -459,9 +459,7 @@ describe("os object bulk-download", () => {
     expect(stderr).toContain(
       "Error: invalid choice: z. (choose from Y, N, A)\n",
     );
-    expect(stderr).toContain(
-      `Downloading f2.txt to ${join(dlDir, "f2.txt")}\n`,
-    );
+    expect(stderr).toContain(`Downloading f2.txt to ${dlDir}/f2.txt\n`);
     expect(stderr).toContain("Failed to download ghost.txt\n");
     expect(stderr).toContain("Downloaded ghost.txt\n");
     expect(readFileSync(join(dlDir, "f1.txt"), "utf8")).toBe("old:f1.txt");

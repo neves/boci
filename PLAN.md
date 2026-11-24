@@ -160,7 +160,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `compute instance list-vnics`
 - [x] `compute instance attach-vnic`
 - [x] `compute instance action`
-- [ ] `compute instance change-compartment`
+- [x] `compute instance change-compartment`
 - [ ] `compute instance detach-vnic`
 - [ ] `compute instance-console-connection get-plink-connection-string`
 - [ ] `compute volume-attachment list`

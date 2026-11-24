@@ -24693,6 +24693,18 @@
         ],
         "discriminator": "Rule"
       },
+      "Backend": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["ip_address", "str", "ipAddress"],
+          ["port", "int", "port"],
+          ["weight", "int", "weight"],
+          ["max_connections", "int", "maxConnections"],
+          ["drain", "bool", "drain"],
+          ["backup", "bool", "backup"],
+          ["offline", "bool", "offline"]
+        ]
+      },
       "BackendDetails": {
         "attributes": [
           ["ip_address", "str", "ipAddress"],
@@ -24702,6 +24714,36 @@
           ["backup", "bool", "backup"],
           ["drain", "bool", "drain"],
           ["offline", "bool", "offline"]
+        ]
+      },
+      "BackendHealth": {
+        "attributes": [
+          ["status", "str", "status"],
+          [
+            "health_check_results",
+            "list[HealthCheckResult]",
+            "healthCheckResults"
+          ]
+        ]
+      },
+      "BackendSet": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["policy", "str", "policy"],
+          ["backends", "list[Backend]", "backends"],
+          ["backend_max_connections", "int", "backendMaxConnections"],
+          ["health_checker", "HealthChecker", "healthChecker"],
+          ["ssl_configuration", "SSLConfiguration", "sslConfiguration"],
+          [
+            "session_persistence_configuration",
+            "SessionPersistenceConfigurationDetails",
+            "sessionPersistenceConfiguration"
+          ],
+          [
+            "lb_cookie_session_persistence_configuration",
+            "LBCookieSessionPersistenceConfigurationDetails",
+            "lbCookieSessionPersistenceConfiguration"
+          ]
         ]
       },
       "BackendSetDetails": {
@@ -24721,6 +24763,34 @@
             "LBCookieSessionPersistenceConfigurationDetails",
             "lbCookieSessionPersistenceConfiguration"
           ]
+        ]
+      },
+      "BackendSetHealth": {
+        "attributes": [
+          ["status", "str", "status"],
+          [
+            "warning_state_backend_names",
+            "list[str]",
+            "warningStateBackendNames"
+          ],
+          [
+            "critical_state_backend_names",
+            "list[str]",
+            "criticalStateBackendNames"
+          ],
+          [
+            "unknown_state_backend_names",
+            "list[str]",
+            "unknownStateBackendNames"
+          ],
+          ["total_backend_count", "int", "totalBackendCount"]
+        ]
+      },
+      "Certificate": {
+        "attributes": [
+          ["certificate_name", "str", "certificateName"],
+          ["public_certificate", "str", "publicCertificate"],
+          ["ca_certificate", "str", "caCertificate"]
         ]
       },
       "CertificateDetails": {
@@ -24780,6 +24850,33 @@
         ],
         "discriminator": "Action"
       },
+      "HealthCheckResult": {
+        "attributes": [
+          ["subnet_id", "str", "subnetId"],
+          ["source_ip_address", "str", "sourceIpAddress"],
+          ["timestamp", "datetime", "timestamp"],
+          ["health_check_status", "str", "healthCheckStatus"]
+        ]
+      },
+      "HealthChecker": {
+        "attributes": [
+          ["protocol", "str", "protocol"],
+          ["url_path", "str", "urlPath"],
+          ["port", "int", "port"],
+          ["return_code", "int", "returnCode"],
+          ["retries", "int", "retries"],
+          ["timeout_in_millis", "int", "timeoutInMillis"],
+          ["interval_in_millis", "int", "intervalInMillis"],
+          ["response_body_regex", "str", "responseBodyRegex"],
+          [
+            "is_dynamic_backend_weight_enabled",
+            "bool",
+            "isDynamicBackendWeightEnabled"
+          ],
+          ["default_weight", "int", "defaultWeight"],
+          ["is_force_plain_text", "bool", "isForcePlainText"]
+        ]
+      },
       "HealthCheckerDetails": {
         "attributes": [
           ["protocol", "str", "protocol"],
@@ -24799,6 +24896,12 @@
           ["is_force_plain_text", "bool", "isForcePlainText"]
         ]
       },
+      "Hostname": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["hostname", "str", "hostname"]
+        ]
+      },
       "HostnameDetails": {
         "attributes": [
           ["name", "str", "name"],
@@ -24816,6 +24919,13 @@
           ["http_large_header_size_in_kb", "int", "httpLargeHeaderSizeInKB"]
         ],
         "discriminator": "Rule"
+      },
+      "IpAddress": {
+        "attributes": [
+          ["ip_address", "str", "ipAddress"],
+          ["is_public", "bool", "isPublic"],
+          ["reserved_ip", "ReservedIP", "reservedIp"]
+        ]
       },
       "IpBasedMaxConnectionsRule": {
         "attributes": [
@@ -24842,6 +24952,24 @@
           ["is_http_only", "bool", "isHttpOnly"]
         ]
       },
+      "Listener": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["default_backend_set_name", "str", "defaultBackendSetName"],
+          ["port", "int", "port"],
+          ["protocol", "str", "protocol"],
+          ["hostname_names", "list[str]", "hostnameNames"],
+          ["path_route_set_name", "str", "pathRouteSetName"],
+          ["ssl_configuration", "SSLConfiguration", "sslConfiguration"],
+          [
+            "connection_configuration",
+            "ConnectionConfiguration",
+            "connectionConfiguration"
+          ],
+          ["rule_set_names", "list[str]", "ruleSetNames"],
+          ["routing_policy_name", "str", "routingPolicyName"]
+        ]
+      },
       "ListenerDetails": {
         "attributes": [
           ["default_backend_set_name", "str", "defaultBackendSetName"],
@@ -24859,6 +24987,88 @@
           ["rule_set_names", "list[str]", "ruleSetNames"]
         ]
       },
+      "ListenerRuleSummary": {
+        "attributes": [
+          ["rule", "Rule", "rule"],
+          ["rule_set_name", "str", "ruleSetName"]
+        ]
+      },
+      "LoadBalancer": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["ip_addresses", "list[IpAddress]", "ipAddresses"],
+          ["reserved_ip_addresses", "list[ReservedIP]", "reservedIpAddresses"],
+          ["shape_name", "str", "shapeName"],
+          ["shape_details", "ShapeDetails", "shapeDetails"],
+          ["is_private", "bool", "isPrivate"],
+          ["is_delete_protection_enabled", "bool", "isDeleteProtectionEnabled"],
+          ["is_request_id_enabled", "bool", "isRequestIdEnabled"],
+          ["request_id_header", "str", "requestIdHeader"],
+          ["subnet_ids", "list[str]", "subnetIds"],
+          [
+            "network_security_group_ids",
+            "list[str]",
+            "networkSecurityGroupIds"
+          ],
+          ["listeners", "dict(str, Listener)", "listeners"],
+          ["hostnames", "dict(str, Hostname)", "hostnames"],
+          ["ssl_cipher_suites", "dict(str, SSLCipherSuite)", "sslCipherSuites"],
+          ["certificates", "dict(str, Certificate)", "certificates"],
+          ["backend_sets", "dict(str, BackendSet)", "backendSets"],
+          ["path_route_sets", "dict(str, PathRouteSet)", "pathRouteSets"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["rule_sets", "dict(str, RuleSet)", "ruleSets"],
+          ["routing_policies", "dict(str, RoutingPolicy)", "routingPolicies"],
+          ["ip_mode", "str", "ipMode"]
+        ]
+      },
+      "LoadBalancerHealth": {
+        "attributes": [
+          ["status", "str", "status"],
+          [
+            "warning_state_backend_set_names",
+            "list[str]",
+            "warningStateBackendSetNames"
+          ],
+          [
+            "critical_state_backend_set_names",
+            "list[str]",
+            "criticalStateBackendSetNames"
+          ],
+          [
+            "unknown_state_backend_set_names",
+            "list[str]",
+            "unknownStateBackendSetNames"
+          ],
+          ["total_backend_set_count", "int", "totalBackendSetCount"]
+        ]
+      },
+      "LoadBalancerHealthSummary": {
+        "attributes": [
+          ["load_balancer_id", "str", "loadBalancerId"],
+          ["status", "str", "status"]
+        ]
+      },
+      "LoadBalancerPolicy": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "LoadBalancerProtocol": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "LoadBalancerShape": {
+        "attributes": [["name", "str", "name"]]
+      },
       "PathMatchCondition": {
         "attributes": [
           ["attribute_name", "str", "attributeName"],
@@ -24875,6 +25085,12 @@
           ["path", "str", "path"],
           ["path_match_type", "PathMatchType", "pathMatchType"],
           ["backend_set_name", "str", "backendSetName"]
+        ]
+      },
+      "PathRouteSet": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["path_routes", "list[PathRoute]", "pathRoutes"]
         ]
       },
       "PathRouteSetDetails": {
@@ -24914,6 +25130,13 @@
       },
       "ReservedIP": {
         "attributes": [["id", "str", "id"]]
+      },
+      "RoutingPolicy": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["condition_language_version", "str", "conditionLanguageVersion"],
+          ["rules", "list[RoutingRule]", "rules"]
+        ]
       },
       "RoutingRule": {
         "attributes": [
@@ -24955,13 +25178,42 @@
           "fallback": "RuleCondition"
         }
       },
+      "RuleSet": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["items", "list[Rule]", "items"]
+        ]
+      },
       "RuleSetDetails": {
         "attributes": [["items", "list[Rule]", "items"]]
+      },
+      "SSLCipherSuite": {
+        "attributes": [
+          ["ciphers", "list[str]", "ciphers"],
+          ["name", "str", "name"]
+        ]
       },
       "SSLCipherSuiteDetails": {
         "attributes": [
           ["ciphers", "list[str]", "ciphers"],
           ["name", "str", "name"]
+        ]
+      },
+      "SSLConfiguration": {
+        "attributes": [
+          ["protocols", "list[str]", "protocols"],
+          ["cipher_suite_name", "str", "cipherSuiteName"],
+          ["server_order_preference", "str", "serverOrderPreference"],
+          ["certificate_name", "str", "certificateName"],
+          ["certificate_ids", "list[str]", "certificateIds"],
+          [
+            "trusted_certificate_authority_ids",
+            "list[str]",
+            "trustedCertificateAuthorityIds"
+          ],
+          ["has_session_resumption", "bool", "hasSessionResumption"],
+          ["verify_peer_certificate", "bool", "verifyPeerCertificate"],
+          ["verify_depth", "int", "verifyDepth"]
         ]
       },
       "SSLConfigurationDetails": {
@@ -25013,6 +25265,25 @@
           ["attribute_value", "str", "attributeValue"]
         ],
         "discriminator": "RuleCondition"
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["load_balancer_id", "str", "loadBalancerId"],
+          ["type", "str", "type"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["message", "str", "message"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["error_details", "list[WorkRequestError]", "errorDetails"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["error_code", "str", "errorCode"],
+          ["message", "str", "message"]
+        ]
       }
     }
   }

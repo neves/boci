@@ -8470,6 +8470,82 @@
   },
   "models": {
     "blockchain": {
+      "BlockchainPlatform": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["description", "str", "description"],
+          ["is_byol", "bool", "isByol"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["platform_version", "str", "platformVersion"],
+          ["service_version", "str", "serviceVersion"],
+          ["platform_role", "str", "platformRole"],
+          ["compute_shape", "str", "computeShape"],
+          ["platform_shape_type", "str", "platformShapeType"],
+          ["load_balancer_shape", "str", "loadBalancerShape"],
+          ["service_endpoint", "str", "serviceEndpoint"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["storage_size_in_tbs", "float", "storageSizeInTBs"],
+          ["storage_used_in_t_bs", "float", "storageUsedInTBs"],
+          ["is_multi_ad", "bool", "isMultiAD"],
+          ["total_ocpu_capacity", "int", "totalOcpuCapacity"],
+          [
+            "component_details",
+            "BlockchainPlatformComponentDetails",
+            "componentDetails"
+          ],
+          ["replicas", "ReplicaDetails", "replicas"],
+          [
+            "host_ocpu_utilization_info",
+            "list[OcpuUtilizationInfo]",
+            "hostOcpuUtilizationInfo"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "BlockchainPlatformCollection": {
+        "attributes": [["items", "list[BlockchainPlatformSummary]", "items"]]
+      },
+      "BlockchainPlatformComponentDetails": {
+        "attributes": [
+          ["osns", "list[Osn]", "osns"],
+          ["peers", "list[Peer]", "peers"]
+        ]
+      },
+      "BlockchainPlatformPatchCollection": {
+        "attributes": [
+          ["items", "list[BlockchainPlatformPatchSummary]", "items"]
+        ]
+      },
+      "BlockchainPlatformPatchSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["service_version", "str", "serviceVersion"],
+          ["patch_info_url", "str", "patchInfoUrl"],
+          ["time_patch_due", "datetime", "timePatchDue"]
+        ]
+      },
+      "BlockchainPlatformSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["platform_role", "str", "platformRole"],
+          ["compute_shape", "str", "computeShape"],
+          ["service_endpoint", "str", "serviceEndpoint"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
       "CreateOsnDetails": {
         "attributes": [
           ["ad", "str", "ad"],
@@ -8507,6 +8583,58 @@
           ["ocpu_allocation_number", "float", "ocpuAllocationNumber"]
         ]
       },
+      "OcpuUtilizationInfo": {
+        "attributes": [
+          ["host", "str", "host"],
+          ["ocpu_utilization_number", "float", "ocpuUtilizationNumber"],
+          ["ocpu_capacity_number", "float", "ocpuCapacityNumber"]
+        ]
+      },
+      "Osn": {
+        "attributes": [
+          ["osn_key", "str", "osnKey"],
+          ["ad", "str", "ad"],
+          [
+            "ocpu_allocation_param",
+            "OcpuAllocationNumberParam",
+            "ocpuAllocationParam"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "OsnCollection": {
+        "attributes": [["items", "list[OsnSummary]", "items"]]
+      },
+      "OsnSummary": {
+        "attributes": [
+          ["osn_key", "str", "osnKey"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "Peer": {
+        "attributes": [
+          ["peer_key", "str", "peerKey"],
+          ["role", "str", "role"],
+          ["alias", "str", "alias"],
+          [
+            "ocpu_allocation_param",
+            "OcpuAllocationNumberParam",
+            "ocpuAllocationParam"
+          ],
+          ["host", "str", "host"],
+          ["ad", "str", "ad"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "PeerCollection": {
+        "attributes": [["items", "list[PeerSummary]", "items"]]
+      },
+      "PeerSummary": {
+        "attributes": [
+          ["peer_key", "str", "peerKey"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
       "ReplicaDetails": {
         "attributes": [
           ["proxy_count", "int", "proxyCount"],
@@ -8514,8 +8642,149 @@
           ["console_count", "int", "consoleCount"]
         ]
       },
+      "ScaleBlockchainPlatformDetails": {
+        "attributes": [
+          ["add_osns", "list[CreateOsnDetails]", "addOsns"],
+          ["add_replicas", "ReplicaDetails", "addReplicas"],
+          ["add_peers", "list[CreatePeerDetails]", "addPeers"],
+          ["add_storage", "ScaleStorageDetails", "addStorage"],
+          ["modify_peers", "list[ModifyPeerDetails]", "modifyPeers"],
+          ["remove_replicas", "ReplicaDetails", "removeReplicas"],
+          ["remove_osns", "list[str]", "removeOsns"],
+          ["remove_peers", "list[str]", "removePeers"]
+        ]
+      },
       "ScaleStorageDetails": {
         "attributes": [["storage_size_in_tbs", "int", "storageSizeInTBs"]]
+      },
+      "ScaledBlockchainPlatformPreview": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["description", "str", "description"],
+          ["compute_shape", "str", "computeShape"],
+          ["storage_size_in_tbs", "float", "storageSizeInTBs"],
+          [
+            "storage_size_in_tbs_post_scaling",
+            "float",
+            "storageSizeInTBsPostScaling"
+          ],
+          [
+            "component_details",
+            "BlockchainPlatformComponentDetails",
+            "componentDetails"
+          ],
+          ["replicas", "ReplicaDetails", "replicas"],
+          [
+            "component_details_post_scaling",
+            "BlockchainPlatformComponentDetails",
+            "componentDetailsPostScaling"
+          ],
+          ["replicas_post_scaling", "ReplicaDetails", "replicasPostScaling"],
+          [
+            "host_ocpu_utilization_info",
+            "list[OcpuUtilizationInfo]",
+            "hostOcpuUtilizationInfo"
+          ],
+          [
+            "host_ocpu_utilization_info_post_scaling",
+            "list[OcpuUtilizationInfo]",
+            "hostOcpuUtilizationInfoPostScaling"
+          ],
+          ["new_vm_count", "int", "newVmCount"],
+          [
+            "metering_preview",
+            "ScaledPlatformMeteringPreview",
+            "meteringPreview"
+          ],
+          ["scale_payload", "ScaleBlockchainPlatformDetails", "scalePayload"]
+        ]
+      },
+      "ScaledPlatformMeteringPreview": {
+        "attributes": [
+          ["total_ocpu_allocation", "float", "totalOcpuAllocation"],
+          [
+            "total_ocpu_allocation_post_scaling",
+            "float",
+            "totalOcpuAllocationPostScaling"
+          ],
+          ["storage_metered_units", "float", "storageMeteredUnits"],
+          ["extra_storage_metered_units", "float", "extraStorageMeteredUnits"],
+          [
+            "storage_metered_units_post_scaling",
+            "float",
+            "storageMeteredUnitsPostScaling"
+          ]
+        ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"],
+          [
+            "sub_type_details",
+            "list[WorkRequestResourceSubTypeDetail]",
+            "subTypeDetails"
+          ]
+        ]
+      },
+      "WorkRequestResourceSubTypeDetail": {
+        "attributes": [
+          ["sub_type", "str", "subType"],
+          ["sub_type_key", "str", "subTypeKey"],
+          ["sub_type_status", "str", "subTypeStatus"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
       }
     }
   }

@@ -360,6 +360,7 @@ def service_spec(name: str, cmd: click.Command) -> dict:
         getter = {"client": key, **sdk.sdk_operation(cls, "get_work_request")}
         CLIENTS[key] = {**sdk.client_info(cls), "workRequestGetter": getter}
     sdk.hidden_lifecycle_getters(commands, CLIENTS, CLIENT_MAP)
+    models.collect_responses(commands, CLIENTS, MODELS)
     clients, CLIENTS = dict(sorted(CLIENTS.items())), None
     top = {"hidden": bool(getattr(cmd, "hidden", False))}
     if cmd.help:

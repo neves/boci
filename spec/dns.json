@@ -22075,8 +22075,31 @@
   },
   "models": {
     "dns": {
+      "AttachedView": {
+        "attributes": [["view_id", "str", "viewId"]]
+      },
       "AttachedViewDetails": {
         "attributes": [["view_id", "str", "viewId"]]
+      },
+      "DnssecConfig": {
+        "attributes": [
+          [
+            "ksk_dnssec_key_versions",
+            "list[KskDnssecKeyVersion]",
+            "kskDnssecKeyVersions"
+          ],
+          [
+            "zsk_dnssec_key_versions",
+            "list[ZskDnssecKeyVersion]",
+            "zskDnssecKeyVersions"
+          ]
+        ]
+      },
+      "DnssecKeyVersionDsData": {
+        "attributes": [
+          ["rdata", "str", "rdata"],
+          ["digest_type", "str", "digestType"]
+        ]
       },
       "DynectMigrationDetails": {
         "attributes": [
@@ -22104,6 +22127,32 @@
           ["tsig_key_id", "str", "tsigKeyId"]
         ]
       },
+      "KskDnssecKeyVersion": {
+        "attributes": [
+          ["uuid", "str", "uuid"],
+          ["algorithm", "str", "algorithm"],
+          ["length_in_bytes", "int", "lengthInBytes"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_published", "datetime", "timePublished"],
+          ["time_activated", "datetime", "timeActivated"],
+          ["time_inactivated", "datetime", "timeInactivated"],
+          ["time_unpublished", "datetime", "timeUnpublished"],
+          ["time_expired", "datetime", "timeExpired"],
+          ["time_promoted", "datetime", "timePromoted"],
+          [
+            "predecessor_dnssec_key_version_uuid",
+            "str",
+            "predecessorDnssecKeyVersionUuid"
+          ],
+          [
+            "successor_dnssec_key_version_uuid",
+            "str",
+            "successorDnssecKeyVersionUuid"
+          ],
+          ["key_tag", "int", "keyTag"],
+          ["ds_data", "list[DnssecKeyVersionDsData]", "dsData"]
+        ]
+      },
       "MigrationReplacement": {
         "attributes": [
           ["rtype", "str", "rtype"],
@@ -22111,6 +22160,26 @@
           ["ttl", "int", "ttl"],
           ["rdata", "str", "rdata"]
         ]
+      },
+      "Nameserver": {
+        "attributes": [["hostname", "str", "hostname"]]
+      },
+      "RRSet": {
+        "attributes": [["items", "list[Record]", "items"]]
+      },
+      "Record": {
+        "attributes": [
+          ["domain", "str", "domain"],
+          ["record_hash", "str", "recordHash"],
+          ["is_protected", "bool", "isProtected"],
+          ["rdata", "str", "rdata"],
+          ["rrset_version", "str", "rrsetVersion"],
+          ["rtype", "str", "rtype"],
+          ["ttl", "int", "ttl"]
+        ]
+      },
+      "RecordCollection": {
+        "attributes": [["items", "list[Record]", "items"]]
       },
       "RecordDetails": {
         "attributes": [
@@ -22135,6 +22204,87 @@
           ["operation", "str", "operation"]
         ]
       },
+      "Resolver": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["attached_vcn_id", "str", "attachedVcnId"],
+          ["display_name", "str", "displayName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["_self", "str", "self"],
+          ["default_view_id", "str", "defaultViewId"],
+          ["is_protected", "bool", "isProtected"],
+          ["endpoints", "list[ResolverEndpointSummary]", "endpoints"],
+          ["attached_views", "list[AttachedView]", "attachedViews"],
+          ["rules", "list[ResolverRule]", "rules"]
+        ]
+      },
+      "ResolverEndpoint": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["endpoint_type", "str", "endpointType"],
+          ["forwarding_address", "str", "forwardingAddress"],
+          ["is_forwarding", "bool", "isForwarding"],
+          ["is_listening", "bool", "isListening"],
+          ["listening_address", "str", "listeningAddress"],
+          ["id", "str", "id"],
+          ["resolver_id", "str", "resolverId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["_self", "str", "self"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ],
+        "discriminator": {
+          "field": "endpointType",
+          "values": {
+            "VNIC": "ResolverVnicEndpoint"
+          },
+          "fallback": "ResolverEndpoint"
+        }
+      },
+      "ResolverEndpointSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["endpoint_type", "str", "endpointType"],
+          ["forwarding_address", "str", "forwardingAddress"],
+          ["is_forwarding", "bool", "isForwarding"],
+          ["is_listening", "bool", "isListening"],
+          ["listening_address", "str", "listeningAddress"],
+          ["id", "str", "id"],
+          ["resolver_id", "str", "resolverId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["_self", "str", "self"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ],
+        "discriminator": {
+          "field": "endpointType",
+          "values": {
+            "VNIC": "ResolverVnicEndpointSummary"
+          },
+          "fallback": "ResolverEndpointSummary"
+        }
+      },
+      "ResolverForwardRule": {
+        "attributes": [
+          ["client_address_conditions", "list[str]", "clientAddressConditions"],
+          ["qname_cover_conditions", "list[str]", "qnameCoverConditions"],
+          ["action", "str", "action"],
+          ["destination_addresses", "list[str]", "destinationAddresses"],
+          ["source_endpoint_name", "str", "sourceEndpointName"]
+        ],
+        "discriminator": "ResolverRule"
+      },
       "ResolverForwardRuleDetails": {
         "attributes": [
           ["client_address_conditions", "list[str]", "clientAddressConditions"],
@@ -22144,6 +22294,20 @@
           ["source_endpoint_name", "str", "sourceEndpointName"]
         ],
         "discriminator": "ResolverRuleDetails"
+      },
+      "ResolverRule": {
+        "attributes": [
+          ["client_address_conditions", "list[str]", "clientAddressConditions"],
+          ["qname_cover_conditions", "list[str]", "qnameCoverConditions"],
+          ["action", "str", "action"]
+        ],
+        "discriminator": {
+          "field": "action",
+          "values": {
+            "FORWARD": "ResolverForwardRule"
+          },
+          "fallback": "ResolverRule"
+        }
       },
       "ResolverRuleDetails": {
         "attributes": [
@@ -22159,6 +22323,96 @@
           "fallback": "ResolverRuleDetails"
         }
       },
+      "ResolverSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["attached_vcn_id", "str", "attachedVcnId"],
+          ["display_name", "str", "displayName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["_self", "str", "self"],
+          ["default_view_id", "str", "defaultViewId"],
+          ["is_protected", "bool", "isProtected"]
+        ]
+      },
+      "ResolverVnicEndpoint": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["endpoint_type", "str", "endpointType"],
+          ["forwarding_address", "str", "forwardingAddress"],
+          ["is_forwarding", "bool", "isForwarding"],
+          ["is_listening", "bool", "isListening"],
+          ["listening_address", "str", "listeningAddress"],
+          ["id", "str", "id"],
+          ["resolver_id", "str", "resolverId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["_self", "str", "self"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["subnet_id", "str", "subnetId"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ],
+          ["pe_id", "str", "peId"],
+          ["vnic_id", "str", "vnicId"]
+        ],
+        "discriminator": "ResolverEndpoint"
+      },
+      "ResolverVnicEndpointSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["endpoint_type", "str", "endpointType"],
+          ["forwarding_address", "str", "forwardingAddress"],
+          ["is_forwarding", "bool", "isForwarding"],
+          ["is_listening", "bool", "isListening"],
+          ["listening_address", "str", "listeningAddress"],
+          ["id", "str", "id"],
+          ["resolver_id", "str", "resolverId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["_self", "str", "self"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["subnet_id", "str", "subnetId"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ],
+          ["pe_id", "str", "peId"],
+          ["vnic_id", "str", "vnicId"]
+        ],
+        "discriminator": "ResolverEndpointSummary"
+      },
+      "SteeringPolicy": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["ttl", "int", "ttl"],
+          ["health_check_monitor_id", "str", "healthCheckMonitorId"],
+          ["template", "str", "template"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["answers", "list[SteeringPolicyAnswer]", "answers"],
+          ["rules", "list[SteeringPolicyRule]", "rules"],
+          ["_self", "str", "self"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
       "SteeringPolicyAnswer": {
         "attributes": [
           ["name", "str", "name"],
@@ -22166,6 +22420,34 @@
           ["rdata", "str", "rdata"],
           ["pool", "str", "pool"],
           ["is_disabled", "bool", "isDisabled"]
+        ]
+      },
+      "SteeringPolicyAttachment": {
+        "attributes": [
+          ["steering_policy_id", "str", "steeringPolicyId"],
+          ["zone_id", "str", "zoneId"],
+          ["domain_name", "str", "domainName"],
+          ["display_name", "str", "displayName"],
+          ["rtypes", "list[str]", "rtypes"],
+          ["compartment_id", "str", "compartmentId"],
+          ["_self", "str", "self"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "SteeringPolicyAttachmentSummary": {
+        "attributes": [
+          ["steering_policy_id", "str", "steeringPolicyId"],
+          ["zone_id", "str", "zoneId"],
+          ["domain_name", "str", "domainName"],
+          ["display_name", "str", "displayName"],
+          ["rtypes", "list[str]", "rtypes"],
+          ["compartment_id", "str", "compartmentId"],
+          ["_self", "str", "self"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"]
         ]
       },
       "SteeringPolicyFilterAnswerData": {
@@ -22265,6 +22547,21 @@
           "fallback": "SteeringPolicyRule"
         }
       },
+      "SteeringPolicySummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["ttl", "int", "ttl"],
+          ["health_check_monitor_id", "str", "healthCheckMonitorId"],
+          ["template", "str", "template"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["_self", "str", "self"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
       "SteeringPolicyWeightedAnswerData": {
         "attributes": [
           ["answer_condition", "str", "answerCondition"],
@@ -22292,6 +22589,172 @@
             "list[SteeringPolicyWeightedAnswerData]",
             "answerData"
           ]
+        ]
+      },
+      "TsigKey": {
+        "attributes": [
+          ["algorithm", "str", "algorithm"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["secret", "str", "secret"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["id", "str", "id"],
+          ["_self", "str", "self"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "TsigKeySummary": {
+        "attributes": [
+          ["algorithm", "str", "algorithm"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["id", "str", "id"],
+          ["_self", "str", "self"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "View": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["id", "str", "id"],
+          ["_self", "str", "self"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_protected", "bool", "isProtected"]
+        ]
+      },
+      "ViewSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["id", "str", "id"],
+          ["_self", "str", "self"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_protected", "bool", "isProtected"]
+        ]
+      },
+      "Zone": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["zone_type", "str", "zoneType"],
+          ["compartment_id", "str", "compartmentId"],
+          ["view_id", "str", "viewId"],
+          ["scope", "str", "scope"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["resolution_mode", "str", "resolutionMode"],
+          ["dnssec_state", "str", "dnssecState"],
+          ["external_masters", "list[ExternalMaster]", "externalMasters"],
+          [
+            "external_downstreams",
+            "list[ExternalDownstream]",
+            "externalDownstreams"
+          ],
+          ["self_uri", "str", "self"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["version", "str", "version"],
+          ["serial", "int", "serial"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_protected", "bool", "isProtected"],
+          ["dnssec_config", "DnssecConfig", "dnssecConfig"],
+          ["nameservers", "list[Nameserver]", "nameservers"],
+          [
+            "zone_transfer_servers",
+            "list[ZoneTransferServer]",
+            "zoneTransferServers"
+          ]
+        ]
+      },
+      "ZoneSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["zone_type", "str", "zoneType"],
+          ["compartment_id", "str", "compartmentId"],
+          ["view_id", "str", "viewId"],
+          ["scope", "str", "scope"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["resolution_mode", "str", "resolutionMode"],
+          ["dnssec_state", "str", "dnssecState"],
+          ["self_uri", "str", "self"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["version", "str", "version"],
+          ["serial", "int", "serial"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_protected", "bool", "isProtected"],
+          ["dnssec_config", "DnssecConfig", "dnssecConfig"]
+        ]
+      },
+      "ZoneTransferServer": {
+        "attributes": [
+          ["address", "str", "address"],
+          ["port", "int", "port"],
+          ["is_transfer_source", "bool", "isTransferSource"],
+          ["is_transfer_destination", "bool", "isTransferDestination"]
+        ]
+      },
+      "ZskDnssecKeyVersion": {
+        "attributes": [
+          ["uuid", "str", "uuid"],
+          ["algorithm", "str", "algorithm"],
+          ["length_in_bytes", "int", "lengthInBytes"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_published", "datetime", "timePublished"],
+          ["time_activated", "datetime", "timeActivated"],
+          ["time_inactivated", "datetime", "timeInactivated"],
+          ["time_unpublished", "datetime", "timeUnpublished"],
+          ["time_expired", "datetime", "timeExpired"],
+          ["time_promoted", "datetime", "timePromoted"],
+          [
+            "predecessor_dnssec_key_version_uuid",
+            "str",
+            "predecessorDnssecKeyVersionUuid"
+          ],
+          [
+            "successor_dnssec_key_version_uuid",
+            "str",
+            "successorDnssecKeyVersionUuid"
+          ],
+          ["key_tag", "int", "keyTag"]
+        ]
+      }
+    },
+    "work_requests": {
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["entity_type", "str", "entityType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
         ]
       }
     }

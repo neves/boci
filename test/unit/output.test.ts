@@ -40,6 +40,14 @@ function result(
     raw,
     allPages: false,
     pageItems: [],
+    responseModels: {
+      Thing: {
+        attributes: [
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["display_name", "str", "displayName"],
+        ],
+      },
+    },
     ...extra,
   };
 }
@@ -58,9 +66,18 @@ const things = {
 
 test("json maps camelCase keys to dashes and sorts them", () => {
   const { io, out } = invocation();
-  printResult(io, result({ items: [{ zKey: 1, aKey: { bC: 2 } }] }), { rc });
+  printResult(io, result(things), { rc });
   expect(out.join("")).toBe(
-    `${JSON.stringify({ data: [{ "a-key": { "b-c": 2 }, "z-key": 1 }] }, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        data: [
+          { "display-name": "a", "lifecycle-state": "ACTIVE" },
+          { "display-name": "bb", "lifecycle-state": "DELETED" },
+        ],
+      },
+      null,
+      2,
+    )}\n`,
   );
 });
 

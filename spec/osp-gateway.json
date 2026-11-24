@@ -4989,6 +4989,70 @@
           ["municipal_inscription", "str", "municipalInscription"]
         ]
       },
+      "AddressRule": {
+        "attributes": [
+          ["country_code", "str", "countryCode"],
+          ["address", "AddressTypeRule", "address"],
+          ["contact", "ContactTypeRule", "contact"],
+          ["tax", "TaxTypeRule", "tax"]
+        ]
+      },
+      "AddressTypeRule": {
+        "attributes": [
+          ["third_party_validation", "str", "thirdPartyValidation"],
+          ["fields", "list[Field]", "fields"]
+        ]
+      },
+      "AuthorizeSubscriptionPaymentReceipt": {
+        "attributes": [
+          ["header_id", "str", "headerId"],
+          ["api_token", "str", "apiToken"],
+          ["user_token", "str", "userToken"]
+        ]
+      },
+      "BillToAddress": {
+        "attributes": [
+          ["contact_name", "str", "contactName"],
+          ["company_name", "str", "companyName"],
+          ["address_line1", "str", "addressLine1"],
+          ["address_line2", "str", "addressLine2"],
+          ["address_line3", "str", "addressLine3"],
+          ["address_line4", "str", "addressLine4"],
+          ["street_name", "str", "streetName"],
+          ["street_number", "str", "streetNumber"],
+          ["city", "str", "city"],
+          ["country", "Country", "country"],
+          ["county", "str", "county"],
+          ["state", "str", "state"],
+          ["postal_code", "str", "postalCode"],
+          ["province", "str", "province"]
+        ]
+      },
+      "ContactTypeRule": {
+        "attributes": [["fields", "list[Field]", "fields"]]
+      },
+      "Country": {
+        "attributes": [
+          ["country_id", "float", "countryId"],
+          ["country_code", "str", "countryCode"],
+          ["country_name", "str", "countryName"],
+          ["language_id", "float", "languageId"],
+          ["ascii3_country_code", "str", "ascii3CountryCode"]
+        ]
+      },
+      "CreditCardPaymentDetail": {
+        "attributes": [
+          ["time_paid_on", "datetime", "timePaidOn"],
+          ["paid_by", "str", "paidBy"],
+          ["payment_method", "str", "paymentMethod"],
+          ["amount_paid", "float", "amountPaid"],
+          ["name_on_card", "str", "nameOnCard"],
+          ["credit_card_type", "str", "creditCardType"],
+          ["last_digits", "str", "lastDigits"],
+          ["time_expiration", "datetime", "timeExpiration"]
+        ],
+        "discriminator": "PaymentDetail"
+      },
       "CreditCardPaymentOption": {
         "attributes": [
           ["wallet_instrument_id", "str", "walletInstrumentId"],
@@ -5001,11 +5065,178 @@
         ],
         "discriminator": "PaymentOption"
       },
+      "Currency": {
+        "attributes": [
+          ["currency_code", "str", "currencyCode"],
+          ["currency_symbol", "str", "currencySymbol"],
+          ["name", "str", "name"],
+          ["usd_conversion", "float", "usdConversion"],
+          ["round_decimal_point", "float", "roundDecimalPoint"]
+        ]
+      },
+      "EcheckPaymentDetail": {
+        "attributes": [
+          ["time_paid_on", "datetime", "timePaidOn"],
+          ["paid_by", "str", "paidBy"],
+          ["payment_method", "str", "paymentMethod"],
+          ["amount_paid", "float", "amountPaid"],
+          ["name_on_card", "str", "nameOnCard"],
+          ["card_type", "str", "cardType"],
+          ["account_number", "str", "accountNumber"],
+          ["routing_number", "str", "routingNumber"]
+        ],
+        "discriminator": "PaymentDetail"
+      },
+      "Field": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["is_required", "bool", "isRequired"],
+          ["format", "Format", "format"],
+          ["label", "Label", "label"],
+          ["language", "str", "language"]
+        ]
+      },
+      "Format": {
+        "attributes": [
+          ["value", "str", "value"],
+          ["example", "str", "example"]
+        ]
+      },
+      "Invoice": {
+        "attributes": [
+          ["invoice_id", "str", "invoiceId"],
+          ["invoice_number", "str", "invoiceNumber"],
+          ["internal_invoice_id", "str", "internalInvoiceId"],
+          ["is_credit_card_payable", "bool", "isCreditCardPayable"],
+          ["time_invoice", "datetime", "timeInvoice"],
+          ["tax", "float", "tax"],
+          ["invoice_amount", "float", "invoiceAmount"],
+          ["invoice_amount_due", "float", "invoiceAmountDue"],
+          ["invoice_amount_credited", "float", "invoiceAmountCredited"],
+          ["invoice_amount_adjusted", "float", "invoiceAmountAdjusted"],
+          ["invoice_amount_applied", "float", "invoiceAmountApplied"],
+          ["currency", "Currency", "currency"],
+          ["invoice_type", "str", "invoiceType"],
+          ["time_invoice_due", "datetime", "timeInvoiceDue"],
+          ["invoice_ref_number", "str", "invoiceRefNumber"],
+          ["invoice_po_number", "str", "invoicePoNumber"],
+          ["invoice_status", "str", "invoiceStatus"],
+          ["preferred_email", "str", "preferredEmail"],
+          ["is_pdf_email_available", "bool", "isPdfEmailAvailable"],
+          ["is_display_download_pdf", "bool", "isDisplayDownloadPdf"],
+          ["is_payable", "bool", "isPayable"],
+          ["payment_terms", "str", "paymentTerms"],
+          ["last_payment_detail", "PaymentDetail", "lastPaymentDetail"],
+          ["bill_to_address", "BillToAddress", "billToAddress"],
+          ["subscription_ids", "list[str]", "subscriptionIds"]
+        ]
+      },
+      "InvoiceCollection": {
+        "attributes": [["items", "list[InvoiceSummary]", "items"]]
+      },
+      "InvoiceLineCollection": {
+        "attributes": [["items", "list[InvoiceLineSummary]", "items"]]
+      },
+      "InvoiceLineSummary": {
+        "attributes": [
+          ["product", "str", "product"],
+          ["order_no", "str", "orderNo"],
+          ["part_number", "str", "partNumber"],
+          ["time_start", "datetime", "timeStart"],
+          ["time_end", "datetime", "timeEnd"],
+          ["quantity", "float", "quantity"],
+          ["net_unit_price", "float", "netUnitPrice"],
+          ["total_price", "float", "totalPrice"],
+          ["currency", "Currency", "currency"]
+        ]
+      },
+      "InvoiceSummary": {
+        "attributes": [
+          ["invoice_id", "str", "invoiceId"],
+          ["invoice_number", "str", "invoiceNumber"],
+          ["internal_invoice_id", "str", "internalInvoiceId"],
+          ["is_credit_card_payable", "bool", "isCreditCardPayable"],
+          ["invoice_status", "str", "invoiceStatus"],
+          ["invoice_type", "str", "invoiceType"],
+          ["is_paid", "bool", "isPaid"],
+          ["is_payable", "bool", "isPayable"],
+          ["invoice_amount", "float", "invoiceAmount"],
+          ["invoice_amount_due", "float", "invoiceAmountDue"],
+          ["invoice_amount_credited", "float", "invoiceAmountCredited"],
+          ["invoice_amount_adjusted", "float", "invoiceAmountAdjusted"],
+          ["invoice_amount_applied", "float", "invoiceAmountApplied"],
+          ["time_invoice_due", "datetime", "timeInvoiceDue"],
+          ["is_payment_failed", "bool", "isPaymentFailed"],
+          ["invoice_amount_in_dispute", "float", "invoiceAmountInDispute"],
+          ["invoice_ref_number", "str", "invoiceRefNumber"],
+          ["invoice_po_number", "str", "invoicePoNumber"],
+          ["time_invoice", "datetime", "timeInvoice"],
+          ["currency", "Currency", "currency"],
+          ["is_pdf_email_available", "bool", "isPdfEmailAvailable"],
+          ["is_display_view_pdf", "bool", "isDisplayViewPdf"],
+          ["is_display_download_pdf", "bool", "isDisplayDownloadPdf"],
+          ["last_payment_detail", "PaymentDetail", "lastPaymentDetail"],
+          ["party_name", "str", "partyName"],
+          ["subscription_ids", "list[str]", "subscriptionIds"]
+        ]
+      },
+      "Label": {
+        "attributes": [
+          ["value", "str", "value"],
+          ["example", "str", "example"]
+        ]
+      },
       "MerchantDefinedData": {
         "attributes": [
           ["promo_type", "str", "promoType"],
           ["cloud_account_name", "str", "cloudAccountName"]
         ]
+      },
+      "OtherPaymentDetail": {
+        "attributes": [
+          ["time_paid_on", "datetime", "timePaidOn"],
+          ["paid_by", "str", "paidBy"],
+          ["payment_method", "str", "paymentMethod"],
+          ["amount_paid", "float", "amountPaid"],
+          ["echeck_routing", "str", "echeckRouting"],
+          ["name_on_card", "str", "nameOnCard"],
+          ["credit_card_type", "str", "creditCardType"],
+          ["last_digits", "str", "lastDigits"],
+          ["time_expiration", "datetime", "timeExpiration"]
+        ],
+        "discriminator": "PaymentDetail"
+      },
+      "PayInvoiceReceipt": {
+        "attributes": [
+          ["url", "str", "url"],
+          ["header_id", "str", "headerId"],
+          ["token", "str", "token"]
+        ]
+      },
+      "PaySubscriptionReceipt": {
+        "attributes": [
+          ["header_id", "str", "headerId"],
+          ["api_token", "str", "apiToken"],
+          ["user_token", "str", "userToken"]
+        ]
+      },
+      "PaymentDetail": {
+        "attributes": [
+          ["time_paid_on", "datetime", "timePaidOn"],
+          ["paid_by", "str", "paidBy"],
+          ["payment_method", "str", "paymentMethod"],
+          ["amount_paid", "float", "amountPaid"]
+        ],
+        "discriminator": {
+          "field": "paymentMethod",
+          "values": {
+            "ECHECK": "EcheckPaymentDetail",
+            "OTHER": "OtherPaymentDetail",
+            "PAYPAL": "PaypalPaymentDetail",
+            "CREDIT_CARD": "CreditCardPaymentDetail"
+          },
+          "fallback": "PaymentDetail"
+        }
       },
       "PaymentGateway": {
         "attributes": [
@@ -5030,6 +5261,17 @@
           },
           "fallback": "PaymentOption"
         }
+      },
+      "PaypalPaymentDetail": {
+        "attributes": [
+          ["time_paid_on", "datetime", "timePaidOn"],
+          ["paid_by", "str", "paidBy"],
+          ["payment_method", "str", "paymentMethod"],
+          ["amount_paid", "float", "amountPaid"],
+          ["paypal_id", "str", "paypalId"],
+          ["paypal_reference", "str", "paypalReference"]
+        ],
+        "discriminator": "PaymentDetail"
       },
       "PaypalPaymentOption": {
         "attributes": [
@@ -5077,6 +5319,43 @@
           ]
         ]
       },
+      "SubscriptionCollection": {
+        "attributes": [["items", "list[SubscriptionSummary]", "items"]]
+      },
+      "SubscriptionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["subscription_plan_number", "str", "subscriptionPlanNumber"],
+          ["plan_type", "str", "planType"],
+          ["time_start", "datetime", "timeStart"],
+          ["ship_to_cust_acct_site_id", "str", "shipToCustAcctSiteId"],
+          ["ship_to_cust_acct_role_id", "str", "shipToCustAcctRoleId"],
+          ["bill_to_cust_account_id", "str", "billToCustAccountId"],
+          ["is_intent_to_pay", "bool", "isIntentToPay"],
+          [
+            "is_corporate_conversion_allowed",
+            "bool",
+            "isCorporateConversionAllowed"
+          ],
+          ["currency_code", "str", "currencyCode"],
+          ["gsi_org_code", "str", "gsiOrgCode"],
+          ["language_code", "str", "languageCode"],
+          ["organization_id", "str", "organizationId"],
+          ["upgrade_state", "str", "upgradeState"],
+          ["upgrade_state_details", "str", "upgradeStateDetails"],
+          ["account_type", "str", "accountType"],
+          ["tax_info", "TaxInfo", "taxInfo"],
+          ["payment_options", "list[PaymentOption]", "paymentOptions"],
+          ["payment_gateway", "PaymentGateway", "paymentGateway"],
+          ["billing_address", "Address", "billingAddress"],
+          ["time_plan_upgrade", "datetime", "timePlanUpgrade"],
+          [
+            "time_personal_to_corporate_conv",
+            "datetime",
+            "timePersonalToCorporateConv"
+          ]
+        ]
+      },
       "TaxInfo": {
         "attributes": [
           ["tax_payer_id", "str", "taxPayerId"],
@@ -5085,6 +5364,25 @@
           ["no_tax_reason_code_details", "str", "noTaxReasonCodeDetails"],
           ["tax_cnpj", "str", "taxCnpj"],
           ["giro", "str", "giro"]
+        ]
+      },
+      "TaxTypeRule": {
+        "attributes": [
+          ["fields", "list[Field]", "fields"],
+          ["value_set", "list[ValueSetEntity]", "valueSet"]
+        ]
+      },
+      "ValueSetEntity": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["value", "str", "value"]
+        ]
+      },
+      "VerifyAddressReceipt": {
+        "attributes": [
+          ["address", "Address", "address"],
+          ["quality", "str", "quality"],
+          ["verification_code", "str", "verificationCode"]
         ]
       }
     }

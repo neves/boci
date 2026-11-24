@@ -2,6 +2,7 @@
 // call; otherwise the data/etag/opc-next-page document, filtered by --query (or an rc canned
 // query) and printed as JSON (keys sorted), a table, or --raw-output text.
 import { Exit, type Invocation } from "../lib/io.ts";
+import type { Models } from "./camelize.ts";
 import type { OperationResult } from "./operation.ts";
 import { applyQuery } from "../lib/query.ts";
 import type { Rc } from "./rc.ts";
@@ -36,6 +37,7 @@ export function printResult(
     operation,
     response,
     raw,
+    result.responseModels,
     result.pageItems,
     result.allPages,
     options,
@@ -82,12 +84,12 @@ function renderGeneratedResponse(
   operation: OperationSpec,
   response: Response,
   raw: string,
+  models: Models[string] | undefined,
   pageItems: unknown[],
   allPages: boolean,
   options: OutputOptions,
 ): void {
-  const { rc } = options;
-  const hasBody = raw.trim().length > 0;
+  const hasBody = Boolean(operation.responseType) && raw.trim().length > 0;
   let value: unknown;
   if (hasBody) {
     try {
@@ -95,9 +97,9 @@ function renderGeneratedResponse(
       value =
         typeof parsed === "string"
           ? parsed
-          : operation.method === "get_namespace"
+          : operation.responseType === "str"
             ? raw
-            : mapResponseKeys(
+            : renderModel(
                 allPages && operation.responseType?.startsWith("list[")
                   ? pageItems
                   : operation.responseType?.startsWith("list[") &&
@@ -107,6 +109,8 @@ function renderGeneratedResponse(
                       Array.isArray(parsed.items)
                     ? parsed.items
                     : parsed,
+                operation.responseType!,
+                models,
               );
     } catch {
       value = raw;
@@ -186,16 +190,49 @@ function sortJson(value: unknown): unknown {
   return value;
 }
 
-function mapResponseKeys(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(mapResponseKeys);
-  if (value && typeof value === "object")
+function renderModel(
+  value: unknown,
+  type: string,
+  models?: Models[string],
+): unknown {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    const element = /^list\[(.*)\]$/.exec(type)?.[1];
+    return element
+      ? value.map((item) => renderModel(item, element, models))
+      : value;
+  }
+  const data = value as Record<string, unknown>;
+  const dictValue = /^dict\([^,]+, (.*)\)$/.exec(type)?.[1];
+  if (dictValue)
     return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [
-        key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`),
-        mapResponseKeys(item),
+      Object.entries(data).map(([key, item]) => [
+        key,
+        renderModel(item, dictValue, models),
       ]),
     );
-  return value;
+  let model = models?.[type];
+  if (!model) return data;
+  let disc = model.discriminator;
+  if (typeof disc === "string") disc = models?.[disc]?.discriminator;
+  if (disc && typeof disc !== "string") {
+    const key = data[disc.field];
+    const subtype =
+      typeof key === "string" && Object.hasOwn(disc.values, key)
+        ? disc.values[key]
+        : disc.fallback;
+    model = models?.[subtype!] ?? model;
+  }
+  return Object.fromEntries(
+    model.attributes.map(([name, fieldType, wire]) => [
+      name.replaceAll("_", "-"),
+      renderModel(
+        Object.hasOwn(data, wire) ? data[wire] : null,
+        fieldType,
+        models,
+      ),
+    ]),
+  );
 }
 
 function renderTable(value: unknown): string {

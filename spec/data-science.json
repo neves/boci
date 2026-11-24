@@ -64416,6 +64416,24 @@
   },
   "models": {
     "data_science": {
+      "ApplicationComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "DATA_SCIENCE_JOB": "DataScienceJobApplicationComponent",
+            "DATA_FLOW_APPLICATION": "DataFlowApplicationApplicationComponent",
+            "GENERIC_OCI_RESOURCE": "GenericOciResourceApplicationComponent",
+            "DATA_SCIENCE_PIPELINE": "DataSciencePipelineApplicationComponent",
+            "DATA_SCIENCE_MODEL": "DataScienceModelApplicationComponent"
+          },
+          "fallback": "ApplicationComponent"
+        }
+      },
       "ArtifactExportDetails": {
         "attributes": [["artifact_source_type", "str", "artifactSourceType"]],
         "discriminator": {
@@ -64456,6 +64474,16 @@
         ],
         "discriminator": "ArtifactImportDetails"
       },
+      "AuthConfiguration": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "IAM": "IamAuthConfiguration"
+          },
+          "fallback": "AuthConfiguration"
+        }
+      },
       "AutoScalingPolicy": {
         "attributes": [
           ["policy_type", "str", "policyType"],
@@ -64480,6 +64508,13 @@
           },
           "fallback": "AutoScalingPolicyDetails"
         }
+      },
+      "BackupOperationDetails": {
+        "attributes": [
+          ["time_last_backup", "datetime", "timeLastBackup"],
+          ["backup_state", "str", "backupState"],
+          ["backup_state_details", "str", "backupStateDetails"]
+        ]
       },
       "BackupSetting": {
         "attributes": [
@@ -64538,10 +64573,101 @@
           "fallback": "ComputeConfigurationDetails"
         }
       },
+      "ComputeTarget": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["metadata", "dict(str, str)", "metadata"],
+          ["created_by", "str", "createdBy"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          [
+            "compute_configuration_details",
+            "ComputeConfigurationDetails",
+            "computeConfigurationDetails"
+          ],
+          [
+            "compute_target_system_data",
+            "ComputeTargetSystemData",
+            "computeTargetSystemData"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ComputeTargetShapeSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["core_count", "int", "coreCount"],
+          ["memory_in_gbs", "int", "memoryInGBs"],
+          ["shape_series", "str", "shapeSeries"]
+        ]
+      },
+      "ComputeTargetSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["created_by", "str", "createdBy"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ComputeTargetSystemData": {
+        "attributes": [["compute_type", "str", "computeType"]],
+        "discriminator": {
+          "field": "computeType",
+          "values": {
+            "MANAGED_COMPUTE_CLUSTER": "ManagedComputeClusterSystemData"
+          },
+          "fallback": "ComputeTargetSystemData"
+        }
+      },
       "ConfigurationProperty": {
         "attributes": [
           ["key", "str", "key"],
           ["value", "str", "value"]
+        ]
+      },
+      "ConfigurationPropertySchema": {
+        "attributes": [
+          ["key_name", "str", "keyName"],
+          ["value_type", "str", "valueType"],
+          ["description", "str", "description"],
+          ["is_mandatory", "bool", "isMandatory"],
+          ["default_value", "str", "defaultValue"],
+          ["validation_regexp", "str", "validationRegexp"],
+          ["sample_value", "str", "sampleValue"]
+        ]
+      },
+      "ContainerSummary": {
+        "attributes": [
+          ["container_name", "str", "containerName"],
+          ["display_name", "str", "displayName"],
+          ["family_name", "str", "familyName"],
+          ["description", "str", "description"],
+          ["is_latest", "bool", "isLatest"],
+          ["target_workloads", "list[str]", "targetWorkloads"],
+          ["usages", "list[str]", "usages"],
+          ["tag", "str", "tag"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          [
+            "workload_configuration_details_list",
+            "list[WorkloadConfigurationDetails]",
+            "workloadConfigurationDetailsList"
+          ],
+          [
+            "tag_configuration_list",
+            "list[TagConfiguration]",
+            "tagConfigurationList"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
         ]
       },
       "CreateAuthConfigurationDetails": {
@@ -64700,6 +64826,100 @@
         ],
         "discriminator": "MetricExpressionRule"
       },
+      "DataFlowApplicationApplicationComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["application_id", "str", "applicationId"]
+        ],
+        "discriminator": "ApplicationComponent"
+      },
+      "DataScienceJobApplicationComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["job_id", "str", "jobId"]
+        ],
+        "discriminator": "ApplicationComponent"
+      },
+      "DataScienceModelApplicationComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["model_id", "str", "modelId"]
+        ],
+        "discriminator": "ApplicationComponent"
+      },
+      "DataScienceModelDeploymentInstanceComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["prediction_use_case_name", "str", "predictionUseCaseName"],
+          ["model_deployment_id", "str", "modelDeploymentId"]
+        ],
+        "discriminator": "InstanceComponent"
+      },
+      "DataSciencePipelineApplicationComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["pipeline_id", "str", "pipelineId"]
+        ],
+        "discriminator": "ApplicationComponent"
+      },
+      "DataSciencePrivateEndpoint": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["description", "str", "description"],
+          ["display_name", "str", "displayName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["id", "str", "id"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["created_by", "str", "createdBy"],
+          ["subnet_id", "str", "subnetId"],
+          ["fqdn", "str", "fqdn"],
+          ["data_science_resource_type", "str", "dataScienceResourceType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "DataSciencePrivateEndpointSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["id", "str", "id"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["data_science_resource_type", "str", "dataScienceResourceType"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["created_by", "str", "createdBy"],
+          ["subnet_id", "str", "subnetId"],
+          ["fqdn", "str", "fqdn"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "DataScienceScheduleInstanceComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["schedule_id", "str", "scheduleId"]
+        ],
+        "discriminator": "InstanceComponent"
+      },
       "DefaultJobConfigurationDetails": {
         "attributes": [
           ["job_type", "str", "jobType"],
@@ -64731,6 +64951,16 @@
         ],
         "discriminator": "JobInfrastructureConfigurationDetails"
       },
+      "FastLaunchJobConfigSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["shape_name", "str", "shapeName"],
+          ["core_count", "int", "coreCount"],
+          ["memory_in_gbs", "int", "memoryInGBs"],
+          ["shape_series", "str", "shapeSeries"],
+          ["managed_egress_support", "str", "managedEgressSupport"]
+        ]
+      },
       "FileStorageMountConfigurationDetails": {
         "attributes": [
           ["storage_type", "str", "storageType"],
@@ -64748,6 +64978,37 @@
         ],
         "discriminator": "ScalingPolicy"
       },
+      "GenericJobRunUseCaseConfigurationDetails": {
+        "attributes": [
+          ["use_case_type", "str", "useCaseType"],
+          [
+            "additional_configurations",
+            "dict(str, str)",
+            "additionalConfigurations"
+          ]
+        ],
+        "discriminator": "JobRunUseCaseConfigurationDetails"
+      },
+      "GenericOciResourceApplicationComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["id", "str", "id"],
+          ["resource_type", "str", "resourceType"]
+        ],
+        "discriminator": "ApplicationComponent"
+      },
+      "GenericOciResourceInstanceComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["id", "str", "id"],
+          ["resource_type", "str", "resourceType"]
+        ],
+        "discriminator": "InstanceComponent"
+      },
       "HeterogeneousModelGroupDetails": {
         "attributes": [
           ["type", "str", "type"],
@@ -64761,6 +65022,10 @@
           ["custom_metadata_list", "list[CustomMetadata]", "customMetadataList"]
         ],
         "discriminator": "ModelGroupDetails"
+      },
+      "IamAuthConfiguration": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": "AuthConfiguration"
       },
       "ImplementationLogDetails": {
         "attributes": [
@@ -64800,6 +65065,25 @@
           "fallback": "InfrastructureConfigurationDetails"
         }
       },
+      "InstanceComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "DATA_SCIENCE_MODEL_DEPLOYMENT": "DataScienceModelDeploymentInstanceComponent",
+            "GENERIC_OCI_RESOURCE": "GenericOciResourceInstanceComponent",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER": "MlApplicationInstanceInternalTrigger",
+            "DATA_SCIENCE_SCHEDULE": "DataScienceScheduleInstanceComponent",
+            "OBJECT_STORAGE_OBJECT": "ObjectStorageObjectInstanceComponent",
+            "OBJECT_STORAGE_BUCKET": "ObjectStorageBucketInstanceComponent"
+          },
+          "fallback": "InstanceComponent"
+        }
+      },
       "InstanceConfiguration": {
         "attributes": [
           ["instance_shape_name", "str", "instanceShapeName"],
@@ -64828,6 +65112,14 @@
         ],
         "discriminator": "InfrastructureConfigurationDetails"
       },
+      "InstancePoolModelDeploymentSystemData": {
+        "attributes": [
+          ["system_infra_type", "str", "systemInfraType"],
+          ["model_type", "str", "modelType"],
+          ["current_instance_count", "int", "currentInstanceCount"]
+        ],
+        "discriminator": "ModelDeploymentSystemData"
+      },
       "InvokeMlApplicationProviderTriggerScheduleActionDetails": {
         "attributes": [
           ["http_action_type", "str", "httpActionType"],
@@ -64843,6 +65135,56 @@
           ]
         ],
         "discriminator": "ScheduleHttpActionDetails"
+      },
+      "Job": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          [
+            "job_run_retention_period_in_days",
+            "int",
+            "jobRunRetentionPeriodInDays"
+          ],
+          [
+            "job_configuration_details",
+            "JobConfigurationDetails",
+            "jobConfigurationDetails"
+          ],
+          [
+            "job_infrastructure_configuration_details",
+            "JobInfrastructureConfigurationDetails",
+            "jobInfrastructureConfigurationDetails"
+          ],
+          [
+            "job_environment_configuration_details",
+            "JobEnvironmentConfigurationDetails",
+            "jobEnvironmentConfigurationDetails"
+          ],
+          [
+            "job_log_configuration_details",
+            "JobLogConfigurationDetails",
+            "jobLogConfigurationDetails"
+          ],
+          [
+            "job_storage_mount_configuration_details_list",
+            "list[StorageMountConfigurationDetails]",
+            "jobStorageMountConfigurationDetailsList"
+          ],
+          [
+            "job_node_configuration_details",
+            "JobNodeConfigurationDetails",
+            "jobNodeConfigurationDetails"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
       },
       "JobConfigurationDetails": {
         "attributes": [["job_type", "str", "jobType"]],
@@ -64963,11 +65305,144 @@
           "fallback": "JobProbeDetails"
         }
       },
+      "JobRun": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["job_id", "str", "jobId"],
+          ["display_name", "str", "displayName"],
+          [
+            "job_run_retention_period_in_days_override",
+            "int",
+            "jobRunRetentionPeriodInDaysOverride"
+          ],
+          [
+            "job_configuration_override_details",
+            "JobConfigurationDetails",
+            "jobConfigurationOverrideDetails"
+          ],
+          [
+            "job_infrastructure_configuration_details",
+            "JobInfrastructureConfigurationDetails",
+            "jobInfrastructureConfigurationDetails"
+          ],
+          [
+            "job_environment_configuration_override_details",
+            "JobEnvironmentConfigurationDetails",
+            "jobEnvironmentConfigurationOverrideDetails"
+          ],
+          [
+            "job_log_configuration_override_details",
+            "JobLogConfigurationDetails",
+            "jobLogConfigurationOverrideDetails"
+          ],
+          [
+            "job_storage_mount_configuration_details_list",
+            "list[StorageMountConfigurationDetails]",
+            "jobStorageMountConfigurationDetailsList"
+          ],
+          [
+            "job_storage_mount_configuration_override_details_list",
+            "list[StorageMountConfigurationDetails]",
+            "jobStorageMountConfigurationOverrideDetailsList"
+          ],
+          ["log_details", "JobRunLogDetails", "logDetails"],
+          [
+            "job_infrastructure_configuration_override_details",
+            "JobInfrastructureConfigurationDetails",
+            "jobInfrastructureConfigurationOverrideDetails"
+          ],
+          [
+            "job_node_configuration_override_details",
+            "JobNodeConfigurationDetails",
+            "jobNodeConfigurationOverrideDetails"
+          ],
+          [
+            "node_group_details_list",
+            "list[NodeGroupDetails]",
+            "nodeGroupDetailsList"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "JobRunLogDetails": {
+        "attributes": [
+          ["log_group_id", "str", "logGroupId"],
+          ["log_id", "str", "logId"]
+        ]
+      },
+      "JobRunSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["job_id", "str", "jobId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "JobRunUseCaseConfigurationDetails": {
+        "attributes": [["use_case_type", "str", "useCaseType"]],
+        "discriminator": {
+          "field": "useCaseType",
+          "values": {
+            "GENERIC": "GenericJobRunUseCaseConfigurationDetails"
+          },
+          "fallback": "JobRunUseCaseConfigurationDetails"
+        }
+      },
+      "JobRunWorkloadConfigurationDetails": {
+        "attributes": [
+          ["workload_type", "str", "workloadType"],
+          [
+            "use_case_configuration",
+            "JobRunUseCaseConfigurationDetails",
+            "useCaseConfiguration"
+          ]
+        ],
+        "discriminator": "WorkloadConfigurationDetails"
+      },
       "JobShapeConfigDetails": {
         "attributes": [
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["cpu_baseline", "str", "cpuBaseline"]
+        ]
+      },
+      "JobShapeSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["core_count", "int", "coreCount"],
+          ["memory_in_gbs", "int", "memoryInGBs"],
+          ["shape_series", "str", "shapeSeries"]
+        ]
+      },
+      "JobSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
         ]
       },
       "LogDetails": {
@@ -65207,6 +65682,14 @@
           ]
         ]
       },
+      "ManagedComputeClusterModelDeploymentSystemData": {
+        "attributes": [
+          ["system_infra_type", "str", "systemInfraType"],
+          ["model_type", "str", "modelType"],
+          ["current_instance_count", "int", "currentInstanceCount"]
+        ],
+        "discriminator": "ModelDeploymentSystemData"
+      },
       "ManagedComputeClusterNetworkConfigurationDetails": {
         "attributes": [["network_type", "str", "networkType"]],
         "discriminator": {
@@ -65269,6 +65752,13 @@
           },
           "fallback": "ManagedComputeClusterScalingPolicy"
         }
+      },
+      "ManagedComputeClusterSystemData": {
+        "attributes": [
+          ["compute_type", "str", "computeType"],
+          ["current_instance_count", "int", "currentInstanceCount"]
+        ],
+        "discriminator": "ComputeTargetSystemData"
       },
       "ManagedComputeClusterThresholdBasedAutoScalingPolicyDetails": {
         "attributes": [
@@ -65418,6 +65908,395 @@
           "fallback": "MetricExpressionRule"
         }
       },
+      "MlApplication": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationCollection": {
+        "attributes": [["items", "list[MlApplicationSummary]", "items"]]
+      },
+      "MlApplicationImplementation": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          ["package_version", "str", "packageVersion"],
+          [
+            "application_components",
+            "list[ApplicationComponent]",
+            "applicationComponents"
+          ],
+          [
+            "configuration_schema",
+            "list[ConfigurationPropertySchema]",
+            "configurationSchema"
+          ],
+          [
+            "ml_application_package_arguments",
+            "MlApplicationPackageArguments",
+            "mlApplicationPackageArguments"
+          ],
+          [
+            "allowed_migration_destinations",
+            "list[str]",
+            "allowedMigrationDestinations"
+          ],
+          ["logging", "ImplementationLogging", "logging"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationImplementationCollection": {
+        "attributes": [
+          ["items", "list[MlApplicationImplementationSummary]", "items"]
+        ]
+      },
+      "MlApplicationImplementationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          ["package_version", "str", "packageVersion"],
+          [
+            "configuration_schema",
+            "list[ConfigurationPropertySchema]",
+            "configurationSchema"
+          ],
+          [
+            "allowed_migration_destinations",
+            "list[str]",
+            "allowedMigrationDestinations"
+          ],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationImplementationVersion": {
+        "attributes": [
+          ["id", "str", "id"],
+          [
+            "ml_application_implementation_id",
+            "str",
+            "mlApplicationImplementationId"
+          ],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          ["package_version", "str", "packageVersion"],
+          [
+            "application_components",
+            "list[ApplicationComponent]",
+            "applicationComponents"
+          ],
+          [
+            "configuration_schema",
+            "list[ConfigurationPropertySchema]",
+            "configurationSchema"
+          ],
+          [
+            "ml_application_package_arguments",
+            "MlApplicationPackageArguments",
+            "mlApplicationPackageArguments"
+          ],
+          [
+            "allowed_migration_destinations",
+            "list[str]",
+            "allowedMigrationDestinations"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationImplementationVersionCollection": {
+        "attributes": [
+          ["items", "list[MlApplicationImplementationVersionSummary]", "items"]
+        ]
+      },
+      "MlApplicationImplementationVersionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          [
+            "ml_application_implementation_id",
+            "str",
+            "mlApplicationImplementationId"
+          ],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          ["package_version", "str", "packageVersion"],
+          [
+            "configuration_schema",
+            "list[ConfigurationPropertySchema]",
+            "configurationSchema"
+          ],
+          [
+            "allowed_migration_destinations",
+            "list[str]",
+            "allowedMigrationDestinations"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationInstance": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          [
+            "ml_application_implementation_id",
+            "str",
+            "mlApplicationImplementationId"
+          ],
+          [
+            "ml_application_implementation_name",
+            "str",
+            "mlApplicationImplementationName"
+          ],
+          ["auth_configuration", "AuthConfiguration", "authConfiguration"],
+          ["configuration", "list[ConfigurationProperty]", "configuration"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "prediction_endpoint_details",
+            "PredictionEndpointDetails",
+            "predictionEndpointDetails"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_substate", "str", "lifecycleSubstate"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationInstanceCollection": {
+        "attributes": [["items", "list[MlApplicationInstanceSummary]", "items"]]
+      },
+      "MlApplicationInstanceInternalTrigger": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["trigger_definition", "str", "triggerDefinition"],
+          ["is_enabled", "bool", "isEnabled"]
+        ],
+        "discriminator": "InstanceComponent"
+      },
+      "MlApplicationInstanceSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          [
+            "ml_application_implementation_id",
+            "str",
+            "mlApplicationImplementationId"
+          ],
+          [
+            "ml_application_implementation_name",
+            "str",
+            "mlApplicationImplementationName"
+          ],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_substate", "str", "lifecycleSubstate"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationInstanceView": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["ml_application_instance_id", "str", "mlApplicationInstanceId"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          [
+            "ml_application_implementation_id",
+            "str",
+            "mlApplicationImplementationId"
+          ],
+          [
+            "ml_application_implementation_name",
+            "str",
+            "mlApplicationImplementationName"
+          ],
+          ["package_version", "str", "packageVersion"],
+          [
+            "ml_application_implementation_version_id",
+            "str",
+            "mlApplicationImplementationVersionId"
+          ],
+          ["auth_configuration", "AuthConfiguration", "authConfiguration"],
+          ["configuration", "list[ConfigurationProperty]", "configuration"],
+          ["is_enabled", "bool", "isEnabled"],
+          [
+            "instance_components",
+            "list[InstanceComponent]",
+            "instanceComponents"
+          ],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "prediction_endpoint_details",
+            "PredictionEndpointDetails",
+            "predictionEndpointDetails"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_substate", "str", "lifecycleSubstate"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationInstanceViewCollection": {
+        "attributes": [
+          ["items", "list[MlApplicationInstanceViewSummary]", "items"]
+        ]
+      },
+      "MlApplicationInstanceViewSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["ml_application_id", "str", "mlApplicationId"],
+          ["ml_application_name", "str", "mlApplicationName"],
+          ["ml_application_instance_id", "str", "mlApplicationInstanceId"],
+          [
+            "ml_application_implementation_id",
+            "str",
+            "mlApplicationImplementationId"
+          ],
+          [
+            "ml_application_implementation_name",
+            "str",
+            "mlApplicationImplementationName"
+          ],
+          ["package_version", "str", "packageVersion"],
+          [
+            "ml_application_implementation_version_id",
+            "str",
+            "mlApplicationImplementationVersionId"
+          ],
+          ["is_enabled", "bool", "isEnabled"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_substate", "str", "lifecycleSubstate"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MlApplicationPackageArgumentDetails": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["value", "str", "value"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["is_mandatory", "bool", "isMandatory"]
+        ]
+      },
+      "MlApplicationPackageArguments": {
+        "attributes": [
+          [
+            "arguments",
+            "list[MlApplicationPackageArgumentDetails]",
+            "arguments"
+          ]
+        ]
+      },
+      "MlApplicationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "Model": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["created_by", "str", "createdBy"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["custom_metadata_list", "list[Metadata]", "customMetadataList"],
+          ["defined_metadata_list", "list[Metadata]", "definedMetadataList"],
+          ["input_schema", "str", "inputSchema"],
+          ["output_schema", "str", "outputSchema"],
+          ["model_version_set_id", "str", "modelVersionSetId"],
+          ["model_version_set_name", "str", "modelVersionSetName"],
+          ["version_id", "int", "versionId"],
+          ["version_label", "str", "versionLabel"],
+          ["category", "str", "category"],
+          ["is_model_by_reference", "bool", "isModelByReference"],
+          ["retention_setting", "RetentionSetting", "retentionSetting"],
+          ["backup_setting", "BackupSetting", "backupSetting"],
+          [
+            "retention_operation_details",
+            "RetentionOperationDetails",
+            "retentionOperationDetails"
+          ],
+          [
+            "backup_operation_details",
+            "BackupOperationDetails",
+            "backupOperationDetails"
+          ]
+        ]
+      },
       "ModelArtifactReferenceDetails": {
         "attributes": [
           ["model_artifact_reference_type", "str", "modelArtifactReferenceType"]
@@ -65429,6 +66308,42 @@
           },
           "fallback": "ModelArtifactReferenceDetails"
         }
+      },
+      "ModelArtifactSignature": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_version_id", "str", "kmsKeyVersionId"],
+          ["model_id", "str", "modelId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["digest", "str", "digest"],
+          ["signature", "str", "signature"],
+          ["signing_algorithm", "str", "signingAlgorithm"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ModelArtifactSignatureSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["model_id", "str", "modelId"],
+          ["digest", "str", "digest"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["created_by", "str", "createdBy"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "ModelConfigurationDetails": {
         "attributes": [
@@ -65453,6 +66368,47 @@
           },
           "fallback": "ModelDeployInfrastructureConfigurationDetails"
         }
+      },
+      "ModelDeployWorkloadConfigurationDetails": {
+        "attributes": [
+          ["workload_type", "str", "workloadType"],
+          ["cmd", "str", "cmd"],
+          ["server_port", "int", "serverPort"],
+          ["health_check_port", "int", "healthCheckPort"],
+          [
+            "additional_configurations",
+            "dict(str, str)",
+            "additionalConfigurations"
+          ]
+        ],
+        "discriminator": "WorkloadConfigurationDetails"
+      },
+      "ModelDeployment": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["project_id", "str", "projectId"],
+          ["created_by", "str", "createdBy"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "model_deployment_configuration_details",
+            "ModelDeploymentConfigurationDetails",
+            "modelDeploymentConfigurationDetails"
+          ],
+          ["category_log_details", "CategoryLogDetails", "categoryLogDetails"],
+          ["model_deployment_url", "str", "modelDeploymentUrl"],
+          [
+            "model_deployment_system_data",
+            "ModelDeploymentSystemData",
+            "modelDeploymentSystemData"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
       },
       "ModelDeploymentConfigurationDetails": {
         "attributes": [["deployment_type", "str", "deploymentType"]],
@@ -65488,6 +66444,99 @@
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["cpu_baseline", "str", "cpuBaseline"]
+        ]
+      },
+      "ModelDeploymentModelStateSummary": {
+        "attributes": [
+          ["model_id", "str", "modelId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["inference_key", "str", "inferenceKey"],
+          ["state", "str", "state"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ModelDeploymentShapeSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["core_count", "int", "coreCount"],
+          ["memory_in_gbs", "int", "memoryInGBs"],
+          ["shape_series", "str", "shapeSeries"]
+        ]
+      },
+      "ModelDeploymentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["project_id", "str", "projectId"],
+          ["created_by", "str", "createdBy"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "model_deployment_configuration_details",
+            "ModelDeploymentConfigurationDetails",
+            "modelDeploymentConfigurationDetails"
+          ],
+          ["category_log_details", "CategoryLogDetails", "categoryLogDetails"],
+          ["model_deployment_url", "str", "modelDeploymentUrl"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          [
+            "model_deployment_system_data",
+            "ModelDeploymentSystemData",
+            "modelDeploymentSystemData"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ModelDeploymentSystemData": {
+        "attributes": [
+          ["system_infra_type", "str", "systemInfraType"],
+          ["model_type", "str", "modelType"]
+        ],
+        "discriminator": {
+          "field": "systemInfraType",
+          "values": {
+            "MANAGED_COMPUTE_CLUSTER": "ManagedComputeClusterModelDeploymentSystemData",
+            "INSTANCE_POOL": "InstancePoolModelDeploymentSystemData"
+          },
+          "fallback": "ModelDeploymentSystemData"
+        }
+      },
+      "ModelGroup": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["model_group_details", "ModelGroupDetails", "modelGroupDetails"],
+          ["member_model_entries", "MemberModelEntries", "memberModelEntries"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          [
+            "model_group_version_history_id",
+            "str",
+            "modelGroupVersionHistoryId"
+          ],
+          [
+            "model_group_version_history_name",
+            "str",
+            "modelGroupVersionHistoryName"
+          ],
+          ["version_label", "str", "versionLabel"],
+          ["version_id", "int", "versionId"],
+          ["create_type", "str", "createType"],
+          ["source_model_group_id", "str", "sourceModelGroupId"]
         ]
       },
       "ModelGroupCloneSourceDetails": {
@@ -65542,6 +66591,153 @@
           "fallback": "ModelGroupDetails"
         }
       },
+      "ModelGroupModelSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["model_id", "str", "modelId"],
+          ["inference_key", "str", "inferenceKey"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["created_by", "str", "createdBy"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["category", "str", "category"],
+          ["is_model_by_reference", "bool", "isModelByReference"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ModelGroupSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["created_by", "str", "createdBy"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "model_group_version_history_id",
+            "str",
+            "modelGroupVersionHistoryId"
+          ],
+          [
+            "model_group_version_history_name",
+            "str",
+            "modelGroupVersionHistoryName"
+          ],
+          ["version_label", "str", "versionLabel"],
+          ["version_id", "int", "versionId"],
+          ["model_group_details", "ModelGroupDetails", "modelGroupDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ModelGroupVersionHistory": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["latest_model_group_id", "str", "latestModelGroupId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"]
+        ]
+      },
+      "ModelGroupVersionHistorySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["latest_model_group_id", "str", "latestModelGroupId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"]
+        ]
+      },
+      "ModelProvenance": {
+        "attributes": [
+          ["repository_url", "str", "repositoryUrl"],
+          ["git_branch", "str", "gitBranch"],
+          ["git_commit", "str", "gitCommit"],
+          ["script_dir", "str", "scriptDir"],
+          ["training_script", "str", "trainingScript"],
+          ["training_id", "str", "trainingId"]
+        ]
+      },
+      "ModelSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["created_by", "str", "createdBy"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["model_version_set_id", "str", "modelVersionSetId"],
+          ["model_version_set_name", "str", "modelVersionSetName"],
+          ["version_id", "int", "versionId"],
+          ["version_label", "str", "versionLabel"],
+          ["category", "str", "category"],
+          ["is_model_by_reference", "bool", "isModelByReference"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ModelVersionSet": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["category", "str", "category"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ModelVersionSetSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["name", "str", "name"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["category", "str", "category"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "ModifyModelGroupDetails": {
         "attributes": [
           ["display_name", "str", "displayName"],
@@ -65588,6 +66784,48 @@
           ]
         ],
         "discriminator": "JobNodeConfigurationDetails"
+      },
+      "NodeGroupDetails": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ]
+      },
+      "NotebookSession": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["display_name", "str", "displayName"],
+          ["project_id", "str", "projectId"],
+          ["created_by", "str", "createdBy"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "notebook_session_configuration_details",
+            "NotebookSessionConfigurationDetails",
+            "notebookSessionConfigurationDetails"
+          ],
+          [
+            "notebook_session_config_details",
+            "NotebookSessionConfigDetails",
+            "notebookSessionConfigDetails"
+          ],
+          [
+            "notebook_session_runtime_config_details",
+            "NotebookSessionRuntimeConfigDetails",
+            "notebookSessionRuntimeConfigDetails"
+          ],
+          [
+            "notebook_session_storage_mount_configuration_details_list",
+            "list[StorageMountConfigurationDetails]",
+            "notebookSessionStorageMountConfigurationDetailsList"
+          ],
+          ["notebook_session_url", "str", "notebookSessionUrl"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
       },
       "NotebookSessionConfigDetails": {
         "attributes": [
@@ -65650,6 +66888,38 @@
           ["cpu_baseline", "str", "cpuBaseline"]
         ]
       },
+      "NotebookSessionShapeSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["core_count", "int", "coreCount"],
+          ["memory_in_gbs", "int", "memoryInGBs"],
+          ["shape_series", "str", "shapeSeries"]
+        ]
+      },
+      "NotebookSessionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["display_name", "str", "displayName"],
+          ["project_id", "str", "projectId"],
+          ["created_by", "str", "createdBy"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "notebook_session_configuration_details",
+            "NotebookSessionConfigurationDetails",
+            "notebookSessionConfigurationDetails"
+          ],
+          [
+            "notebook_session_config_details",
+            "NotebookSessionConfigDetails",
+            "notebookSessionConfigDetails"
+          ],
+          ["notebook_session_url", "str", "notebookSessionUrl"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
       "OSSModelArtifactReferenceDetails": {
         "attributes": [
           [
@@ -65663,6 +66933,16 @@
         ],
         "discriminator": "ModelArtifactReferenceDetails"
       },
+      "ObjectStorageBucketInstanceComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["namespace", "str", "namespace"],
+          ["bucket_id", "str", "bucketId"]
+        ],
+        "discriminator": "InstanceComponent"
+      },
       "ObjectStorageMountConfigurationDetails": {
         "attributes": [
           ["storage_type", "str", "storageType"],
@@ -65673,6 +66953,17 @@
           ["prefix", "str", "prefix"]
         ],
         "discriminator": "StorageMountConfigurationDetails"
+      },
+      "ObjectStorageObjectInstanceComponent": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["component_name", "str", "componentName"],
+          ["object_id", "str", "objectId"],
+          ["namespace", "str", "namespace"],
+          ["bucket_name", "str", "bucketName"]
+        ],
+        "discriminator": "InstanceComponent"
       },
       "OcirContainerJobEnvironmentConfigurationDetails": {
         "attributes": [
@@ -65742,6 +67033,50 @@
         ],
         "discriminator": "PatchInstruction"
       },
+      "Pipeline": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          [
+            "pipeline_run_retention_period_in_days",
+            "int",
+            "pipelineRunRetentionPeriodInDays"
+          ],
+          [
+            "configuration_details",
+            "PipelineConfigurationDetails",
+            "configurationDetails"
+          ],
+          [
+            "log_configuration_details",
+            "PipelineLogConfigurationDetails",
+            "logConfigurationDetails"
+          ],
+          [
+            "infrastructure_configuration_details",
+            "PipelineInfrastructureConfigurationDetails",
+            "infrastructureConfigurationDetails"
+          ],
+          [
+            "storage_mount_configuration_details_list",
+            "list[StorageMountConfigurationDetails]",
+            "storageMountConfigurationDetailsList"
+          ],
+          ["parameters", "dict(str, str)", "parameters"],
+          ["step_details", "list[PipelineStepDetails]", "stepDetails"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "PipelineConfigurationDetails": {
         "attributes": [["type", "str", "type"]],
         "discriminator": {
@@ -65793,6 +67128,17 @@
         ],
         "discriminator": "PipelineStepDetails"
       },
+      "PipelineContainerStepRun": {
+        "attributes": [
+          ["step_type", "str", "stepType"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["step_name", "str", "stepName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ],
+        "discriminator": "PipelineStepRun"
+      },
       "PipelineContainerStepUpdateDetails": {
         "attributes": [
           ["step_type", "str", "stepType"],
@@ -65842,6 +67188,17 @@
           ["step_parameters", "PipelineStepParameterDetails", "stepParameters"]
         ],
         "discriminator": "PipelineStepDetails"
+      },
+      "PipelineCustomScriptStepRun": {
+        "attributes": [
+          ["step_type", "str", "stepType"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["step_name", "str", "stepName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ],
+        "discriminator": "PipelineStepRun"
       },
       "PipelineCustomScriptStepUpdateDetails": {
         "attributes": [
@@ -65906,6 +67263,18 @@
           ]
         ],
         "discriminator": "PipelineStepDetails"
+      },
+      "PipelineDataflowStepRun": {
+        "attributes": [
+          ["step_type", "str", "stepType"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["step_name", "str", "stepName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["dataflow_run_id", "str", "dataflowRunId"]
+        ],
+        "discriminator": "PipelineStepRun"
       },
       "PipelineDataflowStepUpdateDetails": {
         "attributes": [
@@ -65992,6 +67361,19 @@
         ],
         "discriminator": "PipelineStepDetails"
       },
+      "PipelineMLJobStepRun": {
+        "attributes": [
+          ["step_type", "str", "stepType"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["step_name", "str", "stepName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["job_run_id", "str", "jobRunId"],
+          ["step_run_name", "str", "stepRunName"]
+        ],
+        "discriminator": "PipelineStepRun"
+      },
       "PipelineMLJobStepUpdateDetails": {
         "attributes": [
           ["step_type", "str", "stepType"],
@@ -66017,6 +67399,69 @@
           ["image_signature_id", "str", "imageSignatureId"]
         ],
         "discriminator": "PipelineContainerConfigurationDetails"
+      },
+      "PipelineRun": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["created_by", "str", "createdBy"],
+          ["project_id", "str", "projectId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["pipeline_id", "str", "pipelineId"],
+          ["display_name", "str", "displayName"],
+          [
+            "pipeline_run_retention_period_in_days_override",
+            "int",
+            "pipelineRunRetentionPeriodInDaysOverride"
+          ],
+          [
+            "configuration_details",
+            "PipelineConfigurationDetails",
+            "configurationDetails"
+          ],
+          [
+            "configuration_override_details",
+            "PipelineConfigurationDetails",
+            "configurationOverrideDetails"
+          ],
+          [
+            "log_configuration_override_details",
+            "PipelineLogConfigurationDetails",
+            "logConfigurationOverrideDetails"
+          ],
+          [
+            "infrastructure_configuration_override_details",
+            "PipelineInfrastructureConfigurationDetails",
+            "infrastructureConfigurationOverrideDetails"
+          ],
+          [
+            "storage_mount_configuration_override_details_list",
+            "list[StorageMountConfigurationDetails]",
+            "storageMountConfigurationOverrideDetailsList"
+          ],
+          ["parameters_override", "dict(str, str)", "parametersOverride"],
+          [
+            "step_override_details",
+            "list[PipelineStepOverrideDetails]",
+            "stepOverrideDetails"
+          ],
+          ["log_details", "PipelineRunLogDetails", "logDetails"],
+          ["step_runs", "list[PipelineStepRun]", "stepRuns"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PipelineRunLogDetails": {
+        "attributes": [
+          ["log_group_id", "str", "logGroupId"],
+          ["log_id", "str", "logId"]
+        ]
       },
       "PipelineShapeConfigDetails": {
         "attributes": [
@@ -66107,6 +67552,26 @@
           "fallback": "PipelineStepParameterDetails"
         }
       },
+      "PipelineStepRun": {
+        "attributes": [
+          ["step_type", "str", "stepType"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["step_name", "str", "stepName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ],
+        "discriminator": {
+          "field": "stepType",
+          "values": {
+            "CONTAINER": "PipelineContainerStepRun",
+            "CUSTOM_SCRIPT": "PipelineCustomScriptStepRun",
+            "ML_JOB": "PipelineMLJobStepRun",
+            "DATAFLOW": "PipelineDataflowStepRun"
+          },
+          "fallback": "PipelineStepRun"
+        }
+      },
       "PipelineStepUpdateDetails": {
         "attributes": [
           ["step_type", "str", "stepType"],
@@ -66155,6 +67620,46 @@
         ],
         "discriminator": "MetricExpressionRule"
       },
+      "PredictionEndpointDetails": {
+        "attributes": [
+          ["base_prediction_uri", "str", "basePredictionUri"],
+          ["prediction_uris", "list[PredictionUri]", "predictionUris"]
+        ]
+      },
+      "PredictionUri": {
+        "attributes": [
+          ["use_case", "str", "useCase"],
+          ["uri", "str", "uri"]
+        ]
+      },
+      "Project": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["created_by", "str", "createdBy"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ProjectSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["created_by", "str", "createdBy"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "ResourceLimitConfiguration": {
         "attributes": [
           ["ocpus", "float", "ocpus"],
@@ -66166,6 +67671,16 @@
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["gpus", "int", "gpus"]
+        ]
+      },
+      "RetentionOperationDetails": {
+        "attributes": [
+          ["archive_state", "str", "archiveState"],
+          ["archive_state_details", "str", "archiveStateDetails"],
+          ["time_archival_scheduled", "datetime", "timeArchivalScheduled"],
+          ["delete_state", "str", "deleteState"],
+          ["delete_state_details", "str", "deleteStateDetails"],
+          ["time_deletion_scheduled", "datetime", "timeDeletionScheduled"]
         ]
       },
       "RetentionSetting": {
@@ -66200,6 +67715,29 @@
           },
           "fallback": "ScalingPolicy"
         }
+      },
+      "Schedule": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_last_schedule_run", "datetime", "timeLastScheduleRun"],
+          ["time_next_scheduled_run", "datetime", "timeNextScheduledRun"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["last_schedule_run_details", "str", "lastScheduleRunDetails"],
+          ["trigger", "ScheduleTrigger", "trigger"],
+          ["action", "ScheduleAction", "action"],
+          ["log_details", "ScheduleLogDetails", "logDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "ScheduleAction": {
         "attributes": [["action_type", "str", "actionType"]],
@@ -66264,6 +67802,22 @@
         "attributes": [
           ["log_group_id", "str", "logGroupId"],
           ["log_id", "str", "logId"]
+        ]
+      },
+      "ScheduleSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["project_id", "str", "projectId"],
+          ["trigger", "ScheduleTrigger", "trigger"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "ScheduleTrigger": {
@@ -66366,6 +67920,12 @@
           },
           "fallback": "StorageMountConfigurationDetails"
         }
+      },
+      "TagConfiguration": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["value", "str", "value"]
+        ]
       },
       "TargetCustomExpressionQueryScalingConfiguration": {
         "attributes": [
@@ -66698,6 +68258,64 @@
           ]
         ],
         "discriminator": "UpdateModelDeploymentConfigurationDetails"
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["compartment_id", "str", "compartmentId"],
+          ["percent_complete", "float", "percentComplete"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["entity_type", "str", "entityType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["compartment_id", "str", "compartmentId"],
+          ["percent_complete", "float", "percentComplete"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkloadConfigurationDetails": {
+        "attributes": [["workload_type", "str", "workloadType"]],
+        "discriminator": {
+          "field": "workloadType",
+          "values": {
+            "MODEL_DEPLOYMENT": "ModelDeployWorkloadConfigurationDetails",
+            "JOB_RUN": "JobRunWorkloadConfigurationDetails"
+          },
+          "fallback": "WorkloadConfigurationDetails"
+        }
       }
     }
   }

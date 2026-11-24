@@ -14066,6 +14066,12 @@
           ]
         ]
       },
+      "Capabilities": {
+        "attributes": [["capability", "dict(str, Capability)", "capability"]]
+      },
+      "Capability": {
+        "attributes": [["details", "list[str]", "details"]]
+      },
       "Cell": {
         "attributes": [
           ["text", "str", "text"],
@@ -14097,6 +14103,13 @@
           "fallback": "Dataset"
         }
       },
+      "DatasetSummary": {
+        "attributes": [
+          ["training_sample_count", "int", "trainingSampleCount"],
+          ["validation_sample_count", "int", "validationSampleCount"],
+          ["test_sample_count", "int", "testSampleCount"]
+        ]
+      },
       "DetectedDocumentType": {
         "attributes": [
           ["document_type", "str", "documentType"],
@@ -14117,6 +14130,14 @@
           ["unit", "str", "unit"]
         ]
       },
+      "DocumentClassificationConfidenceEntry": {
+        "attributes": [
+          ["threshold", "float", "threshold"],
+          ["precision", "float", "precision"],
+          ["recall", "float", "recall"],
+          ["f1_score", "float", "f1Score"]
+        ]
+      },
       "DocumentClassificationFeature": {
         "attributes": [
           ["feature_type", "str", "featureType"],
@@ -14125,6 +14146,44 @@
           ["tenancy_id", "str", "tenancyId"]
         ],
         "discriminator": "DocumentFeature"
+      },
+      "DocumentClassificationLabelMetricsReport": {
+        "attributes": [
+          ["label", "str", "label"],
+          ["mean_average_precision", "float", "meanAveragePrecision"],
+          [
+            "confidence_entries",
+            "list[DocumentClassificationConfidenceEntry]",
+            "confidenceEntries"
+          ]
+        ]
+      },
+      "DocumentClassificationModelMetrics": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"],
+          [
+            "label_metrics_report",
+            "list[DocumentClassificationLabelMetricsReport]",
+            "labelMetricsReport"
+          ],
+          [
+            "overall_metrics_report",
+            "DocumentClassificationOverallMetricsReport",
+            "overallMetricsReport"
+          ]
+        ],
+        "discriminator": "ModelMetrics"
+      },
+      "DocumentClassificationOverallMetricsReport": {
+        "attributes": [
+          ["mean_average_precision", "float", "meanAveragePrecision"],
+          [
+            "confidence_entries",
+            "list[DocumentClassificationConfidenceEntry]",
+            "confidenceEntries"
+          ]
+        ]
       },
       "DocumentDetails": {
         "attributes": [["source", "str", "source"]],
@@ -14294,6 +14353,55 @@
         ],
         "discriminator": "ProcessorConfig"
       },
+      "KeyValueDetectionConfidenceEntry": {
+        "attributes": [
+          ["threshold", "float", "threshold"],
+          ["precision", "float", "precision"],
+          ["recall", "float", "recall"],
+          ["f1_score", "float", "f1Score"],
+          ["accuracy", "float", "accuracy"]
+        ]
+      },
+      "KeyValueDetectionLabelMetricsReport": {
+        "attributes": [
+          ["label", "str", "label"],
+          ["document_count", "int", "documentCount"],
+          ["mean_average_precision", "float", "meanAveragePrecision"],
+          [
+            "confidence_entries",
+            "list[KeyValueDetectionConfidenceEntry]",
+            "confidenceEntries"
+          ]
+        ]
+      },
+      "KeyValueDetectionModelMetrics": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"],
+          [
+            "label_metrics_report",
+            "list[KeyValueDetectionLabelMetricsReport]",
+            "labelMetricsReport"
+          ],
+          [
+            "overall_metrics_report",
+            "KeyValueDetectionOverallMetricsReport",
+            "overallMetricsReport"
+          ]
+        ],
+        "discriminator": "ModelMetrics"
+      },
+      "KeyValueDetectionOverallMetricsReport": {
+        "attributes": [
+          ["document_count", "int", "documentCount"],
+          ["mean_average_precision", "float", "meanAveragePrecision"],
+          [
+            "confidence_entries",
+            "list[KeyValueDetectionConfidenceEntry]",
+            "confidenceEntries"
+          ]
+        ]
+      },
       "KvModelSubType": {
         "attributes": [
           ["model_type", "str", "modelType"],
@@ -14309,6 +14417,62 @@
           ["word_indexes", "list[int]", "wordIndexes"]
         ]
       },
+      "Model": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["model_type", "str", "modelType"],
+          ["model_sub_type", "ModelSubType", "modelSubType"],
+          ["inference_units", "int", "inferenceUnits"],
+          ["tenancy_id", "str", "tenancyId"],
+          ["alias_name", "str", "aliasName"],
+          ["labels", "list[str]", "labels"],
+          ["is_quick_mode", "bool", "isQuickMode"],
+          ["max_training_time_in_hours", "float", "maxTrainingTimeInHours"],
+          ["language", "str", "language"],
+          ["trained_time_in_hours", "float", "trainedTimeInHours"],
+          ["training_dataset", "Dataset", "trainingDataset"],
+          ["testing_dataset", "Dataset", "testingDataset"],
+          ["validation_dataset", "Dataset", "validationDataset"],
+          ["component_models", "list[ComponentModel]", "componentModels"],
+          ["is_composed_model", "bool", "isComposedModel"],
+          ["model_version", "str", "modelVersion"],
+          ["project_id", "str", "projectId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["metrics", "ModelMetrics", "metrics"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["locks", "list[ResourceLock]", "locks"]
+        ]
+      },
+      "ModelCollection": {
+        "attributes": [["items", "list[ModelSummary]", "items"]]
+      },
+      "ModelMetrics": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"]
+        ],
+        "discriminator": {
+          "field": "modelType",
+          "values": {
+            "PRE_TRAINED_DOCUMENT_ELEMENTS_EXTRACTION": "PreTrainedDocumentElementsExtractionModelDetails",
+            "DOCUMENT_CLASSIFICATION": "DocumentClassificationModelMetrics",
+            "PRE_TRAINED_DOCUMENT_CLASSIFICATION": "PretrainedDocumentClassificationModelDetails",
+            "PRE_TRAINED_TABLE_EXTRACTION": "PretrainedTableExtractionModelDetails",
+            "KEY_VALUE_EXTRACTION": "KeyValueDetectionModelMetrics",
+            "PRE_TRAINED_KEY_VALUE_EXTRACTION": "PretrainedKeyValueExtractionModelDetails",
+            "PRE_TRAINED_TEXT_EXTRACTION": "PretrainedTextExtractionModelDetails"
+          },
+          "fallback": "ModelMetrics"
+        }
+      },
       "ModelSubType": {
         "attributes": [["model_type", "str", "modelType"]],
         "discriminator": {
@@ -14319,6 +14483,40 @@
           },
           "fallback": "ModelSubType"
         }
+      },
+      "ModelSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["model_type", "str", "modelType"],
+          ["inference_units", "int", "inferenceUnits"],
+          ["model_version", "str", "modelVersion"],
+          ["project_id", "str", "projectId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["precision", "float", "precision"],
+          ["tenancy_id", "str", "tenancyId"],
+          ["alias_name", "str", "aliasName"],
+          ["training_dataset", "Dataset", "trainingDataset"],
+          ["testing_dataset", "Dataset", "testingDataset"],
+          ["validation_dataset", "Dataset", "validationDataset"],
+          ["component_models", "list[ComponentModel]", "componentModels"],
+          ["is_composed_model", "bool", "isComposedModel"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["locks", "list[ResourceLock]", "locks"]
+        ]
+      },
+      "ModelTypeInfo": {
+        "attributes": [
+          ["versions", "list[str]", "versions"],
+          ["capabilities", "dict(str, Capabilities)", "capabilities"]
+        ]
       },
       "NormalizationFields": {
         "attributes": [["map", "dict(str, NormalizationFieldsMapValue)", "map"]]
@@ -14399,6 +14597,48 @@
           ["operation", "str", "operation"]
         ]
       },
+      "PatchResponseMessage": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["model_id", "str", "modelId"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
+      },
+      "PreTrainedDocumentElementsExtractionModelDetails": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"]
+        ],
+        "discriminator": "ModelMetrics"
+      },
+      "PretrainedDocumentClassificationModelDetails": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"]
+        ],
+        "discriminator": "ModelMetrics"
+      },
+      "PretrainedKeyValueExtractionModelDetails": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"]
+        ],
+        "discriminator": "ModelMetrics"
+      },
+      "PretrainedTableExtractionModelDetails": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"]
+        ],
+        "discriminator": "ModelMetrics"
+      },
+      "PretrainedTextExtractionModelDetails": {
+        "attributes": [
+          ["model_type", "str", "modelType"],
+          ["dataset_summary", "DatasetSummary", "datasetSummary"]
+        ],
+        "discriminator": "ModelMetrics"
+      },
       "ProcessingError": {
         "attributes": [
           ["code", "str", "code"],
@@ -14415,6 +14655,65 @@
           },
           "fallback": "ProcessorConfig"
         }
+      },
+      "ProcessorJob": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["processor_config", "ProcessorConfig", "processorConfig"],
+          ["input_location", "InputLocation", "inputLocation"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["percent_complete", "float", "percentComplete"],
+          ["output_location", "OutputLocation", "outputLocation"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ]
+      },
+      "Project": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["locks", "list[ResourceLock]", "locks"]
+        ]
+      },
+      "ProjectCollection": {
+        "attributes": [["items", "list[ProjectSummary]", "items"]]
+      },
+      "ProjectSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ResourceLock": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["compartment_id", "str", "compartmentId"],
+          ["related_resource_id", "str", "relatedResourceId"],
+          ["message", "str", "message"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
       },
       "SelectionMark": {
         "attributes": [
@@ -14540,6 +14839,63 @@
           ["confidence", "float", "confidence"],
           ["bounding_polygon", "BoundingPolygon", "boundingPolygon"]
         ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"],
+          ["metadata", "dict(str, str)", "metadata"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

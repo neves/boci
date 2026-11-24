@@ -42767,10 +42767,71 @@
   },
   "models": {
     "generative_ai": {
+      "AllocatableGpuCollection": {
+        "attributes": [["items", "list[AllocatableGpuSummary]", "items"]]
+      },
+      "AllocatableGpuSummary": {
+        "attributes": [
+          ["compute_shape", "str", "computeShape"],
+          ["total_available_gpu_units", "int", "totalAvailableGpuUnits"],
+          ["total_used_gpu_units", "int", "totalUsedGpuUnits"],
+          ["max_allocatable_gpu_units", "int", "maxAllocatableGpuUnits"],
+          ["gpu_allocations", "list[GpuAllocation]", "gpuAllocations"]
+        ]
+      },
       "AllowedDomain": {
         "attributes": [
           ["hostnames", "list[str]", "hostnames"],
           ["ports", "list[int]", "ports"]
+        ]
+      },
+      "ApiKey": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["keys", "list[ApiKeyItem]", "keys"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ApiKeyCollection": {
+        "attributes": [["items", "list[ApiKeySummary]", "items"]]
+      },
+      "ApiKeyItem": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["key_name", "str", "keyName"],
+          ["key_mask", "str", "keyMask"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_expiry", "datetime", "timeExpiry"],
+          ["time_activated", "datetime", "timeActivated"],
+          ["time_deactivated", "datetime", "timeDeactivated"],
+          ["time_revoked", "datetime", "timeRevoked"],
+          ["time_last_used", "datetime", "timeLastUsed"],
+          ["state", "str", "state"]
+        ]
+      },
+      "ApiKeySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["keys", "list[ApiKeyItem]", "keys"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "Artifact": {
@@ -42793,6 +42854,25 @@
           },
           "fallback": "Artifact"
         }
+      },
+      "Availability": {
+        "attributes": [
+          ["realm", "str", "realm"],
+          ["region", "str", "region"],
+          ["serving_modes", "list[ServingMode]", "servingModes"],
+          ["time_deprecated", "datetime", "timeDeprecated"],
+          ["time_on_demand_retired", "datetime", "timeOnDemandRetired"],
+          ["time_dedicated_retired", "datetime", "timeDedicatedRetired"],
+          ["supported_replacements", "list[str]", "supportedReplacements"]
+        ]
+      },
+      "ChatModelMetrics": {
+        "attributes": [
+          ["model_metrics_type", "str", "modelMetricsType"],
+          ["final_accuracy", "float", "finalAccuracy"],
+          ["final_loss", "float", "finalLoss"]
+        ],
+        "discriminator": "ModelMetrics"
       },
       "CondenserConfig": {
         "attributes": [
@@ -42908,6 +42988,24 @@
         ],
         "discriminator": "SemanticStoreModelSelection"
       },
+      "DataSourceDatabaseToolsConnectionDetails": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["querying_connection_id", "str", "queryingConnectionId"],
+          ["enrichment_connection_id", "str", "enrichmentConnectionId"]
+        ],
+        "discriminator": "DataSourceDetails"
+      },
+      "DataSourceDetails": {
+        "attributes": [["connection_type", "str", "connectionType"]],
+        "discriminator": {
+          "field": "connectionType",
+          "values": {
+            "DATABASE_TOOLS_CONNECTION": "DataSourceDatabaseToolsConnectionDetails"
+          },
+          "fallback": "DataSourceDetails"
+        }
+      },
       "Dataset": {
         "attributes": [["dataset_type", "str", "datasetType"]],
         "discriminator": {
@@ -42917,6 +43015,68 @@
           },
           "fallback": "Dataset"
         }
+      },
+      "DedicatedAiCluster": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["unit_count", "int", "unitCount"],
+          ["unit_shape", "str", "unitShape"],
+          ["capacity_reservation_id", "str", "capacityReservationId"],
+          ["capacity", "DedicatedAiClusterCapacity", "capacity"],
+          ["previous_state", "DedicatedAiCluster", "previousState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "DedicatedAiClusterCapacity": {
+        "attributes": [["capacity_type", "str", "capacityType"]],
+        "discriminator": {
+          "field": "capacityType",
+          "values": {
+            "HOSTING_CAPACITY": "DedicatedAiClusterHostingCapacity"
+          },
+          "fallback": "DedicatedAiClusterCapacity"
+        }
+      },
+      "DedicatedAiClusterCollection": {
+        "attributes": [["items", "list[DedicatedAiClusterSummary]", "items"]]
+      },
+      "DedicatedAiClusterHostingCapacity": {
+        "attributes": [
+          ["capacity_type", "str", "capacityType"],
+          ["total_endpoint_capacity", "int", "totalEndpointCapacity"],
+          ["used_endpoint_capacity", "int", "usedEndpointCapacity"]
+        ],
+        "discriminator": "DedicatedAiClusterCapacity"
+      },
+      "DedicatedAiClusterSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["unit_count", "int", "unitCount"],
+          ["unit_shape", "str", "unitShape"],
+          ["capacity_reservation_id", "str", "capacityReservationId"],
+          ["capacity", "DedicatedAiClusterCapacity", "capacity"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "DefaultSemanticStoreModelSelection": {
         "attributes": [["model_selection_type", "str", "modelSelectionType"]],
@@ -42928,6 +43088,76 @@
           ["llm_selection", "LlmSelection", "llmSelection"]
         ],
         "discriminator": "ModelConfig"
+      },
+      "Endpoint": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["model_id", "str", "modelId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["dedicated_ai_cluster_id", "str", "dedicatedAiClusterId"],
+          [
+            "generative_ai_private_endpoint_id",
+            "str",
+            "generativeAiPrivateEndpointId"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "content_moderation_config",
+            "ContentModerationConfig",
+            "contentModerationConfig"
+          ],
+          [
+            "prompt_injection_config",
+            "PromptInjectionConfig",
+            "promptInjectionConfig"
+          ],
+          ["pii_detection_config", "PiiDetectionConfig", "piiDetectionConfig"],
+          ["previous_state", "Endpoint", "previousState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "EndpointCollection": {
+        "attributes": [["items", "list[EndpointSummary]", "items"]]
+      },
+      "EndpointSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["model_id", "str", "modelId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["dedicated_ai_cluster_id", "str", "dedicatedAiClusterId"],
+          [
+            "generative_ai_private_endpoint_id",
+            "str",
+            "generativeAiPrivateEndpointId"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "content_moderation_config",
+            "ContentModerationConfig",
+            "contentModerationConfig"
+          ],
+          [
+            "prompt_injection_config",
+            "PromptInjectionConfig",
+            "promptInjectionConfig"
+          ],
+          ["pii_detection_config", "PiiDetectionConfig", "piiDetectionConfig"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "EnvironmentVariable": {
         "attributes": [
@@ -42943,6 +43173,28 @@
         ],
         "discriminator": "ModelConfig"
       },
+      "FileSyncIngestionLogs": {
+        "attributes": [
+          ["file_id", "str", "fileId"],
+          ["file_path", "str", "filePath"],
+          ["file_size_in_bytes", "int", "fileSizeInBytes"],
+          ["total_chunks_created", "int", "totalChunksCreated"],
+          ["duration_in_seconds", "int", "durationInSeconds"],
+          ["status", "str", "status"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FileSyncIngestionLogsCollection": {
+        "attributes": [["items", "list[FileSyncIngestionLogs]", "items"]]
+      },
+      "FileSyncStatistics": {
+        "attributes": [
+          ["total_files_synced", "int", "totalFilesSynced"],
+          ["sync_stats_by_file_type", "dict(str, int)", "syncStatsByFileType"]
+        ]
+      },
       "FineTuneDetails": {
         "attributes": [
           ["training_dataset", "Dataset", "trainingDataset"],
@@ -42957,6 +43209,264 @@
         ],
         "discriminator": "LlmSelection"
       },
+      "GenerativeAiPrivateEndpoint": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["subnet_id", "str", "subnetId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["fqdn", "str", "fqdn"],
+          ["is_allow_on_demand", "bool", "isAllowOnDemand"],
+          ["private_endpoint_ip", "str", "privateEndpointIp"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["previous_state", "GenerativeAiPrivateEndpoint", "previousState"],
+          ["resource_type", "str", "resourceType"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ]
+        ]
+      },
+      "GenerativeAiPrivateEndpointCollection": {
+        "attributes": [
+          ["items", "list[GenerativeAiPrivateEndpointSummary]", "items"]
+        ]
+      },
+      "GenerativeAiPrivateEndpointSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["subnet_id", "str", "subnetId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["fqdn", "str", "fqdn"],
+          ["is_allow_on_demand", "bool", "isAllowOnDemand"],
+          ["private_endpoint_ip", "str", "privateEndpointIp"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["resource_type", "str", "resourceType"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ]
+        ]
+      },
+      "GenerativeAiProject": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["conversation_config", "ConversationConfig", "conversationConfig"],
+          [
+            "long_term_memory_config",
+            "LongTermMemoryConfig",
+            "longTermMemoryConfig"
+          ],
+          [
+            "short_term_memory_optimization_config",
+            "ShortTermMemoryOptimizationConfig",
+            "shortTermMemoryOptimizationConfig"
+          ],
+          ["sandbox_config", "SandboxConfig", "sandboxConfig"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "GenerativeAiProjectCollection": {
+        "attributes": [["items", "list[GenerativeAiProjectSummary]", "items"]]
+      },
+      "GenerativeAiProjectSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "GpuAllocation": {
+        "attributes": [
+          ["used_gpus", "int", "usedGpus"],
+          ["available_gpus", "int", "availableGpus"]
+        ]
+      },
+      "HostedApplication": {
+        "attributes": [
+          ["inbound_auth_config", "InboundAuthConfig", "inboundAuthConfig"],
+          ["application_endpoint", "str", "applicationEndpoint"],
+          [
+            "public_access_path_patterns",
+            "list[str]",
+            "publicAccessPathPatterns"
+          ],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["scaling_config", "ScalingConfig", "scalingConfig"],
+          ["storage_configs", "list[StorageConfig]", "storageConfigs"],
+          ["networking_config", "NetworkingConfig", "networkingConfig"],
+          [
+            "environment_variables",
+            "list[EnvironmentVariable]",
+            "environmentVariables"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "HostedApplicationCollection": {
+        "attributes": [["items", "list[HostedApplicationSummary]", "items"]]
+      },
+      "HostedApplicationIam": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["scaling_config", "ScalingConfig", "scalingConfig"],
+          ["storage_configs", "list[StorageConfig]", "storageConfigs"],
+          ["networking_config", "NetworkingConfig", "networkingConfig"],
+          [
+            "environment_variables",
+            "list[EnvironmentVariable]",
+            "environmentVariables"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "HostedApplicationStorage": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["storage_type", "str", "storageType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["application_ids", "list[str]", "applicationIds"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "HostedApplicationStorageCollection": {
+        "attributes": [
+          ["items", "list[HostedApplicationStorageSummary]", "items"]
+        ]
+      },
+      "HostedApplicationStorageSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["storage_type", "str", "storageType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "HostedApplicationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "HostedDeployment": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["hosted_application_id", "str", "hostedApplicationId"],
+          ["active_artifact", "Artifact", "activeArtifact"],
+          ["artifacts", "list[Artifact]", "artifacts"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "HostedDeploymentCollection": {
+        "attributes": [["items", "list[HostedDeploymentSummary]", "items"]]
+      },
+      "HostedDeploymentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["hosted_application_id", "str", "hostedApplicationId"],
+          ["active_artifact", "Artifact", "activeArtifact"],
+          ["artifacts", "list[Artifact]", "artifacts"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "HuggingFaceModel": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["model_id", "str", "modelId"],
+          ["access_token", "str", "accessToken"],
+          ["branch", "str", "branch"],
+          ["commit", "str", "commit"]
+        ],
+        "discriminator": "ModelDataSource"
+      },
       "IdcsAuthConfig": {
         "attributes": [
           ["domain_url", "str", "domainUrl"],
@@ -42964,6 +43474,48 @@
           ["audience", "str", "audience"],
           ["client_id", "str", "clientId"],
           ["client_secret_vault_id", "str", "clientSecretVaultId"]
+        ]
+      },
+      "ImportedModel": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["capabilities", "list[str]", "capabilities"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["vendor", "str", "vendor"],
+          ["version", "str", "version"],
+          ["data_source", "ModelDataSource", "dataSource"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["previous_state", "ImportedModel", "previousState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ImportedModelCollection": {
+        "attributes": [["items", "list[ImportedModelSummary]", "items"]]
+      },
+      "ImportedModelSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["capabilities", "list[str]", "capabilities"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["vendor", "str", "vendor"],
+          ["version", "str", "version"],
+          ["data_source", "ModelDataSource", "dataSource"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "InboundAuthConfig": {
@@ -43029,6 +43581,36 @@
         ],
         "discriminator": "SandboxOutboundNetworkingConfig"
       },
+      "Model": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["capabilities", "list[str]", "capabilities"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["vendor", "str", "vendor"],
+          ["version", "str", "version"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["base_model_id", "str", "baseModelId"],
+          ["type", "str", "type"],
+          ["fine_tune_details", "FineTuneDetails", "fineTuneDetails"],
+          ["model_metrics", "ModelMetrics", "modelMetrics"],
+          ["is_long_term_supported", "bool", "isLongTermSupported"],
+          ["time_deprecated", "datetime", "timeDeprecated"],
+          ["time_on_demand_retired", "datetime", "timeOnDemandRetired"],
+          ["time_dedicated_retired", "datetime", "timeDedicatedRetired"],
+          ["previous_state", "Model", "previousState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ModelCollection": {
+        "attributes": [["items", "list[ModelSummary]", "items"]]
+      },
       "ModelConfig": {
         "attributes": [
           ["model_config_type", "str", "modelConfigType"],
@@ -43044,8 +43626,75 @@
           "fallback": "ModelConfig"
         }
       },
+      "ModelDataSource": {
+        "attributes": [["source_type", "str", "sourceType"]],
+        "discriminator": {
+          "field": "sourceType",
+          "values": {
+            "OBJECT_STORAGE_OBJECT": "ObjectStorageObject",
+            "HUGGING_FACE_MODEL": "HuggingFaceModel"
+          },
+          "fallback": "ModelDataSource"
+        }
+      },
+      "ModelDiscovery": {
+        "attributes": [
+          ["model_id", "str", "modelId"],
+          ["vendor", "str", "vendor"],
+          ["capabilities", "list[ModelCapability]", "capabilities"],
+          ["api_capability", "list[str]", "apiCapability"],
+          ["modality_support", "list[ModelModalitySupport]", "modalitySupport"],
+          ["model_access", "str", "modelAccess"],
+          ["parameters", "list[Parameter]", "parameters"],
+          ["availability", "list[Availability]", "availability"]
+        ]
+      },
+      "ModelDiscoveryCollection": {
+        "attributes": [["items", "list[ModelDiscovery]", "items"]]
+      },
+      "ModelMetrics": {
+        "attributes": [["model_metrics_type", "str", "modelMetricsType"]],
+        "discriminator": {
+          "field": "modelMetricsType",
+          "values": {
+            "TEXT_GENERATION_MODEL_METRICS": "TextGenerationModelMetrics",
+            "CHAT_MODEL_METRICS": "ChatModelMetrics"
+          },
+          "fallback": "ModelMetrics"
+        }
+      },
+      "ModelModalitySupport": {
+        "attributes": [
+          ["input", "str", "input"],
+          ["output", "str", "output"]
+        ]
+      },
       "ModelRoutingPolicy": {
         "attributes": [["allowed_models", "list[str]", "allowedModels"]]
+      },
+      "ModelSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["capabilities", "list[str]", "capabilities"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["display_name", "str", "displayName"],
+          ["vendor", "str", "vendor"],
+          ["version", "str", "version"],
+          ["time_created", "datetime", "timeCreated"],
+          ["base_model_id", "str", "baseModelId"],
+          ["type", "str", "type"],
+          ["fine_tune_details", "FineTuneDetails", "fineTuneDetails"],
+          ["model_metrics", "ModelMetrics", "modelMetrics"],
+          ["is_long_term_supported", "bool", "isLongTermSupported"],
+          ["time_deprecated", "datetime", "timeDeprecated"],
+          ["time_on_demand_retired", "datetime", "timeOnDemandRetired"],
+          ["time_dedicated_retired", "datetime", "timeDedicatedRetired"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "NetworkingConfig": {
         "attributes": [
@@ -43077,6 +43726,16 @@
         ],
         "discriminator": "Dataset"
       },
+      "ObjectStorageObject": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["namespace_name", "str", "namespaceName"],
+          ["bucket_name", "str", "bucketName"],
+          ["prefix_name", "str", "prefixName"],
+          ["region", "str", "region"]
+        ],
+        "discriminator": "ModelDataSource"
+      },
       "OciObjectStorageConfiguration": {
         "attributes": [
           ["type", "str", "type"],
@@ -43095,11 +43754,42 @@
           ["nsg_ids", "list[str]", "nsgIds"]
         ]
       },
+      "Parameter": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["minimum", "float", "minimum"],
+          ["maximum", "float", "maximum"],
+          ["default_value", "str", "defaultValue"],
+          ["description", "str", "description"]
+        ]
+      },
       "PiiDetectionConfig": {
         "attributes": [
           ["mode", "str", "mode"],
           ["model_id", "str", "modelId"],
           ["is_enabled", "bool", "isEnabled"]
+        ]
+      },
+      "PreviousRoutingProfileState": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "region_routing_policy",
+            "RegionRoutingPolicy",
+            "regionRoutingPolicy"
+          ],
+          ["model_routing_policy", "ModelRoutingPolicy", "modelRoutingPolicy"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "PromptInjectionConfig": {
@@ -43138,6 +43828,52 @@
       },
       "RegionRoutingPolicy": {
         "attributes": [["allowed_regions", "list[str]", "allowedRegions"]]
+      },
+      "RoutingProfile": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "region_routing_policy",
+            "RegionRoutingPolicy",
+            "regionRoutingPolicy"
+          ],
+          ["model_routing_policy", "ModelRoutingPolicy", "modelRoutingPolicy"],
+          ["previous_state", "PreviousRoutingProfileState", "previousState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "RoutingProfileCollection": {
+        "attributes": [["items", "list[RoutingProfileSummary]", "items"]]
+      },
+      "RoutingProfileSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "region_routing_policy",
+            "RegionRoutingPolicy",
+            "regionRoutingPolicy"
+          ],
+          ["model_routing_policy", "ModelRoutingPolicy", "modelRoutingPolicy"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "SandboxAllowAllNetworkPolicy": {
         "attributes": [["mode", "str", "mode"]],
@@ -43233,11 +43969,51 @@
           "fallback": "SandboxOutboundNetworkingConfig"
         }
       },
+      "SandboxWarmPool": {
+        "attributes": [
+          ["project_id", "str", "projectId"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["container_image", "str", "containerImage"],
+          ["shape", "str", "shape"],
+          ["desired_capacity", "int", "desiredCapacity"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["runtime_status", "SandboxWarmPoolRuntimeStatus", "runtimeStatus"]
+        ]
+      },
+      "SandboxWarmPoolCollection": {
+        "attributes": [["items", "list[SandboxWarmPoolSummary]", "items"]]
+      },
       "SandboxWarmPoolConfig": {
         "attributes": [
           ["small_count", "int", "smallCount"],
           ["medium_count", "int", "mediumCount"],
           ["large_count", "int", "largeCount"]
+        ]
+      },
+      "SandboxWarmPoolRuntimeStatus": {
+        "attributes": [
+          ["ready_capacity", "int", "readyCapacity"],
+          ["observation_status", "str", "observationStatus"],
+          ["time_read", "datetime", "timeRead"],
+          ["reason", "str", "reason"]
+        ]
+      },
+      "SandboxWarmPoolSummary": {
+        "attributes": [
+          ["project_id", "str", "projectId"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["container_image", "str", "containerImage"],
+          ["shape", "str", "shape"],
+          ["desired_capacity", "int", "desiredCapacity"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
         ]
       },
       "ScalingConfig": {
@@ -43291,6 +44067,50 @@
       "SchemaItem": {
         "attributes": [["name", "str", "name"]]
       },
+      "SchemasDatabaseToolsConnectionDetails": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["schemas", "list[SchemaItem]", "schemas"]
+        ],
+        "discriminator": "SchemasDetails"
+      },
+      "SchemasDetails": {
+        "attributes": [["connection_type", "str", "connectionType"]],
+        "discriminator": {
+          "field": "connectionType",
+          "values": {
+            "DATABASE_TOOLS_CONNECTION": "SchemasDatabaseToolsConnectionDetails"
+          },
+          "fallback": "SchemasDetails"
+        }
+      },
+      "SemanticStore": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "is_user_defined_semantics_enabled",
+            "bool",
+            "isUserDefinedSemanticsEnabled"
+          ],
+          ["data_source", "DataSourceDetails", "dataSource"],
+          ["model_selection", "SemanticStoreModelSelection", "modelSelection"],
+          ["refresh_schedule", "RefreshScheduleDetails", "refreshSchedule"],
+          ["schemas", "SchemasDetails", "schemas"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SemanticStoreCollection": {
+        "attributes": [["items", "list[SemanticStoreSummary]", "items"]]
+      },
       "SemanticStoreModelSelection": {
         "attributes": [["model_selection_type", "str", "modelSelectionType"]],
         "discriminator": {
@@ -43301,6 +44121,30 @@
           },
           "fallback": "SemanticStoreModelSelection"
         }
+      },
+      "SemanticStoreSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["data_source", "DataSourceDetails", "dataSource"],
+          ["model_selection", "SemanticStoreModelSelection", "modelSelection"],
+          ["refresh_schedule", "RefreshScheduleDetails", "refreshSchedule"],
+          ["schemas", "SchemasDetails", "schemas"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "is_user_defined_semantics_enabled",
+            "bool",
+            "isUserDefinedSemanticsEnabled"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "ShortTermMemoryOptimizationConfig": {
         "attributes": [
@@ -43354,6 +44198,14 @@
         ],
         "discriminator": "TrainingConfig"
       },
+      "TextGenerationModelMetrics": {
+        "attributes": [
+          ["model_metrics_type", "str", "modelMetricsType"],
+          ["final_accuracy", "float", "finalAccuracy"],
+          ["final_loss", "float", "finalLoss"]
+        ],
+        "discriminator": "ModelMetrics"
+      },
       "TrainingConfig": {
         "attributes": [
           ["training_config_type", "str", "trainingConfigType"],
@@ -43394,6 +44246,189 @@
           ["num_of_last_layers", "int", "numOfLastLayers"]
         ],
         "discriminator": "TrainingConfig"
+      },
+      "VectorStoreConnector": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["vector_store_id", "str", "vectorStoreId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["tenant_id", "str", "tenantId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["vault_secret_id", "str", "vaultSecretId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["schedule_config", "ScheduleConfig", "scheduleConfig"],
+          ["configuration", "ConnectorConfiguration", "configuration"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "VectorStoreConnectorCollection": {
+        "attributes": [["items", "list[VectorStoreConnectorSummary]", "items"]]
+      },
+      "VectorStoreConnectorFileSync": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["vector_store_connector_id", "str", "vectorStoreConnectorId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["tenant_id", "str", "tenantId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["duration_in_seconds", "int", "durationInSeconds"],
+          ["trigger_type", "str", "triggerType"],
+          ["stats", "VectorStoreConnectorStats", "stats"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "VectorStoreConnectorFileSyncCollection": {
+        "attributes": [
+          ["items", "list[VectorStoreConnectorFileSyncSummary]", "items"]
+        ]
+      },
+      "VectorStoreConnectorFileSyncSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["vector_store_connector_id", "str", "vectorStoreConnectorId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["tenant_id", "str", "tenantId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["duration_in_seconds", "int", "durationInSeconds"],
+          ["trigger_type", "str", "triggerType"],
+          ["stats", "VectorStoreConnectorStats", "stats"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "VectorStoreConnectorIngestionLogs": {
+        "attributes": [
+          ["file_id", "str", "fileId"],
+          [
+            "vector_store_connector_file_sync_id",
+            "str",
+            "vectorStoreConnectorFileSyncId"
+          ],
+          ["file_path", "str", "filePath"],
+          ["file_size_in_bytes", "int", "fileSizeInBytes"],
+          ["total_chunks_created", "int", "totalChunksCreated"],
+          ["duration_in_seconds", "int", "durationInSeconds"],
+          ["status", "str", "status"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "VectorStoreConnectorIngestionLogsCollection": {
+        "attributes": [
+          ["items", "list[VectorStoreConnectorIngestionLogs]", "items"]
+        ]
+      },
+      "VectorStoreConnectorStats": {
+        "attributes": [
+          ["time_generated", "datetime", "timeGenerated"],
+          ["created", "FileSyncStatistics", "created"],
+          ["updated", "FileSyncStatistics", "updated"],
+          ["deleted", "FileSyncStatistics", "deleted"],
+          ["metadata_updated", "FileSyncStatistics", "metadataUpdated"],
+          ["ignored", "FileSyncStatistics", "ignored"],
+          ["unsupported", "FileSyncStatistics", "unsupported"],
+          ["in_progress", "FileSyncStatistics", "inProgress"],
+          ["failed", "FileSyncStatistics", "failed"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "VectorStoreConnectorSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["vector_store_id", "str", "vectorStoreId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["tenant_id", "str", "tenantId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["schedule_config", "ScheduleConfig", "scheduleConfig"],
+          ["configuration", "ConnectorConfiguration", "configuration"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"],
+          ["metadata", "dict(str, str)", "metadata"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

@@ -80,9 +80,13 @@ def collect(metadata: dict | None, pool: dict) -> None:
     from oci_cli.cli_clients import MODULE_TO_TYPE_MAPPINGS
 
     pending = [(t["module"], _referenced(t["class"])) for t in (metadata or {}).values()]
+    _collect(pending, pool, MODULE_TO_TYPE_MAPPINGS)
+
+
+def _collect(pending, pool, mappings):
     while pending:
         module, name = pending.pop()
-        mapping = MODULE_TO_TYPE_MAPPINGS.get(module, {})
+        mapping = mappings.get(module, {})
         if name not in mapping or name in pool.get(module, {}):
             continue
         instance = mapping[name]()
@@ -101,3 +105,19 @@ def collect(metadata: dict | None, pool: dict) -> None:
             model["discriminator"] = disc
             pending += [(module, c) for c in [*disc["values"].values(), disc["fallback"]]]
         pool.setdefault(module, {})[name] = model
+
+def collect_responses(commands, clients, pool):
+    """Walk the response models of every callable operation, including waiter getters."""
+    operations = [target.get("operation", {}) for command in commands.values()
+                  for target in [command, *command.get("variants", [])]]
+    for client in clients.values():
+        operations.extend(client.get("lifecycleGetters", {}).values())
+        operations.append(client.get("workRequestGetter", {}))
+    pending = {(op["client"].split(".")[0], _referenced(op["responseType"]))
+               for op in operations if op.get("responseType")}
+    mappings = {}
+    for module, _ in sorted(pending):
+        if module not in mappings:
+            sdk_models = importlib.import_module(f"oci.{module}.models")
+            mappings[module] = getattr(sdk_models, f"{module}_type_mapping")
+    _collect(sorted(pending), pool, mappings)

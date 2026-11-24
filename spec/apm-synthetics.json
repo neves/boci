@@ -28498,6 +28498,28 @@
   },
   "models": {
     "apm_synthetics": {
+      "AggregatedNetworkData": {
+        "attributes": [
+          ["result_state", "str", "resultState"],
+          [
+            "vantage_point_nodes",
+            "list[VantagePointNode]",
+            "vantagePointNodes"
+          ],
+          ["nodes_by_level", "list[list[Node]]", "nodesByLevel"],
+          ["links", "dict(str, Link)", "links"],
+          ["error_details", "str", "errorDetails"]
+        ]
+      },
+      "AggregatedNetworkDataResult": {
+        "attributes": [
+          [
+            "aggregated_network_data",
+            "AggregatedNetworkData",
+            "aggregatedNetworkData"
+          ]
+        ]
+      },
       "AvailabilityConfiguration": {
         "attributes": [
           [
@@ -28508,11 +28530,38 @@
           ["min_allowed_runs_per_interval", "int", "minAllowedRunsPerInterval"]
         ]
       },
+      "AvailableCapability": {
+        "attributes": [
+          ["capability", "str", "capability"],
+          ["count", "int", "count"]
+        ]
+      },
       "BasicAuthenticationDetails": {
         "attributes": [
           ["username", "str", "username"],
           ["password", "Password", "password"]
         ]
+      },
+      "BrowserMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          [
+            "is_certificate_validation_enabled",
+            "bool",
+            "isCertificateValidationEnabled"
+          ],
+          ["is_default_snapshot_enabled", "bool", "isDefaultSnapshotEnabled"],
+          ["verify_texts", "list[VerifyText]", "verifyTexts"],
+          ["verify_response_codes", "list[str]", "verifyResponseCodes"],
+          [
+            "network_configuration",
+            "NetworkConfiguration",
+            "networkConfiguration"
+          ]
+        ],
+        "discriminator": "MonitorConfiguration"
       },
       "ClientCertificate": {
         "attributes": [
@@ -28532,16 +28581,164 @@
           ["service_name", "str", "serviceName"]
         ]
       },
+      "DedicatedVantagePoint": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["name", "str", "name"],
+          ["status", "str", "status"],
+          ["dvp_stack_details", "DvpStackDetails", "dvpStackDetails"],
+          ["region", "str", "region"],
+          [
+            "monitor_status_count_map",
+            "MonitorStatusCountMap",
+            "monitorStatusCountMap"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "DedicatedVantagePointCollection": {
+        "attributes": [["items", "list[DedicatedVantagePointSummary]", "items"]]
+      },
+      "DedicatedVantagePointSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["name", "str", "name"],
+          ["status", "str", "status"],
+          ["dvp_stack_details", "DvpStackDetails", "dvpStackDetails"],
+          ["region", "str", "region"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          [
+            "monitor_status_count_map",
+            "MonitorStatusCountMap",
+            "monitorStatusCountMap"
+          ]
+        ]
+      },
       "DnsConfiguration": {
         "attributes": [
           ["is_override_dns", "bool", "isOverrideDns"],
           ["override_dns_ip", "str", "overrideDnsIp"]
         ]
       },
+      "DnsSecMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          ["record_type", "str", "recordType"],
+          ["verify_response_content", "str", "verifyResponseContent"]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "DnsServerMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          ["record_type", "str", "recordType"],
+          ["name_server", "str", "nameServer"],
+          [
+            "network_configuration",
+            "NetworkConfiguration",
+            "networkConfiguration"
+          ],
+          ["protocol", "str", "protocol"],
+          ["verify_response_content", "str", "verifyResponseContent"],
+          ["is_query_recursive", "bool", "isQueryRecursive"]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "DnsTraceMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          ["record_type", "str", "recordType"],
+          ["protocol", "str", "protocol"],
+          ["verify_response_content", "str", "verifyResponseContent"]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "DvpStackDetails": {
+        "attributes": [
+          ["dvp_stack_type", "str", "dvpStackType"],
+          ["dvp_version", "str", "dvpVersion"]
+        ],
+        "discriminator": {
+          "field": "dvpStackType",
+          "values": {
+            "ORACLE_RM_STACK": "OracleRMStack"
+          },
+          "fallback": "DvpStackDetails"
+        }
+      },
+      "FtpMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          ["ftp_protocol", "str", "ftpProtocol"],
+          ["ftp_request_type", "str", "ftpRequestType"],
+          ["is_active_mode", "bool", "isActiveMode"],
+          [
+            "ftp_basic_authentication_details",
+            "BasicAuthenticationDetails",
+            "ftpBasicAuthenticationDetails"
+          ],
+          ["download_size_limit_in_bytes", "int", "downloadSizeLimitInBytes"],
+          ["upload_file_size_in_bytes", "int", "uploadFileSizeInBytes"],
+          [
+            "network_configuration",
+            "NetworkConfiguration",
+            "networkConfiguration"
+          ],
+          ["verify_response_codes", "list[str]", "verifyResponseCodes"],
+          ["verify_response_content", "str", "verifyResponseContent"]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "GeoSummary": {
+        "attributes": [
+          ["admin_div_code", "str", "adminDivCode"],
+          ["city_name", "str", "cityName"],
+          ["country_code", "str", "countryCode"],
+          ["country_name", "str", "countryName"],
+          ["latitude", "float", "latitude"],
+          ["longitude", "float", "longitude"]
+        ]
+      },
       "Header": {
         "attributes": [
           ["header_name", "str", "headerName"],
           ["header_value", "str", "headerValue"]
+        ]
+      },
+      "IdentityInfoDetails": {
+        "attributes": [
+          ["region_name", "str", "regionName"],
+          ["apm_short_id", "str", "apmShortId"],
+          ["collector_end_point", "str", "collectorEndPoint"]
+        ]
+      },
+      "Link": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["source", "str", "source"],
+          ["destination", "str", "destination"],
+          ["repeat_count", "int", "repeatCount"],
+          ["forwarding_loss", "float", "forwardingLoss"],
+          ["delay_in_milliseconds", "float", "delayInMilliseconds"],
+          ["min_delay_in_milliseconds", "float", "minDelayInMilliseconds"],
+          ["max_delay_in_milliseconds", "float", "maxDelayInMilliseconds"],
+          ["paths", "list[str]", "paths"]
         ]
       },
       "MaintenanceWindowSchedule": {
@@ -28552,10 +28749,148 @@
           ["recurrence_type", "str", "recurrenceType"]
         ]
       },
+      "Monitor": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["monitor_type", "str", "monitorType"],
+          ["vantage_points", "list[VantagePointInfo]", "vantagePoints"],
+          ["vantage_point_count", "int", "vantagePointCount"],
+          ["script_id", "str", "scriptId"],
+          ["script_name", "str", "scriptName"],
+          ["content_type", "str", "contentType"],
+          ["status", "str", "status"],
+          ["repeat_interval_in_seconds", "int", "repeatIntervalInSeconds"],
+          ["is_run_once", "bool", "isRunOnce"],
+          ["timeout_in_seconds", "int", "timeoutInSeconds"],
+          ["target", "str", "target"],
+          [
+            "script_parameters",
+            "list[MonitorScriptParameterInfo]",
+            "scriptParameters"
+          ],
+          ["configuration", "MonitorConfiguration", "configuration"],
+          [
+            "availability_configuration",
+            "AvailabilityConfiguration",
+            "availabilityConfiguration"
+          ],
+          [
+            "maintenance_window_schedule",
+            "MaintenanceWindowSchedule",
+            "maintenanceWindowSchedule"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["is_run_now", "bool", "isRunNow"],
+          ["scheduling_policy", "str", "schedulingPolicy"],
+          ["batch_interval_in_seconds", "int", "batchIntervalInSeconds"],
+          ["is_i_pv6", "bool", "isIPv6"],
+          ["created_by", "str", "createdBy"],
+          ["last_updated_by", "str", "lastUpdatedBy"]
+        ]
+      },
+      "MonitorCollection": {
+        "attributes": [["items", "list[MonitorSummary]", "items"]]
+      },
+      "MonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"]
+        ],
+        "discriminator": {
+          "field": "configType",
+          "values": {
+            "FTP_CONFIG": "FtpMonitorConfiguration",
+            "DNSSEC_CONFIG": "DnsSecMonitorConfiguration",
+            "DNS_TRACE_CONFIG": "DnsTraceMonitorConfiguration",
+            "SQL_CONFIG": "SqlMonitorConfiguration",
+            "SCRIPTED_REST_CONFIG": "ScriptedRestMonitorConfiguration",
+            "DNS_SERVER_CONFIG": "DnsServerMonitorConfiguration",
+            "SCRIPTED_BROWSER_CONFIG": "ScriptedBrowserMonitorConfiguration",
+            "REST_CONFIG": "RestMonitorConfiguration",
+            "BROWSER_CONFIG": "BrowserMonitorConfiguration",
+            "NETWORK_CONFIG": "NetworkMonitorConfiguration"
+          },
+          "fallback": "MonitorConfiguration"
+        }
+      },
+      "MonitorResult": {
+        "attributes": [
+          ["result_type", "str", "resultType"],
+          ["result_content_type", "str", "resultContentType"],
+          ["result_data_set", "list[MonitorResultData]", "resultDataSet"],
+          ["monitor_id", "str", "monitorId"],
+          ["vantage_point", "str", "vantagePoint"],
+          ["execution_time", "str", "executionTime"]
+        ]
+      },
+      "MonitorResultData": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["byte_content", "str", "byteContent"],
+          ["string_content", "str", "stringContent"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
       "MonitorScriptParameter": {
         "attributes": [
           ["param_name", "str", "paramName"],
           ["param_value", "str", "paramValue"]
+        ]
+      },
+      "MonitorScriptParameterInfo": {
+        "attributes": [
+          [
+            "monitor_script_parameter",
+            "MonitorScriptParameter",
+            "monitorScriptParameter"
+          ],
+          ["is_secret", "bool", "isSecret"],
+          ["is_overwritten", "bool", "isOverwritten"]
+        ]
+      },
+      "MonitorStatusCountMap": {
+        "attributes": [
+          ["total", "int", "total"],
+          ["enabled", "int", "enabled"],
+          ["disabled", "int", "disabled"],
+          ["invalid", "int", "invalid"]
+        ]
+      },
+      "MonitorSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["monitor_type", "str", "monitorType"],
+          ["vantage_points", "list[VantagePointInfo]", "vantagePoints"],
+          ["vantage_point_count", "int", "vantagePointCount"],
+          ["script_id", "str", "scriptId"],
+          ["script_name", "str", "scriptName"],
+          ["status", "str", "status"],
+          ["repeat_interval_in_seconds", "int", "repeatIntervalInSeconds"],
+          ["is_run_once", "bool", "isRunOnce"],
+          ["timeout_in_seconds", "int", "timeoutInSeconds"],
+          ["target", "str", "target"],
+          ["configuration", "MonitorConfiguration", "configuration"],
+          [
+            "maintenance_window_schedule",
+            "MaintenanceWindowSchedule",
+            "maintenanceWindowSchedule"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["is_run_now", "bool", "isRunNow"],
+          ["scheduling_policy", "str", "schedulingPolicy"],
+          ["batch_interval_in_seconds", "int", "batchIntervalInSeconds"],
+          ["is_i_pv6", "bool", "isIPv6"],
+          ["created_by", "str", "createdBy"],
+          ["last_updated_by", "str", "lastUpdatedBy"]
         ]
       },
       "NetworkConfiguration": {
@@ -28566,6 +28901,84 @@
           ["protocol", "str", "protocol"],
           ["probe_mode", "str", "probeMode"]
         ]
+      },
+      "NetworkMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          [
+            "network_configuration",
+            "NetworkConfiguration",
+            "networkConfiguration"
+          ]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "Node": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["ip_address", "str", "ipAddress"],
+          ["display_name", "str", "displayName"],
+          ["geo_info", "str", "geoInfo"],
+          ["outgoing_links", "list[str]", "outgoingLinks"],
+          ["consecutive_anonymous_count", "int", "consecutiveAnonymousCount"],
+          ["level", "int", "level"],
+          [
+            "avg_packet_response_time_in_ms",
+            "float",
+            "avgPacketResponseTimeInMs"
+          ],
+          ["avg_packet_loss_percent", "float", "avgPacketLossPercent"],
+          ["type", "str", "type"]
+        ]
+      },
+      "OnPremiseVantagePoint": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["description", "str", "description"],
+          ["workers_summary", "WorkersSummary", "workersSummary"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "OnPremiseVantagePointCollection": {
+        "attributes": [["items", "list[OnPremiseVantagePointSummary]", "items"]]
+      },
+      "OnPremiseVantagePointSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["description", "str", "description"],
+          ["workers_summary", "WorkersSummary", "workersSummary"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "OnPremiseVpWorkerVersionDetails": {
+        "attributes": [
+          ["version", "str", "version"],
+          ["min_supported_version", "str", "minSupportedVersion"],
+          ["latest_version", "str", "latestVersion"]
+        ]
+      },
+      "OracleRMStack": {
+        "attributes": [
+          ["dvp_stack_type", "str", "dvpStackType"],
+          ["dvp_version", "str", "dvpVersion"],
+          ["dvp_stack_id", "str", "dvpStackId"],
+          ["dvp_stream_id", "str", "dvpStreamId"]
+        ],
+        "discriminator": "DvpStackDetails"
       },
       "Password": {
         "attributes": [["password_type", "str", "passwordType"]],
@@ -28598,6 +29011,16 @@
           ["content", "str", "content"]
         ]
       },
+      "PublicVantagePointCollection": {
+        "attributes": [["items", "list[PublicVantagePointSummary]", "items"]]
+      },
+      "PublicVantagePointSummary": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["name", "str", "name"],
+          ["geo", "GeoSummary", "geo"]
+        ]
+      },
       "RequestAuthenticationDetails": {
         "attributes": [
           ["oauth_scheme", "str", "oauthScheme"],
@@ -28616,6 +29039,70 @@
           ["param_value", "str", "paramValue"]
         ]
       },
+      "RestMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          ["is_redirection_enabled", "bool", "isRedirectionEnabled"],
+          [
+            "is_certificate_validation_enabled",
+            "bool",
+            "isCertificateValidationEnabled"
+          ],
+          ["request_method", "str", "requestMethod"],
+          ["req_authentication_scheme", "str", "reqAuthenticationScheme"],
+          [
+            "req_authentication_details",
+            "RequestAuthenticationDetails",
+            "reqAuthenticationDetails"
+          ],
+          [
+            "client_certificate_details",
+            "ClientCertificateDetails",
+            "clientCertificateDetails"
+          ],
+          ["request_headers", "list[Header]", "requestHeaders"],
+          [
+            "request_query_params",
+            "list[RequestQueryParam]",
+            "requestQueryParams"
+          ],
+          ["request_post_body", "str", "requestPostBody"],
+          ["verify_response_content", "str", "verifyResponseContent"],
+          ["verify_response_codes", "list[str]", "verifyResponseCodes"],
+          [
+            "network_configuration",
+            "NetworkConfiguration",
+            "networkConfiguration"
+          ]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "Script": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["content_type", "str", "contentType"],
+          ["content", "str", "content"],
+          ["time_uploaded", "datetime", "timeUploaded"],
+          ["content_size_in_bytes", "int", "contentSizeInBytes"],
+          ["content_file_name", "str", "contentFileName"],
+          ["parameters", "list[ScriptParameterInfo]", "parameters"],
+          [
+            "monitor_status_count_map",
+            "MonitorStatusCountMap",
+            "monitorStatusCountMap"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ScriptCollection": {
+        "attributes": [["items", "list[ScriptSummary]", "items"]]
+      },
       "ScriptParameter": {
         "attributes": [
           ["param_name", "str", "paramName"],
@@ -28623,14 +29110,185 @@
           ["is_secret", "bool", "isSecret"]
         ]
       },
+      "ScriptParameterInfo": {
+        "attributes": [
+          ["script_parameter", "ScriptParameter", "scriptParameter"],
+          ["is_overwritten", "bool", "isOverwritten"]
+        ]
+      },
+      "ScriptSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["content_type", "str", "contentType"],
+          [
+            "monitor_status_count_map",
+            "MonitorStatusCountMap",
+            "monitorStatusCountMap"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ScriptedBrowserMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          [
+            "is_certificate_validation_enabled",
+            "bool",
+            "isCertificateValidationEnabled"
+          ],
+          ["is_default_snapshot_enabled", "bool", "isDefaultSnapshotEnabled"],
+          [
+            "network_configuration",
+            "NetworkConfiguration",
+            "networkConfiguration"
+          ]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "ScriptedRestMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          ["req_authentication_scheme", "str", "reqAuthenticationScheme"],
+          ["verify_response_codes", "list[str]", "verifyResponseCodes"],
+          [
+            "network_configuration",
+            "NetworkConfiguration",
+            "networkConfiguration"
+          ]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
+      "SqlMonitorConfiguration": {
+        "attributes": [
+          ["config_type", "str", "configType"],
+          ["is_failure_retried", "bool", "isFailureRetried"],
+          ["dns_configuration", "DnsConfiguration", "dnsConfiguration"],
+          ["database_type", "str", "databaseType"],
+          ["query", "str", "query"],
+          [
+            "database_authentication_details",
+            "BasicAuthenticationDetails",
+            "databaseAuthenticationDetails"
+          ],
+          ["database_role", "str", "databaseRole"],
+          ["database_connection_type", "str", "databaseConnectionType"],
+          ["connection_string", "str", "connectionString"],
+          [
+            "database_wallet_details",
+            "DatabaseWalletDetails",
+            "databaseWalletDetails"
+          ]
+        ],
+        "discriminator": "MonitorConfiguration"
+      },
       "VantagePointExecution": {
         "attributes": [
           ["name", "str", "name"],
           ["executions", "list[int]", "executions"]
         ]
       },
+      "VantagePointInfo": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["worker_list", "list[str]", "workerList"]
+        ]
+      },
+      "VantagePointNode": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["geo_info", "str", "geoInfo"],
+          ["outgoing_links", "list[str]", "outgoingLinks"]
+        ]
+      },
       "VerifyText": {
         "attributes": [["text", "str", "text"]]
+      },
+      "Worker": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["runtime_id", "str", "runtimeId"],
+          ["display_name", "str", "displayName"],
+          ["name", "str", "name"],
+          ["opvp_id", "str", "opvpId"],
+          ["opvp_name", "str", "opvpName"],
+          [
+            "version_details",
+            "OnPremiseVpWorkerVersionDetails",
+            "versionDetails"
+          ],
+          ["configuration_details", "object", "configurationDetails"],
+          ["worker_type", "str", "workerType"],
+          ["status", "str", "status"],
+          ["priority", "int", "priority"],
+          ["geo_info", "str", "geoInfo"],
+          ["monitor_list", "list[WorkerMonitorList]", "monitorList"],
+          ["identity_info", "IdentityInfoDetails", "identityInfo"],
+          ["time_last_sync_up", "datetime", "timeLastSyncUp"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "WorkerCollection": {
+        "attributes": [["items", "list[WorkerSummary]", "items"]]
+      },
+      "WorkerMonitorList": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["monitor_type", "str", "monitorType"],
+          ["is_run_now", "bool", "isRunNow"],
+          ["time_assigned", "datetime", "timeAssigned"]
+        ]
+      },
+      "WorkerSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["name", "str", "name"],
+          [
+            "version_details",
+            "OnPremiseVpWorkerVersionDetails",
+            "versionDetails"
+          ],
+          ["configuration_details", "object", "configurationDetails"],
+          ["worker_type", "str", "workerType"],
+          ["status", "str", "status"],
+          ["priority", "int", "priority"],
+          ["geo_info", "str", "geoInfo"],
+          ["monitor_list", "list[WorkerMonitorList]", "monitorList"],
+          ["time_last_syncup", "datetime", "timeLastSyncup"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "WorkersSummary": {
+        "attributes": [
+          ["total", "int", "total"],
+          ["available", "int", "available"],
+          ["used", "int", "used"],
+          ["disabled", "int", "disabled"],
+          ["min_version", "str", "minVersion"],
+          [
+            "available_capabilities",
+            "list[AvailableCapability]",
+            "availableCapabilities"
+          ]
+        ]
       }
     }
   }

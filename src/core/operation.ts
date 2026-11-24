@@ -58,6 +58,7 @@ export type OperationCall = {
 };
 
 export type OperationResult = {
+  responseModels?: Models[string];
   operation: OperationSpec;
   /** The first page's URL (a ServiceError's request_endpoint). */
   url: URL;
@@ -966,7 +967,8 @@ export async function callOperation(
     ) {
       try {
         const parsed: unknown = JSON.parse(raw);
-        if (
+        if (Array.isArray(parsed)) pageItems.push(...parsed);
+        else if (
           parsed &&
           typeof parsed === "object" &&
           "items" in parsed &&
@@ -982,6 +984,7 @@ export async function callOperation(
   } while (page !== null);
   return {
     operation,
+    responseModels: spec.models?.[operation.client.split(".")[0]!],
     url: firstUrl,
     response,
     raw,

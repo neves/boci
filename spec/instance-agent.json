@@ -2734,11 +2734,104 @@
   },
   "models": {
     "compute_instance_agent": {
+      "AvailablePluginSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["summary", "str", "summary"],
+          ["is_supported", "bool", "isSupported"],
+          ["is_enabled_by_default", "bool", "isEnabledByDefault"]
+        ]
+      },
+      "InstanceAgentCommand": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_canceled", "bool", "isCanceled"],
+          ["execution_time_out_in_seconds", "int", "executionTimeOutInSeconds"],
+          ["target", "InstanceAgentCommandTarget", "target"],
+          ["content", "InstanceAgentCommandContent", "content"]
+        ]
+      },
       "InstanceAgentCommandContent": {
         "attributes": [
           ["source", "InstanceAgentCommandSourceDetails", "source"],
           ["output", "InstanceAgentCommandOutputDetails", "output"],
           ["command_string", "str", "commandString"]
+        ]
+      },
+      "InstanceAgentCommandExecution": {
+        "attributes": [
+          ["instance_agent_command_id", "str", "instanceAgentCommandId"],
+          ["instance_id", "str", "instanceId"],
+          ["delivery_state", "str", "deliveryState"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["sequence_number", "int", "sequenceNumber"],
+          ["display_name", "str", "displayName"],
+          ["content", "InstanceAgentCommandExecutionOutputContent", "content"]
+        ]
+      },
+      "InstanceAgentCommandExecutionOutputContent": {
+        "attributes": [
+          ["output_type", "str", "outputType"],
+          ["exit_code", "int", "exitCode"],
+          ["message", "str", "message"]
+        ],
+        "discriminator": {
+          "field": "outputType",
+          "values": {
+            "TEXT": "InstanceAgentCommandExecutionOutputViaTextDetails",
+            "OBJECT_STORAGE_URI": "InstanceAgentCommandExecutionOutputViaObjectStorageUriDetails",
+            "OBJECT_STORAGE_TUPLE": "InstanceAgentCommandExecutionOutputViaObjectStorageTupleDetails"
+          },
+          "fallback": "InstanceAgentCommandExecutionOutputContent"
+        }
+      },
+      "InstanceAgentCommandExecutionOutputViaObjectStorageTupleDetails": {
+        "attributes": [
+          ["output_type", "str", "outputType"],
+          ["exit_code", "int", "exitCode"],
+          ["message", "str", "message"],
+          ["bucket_name", "str", "bucketName"],
+          ["namespace_name", "str", "namespaceName"],
+          ["object_name", "str", "objectName"]
+        ],
+        "discriminator": "InstanceAgentCommandExecutionOutputContent"
+      },
+      "InstanceAgentCommandExecutionOutputViaObjectStorageUriDetails": {
+        "attributes": [
+          ["output_type", "str", "outputType"],
+          ["exit_code", "int", "exitCode"],
+          ["message", "str", "message"],
+          ["output_uri", "str", "outputUri"]
+        ],
+        "discriminator": "InstanceAgentCommandExecutionOutputContent"
+      },
+      "InstanceAgentCommandExecutionOutputViaTextDetails": {
+        "attributes": [
+          ["output_type", "str", "outputType"],
+          ["exit_code", "int", "exitCode"],
+          ["message", "str", "message"],
+          ["text", "str", "text"],
+          ["text_sha256", "str", "textSha256"]
+        ],
+        "discriminator": "InstanceAgentCommandExecutionOutputContent"
+      },
+      "InstanceAgentCommandExecutionSummary": {
+        "attributes": [
+          ["instance_agent_command_id", "str", "instanceAgentCommandId"],
+          ["instance_id", "str", "instanceId"],
+          ["delivery_state", "str", "deliveryState"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["sequence_number", "int", "sequenceNumber"],
+          ["display_name", "str", "displayName"],
+          ["content", "InstanceAgentCommandExecutionOutputContent", "content"]
         ]
       },
       "InstanceAgentCommandOutputDetails": {
@@ -2809,8 +2902,33 @@
         ],
         "discriminator": "InstanceAgentCommandSourceDetails"
       },
+      "InstanceAgentCommandSummary": {
+        "attributes": [
+          ["instance_agent_command_id", "str", "instanceAgentCommandId"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_canceled", "bool", "isCanceled"]
+        ]
+      },
       "InstanceAgentCommandTarget": {
         "attributes": [["instance_id", "str", "instanceId"]]
+      },
+      "InstanceAgentPlugin": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["status", "str", "status"],
+          ["time_last_updated_utc", "datetime", "timeLastUpdatedUtc"],
+          ["message", "str", "message"]
+        ]
+      },
+      "InstanceAgentPluginSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["status", "str", "status"],
+          ["time_last_updated_utc", "datetime", "timeLastUpdatedUtc"]
+        ]
       }
     }
   }

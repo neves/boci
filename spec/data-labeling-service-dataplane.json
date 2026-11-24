@@ -7845,6 +7845,57 @@
   },
   "models": {
     "data_labeling_service_dataplane": {
+      "Annotation": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["record_id", "str", "recordId"],
+          ["entities", "list[Entity]", "entities"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "AnnotationAggregationDimensions": {
+        "attributes": [
+          ["label", "Label", "label"],
+          ["updated_by", "str", "updatedBy"]
+        ]
+      },
+      "AnnotationAnalyticsAggregation": {
+        "attributes": [
+          ["count", "float", "count"],
+          ["dataset_id", "str", "datasetId"],
+          ["dimensions", "AnnotationAggregationDimensions", "dimensions"],
+          ["updated_by", "str", "updatedBy"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "AnnotationAnalyticsAggregationCollection": {
+        "attributes": [
+          ["items", "list[AnnotationAnalyticsAggregation]", "items"]
+        ]
+      },
+      "AnnotationCollection": {
+        "attributes": [["items", "list[AnnotationSummary]", "items"]]
+      },
+      "AnnotationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["record_id", "str", "recordId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
       "BoundingPolygon": {
         "attributes": [
           [
@@ -7872,6 +7923,83 @@
           },
           "fallback": "CreateSourceDetails"
         }
+      },
+      "Dataset": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["lifecycle_substate", "str", "lifecycleSubstate"],
+          ["annotation_format", "str", "annotationFormat"],
+          [
+            "dataset_source_details",
+            "DatasetSourceDetails",
+            "datasetSourceDetails"
+          ],
+          [
+            "dataset_format_details",
+            "DatasetFormatDetails",
+            "datasetFormatDetails"
+          ],
+          ["label_set", "LabelSet", "labelSet"],
+          [
+            "initial_record_generation_configuration",
+            "InitialRecordGenerationConfiguration",
+            "initialRecordGenerationConfiguration"
+          ],
+          [
+            "initial_import_dataset_configuration",
+            "InitialImportDatasetConfiguration",
+            "initialImportDatasetConfiguration"
+          ],
+          ["labeling_instructions", "str", "labelingInstructions"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["additional_properties", "dict(str, str)", "additionalProperties"]
+        ]
+      },
+      "DatasetFormatDetails": {
+        "attributes": [["format_type", "str", "formatType"]],
+        "discriminator": {
+          "field": "formatType",
+          "values": {
+            "IMAGE": "ImageDatasetFormatDetails",
+            "DOCUMENT": "DocumentDatasetFormatDetails",
+            "TEXT": "TextDatasetFormatDetails"
+          },
+          "fallback": "DatasetFormatDetails"
+        }
+      },
+      "DatasetSourceDetails": {
+        "attributes": [["source_type", "str", "sourceType"]],
+        "discriminator": {
+          "field": "sourceType",
+          "values": {
+            "OBJECT_STORAGE": "ObjectStorageDatasetSourceDetails"
+          },
+          "fallback": "DatasetSourceDetails"
+        }
+      },
+      "DelimitedFileTypeMetadata": {
+        "attributes": [
+          ["format_type", "str", "formatType"],
+          ["column_name", "str", "columnName"],
+          ["column_index", "int", "columnIndex"],
+          ["column_delimiter", "str", "columnDelimiter"],
+          ["line_delimiter", "str", "lineDelimiter"],
+          ["escape_character", "str", "escapeCharacter"]
+        ],
+        "discriminator": "TextFileTypeMetadata"
+      },
+      "DocumentDatasetFormatDetails": {
+        "attributes": [["format_type", "str", "formatType"]],
+        "discriminator": "DatasetFormatDetails"
       },
       "DocumentEntityMetadata": {
         "attributes": [["page_number", "float", "pageNumber"]]
@@ -7909,6 +8037,10 @@
         ],
         "discriminator": "Entity"
       },
+      "ImageDatasetFormatDetails": {
+        "attributes": [["format_type", "str", "formatType"]],
+        "discriminator": "DatasetFormatDetails"
+      },
       "ImageMetadata": {
         "attributes": [
           ["record_type", "str", "recordType"],
@@ -7927,6 +8059,31 @@
         ],
         "discriminator": "Entity"
       },
+      "ImportFormat": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["version", "str", "version"]
+        ]
+      },
+      "ImportMetadataPath": {
+        "attributes": [["source_type", "str", "sourceType"]],
+        "discriminator": {
+          "field": "sourceType",
+          "values": {
+            "OBJECT_STORAGE": "ObjectStorageImportMetadataPath"
+          },
+          "fallback": "ImportMetadataPath"
+        }
+      },
+      "InitialImportDatasetConfiguration": {
+        "attributes": [
+          ["import_format", "ImportFormat", "importFormat"],
+          ["import_metadata_path", "ImportMetadataPath", "importMetadataPath"]
+        ]
+      },
+      "InitialRecordGenerationConfiguration": {
+        "attributes": [["limit", "float", "limit"]]
+      },
       "KeyValueSelectionEntity": {
         "attributes": [
           ["entity_type", "str", "entityType"],
@@ -7942,11 +8099,82 @@
       "Label": {
         "attributes": [["label", "str", "label"]]
       },
+      "LabelName": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "LabelSet": {
+        "attributes": [["items", "list[LabelName]", "items"]]
+      },
       "NormalizedVertex": {
         "attributes": [
           ["x", "float", "x"],
           ["y", "float", "y"]
         ]
+      },
+      "ObjectStorageDatasetSourceDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["namespace", "str", "namespace"],
+          ["bucket", "str", "bucket"],
+          ["prefix", "str", "prefix"]
+        ],
+        "discriminator": "DatasetSourceDetails"
+      },
+      "ObjectStorageImportMetadataPath": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["namespace", "str", "namespace"],
+          ["bucket", "str", "bucket"],
+          ["path", "str", "path"]
+        ],
+        "discriminator": "ImportMetadataPath"
+      },
+      "ObjectStorageSourceDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["relative_path", "str", "relativePath"],
+          ["path", "str", "path"],
+          ["offset", "float", "offset"],
+          ["length", "float", "length"]
+        ],
+        "discriminator": "SourceDetails"
+      },
+      "Record": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["dataset_id", "str", "datasetId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["source_details", "SourceDetails", "sourceDetails"],
+          ["is_labeled", "bool", "isLabeled"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["record_metadata", "RecordMetadata", "recordMetadata"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "RecordAggregationDimensions": {
+        "attributes": [
+          ["is_labeled", "bool", "isLabeled"],
+          ["annotation_label_contains", "str", "annotationLabelContains"]
+        ]
+      },
+      "RecordAnalyticsAggregation": {
+        "attributes": [
+          ["count", "float", "count"],
+          ["dimensions", "RecordAggregationDimensions", "dimensions"],
+          ["dataset_id", "str", "datasetId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "RecordAnalyticsAggregationCollection": {
+        "attributes": [["items", "list[RecordAnalyticsAggregation]", "items"]]
+      },
+      "RecordCollection": {
+        "attributes": [["items", "list[RecordSummary]", "items"]]
       },
       "RecordMetadata": {
         "attributes": [["record_type", "str", "recordType"]],
@@ -7958,6 +8186,52 @@
             "TEXT_METADATA": "TextMetadata"
           },
           "fallback": "RecordMetadata"
+        }
+      },
+      "RecordSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["dataset_id", "str", "datasetId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["is_labeled", "bool", "isLabeled"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["record_metadata", "RecordMetadata", "recordMetadata"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "SourceDetails": {
+        "attributes": [["source_type", "str", "sourceType"]],
+        "discriminator": {
+          "field": "sourceType",
+          "values": {
+            "OBJECT_STORAGE": "ObjectStorageSourceDetails"
+          },
+          "fallback": "SourceDetails"
+        }
+      },
+      "TextDatasetFormatDetails": {
+        "attributes": [
+          ["format_type", "str", "formatType"],
+          [
+            "text_file_type_metadata",
+            "TextFileTypeMetadata",
+            "textFileTypeMetadata"
+          ]
+        ],
+        "discriminator": "DatasetFormatDetails"
+      },
+      "TextFileTypeMetadata": {
+        "attributes": [["format_type", "str", "formatType"]],
+        "discriminator": {
+          "field": "formatType",
+          "values": {
+            "DELIMITED": "DelimitedFileTypeMetadata"
+          },
+          "fallback": "TextFileTypeMetadata"
         }
       },
       "TextMetadata": {

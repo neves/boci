@@ -9792,6 +9792,32 @@
   },
   "models": {
     "apm_config": {
+      "AgentConfig": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          [
+            "match_agents_with_attribute_key",
+            "list[str]",
+            "matchAgentsWithAttributeKey"
+          ],
+          [
+            "match_agents_with_attribute_value",
+            "str",
+            "matchAgentsWithAttributeValue"
+          ],
+          ["config", "AgentConfigMap", "config"],
+          ["overrides", "AgentConfigOverrides", "overrides"]
+        ],
+        "discriminator": "Config"
+      },
       "AgentConfigFile": {
         "attributes": [
           ["content_type", "str", "contentType"],
@@ -9814,6 +9840,33 @@
           ["override_list", "list[AgentConfigOverride]", "overrideList"]
         ]
       },
+      "AgentConfigSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "match_agents_with_attribute_key",
+            "list[str]",
+            "matchAgentsWithAttributeKey"
+          ],
+          [
+            "match_agents_with_attribute_value",
+            "str",
+            "matchAgentsWithAttributeValue"
+          ],
+          ["config", "AgentConfigMap", "config"],
+          ["overrides", "AgentConfigOverrides", "overrides"]
+        ],
+        "discriminator": "ConfigSummary"
+      },
       "Apdex": {
         "attributes": [
           ["filter_text", "str", "filterText"],
@@ -9825,10 +9878,119 @@
           ["display_name", "str", "displayName"]
         ]
       },
+      "ApdexRules": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          ["rules", "list[Apdex]", "rules"]
+        ],
+        "discriminator": "Config"
+      },
+      "ApdexRulesSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["rules", "list[Apdex]", "rules"],
+          ["display_name", "str", "displayName"]
+        ],
+        "discriminator": "ConfigSummary"
+      },
+      "Config": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ],
+        "discriminator": {
+          "field": "configType",
+          "values": {
+            "AGENT": "AgentConfig",
+            "OPTIONS": "Options",
+            "MACS_APM_EXTENSION": "MacsApmExtension",
+            "METRIC_GROUP": "MetricGroup",
+            "APDEX": "ApdexRules",
+            "SPAN_FILTER": "SpanFilter"
+          },
+          "fallback": "Config"
+        }
+      },
+      "ConfigCollection": {
+        "attributes": [["items", "list[ConfigSummary]", "items"]]
+      },
+      "ConfigSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ],
+        "discriminator": {
+          "field": "configType",
+          "values": {
+            "MACS_APM_EXTENSION": "MacsApmExtensionSummary",
+            "METRIC_GROUP": "MetricGroupSummary",
+            "APDEX": "ApdexRulesSummary",
+            "AGENT": "AgentConfigSummary",
+            "SPAN_FILTER": "SpanFilterSummary",
+            "OPTIONS": "OptionsSummary"
+          },
+          "fallback": "ConfigSummary"
+        }
+      },
+      "DataFileSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["apm_type", "str", "apmType"],
+          ["size_in_bytes", "int", "sizeInBytes"],
+          ["md5", "str", "md5"],
+          ["time_last_modified", "datetime", "timeLastModified"],
+          ["metadata", "dict(str, str)", "metadata"]
+        ]
+      },
+      "DataFileSummaryCollection": {
+        "attributes": [["items", "list[DataFileSummary]", "items"]]
+      },
       "Dimension": {
         "attributes": [
           ["name", "str", "name"],
           ["value_source", "str", "valueSource"]
+        ]
+      },
+      "ExportConfigurationResponseDetails": {
+        "attributes": [
+          [
+            "configuration_items",
+            "list[ExportImportConfigSummary]",
+            "configurationItems"
+          ]
         ]
       },
       "ExportImportApdexRulesSummary": {
@@ -9905,6 +10067,67 @@
           ["filter_text", "str", "filterText"]
         ]
       },
+      "ImportConfigurationFailedItemSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["error_message", "str", "errorMessage"],
+          ["config_type", "str", "configType"]
+        ]
+      },
+      "ImportConfigurationFailedItemsCollection": {
+        "attributes": [
+          ["items", "list[ImportConfigurationFailedItemSummary]", "items"]
+        ]
+      },
+      "MacsApmExtension": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          ["management_agent_id", "str", "managementAgentId"],
+          ["process_filter", "list[str]", "processFilter"],
+          ["run_as_user", "str", "runAsUser"],
+          ["service_name", "str", "serviceName"],
+          ["agent_version", "str", "agentVersion"],
+          ["attach_install_dir", "str", "attachInstallDir"]
+        ],
+        "discriminator": "Config"
+      },
+      "MacsApmExtensionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["display_name", "str", "displayName"],
+          ["management_agent_id", "str", "managementAgentId"],
+          ["process_filter", "list[str]", "processFilter"],
+          ["run_as_user", "str", "runAsUser"],
+          ["service_name", "str", "serviceName"],
+          ["agent_version", "str", "agentVersion"],
+          ["attach_install_dir", "str", "attachInstallDir"]
+        ],
+        "discriminator": "ConfigSummary"
+      },
+      "MatchAgentsWithAttributeKey": {
+        "attributes": [
+          ["agent_attribute_keys", "list[str]", "agentAttributeKeys"]
+        ]
+      },
       "Metric": {
         "attributes": [
           ["name", "str", "name"],
@@ -9912,6 +10135,161 @@
           ["unit", "str", "unit"],
           ["description", "str", "description"]
         ]
+      },
+      "MetricGroup": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          ["filter_id", "str", "filterId"],
+          ["namespace", "str", "namespace"],
+          ["dimensions", "list[Dimension]", "dimensions"],
+          ["metrics", "list[Metric]", "metrics"]
+        ],
+        "discriminator": "Config"
+      },
+      "MetricGroupSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["display_name", "str", "displayName"],
+          ["filter_id", "str", "filterId"],
+          ["namespace", "str", "namespace"],
+          ["dimensions", "list[Dimension]", "dimensions"],
+          ["metrics", "list[Metric]", "metrics"]
+        ],
+        "discriminator": "ConfigSummary"
+      },
+      "Namespace": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "NamespaceCollection": {
+        "attributes": [["items", "list[Namespace]", "items"]]
+      },
+      "NamespaceMetric": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["unit", "str", "unit"]
+        ]
+      },
+      "NamespaceMetricCollection": {
+        "attributes": [["items", "list[NamespaceMetric]", "items"]]
+      },
+      "Options": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          ["options", "object", "options"],
+          ["group", "str", "group"],
+          ["description", "str", "description"]
+        ],
+        "discriminator": "Config"
+      },
+      "OptionsSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["display_name", "str", "displayName"],
+          ["options", "object", "options"],
+          ["group", "str", "group"],
+          ["description", "str", "description"]
+        ],
+        "discriminator": "ConfigSummary"
+      },
+      "SpanFilter": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          ["filter_text", "str", "filterText"],
+          ["in_use_by", "list[SpanFilterReference]", "inUseBy"],
+          ["description", "str", "description"]
+        ],
+        "discriminator": "Config"
+      },
+      "SpanFilterReference": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["options_group", "str", "optionsGroup"],
+          ["display_name", "str", "displayName"]
+        ]
+      },
+      "SpanFilterSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["config_type", "str", "configType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["created_by", "str", "createdBy"],
+          ["updated_by", "str", "updatedBy"],
+          ["etag", "str", "etag"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["display_name", "str", "displayName"],
+          ["filter_text", "str", "filterText"],
+          ["in_use_by", "list[SpanFilterReference]", "inUseBy"],
+          ["description", "str", "description"]
+        ],
+        "discriminator": "ConfigSummary"
+      },
+      "TestOutput": {
+        "attributes": [["test_type", "str", "testType"]],
+        "discriminator": {
+          "field": "testType",
+          "values": {
+            "SPAN_ENRICHMENT": "TestSpanEnrichmentOutput"
+          },
+          "fallback": "TestOutput"
+        }
+      },
+      "TestSpanEnrichmentOutput": {
+        "attributes": [
+          ["test_type", "str", "testType"],
+          ["span", "object", "span"],
+          ["filters", "list[bool]", "filters"]
+        ],
+        "discriminator": "TestOutput"
       }
     }
   }

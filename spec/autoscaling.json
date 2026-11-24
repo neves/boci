@@ -3441,11 +3441,66 @@
           ["value", "int", "value"]
         ]
       },
+      "AutoScalingConfiguration": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["id", "str", "id"],
+          ["cool_down_in_seconds", "int", "coolDownInSeconds"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["resource", "Resource", "resource"],
+          ["policies", "list[AutoScalingPolicy]", "policies"],
+          ["time_created", "datetime", "timeCreated"],
+          ["max_resource_count", "int", "maxResourceCount"],
+          ["min_resource_count", "int", "minResourceCount"]
+        ]
+      },
+      "AutoScalingConfigurationSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["id", "str", "id"],
+          ["cool_down_in_seconds", "int", "coolDownInSeconds"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["resource", "Resource", "resource"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
+      "AutoScalingPolicy": {
+        "attributes": [
+          ["capacity", "Capacity", "capacity"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["policy_type", "str", "policyType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["is_enabled", "bool", "isEnabled"]
+        ],
+        "discriminator": {
+          "field": "policyType",
+          "values": {
+            "scheduled": "ScheduledPolicy",
+            "threshold": "ThresholdPolicy"
+          },
+          "fallback": "AutoScalingPolicy"
+        }
+      },
       "Capacity": {
         "attributes": [
           ["max", "int", "max"],
           ["min", "int", "min"],
           ["initial", "int", "initial"]
+        ]
+      },
+      "Condition": {
+        "attributes": [
+          ["action", "Action", "action"],
+          ["display_name", "str", "displayName"],
+          ["id", "str", "id"],
+          ["metric", "MetricBase", "metric"]
         ]
       },
       "CreateAutoScalingPolicyDetails": {
@@ -3584,11 +3639,36 @@
         ],
         "discriminator": "ResourceAction"
       },
+      "ScheduledPolicy": {
+        "attributes": [
+          ["capacity", "Capacity", "capacity"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["policy_type", "str", "policyType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["execution_schedule", "ExecutionSchedule", "executionSchedule"],
+          ["resource_action", "ResourceAction", "resourceAction"]
+        ],
+        "discriminator": "AutoScalingPolicy"
+      },
       "Threshold": {
         "attributes": [
           ["operator", "str", "operator"],
           ["value", "int", "value"]
         ]
+      },
+      "ThresholdPolicy": {
+        "attributes": [
+          ["capacity", "Capacity", "capacity"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["policy_type", "str", "policyType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["rules", "list[Condition]", "rules"]
+        ],
+        "discriminator": "AutoScalingPolicy"
       }
     }
   }

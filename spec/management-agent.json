@@ -11220,10 +11220,345 @@
   },
   "models": {
     "management_agent": {
+      "AutoUpgradableConfig": {
+        "attributes": [
+          ["is_agent_auto_upgradable", "bool", "isAgentAutoUpgradable"]
+        ]
+      },
+      "AvailabilityHistorySummary": {
+        "attributes": [
+          ["management_agent_id", "str", "managementAgentId"],
+          ["availability_status", "str", "availabilityStatus"],
+          [
+            "time_availability_status_started",
+            "datetime",
+            "timeAvailabilityStatusStarted"
+          ],
+          [
+            "time_availability_status_ended",
+            "datetime",
+            "timeAvailabilityStatusEnded"
+          ]
+        ]
+      },
+      "DataSource": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["state", "str", "state"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "KUBERNETES_CLUSTER": "KubernetesClusterDataSource",
+            "PROMETHEUS_EMITTER": "PrometheusEmitterDataSource"
+          },
+          "fallback": "DataSource"
+        }
+      },
+      "DataSourceSummary": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "PROMETHEUS_EMITTER": "PrometheusEmitterDataSourceSummary",
+            "KUBERNETES_CLUSTER": "KubernetesClusterDataSourceSummary"
+          },
+          "fallback": "DataSourceSummary"
+        }
+      },
+      "DataSourceSummaryItem": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "PROMETHEUS_EMITTER": "PrometheusEmitterDataSourceSummaryItem",
+            "KUBERNETES_CLUSTER": "KubernetesClusterDataSourceSummaryItem"
+          },
+          "fallback": "DataSourceSummaryItem"
+        }
+      },
+      "KubernetesClusterDataSource": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["state", "str", "state"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["namespace", "str", "namespace"],
+          ["is_daemon_set", "bool", "isDaemonSet"]
+        ],
+        "discriminator": "DataSource"
+      },
+      "KubernetesClusterDataSourceSummary": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["is_daemon_set", "bool", "isDaemonSet"]
+        ],
+        "discriminator": "DataSourceSummary"
+      },
+      "KubernetesClusterDataSourceSummaryItem": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["is_daemon_set", "bool", "isDaemonSet"]
+        ],
+        "discriminator": "DataSourceSummaryItem"
+      },
+      "ManagementAgent": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["install_key_id", "str", "installKeyId"],
+          ["display_name", "str", "displayName"],
+          ["platform_type", "str", "platformType"],
+          ["platform_name", "str", "platformName"],
+          ["platform_version", "str", "platformVersion"],
+          ["version", "str", "version"],
+          ["resource_artifact_version", "str", "resourceArtifactVersion"],
+          ["host", "str", "host"],
+          ["host_id", "str", "hostId"],
+          ["install_path", "str", "installPath"],
+          ["plugin_list", "list[ManagementAgentPluginDetails]", "pluginList"],
+          ["compartment_id", "str", "compartmentId"],
+          ["is_agent_auto_upgradable", "bool", "isAgentAutoUpgradable"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_heartbeat", "datetime", "timeLastHeartbeat"],
+          ["availability_status", "str", "availabilityStatus"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["is_customer_deployed", "bool", "isCustomerDeployed"],
+          ["install_type", "str", "installType"],
+          [
+            "management_agent_properties",
+            "list[ManagementAgentProperty]",
+            "managementAgentProperties"
+          ],
+          ["data_source_list", "list[DataSource]", "dataSourceList"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ManagementAgentAggregation": {
+        "attributes": [
+          ["dimensions", "ManagementAgentAggregationDimensions", "dimensions"],
+          ["count", "int", "count"]
+        ]
+      },
+      "ManagementAgentAggregationCollection": {
+        "attributes": [["items", "list[ManagementAgentAggregation]", "items"]]
+      },
+      "ManagementAgentAggregationDimensions": {
+        "attributes": [
+          ["availability_status", "str", "availabilityStatus"],
+          ["platform_type", "str", "platformType"],
+          ["version", "str", "version"],
+          ["has_plugins", "bool", "hasPlugins"],
+          ["install_type", "str", "installType"]
+        ]
+      },
+      "ManagementAgentImageSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["platform_type", "str", "platformType"],
+          ["platform_name", "str", "platformName"],
+          ["package_type", "str", "packageType"],
+          ["package_architecture_type", "str", "packageArchitectureType"],
+          ["version", "str", "version"],
+          ["size", "float", "size"],
+          ["checksum", "str", "checksum"],
+          ["object_url", "str", "objectUrl"],
+          [
+            "image_object_storage_details",
+            "ObjectDetails",
+            "imageObjectStorageDetails"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "ManagementAgentInstallKey": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["key", "str", "key"],
+          ["created_by_principal_id", "str", "createdByPrincipalId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["allowed_key_install_count", "int", "allowedKeyInstallCount"],
+          ["current_key_install_count", "int", "currentKeyInstallCount"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_expires", "datetime", "timeExpires"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_unlimited", "bool", "isUnlimited"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ManagementAgentInstallKeySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["created_by_principal_id", "str", "createdByPrincipalId"],
+          ["allowed_key_install_count", "int", "allowedKeyInstallCount"],
+          ["current_key_install_count", "int", "currentKeyInstallCount"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_expires", "datetime", "timeExpires"],
+          ["compartment_id", "str", "compartmentId"],
+          ["is_unlimited", "bool", "isUnlimited"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ManagementAgentPluginAggregation": {
+        "attributes": [
+          [
+            "dimensions",
+            "ManagementAgentPluginAggregationDimensions",
+            "dimensions"
+          ],
+          ["count", "int", "count"]
+        ]
+      },
+      "ManagementAgentPluginAggregationCollection": {
+        "attributes": [
+          ["items", "list[ManagementAgentPluginAggregation]", "items"]
+        ]
+      },
+      "ManagementAgentPluginAggregationDimensions": {
+        "attributes": [
+          ["plugin_name", "str", "pluginName"],
+          ["plugin_display_name", "str", "pluginDisplayName"]
+        ]
+      },
+      "ManagementAgentPluginDetails": {
+        "attributes": [
+          ["plugin_id", "str", "pluginId"],
+          ["plugin_name", "str", "pluginName"],
+          ["plugin_display_name", "str", "pluginDisplayName"],
+          ["plugin_version", "str", "pluginVersion"],
+          ["plugin_status", "str", "pluginStatus"],
+          ["plugin_status_message", "str", "pluginStatusMessage"],
+          ["is_enabled", "bool", "isEnabled"]
+        ]
+      },
+      "ManagementAgentPluginSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["version", "int", "version"],
+          ["supported_platform_types", "list[str]", "supportedPlatformTypes"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["is_console_deployable", "bool", "isConsoleDeployable"],
+          ["lifecycle_state", "str", "lifecycleState"]
+        ]
+      },
+      "ManagementAgentProperty": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["values", "list[str]", "values"],
+          ["units", "str", "units"]
+        ]
+      },
+      "ManagementAgentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["install_key_id", "str", "installKeyId"],
+          ["display_name", "str", "displayName"],
+          ["platform_type", "str", "platformType"],
+          ["platform_name", "str", "platformName"],
+          ["platform_version", "str", "platformVersion"],
+          ["version", "str", "version"],
+          ["resource_artifact_version", "str", "resourceArtifactVersion"],
+          ["is_agent_auto_upgradable", "bool", "isAgentAutoUpgradable"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["host", "str", "host"],
+          ["host_id", "str", "hostId"],
+          ["plugin_list", "list[ManagementAgentPluginDetails]", "pluginList"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_last_heartbeat", "datetime", "timeLastHeartbeat"],
+          ["availability_status", "str", "availabilityStatus"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["is_customer_deployed", "bool", "isCustomerDeployed"],
+          ["install_type", "str", "installType"],
+          ["latest_supported_version", "str", "latestSupportedVersion"],
+          [
+            "data_source_summary_list",
+            "list[DataSourceSummaryItem]",
+            "dataSourceSummaryList"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "MetricDimension": {
         "attributes": [
           ["name", "str", "name"],
           ["value", "str", "value"]
+        ]
+      },
+      "NamedCredential": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["management_agent_id", "str", "managementAgentId"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["properties", "list[NamedCredentialProperty]", "properties"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "NamedCredentialCollection": {
+        "attributes": [["items", "list[NamedCredentialSummary]", "items"]]
+      },
+      "NamedCredentialFieldDefinition": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["default_value", "str", "defaultValue"],
+          ["regex", "str", "regex"],
+          ["allowed_values", "list[str]", "allowedValues"],
+          ["value_category", "list[str]", "valueCategory"],
+          ["is_required", "bool", "isRequired"]
+        ]
+      },
+      "NamedCredentialMetadataDefinition": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["display_name", "str", "displayName"],
+          ["minimum_agent_version", "str", "minimumAgentVersion"],
+          ["properties", "list[NamedCredentialFieldDefinition]", "properties"]
         ]
       },
       "NamedCredentialProperty": {
@@ -11231,6 +11566,128 @@
           ["name", "str", "name"],
           ["value", "str", "value"],
           ["value_category", "str", "valueCategory"]
+        ]
+      },
+      "NamedCredentialSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["management_agent_id", "str", "managementAgentId"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["properties", "list[NamedCredentialProperty]", "properties"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "NamedCredentialsMetadatum": {
+        "attributes": [
+          ["metadata", "list[NamedCredentialMetadataDefinition]", "metadata"]
+        ]
+      },
+      "ObjectDetails": {
+        "attributes": [
+          ["object_namespace", "str", "objectNamespace"],
+          ["object_bucket", "str", "objectBucket"],
+          ["object_name", "str", "objectName"],
+          ["object_url", "str", "objectUrl"],
+          ["checksum", "str", "checksum"]
+        ]
+      },
+      "PrometheusEmitterDataSource": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["state", "str", "state"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["url", "str", "url"],
+          ["namespace", "str", "namespace"],
+          ["allow_metrics", "str", "allowMetrics"],
+          ["proxy_url", "str", "proxyUrl"],
+          ["connection_timeout", "int", "connectionTimeout"],
+          ["read_timeout", "int", "readTimeout"],
+          ["read_data_limit", "int", "readDataLimit"],
+          ["schedule_mins", "int", "scheduleMins"],
+          ["resource_group", "str", "resourceGroup"],
+          ["metric_dimensions", "list[MetricDimension]", "metricDimensions"]
+        ],
+        "discriminator": "DataSource"
+      },
+      "PrometheusEmitterDataSourceSummary": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": "DataSourceSummary"
+      },
+      "PrometheusEmitterDataSourceSummaryItem": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["type", "str", "type"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": "DataSourceSummaryItem"
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["source_id", "str", "sourceId"],
+          ["source_name", "str", "sourceName"],
+          ["source_version", "str", "sourceVersion"],
+          ["entity_uri", "str", "entityUri"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["metadata", "object", "metadata"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
         ]
       }
     }

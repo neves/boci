@@ -1579,6 +1579,58 @@
   },
   "models": {
     "generative_ai_agent_runtime": {
+      "ChatResult": {
+        "attributes": [
+          ["message", "Message", "message"],
+          ["traces", "list[Trace]", "traces"],
+          ["tool_results", "dict(str, str)", "toolResults"],
+          ["tool_outputs", "list[ToolOutput]", "toolOutputs"],
+          ["required_actions", "list[RequiredAction]", "requiredActions"],
+          ["guardrail_result", "str", "guardrailResult"]
+        ]
+      },
+      "Citation": {
+        "attributes": [
+          ["source_text", "str", "sourceText"],
+          ["source_location", "SourceLocation", "sourceLocation"],
+          ["title", "str", "title"],
+          ["doc_id", "str", "docId"],
+          ["page_numbers", "list[int]", "pageNumbers"],
+          ["metadata", "dict(str, object)", "metadata"]
+        ]
+      },
+      "ErrorTrace": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["parent_key", "str", "parentKey"],
+          ["source", "SourceDetails", "source"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["trace_type", "str", "traceType"],
+          ["error_message", "str", "errorMessage"],
+          ["code", "str", "code"]
+        ],
+        "discriminator": "Trace"
+      },
+      "ExecutionTrace": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["parent_key", "str", "parentKey"],
+          ["source", "SourceDetails", "source"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["trace_type", "str", "traceType"],
+          ["input", "str", "input"],
+          ["output", "str", "output"]
+        ],
+        "discriminator": "Trace"
+      },
+      "FunctionCall": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["arguments", "str", "arguments"]
+        ]
+      },
       "FunctionCallingPerformedAction": {
         "attributes": [
           ["action_id", "str", "actionId"],
@@ -1586,6 +1638,28 @@
           ["function_call_output", "str", "functionCallOutput"]
         ],
         "discriminator": "PerformedAction"
+      },
+      "FunctionCallingRequiredAction": {
+        "attributes": [
+          ["action_id", "str", "actionId"],
+          ["required_action_type", "str", "requiredActionType"],
+          ["function_call", "FunctionCall", "functionCall"]
+        ],
+        "discriminator": "RequiredAction"
+      },
+      "GenerationTrace": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["parent_key", "str", "parentKey"],
+          ["source", "SourceDetails", "source"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["trace_type", "str", "traceType"],
+          ["generation", "str", "generation"],
+          ["input", "str", "input"],
+          ["usage", "list[Usage]", "usage"]
+        ],
+        "discriminator": "Trace"
       },
       "GenericToolInput": {
         "attributes": [
@@ -1595,6 +1669,15 @@
         ],
         "discriminator": "ToolInput"
       },
+      "GenericToolOutput": {
+        "attributes": [
+          ["tool_id", "str", "toolId"],
+          ["tool_name", "str", "toolName"],
+          ["tool_output_type", "str", "toolOutputType"],
+          ["output", "object", "output"]
+        ],
+        "discriminator": "ToolOutput"
+      },
       "HumanApprovalPerformedAction": {
         "attributes": [
           ["action_id", "str", "actionId"],
@@ -1603,10 +1686,112 @@
         ],
         "discriminator": "PerformedAction"
       },
+      "HumanApprovalRequiredAction": {
+        "attributes": [
+          ["action_id", "str", "actionId"],
+          ["required_action_type", "str", "requiredActionType"],
+          ["message", "str", "message"],
+          ["options", "list[str]", "options"]
+        ],
+        "discriminator": "RequiredAction"
+      },
+      "KnowledgeBaseMetadataSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["operations", "list[str]", "operations"],
+          ["values", "list[KnowledgeBaseMetadataValue]", "values"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "KnowledgeBaseMetadataValue": {
+        "attributes": [
+          ["value", "str", "value"],
+          ["count", "int", "count"]
+        ]
+      },
+      "Message": {
+        "attributes": [
+          ["role", "str", "role"],
+          ["content", "MessageContent", "content"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
+      "MessageContent": {
+        "attributes": [
+          ["text", "str", "text"],
+          ["citations", "list[Citation]", "citations"],
+          [
+            "paragraph_citations",
+            "list[ParagraphCitation]",
+            "paragraphCitations"
+          ]
+        ]
+      },
       "MetadataFilter": {
         "attributes": [
           ["field_name", "str", "fieldName"],
           ["value", "str", "value"]
+        ]
+      },
+      "ModelDetails": {
+        "attributes": [
+          ["model_name", "str", "modelName"],
+          ["model_version", "str", "modelVersion"],
+          ["model_params", "ModelParams", "modelParams"]
+        ]
+      },
+      "ModelParams": {
+        "attributes": [
+          ["max_tokens", "int", "maxTokens"],
+          ["temperature", "float", "temperature"],
+          ["top_p", "float", "topP"],
+          ["top_k", "int", "topK"],
+          ["frequency_penalty", "float", "frequencyPenalty"],
+          ["presence_penalty", "float", "presencePenalty"],
+          ["seed", "int", "seed"],
+          ["reasoning_effort", "str", "reasoningEffort"],
+          ["verbosity", "str", "verbosity"]
+        ]
+      },
+      "OciDatabaseSourceLocation": {
+        "attributes": [
+          ["source_location_type", "str", "sourceLocationType"],
+          ["id", "str", "id"],
+          ["function_name", "str", "functionName"],
+          ["url", "str", "url"]
+        ],
+        "discriminator": "SourceLocation"
+      },
+      "OciObjectStorageSourceLocation": {
+        "attributes": [
+          ["source_location_type", "str", "sourceLocationType"],
+          ["url", "str", "url"]
+        ],
+        "discriminator": "SourceLocation"
+      },
+      "OciOpenSearchSourceLocation": {
+        "attributes": [
+          ["source_location_type", "str", "sourceLocationType"],
+          ["id", "str", "id"],
+          ["index_name", "str", "indexName"],
+          ["url", "str", "url"]
+        ],
+        "discriminator": "SourceLocation"
+      },
+      "Paragraph": {
+        "attributes": [
+          ["text", "str", "text"],
+          ["start", "int", "start"],
+          ["end", "int", "end"]
+        ]
+      },
+      "ParagraphCitation": {
+        "attributes": [
+          ["paragraph", "Paragraph", "paragraph"],
+          ["citations", "list[Citation]", "citations"]
         ]
       },
       "PerformedAction": {
@@ -1623,6 +1808,109 @@
           "fallback": "PerformedAction"
         }
       },
+      "PlanningTrace": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["parent_key", "str", "parentKey"],
+          ["source", "SourceDetails", "source"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["trace_type", "str", "traceType"],
+          ["input", "str", "input"],
+          ["output", "str", "output"],
+          ["usage", "list[Usage]", "usage"]
+        ],
+        "discriminator": "Trace"
+      },
+      "RagToolOutput": {
+        "attributes": [
+          ["tool_id", "str", "toolId"],
+          ["tool_name", "str", "toolName"],
+          ["tool_output_type", "str", "toolOutputType"],
+          ["text", "str", "text"],
+          ["citations", "list[Citation]", "citations"],
+          [
+            "paragraph_citations",
+            "list[ParagraphCitation]",
+            "paragraphCitations"
+          ]
+        ],
+        "discriminator": "ToolOutput"
+      },
+      "RequiredAction": {
+        "attributes": [
+          ["action_id", "str", "actionId"],
+          ["required_action_type", "str", "requiredActionType"]
+        ],
+        "discriminator": {
+          "field": "requiredActionType",
+          "values": {
+            "HUMAN_APPROVAL_REQUIRED_ACTION": "HumanApprovalRequiredAction",
+            "FUNCTION_CALLING_REQUIRED_ACTION": "FunctionCallingRequiredAction"
+          },
+          "fallback": "RequiredAction"
+        }
+      },
+      "RetrievalTrace": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["parent_key", "str", "parentKey"],
+          ["source", "SourceDetails", "source"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["trace_type", "str", "traceType"],
+          ["retrieval_input", "str", "retrievalInput"],
+          ["citations", "list[Citation]", "citations"],
+          ["usage", "list[Usage]", "usage"]
+        ],
+        "discriminator": "Trace"
+      },
+      "Session": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["welcome_message", "str", "welcomeMessage"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "SourceDetails": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["name", "str", "name"]
+        ]
+      },
+      "SourceLocation": {
+        "attributes": [["source_location_type", "str", "sourceLocationType"]],
+        "discriminator": {
+          "field": "sourceLocationType",
+          "values": {
+            "OCI_OBJECT_STORAGE": "OciObjectStorageSourceLocation",
+            "OCI_OPEN_SEARCH": "OciOpenSearchSourceLocation",
+            "OCI_DATABASE": "OciDatabaseSourceLocation"
+          },
+          "fallback": "SourceLocation"
+        }
+      },
+      "SqlResultFiles": {
+        "attributes": [
+          ["status_file", "str", "statusFile"],
+          ["data_file", "str", "dataFile"]
+        ]
+      },
+      "SqlToolOutput": {
+        "attributes": [
+          ["tool_id", "str", "toolId"],
+          ["tool_name", "str", "toolName"],
+          ["tool_output_type", "str", "toolOutputType"],
+          ["generated_sql", "str", "generatedSql"],
+          ["result", "list[object]", "result"],
+          ["result_files", "SqlResultFiles", "resultFiles"],
+          ["additional_info", "str", "additionalInfo"]
+        ],
+        "discriminator": "ToolOutput"
+      },
       "ToolInput": {
         "attributes": [
           ["tool_id", "str", "toolId"],
@@ -1635,6 +1923,72 @@
           },
           "fallback": "ToolInput"
         }
+      },
+      "ToolInvocationTrace": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["parent_key", "str", "parentKey"],
+          ["source", "SourceDetails", "source"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["trace_type", "str", "traceType"],
+          ["tool_id", "str", "toolId"],
+          ["tool_name", "str", "toolName"],
+          ["invocation_details", "str", "invocationDetails"]
+        ],
+        "discriminator": "Trace"
+      },
+      "ToolOutput": {
+        "attributes": [
+          ["tool_id", "str", "toolId"],
+          ["tool_name", "str", "toolName"],
+          ["tool_output_type", "str", "toolOutputType"]
+        ],
+        "discriminator": {
+          "field": "toolOutputType",
+          "values": {
+            "GENERIC_TOOL_OUTPUT": "GenericToolOutput",
+            "SQL_TOOL_OUTPUT": "SqlToolOutput",
+            "RAG_TOOL_OUTPUT": "RagToolOutput"
+          },
+          "fallback": "ToolOutput"
+        }
+      },
+      "Trace": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["parent_key", "str", "parentKey"],
+          ["source", "SourceDetails", "source"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["trace_type", "str", "traceType"]
+        ],
+        "discriminator": {
+          "field": "traceType",
+          "values": {
+            "ERROR_TRACE": "ErrorTrace",
+            "RETRIEVAL_TRACE": "RetrievalTrace",
+            "EXECUTION_TRACE": "ExecutionTrace",
+            "GENERATION_TRACE": "GenerationTrace",
+            "TOOL_INVOCATION_TRACE": "ToolInvocationTrace",
+            "PLANNING_TRACE": "PlanningTrace"
+          },
+          "fallback": "Trace"
+        }
+      },
+      "Usage": {
+        "attributes": [
+          ["model_details", "ModelDetails", "modelDetails"],
+          ["usage_details", "UsageDetails", "usageDetails"]
+        ]
+      },
+      "UsageDetails": {
+        "attributes": [
+          ["input_token_count", "int", "inputTokenCount"],
+          ["output_token_count", "int", "outputTokenCount"],
+          ["input_char_count", "int", "inputCharCount"],
+          ["output_char_count", "int", "outputCharCount"]
+        ]
       }
     }
   }

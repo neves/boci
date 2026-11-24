@@ -4465,6 +4465,69 @@
   },
   "models": {
     "vn_monitoring": {
+      "AccessDeniedTrafficNode": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["egress_traffic", "EgressTrafficSpec", "egressTraffic"],
+          ["next_hop_routing_action", "RoutingAction", "nextHopRoutingAction"],
+          ["egress_security_action", "SecurityAction", "egressSecurityAction"],
+          [
+            "ingress_security_action",
+            "SecurityAction",
+            "ingressSecurityAction"
+          ],
+          [
+            "zpr_egress_security_action",
+            "SecurityAction",
+            "zprEgressSecurityAction"
+          ],
+          [
+            "zpr_ingress_security_action",
+            "SecurityAction",
+            "zprIngressSecurityAction"
+          ]
+        ],
+        "discriminator": "TrafficNode"
+      },
+      "AllowedSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "allowed_security_action_details",
+            "AllowedSecurityActionDetails",
+            "allowedSecurityActionDetails"
+          ]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "AllowedSecurityActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          [
+            "allowed_security_configuration",
+            "AllowedSecurityConfiguration",
+            "allowedSecurityConfiguration"
+          ]
+        ]
+      },
+      "AllowedSecurityConfiguration": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "STATEFUL_EGRESS_SECURITY_LIST": "StatefulEgressSecurityListConfiguration",
+            "STATEFUL_ZPR": "StatefulZprConfiguration",
+            "NSG": "NsgConfiguration",
+            "ZPR": "ZprConfiguration",
+            "INGRESS_SECURITY_LIST": "IngressSecurityListConfiguration",
+            "STATEFUL_INGRESS_SECURITY_LIST": "StatefulIngressSecurityListConfiguration",
+            "EGRESS_SECURITY_LIST": "EgressSecurityListConfiguration",
+            "STATEFUL_NSG": "StatefulNsgConfiguration"
+          },
+          "fallback": "AllowedSecurityConfiguration"
+        }
+      },
       "ComputeInstanceEndpoint": {
         "attributes": [
           ["type", "str", "type"],
@@ -4473,6 +4536,81 @@
           ["vnic_id", "str", "vnicId"]
         ],
         "discriminator": "Endpoint"
+      },
+      "DeniedSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "denied_security_action_details",
+            "DeniedSecurityActionDetails",
+            "deniedSecurityActionDetails"
+          ]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "DeniedSecurityActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          [
+            "evaluated_security_list_ids",
+            "list[str]",
+            "evaluatedSecurityListIds"
+          ],
+          ["evaluated_nsg_ids", "list[str]", "evaluatedNsgIds"]
+        ]
+      },
+      "DrgRouteRule": {
+        "attributes": [
+          ["destination", "str", "destination"],
+          ["destination_type", "str", "destinationType"],
+          ["next_hop_drg_attachment_id", "str", "nextHopDrgAttachmentId"],
+          ["route_type", "str", "routeType"],
+          ["is_conflict", "bool", "isConflict"],
+          ["is_blackhole", "bool", "isBlackhole"],
+          ["id", "str", "id"],
+          ["route_provenance", "str", "routeProvenance"],
+          ["attributes", "object", "attributes"]
+        ]
+      },
+      "DrgRoutingConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["drg_route_table_id", "str", "drgRouteTableId"],
+          ["route_rule", "DrgRouteRule", "routeRule"]
+        ],
+        "discriminator": "ForwardedRoutingConfiguration"
+      },
+      "EgressSecurityListConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["security_list_id", "str", "securityListId"],
+          ["security_rule", "EgressSecurityRule", "securityRule"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
+      "EgressSecurityRule": {
+        "attributes": [
+          ["destination", "str", "destination"],
+          ["destination_type", "str", "destinationType"],
+          ["icmp_options", "IcmpOptions", "icmpOptions"],
+          ["is_stateless", "bool", "isStateless"],
+          ["protocol", "str", "protocol"],
+          ["tcp_options", "TcpOptions", "tcpOptions"],
+          ["udp_options", "UdpOptions", "udpOptions"]
+        ]
+      },
+      "EgressTrafficSpec": {
+        "attributes": [
+          ["protocol", "int", "protocol"],
+          ["source_address", "str", "sourceAddress"],
+          ["destination_address", "str", "destinationAddress"],
+          [
+            "traffic_protocol_parameters",
+            "TrafficProtocolParameters",
+            "trafficProtocolParameters"
+          ]
+        ]
       },
       "Endpoint": {
         "attributes": [["type", "str", "type"]],
@@ -4494,6 +4632,45 @@
           "fallback": "Endpoint"
         }
       },
+      "ForwardedRoutingAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "forwarded_routing_action_details",
+            "ForwardedRoutingActionDetails",
+            "forwardedRoutingActionDetails"
+          ]
+        ],
+        "discriminator": "RoutingAction"
+      },
+      "ForwardedRoutingActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          [
+            "forwarded_routing_configuration",
+            "ForwardedRoutingConfiguration",
+            "forwardedRoutingConfiguration"
+          ]
+        ]
+      },
+      "ForwardedRoutingConfiguration": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "VCN": "VcnRoutingConfiguration",
+            "DRG": "DrgRoutingConfiguration"
+          },
+          "fallback": "ForwardedRoutingConfiguration"
+        }
+      },
+      "IcmpOptions": {
+        "attributes": [
+          ["code", "int", "code"],
+          ["type", "int", "type"]
+        ]
+      },
       "IcmpProtocolParameters": {
         "attributes": [
           ["type", "str", "type"],
@@ -4501,6 +4678,40 @@
           ["icmp_type", "int", "icmpType"]
         ],
         "discriminator": "ProtocolParameters"
+      },
+      "IcmpTrafficProtocolParameters": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["icmp_code", "int", "icmpCode"],
+          ["icmp_type", "int", "icmpType"]
+        ],
+        "discriminator": "TrafficProtocolParameters"
+      },
+      "IndeterminateRoutingAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"]
+        ],
+        "discriminator": "RoutingAction"
+      },
+      "IngressSecurityListConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["security_list_id", "str", "securityListId"],
+          ["security_rule", "IngressSecurityRule", "securityRule"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
+      "IngressSecurityRule": {
+        "attributes": [
+          ["icmp_options", "IcmpOptions", "icmpOptions"],
+          ["is_stateless", "bool", "isStateless"],
+          ["protocol", "str", "protocol"],
+          ["source", "str", "source"],
+          ["source_type", "str", "sourceType"],
+          ["tcp_options", "TcpOptions", "tcpOptions"],
+          ["udp_options", "UdpOptions", "udpOptions"]
+        ]
       },
       "IpAddressEndpoint": {
         "attributes": [
@@ -4539,12 +4750,127 @@
         ],
         "discriminator": "Endpoint"
       },
+      "NetworkingTopology": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["entities", "list[object]", "entities"],
+          [
+            "relationships",
+            "list[TopologyEntityRelationship]",
+            "relationships"
+          ],
+          ["limited_entities", "list[str]", "limitedEntities"],
+          ["time_created", "datetime", "timeCreated"]
+        ],
+        "discriminator": "Topology"
+      },
+      "NoRouteRoutingAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "no_route_routing_action_details",
+            "NoRouteRoutingActionDetails",
+            "noRouteRoutingActionDetails"
+          ]
+        ],
+        "discriminator": "RoutingAction"
+      },
+      "NoRouteRoutingActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          ["evaluated_vcn_route_table_id", "str", "evaluatedVcnRouteTableId"],
+          ["evaluated_drg_route_table_id", "str", "evaluatedDrgRouteTableId"]
+        ]
+      },
+      "NsgConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["nsg_id", "str", "nsgId"],
+          ["security_rule", "SecurityRule", "securityRule"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
       "OnPremEndpoint": {
         "attributes": [
           ["type", "str", "type"],
           ["address", "str", "address"]
         ],
         "discriminator": "Endpoint"
+      },
+      "Path": {
+        "attributes": [
+          ["forward_route", "TrafficRoute", "forwardRoute"],
+          ["return_route", "TrafficRoute", "returnRoute"],
+          ["topology", "PathTopology", "topology"]
+        ]
+      },
+      "PathAnalysisWorkRequestResult": {
+        "attributes": [
+          ["result_type", "str", "resultType"],
+          ["paths", "list[Path]", "paths"],
+          ["time_created", "datetime", "timeCreated"]
+        ],
+        "discriminator": "WorkRequestResult"
+      },
+      "PathAnalyzerTest": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["protocol", "int", "protocol"],
+          ["source_endpoint", "Endpoint", "sourceEndpoint"],
+          ["destination_endpoint", "Endpoint", "destinationEndpoint"],
+          ["protocol_parameters", "ProtocolParameters", "protocolParameters"],
+          ["query_options", "QueryOptions", "queryOptions"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PathAnalyzerTestCollection": {
+        "attributes": [["items", "list[PathAnalyzerTestSummary]", "items"]]
+      },
+      "PathAnalyzerTestSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["protocol", "int", "protocol"],
+          ["source_endpoint", "Endpoint", "sourceEndpoint"],
+          ["destination_endpoint", "Endpoint", "destinationEndpoint"],
+          ["protocol_parameters", "ProtocolParameters", "protocolParameters"],
+          ["query_options", "QueryOptions", "queryOptions"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PathTopology": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["entities", "list[object]", "entities"],
+          [
+            "relationships",
+            "list[TopologyEntityRelationship]",
+            "relationships"
+          ],
+          ["limited_entities", "list[str]", "limitedEntities"],
+          ["time_created", "datetime", "timeCreated"]
+        ],
+        "discriminator": "Topology"
+      },
+      "PortRange": {
+        "attributes": [
+          ["max", "int", "max"],
+          ["min", "int", "min"]
+        ]
       },
       "PrivateServiceAccessEndpoint": {
         "attributes": [
@@ -4570,6 +4896,99 @@
           ["is_bi_directional_analysis", "bool", "isBiDirectionalAnalysis"]
         ]
       },
+      "RouteRule": {
+        "attributes": [
+          ["cidr_block", "str", "cidrBlock"],
+          ["destination", "str", "destination"],
+          ["destination_type", "str", "destinationType"],
+          ["network_entity_id", "str", "networkEntityId"]
+        ]
+      },
+      "RoutingAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"]
+        ],
+        "discriminator": {
+          "field": "action",
+          "values": {
+            "NO_ROUTE": "NoRouteRoutingAction",
+            "INDETERMINATE": "IndeterminateRoutingAction",
+            "FORWARDED": "ForwardedRoutingAction"
+          },
+          "fallback": "RoutingAction"
+        }
+      },
+      "SecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"]
+        ],
+        "discriminator": {
+          "field": "action",
+          "values": {
+            "ALLOWED": "AllowedSecurityAction",
+            "ZPR_MISSING_POLICY": "ZprMissingPolicySecurityAction",
+            "ZPR_DENIED": "ZprDeniedSecurityAction",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE": "ZprPolicyNotEvaluatedMissingRouteSecurityAction",
+            "ZPR_NSG_UNSUPPORTED": "ZprNsgUnsupportedSecurityAction",
+            "ZPR_ALLOWED": "ZprAllowedSecurityAction",
+            "DENIED": "DeniedSecurityAction",
+            "ZPR_CIDR_UNSUPPORTED": "ZprCidrUnsupportedSecurityAction",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED": "ZprPolicyNotEvaluatedSlNsgDeniedSecurityAction"
+          },
+          "fallback": "SecurityAction"
+        }
+      },
+      "SecurityRule": {
+        "attributes": [
+          ["description", "str", "description"],
+          ["destination", "str", "destination"],
+          ["destination_type", "str", "destinationType"],
+          ["direction", "str", "direction"],
+          ["icmp_options", "IcmpOptions", "icmpOptions"],
+          ["id", "str", "id"],
+          ["is_stateless", "bool", "isStateless"],
+          ["is_valid", "bool", "isValid"],
+          ["protocol", "str", "protocol"],
+          ["source", "str", "source"],
+          ["source_type", "str", "sourceType"],
+          ["tcp_options", "TcpOptions", "tcpOptions"],
+          ["time_created", "datetime", "timeCreated"],
+          ["udp_options", "UdpOptions", "udpOptions"]
+        ]
+      },
+      "StatefulEgressSecurityListConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["security_list_id", "str", "securityListId"],
+          ["security_rule", "IngressSecurityRule", "securityRule"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
+      "StatefulIngressSecurityListConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["security_list_id", "str", "securityListId"],
+          ["security_rule", "EgressSecurityRule", "securityRule"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
+      "StatefulNsgConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["nsg_id", "str", "nsgId"],
+          ["security_rule", "SecurityRule", "securityRule"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
+      "StatefulZprConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["zpr_policy", "ZprPolicy", "zprPolicy"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
       "SubnetEndpoint": {
         "attributes": [
           ["type", "str", "type"],
@@ -4577,6 +4996,27 @@
           ["subnet_id", "str", "subnetId"]
         ],
         "discriminator": "Endpoint"
+      },
+      "SubnetTopology": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["entities", "list[object]", "entities"],
+          [
+            "relationships",
+            "list[TopologyEntityRelationship]",
+            "relationships"
+          ],
+          ["limited_entities", "list[str]", "limitedEntities"],
+          ["time_created", "datetime", "timeCreated"],
+          ["subnet_id", "str", "subnetId"]
+        ],
+        "discriminator": "Topology"
+      },
+      "TcpOptions": {
+        "attributes": [
+          ["destination_port_range", "PortRange", "destinationPortRange"],
+          ["source_port_range", "PortRange", "sourcePortRange"]
+        ]
       },
       "TcpProtocolParameters": {
         "attributes": [
@@ -4586,6 +5026,154 @@
         ],
         "discriminator": "ProtocolParameters"
       },
+      "TcpTrafficProtocolParameters": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["source_port", "int", "sourcePort"],
+          ["destination_port", "int", "destinationPort"]
+        ],
+        "discriminator": "TrafficProtocolParameters"
+      },
+      "Topology": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["entities", "list[object]", "entities"],
+          [
+            "relationships",
+            "list[TopologyEntityRelationship]",
+            "relationships"
+          ],
+          ["limited_entities", "list[str]", "limitedEntities"],
+          ["time_created", "datetime", "timeCreated"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "VCN": "VcnTopology",
+            "PATH": "PathTopology",
+            "NETWORKING": "NetworkingTopology",
+            "SUBNET": "SubnetTopology"
+          },
+          "fallback": "Topology"
+        }
+      },
+      "TopologyAssociatedWithEntityRelationship": {
+        "attributes": [
+          ["id1", "str", "id1"],
+          ["id2", "str", "id2"],
+          ["type", "str", "type"],
+          [
+            "associated_with_details",
+            "TopologyAssociatedWithRelationshipDetails",
+            "associatedWithDetails"
+          ]
+        ],
+        "discriminator": "TopologyEntityRelationship"
+      },
+      "TopologyAssociatedWithRelationshipDetails": {
+        "attributes": [["via", "list[str]", "via"]]
+      },
+      "TopologyContainsEntityRelationship": {
+        "attributes": [
+          ["id1", "str", "id1"],
+          ["id2", "str", "id2"],
+          ["type", "str", "type"]
+        ],
+        "discriminator": "TopologyEntityRelationship"
+      },
+      "TopologyEntityRelationship": {
+        "attributes": [
+          ["id1", "str", "id1"],
+          ["id2", "str", "id2"],
+          ["type", "str", "type"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "ROUTES_TO": "TopologyRoutesToEntityRelationship",
+            "ASSOCIATED_WITH": "TopologyAssociatedWithEntityRelationship",
+            "CONTAINS": "TopologyContainsEntityRelationship"
+          },
+          "fallback": "TopologyEntityRelationship"
+        }
+      },
+      "TopologyRoutesToEntityRelationship": {
+        "attributes": [
+          ["id1", "str", "id1"],
+          ["id2", "str", "id2"],
+          ["type", "str", "type"],
+          [
+            "route_rule_details",
+            "TopologyRoutesToRelationshipDetails",
+            "routeRuleDetails"
+          ]
+        ],
+        "discriminator": "TopologyEntityRelationship"
+      },
+      "TopologyRoutesToRelationshipDetails": {
+        "attributes": [
+          ["destination_type", "str", "destinationType"],
+          ["destination", "str", "destination"],
+          ["route_table_id", "str", "routeTableId"],
+          ["route_type", "str", "routeType"]
+        ]
+      },
+      "TrafficNode": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["egress_traffic", "EgressTrafficSpec", "egressTraffic"],
+          ["next_hop_routing_action", "RoutingAction", "nextHopRoutingAction"],
+          ["egress_security_action", "SecurityAction", "egressSecurityAction"],
+          [
+            "ingress_security_action",
+            "SecurityAction",
+            "ingressSecurityAction"
+          ],
+          [
+            "zpr_egress_security_action",
+            "SecurityAction",
+            "zprEgressSecurityAction"
+          ],
+          [
+            "zpr_ingress_security_action",
+            "SecurityAction",
+            "zprIngressSecurityAction"
+          ]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "VISIBLE": "VisibleTrafficNode",
+            "ACCESS_DENIED": "AccessDeniedTrafficNode"
+          },
+          "fallback": "TrafficNode"
+        }
+      },
+      "TrafficProtocolParameters": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "ICMP": "IcmpTrafficProtocolParameters",
+            "UDP": "UdpTrafficProtocolParameters",
+            "TCP": "TcpTrafficProtocolParameters"
+          },
+          "fallback": "TrafficProtocolParameters"
+        }
+      },
+      "TrafficRoute": {
+        "attributes": [
+          ["reachability_status", "str", "reachabilityStatus"],
+          ["nodes", "list[TrafficNode]", "nodes"],
+          ["route_analysis_description", "str", "routeAnalysisDescription"]
+        ]
+      },
+      "UdpOptions": {
+        "attributes": [
+          ["destination_port_range", "PortRange", "destinationPortRange"],
+          ["source_port_range", "PortRange", "sourcePortRange"]
+        ]
+      },
       "UdpProtocolParameters": {
         "attributes": [
           ["type", "str", "type"],
@@ -4593,6 +5181,63 @@
           ["destination_port", "int", "destinationPort"]
         ],
         "discriminator": "ProtocolParameters"
+      },
+      "UdpTrafficProtocolParameters": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["source_port", "int", "sourcePort"],
+          ["destination_port", "int", "destinationPort"]
+        ],
+        "discriminator": "TrafficProtocolParameters"
+      },
+      "VcnRoutingConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["vcn_route_table_id", "str", "vcnRouteTableId"],
+          ["route_rule", "RouteRule", "routeRule"]
+        ],
+        "discriminator": "ForwardedRoutingConfiguration"
+      },
+      "VcnTopology": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["entities", "list[object]", "entities"],
+          [
+            "relationships",
+            "list[TopologyEntityRelationship]",
+            "relationships"
+          ],
+          ["limited_entities", "list[str]", "limitedEntities"],
+          ["time_created", "datetime", "timeCreated"],
+          ["vcn_id", "str", "vcnId"]
+        ],
+        "discriminator": "Topology"
+      },
+      "VisibleTrafficNode": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["egress_traffic", "EgressTrafficSpec", "egressTraffic"],
+          ["next_hop_routing_action", "RoutingAction", "nextHopRoutingAction"],
+          ["egress_security_action", "SecurityAction", "egressSecurityAction"],
+          [
+            "ingress_security_action",
+            "SecurityAction",
+            "ingressSecurityAction"
+          ],
+          [
+            "zpr_egress_security_action",
+            "SecurityAction",
+            "zprEgressSecurityAction"
+          ],
+          [
+            "zpr_ingress_security_action",
+            "SecurityAction",
+            "zprIngressSecurityAction"
+          ],
+          ["entity_id", "str", "entityId"],
+          ["transformation_description", "str", "transformationDescription"]
+        ],
+        "discriminator": "TrafficNode"
       },
       "VlanEndpoint": {
         "attributes": [
@@ -4609,6 +5254,185 @@
           ["vnic_id", "str", "vnicId"]
         ],
         "discriminator": "Endpoint"
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["compartment_id", "str", "compartmentId"],
+          ["id", "str", "id"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["status", "str", "status"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestResult": {
+        "attributes": [["result_type", "str", "resultType"]],
+        "discriminator": {
+          "field": "resultType",
+          "values": {
+            "PATH_ANALYSIS": "PathAnalysisWorkRequestResult"
+          },
+          "fallback": "WorkRequestResult"
+        }
+      },
+      "WorkRequestResultCollection": {
+        "attributes": [["items", "list[WorkRequestResult]", "items"]]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["compartment_id", "str", "compartmentId"],
+          ["id", "str", "id"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["status", "str", "status"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
+      },
+      "ZprAllowedSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "allowed_security_action_details",
+            "ZprAllowedSecurityActionDetails",
+            "allowedSecurityActionDetails"
+          ]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "ZprAllowedSecurityActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          [
+            "allowed_security_configuration",
+            "AllowedSecurityConfiguration",
+            "allowedSecurityConfiguration"
+          ]
+        ]
+      },
+      "ZprCidrUnsupportedSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "zpr_cidr_unsupported_security_action_details",
+            "ZprCidrUnsupportedSecurityActionDetails",
+            "zprCidrUnsupportedSecurityActionDetails"
+          ]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "ZprCidrUnsupportedSecurityActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          ["evaluated_zpr_policies", "list[ZprPolicy]", "evaluatedZprPolicies"]
+        ]
+      },
+      "ZprConfiguration": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["zpr_policy", "ZprPolicy", "zprPolicy"]
+        ],
+        "discriminator": "AllowedSecurityConfiguration"
+      },
+      "ZprDeniedSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "zpr_denied_security_action_details",
+            "ZprDeniedSecurityActionDetails",
+            "zprDeniedSecurityActionDetails"
+          ]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "ZprDeniedSecurityActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          ["evaluated_zpr_policies", "list[ZprPolicy]", "evaluatedZprPolicies"]
+        ]
+      },
+      "ZprMissingPolicySecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "ZprNsgUnsupportedSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"],
+          [
+            "zpr_nsg_unsupported_security_action_details",
+            "ZprNsgUnsupportedSecurityActionDetails",
+            "zprNsgUnsupportedSecurityActionDetails"
+          ]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "ZprNsgUnsupportedSecurityActionDetails": {
+        "attributes": [
+          ["is_restricted_or_partial", "bool", "isRestrictedOrPartial"],
+          ["evaluated_zpr_policies", "list[ZprPolicy]", "evaluatedZprPolicies"]
+        ]
+      },
+      "ZprPolicy": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["policy_statements", "list[str]", "policyStatements"]
+        ]
+      },
+      "ZprPolicyNotEvaluatedMissingRouteSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"]
+        ],
+        "discriminator": "SecurityAction"
+      },
+      "ZprPolicyNotEvaluatedSlNsgDeniedSecurityAction": {
+        "attributes": [
+          ["action", "str", "action"],
+          ["action_type", "str", "actionType"]
+        ],
+        "discriminator": "SecurityAction"
       }
     }
   }

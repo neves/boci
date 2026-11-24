@@ -6703,11 +6703,59 @@
   },
   "models": {
     "container_instances": {
+      "BasicImagePullSecret": {
+        "attributes": [
+          ["secret_type", "str", "secretType"],
+          ["registry_endpoint", "str", "registryEndpoint"]
+        ],
+        "discriminator": "ImagePullSecret"
+      },
+      "Container": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["availability_domain", "str", "availabilityDomain"],
+          ["fault_domain", "str", "faultDomain"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["exit_code", "int", "exitCode"],
+          ["time_terminated", "datetime", "timeTerminated"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["container_instance_id", "str", "containerInstanceId"],
+          ["image_url", "str", "imageUrl"],
+          ["command", "list[str]", "command"],
+          ["arguments", "list[str]", "arguments"],
+          ["working_directory", "str", "workingDirectory"],
+          ["environment_variables", "dict(str, str)", "environmentVariables"],
+          ["volume_mounts", "list[VolumeMount]", "volumeMounts"],
+          ["health_checks", "list[ContainerHealthCheck]", "healthChecks"],
+          [
+            "is_resource_principal_disabled",
+            "bool",
+            "isResourcePrincipalDisabled"
+          ],
+          ["resource_config", "ContainerResourceConfig", "resourceConfig"],
+          [
+            "container_restart_attempt_count",
+            "int",
+            "containerRestartAttemptCount"
+          ],
+          ["security_context", "SecurityContext", "securityContext"]
+        ]
+      },
       "ContainerCapabilities": {
         "attributes": [
           ["add_capabilities", "list[str]", "addCapabilities"],
           ["drop_capabilities", "list[str]", "dropCapabilities"]
         ]
+      },
+      "ContainerCollection": {
+        "attributes": [["items", "list[ContainerSummary]", "items"]]
       },
       "ContainerConfigFile": {
         "attributes": [
@@ -6715,6 +6763,259 @@
           ["data", "str", "data"],
           ["path", "str", "path"]
         ]
+      },
+      "ContainerConfigFileVolume": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["volume_type", "str", "volumeType"],
+          ["configs", "list[ContainerConfigFile]", "configs"]
+        ],
+        "discriminator": "ContainerVolume"
+      },
+      "ContainerDnsConfig": {
+        "attributes": [
+          ["nameservers", "list[str]", "nameservers"],
+          ["searches", "list[str]", "searches"],
+          ["options", "list[str]", "options"]
+        ]
+      },
+      "ContainerEmptyDirVolume": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["volume_type", "str", "volumeType"],
+          ["backing_store", "str", "backingStore"]
+        ],
+        "discriminator": "ContainerVolume"
+      },
+      "ContainerHealthCheck": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["health_check_type", "str", "healthCheckType"],
+          ["initial_delay_in_seconds", "int", "initialDelayInSeconds"],
+          ["interval_in_seconds", "int", "intervalInSeconds"],
+          ["failure_threshold", "int", "failureThreshold"],
+          ["success_threshold", "int", "successThreshold"],
+          ["timeout_in_seconds", "int", "timeoutInSeconds"],
+          ["status", "str", "status"],
+          ["status_details", "str", "statusDetails"],
+          ["failure_action", "str", "failureAction"]
+        ],
+        "discriminator": {
+          "field": "healthCheckType",
+          "values": {
+            "TCP": "ContainerTcpHealthCheck",
+            "HTTP": "ContainerHttpHealthCheck"
+          },
+          "fallback": "ContainerHealthCheck"
+        }
+      },
+      "ContainerHttpHealthCheck": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["health_check_type", "str", "healthCheckType"],
+          ["initial_delay_in_seconds", "int", "initialDelayInSeconds"],
+          ["interval_in_seconds", "int", "intervalInSeconds"],
+          ["failure_threshold", "int", "failureThreshold"],
+          ["success_threshold", "int", "successThreshold"],
+          ["timeout_in_seconds", "int", "timeoutInSeconds"],
+          ["status", "str", "status"],
+          ["status_details", "str", "statusDetails"],
+          ["failure_action", "str", "failureAction"],
+          ["path", "str", "path"],
+          ["port", "int", "port"],
+          ["headers", "list[HealthCheckHttpHeader]", "headers"]
+        ],
+        "discriminator": "ContainerHealthCheck"
+      },
+      "ContainerInstance": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["tenant_id", "str", "tenantId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["availability_domain", "str", "availabilityDomain"],
+          ["fault_domain", "str", "faultDomain"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["volumes", "list[ContainerVolume]", "volumes"],
+          ["volume_count", "int", "volumeCount"],
+          ["containers", "list[ContainerInstanceContainer]", "containers"],
+          ["container_count", "int", "containerCount"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["shape", "str", "shape"],
+          ["shape_config", "ContainerInstanceShapeConfig", "shapeConfig"],
+          ["vnics", "list[ContainerVnic]", "vnics"],
+          ["dns_config", "ContainerDnsConfig", "dnsConfig"],
+          [
+            "graceful_shutdown_timeout_in_seconds",
+            "int",
+            "gracefulShutdownTimeoutInSeconds"
+          ],
+          ["image_pull_secrets", "list[ImagePullSecret]", "imagePullSecrets"],
+          ["container_restart_policy", "str", "containerRestartPolicy"],
+          [
+            "security_context",
+            "ContainerInstanceSecurityContext",
+            "securityContext"
+          ]
+        ]
+      },
+      "ContainerInstanceCollection": {
+        "attributes": [["items", "list[ContainerInstanceSummary]", "items"]]
+      },
+      "ContainerInstanceContainer": {
+        "attributes": [
+          ["container_id", "str", "containerId"],
+          ["display_name", "str", "displayName"]
+        ]
+      },
+      "ContainerInstanceSecurityContext": {
+        "attributes": [["security_context_type", "str", "securityContextType"]],
+        "discriminator": {
+          "field": "securityContextType",
+          "values": {
+            "LINUX": "LinuxContainerInstanceSecurityContext"
+          },
+          "fallback": "ContainerInstanceSecurityContext"
+        }
+      },
+      "ContainerInstanceShapeCollection": {
+        "attributes": [
+          ["items", "list[ContainerInstanceShapeSummary]", "items"]
+        ]
+      },
+      "ContainerInstanceShapeConfig": {
+        "attributes": [
+          ["ocpus", "float", "ocpus"],
+          ["memory_in_gbs", "float", "memoryInGBs"],
+          ["processor_description", "str", "processorDescription"],
+          ["networking_bandwidth_in_gbps", "float", "networkingBandwidthInGbps"]
+        ]
+      },
+      "ContainerInstanceShapeSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["processor_description", "str", "processorDescription"],
+          ["ocpu_options", "ShapeOcpuOptions", "ocpuOptions"],
+          ["memory_options", "ShapeMemoryOptions", "memoryOptions"],
+          [
+            "networking_bandwidth_options",
+            "ShapeNetworkingBandwidthOptions",
+            "networkingBandwidthOptions"
+          ]
+        ]
+      },
+      "ContainerInstanceSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["availability_domain", "str", "availabilityDomain"],
+          ["fault_domain", "str", "faultDomain"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["shape", "str", "shape"],
+          ["shape_config", "ContainerInstanceShapeConfig", "shapeConfig"],
+          ["container_count", "int", "containerCount"],
+          [
+            "graceful_shutdown_timeout_in_seconds",
+            "int",
+            "gracefulShutdownTimeoutInSeconds"
+          ],
+          ["volume_count", "int", "volumeCount"],
+          ["container_restart_policy", "str", "containerRestartPolicy"],
+          [
+            "security_context",
+            "ContainerInstanceSecurityContext",
+            "securityContext"
+          ]
+        ]
+      },
+      "ContainerOciFssVolume": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["volume_type", "str", "volumeType"],
+          ["mount_target", "OciFssMountTarget", "mountTarget"],
+          ["export", "OciFssExport", "export"],
+          ["security", "OciFssSecurity", "security"],
+          ["mount_command", "OciFssMountCommand", "mountCommand"],
+          ["subnet_id", "str", "subnetId"]
+        ],
+        "discriminator": "ContainerVolume"
+      },
+      "ContainerResourceConfig": {
+        "attributes": [
+          ["vcpus_limit", "float", "vcpusLimit"],
+          ["memory_limit_in_gbs", "float", "memoryLimitInGBs"]
+        ]
+      },
+      "ContainerSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["availability_domain", "str", "availabilityDomain"],
+          ["fault_domain", "str", "faultDomain"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["container_instance_id", "str", "containerInstanceId"],
+          ["resource_config", "ContainerResourceConfig", "resourceConfig"],
+          ["image_url", "str", "imageUrl"],
+          [
+            "is_resource_principal_disabled",
+            "bool",
+            "isResourcePrincipalDisabled"
+          ],
+          ["security_context", "SecurityContext", "securityContext"]
+        ]
+      },
+      "ContainerTcpHealthCheck": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["health_check_type", "str", "healthCheckType"],
+          ["initial_delay_in_seconds", "int", "initialDelayInSeconds"],
+          ["interval_in_seconds", "int", "intervalInSeconds"],
+          ["failure_threshold", "int", "failureThreshold"],
+          ["success_threshold", "int", "successThreshold"],
+          ["timeout_in_seconds", "int", "timeoutInSeconds"],
+          ["status", "str", "status"],
+          ["status_details", "str", "statusDetails"],
+          ["failure_action", "str", "failureAction"],
+          ["port", "int", "port"]
+        ],
+        "discriminator": "ContainerHealthCheck"
+      },
+      "ContainerVnic": {
+        "attributes": [["vnic_id", "str", "vnicId"]]
+      },
+      "ContainerVolume": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["volume_type", "str", "volumeType"]
+        ],
+        "discriminator": {
+          "field": "volumeType",
+          "values": {
+            "EMPTYDIR": "ContainerEmptyDirVolume",
+            "CONFIGFILE": "ContainerConfigFileVolume",
+            "OCI_FSS_FILE_SYSTEM": "ContainerOciFssVolume"
+          },
+          "fallback": "ContainerVolume"
+        }
       },
       "CreateBasicImagePullSecretDetails": {
         "attributes": [
@@ -7033,6 +7334,215 @@
           ["name", "str", "name"],
           ["value", "str", "value"]
         ]
+      },
+      "ImagePullSecret": {
+        "attributes": [
+          ["secret_type", "str", "secretType"],
+          ["registry_endpoint", "str", "registryEndpoint"]
+        ],
+        "discriminator": {
+          "field": "secretType",
+          "values": {
+            "VAULT": "VaultImagePullSecret",
+            "BASIC": "BasicImagePullSecret"
+          },
+          "fallback": "ImagePullSecret"
+        }
+      },
+      "LinuxContainerInstanceSecurityContext": {
+        "attributes": [
+          ["security_context_type", "str", "securityContextType"],
+          ["fs_group", "int", "fsGroup"],
+          ["fs_group_change_policy", "str", "fsGroupChangePolicy"]
+        ],
+        "discriminator": "ContainerInstanceSecurityContext"
+      },
+      "LinuxSecurityContext": {
+        "attributes": [
+          ["security_context_type", "str", "securityContextType"],
+          ["run_as_user", "int", "runAsUser"],
+          ["run_as_group", "int", "runAsGroup"],
+          [
+            "is_non_root_user_check_enabled",
+            "bool",
+            "isNonRootUserCheckEnabled"
+          ],
+          ["is_root_file_system_readonly", "bool", "isRootFileSystemReadonly"],
+          ["capabilities", "ContainerCapabilities", "capabilities"]
+        ],
+        "discriminator": "SecurityContext"
+      },
+      "OciFssExport": {
+        "attributes": [["oci_fss_export_type", "str", "ociFssExportType"]],
+        "discriminator": {
+          "field": "ociFssExportType",
+          "values": {
+            "OCID": "OciFssExportId"
+          },
+          "fallback": "OciFssExport"
+        }
+      },
+      "OciFssExportId": {
+        "attributes": [
+          ["oci_fss_export_type", "str", "ociFssExportType"],
+          ["id", "str", "id"]
+        ],
+        "discriminator": "OciFssExport"
+      },
+      "OciFssMountCommand": {
+        "attributes": [
+          ["mount_options", "list[OciFssMountOption]", "mountOptions"]
+        ]
+      },
+      "OciFssMountOption": {
+        "attributes": [
+          ["option", "str", "option"],
+          ["value", "str", "value"]
+        ]
+      },
+      "OciFssMountTarget": {
+        "attributes": [
+          ["oci_fss_mount_target_type", "str", "ociFssMountTargetType"]
+        ],
+        "discriminator": {
+          "field": "ociFssMountTargetType",
+          "values": {
+            "OCID": "OciFssMountTargetId"
+          },
+          "fallback": "OciFssMountTarget"
+        }
+      },
+      "OciFssMountTargetId": {
+        "attributes": [
+          ["oci_fss_mount_target_type", "str", "ociFssMountTargetType"],
+          ["id", "str", "id"]
+        ],
+        "discriminator": "OciFssMountTarget"
+      },
+      "OciFssSecurity": {
+        "attributes": [
+          ["auth", "str", "auth"],
+          ["is_encrypted_in_transit", "bool", "isEncryptedInTransit"]
+        ],
+        "discriminator": {
+          "field": "auth",
+          "values": {
+            "SYS": "OciFssSysSecurity"
+          },
+          "fallback": "OciFssSecurity"
+        }
+      },
+      "OciFssSysSecurity": {
+        "attributes": [
+          ["auth", "str", "auth"],
+          ["is_encrypted_in_transit", "bool", "isEncryptedInTransit"]
+        ],
+        "discriminator": "OciFssSecurity"
+      },
+      "SecurityContext": {
+        "attributes": [["security_context_type", "str", "securityContextType"]],
+        "discriminator": {
+          "field": "securityContextType",
+          "values": {
+            "LINUX": "LinuxSecurityContext"
+          },
+          "fallback": "SecurityContext"
+        }
+      },
+      "ShapeMemoryOptions": {
+        "attributes": [
+          ["min_in_gbs", "float", "minInGBs"],
+          ["max_in_gbs", "float", "maxInGBs"],
+          ["default_per_ocpu_in_gbs", "float", "defaultPerOcpuInGBs"],
+          ["min_per_ocpu_in_gbs", "float", "minPerOcpuInGBs"],
+          ["max_per_ocpu_in_gbs", "float", "maxPerOcpuInGBs"]
+        ]
+      },
+      "ShapeNetworkingBandwidthOptions": {
+        "attributes": [
+          ["min_in_gbps", "float", "minInGbps"],
+          ["max_in_gbps", "float", "maxInGbps"],
+          ["default_per_ocpu_in_gbps", "float", "defaultPerOcpuInGbps"]
+        ]
+      },
+      "ShapeOcpuOptions": {
+        "attributes": [
+          ["min", "float", "min"],
+          ["max", "float", "max"]
+        ]
+      },
+      "VaultImagePullSecret": {
+        "attributes": [
+          ["secret_type", "str", "secretType"],
+          ["registry_endpoint", "str", "registryEndpoint"],
+          ["secret_id", "str", "secretId"]
+        ],
+        "discriminator": "ImagePullSecret"
+      },
+      "VolumeMount": {
+        "attributes": [
+          ["mount_path", "str", "mountPath"],
+          ["volume_name", "str", "volumeName"],
+          ["sub_path", "str", "subPath"],
+          ["is_read_only", "bool", "isReadOnly"],
+          ["partition", "int", "partition"]
+        ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

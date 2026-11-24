@@ -9258,6 +9258,12 @@
           ["url_citation", "UrlCitation", "urlCitation"]
         ]
       },
+      "ApplyGuardrailsResult": {
+        "attributes": [
+          ["results", "GuardrailsResults", "results"],
+          ["guardrail_version", "GuardrailVersionResponse", "guardrailVersion"]
+        ]
+      },
       "ApproximateLocation": {
         "attributes": [
           ["city", "str", "city"],
@@ -9303,6 +9309,36 @@
           "fallback": "BaseChatRequest"
         }
       },
+      "BaseChatResponse": {
+        "attributes": [["api_format", "str", "apiFormat"]],
+        "discriminator": {
+          "field": "apiFormat",
+          "values": {
+            "GENERIC": "GenericChatResponse",
+            "COHEREV2": "CohereChatResponseV2",
+            "COHERE": "CohereChatResponse"
+          },
+          "fallback": "BaseChatResponse"
+        }
+      },
+      "CategoryScore": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["score", "float", "score"],
+          ["flagged_modalities", "list[str]", "flaggedModalities"]
+        ]
+      },
+      "ChatChoice": {
+        "attributes": [
+          ["index", "int", "index"],
+          ["message", "Message", "message"],
+          ["finish_reason", "str", "finishReason"],
+          ["logprobs", "Logprobs", "logprobs"],
+          ["usage", "Usage", "usage"],
+          ["grounding_metadata", "GroundingMetadata", "groundingMetadata"],
+          ["service_tier", "str", "serviceTier"]
+        ]
+      },
       "ChatContent": {
         "attributes": [["type", "str", "type"]],
         "discriminator": {
@@ -9316,6 +9352,29 @@
           },
           "fallback": "ChatContent"
         }
+      },
+      "ChatResult": {
+        "attributes": [
+          ["model_id", "str", "modelId"],
+          ["model_version", "str", "modelVersion"],
+          ["chat_response", "BaseChatResponse", "chatResponse"]
+        ]
+      },
+      "Choice": {
+        "attributes": [
+          ["index", "int", "index"],
+          ["text", "str", "text"],
+          ["finish_reason", "str", "finishReason"],
+          ["logprobs", "Logprobs", "logprobs"]
+        ]
+      },
+      "Citation": {
+        "attributes": [
+          ["start", "int", "start"],
+          ["end", "int", "end"],
+          ["text", "str", "text"],
+          ["document_ids", "list[str]", "documentIds"]
+        ]
       },
       "CitationOptionsV2": {
         "attributes": [["mode", "str", "mode"]]
@@ -9398,6 +9457,35 @@
         ],
         "discriminator": "BaseChatRequest"
       },
+      "CohereChatResponse": {
+        "attributes": [
+          ["api_format", "str", "apiFormat"],
+          ["text", "str", "text"],
+          ["chat_history", "list[CohereMessage]", "chatHistory"],
+          ["citations", "list[Citation]", "citations"],
+          ["is_search_required", "bool", "isSearchRequired"],
+          ["finish_reason", "str", "finishReason"],
+          ["error_message", "str", "errorMessage"],
+          ["search_queries", "list[SearchQuery]", "searchQueries"],
+          ["documents", "list[object]", "documents"],
+          ["tool_calls", "list[CohereToolCall]", "toolCalls"],
+          ["prompt", "str", "prompt"],
+          ["usage", "Usage", "usage"]
+        ],
+        "discriminator": "BaseChatResponse"
+      },
+      "CohereChatResponseV2": {
+        "attributes": [
+          ["api_format", "str", "apiFormat"],
+          ["id", "str", "id"],
+          ["message", "CohereAssistantMessageV2", "message"],
+          ["finish_reason", "str", "finishReason"],
+          ["log_probabilities", "list[LogProbability]", "logProbabilities"],
+          ["error_message", "str", "errorMessage"],
+          ["usage", "Usage", "usage"]
+        ],
+        "discriminator": "BaseChatResponse"
+      },
       "CohereCitationDocument": {
         "attributes": [
           ["id", "str", "id"],
@@ -9459,6 +9547,15 @@
           ["url", "str", "url"],
           ["detail", "str", "detail"]
         ]
+      },
+      "CohereLlmInferenceResponse": {
+        "attributes": [
+          ["runtime_type", "str", "runtimeType"],
+          ["generated_texts", "list[GeneratedText]", "generatedTexts"],
+          ["time_created", "datetime", "timeCreated"],
+          ["prompt", "str", "prompt"]
+        ],
+        "discriminator": "LlmInferenceResponse"
       },
       "CohereMessage": {
         "attributes": [["role", "str", "role"]],
@@ -9617,8 +9714,18 @@
         ],
         "discriminator": "CohereMessageV2"
       },
+      "CompletionTokensDetails": {
+        "attributes": [
+          ["accepted_prediction_tokens", "int", "acceptedPredictionTokens"],
+          ["reasoning_tokens", "int", "reasoningTokens"],
+          ["rejected_prediction_tokens", "int", "rejectedPredictionTokens"]
+        ]
+      },
       "ContentModerationConfiguration": {
         "attributes": [["categories", "list[str]", "categories"]]
+      },
+      "ContentModerationResult": {
+        "attributes": [["categories", "list[CategoryScore]", "categories"]]
       },
       "DedicatedServingMode": {
         "attributes": [
@@ -9635,12 +9742,22 @@
         ],
         "discriminator": "Message"
       },
+      "Document": {
+        "attributes": [["text", "str", "text"]]
+      },
       "DocumentContent": {
         "attributes": [
           ["type", "str", "type"],
           ["document_url", "DocumentUrl", "documentUrl"]
         ],
         "discriminator": "ChatContent"
+      },
+      "DocumentRank": {
+        "attributes": [
+          ["index", "int", "index"],
+          ["relevance_score", "float", "relevanceScore"],
+          ["document", "Document", "document"]
+        ]
       },
       "DocumentUrl": {
         "attributes": [
@@ -9673,6 +9790,18 @@
         ],
         "discriminator": "EmbedContent"
       },
+      "EmbedTextResult": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["inputs", "list[str]", "inputs"],
+          ["embed_contents", "list[EmbedContent]", "embedContents"],
+          ["embeddings", "list[list[float]]", "embeddings"],
+          ["embeddings_by_type", "object", "embeddingsByType"],
+          ["model_id", "str", "modelId"],
+          ["model_version", "str", "modelVersion"],
+          ["usage", "Usage", "usage"]
+        ]
+      },
       "Function": {
         "attributes": [
           ["name", "str", "name"],
@@ -9697,6 +9826,22 @@
           ["parameters", "object", "parameters"]
         ],
         "discriminator": "ToolDefinition"
+      },
+      "GenerateTextResult": {
+        "attributes": [
+          ["model_id", "str", "modelId"],
+          ["model_version", "str", "modelVersion"],
+          ["inference_response", "LlmInferenceResponse", "inferenceResponse"]
+        ]
+      },
+      "GeneratedText": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["text", "str", "text"],
+          ["likelihood", "float", "likelihood"],
+          ["finish_reason", "str", "finishReason"],
+          ["token_likelihoods", "list[TokenLikelihood]", "tokenLikelihoods"]
+        ]
       },
       "GenericChatRequest": {
         "attributes": [
@@ -9730,6 +9875,47 @@
         ],
         "discriminator": "BaseChatRequest"
       },
+      "GenericChatResponse": {
+        "attributes": [
+          ["api_format", "str", "apiFormat"],
+          ["time_created", "datetime", "timeCreated"],
+          ["choices", "list[ChatChoice]", "choices"],
+          ["usage", "Usage", "usage"],
+          ["service_tier", "str", "serviceTier"]
+        ],
+        "discriminator": "BaseChatResponse"
+      },
+      "GroundingChunk": {
+        "attributes": [["web", "GroundingWebChunk", "web"]]
+      },
+      "GroundingMetadata": {
+        "attributes": [
+          ["web_search_queries", "list[str]", "webSearchQueries"],
+          ["search_entry_point", "SearchEntryPoint", "searchEntryPoint"],
+          ["grounding_chunks", "list[GroundingChunk]", "groundingChunks"],
+          ["grounding_supports", "list[GroundingSupport]", "groundingSupports"]
+        ]
+      },
+      "GroundingSupport": {
+        "attributes": [
+          ["segment", "GroundingSupportSegment", "segment"],
+          ["grounding_chunk_indices", "list[int]", "groundingChunkIndices"]
+        ]
+      },
+      "GroundingSupportSegment": {
+        "attributes": [
+          ["start_index", "int", "startIndex"],
+          ["end_index", "int", "endIndex"],
+          ["text", "str", "text"]
+        ]
+      },
+      "GroundingWebChunk": {
+        "attributes": [
+          ["uri", "str", "uri"],
+          ["title", "str", "title"],
+          ["domain", "str", "domain"]
+        ]
+      },
       "GuardrailConfigs": {
         "attributes": [
           [
@@ -9749,8 +9935,25 @@
           ]
         ]
       },
+      "GuardrailVersionCollection": {
+        "attributes": [["items", "list[GuardrailVersionSummary]", "items"]]
+      },
       "GuardrailVersionConfig": {
         "attributes": [["guardrail_version", "str", "guardrailVersion"]]
+      },
+      "GuardrailVersionResponse": {
+        "attributes": [["version", "str", "version"]]
+      },
+      "GuardrailVersionSummary": {
+        "attributes": [
+          ["guardrail_version", "str", "guardrailVersion"],
+          ["state", "str", "state"],
+          ["time_previewed", "datetime", "timePreviewed"],
+          ["time_activated", "datetime", "timeActivated"],
+          ["time_deprecated", "datetime", "timeDeprecated"],
+          ["time_retired", "datetime", "timeRetired"],
+          ["description", "str", "description"]
+        ]
       },
       "GuardrailsImageInput": {
         "attributes": [
@@ -9772,6 +9975,25 @@
           },
           "fallback": "GuardrailsInput"
         }
+      },
+      "GuardrailsResults": {
+        "attributes": [
+          [
+            "content_moderation",
+            "ContentModerationResult",
+            "contentModeration"
+          ],
+          [
+            "personally_identifiable_information",
+            "list[PersonallyIdentifiableInformationResult]",
+            "personallyIdentifiableInformation"
+          ],
+          [
+            "prompt_injection",
+            "PromptInjectionProtectionResult",
+            "promptInjection"
+          ]
+        ]
       },
       "GuardrailsTextInput": {
         "attributes": [
@@ -9805,6 +10027,40 @@
         ],
         "discriminator": "ResponseFormat"
       },
+      "LlamaLlmInferenceResponse": {
+        "attributes": [
+          ["runtime_type", "str", "runtimeType"],
+          ["created", "datetime", "created"],
+          ["choices", "list[Choice]", "choices"]
+        ],
+        "discriminator": "LlmInferenceResponse"
+      },
+      "LlmInferenceResponse": {
+        "attributes": [["runtime_type", "str", "runtimeType"]],
+        "discriminator": {
+          "field": "runtimeType",
+          "values": {
+            "LLAMA": "LlamaLlmInferenceResponse",
+            "COHERE": "CohereLlmInferenceResponse"
+          },
+          "fallback": "LlmInferenceResponse"
+        }
+      },
+      "LogProbability": {
+        "attributes": [
+          ["token_ids", "list[int]", "tokenIds"],
+          ["text", "str", "text"],
+          ["log_probabilities", "list[float]", "logProbabilities"]
+        ]
+      },
+      "Logprobs": {
+        "attributes": [
+          ["text_offset", "list[int]", "textOffset"],
+          ["token_logprobs", "list[float]", "tokenLogprobs"],
+          ["tokens", "list[str]", "tokens"],
+          ["top_logprobs", "list[dict(str, str)]", "topLogprobs"]
+        ]
+      },
       "Message": {
         "attributes": [
           ["role", "str", "role"],
@@ -9832,6 +10088,15 @@
       "PersonallyIdentifiableInformationConfiguration": {
         "attributes": [["types", "list[str]", "types"]]
       },
+      "PersonallyIdentifiableInformationResult": {
+        "attributes": [
+          ["length", "int", "length"],
+          ["offset", "int", "offset"],
+          ["text", "str", "text"],
+          ["label", "str", "label"],
+          ["score", "float", "score"]
+        ]
+      },
       "Prediction": {
         "attributes": [["type", "str", "type"]],
         "discriminator": {
@@ -9844,6 +10109,23 @@
       },
       "PromptInjectionConfiguration": {
         "attributes": []
+      },
+      "PromptInjectionProtectionResult": {
+        "attributes": [
+          ["score", "float", "score"],
+          ["flagged_modalities", "list[str]", "flaggedModalities"]
+        ]
+      },
+      "PromptTokensDetails": {
+        "attributes": [["cached_tokens", "int", "cachedTokens"]]
+      },
+      "RerankTextResult": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["model_id", "str", "modelId"],
+          ["model_version", "str", "modelVersion"],
+          ["document_ranks", "list[DocumentRank]", "documentRanks"]
+        ]
       },
       "ResponseFormat": {
         "attributes": [["type", "str", "type"]],
@@ -9864,6 +10146,12 @@
           ["schema", "object", "schema"],
           ["is_strict", "bool", "isStrict"]
         ]
+      },
+      "SearchEntryPoint": {
+        "attributes": [["rendered_content", "str", "renderedContent"]]
+      },
+      "SearchQuery": {
+        "attributes": [["text", "str", "text"]]
       },
       "ServingMode": {
         "attributes": [["serving_type", "str", "servingType"]],
@@ -9886,6 +10174,15 @@
       "StreamOptions": {
         "attributes": [["is_include_usage", "bool", "isIncludeUsage"]]
       },
+      "SummarizeTextResult": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["input", "str", "input"],
+          ["summary", "str", "summary"],
+          ["model_id", "str", "modelId"],
+          ["model_version", "str", "modelVersion"]
+        ]
+      },
       "SystemMessage": {
         "attributes": [
           ["role", "str", "role"],
@@ -9904,6 +10201,12 @@
       "TextResponseFormat": {
         "attributes": [["type", "str", "type"]],
         "discriminator": "ResponseFormat"
+      },
+      "TokenLikelihood": {
+        "attributes": [
+          ["token", "str", "token"],
+          ["likelihood", "float", "likelihood"]
+        ]
       },
       "ToolCall": {
         "attributes": [
@@ -9974,6 +10277,23 @@
           ["end_index", "int", "endIndex"],
           ["title", "str", "title"],
           ["url", "str", "url"]
+        ]
+      },
+      "Usage": {
+        "attributes": [
+          ["completion_tokens", "int", "completionTokens"],
+          ["prompt_tokens", "int", "promptTokens"],
+          ["total_tokens", "int", "totalTokens"],
+          [
+            "completion_tokens_details",
+            "CompletionTokensDetails",
+            "completionTokensDetails"
+          ],
+          [
+            "prompt_tokens_details",
+            "PromptTokensDetails",
+            "promptTokensDetails"
+          ]
         ]
       },
       "UserMessage": {

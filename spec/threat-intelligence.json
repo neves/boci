@@ -2205,5 +2205,143 @@
       "string"
     ]
   },
-  "models": {}
+  "models": {
+    "threat_intelligence": {
+      "DataAttribution": {
+        "attributes": [
+          ["confidence", "int", "confidence"],
+          ["source", "IndicatorSourceSummary", "source"],
+          ["visibility", "DataVisibility", "visibility"],
+          ["time_first_seen", "datetime", "timeFirstSeen"],
+          ["time_last_seen", "datetime", "timeLastSeen"]
+        ]
+      },
+      "DataVisibility": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["tlp_name", "str", "tlpName"]
+        ]
+      },
+      "EntityReference": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "INDICATOR": "IndicatorReference"
+          },
+          "fallback": "EntityReference"
+        }
+      },
+      "GeodataDetails": {
+        "attributes": [
+          ["routed_prefix", "str", "routedPrefix"],
+          ["origin", "str", "origin"],
+          ["geo_id", "str", "geoId"],
+          ["country_code", "str", "countryCode"],
+          ["admin_div", "str", "adminDiv"],
+          ["city", "str", "city"],
+          ["latitude", "str", "latitude"],
+          ["longitude", "str", "longitude"],
+          ["label", "str", "label"]
+        ]
+      },
+      "Indicator": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["type", "str", "type"],
+          ["value", "str", "value"],
+          ["confidence", "int", "confidence"],
+          ["compartment_id", "str", "compartmentId"],
+          ["threat_types", "list[ThreatType]", "threatTypes"],
+          ["attributes", "list[IndicatorAttribute]", "attributes"],
+          ["relationships", "list[IndicatorRelationship]", "relationships"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_seen", "datetime", "timeLastSeen"],
+          ["geodata", "GeodataDetails", "geodata"]
+        ]
+      },
+      "IndicatorAttribute": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["value", "str", "value"],
+          ["attribution", "list[DataAttribution]", "attribution"]
+        ]
+      },
+      "IndicatorAttributeSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["value", "str", "value"]
+        ]
+      },
+      "IndicatorCountCollection": {
+        "attributes": [["items", "list[IndicatorCountSummary]", "items"]]
+      },
+      "IndicatorCountDimensions": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"]
+        ]
+      },
+      "IndicatorCountSummary": {
+        "attributes": [
+          ["dimensions", "IndicatorCountDimensions", "dimensions"],
+          ["count", "int", "count"]
+        ]
+      },
+      "IndicatorReference": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["indicator_id", "str", "indicatorId"]
+        ],
+        "discriminator": "EntityReference"
+      },
+      "IndicatorRelationship": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["related_entity", "EntityReference", "relatedEntity"],
+          ["attribution", "list[DataAttribution]", "attribution"]
+        ]
+      },
+      "IndicatorSourceSummary": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "IndicatorSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["type", "str", "type"],
+          ["value", "str", "value"],
+          ["confidence", "int", "confidence"],
+          ["compartment_id", "str", "compartmentId"],
+          ["threat_types", "list[str]", "threatTypes"],
+          ["attributes", "list[IndicatorAttributeSummary]", "attributes"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_seen", "datetime", "timeLastSeen"],
+          ["geodata", "GeodataDetails", "geodata"]
+        ]
+      },
+      "IndicatorSummaryCollection": {
+        "attributes": [["items", "list[IndicatorSummary]", "items"]]
+      },
+      "ThreatType": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["attribution", "list[DataAttribution]", "attribution"]
+        ]
+      },
+      "ThreatTypeSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"]
+        ]
+      },
+      "ThreatTypesCollection": {
+        "attributes": [["items", "list[ThreatTypeSummary]", "items"]]
+      }
+    }
+  }
 }

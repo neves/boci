@@ -4427,6 +4427,60 @@
   },
   "models": {
     "cims": {
+      "AccountItem": {
+        "attributes": [
+          ["item_key", "str", "itemKey"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["category", "Category", "category"],
+          ["sub_category", "SubCategory", "subCategory"],
+          ["issue_type", "IssueType", "issueType"]
+        ],
+        "discriminator": "Item"
+      },
+      "ActivityItem": {
+        "attributes": [
+          ["item_key", "str", "itemKey"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["category", "Category", "category"],
+          ["sub_category", "SubCategory", "subCategory"],
+          ["issue_type", "IssueType", "issueType"],
+          ["id", "str", "id"],
+          ["comments", "str", "comments"],
+          ["time_created", "int", "timeCreated"],
+          ["time_updated", "int", "timeUpdated"],
+          ["activity_type", "str", "activityType"],
+          ["activity_author", "str", "activityAuthor"],
+          ["item_type", "str", "itemType"],
+          ["item_status", "str", "itemStatus"],
+          ["attachment_id", "str", "attachmentID"]
+        ],
+        "discriminator": "Item"
+      },
+      "Category": {
+        "attributes": [
+          ["category_key", "str", "categoryKey"],
+          ["name", "str", "name"]
+        ]
+      },
+      "Classifier": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["label", "str", "label"],
+          ["description", "str", "description"],
+          ["issue_type_list", "list[IssueType]", "issueTypeList"],
+          ["scope", "str", "scope"],
+          ["unit", "str", "unit"]
+        ]
+      },
+      "CmosUserGroupInfo": {
+        "attributes": [
+          ["user_group_id", "str", "userGroupId"],
+          ["user_group_name", "str", "userGroupName"]
+        ]
+      },
       "Contact": {
         "attributes": [
           ["contact_name", "str", "contactName"],
@@ -4435,6 +4489,9 @@
           ["contact_phone", "str", "contactPhone"],
           ["contact_type", "str", "contactType"]
         ]
+      },
+      "ContactList": {
+        "attributes": [["contact_list", "list[Contact]", "contactList"]]
       },
       "ContextualData": {
         "attributes": [
@@ -4519,8 +4576,196 @@
           ["contextual_data", "ContextualData", "contextualData"]
         ]
       },
+      "Incident": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["compartment_id", "str", "compartmentId"],
+          ["contact_list", "ContactList", "contactList"],
+          ["tenancy_information", "TenancyInformation", "tenancyInformation"],
+          ["ticket", "Ticket", "ticket"],
+          ["incident_type", "IncidentType", "incidentType"],
+          ["migrated_sr_number", "str", "migratedSrNumber"],
+          ["user_group_id", "str", "userGroupId"],
+          ["user_group_name", "str", "userGroupName"],
+          ["primary_contact_party_id", "str", "primaryContactPartyId"],
+          ["primary_contact_party_name", "str", "primaryContactPartyName"],
+          ["is_write_permitted", "bool", "isWritePermitted"],
+          ["warn_message", "str", "warnMessage"],
+          ["problem_type", "str", "problemType"],
+          ["referrer", "str", "referrer"]
+        ]
+      },
+      "IncidentResourceType": {
+        "attributes": [
+          ["resource_type_key", "str", "resourceTypeKey"],
+          ["name", "str", "name"],
+          ["label", "str", "label"],
+          ["description", "str", "description"],
+          ["is_subscriptions_supported", "bool", "isSubscriptionsSupported"],
+          [
+            "service_category_list",
+            "list[ServiceCategory]",
+            "serviceCategoryList"
+          ],
+          ["service", "dict(str, str)", "service"],
+          ["services", "list[Services]", "services"]
+        ]
+      },
+      "IncidentSummary": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["compartment_id", "str", "compartmentId"],
+          ["contact_list", "ContactList", "contactList"],
+          ["tenancy_information", "TenancyInformation", "tenancyInformation"],
+          ["ticket", "Ticket", "ticket"],
+          ["incident_type", "IncidentResourceType", "incidentType"],
+          ["migrated_sr_number", "str", "migratedSrNumber"],
+          ["user_group_id", "str", "userGroupId"],
+          ["user_group_name", "str", "userGroupName"],
+          ["primary_contact_party_id", "str", "primaryContactPartyId"],
+          ["primary_contact_party_name", "str", "primaryContactPartyName"],
+          ["is_write_permitted", "bool", "isWritePermitted"],
+          ["warn_message", "str", "warnMessage"],
+          ["problem_type", "str", "problemType"]
+        ]
+      },
+      "IncidentType": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["label", "str", "label"],
+          ["description", "str", "description"],
+          ["classifier_list", "list[Classifier]", "classifierList"]
+        ]
+      },
+      "IssueType": {
+        "attributes": [
+          ["issue_type_key", "str", "issueTypeKey"],
+          ["label", "str", "label"],
+          ["name", "str", "name"]
+        ]
+      },
+      "Item": {
+        "attributes": [
+          ["item_key", "str", "itemKey"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["category", "Category", "category"],
+          ["sub_category", "SubCategory", "subCategory"],
+          ["issue_type", "IssueType", "issueType"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "account": "AccountItem",
+            "limit": "LimitItem",
+            "tech": "TechSupportItem",
+            "activity": "ActivityItem"
+          },
+          "fallback": "Item"
+        }
+      },
+      "LimitItem": {
+        "attributes": [
+          ["item_key", "str", "itemKey"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["category", "Category", "category"],
+          ["sub_category", "SubCategory", "subCategory"],
+          ["issue_type", "IssueType", "issueType"],
+          ["current_limit", "int", "currentLimit"],
+          ["current_usage", "int", "currentUsage"],
+          ["requested_limit", "int", "requestedLimit"],
+          ["limit_status", "str", "limitStatus"],
+          ["customer_message", "str", "customerMessage"]
+        ],
+        "discriminator": "Item"
+      },
+      "Resource": {
+        "attributes": [
+          ["item", "Item", "item"],
+          ["region", "str", "region"]
+        ]
+      },
+      "ServiceCategory": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["name", "str", "name"],
+          ["label", "str", "label"],
+          ["description", "str", "description"],
+          ["issue_type_list", "list[IssueType]", "issueTypeList"],
+          ["supported_subscriptions", "list[str]", "supportedSubscriptions"],
+          ["scope", "str", "scope"],
+          ["unit", "str", "unit"],
+          ["limit_id", "str", "limitId"]
+        ]
+      },
+      "Services": {
+        "attributes": [
+          ["service", "dict(str, str)", "service"],
+          ["schema", "str", "schema"],
+          ["service_categories", "list[SubCategories]", "serviceCategories"]
+        ]
+      },
+      "SubCategories": {
+        "attributes": [
+          ["service_category", "dict(str, str)", "serviceCategory"],
+          ["schema", "str", "schema"],
+          ["has_sub_category", "str", "hasSubCategory"],
+          ["sub_categories", "list[SubComponents]", "subCategories"]
+        ]
+      },
+      "SubCategory": {
+        "attributes": [
+          ["sub_category_key", "str", "subCategoryKey"],
+          ["name", "str", "name"]
+        ]
+      },
+      "SubComponents": {
+        "attributes": [
+          ["sub_category", "dict(str, str)", "subCategory"],
+          ["schema", "str", "schema"]
+        ]
+      },
+      "TechSupportItem": {
+        "attributes": [
+          ["item_key", "str", "itemKey"],
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["category", "Category", "category"],
+          ["sub_category", "SubCategory", "subCategory"],
+          ["issue_type", "IssueType", "issueType"]
+        ],
+        "discriminator": "Item"
+      },
+      "TenancyInformation": {
+        "attributes": [["tenancy_id", "str", "tenancyId"]]
+      },
+      "Ticket": {
+        "attributes": [
+          ["ticket_number", "str", "ticketNumber"],
+          ["severity", "str", "severity"],
+          ["resource_list", "list[Resource]", "resourceList"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["time_created", "int", "timeCreated"],
+          ["time_updated", "int", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ]
+      },
       "UpdateTicketDetails": {
         "attributes": [["resource", "object", "resource"]]
+      },
+      "ValidationResponse": {
+        "attributes": [
+          ["is_valid_user", "bool", "isValidUser"],
+          [
+            "write_permitted_user_group_infos",
+            "list[CmosUserGroupInfo]",
+            "writePermittedUserGroupInfos"
+          ]
+        ]
       }
     }
   }

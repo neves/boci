@@ -2027,6 +2027,25 @@
   },
   "models": {
     "events": {
+      "Action": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["id", "str", "id"],
+          ["lifecycle_message", "str", "lifecycleMessage"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"]
+        ],
+        "discriminator": {
+          "field": "actionType",
+          "values": {
+            "OSS": "StreamingServiceAction",
+            "ONS": "NotificationServiceAction",
+            "FAAS": "FaaSAction"
+          },
+          "fallback": "Action"
+        }
+      },
       "ActionDetails": {
         "attributes": [
           ["action_type", "str", "actionType"],
@@ -2045,6 +2064,9 @@
       },
       "ActionDetailsList": {
         "attributes": [["actions", "list[ActionDetails]", "actions"]]
+      },
+      "ActionList": {
+        "attributes": [["actions", "list[Action]", "actions"]]
       },
       "CreateFaaSActionDetails": {
         "attributes": [
@@ -2072,6 +2094,72 @@
           ["stream_id", "str", "streamId"]
         ],
         "discriminator": "ActionDetails"
+      },
+      "FaaSAction": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["id", "str", "id"],
+          ["lifecycle_message", "str", "lifecycleMessage"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"],
+          ["function_id", "str", "functionId"]
+        ],
+        "discriminator": "Action"
+      },
+      "NotificationServiceAction": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["id", "str", "id"],
+          ["lifecycle_message", "str", "lifecycleMessage"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"],
+          ["topic_id", "str", "topicId"]
+        ],
+        "discriminator": "Action"
+      },
+      "Rule": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["condition", "str", "condition"],
+          ["compartment_id", "str", "compartmentId"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["actions", "ActionList", "actions"],
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_message", "str", "lifecycleMessage"]
+        ]
+      },
+      "RuleSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["condition", "str", "condition"],
+          ["compartment_id", "str", "compartmentId"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "StreamingServiceAction": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["id", "str", "id"],
+          ["lifecycle_message", "str", "lifecycleMessage"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["description", "str", "description"],
+          ["stream_id", "str", "streamId"]
+        ],
+        "discriminator": "Action"
       }
     }
   }

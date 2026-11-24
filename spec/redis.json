@@ -16731,6 +16731,20 @@
   },
   "models": {
     "redis": {
+      "AssociatedOciCacheClusterCollection": {
+        "attributes": [
+          ["items", "list[AssociatedOciCacheClusterSummary]", "items"]
+        ]
+      },
+      "AssociatedOciCacheClusterSummary": {
+        "attributes": [["id", "str", "id"]]
+      },
+      "AttachedOciCacheCluster": {
+        "attributes": [["oci_cache_cluster_id", "str", "ociCacheClusterId"]]
+      },
+      "AttachedOciCacheUser": {
+        "attributes": [["oci_cache_user_id", "str", "ociCacheUserId"]]
+      },
       "AuthenticationMode": {
         "attributes": [["authentication_type", "str", "authenticationType"]],
         "discriminator": {
@@ -16742,6 +16756,12 @@
           "fallback": "AuthenticationMode"
         }
       },
+      "ClusterReplicationTopology": {
+        "attributes": [
+          ["primary_cluster", "MemberCluster", "primaryCluster"],
+          ["secondary_clusters", "list[MemberCluster]", "secondaryClusters"]
+        ]
+      },
       "ConfigurationDetails": {
         "attributes": [["items", "list[ConfigurationInfo]", "items"]]
       },
@@ -16751,9 +16771,34 @@
           ["config_value", "str", "configValue"]
         ]
       },
+      "DefaultConfigurationDetails": {
+        "attributes": [["items", "list[DefaultConfigurationInfo]", "items"]]
+      },
+      "DefaultConfigurationInfo": {
+        "attributes": [
+          ["config_key", "str", "configKey"],
+          ["default_config_value", "str", "defaultConfigValue"],
+          ["allowed_values", "str", "allowedValues"],
+          ["data_type", "str", "dataType"],
+          ["is_modifiable", "bool", "isModifiable"],
+          ["description", "str", "description"]
+        ]
+      },
+      "EngineVersion": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["version", "str", "version"]
+        ]
+      },
       "IamAuthenticationMode": {
         "attributes": [["authentication_type", "str", "authenticationType"]],
         "discriminator": "AuthenticationMode"
+      },
+      "IdentityTokenDetailsResponse": {
+        "attributes": [
+          ["identity_token", "str", "identityToken"],
+          ["redis_user", "str", "redisUser"]
+        ]
       },
       "ImportOciCacheFromObjectStorageDetails": {
         "attributes": [
@@ -16765,12 +16810,348 @@
       "ImportOciCacheFromObjectStorageObject": {
         "attributes": [["object_name", "str", "objectName"]]
       },
+      "MemberCluster": {
+        "attributes": [
+          ["oci_cache_cluster_id", "str", "ociCacheClusterId"],
+          ["region", "str", "region"]
+        ]
+      },
+      "Node": {
+        "attributes": [
+          ["private_endpoint_fqdn", "str", "privateEndpointFqdn"],
+          ["private_endpoint_ip_address", "str", "privateEndpointIpAddress"],
+          ["display_name", "str", "displayName"]
+        ]
+      },
+      "NodeCollection": {
+        "attributes": [["items", "list[Node]", "items"]]
+      },
+      "NodeSummary": {
+        "attributes": [
+          ["private_endpoint_fqdn", "str", "privateEndpointFqdn"],
+          ["private_endpoint_ip_address", "str", "privateEndpointIpAddress"],
+          ["display_name", "str", "displayName"],
+          ["redis_cluster_id", "str", "redisClusterId"],
+          ["shard_number", "int", "shardNumber"]
+        ]
+      },
+      "OciCacheBackup": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["backup_source", "str", "backupSource"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["retention_period_in_days", "int", "retentionPeriodInDays"],
+          ["backup_size_in_gbs", "float", "backupSizeInGBs"],
+          ["source_cluster_id", "str", "sourceClusterId"],
+          ["cluster_mode", "str", "clusterMode"],
+          ["cluster_memory_in_gbs", "float", "clusterMemoryInGBs"],
+          ["shard_count", "int", "shardCount"],
+          ["software_version", "str", "softwareVersion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["backup_type", "str", "backupType"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "OciCacheBackupCollection": {
+        "attributes": [["items", "list[OciCacheBackupSummary]", "items"]]
+      },
+      "OciCacheBackupSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["source_cluster_id", "str", "sourceClusterId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["cluster_mode", "str", "clusterMode"],
+          ["backup_source", "str", "backupSource"],
+          ["retention_period_in_days", "int", "retentionPeriodInDays"],
+          ["backup_size_in_gbs", "float", "backupSizeInGBs"],
+          ["backup_type", "str", "backupType"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "OciCacheConfigSet": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["default_config_set_id", "str", "defaultConfigSetId"],
+          ["description", "str", "description"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["software_version", "str", "softwareVersion"],
+          [
+            "configuration_details",
+            "ConfigurationDetails",
+            "configurationDetails"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "OciCacheConfigSetCollection": {
+        "attributes": [["items", "list[OciCacheConfigSetSummary]", "items"]]
+      },
+      "OciCacheConfigSetSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["default_config_set_id", "str", "defaultConfigSetId"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["software_version", "str", "softwareVersion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "OciCacheDefaultConfigSet": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["software_version", "str", "softwareVersion"],
+          [
+            "default_configuration_details",
+            "DefaultConfigurationDetails",
+            "defaultConfigurationDetails"
+          ]
+        ]
+      },
+      "OciCacheDefaultConfigSetCollection": {
+        "attributes": [
+          ["items", "list[OciCacheDefaultConfigSetSummary]", "items"]
+        ]
+      },
+      "OciCacheDefaultConfigSetSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["software_version", "str", "softwareVersion"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
+      "OciCacheEngineOptionSummary": {
+        "attributes": [
+          ["engine_versions", "list[EngineVersion]", "engineVersions"]
+        ]
+      },
+      "OciCacheEngineOptionsCollection": {
+        "attributes": [["items", "list[OciCacheEngineOptionSummary]", "items"]]
+      },
+      "OciCacheUser": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["authentication_mode", "AuthenticationMode", "authenticationMode"],
+          ["acl_string", "str", "aclString"],
+          ["status", "str", "status"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "OciCacheUserCollection": {
+        "attributes": [["items", "list[OciCacheUserSummary]", "items"]]
+      },
+      "OciCacheUserSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["authentication_type", "str", "authenticationType"],
+          ["status", "str", "status"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["description", "str", "description"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "PasswordAuthenticationMode": {
         "attributes": [
           ["authentication_type", "str", "authenticationType"],
           ["hashed_passwords", "list[str]", "hashedPasswords"]
         ],
         "discriminator": "AuthenticationMode"
+      },
+      "RedisCluster": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["node_count", "int", "nodeCount"],
+          ["node_memory_in_gbs", "float", "nodeMemoryInGBs"],
+          ["primary_fqdn", "str", "primaryFqdn"],
+          ["primary_endpoint_ip_address", "str", "primaryEndpointIpAddress"],
+          ["replicas_fqdn", "str", "replicasFqdn"],
+          ["replicas_endpoint_ip_address", "str", "replicasEndpointIpAddress"],
+          ["discovery_fqdn", "str", "discoveryFqdn"],
+          [
+            "discovery_endpoint_ip_address",
+            "str",
+            "discoveryEndpointIpAddress"
+          ],
+          ["software_version", "str", "softwareVersion"],
+          ["subnet_id", "str", "subnetId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["node_collection", "NodeCollection", "nodeCollection"],
+          ["oci_cache_config_set_id", "str", "ociCacheConfigSetId"],
+          ["cluster_mode", "str", "clusterMode"],
+          ["shard_count", "int", "shardCount"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["backup_id", "str", "backupId"],
+          [
+            "import_from_object_storage_details",
+            "ImportOciCacheFromObjectStorageDetails",
+            "importFromObjectStorageDetails"
+          ],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ],
+          ["cluster_role", "str", "clusterRole"],
+          ["primary_cluster_id", "str", "primaryClusterId"],
+          [
+            "cluster_replication_topology",
+            "ClusterReplicationTopology",
+            "clusterReplicationTopology"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "RedisClusterCollection": {
+        "attributes": [["items", "list[RedisClusterSummary]", "items"]]
+      },
+      "RedisClusterSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["node_count", "int", "nodeCount"],
+          ["node_memory_in_gbs", "float", "nodeMemoryInGBs"],
+          ["primary_fqdn", "str", "primaryFqdn"],
+          ["primary_endpoint_ip_address", "str", "primaryEndpointIpAddress"],
+          ["replicas_fqdn", "str", "replicasFqdn"],
+          ["replicas_endpoint_ip_address", "str", "replicasEndpointIpAddress"],
+          ["discovery_fqdn", "str", "discoveryFqdn"],
+          [
+            "discovery_endpoint_ip_address",
+            "str",
+            "discoveryEndpointIpAddress"
+          ],
+          ["software_version", "str", "softwareVersion"],
+          ["subnet_id", "str", "subnetId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["oci_cache_config_set_id", "str", "ociCacheConfigSetId"],
+          ["cluster_mode", "str", "clusterMode"],
+          ["shard_count", "int", "shardCount"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["backup_id", "str", "backupId"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ],
+          ["cluster_role", "str", "clusterRole"],
+          ["primary_cluster_id", "str", "primaryClusterId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "RedisNodeCollection": {
+        "attributes": [["items", "list[NodeSummary]", "items"]]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

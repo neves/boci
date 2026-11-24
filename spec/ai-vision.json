@@ -21011,6 +21011,82 @@
   },
   "models": {
     "ai_vision": {
+      "AnalyzeDocumentResult": {
+        "attributes": [
+          ["document_metadata", "DocumentMetadata", "documentMetadata"],
+          ["pages", "list[Page]", "pages"],
+          [
+            "detected_document_types",
+            "list[DetectedDocumentType]",
+            "detectedDocumentTypes"
+          ],
+          ["detected_languages", "list[DetectedLanguage]", "detectedLanguages"],
+          [
+            "document_classification_model_version",
+            "str",
+            "documentClassificationModelVersion"
+          ],
+          [
+            "language_classification_model_version",
+            "str",
+            "languageClassificationModelVersion"
+          ],
+          ["text_detection_model_version", "str", "textDetectionModelVersion"],
+          [
+            "key_value_detection_model_version",
+            "str",
+            "keyValueDetectionModelVersion"
+          ],
+          [
+            "table_detection_model_version",
+            "str",
+            "tableDetectionModelVersion"
+          ],
+          ["errors", "list[ProcessingError]", "errors"],
+          ["searchable_pdf", "str", "searchablePdf"]
+        ]
+      },
+      "AnalyzeImageResult": {
+        "attributes": [
+          ["image_objects", "list[ImageObject]", "imageObjects"],
+          ["labels", "list[Label]", "labels"],
+          ["ontology_classes", "list[OntologyClass]", "ontologyClasses"],
+          ["image_text", "ImageText", "imageText"],
+          ["detected_faces", "list[Face]", "detectedFaces"],
+          [
+            "image_classification_model_version",
+            "str",
+            "imageClassificationModelVersion"
+          ],
+          [
+            "object_detection_model_version",
+            "str",
+            "objectDetectionModelVersion"
+          ],
+          ["text_detection_model_version", "str", "textDetectionModelVersion"],
+          ["face_detection_model_version", "str", "faceDetectionModelVersion"],
+          ["errors", "list[ProcessingError]", "errors"]
+        ]
+      },
+      "BoundingPolygon": {
+        "attributes": [
+          [
+            "normalized_vertices",
+            "list[NormalizedVertex]",
+            "normalizedVertices"
+          ]
+        ]
+      },
+      "Cell": {
+        "attributes": [
+          ["text", "str", "text"],
+          ["row_index", "int", "rowIndex"],
+          ["column_index", "int", "columnIndex"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"]
+        ]
+      },
       "DataScienceLabelingDataset": {
         "attributes": [
           ["dataset_type", "str", "datasetType"],
@@ -21028,6 +21104,25 @@
           },
           "fallback": "Dataset"
         }
+      },
+      "DetectedDocumentType": {
+        "attributes": [
+          ["document_type", "str", "documentType"],
+          ["confidence", "float", "confidence"]
+        ]
+      },
+      "DetectedLanguage": {
+        "attributes": [
+          ["language_code", "str", "languageCode"],
+          ["confidence", "float", "confidence"]
+        ]
+      },
+      "Dimensions": {
+        "attributes": [
+          ["width", "float", "width"],
+          ["height", "float", "height"],
+          ["unit", "str", "unit"]
+        ]
       },
       "DocumentClassificationFeature": {
         "attributes": [
@@ -21062,6 +21157,33 @@
           "fallback": "DocumentFeature"
         }
       },
+      "DocumentField": {
+        "attributes": [
+          ["field_type", "str", "fieldType"],
+          ["field_label", "FieldLabel", "fieldLabel"],
+          ["field_name", "FieldName", "fieldName"],
+          ["field_value", "FieldValue", "fieldValue"]
+        ]
+      },
+      "DocumentJob": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["features", "list[DocumentFeature]", "features"],
+          ["language", "str", "language"],
+          ["document_type", "str", "documentType"],
+          ["input_location", "InputLocation", "inputLocation"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["percent_complete", "float", "percentComplete"],
+          ["output_location", "OutputLocation", "outputLocation"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_zip_output_enabled", "bool", "isZipOutputEnabled"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ]
+      },
       "DocumentKeyValueDetectionFeature": {
         "attributes": [["feature_type", "str", "featureType"]],
         "discriminator": "DocumentFeature"
@@ -21073,6 +21195,12 @@
         ],
         "discriminator": "DocumentFeature"
       },
+      "DocumentMetadata": {
+        "attributes": [
+          ["page_count", "int", "pageCount"],
+          ["mime_type", "str", "mimeType"]
+        ]
+      },
       "DocumentTableDetectionFeature": {
         "attributes": [["feature_type", "str", "featureType"]],
         "discriminator": "DocumentFeature"
@@ -21083,6 +21211,15 @@
           ["generate_searchable_pdf", "bool", "generateSearchablePdf"]
         ],
         "discriminator": "DocumentFeature"
+      },
+      "Face": {
+        "attributes": [
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["quality_score", "float", "qualityScore"],
+          ["landmarks", "list[Landmark]", "landmarks"],
+          ["embeddings", "list[float]", "embeddings"]
+        ]
       },
       "FaceDetectionFeature": {
         "attributes": [
@@ -21099,6 +21236,42 @@
           ["should_return_landmarks", "bool", "shouldReturnLandmarks"]
         ],
         "discriminator": "ImageFeature"
+      },
+      "FieldLabel": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["confidence", "float", "confidence"]
+        ]
+      },
+      "FieldName": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"]
+        ]
+      },
+      "FieldValue": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"]
+        ],
+        "discriminator": {
+          "field": "valueType",
+          "values": {
+            "TIME": "ValueTime",
+            "INTEGER": "ValueInteger",
+            "DATE": "ValueDate",
+            "NUMBER": "ValueNumber",
+            "STRING": "ValueString",
+            "PHONE_NUMBER": "ValuePhoneNumber",
+            "ARRAY": "ValueArray"
+          },
+          "fallback": "FieldValue"
+        }
       },
       "ImageClassificationFeature": {
         "attributes": [
@@ -21133,6 +21306,30 @@
           "fallback": "ImageFeature"
         }
       },
+      "ImageJob": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["features", "list[ImageFeature]", "features"],
+          ["input_location", "InputLocation", "inputLocation"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["percent_complete", "float", "percentComplete"],
+          ["output_location", "OutputLocation", "outputLocation"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["is_zip_output_enabled", "bool", "isZipOutputEnabled"]
+        ]
+      },
+      "ImageObject": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"]
+        ]
+      },
       "ImageObjectDetectionFeature": {
         "attributes": [
           ["feature_type", "str", "featureType"],
@@ -21140,6 +21337,12 @@
           ["model_id", "str", "modelId"]
         ],
         "discriminator": "ImageFeature"
+      },
+      "ImageText": {
+        "attributes": [
+          ["words", "list[Word]", "words"],
+          ["lines", "list[Line]", "lines"]
+        ]
       },
       "ImageTextDetectionFeature": {
         "attributes": [
@@ -21171,6 +21374,93 @@
           },
           "fallback": "InputLocation"
         }
+      },
+      "Label": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["confidence", "float", "confidence"]
+        ]
+      },
+      "Landmark": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["x", "float", "x"],
+          ["y", "float", "y"]
+        ]
+      },
+      "Line": {
+        "attributes": [
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"]
+        ]
+      },
+      "Model": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["model_type", "str", "modelType"],
+          ["is_quick_mode", "bool", "isQuickMode"],
+          [
+            "max_training_duration_in_hours",
+            "float",
+            "maxTrainingDurationInHours"
+          ],
+          ["trained_duration_in_hours", "float", "trainedDurationInHours"],
+          ["training_dataset", "Dataset", "trainingDataset"],
+          ["testing_dataset", "Dataset", "testingDataset"],
+          ["validation_dataset", "Dataset", "validationDataset"],
+          ["model_version", "str", "modelVersion"],
+          ["project_id", "str", "projectId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["precision", "float", "precision"],
+          ["recall", "float", "recall"],
+          ["average_precision", "float", "averagePrecision"],
+          ["confidence_threshold", "float", "confidenceThreshold"],
+          ["total_image_count", "int", "totalImageCount"],
+          ["test_image_count", "int", "testImageCount"],
+          ["metrics", "str", "metrics"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ModelCollection": {
+        "attributes": [["items", "list[ModelSummary]", "items"]]
+      },
+      "ModelSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["model_type", "str", "modelType"],
+          ["model_version", "str", "modelVersion"],
+          ["project_id", "str", "projectId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["precision", "float", "precision"],
+          ["training_dataset", "Dataset", "trainingDataset"],
+          ["testing_dataset", "Dataset", "testingDataset"],
+          ["validation_dataset", "Dataset", "validationDataset"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "NormalizedVertex": {
+        "attributes": [
+          ["x", "float", "x"],
+          ["y", "float", "y"]
+        ]
       },
       "ObjectListInlineInputLocation": {
         "attributes": [
@@ -21222,11 +21512,34 @@
         ],
         "discriminator": "StreamOutputLocation"
       },
+      "OntologyClass": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["parent_names", "list[str]", "parentNames"],
+          ["synonym_names", "list[str]", "synonymNames"]
+        ]
+      },
       "OutputLocation": {
         "attributes": [
           ["namespace_name", "str", "namespaceName"],
           ["bucket_name", "str", "bucketName"],
           ["prefix", "str", "prefix"]
+        ]
+      },
+      "Page": {
+        "attributes": [
+          ["page_number", "int", "pageNumber"],
+          ["dimensions", "Dimensions", "dimensions"],
+          [
+            "detected_document_types",
+            "list[DetectedDocumentType]",
+            "detectedDocumentTypes"
+          ],
+          ["detected_languages", "list[DetectedLanguage]", "detectedLanguages"],
+          ["words", "list[Word]", "words"],
+          ["lines", "list[Line]", "lines"],
+          ["tables", "list[Table]", "tables"],
+          ["document_fields", "list[DocumentField]", "documentFields"]
         ]
       },
       "PrivateStreamNetworkAccessDetails": {
@@ -21235,6 +21548,44 @@
           ["private_endpoint_id", "str", "privateEndpointId"]
         ],
         "discriminator": "StreamNetworkAccessDetails"
+      },
+      "ProcessingError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"]
+        ]
+      },
+      "Project": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ProjectCollection": {
+        "attributes": [["items", "list[ProjectSummary]", "items"]]
+      },
+      "ProjectSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "RtspSourceDetails": {
         "attributes": [
@@ -21249,9 +21600,90 @@
         ],
         "discriminator": "StreamSourceDetails"
       },
+      "StreamGroup": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["stream_source_ids", "list[str]", "streamSourceIds"],
+          ["stream_overlaps", "list[StreamGroupOverlap]", "streamOverlaps"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "StreamGroupCollection": {
+        "attributes": [["items", "list[StreamGroupSummary]", "items"]]
+      },
       "StreamGroupOverlap": {
         "attributes": [
           ["overlapping_streams", "list[str]", "overlappingStreams"]
+        ]
+      },
+      "StreamGroupSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_enabled", "bool", "isEnabled"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["stream_source_ids", "list[str]", "streamSourceIds"],
+          ["stream_overlaps", "list[StreamGroupOverlap]", "streamOverlaps"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "StreamJob": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["stream_source_id", "str", "streamSourceId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["features", "list[VideoStreamFeature]", "features"],
+          [
+            "stream_output_location",
+            "StreamOutputLocation",
+            "streamOutputLocation"
+          ],
+          ["agent_participant_id", "str", "agentParticipantId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "StreamJobCollection": {
+        "attributes": [["items", "list[StreamJobSummary]", "items"]]
+      },
+      "StreamJobSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["stream_source_id", "str", "streamSourceId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["features", "list[VideoStreamFeature]", "features"],
+          [
+            "stream_output_location",
+            "StreamOutputLocation",
+            "streamOutputLocation"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "StreamNetworkAccessDetails": {
@@ -21274,6 +21706,27 @@
           "fallback": "StreamOutputLocation"
         }
       },
+      "StreamSource": {
+        "attributes": [
+          [
+            "stream_source_details",
+            "StreamSourceDetails",
+            "streamSourceDetails"
+          ],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "StreamSourceCollection": {
+        "attributes": [["items", "list[StreamSourceSummary]", "items"]]
+      },
       "StreamSourceDetails": {
         "attributes": [
           [
@@ -21291,6 +21744,38 @@
           "fallback": "StreamSourceDetails"
         }
       },
+      "StreamSourceSummary": {
+        "attributes": [
+          [
+            "stream_source_details",
+            "StreamSourceDetails",
+            "streamSourceDetails"
+          ],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "Table": {
+        "attributes": [
+          ["row_count", "int", "rowCount"],
+          ["column_count", "int", "columnCount"],
+          ["header_rows", "list[TableRow]", "headerRows"],
+          ["body_rows", "list[TableRow]", "bodyRows"],
+          ["footer_rows", "list[TableRow]", "footerRows"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"]
+        ]
+      },
+      "TableRow": {
+        "attributes": [["cells", "list[Cell]", "cells"]]
+      },
       "TrackingType": {
         "attributes": [
           ["objects", "list[str]", "objects"],
@@ -21299,6 +21784,83 @@
           ["max_results", "int", "maxResults"],
           ["should_return_landmarks", "bool", "shouldReturnLandmarks"]
         ]
+      },
+      "ValueArray": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"],
+          ["items", "list[DocumentField]", "items"]
+        ],
+        "discriminator": "FieldValue"
+      },
+      "ValueDate": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"],
+          ["value", "datetime", "value"]
+        ],
+        "discriminator": "FieldValue"
+      },
+      "ValueInteger": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"],
+          ["value", "int", "value"]
+        ],
+        "discriminator": "FieldValue"
+      },
+      "ValueNumber": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"],
+          ["value", "float", "value"]
+        ],
+        "discriminator": "FieldValue"
+      },
+      "ValuePhoneNumber": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "FieldValue"
+      },
+      "ValueString": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "FieldValue"
+      },
+      "ValueTime": {
+        "attributes": [
+          ["value_type", "str", "valueType"],
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"],
+          ["word_indexes", "list[int]", "wordIndexes"],
+          ["value", "datetime", "value"]
+        ],
+        "discriminator": "FieldValue"
       },
       "VideoFaceDetectionFeature": {
         "attributes": [
@@ -21322,6 +21884,25 @@
           },
           "fallback": "VideoFeature"
         }
+      },
+      "VideoJob": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["features", "list[VideoFeature]", "features"],
+          ["input_location", "InputLocation", "inputLocation"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["percent_complete", "float", "percentComplete"],
+          ["output_location", "OutputLocation", "outputLocation"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "VideoLabelDetectionFeature": {
         "attributes": [
@@ -21392,6 +21973,103 @@
           ["min_confidence", "float", "minConfidence"]
         ],
         "discriminator": "VideoFeature"
+      },
+      "VisionPrivateEndpoint": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["subnet_id", "str", "subnetId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "VisionPrivateEndpointCollection": {
+        "attributes": [["items", "list[VisionPrivateEndpointSummary]", "items"]]
+      },
+      "VisionPrivateEndpointSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["subnet_id", "str", "subnetId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "Word": {
+        "attributes": [
+          ["text", "str", "text"],
+          ["confidence", "float", "confidence"],
+          ["bounding_polygon", "BoundingPolygon", "boundingPolygon"]
+        ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

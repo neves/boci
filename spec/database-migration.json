@@ -36870,6 +36870,83 @@
   },
   "models": {
     "database_migration": {
+      "ADBDedicatedAutoCreateTablespaceDetails": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["is_auto_create", "bool", "isAutoCreate"],
+          ["is_big_file", "bool", "isBigFile"],
+          ["extend_size_in_mbs", "int", "extendSizeInMBs"],
+          ["block_size_in_kbs", "str", "blockSizeInKBs"]
+        ],
+        "discriminator": "TargetTypeTablespaceDetails"
+      },
+      "ADBDedicatedRemapTargetTablespaceDetails": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["remap_target", "str", "remapTarget"]
+        ],
+        "discriminator": "TargetTypeTablespaceDetails"
+      },
+      "ADBServerlesTablespaceDetails": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["remap_target", "str", "remapTarget"]
+        ],
+        "discriminator": "TargetTypeTablespaceDetails"
+      },
+      "AdminCredentials": {
+        "attributes": [["username", "str", "username"]]
+      },
+      "AdvisorCheckSummary": {
+        "attributes": [
+          ["pass_results_total_count", "int", "passResultsTotalCount"],
+          [
+            "informational_results_total_count",
+            "int",
+            "informationalResultsTotalCount"
+          ],
+          ["warning_results_total_count", "int", "warningResultsTotalCount"],
+          ["blocker_results_total_count", "int", "blockerResultsTotalCount"],
+          ["fatal_results_total_count", "int", "fatalResultsTotalCount"]
+        ]
+      },
+      "AdvisorReport": {
+        "attributes": [
+          [
+            "report_location_details",
+            "AdvisorReportLocationDetails",
+            "reportLocationDetails"
+          ],
+          ["result", "str", "result"],
+          ["number_of_fatal", "int", "numberOfFatal"],
+          ["number_of_fatal_blockers", "int", "numberOfFatalBlockers"],
+          ["number_of_warnings", "int", "numberOfWarnings"],
+          [
+            "number_of_informational_results",
+            "int",
+            "numberOfInformationalResults"
+          ]
+        ]
+      },
+      "AdvisorReportBucketDetails": {
+        "attributes": [
+          ["bucket_name", "str", "bucketName"],
+          ["namespace", "str", "namespace"],
+          ["object_name", "str", "objectName"]
+        ]
+      },
+      "AdvisorReportCheckCollection": {
+        "attributes": [
+          ["summary", "AdvisorCheckSummary", "summary"],
+          ["items", "list[AdvisorReportCheckSummary]", "items"]
+        ]
+      },
+      "AdvisorReportCheckColumn": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["display_name", "str", "displayName"]
+        ]
+      },
       "AdvisorReportCheckObjectSummary": {
         "attributes": [
           ["fields", "dict(str, str)", "fields"],
@@ -36879,11 +36956,265 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
+      "AdvisorReportCheckObjectsCollection": {
+        "attributes": [
+          ["items", "list[AdvisorReportCheckObjectSummary]", "items"]
+        ]
+      },
+      "AdvisorReportCheckSummary": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["display_name", "str", "displayName"],
+          ["result_type", "str", "resultType"],
+          ["is_reviewed", "bool", "isReviewed"],
+          ["issue", "str", "issue"],
+          ["impact", "str", "impact"],
+          ["action", "str", "action"],
+          ["fixup_script_location", "str", "fixupScriptLocation"],
+          ["is_exclusion_allowed", "bool", "isExclusionAllowed"],
+          ["metadata", "ObjectMetadata", "metadata"],
+          ["columns", "list[AdvisorReportCheckColumn]", "columns"],
+          ["object_count", "int", "objectCount"]
+        ]
+      },
+      "AdvisorReportLocationDetails": {
+        "attributes": [
+          [
+            "object_storage_details",
+            "AdvisorReportBucketDetails",
+            "objectStorageDetails"
+          ],
+          ["location_in_source", "str", "locationInSource"]
+        ]
+      },
+      "AffectedObjectsCollection": {
+        "attributes": [
+          ["items", "list[AdvisorReportCheckObjectSummary]", "items"]
+        ]
+      },
+      "Assessment": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "network_speed_megabit_per_second",
+            "str",
+            "networkSpeedMegabitPerSecond"
+          ],
+          ["acceptable_downtime", "str", "acceptableDowntime"],
+          ["database_data_size", "str", "databaseDataSize"],
+          ["ddl_expectation", "str", "ddlExpectation"],
+          ["creation_type", "str", "creationType"],
+          ["migration_id", "str", "migrationId"],
+          [
+            "source_database_connection",
+            "SourceAssessmentConnection",
+            "sourceDatabaseConnection"
+          ],
+          [
+            "target_database_connection",
+            "TargetAssessmentConnection",
+            "targetDatabaseConnection"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["assessment_migration_type", "str", "assessmentMigrationType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "MYSQL": "MySqlAssessment",
+            "ORACLE": "OracleAssessment"
+          },
+          "fallback": "Assessment"
+        }
+      },
+      "AssessmentCollection": {
+        "attributes": [["items", "list[AssessmentSummary]", "items"]]
+      },
+      "AssessmentObjectCollection": {
+        "attributes": [["database_combination", "str", "databaseCombination"]],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "ORACLE": "OracleAssessmentObjectCollection",
+            "MYSQL": "MySqlAssessmentObjectCollection"
+          },
+          "fallback": "AssessmentObjectCollection"
+        }
+      },
+      "AssessmentObjectTypeSummary": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "AssessmentObjectTypeSummaryCollection": {
+        "attributes": [["items", "list[AssessmentObjectTypeSummary]", "items"]]
+      },
+      "AssessmentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["migration_id", "str", "migrationId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "ORACLE": "OracleAssessmentSummary",
+            "MYSQL": "MySqlAssessmentSummary"
+          },
+          "fallback": "AssessmentSummary"
+        }
+      },
+      "Assessor": {
+        "attributes": [
+          ["assessment_id", "str", "assessmentId"],
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["help_link_url", "str", "helpLinkUrl"],
+          ["help_link_text", "str", "helpLinkText"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["assessor_group", "AssessorGroup", "assessorGroup"],
+          ["actions", "list[AssessorAction]", "actions"],
+          ["assessor_result", "str", "assessorResult"],
+          ["checks_summary", "str", "checksSummary"],
+          ["has_script", "bool", "hasScript"],
+          ["script", "str", "script"],
+          ["does_script_require_restart", "bool", "doesScriptRequireRestart"]
+        ]
+      },
+      "AssessorAction": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_disabled", "bool", "isDisabled"],
+          [
+            "user_defined_properties",
+            "UserDefinedProperties",
+            "userDefinedProperties"
+          ],
+          ["resource_id", "str", "resourceId"]
+        ]
+      },
+      "AssessorCheck": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["assessor_check_group", "AssessorCheckGroup", "assessorCheckGroup"],
+          ["help_link_url", "str", "helpLinkUrl"],
+          ["help_link_text", "str", "helpLinkText"],
+          ["assessor_check_state", "str", "assessorCheckState"],
+          ["check_action", "AssessorCheckAction", "checkAction"],
+          ["key", "str", "key"],
+          ["issue", "str", "issue"],
+          ["impact", "str", "impact"],
+          ["action", "str", "action"],
+          ["fixup_script_location", "str", "fixupScriptLocation"],
+          ["is_exclusion_allowed", "bool", "isExclusionAllowed"],
+          ["metadata", "ObjectMetadata", "metadata"],
+          ["columns", "list[AdvisorReportCheckColumn]", "columns"],
+          ["object_count", "int", "objectCount"],
+          ["objects_display_name", "str", "objectsDisplayName"],
+          ["log_location", "LogLocationBucketDetails", "logLocation"]
+        ]
+      },
+      "AssessorCheckAction": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          [
+            "user_defined_properties",
+            "UserDefinedProperties",
+            "userDefinedProperties"
+          ]
+        ]
+      },
+      "AssessorCheckGroup": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["is_expanded", "bool", "isExpanded"]
+        ]
+      },
       "AssessorCheckNameValue": {
         "attributes": [
           ["name", "str", "name"],
           ["value", "str", "value"]
         ]
+      },
+      "AssessorCheckSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["assessor_check_group", "AssessorCheckGroup", "assessorCheckGroup"],
+          ["help_link_url", "str", "helpLinkUrl"],
+          ["help_link_text", "str", "helpLinkText"],
+          ["assessor_check_state", "str", "assessorCheckState"],
+          ["check_action", "AssessorCheckAction", "checkAction"],
+          ["key", "str", "key"],
+          ["issue", "str", "issue"],
+          ["impact", "str", "impact"],
+          ["action", "str", "action"],
+          ["fixup_script_location", "str", "fixupScriptLocation"],
+          ["is_exclusion_allowed", "bool", "isExclusionAllowed"],
+          ["metadata", "ObjectMetadata", "metadata"],
+          ["columns", "list[AdvisorReportCheckColumn]", "columns"],
+          ["object_count", "int", "objectCount"],
+          ["objects_display_name", "str", "objectsDisplayName"],
+          ["log_location", "LogLocationBucketDetails", "logLocation"]
+        ]
+      },
+      "AssessorCheckSummaryCollection": {
+        "attributes": [["items", "list[AssessorCheckSummary]", "items"]]
+      },
+      "AssessorGroup": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["actions", "list[AssessorAction]", "actions"]
+        ]
+      },
+      "AssessorSummary": {
+        "attributes": [
+          ["assessment_id", "str", "assessmentId"],
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["help_link_url", "str", "helpLinkUrl"],
+          ["help_link_text", "str", "helpLinkText"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["assessor_group", "AssessorGroup", "assessorGroup"],
+          ["actions", "list[AssessorAction]", "actions"],
+          ["assessor_result", "str", "assessorResult"],
+          ["checks_summary", "str", "checksSummary"],
+          ["has_script", "bool", "hasScript"],
+          ["script", "str", "script"],
+          ["does_script_require_restart", "bool", "doesScriptRequireRestart"]
+        ]
+      },
+      "AssessorSummaryCollection": {
+        "attributes": [["items", "list[AssessorSummary]", "items"]]
       },
       "CloneOracleMigrationSettings": {
         "attributes": [["migration_method", "str", "migrationMethod"]],
@@ -36927,6 +37258,81 @@
           ]
         ],
         "discriminator": "CloneOracleMigrationSettings"
+      },
+      "CollectTracesData": {
+        "attributes": [
+          ["bucket_name", "str", "bucketName"],
+          ["namespace", "str", "namespace"],
+          ["object_name", "str", "objectName"],
+          ["collect_traces_state", "str", "collectTracesState"]
+        ]
+      },
+      "Connection": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["vault_id", "str", "vaultId"],
+          ["key_id", "str", "keyId"],
+          ["subnet_id", "str", "subnetId"],
+          ["ingress_ips", "list[IngressIpDetails]", "ingressIps"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["username", "str", "username"],
+          ["password", "str", "password"],
+          ["replication_username", "str", "replicationUsername"],
+          ["replication_password", "str", "replicationPassword"],
+          ["secret_id", "str", "secretId"],
+          ["private_endpoint_id", "str", "privateEndpointId"]
+        ],
+        "discriminator": {
+          "field": "connectionType",
+          "values": {
+            "MYSQL": "MysqlConnection",
+            "ORACLE": "OracleConnection"
+          },
+          "fallback": "Connection"
+        }
+      },
+      "ConnectionCollection": {
+        "attributes": [["items", "list[ConnectionSummary]", "items"]]
+      },
+      "ConnectionSummary": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["vault_id", "str", "vaultId"],
+          ["key_id", "str", "keyId"],
+          ["subnet_id", "str", "subnetId"],
+          ["ingress_ips", "list[IngressIpDetails]", "ingressIps"],
+          ["nsg_ids", "list[str]", "nsgIds"]
+        ],
+        "discriminator": {
+          "field": "connectionType",
+          "values": {
+            "ORACLE": "OracleConnectionSummary",
+            "MYSQL": "MysqlConnectionSummary"
+          },
+          "fallback": "ConnectionSummary"
+        }
       },
       "CreateADBDedicatedAutoCreateTablespaceDetails": {
         "attributes": [
@@ -37312,6 +37718,205 @@
         ],
         "discriminator": "HostDumpTransferDetails"
       },
+      "DataPumpParameters": {
+        "attributes": [
+          ["is_cluster", "bool", "isCluster"],
+          ["estimate", "str", "estimate"],
+          ["table_exists_action", "str", "tableExistsAction"],
+          [
+            "exclude_parameters",
+            "list[DataPumpExcludeParameters]",
+            "excludeParameters"
+          ],
+          ["import_parallelism_degree", "int", "importParallelismDegree"],
+          ["export_parallelism_degree", "int", "exportParallelismDegree"]
+        ]
+      },
+      "DataVerificationDetail": {
+        "attributes": [
+          ["migration_id", "str", "migrationId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_completed", "datetime", "timeCompleted"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
+      "DataVerificationObjectStatusCollection": {
+        "attributes": [
+          ["items", "list[DataVerificationObjectStatusSummary]", "items"],
+          ["total_items", "int", "totalItems"]
+        ]
+      },
+      "DataVerificationObjectStatusSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["owner", "str", "owner"],
+          ["object_name", "str", "objectName"],
+          ["status_in_source", "str", "statusInSource"],
+          ["status_in_target", "str", "statusInTarget"]
+        ],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "MYSQL": "MySqlDataVerificationObjectStatusSummary",
+            "ORACLE": "OracleDataVerificationObjectStatusSummary"
+          },
+          "fallback": "DataVerificationObjectStatusSummary"
+        }
+      },
+      "DataVerificationObjectTypeCountCollection": {
+        "attributes": [
+          ["items", "list[DataVerificationObjectTypeCountSummary]", "items"],
+          ["total_items", "int", "totalItems"]
+        ]
+      },
+      "DataVerificationObjectTypeCountSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["schema_name", "str", "schemaName"],
+          ["source_object_count", "int", "sourceObjectCount"],
+          ["target_object_count", "int", "targetObjectCount"],
+          ["delta_percent", "float", "deltaPercent"]
+        ],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "MYSQL": "MySqlDataVerificationObjectTypeCountSummary",
+            "ORACLE": "OracleDataVerificationObjectTypeCountSummary"
+          },
+          "fallback": "DataVerificationObjectTypeCountSummary"
+        }
+      },
+      "DataVerificationTableRowCountCollection": {
+        "attributes": [
+          ["items", "list[DataVerificationTableRowCountSummary]", "items"],
+          ["total_items", "int", "totalItems"]
+        ]
+      },
+      "DataVerificationTableRowCountSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["owner", "str", "owner"],
+          ["table_name", "str", "tableName"],
+          ["source_row_count", "int", "sourceRowCount"],
+          ["target_row_count", "int", "targetRowCount"],
+          ["variance_percent", "float", "variancePercent"]
+        ],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "MYSQL": "MySqlDataVerificationTableRowCountSummary",
+            "ORACLE": "OracleDataVerificationTableRowCountSummary"
+          },
+          "fallback": "DataVerificationTableRowCountSummary"
+        }
+      },
+      "DatabaseConnectionTypeCollection": {
+        "attributes": [
+          ["items", "list[DatabaseConnectionTypeSummary]", "items"]
+        ]
+      },
+      "DatabaseConnectionTypeSummary": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          [
+            "technology_types",
+            "list[DatabaseTechnologyType]",
+            "technologyTypes"
+          ]
+        ]
+      },
+      "DatabaseInformation": {
+        "attributes": [
+          ["database_name", "str", "databaseName"],
+          ["database_version", "str", "databaseVersion"],
+          ["data_size_in_mbs", "int", "dataSizeInMBs"]
+        ]
+      },
+      "DatabaseTechnologySubType": {
+        "attributes": [
+          ["technology_sub_type", "str", "technologySubType"],
+          [
+            "technology_sub_type_display_name",
+            "str",
+            "technologySubTypeDisplayName"
+          ],
+          ["database_versions", "list[str]", "databaseVersions"]
+        ]
+      },
+      "DatabaseTechnologyType": {
+        "attributes": [
+          ["technology_type", "str", "technologyType"],
+          [
+            "technology_sub_types",
+            "list[DatabaseTechnologySubType]",
+            "technologySubTypes"
+          ],
+          ["database_versions", "list[str]", "databaseVersions"]
+        ]
+      },
+      "DiagnosticsResult": {
+        "attributes": [
+          ["result_type", "str", "resultType"],
+          ["error", "ResultError", "error"],
+          ["database_information", "DatabaseInformation", "databaseInformation"]
+        ]
+      },
+      "DirectoryObject": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["path", "str", "path"]
+        ]
+      },
+      "DownloadSqlDetails": {
+        "attributes": [["download_url", "str", "downloadUrl"]]
+      },
+      "ExcludedObjectSummary": {
+        "attributes": [
+          ["owner", "str", "owner"],
+          ["object", "str", "object"],
+          ["type", "str", "type"],
+          ["reason_category", "str", "reasonCategory"],
+          ["source_rule", "str", "sourceRule"]
+        ]
+      },
+      "ExcludedObjectSummaryCollection": {
+        "attributes": [["items", "list[ExcludedObjectSummary]", "items"]]
+      },
+      "Extract": {
+        "attributes": [
+          ["performance_profile", "str", "performanceProfile"],
+          ["long_trans_duration", "int", "longTransDuration"]
+        ]
+      },
+      "GgsDeployment": {
+        "attributes": [
+          ["deployment_id", "str", "deploymentId"],
+          [
+            "ggs_admin_credentials_secret_id",
+            "str",
+            "ggsAdminCredentialsSecretId"
+          ]
+        ]
+      },
+      "GoldenGateHubDetails": {
+        "attributes": [
+          [
+            "rest_admin_credentials",
+            "AdminCredentials",
+            "restAdminCredentials"
+          ],
+          ["url", "str", "url"],
+          ["compute_id", "str", "computeId"],
+          ["vault_id", "str", "vaultId"],
+          ["key_id", "str", "keyId"],
+          ["extract", "Extract", "extract"],
+          ["replicat", "Replicat", "replicat"],
+          ["acceptable_lag", "int", "acceptableLag"]
+        ]
+      },
       "HostDumpTransferDetails": {
         "attributes": [
           ["wallet_location", "str", "walletLocation"],
@@ -37326,6 +37931,68 @@
           "fallback": "HostDumpTransferDetails"
         }
       },
+      "IngressIpDetails": {
+        "attributes": [["ingress_ip", "str", "ingressIp"]]
+      },
+      "Job": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["migration_id", "str", "migrationId"],
+          ["type", "str", "type"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["progress", "MigrationJobProgressResource", "progress"],
+          [
+            "unsupported_objects",
+            "list[UnsupportedDatabaseObject]",
+            "unsupportedObjects"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "parameter_file_versions",
+            "list[ParameterFileVersionSummary]",
+            "parameterFileVersions"
+          ],
+          ["collect_traces_data", "CollectTracesData", "collectTracesData"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "JobCollection": {
+        "attributes": [["items", "list[JobSummary]", "items"]]
+      },
+      "JobOutputSummary": {
+        "attributes": [["message", "str", "message"]]
+      },
+      "JobOutputSummaryCollection": {
+        "attributes": [["items", "list[JobOutputSummary]", "items"]]
+      },
+      "JobSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["migration_id", "str", "migrationId"],
+          ["type", "str", "type"],
+          ["progress", "MigrationJobProgressSummary", "progress"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "LogLocationBucketDetails": {
+        "attributes": [
+          ["bucket_name", "str", "bucketName"],
+          ["namespace", "str", "namespace"],
+          ["object_name", "str", "objectName"]
+        ]
+      },
       "MetadataRemap": {
         "attributes": [
           ["type", "str", "type"],
@@ -37333,12 +38000,269 @@
           ["new_value", "str", "newValue"]
         ]
       },
+      "Migration": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          ["wait_after", "str", "waitAfter"],
+          [
+            "source_database_connection_id",
+            "str",
+            "sourceDatabaseConnectionId"
+          ],
+          [
+            "target_database_connection_id",
+            "str",
+            "targetDatabaseConnectionId"
+          ],
+          ["executing_job_id", "str", "executingJobId"],
+          ["assessment_id", "str", "assessmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_migration", "datetime", "timeLastMigration"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "ORACLE": "OracleMigration",
+            "MYSQL": "MySqlMigration"
+          },
+          "fallback": "Migration"
+        }
+      },
+      "MigrationCollection": {
+        "attributes": [["items", "list[MigrationSummary]", "items"]]
+      },
+      "MigrationJobProgressResource": {
+        "attributes": [
+          ["current_status", "str", "currentStatus"],
+          ["current_phase", "str", "currentPhase"],
+          ["phases", "list[PhaseStatus]", "phases"]
+        ]
+      },
+      "MigrationJobProgressSummary": {
+        "attributes": [
+          ["current_phase", "str", "currentPhase"],
+          ["current_status", "str", "currentStatus"],
+          ["job_progress", "int", "jobProgress"]
+        ]
+      },
+      "MigrationObjectCollection": {
+        "attributes": [["database_combination", "str", "databaseCombination"]],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "MYSQL": "MySqlMigrationObjectCollection",
+            "ORACLE": "OracleMigrationObjectCollection"
+          },
+          "fallback": "MigrationObjectCollection"
+        }
+      },
       "MigrationParameterDetails": {
         "attributes": [
           ["value", "str", "value"],
           ["name", "str", "name"],
           ["data_type", "str", "dataType"]
         ]
+      },
+      "MigrationParameterSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["doc_url_link", "str", "docUrlLink"],
+          ["description", "str", "description"],
+          ["category_name", "str", "categoryName"],
+          ["category_display_name", "str", "categoryDisplayName"],
+          ["migration_type", "str", "migrationType"],
+          ["default_value", "str", "defaultValue"],
+          ["min_value", "float", "minValue"],
+          ["max_value", "float", "maxValue"],
+          ["hint_text", "str", "hintText"],
+          ["name", "str", "name"],
+          ["data_type", "str", "dataType"]
+        ]
+      },
+      "MigrationParameterSummaryCollection": {
+        "attributes": [["items", "list[MigrationParameterSummary]", "items"]]
+      },
+      "MigrationPhaseCollection": {
+        "attributes": [["items", "list[MigrationPhaseSummary]", "items"]]
+      },
+      "MigrationPhaseSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["recommended_action", "str", "recommendedAction"],
+          ["supported_actions", "list[OdmsPhaseActions]", "supportedActions"]
+        ]
+      },
+      "MigrationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          [
+            "source_database_connection_id",
+            "str",
+            "sourceDatabaseConnectionId"
+          ],
+          [
+            "target_database_connection_id",
+            "str",
+            "targetDatabaseConnectionId"
+          ],
+          ["executing_job_id", "str", "executingJobId"],
+          ["assessment_id", "str", "assessmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_migration", "datetime", "timeLastMigration"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ],
+        "discriminator": {
+          "field": "databaseCombination",
+          "values": {
+            "ORACLE": "OracleMigrationSummary",
+            "MYSQL": "MySqlMigrationSummary"
+          },
+          "fallback": "MigrationSummary"
+        }
+      },
+      "MySqlAdvisorSettings": {
+        "attributes": [
+          ["is_skip_advisor", "bool", "isSkipAdvisor"],
+          ["is_ignore_errors", "bool", "isIgnoreErrors"]
+        ]
+      },
+      "MySqlAssessment": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "network_speed_megabit_per_second",
+            "str",
+            "networkSpeedMegabitPerSecond"
+          ],
+          ["acceptable_downtime", "str", "acceptableDowntime"],
+          ["database_data_size", "str", "databaseDataSize"],
+          ["ddl_expectation", "str", "ddlExpectation"],
+          ["creation_type", "str", "creationType"],
+          ["migration_id", "str", "migrationId"],
+          [
+            "source_database_connection",
+            "SourceAssessmentConnection",
+            "sourceDatabaseConnection"
+          ],
+          [
+            "target_database_connection",
+            "TargetAssessmentConnection",
+            "targetDatabaseConnection"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["assessment_migration_type", "str", "assessmentMigrationType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["migration_scope", "str", "migrationScope"]
+        ],
+        "discriminator": "Assessment"
+      },
+      "MySqlAssessmentObjectCollection": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["items", "list[MySqlDatabaseObjectSummary]", "items"]
+        ],
+        "discriminator": "AssessmentObjectCollection"
+      },
+      "MySqlAssessmentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["migration_id", "str", "migrationId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["migration_scope", "str", "migrationScope"]
+        ],
+        "discriminator": "AssessmentSummary"
+      },
+      "MySqlDataTransferMediumDetails": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "OBJECT_STORAGE": "MySqlObjectStorageDataTransferMediumDetails"
+          },
+          "fallback": "MySqlDataTransferMediumDetails"
+        }
+      },
+      "MySqlDataVerificationObjectStatusSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["owner", "str", "owner"],
+          ["object_name", "str", "objectName"],
+          ["status_in_source", "str", "statusInSource"],
+          ["status_in_target", "str", "statusInTarget"],
+          ["object_type", "str", "objectType"]
+        ],
+        "discriminator": "DataVerificationObjectStatusSummary"
+      },
+      "MySqlDataVerificationObjectTypeCountSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["schema_name", "str", "schemaName"],
+          ["source_object_count", "int", "sourceObjectCount"],
+          ["target_object_count", "int", "targetObjectCount"],
+          ["delta_percent", "float", "deltaPercent"],
+          ["object_type", "str", "objectType"],
+          ["source_invalid_count", "int", "sourceInvalidCount"],
+          ["target_invalid_count", "int", "targetInvalidCount"]
+        ],
+        "discriminator": "DataVerificationObjectTypeCountSummary"
+      },
+      "MySqlDataVerificationTableRowCountSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["owner", "str", "owner"],
+          ["table_name", "str", "tableName"],
+          ["source_row_count", "int", "sourceRowCount"],
+          ["target_row_count", "int", "targetRowCount"],
+          ["variance_percent", "float", "variancePercent"],
+          [
+            "time_last_source_statistics_collection",
+            "datetime",
+            "timeLastSourceStatisticsCollection"
+          ],
+          [
+            "time_last_target_statistics_collection",
+            "datetime",
+            "timeLastTargetStatisticsCollection"
+          ]
+        ],
+        "discriminator": "DataVerificationTableRowCountSummary"
       },
       "MySqlDatabaseObject": {
         "attributes": [
@@ -37355,10 +38279,217 @@
           ["type", "str", "type"]
         ]
       },
+      "MySqlGgsDeploymentDetails": {
+        "attributes": [
+          ["ggs_deployment", "GgsDeployment", "ggsDeployment"],
+          ["replicat", "Replicat", "replicat"],
+          ["acceptable_lag", "int", "acceptableLag"]
+        ]
+      },
+      "MySqlInitialLoadSettings": {
+        "attributes": [
+          ["is_consistent", "bool", "isConsistent"],
+          ["is_tz_utc", "bool", "isTzUtc"],
+          ["compatibility", "list[CompatibilityOption]", "compatibility"],
+          ["primary_key_compatibility", "str", "primaryKeyCompatibility"],
+          ["is_ignore_existing_objects", "bool", "isIgnoreExistingObjects"],
+          ["handle_grant_errors", "str", "handleGrantErrors"],
+          ["job_mode", "str", "jobMode"]
+        ]
+      },
+      "MySqlMigration": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          ["wait_after", "str", "waitAfter"],
+          [
+            "source_database_connection_id",
+            "str",
+            "sourceDatabaseConnectionId"
+          ],
+          [
+            "target_database_connection_id",
+            "str",
+            "targetDatabaseConnectionId"
+          ],
+          ["executing_job_id", "str", "executingJobId"],
+          ["assessment_id", "str", "assessmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_migration", "datetime", "timeLastMigration"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "data_transfer_medium_details",
+            "MySqlDataTransferMediumDetails",
+            "dataTransferMediumDetails"
+          ],
+          [
+            "initial_load_settings",
+            "MySqlInitialLoadSettings",
+            "initialLoadSettings"
+          ],
+          ["advisor_settings", "MySqlAdvisorSettings", "advisorSettings"],
+          ["hub_details", "GoldenGateHubDetails", "hubDetails"],
+          ["ggs_details", "MySqlGgsDeploymentDetails", "ggsDetails"]
+        ],
+        "discriminator": "Migration"
+      },
+      "MySqlMigrationObjectCollection": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["items", "list[MySqlDatabaseObjectSummary]", "items"],
+          ["bulk_include_exclude_data", "str", "bulkIncludeExcludeData"]
+        ],
+        "discriminator": "MigrationObjectCollection"
+      },
+      "MySqlMigrationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          [
+            "source_database_connection_id",
+            "str",
+            "sourceDatabaseConnectionId"
+          ],
+          [
+            "target_database_connection_id",
+            "str",
+            "targetDatabaseConnectionId"
+          ],
+          ["executing_job_id", "str", "executingJobId"],
+          ["assessment_id", "str", "assessmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_migration", "datetime", "timeLastMigration"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ],
+        "discriminator": "MigrationSummary"
+      },
+      "MySqlObjectStorageDataTransferMediumDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["object_storage_bucket", "ObjectStoreBucket", "objectStorageBucket"]
+        ],
+        "discriminator": "MySqlDataTransferMediumDetails"
+      },
+      "MysqlConnection": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["vault_id", "str", "vaultId"],
+          ["key_id", "str", "keyId"],
+          ["subnet_id", "str", "subnetId"],
+          ["ingress_ips", "list[IngressIpDetails]", "ingressIps"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["username", "str", "username"],
+          ["password", "str", "password"],
+          ["replication_username", "str", "replicationUsername"],
+          ["replication_password", "str", "replicationPassword"],
+          ["secret_id", "str", "secretId"],
+          ["private_endpoint_id", "str", "privateEndpointId"],
+          ["technology_type", "str", "technologyType"],
+          ["host", "str", "host"],
+          ["port", "int", "port"],
+          ["database_name", "str", "databaseName"],
+          ["security_protocol", "str", "securityProtocol"],
+          ["ssl_mode", "str", "sslMode"],
+          [
+            "additional_attributes",
+            "list[NameValuePair]",
+            "additionalAttributes"
+          ],
+          ["db_system_id", "str", "dbSystemId"]
+        ],
+        "discriminator": "Connection"
+      },
+      "MysqlConnectionSummary": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["vault_id", "str", "vaultId"],
+          ["key_id", "str", "keyId"],
+          ["subnet_id", "str", "subnetId"],
+          ["ingress_ips", "list[IngressIpDetails]", "ingressIps"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["technology_type", "str", "technologyType"],
+          ["host", "str", "host"],
+          ["port", "int", "port"],
+          ["database_name", "str", "databaseName"],
+          ["security_protocol", "str", "securityProtocol"],
+          ["ssl_mode", "str", "sslMode"],
+          [
+            "additional_attributes",
+            "list[NameValuePair]",
+            "additionalAttributes"
+          ],
+          ["db_system_id", "str", "dbSystemId"]
+        ],
+        "discriminator": "ConnectionSummary"
+      },
       "NameValuePair": {
         "attributes": [
           ["name", "str", "name"],
           ["value", "str", "value"]
+        ]
+      },
+      "NonADBAutoCreateTablespaceDetails": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["is_auto_create", "bool", "isAutoCreate"],
+          ["is_big_file", "bool", "isBigFile"],
+          ["extend_size_in_mbs", "int", "extendSizeInMBs"],
+          ["block_size_in_kbs", "str", "blockSizeInKBs"]
+        ],
+        "discriminator": "TargetTypeTablespaceDetails"
+      },
+      "NonADBRemapTablespaceDetails": {
+        "attributes": [
+          ["target_type", "str", "targetType"],
+          ["remap_target", "str", "remapTarget"]
+        ],
+        "discriminator": "TargetTypeTablespaceDetails"
+      },
+      "ObjectMetadata": {
+        "attributes": [
+          ["schema_owner_column", "str", "schemaOwnerColumn"],
+          ["object_name_column", "str", "objectNameColumn"],
+          ["object_type_fixed", "str", "objectTypeFixed"],
+          ["object_type_column", "str", "objectTypeColumn"]
         ]
       },
       "ObjectStoreBucket": {
@@ -37374,6 +38505,206 @@
           ["oci_home", "str", "ociHome"]
         ],
         "discriminator": "HostDumpTransferDetails"
+      },
+      "OracleAdvisorSettings": {
+        "attributes": [
+          ["is_skip_advisor", "bool", "isSkipAdvisor"],
+          ["is_ignore_errors", "bool", "isIgnoreErrors"]
+        ]
+      },
+      "OracleAssessment": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          [
+            "network_speed_megabit_per_second",
+            "str",
+            "networkSpeedMegabitPerSecond"
+          ],
+          ["acceptable_downtime", "str", "acceptableDowntime"],
+          ["database_data_size", "str", "databaseDataSize"],
+          ["ddl_expectation", "str", "ddlExpectation"],
+          ["creation_type", "str", "creationType"],
+          ["migration_id", "str", "migrationId"],
+          [
+            "source_database_connection",
+            "SourceAssessmentConnection",
+            "sourceDatabaseConnection"
+          ],
+          [
+            "target_database_connection",
+            "TargetAssessmentConnection",
+            "targetDatabaseConnection"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["assessment_migration_type", "str", "assessmentMigrationType"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["migration_scope", "str", "migrationScope"],
+          ["is_cdb_supported", "bool", "isCdbSupported"]
+        ],
+        "discriminator": "Assessment"
+      },
+      "OracleAssessmentObjectCollection": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["items", "list[OracleDatabaseObjectSummary]", "items"],
+          ["bulk_include_exclude_data", "str", "bulkIncludeExcludeData"]
+        ],
+        "discriminator": "AssessmentObjectCollection"
+      },
+      "OracleAssessmentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["migration_id", "str", "migrationId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["migration_scope", "str", "migrationScope"],
+          ["is_cdb_supported", "bool", "isCdbSupported"]
+        ],
+        "discriminator": "AssessmentSummary"
+      },
+      "OracleAwsS3DataTransferMediumDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["name", "str", "name"],
+          ["region", "str", "region"],
+          ["access_key_id", "str", "accessKeyId"],
+          ["secret_access_key", "str", "secretAccessKey"],
+          ["object_storage_bucket", "ObjectStoreBucket", "objectStorageBucket"]
+        ],
+        "discriminator": "OracleDataTransferMediumDetails"
+      },
+      "OracleConnection": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["vault_id", "str", "vaultId"],
+          ["key_id", "str", "keyId"],
+          ["subnet_id", "str", "subnetId"],
+          ["ingress_ips", "list[IngressIpDetails]", "ingressIps"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["username", "str", "username"],
+          ["password", "str", "password"],
+          ["replication_username", "str", "replicationUsername"],
+          ["replication_password", "str", "replicationPassword"],
+          ["secret_id", "str", "secretId"],
+          ["private_endpoint_id", "str", "privateEndpointId"],
+          ["technology_type", "str", "technologyType"],
+          ["connection_string", "str", "connectionString"],
+          ["database_id", "str", "databaseId"],
+          ["ssh_host", "str", "sshHost"],
+          ["ssh_key", "str", "sshKey"],
+          ["ssh_user", "str", "sshUser"],
+          ["ssh_sudo_location", "str", "sshSudoLocation"]
+        ],
+        "discriminator": "Connection"
+      },
+      "OracleConnectionSummary": {
+        "attributes": [
+          ["connection_type", "str", "connectionType"],
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["vault_id", "str", "vaultId"],
+          ["key_id", "str", "keyId"],
+          ["subnet_id", "str", "subnetId"],
+          ["ingress_ips", "list[IngressIpDetails]", "ingressIps"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["technology_type", "str", "technologyType"],
+          ["connection_string", "str", "connectionString"],
+          ["database_id", "str", "databaseId"]
+        ],
+        "discriminator": "ConnectionSummary"
+      },
+      "OracleDataTransferMediumDetails": {
+        "attributes": [["type", "str", "type"]],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "DBLINK": "OracleDbLinkDataTransferMediumDetails",
+            "OBJECT_STORAGE": "OracleObjectStorageDataTransferMediumDetails",
+            "AWS_S3": "OracleAwsS3DataTransferMediumDetails",
+            "NFS": "OracleNfsDataTransferMediumDetails"
+          },
+          "fallback": "OracleDataTransferMediumDetails"
+        }
+      },
+      "OracleDataVerificationObjectStatusSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["owner", "str", "owner"],
+          ["object_name", "str", "objectName"],
+          ["status_in_source", "str", "statusInSource"],
+          ["status_in_target", "str", "statusInTarget"],
+          ["object_type", "str", "objectType"]
+        ],
+        "discriminator": "DataVerificationObjectStatusSummary"
+      },
+      "OracleDataVerificationObjectTypeCountSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["schema_name", "str", "schemaName"],
+          ["source_object_count", "int", "sourceObjectCount"],
+          ["target_object_count", "int", "targetObjectCount"],
+          ["delta_percent", "float", "deltaPercent"],
+          ["object_type", "str", "objectType"],
+          ["source_invalid_count", "int", "sourceInvalidCount"],
+          ["target_invalid_count", "int", "targetInvalidCount"]
+        ],
+        "discriminator": "DataVerificationObjectTypeCountSummary"
+      },
+      "OracleDataVerificationTableRowCountSummary": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["owner", "str", "owner"],
+          ["table_name", "str", "tableName"],
+          ["source_row_count", "int", "sourceRowCount"],
+          ["target_row_count", "int", "targetRowCount"],
+          ["variance_percent", "float", "variancePercent"],
+          [
+            "time_last_source_statistics_collection",
+            "datetime",
+            "timeLastSourceStatisticsCollection"
+          ],
+          [
+            "time_last_target_statistics_collection",
+            "datetime",
+            "timeLastTargetStatisticsCollection"
+          ]
+        ],
+        "discriminator": "DataVerificationTableRowCountSummary"
       },
       "OracleDatabaseObject": {
         "attributes": [
@@ -37400,6 +38731,387 @@
           ]
         ]
       },
+      "OracleDbLinkDataTransferMediumDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["object_storage_bucket", "ObjectStoreBucket", "objectStorageBucket"],
+          ["name", "str", "name"]
+        ],
+        "discriminator": "OracleDataTransferMediumDetails"
+      },
+      "OracleGgsDeploymentDetails": {
+        "attributes": [
+          ["ggs_deployment", "GgsDeployment", "ggsDeployment"],
+          ["extract", "Extract", "extract"],
+          ["replicat", "Replicat", "replicat"],
+          ["acceptable_lag", "int", "acceptableLag"]
+        ]
+      },
+      "OracleInitialLoadSettings": {
+        "attributes": [
+          ["data_pump_parameters", "DataPumpParameters", "dataPumpParameters"],
+          [
+            "tablespace_details",
+            "TargetTypeTablespaceDetails",
+            "tablespaceDetails"
+          ],
+          [
+            "export_directory_object",
+            "DirectoryObject",
+            "exportDirectoryObject"
+          ],
+          [
+            "import_directory_object",
+            "DirectoryObject",
+            "importDirectoryObject"
+          ],
+          ["job_mode", "str", "jobMode"],
+          ["metadata_remaps", "list[MetadataRemap]", "metadataRemaps"]
+        ]
+      },
+      "OracleMigration": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          ["wait_after", "str", "waitAfter"],
+          [
+            "source_database_connection_id",
+            "str",
+            "sourceDatabaseConnectionId"
+          ],
+          [
+            "target_database_connection_id",
+            "str",
+            "targetDatabaseConnectionId"
+          ],
+          ["executing_job_id", "str", "executingJobId"],
+          ["assessment_id", "str", "assessmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_migration", "datetime", "timeLastMigration"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "migration_settings",
+            "OracleMigrationSettings",
+            "migrationSettings"
+          ],
+          [
+            "data_transfer_medium_details",
+            "OracleDataTransferMediumDetails",
+            "dataTransferMediumDetails"
+          ],
+          [
+            "initial_load_settings",
+            "OracleInitialLoadSettings",
+            "initialLoadSettings"
+          ],
+          ["advisor_settings", "OracleAdvisorSettings", "advisorSettings"],
+          ["hub_details", "GoldenGateHubDetails", "hubDetails"],
+          ["ggs_details", "OracleGgsDeploymentDetails", "ggsDetails"],
+          [
+            "source_container_database_connection_id",
+            "str",
+            "sourceContainerDatabaseConnectionId"
+          ],
+          [
+            "source_standby_database_connection_id",
+            "str",
+            "sourceStandbyDatabaseConnectionId"
+          ],
+          [
+            "advanced_parameters",
+            "list[MigrationParameterDetails]",
+            "advancedParameters"
+          ]
+        ],
+        "discriminator": "Migration"
+      },
+      "OracleMigrationObjectCollection": {
+        "attributes": [
+          ["database_combination", "str", "databaseCombination"],
+          ["items", "list[OracleDatabaseObjectSummary]", "items"],
+          ["bulk_include_exclude_data", "str", "bulkIncludeExcludeData"]
+        ],
+        "discriminator": "MigrationObjectCollection"
+      },
+      "OracleMigrationSettings": {
+        "attributes": [["migration_method", "str", "migrationMethod"]],
+        "discriminator": {
+          "field": "migrationMethod",
+          "values": {
+            "ONLINE_STANDBY": "OracleOnlineStandbyMigrationSettings",
+            "OFFLINE_LOGICAL": "OracleOfflineLogicalMigrationSettings",
+            "ONLINE_LOGICAL": "OracleOnlineLogicalMigrationSettings"
+          },
+          "fallback": "OracleMigrationSettings"
+        }
+      },
+      "OracleMigrationSettingsSummary": {
+        "attributes": [["migration_method", "str", "migrationMethod"]],
+        "discriminator": {
+          "field": "migrationMethod",
+          "values": {
+            "OFFLINE_LOGICAL": "OracleOfflineLogicalMigrationSettingsSummary",
+            "ONLINE_STANDBY": "OracleOnlineStandbyMigrationSettingsSummary",
+            "ONLINE_LOGICAL": "OracleOnlineLogicalMigrationSettingsSummary"
+          },
+          "fallback": "OracleMigrationSettingsSummary"
+        }
+      },
+      "OracleMigrationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["database_combination", "str", "databaseCombination"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          [
+            "source_database_connection_id",
+            "str",
+            "sourceDatabaseConnectionId"
+          ],
+          [
+            "target_database_connection_id",
+            "str",
+            "targetDatabaseConnectionId"
+          ],
+          ["executing_job_id", "str", "executingJobId"],
+          ["assessment_id", "str", "assessmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_last_migration", "datetime", "timeLastMigration"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "migration_settings",
+            "OracleMigrationSettingsSummary",
+            "migrationSettings"
+          ],
+          [
+            "source_container_database_connection_id",
+            "str",
+            "sourceContainerDatabaseConnectionId"
+          ],
+          [
+            "source_standby_database_connection_id",
+            "str",
+            "sourceStandbyDatabaseConnectionId"
+          ]
+        ],
+        "discriminator": "MigrationSummary"
+      },
+      "OracleNfsDataTransferMediumDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["object_storage_bucket", "ObjectStoreBucket", "objectStorageBucket"],
+          ["source", "HostDumpTransferDetails", "source"],
+          ["target", "HostDumpTransferDetails", "target"],
+          [
+            "shared_storage_mount_target_id",
+            "str",
+            "sharedStorageMountTargetId"
+          ]
+        ],
+        "discriminator": "OracleDataTransferMediumDetails"
+      },
+      "OracleObjectStorageDataTransferMediumDetails": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["object_storage_bucket", "ObjectStoreBucket", "objectStorageBucket"],
+          ["source", "HostDumpTransferDetails", "source"],
+          ["target", "HostDumpTransferDetails", "target"]
+        ],
+        "discriminator": "OracleDataTransferMediumDetails"
+      },
+      "OracleOfflineLogicalMigrationSettings": {
+        "attributes": [
+          ["migration_method", "str", "migrationMethod"],
+          [
+            "data_transfer_medium_details",
+            "OracleDataTransferMediumDetails",
+            "dataTransferMediumDetails"
+          ],
+          [
+            "initial_load_settings",
+            "OracleInitialLoadSettings",
+            "initialLoadSettings"
+          ],
+          ["advisor_settings", "OracleAdvisorSettings", "advisorSettings"],
+          [
+            "advanced_parameters",
+            "list[MigrationParameterDetails]",
+            "advancedParameters"
+          ]
+        ],
+        "discriminator": "OracleMigrationSettings"
+      },
+      "OracleOfflineLogicalMigrationSettingsSummary": {
+        "attributes": [["migration_method", "str", "migrationMethod"]],
+        "discriminator": "OracleMigrationSettingsSummary"
+      },
+      "OracleOnlineLogicalMigrationSettings": {
+        "attributes": [
+          ["migration_method", "str", "migrationMethod"],
+          [
+            "data_transfer_medium_details",
+            "OracleDataTransferMediumDetails",
+            "dataTransferMediumDetails"
+          ],
+          [
+            "initial_load_settings",
+            "OracleInitialLoadSettings",
+            "initialLoadSettings"
+          ],
+          ["advisor_settings", "OracleAdvisorSettings", "advisorSettings"],
+          ["hub_details", "GoldenGateHubDetails", "hubDetails"],
+          ["ggs_details", "OracleGgsDeploymentDetails", "ggsDetails"],
+          [
+            "source_container_database_connection_id",
+            "str",
+            "sourceContainerDatabaseConnectionId"
+          ],
+          [
+            "advanced_parameters",
+            "list[MigrationParameterDetails]",
+            "advancedParameters"
+          ]
+        ],
+        "discriminator": "OracleMigrationSettings"
+      },
+      "OracleOnlineLogicalMigrationSettingsSummary": {
+        "attributes": [
+          ["migration_method", "str", "migrationMethod"],
+          [
+            "source_container_database_connection_id",
+            "str",
+            "sourceContainerDatabaseConnectionId"
+          ]
+        ],
+        "discriminator": "OracleMigrationSettingsSummary"
+      },
+      "OracleOnlineStandbyMigrationSettings": {
+        "attributes": [
+          ["migration_method", "str", "migrationMethod"],
+          [
+            "data_transfer_medium_details",
+            "OracleDataTransferMediumDetails",
+            "dataTransferMediumDetails"
+          ],
+          [
+            "initial_load_settings",
+            "OracleInitialLoadSettings",
+            "initialLoadSettings"
+          ],
+          ["advisor_settings", "OracleAdvisorSettings", "advisorSettings"],
+          ["hub_details", "GoldenGateHubDetails", "hubDetails"],
+          ["ggs_details", "OracleGgsDeploymentDetails", "ggsDetails"],
+          [
+            "source_container_database_connection_id",
+            "str",
+            "sourceContainerDatabaseConnectionId"
+          ],
+          [
+            "source_standby_database_connection_id",
+            "str",
+            "sourceStandbyDatabaseConnectionId"
+          ],
+          [
+            "advanced_parameters",
+            "list[MigrationParameterDetails]",
+            "advancedParameters"
+          ]
+        ],
+        "discriminator": "OracleMigrationSettings"
+      },
+      "OracleOnlineStandbyMigrationSettingsSummary": {
+        "attributes": [
+          ["migration_method", "str", "migrationMethod"],
+          [
+            "source_container_database_connection_id",
+            "str",
+            "sourceContainerDatabaseConnectionId"
+          ],
+          [
+            "source_standby_database_connection_id",
+            "str",
+            "sourceStandbyDatabaseConnectionId"
+          ]
+        ],
+        "discriminator": "OracleMigrationSettingsSummary"
+      },
+      "ParameterFileVersion": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["is_current", "bool", "isCurrent"],
+          ["is_factory", "bool", "isFactory"],
+          ["kind", "str", "kind"],
+          ["time_created", "datetime", "timeCreated"],
+          ["content", "str", "content"]
+        ]
+      },
+      "ParameterFileVersionCollection": {
+        "attributes": [["items", "list[ParameterFileVersionSummary]", "items"]]
+      },
+      "ParameterFileVersionSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["kind", "str", "kind"],
+          ["description", "str", "description"],
+          ["is_current", "bool", "isCurrent"],
+          ["is_factory", "bool", "isFactory"],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PhaseExtractEntry": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["message", "str", "message"]
+        ]
+      },
+      "PhaseStatus": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["status", "str", "status"],
+          ["duration_in_ms", "int", "durationInMs"],
+          ["is_advisor_report_available", "bool", "isAdvisorReportAvailable"],
+          ["issue", "str", "issue"],
+          ["action", "str", "action"],
+          ["extract", "list[PhaseExtractEntry]", "extract"],
+          ["log_location", "LogLocationBucketDetails", "logLocation"],
+          ["progress", "int", "progress"],
+          ["is_suspend_available", "bool", "isSuspendAvailable"],
+          ["editable_parameter_files", "list[str]", "editableParameterFiles"],
+          ["group_display_name", "str", "groupDisplayName"]
+        ]
+      },
+      "Replicat": {
+        "attributes": [["performance_profile", "str", "performanceProfile"]]
+      },
+      "ResultError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["issue", "str", "issue"],
+          ["action", "str", "action"],
+          ["action_link", "str", "actionLink"],
+          ["action_text", "str", "actionText"]
+        ]
+      },
       "SourceAssessmentConnection": {
         "attributes": [["id", "str", "id"]]
       },
@@ -37410,6 +39122,27 @@
           ["technology_type", "str", "technologyType"],
           ["technology_sub_type", "str", "technologySubType"],
           ["database_version", "str", "databaseVersion"]
+        ]
+      },
+      "TargetTypeTablespaceDetails": {
+        "attributes": [["target_type", "str", "targetType"]],
+        "discriminator": {
+          "field": "targetType",
+          "values": {
+            "ADB_D_AUTOCREATE": "ADBDedicatedAutoCreateTablespaceDetails",
+            "ADB_S_REMAP": "ADBServerlesTablespaceDetails",
+            "ADB_D_REMAP": "ADBDedicatedRemapTargetTablespaceDetails",
+            "NON_ADB_REMAP": "NonADBRemapTablespaceDetails",
+            "NON_ADB_AUTOCREATE": "NonADBAutoCreateTablespaceDetails"
+          },
+          "fallback": "TargetTypeTablespaceDetails"
+        }
+      },
+      "UnsupportedDatabaseObject": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["owner", "str", "owner"],
+          ["object_name", "str", "objectName"]
         ]
       },
       "UpdateADBDedicatedAutoCreateTablespaceDetails": {
@@ -37789,6 +39522,91 @@
           },
           "fallback": "UpdateTargetTypeTablespaceDetails"
         }
+      },
+      "UserDefinedProperties": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["help_link_url", "str", "helpLinkUrl"],
+          ["help_link_text", "str", "helpLinkText"],
+          ["properties", "list[UserDefinedProperty]", "properties"]
+        ]
+      },
+      "UserDefinedProperty": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["is_required", "bool", "isRequired"],
+          ["min_length", "int", "minLength"],
+          ["max_length", "int", "maxLength"],
+          ["default_value", "str", "defaultValue"],
+          ["value", "str", "value"],
+          ["options", "list[UserDefinedPropertyOption]", "options"]
+        ]
+      },
+      "UserDefinedPropertyOption": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["value", "str", "value"]
+        ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["action_type", "str", "actionType"],
+          ["entity_type", "str", "entityType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
       }
     }
   }

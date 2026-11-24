@@ -11209,10 +11209,256 @@
   },
   "models": {
     "wlms": {
+      "Agreement": {
+        "attributes": [
+          ["uuid", "str", "uuid"],
+          ["terms_and_conditions_text", "str", "termsAndConditionsText"],
+          ["signature", "str", "signature"]
+        ]
+      },
+      "AgreementRecord": {
+        "attributes": [
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["agreement_uuid", "str", "agreementUuid"],
+          ["agreement_signature", "str", "agreementSignature"]
+        ]
+      },
+      "AgreementRecordCollection": {
+        "attributes": [["items", "list[AgreementRecordSummary]", "items"]]
+      },
+      "AgreementRecordSummary": {
+        "attributes": [
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["agreement_uuid", "str", "agreementUuid"],
+          ["agreement_signature", "str", "agreementSignature"]
+        ]
+      },
+      "ApplicablePatchCollection": {
+        "attributes": [["items", "list[ApplicablePatchSummary]", "items"]]
+      },
+      "ApplicablePatchSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["weblogic_version", "str", "weblogicVersion"],
+          ["middleware_type", "list[str]", "middlewareType"],
+          ["os_arch", "str", "osArch"]
+        ]
+      },
+      "Backup": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["type", "str", "type"],
+          ["managed_instance_id", "str", "managedInstanceId"],
+          ["backup_location", "str", "backupLocation"],
+          ["content_type", "str", "contentType"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
+      "BackupCollection": {
+        "attributes": [["items", "list[BackupSummary]", "items"]]
+      },
+      "BackupContent": {
+        "attributes": [["content_type", "str", "contentType"]],
+        "discriminator": {
+          "field": "contentType",
+          "values": {
+            "BINARY": "BinaryBackupContent"
+          },
+          "fallback": "BackupContent"
+        }
+      },
+      "BackupSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["type", "str", "type"],
+          ["managed_instance_id", "str", "managedInstanceId"],
+          ["backup_location", "str", "backupLocation"],
+          ["content_type", "str", "contentType"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
       "BackupToRestore": {
         "attributes": [
           ["id", "str", "id"],
           ["content_type", "str", "contentType"]
+        ]
+      },
+      "BinaryBackupContent": {
+        "attributes": [
+          ["content_type", "str", "contentType"],
+          ["middleware", "MiddlewareBinaryBackupContent", "middleware"]
+        ],
+        "discriminator": "BackupContent"
+      },
+      "Configuration": {
+        "attributes": [
+          ["discovery_interval", "int", "discoveryInterval"],
+          ["domain_search_paths", "list[str]", "domainSearchPaths"]
+        ]
+      },
+      "InstalledPatchCollection": {
+        "attributes": [["items", "list[InstalledPatchSummary]", "items"]]
+      },
+      "InstalledPatchSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["description", "str", "description"],
+          ["display_name", "str", "displayName"]
+        ]
+      },
+      "ManagedInstance": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["host_name", "str", "hostName"],
+          ["server_count", "int", "serverCount"],
+          ["plugin_status", "str", "pluginStatus"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["os_name", "str", "osName"],
+          ["os_arch", "str", "osArch"],
+          ["configuration", "ManagedInstanceConfiguration", "configuration"]
+        ]
+      },
+      "ManagedInstanceCollection": {
+        "attributes": [["items", "list[ManagedInstanceSummary]", "items"]]
+      },
+      "ManagedInstanceConfiguration": {
+        "attributes": [
+          ["discovery_interval", "int", "discoveryInterval"],
+          ["domain_search_paths", "list[str]", "domainSearchPaths"]
+        ]
+      },
+      "ManagedInstanceSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["host_name", "str", "hostName"],
+          ["server_count", "int", "serverCount"],
+          ["plugin_status", "str", "pluginStatus"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "MiddlewareBackupPatch": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"]
+        ]
+      },
+      "MiddlewareBinaryBackupContent": {
+        "attributes": [
+          ["version", "str", "version"],
+          ["patches", "list[MiddlewareBackupPatch]", "patches"]
+        ]
+      },
+      "RequiredPolicyCollection": {
+        "attributes": [["items", "list[RequiredPolicySummary]", "items"]]
+      },
+      "RequiredPolicySummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["statements", "list[str]", "statements"]
+        ]
+      },
+      "ResourceInventory": {
+        "attributes": [
+          ["wls_domain_count", "int", "wlsDomainCount"],
+          [
+            "wls_domain_not_in_latest_patch_count",
+            "int",
+            "wlsDomainNotInLatestPatchCount"
+          ],
+          [
+            "wls_domain_with_patch_readiness_warning_count",
+            "int",
+            "wlsDomainWithPatchReadinessWarningCount"
+          ],
+          [
+            "wls_domain_with_patch_readiness_error_count",
+            "int",
+            "wlsDomainWithPatchReadinessErrorCount"
+          ],
+          ["managed_instance_count", "int", "managedInstanceCount"],
+          [
+            "managed_instance_with_patch_readiness_warning_count",
+            "int",
+            "managedInstanceWithPatchReadinessWarningCount"
+          ],
+          [
+            "managed_instance_with_patch_readiness_error_count",
+            "int",
+            "managedInstanceWithPatchReadinessErrorCount"
+          ]
+        ]
+      },
+      "ScanResultCollection": {
+        "attributes": [["items", "list[ScanResultSummary]", "items"]]
+      },
+      "ScanResultSummary": {
+        "attributes": [
+          ["wls_domain_id", "str", "wlsDomainId"],
+          ["server_name", "str", "serverName"],
+          ["time_of_server_check", "datetime", "timeOfServerCheck"],
+          ["server_check_status", "str", "serverCheckStatus"],
+          ["server_check_name", "str", "serverCheckName"],
+          ["server_check_result_id", "str", "serverCheckResultId"],
+          ["server_check_result", "str", "serverCheckResult"]
+        ]
+      },
+      "Server": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["is_admin", "bool", "isAdmin"],
+          ["status", "str", "status"],
+          ["restart_order", "int", "restartOrder"],
+          ["middleware_path", "str", "middlewarePath"],
+          ["middleware_type", "str", "middlewareType"],
+          ["weblogic_version", "str", "weblogicVersion"],
+          ["jdk_path", "str", "jdkPath"],
+          ["jdk_version", "str", "jdkVersion"],
+          ["wls_domain_name", "str", "wlsDomainName"],
+          ["wls_domain_id", "str", "wlsDomainId"],
+          ["wls_domain_path", "str", "wlsDomainPath"],
+          ["latest_patches_status", "str", "latestPatchesStatus"],
+          ["patch_readiness_status", "str", "patchReadinessStatus"],
+          ["host_name", "str", "hostName"],
+          ["managed_instance_id", "str", "managedInstanceId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "ServerCollection": {
+        "attributes": [["items", "list[ServerSummary]", "items"]]
+      },
+      "ServerSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["is_admin", "bool", "isAdmin"],
+          ["status", "str", "status"],
+          ["restart_order", "int", "restartOrder"],
+          ["middleware_path", "str", "middlewarePath"],
+          ["middleware_type", "str", "middlewareType"],
+          ["weblogic_version", "str", "weblogicVersion"],
+          ["jdk_path", "str", "jdkPath"],
+          ["jdk_version", "str", "jdkVersion"],
+          ["wls_domain_name", "str", "wlsDomainName"],
+          ["wls_domain_id", "str", "wlsDomainId"],
+          ["wls_domain_path", "str", "wlsDomainPath"],
+          ["latest_patches_status", "str", "latestPatchesStatus"],
+          ["patch_readiness_status", "str", "patchReadinessStatus"],
+          ["host_name", "str", "hostName"],
+          ["managed_instance_id", "str", "managedInstanceId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
         ]
       },
       "ServerToRestore": {
@@ -11260,6 +11506,150 @@
             "managedServerStopScriptPath"
           ]
         ]
+      },
+      "WlsDomain": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["middleware_type", "str", "middlewareType"],
+          ["weblogic_version", "str", "weblogicVersion"],
+          ["patch_readiness_status", "str", "patchReadinessStatus"],
+          [
+            "is_accepted_terms_and_conditions",
+            "bool",
+            "isAcceptedTermsAndConditions"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["configuration", "WlsDomainConfiguration", "configuration"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "WlsDomainCollection": {
+        "attributes": [["items", "list[WlsDomainSummary]", "items"]]
+      },
+      "WlsDomainConfiguration": {
+        "attributes": [
+          ["is_patch_enabled", "bool", "isPatchEnabled"],
+          ["is_rollback_on_failure", "bool", "isRollbackOnFailure"],
+          ["servers_shutdown_timeout", "int", "serversShutdownTimeout"],
+          ["admin_server_control_mode", "str", "adminServerControlMode"],
+          ["managed_server_control_mode", "str", "managedServerControlMode"],
+          [
+            "admin_server_start_script_path",
+            "str",
+            "adminServerStartScriptPath"
+          ],
+          ["admin_server_stop_script_path", "str", "adminServerStopScriptPath"],
+          [
+            "managed_server_start_script_path",
+            "str",
+            "managedServerStartScriptPath"
+          ],
+          [
+            "managed_server_stop_script_path",
+            "str",
+            "managedServerStopScriptPath"
+          ]
+        ]
+      },
+      "WlsDomainCredential": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["strategy", "str", "strategy"],
+          ["user_secret_id", "str", "userSecretId"],
+          ["password_secret_id", "str", "passwordSecretId"]
+        ]
+      },
+      "WlsDomainCredentialCollection": {
+        "attributes": [["items", "list[WlsDomainCredentialSummary]", "items"]]
+      },
+      "WlsDomainCredentialSummary": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["strategy", "str", "strategy"]
+        ]
+      },
+      "WlsDomainSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["middleware_type", "str", "middlewareType"],
+          ["weblogic_version", "str", "weblogicVersion"],
+          ["patch_readiness_status", "str", "patchReadinessStatus"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"],
+          ["metadata", "dict(str, str)", "metadata"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

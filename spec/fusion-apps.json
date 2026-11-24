@@ -22789,12 +22789,41 @@
   },
   "models": {
     "fusion_apps": {
+      "Action": {
+        "attributes": [
+          ["reference_key", "str", "referenceKey"],
+          ["action_type", "str", "actionType"],
+          ["state", "str", "state"],
+          ["description", "str", "description"]
+        ],
+        "discriminator": {
+          "field": "actionType",
+          "values": {
+            "PATCH": "PatchAction",
+            "QUARTERLY_UPGRADE": "UpgradeAction",
+            "APPLICATION_MIGRATION": "ApplicationMigrationAction",
+            "VERTEX": "VertexAction"
+          },
+          "fallback": "Action"
+        }
+      },
       "AdditionalEgressRule": {
         "attributes": [
           ["description", "str", "description"],
           ["destination_cidr", "str", "destinationCidr"],
           ["max_destination_port", "int", "maxDestinationPort"],
           ["min_destination_port", "int", "minDestinationPort"]
+        ]
+      },
+      "AdminUserCollection": {
+        "attributes": [["items", "list[AdminUserSummary]", "items"]]
+      },
+      "AdminUserSummary": {
+        "attributes": [
+          ["username", "str", "username"],
+          ["email_address", "str", "emailAddress"],
+          ["first_name", "str", "firstName"],
+          ["last_name", "str", "lastName"]
         ]
       },
       "AllowRule": {
@@ -22804,6 +22833,19 @@
           ["description", "str", "description"]
         ],
         "discriminator": "Rule"
+      },
+      "ApplicationMigrationAction": {
+        "attributes": [
+          ["reference_key", "str", "referenceKey"],
+          ["action_type", "str", "actionType"],
+          ["state", "str", "state"],
+          ["description", "str", "description"],
+          ["application_type", "str", "applicationType"],
+          ["source_environment_name", "str", "sourceEnvironmentName"],
+          ["source_environment_id", "str", "sourceEnvironmentId"],
+          ["source_environment_url", "str", "sourceEnvironmentUrl"]
+        ],
+        "discriminator": "Action"
       },
       "CertificateInfo": {
         "attributes": [
@@ -22833,6 +22875,100 @@
           ["last_name", "str", "lastName"]
         ]
       },
+      "DataMaskingActivity": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_masking_start", "datetime", "timeMaskingStart"],
+          ["time_masking_finish", "datetime", "timeMaskingFinish"]
+        ]
+      },
+      "DataMaskingActivityCollection": {
+        "attributes": [["items", "list[DataMaskingActivitySummary]", "items"]]
+      },
+      "DataMaskingActivitySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_masking_start", "datetime", "timeMaskingStart"],
+          ["time_masking_finish", "datetime", "timeMaskingFinish"]
+        ]
+      },
+      "DnsRecord": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["rdata", "str", "rdata"],
+          ["type", "str", "type"],
+          ["ttl_in_seconds", "int", "ttlInSeconds"]
+        ]
+      },
+      "EmailSubdomain": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["marketing_brand_id", "str", "marketingBrandId"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["dns_management", "str", "dnsManagement"],
+          ["dns_status", "str", "dnsStatus"],
+          ["certificate_management", "str", "certificateManagement"],
+          ["certificate_status", "str", "certificateStatus"],
+          [
+            "time_certificate_expiration",
+            "datetime",
+            "timeCertificateExpiration"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "EmailSubdomainCollection": {
+        "attributes": [["items", "list[EmailSubdomainSummary]", "items"]]
+      },
+      "EmailSubdomainSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["marketing_brand_id", "str", "marketingBrandId"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["dns_management", "str", "dnsManagement"],
+          ["dns_status", "str", "dnsStatus"],
+          ["certificate_management", "str", "certificateManagement"],
+          ["certificate_status", "str", "certificateStatus"],
+          [
+            "time_certificate_expiration",
+            "datetime",
+            "timeCertificateExpiration"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "EnvironmentRole": {
+        "attributes": [
+          ["current_role", "str", "currentRole"],
+          ["standby_environment_region", "str", "standbyEnvironmentRegion"],
+          ["standby_environment_id", "str", "standbyEnvironmentId"]
+        ]
+      },
+      "ExtractDetailsCollection": {
+        "attributes": [["items", "list[ExtractDetailsSummary]", "items"]]
+      },
+      "ExtractDetailsSummary": {
+        "attributes": [
+          ["par_url", "str", "parUrl"],
+          ["password", "str", "password"],
+          ["time_created", "datetime", "timeCreated"]
+        ]
+      },
       "FamilyMaintenancePolicy": {
         "attributes": [
           [
@@ -22844,6 +22980,181 @@
           ["concurrent_maintenance", "str", "concurrentMaintenance"]
         ]
       },
+      "FusionEnvironment": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          [
+            "maintenance_policy",
+            "GetMaintenancePolicyDetails",
+            "maintenancePolicy"
+          ],
+          ["time_upcoming_maintenance", "datetime", "timeUpcomingMaintenance"],
+          ["compartment_id", "str", "compartmentId"],
+          ["fusion_environment_family_id", "str", "fusionEnvironmentFamilyId"],
+          ["subscription_ids", "list[str]", "subscriptionIds"],
+          ["fusion_environment_type", "str", "fusionEnvironmentType"],
+          ["kms_key_id", "str", "kmsKeyId"],
+          ["kms_key_info", "object", "kmsKeyInfo"],
+          ["domain_id", "str", "domainId"],
+          ["idcs_domain_url", "str", "idcsDomainUrl"],
+          ["applied_patch_bundles", "list[str]", "appliedPatchBundles"],
+          ["version", "str", "version"],
+          ["public_url", "str", "publicUrl"],
+          ["dns_prefix", "str", "dnsPrefix"],
+          ["additional_language_packs", "list[str]", "additionalLanguagePacks"],
+          ["is_i_pv6_dual_stack_enabled", "bool", "isIPv6DualStackEnabled"],
+          ["lockbox_id", "str", "lockboxId"],
+          ["is_break_glass_enabled", "bool", "isBreakGlassEnabled"],
+          ["refresh", "RefreshDetails", "refresh"],
+          ["rules", "list[Rule]", "rules"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["system_name", "str", "systemName"],
+          ["environment_role", "EnvironmentRole", "environmentRole"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["is_suspended", "bool", "isSuspended"],
+          [
+            "additional_egress_rules",
+            "list[AdditionalEgressRule]",
+            "additionalEgressRules"
+          ]
+        ]
+      },
+      "FusionEnvironmentCollection": {
+        "attributes": [["items", "list[FusionEnvironmentSummary]", "items"]]
+      },
+      "FusionEnvironmentFamily": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          [
+            "family_maintenance_policy",
+            "FamilyMaintenancePolicy",
+            "familyMaintenancePolicy"
+          ],
+          ["compartment_id", "str", "compartmentId"],
+          ["subscription_ids", "list[str]", "subscriptionIds"],
+          [
+            "is_subscription_update_needed",
+            "bool",
+            "isSubscriptionUpdateNeeded"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["system_name", "str", "systemName"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          [
+            "time_last_subscription_update",
+            "datetime",
+            "timeLastSubscriptionUpdate"
+          ]
+        ]
+      },
+      "FusionEnvironmentFamilyCollection": {
+        "attributes": [
+          ["items", "list[FusionEnvironmentFamilySummary]", "items"]
+        ]
+      },
+      "FusionEnvironmentFamilyLimitsAndUsage": {
+        "attributes": [
+          [
+            "production_limit_and_usage",
+            "LimitAndUsage",
+            "productionLimitAndUsage"
+          ],
+          ["test_limit_and_usage", "LimitAndUsage", "testLimitAndUsage"],
+          [
+            "development_limit_and_usage",
+            "LimitAndUsage",
+            "developmentLimitAndUsage"
+          ],
+          ["demo_limit_and_usage", "LimitAndUsage", "demoLimitAndUsage"]
+        ]
+      },
+      "FusionEnvironmentFamilySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          [
+            "family_maintenance_policy",
+            "FamilyMaintenancePolicy",
+            "familyMaintenancePolicy"
+          ],
+          ["compartment_id", "str", "compartmentId"],
+          ["subscription_ids", "list[str]", "subscriptionIds"],
+          [
+            "is_subscription_update_needed",
+            "bool",
+            "isSubscriptionUpdateNeeded"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "FusionEnvironmentStatus": {
+        "attributes": [["status", "str", "status"]]
+      },
+      "FusionEnvironmentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["time_upcoming_maintenance", "datetime", "timeUpcomingMaintenance"],
+          [
+            "maintenance_policy",
+            "GetMaintenancePolicyDetails",
+            "maintenancePolicy"
+          ],
+          ["compartment_id", "str", "compartmentId"],
+          ["fusion_environment_family_id", "str", "fusionEnvironmentFamilyId"],
+          ["subscription_ids", "list[str]", "subscriptionIds"],
+          ["applied_patch_bundles", "list[str]", "appliedPatchBundles"],
+          ["fusion_environment_type", "str", "fusionEnvironmentType"],
+          ["version", "str", "version"],
+          ["public_url", "str", "publicUrl"],
+          ["dns_prefix", "str", "dnsPrefix"],
+          ["additional_language_packs", "list[str]", "additionalLanguagePacks"],
+          ["is_i_pv6_dual_stack_enabled", "bool", "isIPv6DualStackEnabled"],
+          ["lockbox_id", "str", "lockboxId"],
+          ["is_break_glass_enabled", "bool", "isBreakGlassEnabled"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "GetMaintenancePolicyDetails": {
+        "attributes": [
+          [
+            "quarterly_upgrade_begin_times",
+            "QuarterlyUpgradeBeginTimes",
+            "quarterlyUpgradeBeginTimes"
+          ],
+          ["monthly_patching_override", "str", "monthlyPatchingOverride"],
+          [
+            "environment_maintenance_override",
+            "str",
+            "environmentMaintenanceOverride"
+          ]
+        ]
+      },
+      "LimitAndUsage": {
+        "attributes": [
+          ["limit", "int", "limit"],
+          ["usage", "int", "usage"]
+        ]
+      },
       "MaintenancePolicy": {
         "attributes": [
           ["monthly_patching_override", "str", "monthlyPatchingOverride"],
@@ -22853,6 +23164,159 @@
             "environmentMaintenanceOverride"
           ]
         ]
+      },
+      "MarketingBrand": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MarketingBrandCollection": {
+        "attributes": [["items", "list[MarketingBrandSummary]", "items"]]
+      },
+      "MarketingBrandEmailSubdomainCsr": {
+        "attributes": [
+          ["common_name", "str", "commonName"],
+          ["csr", "str", "csr"]
+        ]
+      },
+      "MarketingBrandEmailSubdomainDnsConfig": {
+        "attributes": [["records", "list[DnsRecord]", "records"]]
+      },
+      "MarketingBrandMicrositeDnsConfig": {
+        "attributes": [["records", "list[DnsRecord]", "records"]]
+      },
+      "MarketingBrandSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "Microsite": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["marketing_brand_id", "str", "marketingBrandId"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["dns_management", "str", "dnsManagement"],
+          ["dns_status", "str", "dnsStatus"],
+          ["certificate_management", "str", "certificateManagement"],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MicrositeCollection": {
+        "attributes": [["items", "list[MicrositeSummary]", "items"]]
+      },
+      "MicrositeSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["marketing_brand_id", "str", "marketingBrandId"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["dns_management", "str", "dnsManagement"],
+          ["dns_status", "str", "dnsStatus"],
+          ["certificate_management", "str", "certificateManagement"],
+          ["time_created", "datetime", "timeCreated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PatchAction": {
+        "attributes": [
+          ["reference_key", "str", "referenceKey"],
+          ["action_type", "str", "actionType"],
+          ["state", "str", "state"],
+          ["description", "str", "description"],
+          ["mode", "str", "mode"],
+          ["category", "str", "category"],
+          ["artifact", "str", "artifact"]
+        ],
+        "discriminator": "Action"
+      },
+      "QuarterlyUpgradeBeginTimes": {
+        "attributes": [
+          ["override_type", "str", "overrideType"],
+          ["begin_times_value", "str", "beginTimesValue"]
+        ]
+      },
+      "RefreshActivity": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["source_fusion_environment_id", "str", "sourceFusionEnvironmentId"],
+          ["time_of_restoration_point", "datetime", "timeOfRestorationPoint"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["service_availability", "str", "serviceAvailability"],
+          ["time_scheduled_start", "datetime", "timeScheduledStart"],
+          ["time_expected_finish", "datetime", "timeExpectedFinish"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_data_masking_opted", "bool", "isDataMaskingOpted"],
+          [
+            "refresh_issue_details_list",
+            "list[RefreshIssueDetails]",
+            "refreshIssueDetailsList"
+          ],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ]
+      },
+      "RefreshActivityCollection": {
+        "attributes": [["items", "list[RefreshActivitySummary]", "items"]]
+      },
+      "RefreshActivitySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["source_fusion_environment_id", "str", "sourceFusionEnvironmentId"],
+          ["time_of_restoration_point", "datetime", "timeOfRestorationPoint"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_scheduled_start", "datetime", "timeScheduledStart"],
+          ["time_expected_finish", "datetime", "timeExpectedFinish"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["service_availability", "str", "serviceAvailability"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_data_masking_opted", "bool", "isDataMaskingOpted"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          [
+            "refresh_issue_details_list",
+            "list[RefreshIssueDetails]",
+            "refreshIssueDetailsList"
+          ]
+        ]
+      },
+      "RefreshDetails": {
+        "attributes": [
+          ["source_fusion_environment_id", "str", "sourceFusionEnvironmentId"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_of_restoration_point", "datetime", "timeOfRestorationPoint"]
+        ]
+      },
+      "RefreshIssueDetails": {
+        "attributes": [["refresh_issues", "str", "refreshIssues"]]
       },
       "Rule": {
         "attributes": [["action", "str", "action"]],
@@ -22876,6 +23340,94 @@
           "fallback": "RuleCondition"
         }
       },
+      "ScheduledActivity": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["run_cycle", "str", "runCycle"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["actions", "list[Action]", "actions"],
+          ["service_availability", "str", "serviceAvailability"],
+          ["time_scheduled_start", "datetime", "timeScheduledStart"],
+          ["time_expected_finish", "datetime", "timeExpectedFinish"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["delay_in_hours", "int", "delayInHours"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["scheduled_activity_phase", "str", "scheduledActivityPhase"],
+          [
+            "scheduled_activity_association_id",
+            "str",
+            "scheduledActivityAssociationId"
+          ]
+        ]
+      },
+      "ScheduledActivityCollection": {
+        "attributes": [["items", "list[ScheduledActivitySummary]", "items"]]
+      },
+      "ScheduledActivitySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["run_cycle", "str", "runCycle"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["actions", "list[Action]", "actions"],
+          ["time_scheduled_start", "datetime", "timeScheduledStart"],
+          ["time_expected_finish", "datetime", "timeExpectedFinish"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["delay_in_hours", "int", "delayInHours"],
+          ["service_availability", "str", "serviceAvailability"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["scheduled_activity_phase", "str", "scheduledActivityPhase"],
+          [
+            "scheduled_activity_association_id",
+            "str",
+            "scheduledActivityAssociationId"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ServiceAttachment": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["service_instance_id", "str", "serviceInstanceId"],
+          ["display_name", "str", "displayName"],
+          ["service_instance_type", "str", "serviceInstanceType"],
+          ["service_url", "str", "serviceUrl"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_sku_based", "bool", "isSkuBased"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "ServiceAttachmentCollection": {
+        "attributes": [["items", "list[ServiceAttachmentSummary]", "items"]]
+      },
+      "ServiceAttachmentSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["service_instance_type", "str", "serviceInstanceType"],
+          ["service_instance_id", "str", "serviceInstanceId"],
+          ["service_url", "str", "serviceUrl"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["is_sku_based", "bool", "isSkuBased"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
       "SourceIpAddressCondition": {
         "attributes": [
           ["attribute_name", "str", "attributeName"],
@@ -22897,11 +23449,197 @@
         ],
         "discriminator": "RuleCondition"
       },
+      "Subscription": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["classic_subscription_id", "str", "classicSubscriptionId"],
+          ["service_name", "str", "serviceName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["skus", "list[SubscriptionSku]", "skus"]
+        ]
+      },
+      "SubscriptionDetail": {
+        "attributes": [["subscriptions", "list[Subscription]", "subscriptions"]]
+      },
+      "SubscriptionSku": {
+        "attributes": [
+          ["sku", "str", "sku"],
+          ["license_part_description", "str", "licensePartDescription"],
+          ["metric_name", "str", "metricName"],
+          ["quantity", "int", "quantity"],
+          ["description", "str", "description"]
+        ]
+      },
+      "TimeAvailableForRefreshCollection": {
+        "attributes": [
+          ["items", "list[TimeAvailableForRefreshSummary]", "items"]
+        ]
+      },
+      "TimeAvailableForRefreshSummary": {
+        "attributes": [
+          ["time_available_for_refresh", "datetime", "timeAvailableForRefresh"]
+        ]
+      },
       "UpdateFamilyMaintenancePolicyDetails": {
         "attributes": [
           ["is_monthly_patching_enabled", "bool", "isMonthlyPatchingEnabled"],
           ["concurrent_maintenance", "str", "concurrentMaintenance"]
         ]
+      },
+      "UpgradeAction": {
+        "attributes": [
+          ["reference_key", "str", "referenceKey"],
+          ["action_type", "str", "actionType"],
+          ["state", "str", "state"],
+          ["description", "str", "description"],
+          ["version", "str", "version"],
+          ["qualifier", "str", "qualifier"]
+        ],
+        "discriminator": "Action"
+      },
+      "VanityDnsRecord": {
+        "attributes": [
+          ["domain", "str", "domain"],
+          ["rdata", "str", "rdata"],
+          ["type", "str", "type"],
+          ["ttl_in_seconds", "int", "ttlInSeconds"]
+        ]
+      },
+      "VanityDomain": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["vanity_domain", "str", "vanityDomain"],
+          ["prefix", "str", "prefix"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_enabled", "datetime", "timeEnabled"],
+          ["origin_cert_request_type", "str", "originCertRequestType"],
+          ["cdn_cert_request_type", "str", "cdnCertRequestType"],
+          ["dns_managed_by", "str", "dnsManagedBy"],
+          ["certificate_info", "CertificateInfo", "certificateInfo"],
+          ["change_management_link", "str", "changeManagementLink"],
+          ["scheduled_activity_id", "str", "scheduledActivityId"],
+          [
+            "customer_dns_records",
+            "list[VanityDnsRecord]",
+            "customerDnsRecords"
+          ],
+          ["is_dns_status_ready", "bool", "isDnsStatusReady"],
+          ["is_origin_cert_status_ready", "bool", "isOriginCertStatusReady"],
+          ["origin_cert_status", "str", "originCertStatus"],
+          ["time_origin_cert_expired", "datetime", "timeOriginCertExpired"],
+          ["is_cdn_cert_status_ready", "bool", "isCdnCertStatusReady"],
+          ["cdn_cert_status", "str", "cdnCertStatus"],
+          ["time_cdn_cert_expired", "datetime", "timeCdnCertExpired"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "VanityDomainActivity": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["vanity_domain_id", "str", "vanityDomainId"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_enabled", "datetime", "timeEnabled"],
+          ["time_deactivated", "datetime", "timeDeactivated"],
+          ["time_scheduled", "datetime", "timeScheduled"],
+          ["operation_type", "str", "operationType"]
+        ]
+      },
+      "VanityDomainCollection": {
+        "attributes": [["items", "list[VanityDomainSummary]", "items"]]
+      },
+      "VanityDomainSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["vanity_domain", "str", "vanityDomain"],
+          ["prefix", "str", "prefix"],
+          ["fusion_environment_id", "str", "fusionEnvironmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_enabled", "datetime", "timeEnabled"],
+          ["scheduled_activity_id", "str", "scheduledActivityId"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "VertexAction": {
+        "attributes": [
+          ["reference_key", "str", "referenceKey"],
+          ["action_type", "str", "actionType"],
+          ["state", "str", "state"],
+          ["description", "str", "description"],
+          ["artifact", "str", "artifact"]
+        ],
+        "discriminator": "Action"
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

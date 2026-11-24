@@ -4296,6 +4296,46 @@
   },
   "models": {
     "sch": {
+      "ConnectorPlugin": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["estimated_throughput", "str", "estimatedThroughput"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["display_name", "str", "displayName"],
+          ["schema", "str", "schema"]
+        ],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "TARGET": "TargetConnectorPlugin",
+            "SOURCE": "SourceConnectorPlugin"
+          },
+          "fallback": "ConnectorPlugin"
+        }
+      },
+      "ConnectorPluginCollection": {
+        "attributes": [["items", "list[ConnectorPluginSummary]", "items"]]
+      },
+      "ConnectorPluginSummary": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["estimated_throughput", "str", "estimatedThroughput"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["display_name", "str", "displayName"]
+        ],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "SOURCE": "SourceConnectorPluginSummary",
+            "TARGET": "TargetConnectorPluginSummary"
+          },
+          "fallback": "ConnectorPluginSummary"
+        }
+      },
       "DimensionDetails": {
         "attributes": [
           ["name", "str", "name"],
@@ -4322,6 +4362,20 @@
         ],
         "discriminator": "TaskDetails"
       },
+      "FunctionTaskDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["function_id", "str", "functionId"],
+          ["batch_size_in_kbs", "int", "batchSizeInKbs"],
+          ["batch_time_in_sec", "int", "batchTimeInSec"]
+        ],
+        "discriminator": "TaskDetailsResponse"
+      },
       "FunctionsTargetDetails": {
         "attributes": [
           ["kind", "str", "kind"],
@@ -4331,6 +4385,21 @@
           ["batch_time_in_sec", "int", "batchTimeInSec"]
         ],
         "discriminator": "TargetDetails"
+      },
+      "FunctionsTargetDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["function_id", "str", "functionId"],
+          ["batch_size_in_kbs", "int", "batchSizeInKbs"],
+          ["batch_size_in_num", "int", "batchSizeInNum"],
+          ["batch_time_in_sec", "int", "batchTimeInSec"]
+        ],
+        "discriminator": "TargetDetailsResponse"
       },
       "JmesPathDimensionValue": {
         "attributes": [
@@ -4350,6 +4419,18 @@
         ],
         "discriminator": "TaskDetails"
       },
+      "LogRuleTaskDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["condition", "str", "condition"]
+        ],
+        "discriminator": "TaskDetailsResponse"
+      },
       "LogSource": {
         "attributes": [
           ["compartment_id", "str", "compartmentId"],
@@ -4365,12 +4446,37 @@
         ],
         "discriminator": "TargetDetails"
       },
+      "LoggingAnalyticsTargetDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["log_group_id", "str", "logGroupId"],
+          ["log_source_identifier", "str", "logSourceIdentifier"]
+        ],
+        "discriminator": "TargetDetailsResponse"
+      },
       "LoggingSourceDetails": {
         "attributes": [
           ["kind", "str", "kind"],
           ["log_sources", "list[LogSource]", "logSources"]
         ],
         "discriminator": "SourceDetails"
+      },
+      "LoggingSourceDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["log_sources", "list[LogSource]", "logSources"]
+        ],
+        "discriminator": "SourceDetailsResponse"
       },
       "MonitoringSource": {
         "attributes": [
@@ -4392,6 +4498,18 @@
           ["monitoring_sources", "list[MonitoringSource]", "monitoringSources"]
         ],
         "discriminator": "SourceDetails"
+      },
+      "MonitoringSourceDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["monitoring_sources", "list[MonitoringSource]", "monitoringSources"]
+        ],
+        "discriminator": "SourceDetailsResponse"
       },
       "MonitoringSourceMetricDetails": {
         "attributes": [["kind", "str", "kind"]],
@@ -4440,6 +4558,21 @@
         ],
         "discriminator": "TargetDetails"
       },
+      "MonitoringTargetDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["compartment_id", "str", "compartmentId"],
+          ["metric_namespace", "str", "metricNamespace"],
+          ["metric", "str", "metric"],
+          ["dimensions", "list[DimensionDetails]", "dimensions"]
+        ],
+        "discriminator": "TargetDetailsResponse"
+      },
       "NotificationsTargetDetails": {
         "attributes": [
           ["kind", "str", "kind"],
@@ -4447,6 +4580,19 @@
           ["enable_formatted_messaging", "bool", "enableFormattedMessaging"]
         ],
         "discriminator": "TargetDetails"
+      },
+      "NotificationsTargetDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["topic_id", "str", "topicId"],
+          ["enable_formatted_messaging", "bool", "enableFormattedMessaging"]
+        ],
+        "discriminator": "TargetDetailsResponse"
       },
       "ObjectStorageTargetDetails": {
         "attributes": [
@@ -4459,6 +4605,22 @@
         ],
         "discriminator": "TargetDetails"
       },
+      "ObjectStorageTargetDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["namespace", "str", "namespace"],
+          ["bucket_name", "str", "bucketName"],
+          ["object_name_prefix", "str", "objectNamePrefix"],
+          ["batch_rollover_size_in_mbs", "int", "batchRolloverSizeInMBs"],
+          ["batch_rollover_time_in_ms", "int", "batchRolloverTimeInMs"]
+        ],
+        "discriminator": "TargetDetailsResponse"
+      },
       "PluginSourceDetails": {
         "attributes": [
           ["kind", "str", "kind"],
@@ -4466,6 +4628,87 @@
           ["config_map", "object", "configMap"]
         ],
         "discriminator": "SourceDetails"
+      },
+      "PluginSourceDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["plugin_name", "str", "pluginName"],
+          ["config_map", "object", "configMap"]
+        ],
+        "discriminator": "SourceDetailsResponse"
+      },
+      "PrivateEndpointMetadata": {
+        "attributes": [
+          ["rce_traffic_ip_address", "str", "rceTrafficIpAddress"],
+          ["rce_dns_proxy_ip_address", "str", "rceDnsProxyIpAddress"]
+        ]
+      },
+      "ServiceConnector": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["lifecyle_details", "str", "lifecyleDetails"],
+          ["source", "SourceDetailsResponse", "source"],
+          ["tasks", "list[TaskDetailsResponse]", "tasks"],
+          ["target", "TargetDetailsResponse", "target"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ServiceConnectorCollection": {
+        "attributes": [["items", "list[ServiceConnectorSummary]", "items"]]
+      },
+      "ServiceConnectorSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SourceConnectorPlugin": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["estimated_throughput", "str", "estimatedThroughput"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["display_name", "str", "displayName"],
+          ["schema", "str", "schema"],
+          ["max_retention", "str", "maxRetention"]
+        ],
+        "discriminator": "ConnectorPlugin"
+      },
+      "SourceConnectorPluginSummary": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["estimated_throughput", "str", "estimatedThroughput"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["display_name", "str", "displayName"],
+          ["max_retention", "str", "maxRetention"]
+        ],
+        "discriminator": "ConnectorPluginSummary"
       },
       "SourceDetails": {
         "attributes": [["kind", "str", "kind"]],
@@ -4478,6 +4721,26 @@
             "plugin": "PluginSourceDetails"
           },
           "fallback": "SourceDetails"
+        }
+      },
+      "SourceDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ]
+        ],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "logging": "LoggingSourceDetailsResponse",
+            "monitoring": "MonitoringSourceDetailsResponse",
+            "streaming": "StreamingSourceDetailsResponse",
+            "plugin": "PluginSourceDetailsResponse"
+          },
+          "fallback": "SourceDetailsResponse"
         }
       },
       "StaticDimensionValue": {
@@ -4506,12 +4769,60 @@
         ],
         "discriminator": "SourceDetails"
       },
+      "StreamingSourceDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["stream_id", "str", "streamId"],
+          ["cursor", "StreamingCursorDetails", "cursor"]
+        ],
+        "discriminator": "SourceDetailsResponse"
+      },
       "StreamingTargetDetails": {
         "attributes": [
           ["kind", "str", "kind"],
           ["stream_id", "str", "streamId"]
         ],
         "discriminator": "TargetDetails"
+      },
+      "StreamingTargetDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ],
+          ["stream_id", "str", "streamId"]
+        ],
+        "discriminator": "TargetDetailsResponse"
+      },
+      "TargetConnectorPlugin": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["estimated_throughput", "str", "estimatedThroughput"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["display_name", "str", "displayName"],
+          ["schema", "str", "schema"]
+        ],
+        "discriminator": "ConnectorPlugin"
+      },
+      "TargetConnectorPluginSummary": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["estimated_throughput", "str", "estimatedThroughput"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["display_name", "str", "displayName"]
+        ],
+        "discriminator": "ConnectorPluginSummary"
       },
       "TargetDetails": {
         "attributes": [["kind", "str", "kind"]],
@@ -4528,6 +4839,28 @@
           "fallback": "TargetDetails"
         }
       },
+      "TargetDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ]
+        ],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "monitoring": "MonitoringTargetDetailsResponse",
+            "loggingAnalytics": "LoggingAnalyticsTargetDetailsResponse",
+            "functions": "FunctionsTargetDetailsResponse",
+            "objectStorage": "ObjectStorageTargetDetailsResponse",
+            "streaming": "StreamingTargetDetailsResponse",
+            "notifications": "NotificationsTargetDetailsResponse"
+          },
+          "fallback": "TargetDetailsResponse"
+        }
+      },
       "TaskDetails": {
         "attributes": [["kind", "str", "kind"]],
         "discriminator": {
@@ -4539,9 +4872,70 @@
           "fallback": "TaskDetails"
         }
       },
+      "TaskDetailsResponse": {
+        "attributes": [
+          ["kind", "str", "kind"],
+          [
+            "private_endpoint_metadata",
+            "PrivateEndpointMetadata",
+            "privateEndpointMetadata"
+          ]
+        ],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "logRule": "LogRuleTaskDetailsResponse",
+            "function": "FunctionTaskDetailsResponse"
+          },
+          "fallback": "TaskDetailsResponse"
+        }
+      },
       "TrimHorizonStreamingCursor": {
         "attributes": [["kind", "str", "kind"]],
         "discriminator": "StreamingCursorDetails"
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestCollection": {
+        "attributes": [["items", "list[WorkRequest]", "items"]]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
       }
     }
   }

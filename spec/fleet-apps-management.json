@@ -79881,6 +79881,56 @@
         ],
         "discriminator": "UserActionDetails"
       },
+      "ActionGroupDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kind", "str", "kind"],
+          ["product", "str", "product"],
+          ["lifecycle_operation", "str", "lifecycleOperation"],
+          ["activity_id", "str", "activityId"],
+          ["status", "str", "status"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"]
+        ],
+        "discriminator": {
+          "field": "kind",
+          "values": {
+            "FLEET_USING_RUNBOOK": "FleetBasedActionGroupDetails"
+          },
+          "fallback": "ActionGroupDetails"
+        }
+      },
+      "ActivityResourceTarget": {
+        "attributes": [
+          ["target_name", "str", "targetName"],
+          ["status", "str", "status"],
+          ["description", "str", "description"]
+        ]
+      },
+      "AnnouncementCollection": {
+        "attributes": [["items", "list[AnnouncementSummary]", "items"]]
+      },
+      "AnnouncementSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["type", "str", "type"],
+          ["summary", "str", "summary"],
+          ["details", "str", "details"],
+          ["url", "str", "url"],
+          ["announcement_start", "datetime", "announcementStart"],
+          ["announcement_end", "datetime", "announcementEnd"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "ApiBasedExecutionDetails": {
         "attributes": [
           ["execution_type", "str", "executionType"],
@@ -79888,6 +79938,32 @@
           ["system_variables", "list[str]", "systemVariables"]
         ],
         "discriminator": "ExecutionDetails"
+      },
+      "ApmDomainVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "ArrayVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["items", "BaseVariable", "items"],
+          ["max_items", "int", "maxItems"],
+          ["min_items", "int", "minItems"],
+          ["are_unique_items", "bool", "areUniqueItems"],
+          ["default_value", "object", "defaultValue"],
+          ["contains", "BaseVariable", "contains"]
+        ],
+        "discriminator": "BaseVariable"
       },
       "ArtifactDetails": {
         "attributes": [["category", "str", "category"]],
@@ -79945,6 +80021,13 @@
         ],
         "discriminator": "AssociatedTaskDetails"
       },
+      "AssociatedSchedulerDefinition": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["is_recurring", "bool", "isRecurring"]
+        ]
+      },
       "AssociatedSharedTaskDetails": {
         "attributes": [
           ["scope", "str", "scope"],
@@ -79963,12 +80046,231 @@
           "fallback": "AssociatedTaskDetails"
         }
       },
+      "Association": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"]
+        ]
+      },
+      "AutonomousContainerDbVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "AutonomousContainerDbVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "AutonomousContainerDbVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "AutonomousDataBaseVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "AutonomousDataBaseVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "AutonomousDataBaseVariableDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["db_workload", "str", "dbWorkload"]
+        ]
+      },
+      "AutonomousDatabaseVersionVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          [
+            "depends_on",
+            "AutonomousDatabaseVersionVariableDependsOn",
+            "dependsOn"
+          ]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "AutonomousDatabaseVersionVariableDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["db_workload", "str", "dbWorkload"]
+        ]
+      },
+      "AvailabilityDomainVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "AvailabilityDomainVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "AvailabilityDomainVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "BaseOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "LIST": "ListOutput",
+            "OCID": "OcidOutput",
+            "CSV": "CsvOutput",
+            "COPYABLESTRING": "CopyableStringOutput",
+            "JSON": "JsonOutput",
+            "NUMBER": "NumberOutput",
+            "STRING": "StringOutput",
+            "MAP": "MapOutput",
+            "LINK": "LinkOutput",
+            "boolean": "BoolOutput"
+          },
+          "fallback": "BaseOutput"
+        }
+      },
+      "BaseVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": {
+          "field": "type",
+          "values": {
+            "OCI_LOADBALANCER_NETWORKLOADBALANCER_ID": "NetworkLoadBalancerId",
+            "FILE": "FileVariable",
+            "OCI_CORE_NATGATEWAY_ID": "NatGatewayVariable",
+            "ENUM": "EnumVariable",
+            "OCI_CORE_INSTANCESHAPE_NAME": "InstanceShapeVariable",
+            "OCI_DATABASE_AUTONOMOUSCONTAINERDATABASE_ID": "AutonomousContainerDbVariable",
+            "OCI_DATABASE_DATABASE_ID": "DataBaseVariable",
+            "OCI_DATABASE_AUTONOMOUSDATABASEVERSION_ID": "AutonomousDatabaseVersionVariable",
+            "OCI_IDENTITY_REGION_NAME": "RegionVariable",
+            "OCI_CORE_VOLUME_ID": "VolumeId",
+            "OCI_CORE_VCN_NETWORKSECURITYGROUP_ID": "VcnNetworkSecurityGroupId",
+            "INTEGER": "IntegerVariable",
+            "OCI_DATABASE_DBNODE_ID": "DatabaseDbNodeId",
+            "TEXT": "MultilineVariable",
+            "PASSWORD": "PasswordVariable",
+            "ARRAY": "ArrayVariable",
+            "OCI_MGMT_AGENT_ID": "ManagementAgents",
+            "OCI_BLOCKSTORAGE_POLICIES_ID": "VolumeBackupPoliciesVariable",
+            "OCI_LOGAN_SCHEDULEDTASK_ID": "LogAnalyticsScheduledTasks",
+            "OCI_KMS_VAULT_ID": "KmsVaultVariable",
+            "OCI_CORE_SERVICEGATEWAY_ID": "ServiceGatewayVariable",
+            "OCI_LOGAN_LOGENTITY_ID": "LogAnalyticsLogEntities",
+            "OCI_CORE_VCN_SECLIST_ID": "VcnSecListId",
+            "OCI_CORE_NSG_ID": "NsgVariable",
+            "OCI_IDENTITY_DYNAMICGROUPS_ID": "DynamicGroupsVariable",
+            "OCI_ODS_PROJECT_ID": "OdsProjectVariable",
+            "OCI_MOUNT_TARGET_ID": "MountTargetsVariable",
+            "OCI_IDENTITY_DOMAINS_ID": "IdentityDomainVariable",
+            "OCI_STORAGE_OBJECTSTORAGE_BUCKET_NAME": "ObjectStorageBucketName",
+            "OCI_DATABASE_MYSQL_CONFIGURATION_ID": "MysqlConfigurationId",
+            "OCI_STORAGE_FILESTORAGE_EXPORTSET_ID": "FileStorageExportSetId",
+            "OCI_KMS_SECRET_ID": "KmsSecretVariable",
+            "DATETIME": "DatetimeVariable",
+            "OCI_DATABASE_DATAGUARDASSOCIATION_ID": "DatabaseDataguardAssociationId",
+            "OCI_LOGAN_ENTITYTYPE_ID": "LogAnalyticsEntityTypes",
+            "OCI_IDENTITY_GROUPS_ID": "GroupsVariable",
+            "OCI_APM_DOMAIN_ID": "ApmDomainVariable",
+            "OCI_DATABASE_AUTONOMOUSDATABASE_ID": "AutonomousDataBaseVariable",
+            "OCI_IDENTITY_AVAILABILITYDOMAIN_NAME": "AvailabilityDomainVariable",
+            "OCI_KUBERNETES_VERSIONS_ID": "KubernetesVersionsVariable",
+            "OCI_LOADBALANCER_LOADBALANCER_ID": "LoadBalancerVariable",
+            "OCI_CORE_IMAGE_ID": "ImageVariable",
+            "OCI_LOADBALANCER_LOADBALANCER_RESERVEDIPS_ID": "LoadBalancerReservedIps",
+            "OCI_KMS_KEY_ID": "KmsKeyVariable",
+            "OCI_LOGAN_SOURCE_ID": "LogAnalyticsSources",
+            "OCI_DATABASE_DATAGUARD_ID": "DatabaseDataGuardId",
+            "OCI_IDENTITY_TAG_VALUE": "TagVariable",
+            "OCI_DATABASE_CLOUDVMCLUSTER_ID": "CloudVmClusterId",
+            "OCI_RESOURCEMANAGER_PRIVATEENDPOINT_ID": "PrivateEndpointVariable",
+            "OCI_CONTAINER_CLUSTER_ID": "ContainerClusterVariable",
+            "OCI_DATABASE_MYSQL_SHAPE_ID": "MysqlShapeId",
+            "OCI_CORE_VCN_ID": "VcnVariable",
+            "OCI_IDENTITY_COMPARTMENT_ID": "CompartmentVariable",
+            "OCI_IDENTITY_FAULTDOMAIN_NAME": "FaultDomainVariable",
+            "OCI_CORE_INSTANCESHAPEWITHFLEX_NAME": "InstanceShapeVariableWithFlex",
+            "STRING": "StringVariable",
+            "OCI_CORE_INSTANCE_ID": "InstanceVariable",
+            "OCI_DATABASE_EXADATA_ID": "DatabaseExadataId",
+            "OCI_DATABASE_DBHOME_ID": "DbHomeVariable",
+            "OCI_STORAGE_FILESTORAGE_FILESYSTEM_ID": "FileStorageFilesystemId",
+            "NUMBER": "NumberVariable",
+            "OCI_CORE_SUBNET_ID": "SubnetVariable",
+            "OCI_CORE_SSH_PUBLICKEY": "SshPublicKeyVariable",
+            "OCI_LOGAN_LOGGROUP_ID": "LogAnalyticsLogGroup",
+            "BOOLEAN": "BooleanVariable",
+            "OCI_DATABASE_DBSYSTEM_ID": "DbSystemVariable",
+            "OCI_STORAGE_FILESTORAGE_MOUNTTARGET_ID": "FileStorageMountTargetId",
+            "OCI_DATABASE_CDB_ID": "DatabaseCdbId",
+            "OCI_DATABASE_DBHOME_DBVERSION": "DbHomeVersionVariable"
+          },
+          "fallback": "BaseVariable"
+        }
+      },
+      "BoolOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "bool", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
+      "BooleanVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "bool", "defaultValue"]
+        ],
+        "discriminator": "BaseVariable"
+      },
       "CatalogContentDetails": {
         "attributes": [
           ["source_type", "str", "sourceType"],
           ["catalog_id", "str", "catalogId"]
         ],
         "discriminator": "ContentDetails"
+      },
+      "CatalogGitResultConfig": {
+        "attributes": [
+          ["config_result_type", "str", "configResultType"],
+          ["working_directory", "str", "workingDirectory"],
+          ["branch_name", "str", "branchName"],
+          [
+            "configuration_source_provider_id",
+            "str",
+            "configurationSourceProviderId"
+          ],
+          ["repository_url", "str", "repositoryUrl"]
+        ],
+        "discriminator": "CatalogResultPayload"
       },
       "CatalogGitSourceConfig": {
         "attributes": [
@@ -79984,6 +80286,86 @@
         ],
         "discriminator": "CatalogSourcePayload"
       },
+      "CatalogItem": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["config_source_type", "str", "configSourceType"],
+          ["should_list_public_items", "bool", "shouldListPublicItems"],
+          ["description", "str", "description"],
+          [
+            "catalog_source_payload",
+            "CatalogSourcePayload",
+            "catalogSourcePayload"
+          ],
+          [
+            "catalog_result_payload",
+            "CatalogResultPayload",
+            "catalogResultPayload"
+          ],
+          ["listing_id", "str", "listingId"],
+          ["listing_version", "str", "listingVersion"],
+          ["display_name", "str", "displayName"],
+          ["version_description", "str", "versionDescription"],
+          ["short_description", "str", "shortDescription"],
+          ["package_type", "str", "packageType"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_released", "datetime", "timeReleased"],
+          ["time_backfill_last_checked", "datetime", "timeBackfillLastChecked"],
+          ["time_last_checked", "datetime", "timeLastChecked"],
+          ["is_item_locked", "bool", "isItemLocked"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "CatalogItemCollection": {
+        "attributes": [["items", "list[CatalogItemSummary]", "items"]]
+      },
+      "CatalogItemSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["config_source_type", "str", "configSourceType"],
+          ["description", "str", "description"],
+          [
+            "catalog_source_payload",
+            "CatalogSourcePayload",
+            "catalogSourcePayload"
+          ],
+          [
+            "catalog_result_payload",
+            "CatalogResultPayload",
+            "catalogResultPayload"
+          ],
+          ["listing_id", "str", "listingId"],
+          ["listing_version", "str", "listingVersion"],
+          ["display_name", "str", "displayName"],
+          ["package_type", "str", "packageType"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["version_description", "str", "versionDescription"],
+          ["short_description", "str", "shortDescription"],
+          ["time_released", "datetime", "timeReleased"],
+          ["is_item_locked", "bool", "isItemLocked"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "CatalogItemVariablesDefinition": {
+        "attributes": [
+          ["schema_document", "SchemaDocument", "schemaDocument"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "CatalogMarketplaceSourceConfig": {
         "attributes": [
           ["config_source_type", "str", "configSourceType"],
@@ -79992,6 +80374,15 @@
           ["version", "str", "version"]
         ],
         "discriminator": "CatalogSourcePayload"
+      },
+      "CatalogParResultConfig": {
+        "attributes": [
+          ["config_result_type", "str", "configResultType"],
+          ["working_directory", "str", "workingDirectory"],
+          ["package_url", "str", "packageUrl"],
+          ["time_expires", "datetime", "timeExpires"]
+        ],
+        "discriminator": "CatalogResultPayload"
       },
       "CatalogParSourceConfig": {
         "attributes": [
@@ -80004,6 +80395,21 @@
           ["time_expires", "datetime", "timeExpires"]
         ],
         "discriminator": "CatalogSourcePayload"
+      },
+      "CatalogResultPayload": {
+        "attributes": [
+          ["config_result_type", "str", "configResultType"],
+          ["working_directory", "str", "workingDirectory"]
+        ],
+        "discriminator": {
+          "field": "configResultType",
+          "values": {
+            "GIT_RESULT_CONFIG": "CatalogGitResultConfig",
+            "TEMPLATE_RESULT_CONFIG": "CatalogTemplateResultConfig",
+            "PAR_RESULT_CONFIG": "CatalogParResultConfig"
+          },
+          "fallback": "CatalogResultPayload"
+        }
       },
       "CatalogSourcePayload": {
         "attributes": [
@@ -80031,6 +80437,281 @@
           ["template_display_name", "str", "templateDisplayName"]
         ],
         "discriminator": "CatalogSourcePayload"
+      },
+      "CatalogTemplateResultConfig": {
+        "attributes": [
+          ["config_result_type", "str", "configResultType"],
+          ["working_directory", "str", "workingDirectory"],
+          ["template_id", "str", "templateId"]
+        ],
+        "discriminator": "CatalogResultPayload"
+      },
+      "Choice": {
+        "attributes": [
+          [
+            "required_values",
+            "list[RunbookImportDependencyFinderRequiredValue]",
+            "requiredValues"
+          ]
+        ]
+      },
+      "CloudVmClusterId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "ColumnMetadata": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["type", "str", "type"]
+        ]
+      },
+      "CompartmentVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "str", "defaultValue"],
+          ["depends_on", "object", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "Compliance": {
+        "attributes": [
+          ["compliance_state", "str", "complianceState"],
+          ["confirmed_target_count", "int", "confirmedTargetCount"],
+          ["non_compliant_target_count", "int", "nonCompliantTargetCount"]
+        ]
+      },
+      "ComplianceDetailPolicy": {
+        "attributes": [
+          ["compliance_policy_id", "str", "compliancePolicyId"],
+          [
+            "compliance_policy_display_name",
+            "str",
+            "compliancePolicyDisplayName"
+          ],
+          ["compliance_policy_rule_id", "str", "compliancePolicyRuleId"],
+          [
+            "compliance_policy_rule_display_name",
+            "str",
+            "compliancePolicyRuleDisplayName"
+          ],
+          ["grace_period", "str", "gracePeriod"],
+          ["patch_selection", "PatchSelectionDetails", "patchSelection"]
+        ]
+      },
+      "ComplianceDetailProduct": {
+        "attributes": [
+          ["product_stack", "str", "productStack"],
+          ["product_name", "str", "productName"],
+          ["product_version", "str", "productVersion"]
+        ]
+      },
+      "ComplianceDetailResource": {
+        "attributes": [
+          ["resource_id", "str", "resourceId"],
+          ["resource_name", "str", "resourceName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["compartment", "str", "compartment"],
+          ["resource_region", "str", "resourceRegion"]
+        ]
+      },
+      "ComplianceDetailTarget": {
+        "attributes": [
+          ["target_id", "str", "targetId"],
+          ["target_name", "str", "targetName"],
+          ["version", "str", "version"]
+        ]
+      },
+      "CompliancePatchDetail": {
+        "attributes": [
+          ["patch_id", "str", "patchId"],
+          ["patch_name", "str", "patchName"],
+          ["patch_description", "str", "patchDescription"],
+          ["time_released", "datetime", "timeReleased"],
+          ["patch_type", "str", "patchType"],
+          ["severity", "str", "severity"],
+          ["product", "ComplianceDetailProduct", "product"]
+        ]
+      },
+      "CompliancePolicy": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["product_id", "str", "productId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "CompliancePolicyCollection": {
+        "attributes": [["items", "list[CompliancePolicySummary]", "items"]]
+      },
+      "CompliancePolicyRule": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compliance_policy_id", "str", "compliancePolicyId"],
+          ["product_version", "ProductVersionDetails", "productVersion"],
+          ["patch_type_id", "list[str]", "patchTypeId"],
+          ["severity", "list[str]", "severity"],
+          ["patch_selection", "PatchSelectionDetails", "patchSelection"],
+          ["grace_period", "str", "gracePeriod"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "CompliancePolicyRuleCollection": {
+        "attributes": [["items", "list[CompliancePolicyRuleSummary]", "items"]]
+      },
+      "CompliancePolicyRuleSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compliance_policy_id", "str", "compliancePolicyId"],
+          ["product_version", "ProductVersionDetails", "productVersion"],
+          ["patch_type_id", "list[str]", "patchTypeId"],
+          ["severity", "list[str]", "severity"],
+          ["patch_selection", "PatchSelectionDetails", "patchSelection"],
+          ["grace_period", "str", "gracePeriod"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "CompliancePolicySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["product_id", "str", "productId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["type", "str", "type"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ComplianceRecordAggregation": {
+        "attributes": [
+          ["count", "int", "count"],
+          ["dimensions", "ComplianceRecordDimension", "dimensions"]
+        ]
+      },
+      "ComplianceRecordAggregationCollection": {
+        "attributes": [["items", "list[ComplianceRecordAggregation]", "items"]]
+      },
+      "ComplianceRecordCollection": {
+        "attributes": [["items", "list[ComplianceRecordSummary]", "items"]]
+      },
+      "ComplianceRecordDimension": {
+        "attributes": [
+          ["compliance_state", "str", "complianceState"],
+          ["compliance_level", "str", "complianceLevel"]
+        ]
+      },
+      "ComplianceRecordSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["entity_id", "str", "entityId"],
+          ["entity_display_name", "str", "entityDisplayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["policy", "ComplianceDetailPolicy", "policy"],
+          ["resource", "ComplianceDetailResource", "resource"],
+          ["target", "ComplianceDetailTarget", "target"],
+          ["patch", "CompliancePatchDetail", "patch"],
+          ["compliance_state", "str", "complianceState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ComplianceReport": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["fleet_id", "str", "fleetId"],
+          ["compliance_state", "str", "complianceState"],
+          ["percent_compliant", "float", "percentCompliant"],
+          ["resources", "list[ComplianceReportResource]", "resources"]
+        ]
+      },
+      "ComplianceReportPatchDetail": {
+        "attributes": [
+          ["patch_name", "str", "patchName"],
+          ["patch_description", "str", "patchDescription"],
+          ["time_applied", "datetime", "timeApplied"],
+          ["time_released", "datetime", "timeReleased"],
+          ["patch_type", "str", "patchType"]
+        ]
+      },
+      "ComplianceReportProduct": {
+        "attributes": [
+          ["product_name", "str", "productName"],
+          ["targets", "list[ComplianceReportTarget]", "targets"]
+        ]
+      },
+      "ComplianceReportResource": {
+        "attributes": [
+          ["resource_id", "str", "resourceId"],
+          ["resource_name", "str", "resourceName"],
+          ["resource_type", "str", "resourceType"],
+          ["tenancy_id", "str", "tenancyId"],
+          ["tenancy_name", "str", "tenancyName"],
+          ["compartment", "str", "compartment"],
+          ["resource_region", "str", "resourceRegion"],
+          ["compliance_state", "str", "complianceState"],
+          ["products", "list[ComplianceReportProduct]", "products"]
+        ]
+      },
+      "ComplianceReportTarget": {
+        "attributes": [
+          ["target_id", "str", "targetId"],
+          ["target_name", "str", "targetName"],
+          ["version", "str", "version"],
+          ["compliance_state", "str", "complianceState"],
+          [
+            "installed_patches",
+            "list[ComplianceReportPatchDetail]",
+            "installedPatches"
+          ],
+          [
+            "recommended_patches",
+            "list[ComplianceReportPatchDetail]",
+            "recommendedPatches"
+          ]
+        ]
       },
       "ComponentProperties": {
         "attributes": [
@@ -80074,6 +80755,20 @@
           "fallback": "ConfigCategoryDetails"
         }
       },
+      "ContainerClusterVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "ContainerClusterVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "ContainerClusterVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
       "ContentDetails": {
         "attributes": [["source_type", "str", "sourceType"]],
         "discriminator": {
@@ -80084,6 +80779,18 @@
           },
           "fallback": "ContentDetails"
         }
+      },
+      "CopyableStringOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "BaseOutput"
       },
       "CredentialConfigCategoryDetails": {
         "attributes": [["config_category", "str", "configCategory"]],
@@ -80113,6 +80820,18 @@
           "fallback": "CredentialEntitySpecificDetails"
         }
       },
+      "CsvOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "list[object]", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
       "CustomSchedule": {
         "attributes": [
           ["type", "str", "type"],
@@ -80122,8 +80841,144 @@
         ],
         "discriminator": "Schedule"
       },
+      "DataBaseVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "DataBaseVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DataBaseVariableDependsOn": {
+        "attributes": [
+          ["db_home_id", "str", "dbHomeId"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
+      },
+      "DatabaseCdbId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DatabaseDataGuardId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DatabaseDataguardAssociationId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DatabaseDbNodeId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DatabaseExadataId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DatetimeVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "str", "defaultValue"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DbHomeVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "DbHomeVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DbHomeVariableDependsOn": {
+        "attributes": [
+          ["db_system_id", "str", "dbSystemId"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
+      },
+      "DbHomeVersionVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "DbHomeVersionVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DbHomeVersionVariableDependsOn": {
+        "attributes": [["db_home_id", "str", "dbHomeId"]]
+      },
+      "DbSystemVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "DbSystemVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DbSystemVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
       "DependentPatchDetails": {
         "attributes": [["id", "str", "id"]]
+      },
+      "DeployedResourceDetails": {
+        "attributes": [
+          ["mode", "str", "mode"],
+          ["resource_name", "str", "resourceName"],
+          ["resource_provider", "str", "resourceProvider"],
+          ["resource_type", "str", "resourceType"],
+          [
+            "resource_instance_list",
+            "list[InstanceSummary]",
+            "resourceInstanceList"
+          ]
+        ]
       },
       "Details": {
         "attributes": [
@@ -80147,6 +81002,20 @@
           ["operation", "str", "operation"]
         ]
       },
+      "DynamicGroupsVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "DynamicGroupsVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "DynamicGroupsVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
       "DynamicResourceSelection": {
         "attributes": [
           ["resource_selection_type", "str", "resourceSelectionType"],
@@ -80158,6 +81027,31 @@
         ],
         "discriminator": "ResourceSelection"
       },
+      "EntityExecutionDetails": {
+        "attributes": [
+          ["resource_id", "str", "resourceId"],
+          ["resource_display_name", "str", "resourceDisplayName"],
+          ["description", "str", "description"],
+          ["sequence", "str", "sequence"],
+          ["targets", "list[ActivityResourceTarget]", "targets"],
+          ["status", "str", "status"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"]
+        ]
+      },
+      "EnumVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["enum_value", "list[str]", "enumValue"],
+          ["default_value", "str", "defaultValue"],
+          ["can_allow_multiple", "bool", "canAllowMultiple"]
+        ],
+        "discriminator": "BaseVariable"
+      },
       "EnvironmentConfigCategoryDetails": {
         "attributes": [["config_category", "str", "configCategory"]],
         "discriminator": "ConfigCategoryDetails"
@@ -80165,6 +81059,29 @@
       "EnvironmentFleetDetails": {
         "attributes": [["fleet_type", "str", "fleetType"]],
         "discriminator": "FleetDetails"
+      },
+      "Execution": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["task_record_id", "str", "taskRecordId"],
+          ["step_name", "str", "stepName"],
+          ["process_reference_id", "str", "processReferenceId"],
+          ["sequence", "str", "sequence"],
+          ["subjects", "list[str]", "subjects"],
+          ["status", "str", "status"],
+          ["outcome", "Outcome", "outcome"],
+          ["target_id", "str", "targetId"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["is_rollback_task", "bool", "isRollbackTask"],
+          ["description", "str", "description"],
+          ["resource_id", "str", "resourceId"],
+          ["is_retry_exceeded", "bool", "isRetryExceeded"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ExecutionCollection": {
+        "attributes": [["items", "list[ExecutionSummary]", "items"]]
       },
       "ExecutionDetails": {
         "attributes": [["execution_type", "str", "executionType"]],
@@ -80178,8 +81095,43 @@
           "fallback": "ExecutionDetails"
         }
       },
+      "ExecutionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["task_record_id", "str", "taskRecordId"],
+          ["step_name", "str", "stepName"],
+          ["process_reference_id", "str", "processReferenceId"],
+          ["sequence", "str", "sequence"],
+          ["status", "str", "status"],
+          ["target_id", "str", "targetId"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["is_rollback_task", "bool", "isRollbackTask"],
+          ["description", "str", "description"],
+          ["resource_id", "str", "resourceId"],
+          ["is_retry_exceeded", "bool", "isRetryExceeded"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "ExecutionWorkflowDetails": {
         "attributes": [["workflow", "list[WorkflowGroup]", "workflow"]]
+      },
+      "FaultDomainVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "FaultDomainVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "FaultDomainVariableDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["availability_domain_name", "str", "availabilityDomainName"]
+        ]
       },
       "FileInputArgument": {
         "attributes": [
@@ -80189,6 +81141,36 @@
         ],
         "discriminator": "InputArgument"
       },
+      "FileStorageExportSetId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "FileStorageFilesystemId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "FileStorageMountTargetId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
       "FileTaskArgument": {
         "attributes": [
           ["kind", "str", "kind"],
@@ -80196,6 +81178,16 @@
           ["content", "InputFileContentDetails", "content"]
         ],
         "discriminator": "TaskArgument"
+      },
+      "FileVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
       },
       "Filter": {
         "attributes": [
@@ -80211,6 +81203,40 @@
           "fallback": "Filter"
         }
       },
+      "Fleet": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["products", "list[str]", "products"],
+          ["details", "FleetDetails", "details"],
+          ["environment_type", "str", "environmentType"],
+          ["resource_selection", "ResourceSelection", "resourceSelection"],
+          [
+            "notification_preferences",
+            "list[NotificationPreference]",
+            "notificationPreferences"
+          ],
+          ["resources", "list[AssociatedFleetResourceDetails]", "resources"],
+          ["properties", "list[AssociatedFleetPropertyDetails]", "properties"],
+          [
+            "credentials",
+            "list[AssociatedFleetCredentialDetails]",
+            "credentials"
+          ],
+          ["parent_fleet_id", "str", "parentFleetId"],
+          ["is_target_auto_confirm", "bool", "isTargetAutoConfirm"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "FleetBasedActionGroup": {
         "attributes": [
           ["display_name", "str", "displayName"],
@@ -80222,12 +81248,73 @@
         ],
         "discriminator": "ActionGroup"
       },
+      "FleetBasedActionGroupDetails": {
+        "attributes": [
+          ["display_name", "str", "displayName"],
+          ["kind", "str", "kind"],
+          ["product", "str", "product"],
+          ["lifecycle_operation", "str", "lifecycleOperation"],
+          ["activity_id", "str", "activityId"],
+          ["status", "str", "status"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["fleet_id", "str", "fleetId"],
+          ["sequence", "int", "sequence"],
+          ["runbook_id", "str", "runbookId"],
+          ["runbook_version_name", "str", "runbookVersionName"]
+        ],
+        "discriminator": "ActionGroupDetails"
+      },
+      "FleetCollection": {
+        "attributes": [["items", "list[FleetSummary]", "items"]]
+      },
+      "FleetCredential": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          [
+            "entity_specifics",
+            "CredentialEntitySpecificDetails",
+            "entitySpecifics"
+          ],
+          ["user", "CredentialDetails", "user"],
+          ["password", "CredentialDetails", "password"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FleetCredentialCollection": {
+        "attributes": [["items", "list[FleetCredentialSummary]", "items"]]
+      },
       "FleetCredentialEntitySpecificDetails": {
         "attributes": [
           ["credential_level", "str", "credentialLevel"],
           ["variables", "list[Variable]", "variables"]
         ],
         "discriminator": "CredentialEntitySpecificDetails"
+      },
+      "FleetCredentialSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          [
+            "entity_specifics",
+            "CredentialEntitySpecificDetails",
+            "entitySpecifics"
+          ],
+          ["user", "CredentialDetails", "user"],
+          ["password", "CredentialDetails", "password"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "FleetDetails": {
         "attributes": [["fleet_type", "str", "fleetType"]],
@@ -80241,6 +81328,151 @@
           },
           "fallback": "FleetDetails"
         }
+      },
+      "FleetProductCollection": {
+        "attributes": [["items", "list[FleetProductSummary]", "items"]]
+      },
+      "FleetProductSummary": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["target_count", "int", "targetCount"],
+          ["resource", "TargetResource", "resource"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FleetProperty": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["value", "str", "value"],
+          ["property_id", "str", "propertyId"],
+          ["selection_type", "str", "selectionType"],
+          ["value_type", "str", "valueType"],
+          ["allowed_values", "list[str]", "allowedValues"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FleetPropertyCollection": {
+        "attributes": [["items", "list[FleetPropertySummary]", "items"]]
+      },
+      "FleetPropertySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["property_id", "str", "propertyId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["value", "str", "value"],
+          ["value_type", "str", "valueType"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FleetResource": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["tenancy_id", "str", "tenancyId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["resource_id", "str", "resourceId"],
+          ["compartment", "str", "compartment"],
+          ["compliance_state", "str", "complianceState"],
+          ["percent_compliant", "float", "percentCompliant"],
+          ["tenancy_name", "str", "tenancyName"],
+          ["resource_type", "str", "resourceType"],
+          ["product_count", "int", "productCount"],
+          ["target_count", "int", "targetCount"],
+          ["product", "str", "product"],
+          ["environment_type", "str", "environmentType"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FleetResourceCollection": {
+        "attributes": [["items", "list[FleetResourceSummary]", "items"]]
+      },
+      "FleetResourceSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["tenancy_id", "str", "tenancyId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["resource_id", "str", "resourceId"],
+          ["compliance_state", "str", "complianceState"],
+          ["percent_compliant", "float", "percentCompliant"],
+          ["tenancy_name", "str", "tenancyName"],
+          ["compartment", "str", "compartment"],
+          ["resource_type", "str", "resourceType"],
+          ["product_count", "int", "productCount"],
+          ["target_count", "int", "targetCount"],
+          ["product", "str", "product"],
+          ["environment_type", "str", "environmentType"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FleetSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["details", "FleetDetails", "details"],
+          ["environment_type", "str", "environmentType"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FleetTargetCollection": {
+        "attributes": [["items", "list[FleetTargetSummary]", "items"]]
+      },
+      "FleetTargetSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["version", "str", "version"],
+          ["product", "str", "product"],
+          ["resource", "TargetResource", "resource"],
+          ["compliance_state", "str", "complianceState"],
+          [
+            "time_of_last_successful_discovery",
+            "datetime",
+            "timeOfLastSuccessfulDiscovery"
+          ],
+          [
+            "time_of_last_discovery_attempt",
+            "datetime",
+            "timeOfLastDiscoveryAttempt"
+          ],
+          [
+            "is_last_discovery_attempt_successful",
+            "bool",
+            "isLastDiscoveryAttemptSuccessful"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["parent_target_name", "str", "parentTargetName"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "GenericArtifact": {
         "attributes": [["content", "PatchFileContentDetails", "content"]]
@@ -80266,6 +81498,55 @@
       "GroupFleetDetails": {
         "attributes": [["fleet_type", "str", "fleetType"]],
         "discriminator": "FleetDetails"
+      },
+      "GroupsVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "GroupsVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "GroupsVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "IdentityDomainVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["pattern", "str", "pattern"],
+          ["depends_on", "IdentityDomainVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "IdentityDomainVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "ImageVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["pattern", "str", "pattern"],
+          ["depends_on", "ImageVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "ImageVariableDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["shape", "str", "shape"],
+          ["operating_system", "str", "operatingSystem"],
+          ["operating_system_version", "str", "operatingSystemVersion"]
+        ]
       },
       "ImportRunbookPrecheckRequiredValue": {
         "attributes": [
@@ -80317,6 +81598,206 @@
           ["arguments", "list[TaskArgument]", "arguments"]
         ]
       },
+      "InstalledPatchCollection": {
+        "attributes": [["items", "list[InstalledPatchSummary]", "items"]]
+      },
+      "InstalledPatchSummary": {
+        "attributes": [
+          ["patch_id", "str", "patchId"],
+          ["patch_name", "str", "patchName"],
+          ["patch_description", "str", "patchDescription"],
+          ["time_applied", "datetime", "timeApplied"],
+          ["time_released", "datetime", "timeReleased"],
+          ["patch_type", "str", "patchType"],
+          ["patch_level", "str", "patchLevel"],
+          ["severity", "str", "severity"]
+        ]
+      },
+      "InstanceShapeVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["pattern", "str", "pattern"],
+          ["depends_on", "InstanceShapeVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "InstanceShapeVariableDependsOn": {
+        "attributes": [
+          ["image_id", "str", "imageId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["availability_domain", "str", "availabilityDomain"]
+        ]
+      },
+      "InstanceShapeVariableWithFlex": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["pattern", "str", "pattern"],
+          ["depends_on", "InstanceShapeVariableWithFlexDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "InstanceShapeVariableWithFlexDependsOn": {
+        "attributes": [
+          ["image_id", "str", "imageId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["availability_domain", "str", "availabilityDomain"]
+        ]
+      },
+      "InstanceSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["state", "str", "state"]
+        ]
+      },
+      "InstanceVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "InstanceVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "InstanceVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "IntegerVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "int", "defaultValue"],
+          ["multiple_of", "float", "multipleOf"],
+          ["minimum", "float", "minimum"],
+          ["maximum", "float", "maximum"],
+          ["exclusive_minimum", "float", "exclusiveMinimum"],
+          ["exclusive_maximum", "float", "exclusiveMaximum"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "InventoryRecordCollection": {
+        "attributes": [["items", "list[InventoryRecordSummary]", "items"]]
+      },
+      "InventoryRecordComponent": {
+        "attributes": [
+          ["component_name", "str", "componentName"],
+          ["component_version", "str", "componentVersion"],
+          ["component_path", "str", "componentPath"],
+          ["properties", "list[InventoryRecordProperty]", "properties"]
+        ]
+      },
+      "InventoryRecordPatchDetails": {
+        "attributes": [
+          ["patch_id", "str", "patchId"],
+          ["patch_name", "str", "patchName"],
+          ["patch_description", "str", "patchDescription"],
+          ["time_applied", "datetime", "timeApplied"],
+          ["patch_type", "str", "patchType"],
+          ["time_released", "datetime", "timeReleased"],
+          ["patch_level", "str", "patchLevel"]
+        ]
+      },
+      "InventoryRecordProperty": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["value", "str", "value"]
+        ]
+      },
+      "InventoryRecordSummary": {
+        "attributes": [
+          ["target_id", "str", "targetId"],
+          ["target_name", "str", "targetName"],
+          ["version", "str", "version"],
+          ["target_resource_id", "str", "targetResourceId"],
+          ["target_resource_name", "str", "targetResourceName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["target_product_id", "str", "targetProductId"],
+          ["target_product_name", "str", "targetProductName"],
+          ["os_type", "str", "osType"],
+          ["architecture", "str", "architecture"],
+          ["properties", "list[InventoryRecordProperty]", "properties"],
+          ["components", "list[InventoryRecordComponent]", "components"],
+          [
+            "installed_patches",
+            "list[InventoryRecordPatchDetails]",
+            "installedPatches"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["parent_target_name", "str", "parentTargetName"]
+        ]
+      },
+      "InventoryResourceCollection": {
+        "attributes": [["items", "list[InventoryResourceSummary]", "items"]]
+      },
+      "InventoryResourceSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["type", "str", "type"],
+          ["resource_compartment_id", "str", "resourceCompartmentId"],
+          ["availability_domain", "str", "availabilityDomain"],
+          ["resource_region", "str", "resourceRegion"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "JobActivity": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["status", "str", "status"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["runbook_id", "str", "runbookId"],
+          ["runbook_version_name", "str", "runbookVersionName"],
+          ["runbook_name", "str", "runbookName"],
+          ["description", "str", "description"],
+          [
+            "resource_level_executions",
+            "list[EntityExecutionDetails]",
+            "resourceLevelExecutions"
+          ]
+        ]
+      },
+      "JobExecutionDetails": {
+        "attributes": [
+          ["output_name", "str", "outputName"],
+          ["output_type", "str", "outputType"],
+          ["output_value", "str", "outputValue"],
+          ["output_description", "str", "outputDescription"],
+          ["is_sensitive", "bool", "isSensitive"]
+        ]
+      },
+      "JsonOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
       "KeyEncryptionCredentialDetails": {
         "attributes": [
           ["credential_type", "str", "credentialType"],
@@ -80333,9 +81814,221 @@
           ["value", "str", "value"]
         ]
       },
+      "KmsKeyVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "KmsKeyVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "KmsKeyVariableDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["vault_id", "str", "vaultId"],
+          ["protection_mode", "str", "protectionMode"],
+          ["algorithm", "str", "algorithm"],
+          ["length", "int", "length"],
+          ["curve_id", "str", "curveId"]
+        ]
+      },
+      "KmsSecretVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "KmsSecretVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "KmsSecretVariableDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["vault_id", "str", "vaultId"],
+          ["name", "str", "name"]
+        ]
+      },
+      "KmsVaultVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "KmsVaultVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "KmsVaultVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "KubernetesVersionsVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "KubernetesVersionsVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "KubernetesVersionsVariableDependsOn": {
+        "attributes": [
+          ["cluster_option_id", "str", "clusterOptionId"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
+      },
       "LifecycleOperationConfigCategoryDetails": {
         "attributes": [["config_category", "str", "configCategory"]],
         "discriminator": "ConfigCategoryDetails"
+      },
+      "LinkOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["display_text", "str", "displayText"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
+      "ListOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "list[object]", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
+      "LoadBalancerReservedIps": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "LoadBalancerVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "LoadBalancerVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "LoadBalancerVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "LogAnalyticsEntityTypes": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "LogAnalyticsLogEntities": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "LogAnalyticsLogEntitiesDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "LogAnalyticsLogEntitiesDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "LogAnalyticsLogGroup": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "LogAnalyticsLogGroupDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "LogAnalyticsLogGroupDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "LogAnalyticsScheduledTasks": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "LogAnalyticsScheduledTasksDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "LogAnalyticsScheduledTasksDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["task_type", "str", "taskType"]
+        ]
+      },
+      "LogAnalyticsSources": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "LogAnalyticsSourcesDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "LogAnalyticsSourcesDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "MaintenanceWindow": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_outage", "bool", "isOutage"],
+          ["time_schedule_start", "datetime", "timeScheduleStart"],
+          ["duration", "str", "duration"],
+          ["is_recurring", "bool", "isRecurring"],
+          ["recurrences", "str", "recurrences"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MaintenanceWindowCollection": {
+        "attributes": [["items", "list[MaintenanceWindowSummary]", "items"]]
       },
       "MaintenanceWindowSchedule": {
         "attributes": [
@@ -80345,11 +82038,107 @@
         ],
         "discriminator": "Schedule"
       },
+      "MaintenanceWindowSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_outage", "bool", "isOutage"],
+          ["time_schedule_start", "datetime", "timeScheduleStart"],
+          ["duration", "str", "duration"],
+          ["is_recurring", "bool", "isRecurring"],
+          ["recurrences", "str", "recurrences"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ManagedEntityAggregation": {
+        "attributes": [
+          ["count", "int", "count"],
+          ["dimensions", "ManagedEntityDimension", "dimensions"]
+        ]
+      },
+      "ManagedEntityAggregationCollection": {
+        "attributes": [["items", "list[ManagedEntityAggregation]", "items"]]
+      },
+      "ManagedEntityDimension": {
+        "attributes": [["entity", "str", "entity"]]
+      },
+      "ManagementAgentDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "ManagementAgents": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "ManagementAgentDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
       "ManualResourceSelection": {
         "attributes": [
           ["resource_selection_type", "str", "resourceSelectionType"]
         ],
         "discriminator": "ResourceSelection"
+      },
+      "MapOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "object", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
+      "ModelProperty": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["resource_region", "str", "resourceRegion"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["selection", "str", "selection"],
+          ["value_type", "str", "valueType"],
+          ["values", "list[str]", "values"],
+          ["scope", "str", "scope"],
+          ["type", "str", "type"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "MountTargetsVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "MountTargetsVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "MountTargetsVariableDependsOn": {
+        "attributes": [
+          ["availability_domain", "str", "availabilityDomain"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
       },
       "MultiValueFilter": {
         "attributes": [
@@ -80360,12 +82149,119 @@
         ],
         "discriminator": "Filter"
       },
+      "MultilineVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "str", "defaultValue"],
+          ["pattern", "str", "pattern"],
+          ["is_multiline", "bool", "isMultiline"],
+          ["max_length", "int", "maxLength"],
+          ["min_length", "int", "minLength"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "MysqlConfigurationId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "MysqlShapeId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "NatGatewayVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "NatGatewayVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "NatGatewayVariableDependsOn": {
+        "attributes": [
+          ["vcn_id", "str", "vcnId"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
+      },
+      "NetworkLoadBalancerId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
       "NotificationPreference": {
         "attributes": [
           ["topic_id", "str", "topicId"],
           ["compartment_id", "str", "compartmentId"],
           ["preferences", "Preferences", "preferences"]
         ]
+      },
+      "NsgVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "NsgVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "NsgVariableDependsOn": {
+        "attributes": [
+          ["vcn_id", "str", "vcnId"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
+      },
+      "NumberOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "float", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
+      "NumberVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "float", "defaultValue"],
+          ["multiple_of", "float", "multipleOf"],
+          ["minimum", "float", "minimum"],
+          ["maximum", "float", "maximum"],
+          ["exclusive_minimum", "float", "exclusiveMinimum"],
+          ["exclusive_maximum", "float", "exclusiveMaximum"]
+        ],
+        "discriminator": "BaseVariable"
       },
       "ObjectStorageBucketContentDetails": {
         "attributes": [
@@ -80376,6 +82272,93 @@
           ["checksum", "str", "checksum"]
         ],
         "discriminator": "ContentDetails"
+      },
+      "ObjectStorageBucketName": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "OcidOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "BaseOutput"
+      },
+      "OdsProjectVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "OdsProjectVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "OdsProjectVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "Onboarding": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_fams_tag_enabled", "bool", "isFamsTagEnabled"],
+          ["version", "str", "version"],
+          ["is_cost_tracking_tag_enabled", "bool", "isCostTrackingTagEnabled"],
+          ["applied_policies", "OnboardingPolicySummary", "appliedPolicies"],
+          ["discovery_frequency", "str", "discoveryFrequency"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
+      },
+      "OnboardingCollection": {
+        "attributes": [["items", "list[OnboardingSummary]", "items"]]
+      },
+      "OnboardingPolicyCollection": {
+        "attributes": [["items", "list[OnboardingPolicySummary]", "items"]]
+      },
+      "OnboardingPolicySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["statements", "list[str]", "statements"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "OnboardingSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["is_fams_tag_enabled", "bool", "isFamsTagEnabled"],
+          ["version", "str", "version"],
+          ["is_cost_tracking_tag_enabled", "bool", "isCostTrackingTagEnabled"],
+          ["applied_policies", "OnboardingPolicySummary", "appliedPolicies"],
+          ["discovery_frequency", "str", "discoveryFrequency"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
+        ]
       },
       "OperationRunbook": {
         "attributes": [
@@ -80388,6 +82371,19 @@
         "attributes": [
           ["sort_by", "str", "sortBy"],
           ["sort_order", "str", "sortOrder"]
+        ]
+      },
+      "Outcome": {
+        "attributes": [
+          ["output", "str", "output"],
+          ["error", "str", "error"],
+          ["exit_code", "str", "exitCode"]
+        ]
+      },
+      "OutputGroup": {
+        "attributes": [
+          ["title", "str", "title"],
+          ["outputs", "list[str]", "outputs"]
         ]
       },
       "OutputVariableDetails": {
@@ -80413,6 +82409,48 @@
             "outputVariableDetails"
           ]
         ]
+      },
+      "PasswordVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "str", "defaultValue"],
+          ["confirmation", "str", "confirmation"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "Patch": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["patch_type", "PatchType", "patchType"],
+          ["severity", "str", "severity"],
+          ["time_released", "datetime", "timeReleased"],
+          ["artifact_details", "ArtifactDetails", "artifactDetails"],
+          ["product", "PatchProduct", "product"],
+          [
+            "dependent_patches",
+            "list[DependentPatchDetails]",
+            "dependentPatches"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PatchCollection": {
+        "attributes": [["items", "list[PatchSummary]", "items"]]
       },
       "PatchFileContentDetails": {
         "attributes": [["source_type", "str", "sourceType"]],
@@ -80473,6 +82511,28 @@
           "fallback": "PatchSelectionDetails"
         }
       },
+      "PatchSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["patch_type", "PatchType", "patchType"],
+          ["severity", "str", "severity"],
+          ["time_released", "datetime", "timeReleased"],
+          ["artifact_details", "ArtifactDetails", "artifactDetails"],
+          ["product", "PatchProduct", "product"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["resource_region", "str", "resourceRegion"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "PatchType": {
         "attributes": [
           ["platform_configuration_id", "str", "platformConfigurationId"]
@@ -80493,12 +82553,66 @@
           "fallback": "PauseDetails"
         }
       },
+      "Placeholder": {
+        "attributes": [
+          ["step_name", "str", "stepName"],
+          ["key", "str", "key"],
+          ["placeholder", "str", "placeholder"]
+        ]
+      },
       "PlainTextCredentialDetails": {
         "attributes": [
           ["credential_type", "str", "credentialType"],
           ["value", "str", "value"]
         ],
         "discriminator": "CredentialDetails"
+      },
+      "PlatformConfiguration": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["resource_region", "str", "resourceRegion"],
+          ["type", "str", "type"],
+          [
+            "config_category_details",
+            "ConfigCategoryDetails",
+            "configCategoryDetails"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PlatformConfigurationCollection": {
+        "attributes": [["items", "list[PlatformConfigurationSummary]", "items"]]
+      },
+      "PlatformConfigurationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["resource_region", "str", "resourceRegion"],
+          ["type", "str", "type"],
+          [
+            "config_category_details",
+            "ConfigCategoryDetails",
+            "configCategoryDetails"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "PlatformSpecificArtifact": {
         "attributes": [
@@ -80551,6 +82665,23 @@
           ]
         ],
         "discriminator": "RunOnDetails"
+      },
+      "PrivateEndpointVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "PrivateEndpointVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "PrivateEndpointVariableDependsOn": {
+        "attributes": [
+          ["compartment_id", "str", "compartmentId"],
+          ["vcn_id", "str", "vcnId"]
+        ]
       },
       "ProductConfigCategoryDetails": {
         "attributes": [
@@ -80625,17 +82756,212 @@
           ]
         ]
       },
+      "Prompt": {
+        "attributes": [
+          ["acceptance_condition", "str", "acceptanceCondition"],
+          ["choice_group", "list[Choice]", "choiceGroup"]
+        ]
+      },
       "Properties": {
         "attributes": [
           ["num_retries", "int", "numRetries"],
           ["timeout_in_seconds", "int", "timeoutInSeconds"]
         ]
       },
+      "PropertyCollection": {
+        "attributes": [["items", "list[PropertySummary]", "items"]]
+      },
+      "PropertySummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["resource_region", "str", "resourceRegion"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["selection", "str", "selection"],
+          ["value_type", "str", "valueType"],
+          ["values", "list[str]", "values"],
+          ["scope", "str", "scope"],
+          ["type", "str", "type"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "Provision": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["provision_description", "str", "provisionDescription"],
+          ["tf_variable_tenancy_id", "str", "tfVariableTenancyId"],
+          ["tf_variable_region_id", "str", "tfVariableRegionId"],
+          ["tf_variable_current_user_id", "str", "tfVariableCurrentUserId"],
+          ["tf_variable_compartment_id", "str", "tfVariableCompartmentId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["package_catalog_item_id", "str", "packageCatalogItemId"],
+          ["config_catalog_item_id", "str", "configCatalogItemId"],
+          [
+            "package_catalog_item_display_name",
+            "str",
+            "packageCatalogItemDisplayName"
+          ],
+          [
+            "package_catalog_item_listing_id",
+            "str",
+            "packageCatalogItemListingId"
+          ],
+          [
+            "package_catalog_item_listing_version",
+            "str",
+            "packageCatalogItemListingVersion"
+          ],
+          [
+            "config_catalog_item_display_name",
+            "str",
+            "configCatalogItemDisplayName"
+          ],
+          [
+            "config_catalog_item_listing_id",
+            "str",
+            "configCatalogItemListingId"
+          ],
+          [
+            "config_catalog_item_listing_version",
+            "str",
+            "configCatalogItemListingVersion"
+          ],
+          ["stack_id", "str", "stackId"],
+          ["fleet_id", "str", "fleetId"],
+          ["rms_apply_job_id", "str", "rmsApplyJobId"],
+          ["tf_outputs", "list[JobExecutionDetails]", "tfOutputs"],
+          [
+            "deployed_resources",
+            "list[DeployedResourceDetails]",
+            "deployedResources"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "ProvisionCollection": {
+        "attributes": [["items", "list[ProvisionSummary]", "items"]]
+      },
+      "ProvisionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["provision_description", "str", "provisionDescription"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["package_catalog_item_id", "str", "packageCatalogItemId"],
+          ["config_catalog_item_id", "str", "configCatalogItemId"],
+          [
+            "package_catalog_item_display_name",
+            "str",
+            "packageCatalogItemDisplayName"
+          ],
+          [
+            "package_catalog_item_listing_id",
+            "str",
+            "packageCatalogItemListingId"
+          ],
+          [
+            "package_catalog_item_listing_version",
+            "str",
+            "packageCatalogItemListingVersion"
+          ],
+          [
+            "config_catalog_item_display_name",
+            "str",
+            "configCatalogItemDisplayName"
+          ],
+          [
+            "config_catalog_item_listing_id",
+            "str",
+            "configCatalogItemListingId"
+          ],
+          [
+            "config_catalog_item_listing_version",
+            "str",
+            "configCatalogItemListingVersion"
+          ],
+          ["stack_id", "str", "stackId"],
+          ["fleet_id", "str", "fleetId"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "RecommendedPatchCollection": {
+        "attributes": [["items", "list[RecommendedPatchSummary]", "items"]]
+      },
+      "RecommendedPatchSummary": {
+        "attributes": [
+          ["patch_id", "str", "patchId"],
+          ["patch_name", "str", "patchName"],
+          ["patch_description", "str", "patchDescription"],
+          ["time_released", "datetime", "timeReleased"],
+          ["patch_type", "str", "patchType"],
+          ["severity", "str", "severity"],
+          ["patch_level", "str", "patchLevel"]
+        ]
+      },
+      "RegionVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "str", "defaultValue"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "ReportCollection": {
+        "attributes": [["items", "list[ReportSummary]", "items"]]
+      },
+      "ReportFilter": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["value_source", "str", "valueSource"]
+        ]
+      },
+      "ReportMetadataCollection": {
+        "attributes": [["items", "list[ReportMetadataSummary]", "items"]]
+      },
+      "ReportMetadataSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["default_order_clause", "list[OrderClause]", "defaultOrderClause"],
+          ["column_metadata", "list[ColumnMetadata]", "columnMetadata"],
+          ["metric", "str", "metric"],
+          ["filters", "list[ReportFilter]", "filters"]
+        ]
+      },
+      "ReportSummary": {
+        "attributes": [["item", "list[str]", "item"]]
+      },
       "ReportTimeRange": {
         "attributes": [
           ["time_from", "datetime", "timeFrom"],
           ["time_until", "datetime", "timeUntil"]
         ]
+      },
+      "ResourceCollection": {
+        "attributes": [["items", "list[ResourceSummary]", "items"]]
       },
       "ResourceCredentialEntitySpecificDetails": {
         "attributes": [
@@ -80656,6 +82982,33 @@
           },
           "fallback": "ResourceSelection"
         }
+      },
+      "ResourceSummary": {
+        "attributes": [
+          ["resource_id", "str", "resourceId"],
+          ["resource_display_name", "str", "resourceDisplayName"],
+          ["description", "str", "description"],
+          ["sequence", "str", "sequence"],
+          ["targets", "list[ActivityResourceTarget]", "targets"],
+          ["status", "str", "status"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"]
+        ]
+      },
+      "ResourceTagCheckDetails": {
+        "attributes": [
+          [
+            "tag_enablement_info",
+            "list[ResourceTagEnablementInfo]",
+            "tagEnablementInfo"
+          ]
+        ]
+      },
+      "ResourceTagEnablementInfo": {
+        "attributes": [
+          ["resource_id", "str", "resourceId"],
+          ["is_tagging_possible", "bool", "isTaggingPossible"]
+        ]
       },
       "RollbackWorkflowDetails": {
         "attributes": [
@@ -80685,6 +83038,72 @@
           },
           "fallback": "RunOnDetails"
         }
+      },
+      "Runbook": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["operation", "str", "operation"],
+          ["os_type", "str", "osType"],
+          ["platform", "str", "platform"],
+          ["is_default", "bool", "isDefault"],
+          ["is_sudo_access_needed", "bool", "isSudoAccessNeeded"],
+          ["estimated_time", "str", "estimatedTime"],
+          ["latest_version", "str", "latestVersion"],
+          ["has_draft_version", "bool", "hasDraftVersion"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["runbook_version", "Version", "runbookVersion"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "RunbookCollection": {
+        "attributes": [["items", "list[RunbookSummary]", "items"]]
+      },
+      "RunbookExport": {
+        "attributes": [
+          ["tracking_id", "str", "trackingId"],
+          ["runbook_id", "str", "runbookId"],
+          ["runbook_name", "str", "runbookName"],
+          ["runbook_version", "str", "runbookVersion"],
+          ["status", "str", "status"],
+          ["details", "dict(str, str)", "details"]
+        ]
+      },
+      "RunbookExportDependencyCollection": {
+        "attributes": [
+          ["items", "list[RunbookTransferDependencySummary]", "items"]
+        ]
+      },
+      "RunbookExportStatusCollection": {
+        "attributes": [["items", "list[RunbookExportStatusSummary]", "items"]]
+      },
+      "RunbookExportStatusSummary": {
+        "attributes": [
+          ["tracking_id", "str", "trackingId"],
+          ["runbook_id", "str", "runbookId"],
+          ["runbook_name", "str", "runbookName"],
+          ["runbook_version", "str", "runbookVersion"],
+          ["status", "str", "status"]
+        ]
+      },
+      "RunbookImport": {
+        "attributes": [
+          ["tracking_id", "str", "trackingId"],
+          ["runbook_id", "str", "runbookId"],
+          ["runbook_name", "str", "runbookName"],
+          ["runbook_version", "str", "runbookVersion"],
+          ["status", "str", "status"],
+          ["details", "dict(str, str)", "details"]
+        ]
       },
       "RunbookImportAs": {
         "attributes": [
@@ -80719,12 +83138,136 @@
         ],
         "discriminator": "RunbookImportAs"
       },
+      "RunbookImportDependencyCollection": {
+        "attributes": [
+          ["items", "list[RunbookTransferDependencySummary]", "items"]
+        ]
+      },
+      "RunbookImportDependencyFinderRequiredValue": {
+        "attributes": [
+          ["rendering_component", "str", "renderingComponent"],
+          ["label", "str", "label"],
+          ["step_name", "str", "stepName"],
+          ["placeholder_assignment", "str", "placeholderAssignment"],
+          ["expected_assignment", "str", "expectedAssignment"],
+          ["field", "str", "field"]
+        ]
+      },
       "RunbookImportRequiredValue": {
         "attributes": [
           ["step_name", "str", "stepName"],
           ["placeholder", "str", "placeholder"],
           ["value", "str", "value"],
           ["field", "str", "field"]
+        ]
+      },
+      "RunbookImportStatusCollection": {
+        "attributes": [["items", "list[RunbookImportStatusSummary]", "items"]]
+      },
+      "RunbookImportStatusSummary": {
+        "attributes": [
+          ["tracking_id", "str", "trackingId"],
+          ["runbook_id", "str", "runbookId"],
+          ["runbook_name", "str", "runbookName"],
+          ["runbook_version", "str", "runbookVersion"],
+          ["status", "str", "status"]
+        ]
+      },
+      "RunbookSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["operation", "str", "operation"],
+          ["os_type", "str", "osType"],
+          ["platform", "str", "platform"],
+          ["is_default", "bool", "isDefault"],
+          ["estimated_time", "str", "estimatedTime"],
+          ["latest_version", "str", "latestVersion"],
+          ["has_draft_version", "bool", "hasDraftVersion"],
+          ["original_version", "str", "originalVersion"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "RunbookTransferDependency": {
+        "attributes": [
+          ["prompt", "Prompt", "prompt"],
+          ["placeholders", "list[Placeholder]", "placeholders"],
+          ["associations_found", "list[Association]", "associationsFound"]
+        ]
+      },
+      "RunbookTransferDependencySummary": {
+        "attributes": [
+          ["count", "int", "count"],
+          ["entity", "str", "entity"],
+          ["dependency", "RunbookTransferDependency", "dependency"]
+        ]
+      },
+      "RunbookVersion": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["runbook_id", "str", "runbookId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["tasks", "list[Task]", "tasks"],
+          ["groups", "list[Group]", "groups"],
+          [
+            "execution_workflow_details",
+            "ExecutionWorkflowDetails",
+            "executionWorkflowDetails"
+          ],
+          [
+            "rollback_workflow_details",
+            "RollbackWorkflowDetails",
+            "rollbackWorkflowDetails"
+          ],
+          ["name", "str", "name"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "RunbookVersionCollection": {
+        "attributes": [["items", "list[RunbookVersionSummary]", "items"]]
+      },
+      "RunbookVersionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["runbook_id", "str", "runbookId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["tasks", "list[Task]", "tasks"],
+          ["groups", "list[Group]", "groups"],
+          [
+            "execution_workflow_details",
+            "ExecutionWorkflowDetails",
+            "executionWorkflowDetails"
+          ],
+          [
+            "rollback_workflow_details",
+            "RollbackWorkflowDetails",
+            "rollbackWorkflowDetails"
+          ],
+          ["name", "str", "name"],
+          ["is_latest", "bool", "isLatest"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "Schedule": {
@@ -80754,6 +83297,213 @@
           ["condition", "str", "condition"]
         ],
         "discriminator": "RunOnDetails"
+      },
+      "ScheduledFleetCollection": {
+        "attributes": [["items", "list[ScheduledFleetSummary]", "items"]]
+      },
+      "ScheduledFleetSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["count_of_affected_resources", "int", "countOfAffectedResources"],
+          ["count_of_affected_targets", "int", "countOfAffectedTargets"],
+          ["products", "list[str]", "products"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SchedulerDefinition": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_of_next_run", "datetime", "timeOfNextRun"],
+          ["schedule", "Schedule", "schedule"],
+          [
+            "count_of_affected_action_groups",
+            "int",
+            "countOfAffectedActionGroups"
+          ],
+          ["count_of_affected_resources", "int", "countOfAffectedResources"],
+          ["count_of_affected_targets", "int", "countOfAffectedTargets"],
+          ["products", "list[str]", "products"],
+          ["lifecycle_operations", "list[str]", "lifecycleOperations"],
+          ["action_groups", "list[ActionGroup]", "actionGroups"],
+          ["run_books", "list[OperationRunbook]", "runBooks"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SchedulerDefinitionCollection": {
+        "attributes": [["items", "list[SchedulerDefinitionSummary]", "items"]]
+      },
+      "SchedulerDefinitionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_of_next_run", "datetime", "timeOfNextRun"],
+          ["schedule", "Schedule", "schedule"],
+          [
+            "count_of_affected_action_groups",
+            "int",
+            "countOfAffectedActionGroups"
+          ],
+          ["count_of_affected_resources", "int", "countOfAffectedResources"],
+          ["count_of_affected_targets", "int", "countOfAffectedTargets"],
+          ["products", "list[str]", "products"],
+          ["lifecycle_operations", "list[str]", "lifecycleOperations"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SchedulerExecutionCollection": {
+        "attributes": [["items", "list[SchedulerExecutionSummary]", "items"]]
+      },
+      "SchedulerExecutionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["compartment_name", "str", "compartmentName"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_scheduled", "datetime", "timeScheduled"],
+          ["activity_id", "str", "activityId"],
+          ["resource_id", "str", "resourceId"],
+          ["scheduler_job_id", "str", "schedulerJobId"],
+          ["resource_display_name", "str", "resourceDisplayName"],
+          ["runbook_id", "str", "runbookId"],
+          ["runbook_version_name", "str", "runbookVersionName"],
+          ["runbook_display_name", "str", "runbookDisplayName"],
+          ["latest_runbook_version_name", "str", "latestRunbookVersionName"],
+          [
+            "scheduler_definition",
+            "AssociatedSchedulerDefinition",
+            "schedulerDefinition"
+          ],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SchedulerJob": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_scheduled", "datetime", "timeScheduled"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          [
+            "count_of_affected_action_groups",
+            "int",
+            "countOfAffectedActionGroups"
+          ],
+          ["count_of_affected_resources", "int", "countOfAffectedResources"],
+          ["count_of_affected_targets", "int", "countOfAffectedTargets"],
+          ["products", "list[str]", "products"],
+          ["lifecycle_operations", "list[str]", "lifecycleOperations"],
+          ["action_groups", "list[ActionGroupDetails]", "actionGroups"],
+          [
+            "scheduler_definition",
+            "AssociatedSchedulerDefinition",
+            "schedulerDefinition"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SchedulerJobAggregation": {
+        "attributes": [
+          ["count", "int", "count"],
+          ["dimensions", "SchedulerJobDimension", "dimensions"]
+        ]
+      },
+      "SchedulerJobAggregationCollection": {
+        "attributes": [["items", "list[SchedulerJobAggregation]", "items"]]
+      },
+      "SchedulerJobCollection": {
+        "attributes": [["items", "list[SchedulerJobSummary]", "items"]]
+      },
+      "SchedulerJobDimension": {
+        "attributes": [["lifecycle_details", "str", "lifecycleDetails"]]
+      },
+      "SchedulerJobSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["time_scheduled", "datetime", "timeScheduled"],
+          [
+            "count_of_affected_action_groups",
+            "int",
+            "countOfAffectedActionGroups"
+          ],
+          ["count_of_affected_resources", "int", "countOfAffectedResources"],
+          ["count_of_affected_targets", "int", "countOfAffectedTargets"],
+          ["products", "list[str]", "products"],
+          ["lifecycle_operations", "list[str]", "lifecycleOperations"],
+          ["action_groups", "list[ActionGroupDetails]", "actionGroups"],
+          [
+            "scheduler_definition",
+            "AssociatedSchedulerDefinition",
+            "schedulerDefinition"
+          ],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "SchemaDocument": {
+        "attributes": [
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["stack_description", "str", "stackDescription"],
+          ["package_version", "str", "packageVersion"],
+          ["version", "str", "version"],
+          ["schema_version", "str", "schemaVersion"],
+          ["locale", "str", "locale"],
+          ["logo_url", "str", "logoUrl"],
+          ["source", "StackSource", "source"],
+          ["informational_text", "str", "informationalText"],
+          ["instructions", "str", "instructions"],
+          ["troubleshooting", "str", "troubleshooting"],
+          ["can_allow_view_state", "bool", "canAllowViewState"],
+          ["variables", "dict(str, BaseVariable)", "variables"],
+          ["groupings", "VariableGroups", "groupings"],
+          ["variable_groups", "list[VariableGroup]", "variableGroups"],
+          ["outputs", "dict(str, BaseOutput)", "outputs"],
+          ["output_groups", "list[OutputGroup]", "outputGroups"],
+          ["primary_output_button", "str", "primaryOutputButton"]
+        ]
       },
       "ScriptBasedExecutionDetails": {
         "attributes": [
@@ -80789,6 +83539,23 @@
         ],
         "discriminator": "RunOnDetails"
       },
+      "ServiceGatewayVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "ServiceGatewayVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "ServiceGatewayVariableDependsOn": {
+        "attributes": [
+          ["vcn_id", "str", "vcnId"],
+          ["compartment_id", "str", "compartmentId"]
+        ]
+      },
       "SingleValueFilter": {
         "attributes": [
           ["field_name", "str", "fieldName"],
@@ -80797,6 +83564,22 @@
           ["value", "str", "value"]
         ],
         "discriminator": "Filter"
+      },
+      "SshPublicKeyVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "StackSource": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["reference", "str", "reference"]
+        ]
       },
       "StepBasedUserActionDetails": {
         "attributes": [
@@ -80809,6 +83592,22 @@
         ],
         "discriminator": "UserActionDetails"
       },
+      "StepCollection": {
+        "attributes": [["items", "list[StepSummary]", "items"]]
+      },
+      "StepSummary": {
+        "attributes": [
+          ["task_record_id", "str", "taskRecordId"],
+          ["step_name", "str", "stepName"],
+          ["sequence", "str", "sequence"],
+          ["status", "str", "status"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_ended", "datetime", "timeEnded"],
+          ["is_rollback_task", "bool", "isRollbackTask"],
+          ["description", "str", "description"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
       "StringInputArgument": {
         "attributes": [
           ["type", "str", "type"],
@@ -80816,6 +83615,18 @@
           ["description", "str", "description"]
         ],
         "discriminator": "InputArgument"
+      },
+      "StringOutput": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_sensitive", "bool", "isSensitive"],
+          ["format", "str", "format"],
+          ["visible", "str", "visible"],
+          ["value", "str", "value"]
+        ],
+        "discriminator": "BaseOutput"
       },
       "StringTaskArgument": {
         "attributes": [
@@ -80825,6 +83636,66 @@
         ],
         "discriminator": "TaskArgument"
       },
+      "StringVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["default_value", "str", "defaultValue"],
+          ["pattern", "str", "pattern"],
+          ["max_length", "int", "maxLength"],
+          ["min_length", "int", "minLength"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "SubnetVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "SubnetVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "SubnetVariableDependsOn": {
+        "attributes": [
+          ["vcn_id", "str", "vcnId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["hide_public_subnet", "str", "hidePublicSubnet"],
+          ["hide_private_subnet", "str", "hidePrivateSubnet"],
+          ["hide_regional_subnet", "str", "hideRegionalSubnet"],
+          ["hide_ad_subnet", "str", "hideAdSubnet"]
+        ]
+      },
+      "TagVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "TagVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "TagVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "TargetComponentCollection": {
+        "attributes": [["items", "list[TargetComponentSummary]", "items"]]
+      },
+      "TargetComponentSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["version", "str", "version"],
+          ["path", "str", "path"],
+          ["properties", "list[TargetPropertySummary]", "properties"]
+        ]
+      },
       "TargetCredentialEntitySpecificDetails": {
         "attributes": [
           ["credential_level", "str", "credentialLevel"],
@@ -80832,6 +83703,21 @@
           ["target", "str", "target"]
         ],
         "discriminator": "CredentialEntitySpecificDetails"
+      },
+      "TargetPropertyCollection": {
+        "attributes": [["items", "list[TargetPropertySummary]", "items"]]
+      },
+      "TargetPropertySummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["value", "str", "value"]
+        ]
+      },
+      "TargetResource": {
+        "attributes": [
+          ["resource_id", "str", "resourceId"],
+          ["resource_display_name", "str", "resourceDisplayName"]
+        ]
       },
       "Task": {
         "attributes": [
@@ -80868,6 +83754,47 @@
             "shouldNotifyOnTaskFailure"
           ],
           ["should_notify_on_task_success", "bool", "shouldNotifyOnTaskSuccess"]
+        ]
+      },
+      "TaskRecord": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["details", "Details", "details"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["version", "str", "version"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "TaskRecordCollection": {
+        "attributes": [["items", "list[TaskRecordSummary]", "items"]]
+      },
+      "TaskRecordSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["description", "str", "description"],
+          ["type", "str", "type"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["details", "Details", "details"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["version", "str", "version"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resource_region", "str", "resourceRegion"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "TaskVariable": {
@@ -80956,6 +83883,16 @@
           ["value", "str", "value"]
         ]
       },
+      "VariableGroup": {
+        "attributes": [
+          ["title", "str", "title"],
+          ["variables", "list[str]", "variables"],
+          ["visible", "str", "visible"]
+        ]
+      },
+      "VariableGroups": {
+        "attributes": [["array", "dict(str, VariableGroup)", "array"]]
+      },
       "VaultSecretCredentialDetails": {
         "attributes": [
           ["credential_type", "str", "credentialType"],
@@ -80963,6 +83900,40 @@
           ["secret_version", "str", "secretVersion"]
         ],
         "discriminator": "CredentialDetails"
+      },
+      "VcnNetworkSecurityGroupId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "VcnSecListId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "VcnVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "VcnVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "VcnVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
       },
       "Version": {
         "attributes": [
@@ -80981,6 +83952,89 @@
           ["version", "str", "version"],
           ["is_latest", "bool", "isLatest"]
         ]
+      },
+      "VolumeBackupPoliciesVariable": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"],
+          ["depends_on", "VolumeBackupPoliciesVariableDependsOn", "dependsOn"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "VolumeBackupPoliciesVariableDependsOn": {
+        "attributes": [["compartment_id", "str", "compartmentId"]]
+      },
+      "VolumeId": {
+        "attributes": [
+          ["type", "str", "type"],
+          ["title", "str", "title"],
+          ["description", "str", "description"],
+          ["is_required", "bool", "isRequired"],
+          ["visible", "str", "visible"]
+        ],
+        "discriminator": "BaseVariable"
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"],
+          ["metadata", "dict(str, str)", "metadata"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       },
       "WorkflowComponent": {
         "attributes": [["type", "str", "type"]],

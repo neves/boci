@@ -6482,6 +6482,66 @@
   },
   "models": {
     "bastion": {
+      "Bastion": {
+        "attributes": [
+          ["bastion_type", "str", "bastionType"],
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["target_vcn_id", "str", "targetVcnId"],
+          ["target_subnet_id", "str", "targetSubnetId"],
+          ["phone_book_entry", "str", "phoneBookEntry"],
+          [
+            "client_cidr_block_allow_list",
+            "list[str]",
+            "clientCidrBlockAllowList"
+          ],
+          [
+            "static_jump_host_ip_addresses",
+            "list[str]",
+            "staticJumpHostIpAddresses"
+          ],
+          ["private_endpoint_ip_address", "str", "privateEndpointIpAddress"],
+          ["max_session_ttl_in_seconds", "int", "maxSessionTtlInSeconds"],
+          ["max_sessions_allowed", "int", "maxSessionsAllowed"],
+          ["dns_proxy_status", "str", "dnsProxyStatus"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ]
+        ]
+      },
+      "BastionSummary": {
+        "attributes": [
+          ["bastion_type", "str", "bastionType"],
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["target_vcn_id", "str", "targetVcnId"],
+          ["target_subnet_id", "str", "targetSubnetId"],
+          ["dns_proxy_status", "str", "dnsProxyStatus"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ]
+        ]
+      },
       "CreateDynamicPortForwardingSessionTargetResourceDetails": {
         "attributes": [["session_type", "str", "sessionType"]],
         "discriminator": "CreateSessionTargetResourceDetails"
@@ -6530,8 +6590,146 @@
           "fallback": "CreateSessionTargetResourceDetails"
         }
       },
+      "DynamicPortForwardingSessionTargetResourceDetails": {
+        "attributes": [["session_type", "str", "sessionType"]],
+        "discriminator": "TargetResourceDetails"
+      },
+      "ManagedSshSessionTargetResourceDetails": {
+        "attributes": [
+          ["session_type", "str", "sessionType"],
+          [
+            "target_resource_operating_system_user_name",
+            "str",
+            "targetResourceOperatingSystemUserName"
+          ],
+          ["target_resource_id", "str", "targetResourceId"],
+          [
+            "target_resource_private_ip_address",
+            "str",
+            "targetResourcePrivateIpAddress"
+          ],
+          ["target_resource_display_name", "str", "targetResourceDisplayName"],
+          ["target_resource_port", "int", "targetResourcePort"]
+        ],
+        "discriminator": "TargetResourceDetails"
+      },
+      "PortForwardingSessionTargetResourceDetails": {
+        "attributes": [
+          ["session_type", "str", "sessionType"],
+          ["target_resource_id", "str", "targetResourceId"],
+          [
+            "target_resource_private_ip_address",
+            "str",
+            "targetResourcePrivateIpAddress"
+          ],
+          ["target_resource_display_name", "str", "targetResourceDisplayName"],
+          ["target_resource_fqdn", "str", "targetResourceFqdn"],
+          ["target_resource_port", "int", "targetResourcePort"]
+        ],
+        "discriminator": "TargetResourceDetails"
+      },
       "PublicKeyDetails": {
         "attributes": [["public_key_content", "str", "publicKeyContent"]]
+      },
+      "Session": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["bastion_id", "str", "bastionId"],
+          ["bastion_name", "str", "bastionName"],
+          ["bastion_user_name", "str", "bastionUserName"],
+          [
+            "target_resource_details",
+            "TargetResourceDetails",
+            "targetResourceDetails"
+          ],
+          ["ssh_metadata", "dict(str, str)", "sshMetadata"],
+          ["key_type", "str", "keyType"],
+          ["key_details", "PublicKeyDetails", "keyDetails"],
+          ["bastion_public_host_key_info", "str", "bastionPublicHostKeyInfo"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["session_ttl_in_seconds", "int", "sessionTtlInSeconds"]
+        ]
+      },
+      "SessionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["bastion_name", "str", "bastionName"],
+          ["bastion_id", "str", "bastionId"],
+          [
+            "target_resource_details",
+            "TargetResourceDetails",
+            "targetResourceDetails"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["session_ttl_in_seconds", "int", "sessionTtlInSeconds"]
+        ]
+      },
+      "TargetResourceDetails": {
+        "attributes": [["session_type", "str", "sessionType"]],
+        "discriminator": {
+          "field": "sessionType",
+          "values": {
+            "DYNAMIC_PORT_FORWARDING": "DynamicPortForwardingSessionTargetResourceDetails",
+            "MANAGED_SSH": "ManagedSshSessionTargetResourceDetails",
+            "PORT_FORWARDING": "PortForwardingSessionTargetResourceDetails"
+          },
+          "fallback": "TargetResourceDetails"
+        }
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
       }
     }
   }

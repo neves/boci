@@ -32,6 +32,12 @@ describe("generated write pipeline", () => {
     expect(run.stderr).toBe("");
     expect(JSON.parse(run.stdout)).toEqual({
       data: {
+        "availability-domain": null,
+        "defined-tags": null,
+        "freeform-tags": null,
+        "placement-constraint-details": null,
+        "time-created": null,
+        "time-updated": null,
         "compartment-id": "ocid1.compartment.oc1..fake",
         "display-name": "cluster-1",
         id: "ocid1.computecluster.oc1..fake",

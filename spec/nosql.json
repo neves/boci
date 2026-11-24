@@ -8228,11 +8228,76 @@
   },
   "models": {
     "nosql": {
+      "Column": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["type", "str", "type"],
+          ["is_nullable", "bool", "isNullable"],
+          ["default_value", "str", "defaultValue"],
+          ["is_as_uuid", "bool", "isAsUuid"],
+          ["is_generated", "bool", "isGenerated"]
+        ]
+      },
+      "Configuration": {
+        "attributes": [["environment", "str", "environment"]],
+        "discriminator": {
+          "field": "environment",
+          "values": {
+            "MULTI_TENANCY": "MultiTenancyConfiguration",
+            "HOSTED": "HostedConfiguration"
+          },
+          "fallback": "Configuration"
+        }
+      },
+      "DeleteRowResult": {
+        "attributes": [
+          ["is_success", "bool", "isSuccess"],
+          ["existing_version", "str", "existingVersion"],
+          ["existing_value", "dict(str, object)", "existingValue"],
+          ["usage", "RequestUsage", "usage"]
+        ]
+      },
+      "HostedConfiguration": {
+        "attributes": [
+          ["environment", "str", "environment"],
+          ["kms_key", "KmsKey", "kmsKey"]
+        ],
+        "discriminator": "Configuration"
+      },
+      "Identity": {
+        "attributes": [
+          ["column_name", "str", "columnName"],
+          ["is_always", "bool", "isAlways"],
+          ["is_null", "bool", "isNull"]
+        ]
+      },
+      "Index": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["table_name", "str", "tableName"],
+          ["table_id", "str", "tableId"],
+          ["keys", "list[IndexKey]", "keys"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ]
+      },
+      "IndexCollection": {
+        "attributes": [["items", "list[IndexSummary]", "items"]]
+      },
       "IndexKey": {
         "attributes": [
           ["column_name", "str", "columnName"],
           ["json_path", "str", "jsonPath"],
           ["json_field_type", "str", "jsonFieldType"]
+        ]
+      },
+      "IndexSummary": {
+        "attributes": [
+          ["name", "str", "name"],
+          ["keys", "list[IndexKey]", "keys"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
         ]
       },
       "KmsKey": {
@@ -8244,12 +8309,206 @@
           ["time_updated", "datetime", "timeUpdated"]
         ]
       },
+      "MultiTenancyConfiguration": {
+        "attributes": [["environment", "str", "environment"]],
+        "discriminator": "Configuration"
+      },
+      "PreparedStatement": {
+        "attributes": [
+          ["statement", "str", "statement"],
+          ["query_plan", "object", "queryPlan"],
+          ["usage", "RequestUsage", "usage"]
+        ]
+      },
+      "QueryResultCollection": {
+        "attributes": [
+          ["items", "list[dict(str, object)]", "items"],
+          ["usage", "RequestUsage", "usage"]
+        ]
+      },
+      "Replica": {
+        "attributes": [
+          ["region", "str", "region"],
+          ["table_id", "str", "tableId"],
+          ["max_write_units", "int", "maxWriteUnits"],
+          ["capacity_mode", "str", "capacityMode"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"]
+        ]
+      },
+      "RequestUsage": {
+        "attributes": [
+          ["read_units_consumed", "int", "readUnitsConsumed"],
+          ["write_units_consumed", "int", "writeUnitsConsumed"]
+        ]
+      },
+      "Row": {
+        "attributes": [
+          ["value", "dict(str, object)", "value"],
+          ["time_of_expiration", "datetime", "timeOfExpiration"],
+          ["usage", "RequestUsage", "usage"]
+        ]
+      },
+      "Schema": {
+        "attributes": [
+          ["columns", "list[Column]", "columns"],
+          ["primary_key", "list[str]", "primaryKey"],
+          ["shard_key", "list[str]", "shardKey"],
+          ["ttl", "int", "ttl"],
+          ["identity", "Identity", "identity"]
+        ]
+      },
+      "Table": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["compartment_id", "str", "compartmentId"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["table_limits", "TableLimits", "tableLimits"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["is_auto_reclaimable", "bool", "isAutoReclaimable"],
+          ["time_of_expiration", "datetime", "timeOfExpiration"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["schema", "Schema", "schema"],
+          ["ddl_statement", "str", "ddlStatement"],
+          ["schema_state", "str", "schemaState"],
+          ["is_multi_region", "bool", "isMultiRegion"],
+          [
+            "local_replica_initialization_in_percent",
+            "int",
+            "localReplicaInitializationInPercent"
+          ],
+          ["replicas", "list[Replica]", "replicas"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "TableCollection": {
+        "attributes": [
+          ["items", "list[TableSummary]", "items"],
+          ["max_auto_reclaimable_tables", "int", "maxAutoReclaimableTables"],
+          ["auto_reclaimable_tables", "int", "autoReclaimableTables"],
+          ["on_demand_capacity_tables", "int", "onDemandCapacityTables"],
+          ["max_on_demand_capacity_tables", "int", "maxOnDemandCapacityTables"],
+          [
+            "available_replication_regions",
+            "list[str]",
+            "availableReplicationRegions"
+          ]
+        ]
+      },
       "TableLimits": {
         "attributes": [
           ["max_read_units", "int", "maxReadUnits"],
           ["max_write_units", "int", "maxWriteUnits"],
           ["max_storage_in_g_bs", "int", "maxStorageInGBs"],
           ["capacity_mode", "str", "capacityMode"]
+        ]
+      },
+      "TableSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["name", "str", "name"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["table_limits", "TableLimits", "tableLimits"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_details", "str", "lifecycleDetails"],
+          ["is_auto_reclaimable", "bool", "isAutoReclaimable"],
+          ["time_of_expiration", "datetime", "timeOfExpiration"],
+          ["schema_state", "str", "schemaState"],
+          ["is_multi_region", "bool", "isMultiRegion"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "TableUsageCollection": {
+        "attributes": [["items", "list[TableUsageSummary]", "items"]]
+      },
+      "TableUsageSummary": {
+        "attributes": [
+          ["seconds_in_period", "int", "secondsInPeriod"],
+          ["read_units", "int", "readUnits"],
+          ["write_units", "int", "writeUnits"],
+          ["storage_in_g_bs", "int", "storageInGBs"],
+          ["read_throttle_count", "int", "readThrottleCount"],
+          ["write_throttle_count", "int", "writeThrottleCount"],
+          ["storage_throttle_count", "int", "storageThrottleCount"],
+          [
+            "max_shard_size_usage_in_percent",
+            "int",
+            "maxShardSizeUsageInPercent"
+          ],
+          ["time_started", "datetime", "timeStarted"]
+        ]
+      },
+      "UpdateRowResult": {
+        "attributes": [
+          ["version", "str", "version"],
+          ["existing_version", "str", "existingVersion"],
+          ["existing_value", "dict(str, object)", "existingValue"],
+          ["generated_value", "str", "generatedValue"],
+          ["usage", "RequestUsage", "usage"]
+        ]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
+        ]
+      },
+      "WorkRequestCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"]
         ]
       }
     }

@@ -12950,13 +12950,101 @@
   },
   "models": {
     "functions": {
+      "Application": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["config", "dict(str, str)", "config"],
+          ["subnet_ids", "list[str]", "subnetIds"],
+          ["shape", "str", "shape"],
+          [
+            "network_security_group_ids",
+            "list[str]",
+            "networkSecurityGroupIds"
+          ],
+          ["syslog_url", "str", "syslogUrl"],
+          ["trace_config", "ApplicationTraceConfig", "traceConfig"],
+          ["logging", "ApplicationLoggingConfig", "logging"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["image_policy_config", "ImagePolicyConfig", "imagePolicyConfig"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ]
+        ]
+      },
       "ApplicationLoggingConfig": {
         "attributes": [["line_format", "str", "lineFormat"]]
+      },
+      "ApplicationSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["subnet_ids", "list[str]", "subnetIds"],
+          ["shape", "str", "shape"],
+          [
+            "network_security_group_ids",
+            "list[str]",
+            "networkSecurityGroupIds"
+          ],
+          ["trace_config", "ApplicationTraceConfig", "traceConfig"],
+          ["logging", "ApplicationLoggingConfig", "logging"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["image_policy_config", "ImagePolicyConfig", "imagePolicyConfig"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ]
+        ]
       },
       "ApplicationTraceConfig": {
         "attributes": [
           ["is_enabled", "bool", "isEnabled"],
           ["domain_id", "str", "domainId"]
+        ]
+      },
+      "ArchiveFunctionSourceDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          [
+            "archive_source_details",
+            "ArchiveSourceDetails",
+            "archiveSourceDetails"
+          ],
+          ["handler", "str", "handler"],
+          ["runtime_config", "RuntimeConfig", "runtimeConfig"],
+          ["source_code_sha256", "str", "sourceCodeSha256"]
+        ],
+        "discriminator": "FunctionSourceDetails"
+      },
+      "ArchiveSourceDetails": {
+        "attributes": [["archive_source_type", "str", "archiveSourceType"]],
+        "discriminator": {
+          "field": "archiveSourceType",
+          "values": {
+            "DIRECT_ARCHIVE": "DirectArchiveSourceDetails",
+            "OBJECT_STORAGE_ARCHIVE": "ObjectStorageArchiveSourceDetails"
+          },
+          "fallback": "ArchiveSourceDetails"
+        }
+      },
+      "ConfigDetails": {
+        "attributes": [
+          ["key", "str", "key"],
+          ["description", "str", "description"],
+          ["is_optional", "bool", "isOptional"]
         ]
       },
       "ConstantProvisionedConcurrencyConfig": {
@@ -12965,6 +13053,18 @@
           ["count", "int", "count"]
         ],
         "discriminator": "FunctionProvisionedConcurrencyConfig"
+      },
+      "ContainerImageFunctionSourceDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["image", "str", "image"],
+          ["image_digest", "str", "imageDigest"]
+        ],
+        "discriminator": "FunctionSourceDetails"
+      },
+      "DirectArchiveSourceDetails": {
+        "attributes": [["archive_source_type", "str", "archiveSourceType"]],
+        "discriminator": "ArchiveSourceDetails"
       },
       "FailureDestinationDetails": {
         "attributes": [["kind", "str", "kind"]],
@@ -12979,6 +13079,46 @@
           "fallback": "FailureDestinationDetails"
         }
       },
+      "Function": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["application_id", "str", "applicationId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["source_details", "FunctionSourceDetails", "sourceDetails"],
+          ["shape", "str", "shape"],
+          ["memory_in_mbs", "int", "memoryInMBs"],
+          ["config", "dict(str, str)", "config"],
+          ["timeout_in_seconds", "int", "timeoutInSeconds"],
+          [
+            "provisioned_concurrency_config",
+            "FunctionProvisionedConcurrencyConfig",
+            "provisionedConcurrencyConfig"
+          ],
+          [
+            "detached_mode_timeout_in_seconds",
+            "int",
+            "detachedModeTimeoutInSeconds"
+          ],
+          [
+            "failure_destination",
+            "FailureDestinationDetails",
+            "failureDestination"
+          ],
+          [
+            "success_destination",
+            "SuccessDestinationDetails",
+            "successDestination"
+          ],
+          ["trace_config", "FunctionTraceConfig", "traceConfig"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["invoke_endpoint", "str", "invokeEndpoint"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
       "FunctionProvisionedConcurrencyConfig": {
         "attributes": [["strategy", "str", "strategy"]],
         "discriminator": {
@@ -12990,8 +13130,153 @@
           "fallback": "FunctionProvisionedConcurrencyConfig"
         }
       },
+      "FunctionSourceDetails": {
+        "attributes": [["source_type", "str", "sourceType"]],
+        "discriminator": {
+          "field": "sourceType",
+          "values": {
+            "CONTAINER_IMAGE": "ContainerImageFunctionSourceDetails",
+            "ARCHIVE": "ArchiveFunctionSourceDetails",
+            "PRE_BUILT_FUNCTIONS": "PreBuiltFunctionSourceDetails"
+          },
+          "fallback": "FunctionSourceDetails"
+        }
+      },
+      "FunctionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["display_name", "str", "displayName"],
+          ["application_id", "str", "applicationId"],
+          ["compartment_id", "str", "compartmentId"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["source_details", "FunctionSourceDetails", "sourceDetails"],
+          ["shape", "str", "shape"],
+          ["memory_in_mbs", "int", "memoryInMBs"],
+          ["timeout_in_seconds", "int", "timeoutInSeconds"],
+          [
+            "provisioned_concurrency_config",
+            "FunctionProvisionedConcurrencyConfig",
+            "provisionedConcurrencyConfig"
+          ],
+          [
+            "detached_mode_timeout_in_seconds",
+            "int",
+            "detachedModeTimeoutInSeconds"
+          ],
+          [
+            "failure_destination",
+            "FailureDestinationDetails",
+            "failureDestination"
+          ],
+          [
+            "success_destination",
+            "SuccessDestinationDetails",
+            "successDestination"
+          ],
+          ["trace_config", "FunctionTraceConfig", "traceConfig"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["invoke_endpoint", "str", "invokeEndpoint"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
       "FunctionTraceConfig": {
         "attributes": [["is_enabled", "bool", "isEnabled"]]
+      },
+      "FunctionUpdateRuntimeConfig": {
+        "attributes": [
+          ["runtime_config_type", "str", "runtimeConfigType"],
+          ["functions_runtime_name", "str", "functionsRuntimeName"],
+          ["functions_runtime_version_id", "str", "functionsRuntimeVersionId"]
+        ],
+        "discriminator": "RuntimeConfig"
+      },
+      "FunctionsRuntime": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["os", "str", "os"],
+          ["language", "str", "language"],
+          ["time_deprecated", "datetime", "timeDeprecated"],
+          ["time_decommissioned", "datetime", "timeDecommissioned"],
+          ["metadata", "str", "metadata"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          [
+            "current_functions_runtime_version_id",
+            "str",
+            "currentFunctionsRuntimeVersionId"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FunctionsRuntimeCollection": {
+        "attributes": [["items", "list[FunctionsRuntimeSummary]", "items"]]
+      },
+      "FunctionsRuntimeSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["os", "str", "os"],
+          ["language", "str", "language"],
+          ["time_deprecated", "datetime", "timeDeprecated"],
+          ["time_decommissioned", "datetime", "timeDecommissioned"],
+          ["metadata", "str", "metadata"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          [
+            "current_functions_runtime_version_id",
+            "str",
+            "currentFunctionsRuntimeVersionId"
+          ],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FunctionsRuntimeVersion": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["functions_runtime_id", "str", "functionsRuntimeId"],
+          ["display_name", "str", "displayName"],
+          ["os_version", "str", "osVersion"],
+          ["language_version", "str", "languageVersion"],
+          ["supported_architectures", "list[str]", "supportedArchitectures"],
+          ["metadata", "str", "metadata"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "FunctionsRuntimeVersionCollection": {
+        "attributes": [
+          ["items", "list[FunctionsRuntimeVersionSummary]", "items"]
+        ]
+      },
+      "FunctionsRuntimeVersionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["functions_runtime_id", "str", "functionsRuntimeId"],
+          ["display_name", "str", "displayName"],
+          ["os_version", "str", "osVersion"],
+          ["language_version", "str", "languageVersion"],
+          ["supported_architectures", "list[str]", "supportedArchitectures"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["metadata", "str", "metadata"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
       },
       "ImagePolicyConfig": {
         "attributes": [
@@ -13001,6 +13286,14 @@
       },
       "KeyDetails": {
         "attributes": [["kms_key_id", "str", "kmsKeyId"]]
+      },
+      "ManualRuntimeConfig": {
+        "attributes": [
+          ["runtime_config_type", "str", "runtimeConfigType"],
+          ["functions_runtime_name", "str", "functionsRuntimeName"],
+          ["functions_runtime_version_id", "str", "functionsRuntimeVersionId"]
+        ],
+        "discriminator": "RuntimeConfig"
       },
       "NoneFailureDestinationDetails": {
         "attributes": [["kind", "str", "kind"]],
@@ -13028,6 +13321,102 @@
         ],
         "discriminator": "SuccessDestinationDetails"
       },
+      "ObjectStorageArchiveSourceDetails": {
+        "attributes": [
+          ["archive_source_type", "str", "archiveSourceType"],
+          ["bucket_name", "str", "bucketName"],
+          ["namespace", "str", "namespace"],
+          ["object_name", "str", "objectName"],
+          ["object_version_id", "str", "objectVersionId"]
+        ],
+        "discriminator": "ArchiveSourceDetails"
+      },
+      "PbfListing": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["publisher_details", "PublisherDetails", "publisherDetails"],
+          ["triggers", "list[Trigger]", "triggers"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PbfListingSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["name", "str", "name"],
+          ["description", "str", "description"],
+          ["publisher_details", "PublisherDetails", "publisherDetails"],
+          ["triggers", "list[Trigger]", "triggers"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PbfListingVersion": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["pbf_listing_id", "str", "pbfListingId"],
+          ["name", "str", "name"],
+          ["config", "list[ConfigDetails]", "config"],
+          ["requirements", "RequirementDetails", "requirements"],
+          ["change_summary", "str", "changeSummary"],
+          ["triggers", "list[Trigger]", "triggers"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PbfListingVersionSummary": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["pbf_listing_id", "str", "pbfListingId"],
+          ["name", "str", "name"],
+          ["config", "list[ConfigDetails]", "config"],
+          ["requirements", "RequirementDetails", "requirements"],
+          ["change_summary", "str", "changeSummary"],
+          ["triggers", "list[Trigger]", "triggers"],
+          ["time_created", "datetime", "timeCreated"],
+          ["time_updated", "datetime", "timeUpdated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
+        ]
+      },
+      "PbfListingVersionsCollection": {
+        "attributes": [["items", "list[PbfListingVersionSummary]", "items"]]
+      },
+      "PbfListingsCollection": {
+        "attributes": [["items", "list[PbfListingSummary]", "items"]]
+      },
+      "PolicyDetails": {
+        "attributes": [
+          ["policy", "str", "policy"],
+          ["description", "str", "description"]
+        ]
+      },
+      "PreBuiltFunctionSourceDetails": {
+        "attributes": [
+          ["source_type", "str", "sourceType"],
+          ["pbf_listing_id", "str", "pbfListingId"]
+        ],
+        "discriminator": "FunctionSourceDetails"
+      },
+      "PublisherDetails": {
+        "attributes": [["name", "str", "name"]]
+      },
       "QueueFailureDestinationDetails": {
         "attributes": [
           ["kind", "str", "kind"],
@@ -13043,6 +13432,23 @@
           ["channel_id", "str", "channelId"]
         ],
         "discriminator": "SuccessDestinationDetails"
+      },
+      "RequirementDetails": {
+        "attributes": [
+          ["min_memory_required_in_mbs", "int", "minMemoryRequiredInMBs"],
+          ["policies", "list[PolicyDetails]", "policies"]
+        ]
+      },
+      "RuntimeConfig": {
+        "attributes": [["runtime_config_type", "str", "runtimeConfigType"]],
+        "discriminator": {
+          "field": "runtimeConfigType",
+          "values": {
+            "FUNCTION_UPDATE": "FunctionUpdateRuntimeConfig",
+            "MANUAL": "ManualRuntimeConfig"
+          },
+          "fallback": "RuntimeConfig"
+        }
       },
       "StreamFailureDestinationDetails": {
         "attributes": [
@@ -13070,6 +13476,74 @@
           },
           "fallback": "SuccessDestinationDetails"
         }
+      },
+      "Trigger": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "TriggerSummary": {
+        "attributes": [["name", "str", "name"]]
+      },
+      "TriggersCollection": {
+        "attributes": [["items", "list[TriggerSummary]", "items"]]
+      },
+      "WorkRequest": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "WorkRequestError": {
+        "attributes": [
+          ["code", "str", "code"],
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestErrorCollection": {
+        "attributes": [["items", "list[WorkRequestError]", "items"]]
+      },
+      "WorkRequestLogEntry": {
+        "attributes": [
+          ["message", "str", "message"],
+          ["timestamp", "datetime", "timestamp"]
+        ]
+      },
+      "WorkRequestLogEntryCollection": {
+        "attributes": [["items", "list[WorkRequestLogEntry]", "items"]]
+      },
+      "WorkRequestResource": {
+        "attributes": [
+          ["entity_type", "str", "entityType"],
+          ["action_type", "str", "actionType"],
+          ["identifier", "str", "identifier"],
+          ["entity_uri", "str", "entityUri"],
+          ["metadata", "dict(str, str)", "metadata"]
+        ]
+      },
+      "WorkRequestSummary": {
+        "attributes": [
+          ["operation_type", "str", "operationType"],
+          ["status", "str", "status"],
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["resources", "list[WorkRequestResource]", "resources"],
+          ["percent_complete", "float", "percentComplete"],
+          ["time_accepted", "datetime", "timeAccepted"],
+          ["time_started", "datetime", "timeStarted"],
+          ["time_finished", "datetime", "timeFinished"],
+          ["time_updated", "datetime", "timeUpdated"]
+        ]
+      },
+      "WorkRequestSummaryCollection": {
+        "attributes": [["items", "list[WorkRequestSummary]", "items"]]
       }
     }
   }

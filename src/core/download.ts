@@ -26,7 +26,7 @@ export async function writeDownload(
     for await (const chunk of response.body ?? []) {
       if (chunk.length === 0) continue;
       if (toStdout) {
-        if (io.outBytes) io.outBytes(chunk);
+        if (io.outBytes) await io.outBytes(chunk);
         else io.out(decoder.decode(chunk, { stream: true }));
         continue;
       }

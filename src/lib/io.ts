@@ -15,7 +15,7 @@ export type Invocation = {
   cwd: string;
   out(text: string): void;
   /** Write raw bytes to stdout without UTF-8 decoding (falls back to `out` if omitted). */
-  outBytes?(bytes: Uint8Array): void;
+  outBytes?(bytes: Uint8Array): void | Promise<void>;
   err(text: string): void;
   /** Only decides colouring and help width, never behaviour. */
   isTTY(fd: 0 | 1 | 2): boolean;
@@ -65,8 +65,8 @@ export function processStdio() {
     out: (text: string) => {
       queue.push({ fd: 1, data: text });
     },
-    outBytes: (bytes: Uint8Array) => {
-      queue.push({ fd: 1, data: bytes });
+    outBytes: async (bytes: Uint8Array) => {
+      await Bun.write(Bun.stdout, bytes);
     },
     err: (text: string) => {
       queue.push({ fd: 2, data: text });

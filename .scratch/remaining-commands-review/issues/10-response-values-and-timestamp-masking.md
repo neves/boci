@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The harness detects different timestamps in successful stdout, including timezone-free timestamp fields.
-- [ ] Only the volatile top-level timestamp of a recognized transport exception on stderr is masked by the transport-exception timestamp rule.
-- [ ] A full-output load-balancer get case renders a UTC datetime ending in Z with the reference +00:00 suffix and an unfamiliar lifecycle state as UNKNOWN_ENUM_VALUE.
+- [x] The harness detects different timestamps in successful stdout, including timezone-free timestamp fields.
+- [x] Only the volatile top-level timestamp of a recognized transport exception on stderr is masked by the transport-exception timestamp rule.
+- [x] A full-output load-balancer get case renders a UTC datetime ending in Z with the reference +00:00 suffix and an unfamiliar lifecycle state as UNKNOWN_ENUM_VALUE.

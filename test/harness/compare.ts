@@ -1,7 +1,7 @@
 import { createVerify } from "node:crypto";
 // Normalise a Run so the Reference CLI's observation and boci's compare with toEqual.
 import type { CapturedRequest } from "./fake-endpoint.ts";
-import { IGNORED_REQUEST_HEADERS, OUTPUT_MASKS } from "./masks.ts";
+import { applyMasks, IGNORED_REQUEST_HEADERS, maskStderr } from "./masks.ts";
 import type { Run } from "./runner.ts";
 
 export type Authorization = {
@@ -65,13 +65,12 @@ function normalizeRequest(req: CapturedRequest): NormalizedRequest {
   };
 }
 
-export const mask = (s: string) =>
-  OUTPUT_MASKS.reduce((acc, [re, to]) => acc.replace(re, to), s);
+export const mask = applyMasks;
 
 export function normalizeRun(run: Run): NormalizedRun {
   return {
     stdout: mask(run.stdout),
-    stderr: mask(run.stderr),
+    stderr: maskStderr(run.stderr),
     exitCode: run.exitCode,
     requests: run.requests.map(normalizeRequest),
   };

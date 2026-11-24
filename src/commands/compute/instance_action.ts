@@ -1,7 +1,7 @@
 import type { CustomCommandContext } from "../../core/registry.ts";
 import type { OperationSpec } from "../../core/spec.ts";
 import { printResult } from "../../core/output.ts";
-import { runComputeOperation } from "./shared.ts";
+import { computeOutputOptions, runComputeOperation } from "./shared.ts";
 
 const instanceActionOperation: OperationSpec = {
   client: "core.compute",
@@ -32,10 +32,5 @@ export async function runComputeInstanceAction(
     "instance action",
     instanceActionOperation,
   );
-  printResult(ctx.io, result, {
-    query: ctx.rootValues.query,
-    output: ctx.rootValues.output,
-    rawOutput: ctx.rootValues.raw_output,
-    rc: ctx.rc,
-  });
+  printResult(ctx.io, result, computeOutputOptions(ctx));
 }

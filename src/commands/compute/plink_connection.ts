@@ -1,5 +1,5 @@
 import { Exit } from "../../lib/io.ts";
-import { callComputeOperation } from "./shared.ts";
+import { callComputeOperation, computeOutputOptions } from "./shared.ts";
 import type { CustomCommandContext } from "../../core/registry.ts";
 
 const INTERMEDIATE_HOST =
@@ -24,12 +24,7 @@ export async function runComputeInstanceConsolePlink(
   );
   if (!result.response.ok) {
     const { printResult } = await import("../../core/output.ts");
-    printResult(ctx.io, result, {
-      query: ctx.rootValues.query,
-      output: ctx.rootValues.output,
-      rawOutput: ctx.rootValues.raw_output,
-      rc: ctx.rc,
-    });
+    printResult(ctx.io, result, computeOutputOptions(ctx));
   }
 
   const connection = JSON.parse(result.raw) as {

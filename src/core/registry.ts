@@ -107,6 +107,14 @@ export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
     },
   ],
   [
+    "compute volume-attachment list",
+    async (ctx) => {
+      const { runComputeVolumeAttachmentList } =
+        await import("../commands/compute/list_volume_attachments.ts");
+      await runComputeVolumeAttachmentList(ctx);
+    },
+  ],
+  [
     "profile current",
     async (ctx) => {
       const { runProfileCurrent } = await import("../commands/profile.ts");

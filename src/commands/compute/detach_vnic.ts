@@ -2,7 +2,12 @@ import { Exit } from "../../lib/io.ts";
 import type { CustomCommandContext } from "../../core/registry.ts";
 import type { OperationSpec } from "../../core/spec.ts";
 import { printResult } from "../../core/output.ts";
-import { callComputeOperation, runComputeOperation } from "./shared.ts";
+import {
+  callComputeOperation,
+  computeOutputOptions,
+  extractListItems,
+  runComputeOperation,
+} from "./shared.ts";
 
 const detachOperation: OperationSpec = {
   client: "core.compute",
@@ -16,14 +21,6 @@ const detachOperation: OperationSpec = {
     "content-type": { value: "application/json" },
   },
 };
-
-function parseBody(raw: string): unknown {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return undefined;
-  }
-}
 
 export async function runComputeInstanceDetachVnic(
   ctx: CustomCommandContext,
@@ -39,6 +36,7 @@ export async function runComputeInstanceDetachVnic(
       throw new Exit(1);
     }
   }
+  const outputOptions = computeOutputOptions(ctx);
   const listed = await callComputeOperation(
     ctx,
     ctx.spec.service,
@@ -48,21 +46,9 @@ export async function runComputeInstanceDetachVnic(
       vnic_id: ctx.values.vnic_id,
     },
   );
-  if (!listed.response.ok)
-    printResult(ctx.io, listed, {
-      query: ctx.rootValues.query,
-      output: ctx.rootValues.output,
-      rawOutput: ctx.rootValues.raw_output,
-      rc: ctx.rc,
-    });
-  const body = parseBody(listed.raw);
-  const items =
-    typeof body === "object" && body !== null && "items" in body
-      ? (body as { items?: unknown }).items
-      : body;
-  const attachment = Array.isArray(items)
-    ? (items[0] as { id?: unknown } | undefined)
-    : undefined;
+  if (!listed.response.ok) printResult(ctx.io, listed, outputOptions);
+  const items = extractListItems(listed.raw);
+  const attachment = items[0] as { id?: unknown } | undefined;
   if (typeof attachment?.id !== "string" || attachment.id === "") {
     ctx.io.err("A VNIC attachment could not be found for the given VNIC ID.\n");
     throw new Exit(1);
@@ -79,10 +65,5 @@ export async function runComputeInstanceDetachVnic(
     "instance detach-vnic",
     detachOperation,
   );
-  printResult(ctx.io, result, {
-    query: ctx.rootValues.query,
-    output: ctx.rootValues.output,
-    rawOutput: ctx.rootValues.raw_output,
-    rc: ctx.rc,
-  });
+  printResult(ctx.io, result, outputOptions);
 }

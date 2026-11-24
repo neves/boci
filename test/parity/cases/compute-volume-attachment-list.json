@@ -1,0 +1,216 @@
+[
+  {
+    "id": "compute-volume-attachment-list-by-compartment",
+    "key": "compute volume-attachment list",
+    "argv": [
+      "compute",
+      "volume-attachment",
+      "list",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--availability-domain",
+      "Uocm:PHX-AD-1",
+      "--volume-id",
+      "ocid1.volume.oc1..test",
+      "--limit",
+      "5",
+      "--page",
+      "page-1",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "headers": {
+          "opc-next-page": "page-2"
+        },
+        "body": [
+          {
+            "attachmentType": "paravirtualized",
+            "availabilityDomain": "Uocm:PHX-AD-1",
+            "compartmentId": "ocid1.compartment.oc1..test",
+            "displayName": "att-1",
+            "id": "ocid1.volumeattachment.oc1..test1",
+            "instanceId": "ocid1.instance.oc1..test",
+            "isReadOnly": false,
+            "lifecycleState": "ATTACHED",
+            "timeCreated": "2026-01-01T00:00:00Z",
+            "volumeId": "ocid1.volume.oc1..test"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "compute-volume-attachment-list-by-instance",
+    "key": "compute volume-attachment list",
+    "argv": [
+      "compute",
+      "volume-attachment",
+      "list",
+      "--instance-id",
+      "ocid1.instance.oc1..test",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "body": {
+          "compartmentId": "ocid1.compartment.oc1..derived",
+          "id": "ocid1.instance.oc1..test"
+        }
+      },
+      {
+        "body": [
+          {
+            "attachmentType": "iscsi",
+            "availabilityDomain": "Uocm:PHX-AD-1",
+            "compartmentId": "ocid1.compartment.oc1..derived",
+            "id": "ocid1.volumeattachment.oc1..test2",
+            "instanceId": "ocid1.instance.oc1..test",
+            "ipv4": "169.254.2.2",
+            "iqn": "iqn.2015-12.com.oracleiaas:test",
+            "lifecycleState": "ATTACHED",
+            "port": 3260,
+            "timeCreated": "2026-01-01T00:00:00Z",
+            "volumeId": "ocid1.volume.oc1..test"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "compute-volume-attachment-list-all",
+    "key": "compute volume-attachment list",
+    "argv": [
+      "compute",
+      "volume-attachment",
+      "list",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--all",
+      "--page-size",
+      "1",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "headers": {
+          "opc-next-page": "page-2"
+        },
+        "body": [
+          {
+            "attachmentType": "paravirtualized",
+            "id": "ocid1.volumeattachment.oc1..test1",
+            "lifecycleState": "ATTACHED"
+          }
+        ]
+      },
+      {
+        "body": [
+          {
+            "attachmentType": "paravirtualized",
+            "id": "ocid1.volumeattachment.oc1..test2",
+            "lifecycleState": "ATTACHED"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "compute-volume-attachment-list-all-limit",
+    "key": "compute volume-attachment list",
+    "argv": [
+      "compute",
+      "volume-attachment",
+      "list",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--all",
+      "--limit",
+      "10"
+    ]
+  },
+  {
+    "id": "compute-volume-attachment-list-requires-scope",
+    "key": "compute volume-attachment list",
+    "argv": ["compute", "volume-attachment", "list"]
+  },
+  {
+    "id": "compute-volume-attachment-list-instance-error",
+    "key": "compute volume-attachment list",
+    "argv": [
+      "compute",
+      "volume-attachment",
+      "list",
+      "--instance-id",
+      "ocid1.instance.oc1..missing",
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry"
+    ],
+    "replies": [
+      {
+        "status": 404,
+        "headers": {
+          "opc-request-id": "req-instance-404"
+        },
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Authorization failed or requested resource not found."
+        }
+      }
+    ]
+  },
+  {
+    "id": "compute-volume-attachment-list-limit-page-size",
+    "key": "compute volume-attachment list",
+    "argv": [
+      "compute",
+      "volume-attachment",
+      "list",
+      "--compartment-id",
+      "ocid1.compartment.oc1..test",
+      "--limit",
+      "3",
+      "--page-size",
+      "2",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "headers": {
+          "opc-next-page": "page-2"
+        },
+        "body": [
+          {
+            "attachmentType": "paravirtualized",
+            "id": "ocid1.volumeattachment.oc1..test1",
+            "lifecycleState": "ATTACHED"
+          },
+          {
+            "attachmentType": "paravirtualized",
+            "id": "ocid1.volumeattachment.oc1..test2",
+            "lifecycleState": "ATTACHED"
+          }
+        ]
+      },
+      {
+        "body": [
+          {
+            "attachmentType": "paravirtualized",
+            "id": "ocid1.volumeattachment.oc1..test3",
+            "lifecycleState": "ATTACHED"
+          },
+          {
+            "attachmentType": "paravirtualized",
+            "id": "ocid1.volumeattachment.oc1..test4",
+            "lifecycleState": "ATTACHED"
+          }
+        ]
+      }
+    ]
+  }
+]

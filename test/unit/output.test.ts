@@ -122,6 +122,47 @@ test("response subtype discriminator is inherited through named models", () => {
   });
 });
 
+test("keeps model-specific lifecycle states and preserves other model states", () => {
+  const { io, out } = invocation();
+  const lbResult = result(
+    { lifecycleState: "FUTURE_STATE" },
+    {},
+    {
+      operation: {
+        client: "lb",
+        method: "get_load_balancer",
+        http: "GET",
+        path: "/loadBalancers/x",
+        responseType: "LoadBalancer",
+        queryParams: {},
+      },
+      responseModels: {
+        LoadBalancer: {
+          attributes: [["lifecycle_state", "str", "lifecycleState"]],
+        },
+      },
+    },
+  );
+  printResult(io, lbResult, { rc });
+  expect(JSON.parse(out.join("")).data["lifecycle-state"]).toBe(
+    "UNKNOWN_ENUM_VALUE",
+  );
+
+  const other = invocation();
+  printResult(
+    other.io,
+    result(
+      { lifecycleState: "FUTURE_STATE" },
+      {},
+      { operation: { ...result(things).operation, responseType: "Thing" } },
+    ),
+    { rc },
+  );
+  expect(JSON.parse(other.out.join("")).data["lifecycle-state"]).toBe(
+    "FUTURE_STATE",
+  );
+});
+
 test("table renders the data's rows with padded columns", () => {
   const { io, out } = invocation();
   printResult(io, result(things), { output: "table", rc });

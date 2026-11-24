@@ -228,7 +228,8 @@ function renderModel(
     model.attributes.map(([name, fieldType, wire]) => [
       name.replaceAll("_", "-"),
       renderModel(
-        name === "lifecycle_state" &&
+        model === models?.LoadBalancer &&
+          name === "lifecycle_state" &&
           typeof data[wire] === "string" &&
           ![
             "CREATING",

@@ -88,6 +88,13 @@ class ProgramTarget {
  * newlines, like Python's `open(path, "r")`; a second read returns "" (the file is
  * consumed). Write modes are only passed through to the generated command.
  */
+/** Python's UTF-8 decoder is strict and preserves an initial BOM as U+FEFF. */
+function decodePythonUtf8(data: Uint8Array): string {
+  return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+    data,
+  );
+}
+
 export class ProgramFile {
   private consumed = false;
   constructor(
@@ -114,7 +121,7 @@ export class ProgramFile {
     if (this.binary) return data;
     let text: string;
     try {
-      text = new TextDecoder("utf-8", { fatal: true }).decode(data);
+      text = decodePythonUtf8(data);
     } catch {
       throw new ProgramUnsupported("UnicodeDecodeError");
     }
@@ -481,7 +488,7 @@ export function runProgram(
     } else if (obj instanceof Uint8Array && method === "decode") {
       if (args.length === 0 || /^utf-?8$/i.test(String(args[0])))
         try {
-          return new TextDecoder("utf-8", { fatal: true }).decode(obj);
+          return decodePythonUtf8(obj);
         } catch {
           throw new ProgramUnsupported("UnicodeDecodeError");
         }

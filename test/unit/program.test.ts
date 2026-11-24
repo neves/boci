@@ -176,6 +176,33 @@ describe("runProgram", () => {
     expect(() => new ProgramFile("wb").read()).toThrow(ProgramUnsupported);
   });
 
+  test("preserves UTF-8 BOM on text reads and explicit byte decoding", () => {
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf, 0x61]);
+    expect(new ProgramFile("r", bom).read()).toBe("\uFEFFa");
+    const decoded = runProgram(
+      [["set", ["var", "kwargs"], "a", ["call", "decode", kw("a")]], invoke],
+      { a: bom },
+      params,
+      parse,
+    );
+    expect(decoded.kwargs?.a).toBe("\uFEFFa");
+  });
+
+  test("keeps malformed UTF-8 strict on text reads and explicit byte decoding", () => {
+    const malformed = new Uint8Array([0xff]);
+    expect(() => new ProgramFile("r", malformed).read()).toThrow(
+      "UnicodeDecodeError",
+    );
+    expect(() =>
+      runProgram(
+        [["set", ["var", "kwargs"], "a", ["call", "decode", kw("a")]], invoke],
+        { a: malformed },
+        params,
+        parse,
+      ),
+    ).toThrow("UnicodeDecodeError");
+  });
+
   test("for loops, comprehensions over file lines, b64encode", () => {
     const enc = (t: string) => new TextEncoder().encode(t);
     const values = {

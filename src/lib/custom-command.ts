@@ -1,4 +1,3 @@
-import { parseJsonBody } from "../utils/parseJsonBody.ts";
 // Building blocks for Custom (Tier C) commands: what the Reference CLI's hand-written
 // wrappers do with `cli_util.build_client` + `client.<method>(...)` + `render_response`.
 // `bun run scaffold <key>` generates commands on top of these.
@@ -11,6 +10,7 @@ import { printResult, type OutputOptions } from "../core/output.ts";
 import type { CustomCommandContext } from "../core/registry.ts";
 import { loadService, type OperationSpec } from "../core/spec.ts";
 import { waitForState } from "../core/waiter.ts";
+import { parseJsonBody } from "../utils/parseJsonBody.ts";
 
 /** The root --query/--output/--raw-output options `cli_util.render_response` honors. */
 export function outputOptions(ctx: CustomCommandContext): OutputOptions {

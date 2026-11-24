@@ -1,5 +1,5 @@
-import { sample } from "./sample-param.ts";
 // Pure code-template and codemod helpers for `bun run scaffold` (unit-tested).
+import { sample } from "./sample-param.ts";
 import { operationConst, scaffoldNames, type Triage } from "./triage-lib.ts";
 
 export type SpecParam = {

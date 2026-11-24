@@ -1,0 +1,213 @@
+[
+  {
+    "id": "os-object-bulk-delete-versions",
+    "key": "os object bulk-delete-versions",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "object",
+      "bulk-delete-versions",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--parallel-operations-count",
+      "1"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "name": "a.txt",
+              "versionId": "v1"
+            },
+            {
+              "name": "b.log",
+              "versionId": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-versions-dry-run",
+    "key": "os object bulk-delete-versions",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "object",
+      "bulk-delete-versions",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dry-run",
+      "--include",
+      "*.txt"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "name": "a.txt",
+              "versionId": "v1"
+            },
+            {
+              "name": "b.log",
+              "versionId": "v2"
+            }
+          ]
+        },
+        "headers": {
+          "opc-next-page": "next"
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "name": "c.txt",
+              "versionId": "v3"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-object-bulk-delete-versions-conflict",
+    "key": "os object bulk-delete-versions",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "object",
+      "bulk-delete-versions",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--object-name",
+      "a",
+      "--prefix",
+      "b"
+    ],
+    "replies": []
+  },
+  {
+    "id": "os-object-bulk-delete-versions-abort",
+    "key": "os object bulk-delete-versions",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "object",
+      "bulk-delete-versions",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "name": "a.txt",
+              "versionId": "v1"
+            },
+            {
+              "name": "b.log",
+              "versionId": "v2"
+            }
+          ]
+        }
+      }
+    ],
+    "stdin": "n\n"
+  },
+  {
+    "id": "os-object-bulk-delete-versions-error",
+    "key": "os object bulk-delete-versions",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "object",
+      "bulk-delete-versions",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--object-name",
+      "a.txt"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "name": "a.txt",
+              "versionId": "v1"
+            },
+            {
+              "name": "b.log",
+              "versionId": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Not found"
+        },
+        "headers": {
+          "opc-request-id": "service-error-id"
+        }
+      }
+    ],
+    "requestOnly": true,
+    "expect": {
+      "exitCode": 1,
+      "stdoutContains": "Not found",
+      "stderrContains": "Deleted object a.txt,v1"
+    }
+  }
+]

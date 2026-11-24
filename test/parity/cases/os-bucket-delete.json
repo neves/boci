@@ -1,0 +1,331 @@
+[
+  {
+    "id": "os-bucket-delete",
+    "key": "os bucket delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "bucket",
+      "delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force",
+      "--if-match",
+      "test-etag"
+    ],
+    "replies": [
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-bucket-delete-abort",
+    "key": "os bucket delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "bucket",
+      "delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket"
+    ],
+    "replies": [],
+    "stdin": "n\n"
+  },
+  {
+    "id": "os-bucket-delete-invalid-dry-run",
+    "key": "os bucket delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "bucket",
+      "delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--dry-run"
+    ],
+    "replies": []
+  },
+  {
+    "id": "os-bucket-delete-empty-preview",
+    "key": "os bucket delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "bucket",
+      "delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--empty",
+      "--dry-run"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "versioning": "Enabled"
+        }
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "name": "policy",
+            "id": "pid"
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "name": "par",
+            "id": "rid"
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "name": "a.txt",
+              "versionId": "v1"
+            },
+            {
+              "name": "b.log",
+              "versionId": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "object": "upload",
+            "uploadId": "uid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "os-bucket-delete-empty",
+    "key": "os bucket delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "bucket",
+      "delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--empty",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "versioning": "Enabled"
+        }
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "name": "policy",
+            "id": "pid"
+          }
+        ]
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "name": "par",
+            "id": "rid"
+          }
+        ]
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "name": "a.txt",
+              "versionId": "v1"
+            }
+          ]
+        }
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "object": "a.txt",
+            "uploadId": "uid"
+          }
+        ]
+      },
+      {
+        "status": 204,
+        "body": ""
+      },
+      {
+        "status": 204,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "id": "os-bucket-delete-error",
+    "key": "os bucket delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "bucket",
+      "delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--force"
+    ],
+    "replies": [
+      {
+        "status": 404,
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Not found"
+        },
+        "headers": {
+          "opc-request-id": "service-error-id"
+        }
+      }
+    ]
+  },
+  {
+    "id": "os-bucket-delete-empty-preview-unversioned",
+    "key": "os bucket delete",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "os",
+      "bucket",
+      "delete",
+      "-ns",
+      "myns",
+      "-bn",
+      "mybucket",
+      "--empty",
+      "--dry-run"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "versioning": "Disabled"
+        }
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "name": "policy",
+            "id": "pid"
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "name": "par",
+            "id": "rid"
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "body": {
+          "objects": [
+            {
+              "name": "a.txt"
+            }
+          ],
+          "nextStartWith": "b.txt"
+        }
+      },
+      {
+        "body": {
+          "objects": [
+            {
+              "name": "b.txt"
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": [
+          {
+            "object": "upload",
+            "uploadId": "uid"
+          }
+        ]
+      }
+    ]
+  }
+]

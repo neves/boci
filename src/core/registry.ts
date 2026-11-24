@@ -70,6 +70,30 @@ function lazyOsOutput<T>(
 /** Single source of truth for Custom OCI Leaf command handlers, loaded lazily on dispatch. */
 export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
   [
+    "os bucket delete",
+    async (ctx) => {
+      const { runOsBucketDelete } =
+        await import("../commands/os/bucket_delete.ts");
+      await runOsBucketDelete(ctx);
+    },
+  ],
+  [
+    "os object bulk-delete-versions",
+    async (ctx) => {
+      const { runOsObjectBulkDeleteVersions } =
+        await import("../commands/os/object_bulk_delete_versions.ts");
+      await runOsObjectBulkDeleteVersions(ctx);
+    },
+  ],
+  [
+    "fn function invoke",
+    async (ctx) => {
+      const { runFnFunctionInvoke } =
+        await import("../commands/fn/function_invoke.ts");
+      await runFnFunctionInvoke(ctx);
+    },
+  ],
+  [
     "model-deployment inference-result predict-with-response-stream",
     async (ctx) => {
       const { runModelDeploymentInferenceResultPredictWithResponseStream } =

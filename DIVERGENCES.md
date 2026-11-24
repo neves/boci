@@ -138,3 +138,11 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **boci:** prints the same exception line and exits 1
 - **Why:** the preceding frames describe the Python and Click implementation and include local interpreter paths
 - **State:** accepted
+
+### Object Storage bulk deletion worker failures omit Python tracebacks
+
+- **Invocation:** `oci os object bulk-delete-versions --force ...` or `oci os bucket delete --empty --force ...` when a deletion worker receives an HTTP error
+- **Reference CLI:** includes the Python worker traceback and SDK exception in the failed item's `delete-failures` entry
+- **boci:** includes the CLI ServiceError with the operation, status, and service message in that entry. It continues processing the batch and exits 1. Bucket deletion stops after the failed cleanup.
+- **Why:** the Python stack frames contain machine-specific paths and source locations
+- **State:** accepted

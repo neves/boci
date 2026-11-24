@@ -1,14 +1,12 @@
 // Click's invocation flow for the oci command tree (click.core main → Group.invoke →
 // resolve_command → make_context), reproduced so boci fails, helps and dispatches exactly
 // like the Reference CLI. See ADR 0003 and the usage parity cases.
-import { createHash } from "node:crypto";
+import { functionEndpointCache } from "../lib/function-endpoint-cache.ts";
 import {
   appendFileSync,
   closeSync,
   existsSync,
-  mkdirSync,
   readFileSync,
-  renameSync,
   statSync,
   writeFileSync,
 } from "node:fs";
@@ -538,22 +536,27 @@ async function main(io: Invocation): Promise<void> {
   try {
     for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
       if (p.name === "from_json") continue;
+      const envValue =
+        name === "fn" &&
+        key === "function invoke" &&
+        p.name === "endpoint_cache_ttl"
+          ? io.env.OCI_CLI_FUNCTIONS_INVOKE_ENDPOINT_CACHE_TTL || undefined
+          : undefined;
       if (parsed.opts[p.name] !== undefined) {
         paramSources[p.name] = "COMMANDLINE";
+      } else if (envValue !== undefined) {
+        paramSources[p.name] = "ENVIRONMENT";
       } else if (p.name in fromJsonDefaults) {
         paramSources[p.name] = "DEFAULT_MAP";
       } else {
         paramSources[p.name] = "DEFAULT";
       }
-      const rawVal =
-        parsed.opts[p.name] !== undefined
-          ? parsed.opts[p.name]
-          : fromJsonDefaults[p.name];
-      if (rawVal === undefined || rawVal === null) continue;
+      const value = parsed.opts[p.name] ?? envValue ?? fromJsonDefaults[p.name];
+      if (value === undefined || value === null) continue;
       try {
-        values[p.name] = convert(p, rawVal, index.datetime);
+        values[p.name] = convert(p, value, index.datetime);
         if (
-          specCmd.program &&
+          (specCmd.program || (name === "fn" && key === "function invoke")) &&
           p.typeClass === "click.types.File" &&
           typeof values[p.name] === "string"
         ) {
@@ -2436,82 +2439,21 @@ function programFiles(
       }
     },
     deleteFnEndpointCache: (ctxObj, functionId) => {
-      // Mirrors services.functions.src.oci_cli_functions.invoke_endpoint_cache.delete_cached_endpoint.
-      const CACHE_FILE_NAME = "functions-invoke-endpoint-cache.json";
-      const rawCfg = ctxObj.config_file;
-      const expandedCfg = rawCfg
-        ? resolve(
-            io.cwd,
-            expandVars(expandUser(String(rawCfg), io.env), io.env),
-          )
-        : null;
-      const cacheDir = expandedCfg
-        ? dirname(expandedCfg)
-        : join(expandUser("~", io.env), ".oci");
-      const cacheFile = join(cacheDir, CACHE_FILE_NAME);
-      let cacheData: { version?: unknown; entries?: Record<string, unknown> };
-      try {
-        const parsed = JSON.parse(readFileSync(cacheFile, "utf8"));
-        if (
-          !parsed ||
-          typeof parsed !== "object" ||
-          parsed.version !== 1 ||
-          !parsed.entries ||
-          typeof parsed.entries !== "object" ||
-          Array.isArray(parsed.entries)
-        ) {
-          return;
-        }
-        cacheData = parsed;
-      } catch {
-        return;
-      }
-      const toText = (v: unknown) =>
-        v === null || v === undefined
-          ? ""
-          : v === true
-            ? "True"
-            : v === false
-              ? "False"
-              : String(v);
       const cfg =
         ctxObj.config &&
         typeof ctxObj.config === "object" &&
         "fields" in ctxObj.config
           ? (ctxObj.config as { fields: Record<string, unknown> }).fields
           : {};
-      const keyParts: Record<string, string> = {
-        auth: toText(ctxObj.auth),
-        config_file: toText(expandedCfg),
-        enable_dual_stack: toText(ctxObj.enable_dual_stack),
-        endpoint: toText(ctxObj.endpoint || cfg.endpoint),
-        function_id: toText(functionId),
-        profile: toText(ctxObj.profile),
-        region: toText(ctxObj.region || cfg.region),
-      };
-      // Match Python json.dumps(..., sort_keys=True) default separators (", ", ": ").
-      const pyJson = `{${Object.keys(keyParts)
-        .sort()
-        .map((k) => `${JSON.stringify(k)}: ${JSON.stringify(keyParts[k])}`)
-        .join(", ")}}`;
-      const hash = createHash("sha256").update(pyJson).digest("hex");
-      const entries = cacheData.entries!;
-      if (!(hash in entries)) return;
-      delete entries[hash];
-      try {
-        mkdirSync(cacheDir, { recursive: true, mode: 0o700 });
-        const tmp = join(
-          cacheDir,
-          `.${CACHE_FILE_NAME}.${process.pid}.${Date.now()}`,
-        );
-        writeFileSync(
-          tmp,
-          `${JSON.stringify(sortJsonKeys(cacheData), null, 2)}\n`,
-        );
-        renameSync(tmp, cacheFile);
-      } catch {
-        // Cache cleanup is best-effort, matching invoke_endpoint_cache._write_cache.
-      }
+      return functionEndpointCache(
+        io,
+        {
+          ...ctxObj,
+          endpoint: ctxObj.endpoint || cfg.endpoint,
+          region: ctxObj.region || cfg.region,
+        },
+        functionId,
+      ).delete();
     },
   };
 }

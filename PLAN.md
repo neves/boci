@@ -214,7 +214,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `db patch-history get by-database`
 - [x] `db patch-history list by-database`
 - [x] `db system patch`
-- [ ] `fn function invoke`
+- [x] `fn function invoke`
 - [x] `fn function create archive-function direct-archive fn-update-runtime-config`
 - [x] `fn function create archive-function direct-archive manual-runtime-config`
 - [x] `fn function create archive-function object-storage fn-update-runtime-config`
@@ -289,7 +289,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `network-firewall service update`
 - [x] `ocvs sddc retrieve-sddc-operation-status`
 - [x] Object Storage namespace lookup when `--namespace` is omitted. Cover the Engine path using the `GET /n` recording pattern from `os object copy`.
-- [ ] `os bucket delete`
+- [x] `os bucket delete`
 - [x] `os multipart abort`
 - [x] `os object head`
 - [x] `os object list`
@@ -374,6 +374,6 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `kms management vault restore-from-file`
 - [x] `management-dashboard dashboard export`
 - [x] `model-deployment inference-result predict-with-response-stream`
-- [ ] `os object bulk-delete-versions`
+- [x] `os object bulk-delete-versions`
 - [x] `rover device system-upgrade import-bundle`
 - [x] `rover device system-upgrade upload-bundle`

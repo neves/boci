@@ -28,14 +28,15 @@ export type FakeEndpoint = {
   [Symbol.dispose](): void;
 };
 
-function toResponse(reply: Reply): Response {
+function toResponse(reply: Reply, endpoint: string): Response {
   const body = reply.body ?? {};
   const isString = typeof body === "string";
   const headers = new Headers(reply.headers);
   if (!headers.has("content-type")) {
     headers.set("content-type", isString ? "text/plain" : "application/json");
   }
-  return new Response(isString ? body : JSON.stringify(body), {
+  const payload = isString ? body : JSON.stringify(body);
+  return new Response(payload.replaceAll("{endpoint}", endpoint), {
     status: reply.status ?? 200,
     headers,
   });
@@ -48,7 +49,7 @@ export function startFakeEndpoint(replies: Reply | Reply[] = {}): FakeEndpoint {
   const server = Bun.serve({
     port: 0,
     hostname: "127.0.0.1",
-    async fetch(req) {
+    async fetch(req): Promise<Response> {
       // req.url is normalised by Bun; recover the raw target from the URL string as sent.
       const raw = req.url.slice(
         req.url.indexOf("/", req.url.indexOf("//") + 2),
@@ -67,7 +68,7 @@ export function startFakeEndpoint(replies: Reply | Reply[] = {}): FakeEndpoint {
       const reply =
         queue[Math.min(requests.length - 1, queue.length - 1)] ?? {};
       if (reply.delayMs) await Bun.sleep(reply.delayMs);
-      return toResponse(reply);
+      return toResponse(reply, `http://127.0.0.1:${server.port}`);
     },
   });
   return {

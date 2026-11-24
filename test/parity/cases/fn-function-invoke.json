@@ -1,0 +1,235 @@
+[
+  {
+    "id": "fn-function-invoke",
+    "key": "fn function invoke",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "fn",
+      "function",
+      "invoke",
+      "--function-id",
+      "test-function",
+      "--file",
+      "-",
+      "--body",
+      "hello"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "invokeEndpoint": "{endpoint}/invoke-base"
+        }
+      },
+      {
+        "status": 200,
+        "body": "invoked"
+      }
+    ],
+    "expect": {
+      "fileModes": {
+        ".oci/functions-invoke-endpoint-cache.json": 384
+      }
+    }
+  },
+  {
+    "id": "fn-function-invoke-uncached",
+    "key": "fn function invoke",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "fn",
+      "function",
+      "invoke",
+      "--function-id",
+      "test-function",
+      "--file",
+      "-",
+      "--body",
+      "hello",
+      "--no-endpoint-cache",
+      "--is-dry-run",
+      "true",
+      "--fn-intent",
+      "cloudevent"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "invokeEndpoint": "{endpoint}/invoke-base"
+        }
+      },
+      {
+        "status": 200,
+        "body": "invoked"
+      }
+    ],
+    "expect": {
+      "files": {
+        ".oci/functions-invoke-endpoint-cache.json": null
+      }
+    }
+  },
+  {
+    "id": "fn-function-invoke-file",
+    "key": "fn function invoke",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "fn",
+      "function",
+      "invoke",
+      "--function-id",
+      "test-function",
+      "--file",
+      "-",
+      "--body",
+      "hello",
+      "--file",
+      "result.txt",
+      "--endpoint-cache-ttl",
+      "0"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "invokeEndpoint": "{endpoint}/invoke-base"
+        }
+      },
+      {
+        "status": 200,
+        "body": "invoked",
+        "headers": {
+          "content-length": "7"
+        }
+      }
+    ],
+    "expect": {
+      "files": {
+        "result.txt": "invoked"
+      }
+    }
+  },
+  {
+    "id": "fn-function-invoke-management-error",
+    "key": "fn function invoke",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "fn",
+      "function",
+      "invoke",
+      "--function-id",
+      "test-function",
+      "--file",
+      "-",
+      "--body",
+      "hello"
+    ],
+    "replies": [
+      {
+        "status": 404,
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Not found"
+        },
+        "headers": {
+          "opc-request-id": "service-error-id"
+        }
+      }
+    ]
+  },
+  {
+    "id": "fn-function-invoke-error",
+    "key": "fn function invoke",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "fn",
+      "function",
+      "invoke",
+      "--function-id",
+      "test-function",
+      "--file",
+      "-",
+      "--body",
+      "hello"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "invokeEndpoint": "{endpoint}/invoke-base"
+        }
+      },
+      {
+        "status": 404,
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Not found"
+        },
+        "headers": {
+          "opc-request-id": "service-error-id"
+        }
+      }
+    ]
+  },
+  {
+    "id": "fn-function-invoke-cache-ttl-environment",
+    "key": "fn function invoke",
+    "argv": [
+      "--endpoint",
+      "{endpoint}",
+      "--no-retry",
+      "--opc-request-id",
+      "test-request",
+      "fn",
+      "function",
+      "invoke",
+      "--function-id",
+      "test-function",
+      "--file",
+      "-",
+      "--body",
+      "hello"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "body": {
+          "invokeEndpoint": "{endpoint}/invoke-base"
+        }
+      },
+      {
+        "status": 200,
+        "body": "invoked"
+      }
+    ],
+    "expect": {
+      "files": {
+        ".oci/functions-invoke-endpoint-cache.json": null
+      }
+    },
+    "env": {
+      "OCI_CLI_FUNCTIONS_INVOKE_ENDPOINT_CACHE_TTL": "0"
+    }
+  }
+]

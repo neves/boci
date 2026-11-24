@@ -987,7 +987,8 @@ async function promptInputWithDefault(
  */
 export async function runSetupAutocomplete(io: Invocation): Promise<void> {
   const stdin = createStdinReader(io);
-  const isDarwin = io.env.BOCI_SETUP_PLATFORM === "darwin";
+  const isDarwin =
+    (io.env.BOCI_SETUP_PLATFORM ?? process.platform) === "darwin";
   const userBashRc = expandUser("~/.bashrc", io.env);
   const userBashProfile = expandUser("~/.bash_profile", io.env);
 

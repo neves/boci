@@ -20,12 +20,21 @@ async function makeTempHome(prefix: string): Promise<string> {
   return (await realpath(raw)).replaceAll("\\", "/");
 }
 
-async function runAutocomplete(home: string, stdin: string) {
+async function runAutocomplete(
+  home: string,
+  stdin: string,
+  platform = "linux",
+  usePlatformOverride = true,
+) {
   let stdout = "";
   let stderr = "";
   const exitCode = await run({
     argv: ["setup", "autocomplete"],
-    env: { HOME: home, LC_ALL: "C.UTF-8" },
+    env: {
+      HOME: home,
+      LC_ALL: "C.UTF-8",
+      ...(usePlatformOverride ? { BOCI_SETUP_PLATFORM: platform } : {}),
+    },
     cwd: home,
     stdin,
     out: (s) => {
@@ -109,6 +118,58 @@ describe("setup autocomplete", () => {
       expect(res.stdout).toContain(`leave blank to use '${dir}/.bashrc'`);
       expect(await readFile(`${dir}/.bash_profile`, "utf8")).toBe(
         "# profile\n",
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("prefers .bash_profile and creates it by default on macOS", async () => {
+    const dir = await makeTempHome("boci-setup-ac-darwin-");
+    try {
+      await writeFile(`${dir}/.bashrc`, "# bashrc\n");
+      await writeFile(`${dir}/.bash_profile`, "# profile\n");
+      const res = await runAutocomplete(dir, "\ny\n", "darwin");
+      expect(res.exitCode).toBe(0);
+      expect(res.stdout).toContain(`leave blank to use '${dir}/.bash_profile'`);
+      expect(await readFile(`${dir}/.bash_profile`, "utf8")).toContain(
+        `source "${dir}/lib/oci_autocomplete.sh"`,
+      );
+      expect(await readFile(`${dir}/.bashrc`, "utf8")).toBe("# bashrc\n");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test.skipIf(process.platform !== "darwin")(
+    "uses .bash_profile by default on macOS without an override",
+    async () => {
+      const dir = await makeTempHome("boci-setup-ac-darwin-default-");
+      try {
+        await writeFile(`${dir}/.bashrc`, "# bashrc\n");
+        await writeFile(`${dir}/.bash_profile`, "# profile\n");
+        const res = await runAutocomplete(dir, "\ny\n", "linux", false);
+        expect(res.exitCode).toBe(0);
+        expect(res.stdout).toContain(
+          `leave blank to use '${dir}/.bash_profile'`,
+        );
+        expect(await readFile(`${dir}/.bash_profile`, "utf8")).toContain(
+          `source "${dir}/lib/oci_autocomplete.sh"`,
+        );
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    },
+  );
+
+  test("creates .bash_profile when it is the macOS default", async () => {
+    const dir = await makeTempHome("boci-setup-ac-darwin-create-");
+    try {
+      const res = await runAutocomplete(dir, "y\ny\n", "darwin");
+      expect(res.exitCode).toBe(0);
+      expect(res.stdout).toContain(`Create ${dir}/.bash_profile now?`);
+      expect(await readFile(`${dir}/.bash_profile`, "utf8")).toContain(
+        `source "${dir}/lib/oci_autocomplete.sh"`,
       );
     } finally {
       await rm(dir, { recursive: true, force: true });

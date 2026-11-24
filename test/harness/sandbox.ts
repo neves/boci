@@ -142,6 +142,7 @@ export async function createSandbox(
     HOME: home,
     LC_ALL: "C.UTF-8",
     TZ: "UTC",
+    BOCI_SETUP_PLATFORM: "linux",
     ...PROXY_ENV,
   });
 

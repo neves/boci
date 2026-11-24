@@ -43,6 +43,12 @@ const computeHandler: CustomCommandHandler = async (ctx) => {
   await runComputeInstanceListVnics(ctx);
 };
 
+const computePlinkHandler: CustomCommandHandler = async (ctx) => {
+  const { runComputeInstanceConsolePlink } =
+    await import("../commands/compute/plink_connection.ts");
+  await runComputeInstanceConsolePlink(ctx);
+};
+
 function lazyOsOutput<T>(
   load: () => Promise<T>,
   pick: (m: T) => (io: Invocation, opts: OsObjectPutOptions) => Promise<void>,
@@ -64,6 +70,10 @@ function lazyOsOutput<T>(
 /** Single source of truth for Custom OCI Leaf command handlers, loaded lazily on dispatch. */
 export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
   ["compute instance list-vnics", computeHandler],
+  [
+    "compute instance-console-connection get-plink-connection-string",
+    computePlinkHandler,
+  ],
   [
     "compute instance attach-vnic",
     async (ctx) => {

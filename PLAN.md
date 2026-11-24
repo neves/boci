@@ -162,7 +162,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `compute instance action`
 - [x] `compute instance change-compartment`
 - [x] `compute instance detach-vnic`
-- [ ] `compute instance-console-connection get-plink-connection-string`
+- [x] `compute instance-console-connection get-plink-connection-string`
 - [ ] `compute volume-attachment list`
 - [ ] `ce cluster create-kubeconfig`
 - [ ] `ce cluster generate-token`

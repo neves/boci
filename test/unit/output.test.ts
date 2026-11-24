@@ -81,6 +81,47 @@ test("json maps camelCase keys to dashes and sorts them", () => {
   );
 });
 
+test("response subtype discriminator is inherited through named models", () => {
+  const { io, out } = invocation();
+  const extra = {
+    responseModels: {
+      Base: {
+        attributes: [],
+        discriminator: {
+          field: "kind",
+          values: { SPECIAL: "Special" },
+          fallback: "Base",
+        },
+      },
+      Middle: { attributes: [], discriminator: "Base" },
+      Item: { attributes: [], discriminator: "Middle" },
+      Special: {
+        attributes: [
+          ["kind", "str", "kind"],
+          ["special_value", "str", "specialValue"],
+        ] as [string, string, string][],
+      },
+    },
+  };
+  printResult(
+    io,
+    result({ items: [{ kind: "SPECIAL", specialValue: "yes" }] }, {}, extra),
+    { rc },
+  );
+  expect(JSON.parse(out.join(""))).toEqual({
+    data: [{ kind: "SPECIAL", "special-value": "yes" }],
+  });
+  const missing = invocation();
+  printResult(
+    missing.io,
+    result({ items: [{ specialValue: "yes" }] }, {}, extra),
+    { rc },
+  );
+  expect(JSON.parse(missing.out.join(""))).toEqual({
+    data: [{ kind: null, "special-value": "yes" }],
+  });
+});
+
 test("table renders the data's rows with padded columns", () => {
   const { io, out } = invocation();
   printResult(io, result(things), { output: "table", rc });

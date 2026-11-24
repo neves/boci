@@ -2,7 +2,7 @@
 // call; otherwise the data/etag/opc-next-page document, filtered by --query (or an rc canned
 // query) and printed as JSON (keys sorted), a table, or --raw-output text.
 import { Exit, type Invocation } from "../lib/io.ts";
-import type { Models } from "./camelize.ts";
+import { inheritedDiscriminator, type Models } from "./camelize.ts";
 import type { OperationResult } from "./operation.ts";
 import { applyQuery } from "../lib/query.ts";
 import type { Rc } from "./rc.ts";
@@ -213,8 +213,7 @@ function renderModel(
     );
   let model = models?.[type];
   if (!model) return data;
-  let disc = model.discriminator;
-  if (typeof disc === "string") disc = models?.[disc]?.discriminator;
+  const disc = inheritedDiscriminator(models?.[type] ? models : {}, model);
   if (disc && typeof disc !== "string") {
     const key = data[disc.field];
     const subtype =

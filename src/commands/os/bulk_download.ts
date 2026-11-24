@@ -64,6 +64,7 @@ import {
   type SyncWalkEntry,
   type WalkEntry,
   buildBulkDownloadFilter,
+  downloadSinglePartToFile as downloadSinglePartToFileShared,
   buildMultipartGetRanges,
   buildMultipartPutParts,
   computeCrc32cBase64,
@@ -198,71 +199,19 @@ export async function runOsObjectBulkDownload(
   const readLine = createLineReader(io);
   const inFlight = new Set<Promise<void>>();
 
-  const downloadSinglePartToFile = async (
+  const downloadSinglePartToFile = (
     objectName: string,
     resolvedFilePath: string,
-  ): Promise<void> => {
-    const getRes = await sendServiceRequest(io, sc, {
-      method: "GET",
-      pathTemplate: "/n/{namespaceName}/b/{bucketName}/o/{objectName}",
-      pathParams: { namespaceName: namespace, bucketName, objectName },
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        ...sseHeaders,
-      },
-      rawResponse: true,
-      decompress: false,
-    });
-    if (!getRes.response.ok) {
-      throw new Error(
-        formatServiceError(
-          { http: "GET", method: "get_object" },
-          stripQuery(getRes.url),
-          getRes.response,
-          getRes.raw,
-          sc.targetService,
-        ).trimEnd(),
-      );
-    }
-
-    let fd: number;
-    try {
-      fd = openSync(resolvedFilePath, "w");
-    } catch (e) {
-      const err = e as NodeJS.ErrnoException | null;
-      if (
-        err?.code === "EISDIR" ||
-        (err?.code === "EACCES" &&
-          existsSync(resolvedFilePath) &&
-          statSync(resolvedFilePath).isDirectory())
-      ) {
-        await readResponseBytes(getRes.response);
-        return;
-      }
-      throw e;
-    }
-
-    try {
-      if (getRes.response.body) {
-        const reader = getRes.response.body.getReader();
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            if (value && value.length > 0) writeAllToFd(fd, value);
-          }
-        } finally {
-          reader.releaseLock();
-        }
-      } else {
-        const bytes = new Uint8Array(await getRes.response.arrayBuffer());
-        if (bytes.length > 0) writeAllToFd(fd, bytes);
-      }
-    } finally {
-      closeSync(fd);
-    }
-  };
+  ): Promise<void> =>
+    downloadSinglePartToFileShared(
+      io,
+      sc,
+      namespace,
+      bucketName,
+      sseHeaders,
+      objectName,
+      resolvedFilePath,
+    );
 
   const downloadMultipartToFile = async (
     objectName: string,

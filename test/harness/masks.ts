@@ -75,16 +75,14 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
 
 /** Only mask the top-level timestamp in recognized exception envelopes on stderr. */
 export function maskStderr(s: string): string {
-  if (!/^(?:ServiceError|(?:\w+Exception)):\n\{/m.test(s)) return applyMasks(s);
-  return applyMasks(s)
-    .replace(
-      /("timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}\+00:00("(?=,?\s*\n))/g,
-      "$1<timestamp>$2",
-    )
-    .replace(
-      /("timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?("(?=,?\s*\n))/g,
-      "$1<timestamp>$2",
-    );
+  return applyMasks(s).replace(
+    /^(?:ServiceError|RequestException|SSLException|ConnectTimeout):\n\{\n[\s\S]*?^\}/gm,
+    (envelope) =>
+      envelope.replace(
+        /^(    "timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?(?:\+00:00)?(",?)$/m,
+        "$1<timestamp>$2",
+      ),
+  );
 }
 
 export function applyMasks(s: string): string {

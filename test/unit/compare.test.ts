@@ -96,7 +96,7 @@ test("successful stdout timestamps, including timezone-free values, compare exac
 
 test("only the top-level timestamp of a recognized stderr exception is masked", () => {
   const a =
-    'ServiceError:\n{\n    "timestamp": "2026-01-01T00:00:00.000000+00:00",\n    "details": {"timestamp": "2026-01-01T00:00:00"}\n}\n';
+    'ServiceError:\n{\n    "timestamp": "2026-01-01T00:00:00.000000+00:00",\n    "details": {\n        "timestamp": "2026-01-01T00:00:00"\n    }\n}\n';
   const b = a.replaceAll("2026-01-01", "2026-01-02");
   expect(normalizeRun(run({ stderr: a })).stderr).not.toBe(
     normalizeRun(run({ stderr: b })).stderr,
@@ -105,7 +105,9 @@ test("only the top-level timestamp of a recognized stderr exception is masked", 
     '"timestamp": "<timestamp>"',
   );
   expect(
-    normalizeRun(run({ stderr: a.replace("ServiceError:", "noise:") })).stderr,
+    normalizeRun(
+      run({ stderr: a.replace("ServiceError:", "UnrelatedException:") }),
+    ).stderr,
   ).toContain("2026-01-01");
 });
 

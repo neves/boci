@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] A multichunk binary response reaches stdout and a named file byte for byte through both command paths.
-- [ ] Partial file writes are completed before advancing to the next chunk.
-- [ ] A generated download with an empty response leaves an absent destination uncreated.
+- [x] A multichunk binary response reaches stdout and a named file byte for byte through both command paths.
+- [x] Partial file writes are completed before advancing to the next chunk.
+- [x] A generated download with an empty response leaves an absent destination uncreated.

@@ -19,6 +19,7 @@ import {
 } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
+import { writeAllBytes } from "../../core/byte-writer.ts";
 import {
   type OutputFileHandle,
   openClickFileForWrite,
@@ -230,10 +231,7 @@ export function createChunkWriter(
   const fd = outputFile.fd as number;
   return {
     write: (chunk: Uint8Array) => {
-      let offset = 0;
-      while (offset < chunk.length) {
-        offset += writeSync(fd, chunk, offset, chunk.length - offset);
-      }
+      writeAllBytes(fd, chunk);
     },
     finish: () => {},
   };
@@ -747,10 +745,7 @@ export function pyDirname(p: string): string {
 }
 
 export function writeAllToFd(fd: number, chunk: Uint8Array): void {
-  let offset = 0;
-  while (offset < chunk.length) {
-    offset += writeSync(fd, chunk, offset, chunk.length - offset);
-  }
+  writeAllBytes(fd, chunk);
 }
 
 export function createLineReader(io: Invocation): () => Promise<string | null> {

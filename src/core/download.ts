@@ -1,8 +1,9 @@
 // A generated download command (an operation returning a stream): the body goes to the
 // `--file` option, a lazy `click.File('wb')`, as the generated callback writes it.
-import { closeSync, openSync, writeSync } from "node:fs";
+import { closeSync, openSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Invocation } from "../lib/io.ts";
+import { writeAllBytes } from "./byte-writer.ts";
 
 /**
  * Write a successful response's body to `path` (`-` is stdout). Like the generated code,
@@ -30,8 +31,7 @@ export async function writeDownload(
         continue;
       }
       fd ??= openSync(resolve(io.cwd, path), "w");
-      for (let offset = 0; offset < chunk.length;)
-        offset += writeSync(fd, chunk, offset);
+      writeAllBytes(fd, chunk);
     }
     if (toStdout && !io.outBytes) {
       const tail = decoder.decode();

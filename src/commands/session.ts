@@ -40,6 +40,8 @@ import {
 } from "../core/operation.ts";
 import { formatServiceError } from "../core/output.ts";
 import type { Rc } from "../core/rc.ts";
+import { readConfigFile } from "../utils/configFile.ts";
+import { normalizePosixPath } from "../utils/posixPath.ts";
 import {
   DEFAULT_KEY_NAME,
   DEFAULT_PROFILE_NAME,
@@ -525,25 +527,7 @@ export async function runSessionExport(
 
   const resolvedConfigPath = resolve(io.cwd, configFile);
   let profileMap: Map<string, string | null> | undefined;
-  let configText: string | undefined;
-  try {
-    if (
-      !existsSync(resolvedConfigPath) ||
-      !statSync(resolvedConfigPath).isDirectory()
-    ) {
-      configText = readFileSync(resolvedConfigPath, "utf8");
-    }
-  } catch (e) {
-    const code = (e as NodeJS.ErrnoException | null)?.code;
-    if (
-      code !== "ENOENT" &&
-      code !== "ENOTDIR" &&
-      code !== "EISDIR" &&
-      code !== "EACCES"
-    ) {
-      throw e;
-    }
-  }
+  const configText = readConfigFile(resolvedConfigPath) ?? undefined;
 
   if (configText === undefined) {
     profileMap = profile === "DEFAULT" ? new Map() : undefined;
@@ -655,7 +639,7 @@ export async function runSessionExport(
   }
 
   writeZipFile(resolvedZipPath, [...archiveEntries.values()]);
-  io.err(`Export file written to: ${resolvedZipPath.replaceAll("\\", "/")}\n`);
+  io.err(`Export file written to: ${normalizePosixPath(resolvedZipPath)}\n`);
 }
 
 const SESSION_PROFILE_NAME_PATTERN = /^[A-Za-z0-9._\-@]+$/;
@@ -727,25 +711,7 @@ export async function runSessionImport(
 
   const configFile = expandUser(settings.configFile, io.env);
   const resolvedConfigPath = resolve(io.cwd, configFile);
-  let configText: string | undefined;
-  try {
-    if (
-      !existsSync(resolvedConfigPath) ||
-      !statSync(resolvedConfigPath).isDirectory()
-    ) {
-      configText = readFileSync(resolvedConfigPath, "utf8");
-    }
-  } catch (e) {
-    const code = (e as NodeJS.ErrnoException | null)?.code;
-    if (
-      code !== "ENOENT" &&
-      code !== "ENOTDIR" &&
-      code !== "EISDIR" &&
-      code !== "EACCES"
-    ) {
-      throw e;
-    }
-  }
+  const configText = readConfigFile(resolvedConfigPath) ?? undefined;
 
   const currentProfiles = new Set<string>(["DEFAULT"]);
   if (configText !== undefined) {
@@ -874,7 +840,7 @@ export async function runSessionImport(
 
   const defaultTokenDirectory = `${expandUser("~", io.env).replace(/[\\/]+$/, "")}/.oci/sessions`;
   const importedResourcesDir = `${defaultTokenDirectory}/${archivedProfileName}`;
-  const resolvedTokenDir = resolve(defaultTokenDirectory).replaceAll("\\", "/");
+  const resolvedTokenDir = normalizePosixPath(resolve(defaultTokenDirectory));
   const resolvedResourcesDir = resolve(importedResourcesDir).replaceAll(
     "\\",
     "/",
@@ -1009,14 +975,8 @@ function getOciCliProfileEnvVarError(
 
   const resolvedPath = configPath(configFile, io.env, io.cwd);
   const diskPath = resolve(io.cwd, resolvedPath);
-  let text: string;
-  try {
-    const st = statSync(diskPath);
-    if (!st.isFile()) {
-      return `Config file not found: ${resolvedPath}`;
-    }
-    text = readFileSync(diskPath, "utf8");
-  } catch {
+  const text = readConfigFile(diskPath);
+  if (text === null) {
     return `Config file not found: ${resolvedPath}`;
   }
 
@@ -1091,7 +1051,7 @@ async function promptSessionForProfile(
   let parsed: ReturnType<typeof parseConfig>;
   try {
     parsed = parseConfig(
-      readFileSync(diskConfigPath, "utf8"),
+      readConfigFile(diskConfigPath) ?? "",
       defaultConfigLocation,
     );
   } catch (e) {
@@ -1320,7 +1280,7 @@ async function persistUserSession(
   const sessionAuthLocation = resolve(
     io.cwd,
     `${tokenDir.replace(/[\\/]+$/, "")}/${profileName}`,
-  ).replaceAll("\\", "/");
+  );
   if (!existsSync(sessionAuthLocation)) {
     createDirectory(sessionAuthLocation);
   }

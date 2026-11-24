@@ -1034,6 +1034,10 @@ async function main(io: Invocation): Promise<void> {
             region: undefined,
             env: io.env,
             loadContextDefaults,
+            defaultMap:
+              Object.keys(fromJsonDefaults).length > 0
+                ? fromJsonDefaults
+                : null,
             requestId:
               typeof wrapperRootValues.request_id === "string"
                 ? wrapperRootValues.request_id

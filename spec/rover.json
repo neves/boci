@@ -60,7 +60,32 @@
       "endpointTemplate": "https://rover.{region}.oci.{secondLevelDomain}",
       "endpointTemplatePerRealm": {},
       "dualStackByDefault": false,
-      "serviceName": "rover_cluster"
+      "serviceName": "rover_cluster",
+      "lifecycleGetters": {
+        "get_rover_cluster": {
+          "client": "rover.rover_cluster",
+          "method": "get_rover_cluster",
+          "http": "GET",
+          "path": "/roverClusters/{roverClusterId}",
+          "positionalArgs": ["rover_cluster_id"],
+          "pathParams": {
+            "roverClusterId": "rover_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "RoverCluster"
+        }
+      }
     },
     "rover.rover_node": {
       "class": "oci.rover.rover_node_client.RoverNodeClient",
@@ -11008,6 +11033,708 @@
         ],
         "helpers": ["complex_shipping_address_param"]
       },
+      "program": {
+        "body": [
+          ["do", ["fn", "client", "rover", "rover_node"]],
+          [
+            "let",
+            "kwargs",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "complex_shipping_address_param.kwargs",
+                  ["fn", "dict", ["var", "kwargs"]]
+                ],
+                [
+                  "set",
+                  ["var", "complex_shipping_address_param.kwargs"],
+                  "customer_shipping_address",
+                  ["dict"]
+                ],
+                [
+                  "let",
+                  "complex_shipping_address_param.empty_shipping_address",
+                  true
+                ],
+                [
+                  "let",
+                  "complex_shipping_address_param.customer_address_options",
+                  [
+                    "dict",
+                    ["addressee", "addressee"],
+                    ["care_of", "careOf"],
+                    ["address1", "address1"],
+                    ["address2", "address2"],
+                    ["address3", "address3"],
+                    ["address4", "address4"],
+                    ["city_or_locality", "cityOrLocality"],
+                    ["state_province_region", "stateOrRegion"],
+                    ["country", "country"],
+                    ["zip_postal_code", "zipcode"],
+                    ["phone_number", "phoneNumber"],
+                    ["email", "email"]
+                  ]
+                ],
+                [
+                  "for",
+                  [
+                    "complex_shipping_address_param.option",
+                    "complex_shipping_address_param.value"
+                  ],
+                  [
+                    "call",
+                    "items",
+                    [
+                      "var",
+                      "complex_shipping_address_param.customer_address_options"
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "in",
+                        ["var", "complex_shipping_address_param.option"],
+                        ["var", "complex_shipping_address_param.kwargs"]
+                      ],
+                      [
+                        [
+                          "if",
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ],
+                          [
+                            [
+                              "let",
+                              "complex_shipping_address_param.empty_shipping_address",
+                              false
+                            ]
+                          ],
+                          []
+                        ],
+                        [
+                          "set",
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            "customer_shipping_address"
+                          ],
+                          ["var", "complex_shipping_address_param.value"],
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ]
+                        ],
+                        [
+                          "do",
+                          [
+                            "call",
+                            "pop",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ]
+                        ]
+                      ],
+                      []
+                    ]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "var",
+                    "complex_shipping_address_param.empty_shipping_address"
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "complex_shipping_address_param.kwargs"],
+                      "customer_shipping_address",
+                      null
+                    ]
+                  ],
+                  []
+                ],
+                ["return", ["var", "complex_shipping_address_param.kwargs"]]
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["not", ["item", ["var", "kwargs"], "lifecycle_state_details"]],
+            [
+              ["let", "pending_lifecycle_state", "PENDING_SUBMISSION"],
+              [
+                "do",
+                [
+                  "fn",
+                  "echo",
+                  [
+                    "bin",
+                    "+",
+                    "WARNING:Rover node will be updated with lifecycle state details ",
+                    ["var", "pending_lifecycle_state"]
+                  ],
+                  null,
+                  true,
+                  false
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "lifecycle_state_details",
+                ["var", "pending_lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "update",
+              ["var", "kwargs"],
+              [
+                "dict",
+                ["rover_node_id", ["item", ["var", "kwargs"], "node_id"]]
+              ]
+            ]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "node_id"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_node.generated.rovernode_cli.update_rover_node",
+        "complexTypes": {
+          "customer-shipping-address": "rover:ShippingAddress",
+          "node-workloads": "rover:list[RoverWorkload]",
+          "freeform-tags": "rover:dict(str, string)",
+          "defined-tags": "rover:dict(str, dict(str, object))",
+          "system-tags": "rover:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "rover_node_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shape",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "serial_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_shipping_address",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_workloads",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "super_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "unlock_passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact_phone_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "oracle_shipping_tracking_url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_preference",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_vendor",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_pickup_expected",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enclosure_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_return_window_starts",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_return_window_ends",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_import_requested",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_file_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_validation_code",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "public_key",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "certificate_authority_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_cert_validity_end",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "common_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cert_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cert_key_algorithm",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cert_signature_algorithm",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_node",
+        "method": "update_rover_node",
+        "http": "PUT",
+        "path": "/roverNodes/{roverNodeId}",
+        "positionalArgs": ["rover_node_id", "update_rover_node_details"],
+        "pathParams": {
+          "roverNodeId": "rover_node_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rover_node_details",
+        "responseType": "RoverNode",
+        "paginated": false,
+        "lifecycleGetter": "get_rover_node"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_node_id"],
+          "param": "rover_node_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["shape"],
+          "param": "shape",
+          "when": "shape is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["serialNumber"],
+          "param": "serial_number",
+          "when": "serial_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["customerShippingAddress"],
+          "transform": "parse_json_parameter",
+          "param": "customer_shipping_address",
+          "when": "customer_shipping_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["nodeWorkloads"],
+          "transform": "parse_json_parameter",
+          "param": "node_workloads",
+          "when": "node_workloads is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["superUserPassword"],
+          "param": "super_user_password",
+          "when": "super_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["unlockPassphrase"],
+          "param": "unlock_passphrase",
+          "when": "unlock_passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["pointOfContact"],
+          "param": "point_of_contact",
+          "when": "point_of_contact is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["pointOfContactPhoneNumber"],
+          "param": "point_of_contact_phone_number",
+          "when": "point_of_contact_phone_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["oracleShippingTrackingUrl"],
+          "param": "oracle_shipping_tracking_url",
+          "when": "oracle_shipping_tracking_url is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["shippingPreference"],
+          "param": "shipping_preference",
+          "when": "shipping_preference is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["shippingVendor"],
+          "param": "shipping_vendor",
+          "when": "shipping_vendor is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["timePickupExpected"],
+          "param": "time_pickup_expected",
+          "when": "time_pickup_expected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["lifecycleState"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["enclosureType"],
+          "param": "enclosure_type",
+          "when": "enclosure_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["lifecycleStateDetails"],
+          "param": "lifecycle_state_details",
+          "when": "lifecycle_state_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["timeReturnWindowStarts"],
+          "param": "time_return_window_starts",
+          "when": "time_return_window_starts is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["timeReturnWindowEnds"],
+          "param": "time_return_window_ends",
+          "when": "time_return_window_ends is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["isImportRequested"],
+          "param": "is_import_requested",
+          "when": "is_import_requested is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["importCompartmentId"],
+          "param": "import_compartment_id",
+          "when": "import_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["importFileBucket"],
+          "param": "import_file_bucket",
+          "when": "import_file_bucket is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["dataValidationCode"],
+          "param": "data_validation_code",
+          "when": "data_validation_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["publicKey"],
+          "param": "public_key",
+          "when": "public_key is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["certificateAuthorityId"],
+          "param": "certificate_authority_id",
+          "when": "certificate_authority_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["timeCertValidityEnd"],
+          "param": "time_cert_validity_end",
+          "when": "time_cert_validity_end is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["commonName"],
+          "param": "common_name",
+          "when": "common_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["certCompartmentId"],
+          "param": "cert_compartment_id",
+          "when": "cert_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["certKeyAlgorithm"],
+          "param": "cert_key_algorithm",
+          "when": "cert_key_algorithm is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["certSignatureAlgorithm"],
+          "param": "cert_signature_algorithm",
+          "when": "cert_signature_algorithm is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_node_details",
+          "key": ["systemTags"],
+          "transform": "parse_json_parameter",
+          "param": "system_tags",
+          "when": "system_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -12355,6 +13082,172 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "change_cluster_compartment_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "fn",
+                "isstr",
+                [
+                  "item",
+                  ["var", "change_cluster_compartment_common.kwargs"],
+                  "cluster_id"
+                ]
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  [
+                    "call",
+                    "strip",
+                    [
+                      "item",
+                      ["var", "change_cluster_compartment_common.kwargs"],
+                      "cluster_id"
+                    ]
+                  ]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --cluster-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "update",
+              ["var", "change_cluster_compartment_common.kwargs"],
+              [
+                "dict",
+                [
+                  "rover_cluster_id",
+                  [
+                    "item",
+                    ["var", "change_cluster_compartment_common.kwargs"],
+                    "cluster_id"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "change_cluster_compartment_common.kwargs"],
+              "cluster_id"
+            ]
+          ],
+          ["invoke", [], ["var", "change_cluster_compartment_common.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.change_rover_cluster_compartment",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "change_rover_cluster_compartment",
+        "http": "POST",
+        "path": "/roverClusters/{roverClusterId}/actions/changeCompartment",
+        "positionalArgs": [
+          "rover_cluster_id",
+          "change_rover_cluster_compartment_details"
+        ],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_rover_cluster_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_rover_cluster_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -13344,6 +14237,116 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "delete_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "fn",
+                "isstr",
+                ["item", ["var", "delete_cluster_common.kwargs"], "cluster_id"]
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  [
+                    "call",
+                    "strip",
+                    [
+                      "item",
+                      ["var", "delete_cluster_common.kwargs"],
+                      "cluster_id"
+                    ]
+                  ]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --cluster-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "delete_cluster_common.kwargs_request", ["dict"]],
+          [
+            "set",
+            ["var", "delete_cluster_common.kwargs_request"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "delete_cluster_common.client",
+            ["fn", "client", "rover", "rover_cluster"]
+          ],
+          [
+            "let",
+            "delete_cluster_common.result",
+            [
+              "sdk",
+              0,
+              ["var", "delete_cluster_common.client"],
+              [],
+              [
+                [
+                  "rover_cluster_id",
+                  [
+                    "item",
+                    ["var", "delete_cluster_common.kwargs"],
+                    "cluster_id"
+                  ]
+                ]
+              ],
+              ["var", "delete_cluster_common.kwargs_request"]
+            ]
+          ],
+          ["render", ["var", "delete_cluster_common.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "rover.rover_cluster",
+          "method": "delete_rover_cluster",
+          "http": "DELETE",
+          "path": "/roverClusters/{roverClusterId}",
+          "positionalArgs": ["rover_cluster_id"],
+          "pathParams": {
+            "roverClusterId": "rover_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -14293,6 +15296,623 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "request_cluster_common.cluster_type", "STANDALONE"],
+          [
+            "let",
+            "request_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "request_cluster_common.kwargs_request",
+            [
+              "dict",
+              [
+                "rover_cluster_id",
+                ["item", ["var", "request_cluster_common.kwargs"], "cluster_id"]
+              ],
+              ["lifecycle_state", "ACTIVE"],
+              ["lifecycle_state_details", "PENDING_APPROVAL"]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "==",
+              ["var", "request_cluster_common.cluster_type"],
+              "STATION"
+            ],
+            [
+              [
+                "let",
+                "request_cluster_common.result",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "get_rover_cluster_helper.cluster_id",
+                      [
+                        "item",
+                        ["var", "request_cluster_common.kwargs"],
+                        "cluster_id"
+                      ]
+                    ],
+                    [
+                      "let",
+                      "get_rover_cluster_helper.kwargs_request",
+                      [
+                        "dict",
+                        [
+                          "opc_request_id",
+                          [
+                            "fn",
+                            "requestId",
+                            ["item", ["fn", "ctxObj"], "request_id"]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "let",
+                      "get_rover_cluster_helper.client",
+                      ["fn", "client", "rover", "rover_cluster"]
+                    ],
+                    [
+                      "return",
+                      [
+                        "sdk",
+                        0,
+                        ["var", "get_rover_cluster_helper.client"],
+                        [],
+                        [
+                          [
+                            "rover_cluster_id",
+                            ["var", "get_rover_cluster_helper.cluster_id"]
+                          ]
+                        ],
+                        ["var", "get_rover_cluster_helper.kwargs_request"]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  [
+                    "attr",
+                    "lifecycle_state_details",
+                    ["attr", "data", ["var", "request_cluster_common.result"]]
+                  ],
+                  "SUBSCRIPTION_ID_INCORRECT"
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "in",
+                      "subscription_id",
+                      ["var", "request_cluster_common.kwargs"]
+                    ],
+                    [
+                      [
+                        "do",
+                        [
+                          "call",
+                          "update",
+                          ["var", "request_cluster_common.kwargs_request"],
+                          [
+                            "dict",
+                            [
+                              "subscription_id",
+                              [
+                                "item",
+                                ["var", "request_cluster_common.kwargs"],
+                                "subscription-id"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Please update Subscription ID in order to request for approval",
+                          null,
+                          true,
+                          false
+                        ]
+                      ],
+                      ["abort"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "item",
+                      ["var", "request_cluster_common.kwargs"],
+                      "subscription_id"
+                    ],
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Subscription ID update is not allowed",
+                          null,
+                          true,
+                          false
+                        ]
+                      ],
+                      ["abort"]
+                    ],
+                    []
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "fn",
+              "echo",
+              "Changing the state of the RoverStandalone Cluster to PENDING_APPROVAL",
+              null,
+              true,
+              false
+            ]
+          ],
+          ["invoke", [], ["var", "request_cluster_common.kwargs_request"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.update_rover_cluster",
+        "complexTypes": {
+          "customer-shipping-address": "rover:ShippingAddress",
+          "cluster-workloads": "rover:list[RoverWorkload]",
+          "freeform-tags": "rover:dict(str, string)",
+          "defined-tags": "rover:dict(str, dict(str, object))",
+          "system-tags": "rover:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_size",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_shipping_address",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_workloads",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "super_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "unlock_passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enclosure_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact_phone_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_preference",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "oracle_shipping_tracking_url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_vendor",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_pickup_expected",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_import_requested",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_file_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_validation_code",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "update_rover_cluster",
+        "http": "PUT",
+        "path": "/roverClusters/{roverClusterId}",
+        "positionalArgs": ["rover_cluster_id", "update_rover_cluster_details"],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rover_cluster_details",
+        "responseType": "RoverCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_rover_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size",
+          "when": "cluster_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["customerShippingAddress"],
+          "transform": "parse_json_parameter",
+          "param": "customer_shipping_address",
+          "when": "customer_shipping_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterWorkloads"],
+          "transform": "parse_json_parameter",
+          "param": "cluster_workloads",
+          "when": "cluster_workloads is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["superUserPassword"],
+          "param": "super_user_password",
+          "when": "super_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleState"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleStateDetails"],
+          "param": "lifecycle_state_details",
+          "when": "lifecycle_state_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["unlockPassphrase"],
+          "param": "unlock_passphrase",
+          "when": "unlock_passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["enclosureType"],
+          "param": "enclosure_type",
+          "when": "enclosure_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContact"],
+          "param": "point_of_contact",
+          "when": "point_of_contact is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContactPhoneNumber"],
+          "param": "point_of_contact_phone_number",
+          "when": "point_of_contact_phone_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingPreference"],
+          "param": "shipping_preference",
+          "when": "shipping_preference is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["oracleShippingTrackingUrl"],
+          "param": "oracle_shipping_tracking_url",
+          "when": "oracle_shipping_tracking_url is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingVendor"],
+          "param": "shipping_vendor",
+          "when": "shipping_vendor is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["timePickupExpected"],
+          "param": "time_pickup_expected",
+          "when": "time_pickup_expected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["isImportRequested"],
+          "param": "is_import_requested",
+          "when": "is_import_requested is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importCompartmentId"],
+          "param": "import_compartment_id",
+          "when": "import_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importFileBucket"],
+          "param": "import_file_bucket",
+          "when": "import_file_bucket is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["dataValidationCode"],
+          "param": "data_validation_code",
+          "when": "data_validation_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["systemTags"],
+          "transform": "parse_json_parameter",
+          "param": "system_tags",
+          "when": "system_tags is not None"
+        }
+      ],
+      "sdkOperations": [
+        {
+          "client": "rover.rover_cluster",
+          "method": "get_rover_cluster",
+          "http": "GET",
+          "path": "/roverClusters/{roverClusterId}",
+          "positionalArgs": ["rover_cluster_id"],
+          "pathParams": {
+            "roverClusterId": "rover_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "RoverCluster"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15310,6 +16930,554 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "set_secrets_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "set_secrets_cluster_common.kwargs_request",
+            [
+              "dict",
+              [
+                "rover_cluster_id",
+                [
+                  "item",
+                  ["var", "set_secrets_cluster_common.kwargs"],
+                  "cluster_id"
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "or",
+              [
+                "item",
+                ["var", "set_secrets_cluster_common.kwargs"],
+                "super_user_password"
+              ],
+              [
+                "and",
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "super_user_password"
+                  ]
+                ],
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "unlock_passphrase"
+                  ]
+                ]
+              ]
+            ],
+            [
+              [
+                "let",
+                "set_secrets_cluster_common.super_user_password",
+                ["fn", "roverSecret", "super_user_password"]
+              ],
+              [
+                "if",
+                [
+                  "not",
+                  ["var", "set_secrets_cluster_common.super_user_password"]
+                ],
+                [
+                  [
+                    "usage",
+                    "Super user password cannot be whitespace or empty string"
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "set_secrets_cluster_common.kwargs_request"],
+                "super_user_password",
+                ["var", "set_secrets_cluster_common.super_user_password"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              [
+                "item",
+                ["var", "set_secrets_cluster_common.kwargs"],
+                "unlock_passphrase"
+              ],
+              [
+                "and",
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "super_user_password"
+                  ]
+                ],
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "unlock_passphrase"
+                  ]
+                ]
+              ]
+            ],
+            [
+              [
+                "let",
+                "set_secrets_cluster_common.unlock_passphrase",
+                ["fn", "roverSecret", "unlock_passphrase"]
+              ],
+              [
+                "if",
+                [
+                  "not",
+                  ["var", "set_secrets_cluster_common.unlock_passphrase"]
+                ],
+                [
+                  [
+                    "usage",
+                    "Unlock passphrase cannot be whitespace or empty string"
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "set_secrets_cluster_common.kwargs_request"],
+                "unlock_passphrase",
+                ["var", "set_secrets_cluster_common.unlock_passphrase"]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "set_secrets_cluster_common.kwargs_request"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.update_rover_cluster",
+        "complexTypes": {
+          "customer-shipping-address": "rover:ShippingAddress",
+          "cluster-workloads": "rover:list[RoverWorkload]",
+          "freeform-tags": "rover:dict(str, string)",
+          "defined-tags": "rover:dict(str, dict(str, object))",
+          "system-tags": "rover:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_size",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_shipping_address",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_workloads",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "super_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "unlock_passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enclosure_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact_phone_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_preference",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "oracle_shipping_tracking_url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_vendor",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_pickup_expected",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_import_requested",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_file_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_validation_code",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "update_rover_cluster",
+        "http": "PUT",
+        "path": "/roverClusters/{roverClusterId}",
+        "positionalArgs": ["rover_cluster_id", "update_rover_cluster_details"],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rover_cluster_details",
+        "responseType": "RoverCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_rover_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size",
+          "when": "cluster_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["customerShippingAddress"],
+          "transform": "parse_json_parameter",
+          "param": "customer_shipping_address",
+          "when": "customer_shipping_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterWorkloads"],
+          "transform": "parse_json_parameter",
+          "param": "cluster_workloads",
+          "when": "cluster_workloads is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["superUserPassword"],
+          "param": "super_user_password",
+          "when": "super_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleState"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleStateDetails"],
+          "param": "lifecycle_state_details",
+          "when": "lifecycle_state_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["unlockPassphrase"],
+          "param": "unlock_passphrase",
+          "when": "unlock_passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["enclosureType"],
+          "param": "enclosure_type",
+          "when": "enclosure_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContact"],
+          "param": "point_of_contact",
+          "when": "point_of_contact is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContactPhoneNumber"],
+          "param": "point_of_contact_phone_number",
+          "when": "point_of_contact_phone_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingPreference"],
+          "param": "shipping_preference",
+          "when": "shipping_preference is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["oracleShippingTrackingUrl"],
+          "param": "oracle_shipping_tracking_url",
+          "when": "oracle_shipping_tracking_url is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingVendor"],
+          "param": "shipping_vendor",
+          "when": "shipping_vendor is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["timePickupExpected"],
+          "param": "time_pickup_expected",
+          "when": "time_pickup_expected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["isImportRequested"],
+          "param": "is_import_requested",
+          "when": "is_import_requested is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importCompartmentId"],
+          "param": "import_compartment_id",
+          "when": "import_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importFileBucket"],
+          "param": "import_file_bucket",
+          "when": "import_file_bucket is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["dataValidationCode"],
+          "param": "data_validation_code",
+          "when": "data_validation_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["systemTags"],
+          "transform": "parse_json_parameter",
+          "param": "system_tags",
+          "when": "system_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15425,6 +17593,128 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "show_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "fn",
+                "isstr",
+                ["item", ["var", "show_cluster_common.kwargs"], "cluster_id"]
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  [
+                    "call",
+                    "strip",
+                    [
+                      "item",
+                      ["var", "show_cluster_common.kwargs"],
+                      "cluster_id"
+                    ]
+                  ]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --cluster-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "show_cluster_common.result",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "get_rover_cluster_helper.cluster_id",
+                  ["item", ["var", "show_cluster_common.kwargs"], "cluster_id"]
+                ],
+                [
+                  "let",
+                  "get_rover_cluster_helper.kwargs_request",
+                  [
+                    "dict",
+                    [
+                      "opc_request_id",
+                      [
+                        "fn",
+                        "requestId",
+                        ["item", ["fn", "ctxObj"], "request_id"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "get_rover_cluster_helper.client",
+                  ["fn", "client", "rover", "rover_cluster"]
+                ],
+                [
+                  "return",
+                  [
+                    "sdk",
+                    0,
+                    ["var", "get_rover_cluster_helper.client"],
+                    [],
+                    [
+                      [
+                        "rover_cluster_id",
+                        ["var", "get_rover_cluster_helper.cluster_id"]
+                      ]
+                    ],
+                    ["var", "get_rover_cluster_helper.kwargs_request"]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "show_cluster_common.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "rover.rover_cluster",
+          "method": "get_rover_cluster",
+          "http": "GET",
+          "path": "/roverClusters/{roverClusterId}",
+          "positionalArgs": ["rover_cluster_id"],
+          "pathParams": {
+            "roverClusterId": "rover_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "RoverCluster"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -15647,6 +17937,626 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "update_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "update_cluster_common.client",
+            ["fn", "client", "rover", "rover_cluster"]
+          ],
+          [
+            "let",
+            "update_cluster_common.kwargs",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "complex_shipping_address_param.kwargs",
+                  ["fn", "dict", ["var", "update_cluster_common.kwargs"]]
+                ],
+                [
+                  "set",
+                  ["var", "complex_shipping_address_param.kwargs"],
+                  "customer_shipping_address",
+                  ["dict"]
+                ],
+                [
+                  "let",
+                  "complex_shipping_address_param.empty_shipping_address",
+                  true
+                ],
+                [
+                  "let",
+                  "complex_shipping_address_param.customer_address_options",
+                  [
+                    "dict",
+                    ["addressee", "addressee"],
+                    ["care_of", "careOf"],
+                    ["address1", "address1"],
+                    ["address2", "address2"],
+                    ["address3", "address3"],
+                    ["address4", "address4"],
+                    ["city_or_locality", "cityOrLocality"],
+                    ["state_province_region", "stateOrRegion"],
+                    ["country", "country"],
+                    ["zip_postal_code", "zipcode"],
+                    ["phone_number", "phoneNumber"],
+                    ["email", "email"]
+                  ]
+                ],
+                [
+                  "for",
+                  [
+                    "complex_shipping_address_param.option",
+                    "complex_shipping_address_param.value"
+                  ],
+                  [
+                    "call",
+                    "items",
+                    [
+                      "var",
+                      "complex_shipping_address_param.customer_address_options"
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "in",
+                        ["var", "complex_shipping_address_param.option"],
+                        ["var", "complex_shipping_address_param.kwargs"]
+                      ],
+                      [
+                        [
+                          "if",
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ],
+                          [
+                            [
+                              "let",
+                              "complex_shipping_address_param.empty_shipping_address",
+                              false
+                            ]
+                          ],
+                          []
+                        ],
+                        [
+                          "set",
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            "customer_shipping_address"
+                          ],
+                          ["var", "complex_shipping_address_param.value"],
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ]
+                        ],
+                        [
+                          "do",
+                          [
+                            "call",
+                            "pop",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ]
+                        ]
+                      ],
+                      []
+                    ]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "var",
+                    "complex_shipping_address_param.empty_shipping_address"
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "complex_shipping_address_param.kwargs"],
+                      "customer_shipping_address",
+                      null
+                    ]
+                  ],
+                  []
+                ],
+                ["return", ["var", "complex_shipping_address_param.kwargs"]]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "item",
+                ["var", "update_cluster_common.kwargs"],
+                "lifecycle_state_details"
+              ]
+            ],
+            [
+              [
+                "let",
+                "update_cluster_common.pending_lifecycle_state",
+                "PENDING_SUBMISSION"
+              ],
+              [
+                "do",
+                [
+                  "fn",
+                  "echo",
+                  [
+                    "bin",
+                    "+",
+                    "WARNING:Rover cluster will be updated with lifecycle state details ",
+                    ["var", "update_cluster_common.pending_lifecycle_state"]
+                  ],
+                  null,
+                  true,
+                  false
+                ]
+              ],
+              [
+                "set",
+                ["var", "update_cluster_common.kwargs"],
+                "lifecycle_state_details",
+                ["var", "update_cluster_common.pending_lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "update",
+              ["var", "update_cluster_common.kwargs"],
+              [
+                "dict",
+                [
+                  "rover_cluster_id",
+                  [
+                    "item",
+                    ["var", "update_cluster_common.kwargs"],
+                    "cluster_id"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "update_cluster_common.kwargs"],
+              "cluster_id"
+            ]
+          ],
+          ["invoke", [], ["var", "update_cluster_common.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.update_rover_cluster",
+        "complexTypes": {
+          "customer-shipping-address": "rover:ShippingAddress",
+          "cluster-workloads": "rover:list[RoverWorkload]",
+          "freeform-tags": "rover:dict(str, string)",
+          "defined-tags": "rover:dict(str, dict(str, object))",
+          "system-tags": "rover:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_size",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_shipping_address",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_workloads",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "super_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "unlock_passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enclosure_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact_phone_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_preference",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "oracle_shipping_tracking_url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_vendor",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_pickup_expected",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_import_requested",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_file_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_validation_code",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "update_rover_cluster",
+        "http": "PUT",
+        "path": "/roverClusters/{roverClusterId}",
+        "positionalArgs": ["rover_cluster_id", "update_rover_cluster_details"],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rover_cluster_details",
+        "responseType": "RoverCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_rover_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size",
+          "when": "cluster_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["customerShippingAddress"],
+          "transform": "parse_json_parameter",
+          "param": "customer_shipping_address",
+          "when": "customer_shipping_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterWorkloads"],
+          "transform": "parse_json_parameter",
+          "param": "cluster_workloads",
+          "when": "cluster_workloads is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["superUserPassword"],
+          "param": "super_user_password",
+          "when": "super_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleState"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleStateDetails"],
+          "param": "lifecycle_state_details",
+          "when": "lifecycle_state_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["unlockPassphrase"],
+          "param": "unlock_passphrase",
+          "when": "unlock_passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["enclosureType"],
+          "param": "enclosure_type",
+          "when": "enclosure_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContact"],
+          "param": "point_of_contact",
+          "when": "point_of_contact is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContactPhoneNumber"],
+          "param": "point_of_contact_phone_number",
+          "when": "point_of_contact_phone_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingPreference"],
+          "param": "shipping_preference",
+          "when": "shipping_preference is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["oracleShippingTrackingUrl"],
+          "param": "oracle_shipping_tracking_url",
+          "when": "oracle_shipping_tracking_url is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingVendor"],
+          "param": "shipping_vendor",
+          "when": "shipping_vendor is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["timePickupExpected"],
+          "param": "time_pickup_expected",
+          "when": "time_pickup_expected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["isImportRequested"],
+          "param": "is_import_requested",
+          "when": "is_import_requested is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importCompartmentId"],
+          "param": "import_compartment_id",
+          "when": "import_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importFileBucket"],
+          "param": "import_file_bucket",
+          "when": "import_file_bucket is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["dataValidationCode"],
+          "param": "data_validation_code",
+          "when": "data_validation_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["systemTags"],
+          "transform": "parse_json_parameter",
+          "param": "system_tags",
+          "when": "system_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -16543,6 +19453,172 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "change_cluster_compartment_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "fn",
+                "isstr",
+                [
+                  "item",
+                  ["var", "change_cluster_compartment_common.kwargs"],
+                  "cluster_id"
+                ]
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  [
+                    "call",
+                    "strip",
+                    [
+                      "item",
+                      ["var", "change_cluster_compartment_common.kwargs"],
+                      "cluster_id"
+                    ]
+                  ]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --cluster-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "update",
+              ["var", "change_cluster_compartment_common.kwargs"],
+              [
+                "dict",
+                [
+                  "rover_cluster_id",
+                  [
+                    "item",
+                    ["var", "change_cluster_compartment_common.kwargs"],
+                    "cluster_id"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "change_cluster_compartment_common.kwargs"],
+              "cluster_id"
+            ]
+          ],
+          ["invoke", [], ["var", "change_cluster_compartment_common.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.change_rover_cluster_compartment",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "change_rover_cluster_compartment",
+        "http": "POST",
+        "path": "/roverClusters/{roverClusterId}/actions/changeCompartment",
+        "positionalArgs": [
+          "rover_cluster_id",
+          "change_rover_cluster_compartment_details"
+        ],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "change_rover_cluster_compartment_details",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "change_rover_cluster_compartment_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -17668,6 +20744,116 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "delete_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "fn",
+                "isstr",
+                ["item", ["var", "delete_cluster_common.kwargs"], "cluster_id"]
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  [
+                    "call",
+                    "strip",
+                    [
+                      "item",
+                      ["var", "delete_cluster_common.kwargs"],
+                      "cluster_id"
+                    ]
+                  ]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --cluster-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "delete_cluster_common.kwargs_request", ["dict"]],
+          [
+            "set",
+            ["var", "delete_cluster_common.kwargs_request"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "delete_cluster_common.client",
+            ["fn", "client", "rover", "rover_cluster"]
+          ],
+          [
+            "let",
+            "delete_cluster_common.result",
+            [
+              "sdk",
+              0,
+              ["var", "delete_cluster_common.client"],
+              [],
+              [
+                [
+                  "rover_cluster_id",
+                  [
+                    "item",
+                    ["var", "delete_cluster_common.kwargs"],
+                    "cluster_id"
+                  ]
+                ]
+              ],
+              ["var", "delete_cluster_common.kwargs_request"]
+            ]
+          ],
+          ["render", ["var", "delete_cluster_common.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "rover.rover_cluster",
+          "method": "delete_rover_cluster",
+          "http": "DELETE",
+          "path": "/roverClusters/{roverClusterId}",
+          "positionalArgs": ["rover_cluster_id"],
+          "pathParams": {
+            "roverClusterId": "rover_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18198,6 +21384,623 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "request_cluster_common.cluster_type", "STATION"],
+          [
+            "let",
+            "request_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "request_cluster_common.kwargs_request",
+            [
+              "dict",
+              [
+                "rover_cluster_id",
+                ["item", ["var", "request_cluster_common.kwargs"], "cluster_id"]
+              ],
+              ["lifecycle_state", "ACTIVE"],
+              ["lifecycle_state_details", "PENDING_APPROVAL"]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "==",
+              ["var", "request_cluster_common.cluster_type"],
+              "STATION"
+            ],
+            [
+              [
+                "let",
+                "request_cluster_common.result",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "get_rover_cluster_helper.cluster_id",
+                      [
+                        "item",
+                        ["var", "request_cluster_common.kwargs"],
+                        "cluster_id"
+                      ]
+                    ],
+                    [
+                      "let",
+                      "get_rover_cluster_helper.kwargs_request",
+                      [
+                        "dict",
+                        [
+                          "opc_request_id",
+                          [
+                            "fn",
+                            "requestId",
+                            ["item", ["fn", "ctxObj"], "request_id"]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "let",
+                      "get_rover_cluster_helper.client",
+                      ["fn", "client", "rover", "rover_cluster"]
+                    ],
+                    [
+                      "return",
+                      [
+                        "sdk",
+                        0,
+                        ["var", "get_rover_cluster_helper.client"],
+                        [],
+                        [
+                          [
+                            "rover_cluster_id",
+                            ["var", "get_rover_cluster_helper.cluster_id"]
+                          ]
+                        ],
+                        ["var", "get_rover_cluster_helper.kwargs_request"]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  [
+                    "attr",
+                    "lifecycle_state_details",
+                    ["attr", "data", ["var", "request_cluster_common.result"]]
+                  ],
+                  "SUBSCRIPTION_ID_INCORRECT"
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "in",
+                      "subscription_id",
+                      ["var", "request_cluster_common.kwargs"]
+                    ],
+                    [
+                      [
+                        "do",
+                        [
+                          "call",
+                          "update",
+                          ["var", "request_cluster_common.kwargs_request"],
+                          [
+                            "dict",
+                            [
+                              "subscription_id",
+                              [
+                                "item",
+                                ["var", "request_cluster_common.kwargs"],
+                                "subscription-id"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Please update Subscription ID in order to request for approval",
+                          null,
+                          true,
+                          false
+                        ]
+                      ],
+                      ["abort"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "item",
+                      ["var", "request_cluster_common.kwargs"],
+                      "subscription_id"
+                    ],
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Subscription ID update is not allowed",
+                          null,
+                          true,
+                          false
+                        ]
+                      ],
+                      ["abort"]
+                    ],
+                    []
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "fn",
+              "echo",
+              "Changing the state of the RoverStandalone Cluster to PENDING_APPROVAL",
+              null,
+              true,
+              false
+            ]
+          ],
+          ["invoke", [], ["var", "request_cluster_common.kwargs_request"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.update_rover_cluster",
+        "complexTypes": {
+          "customer-shipping-address": "rover:ShippingAddress",
+          "cluster-workloads": "rover:list[RoverWorkload]",
+          "freeform-tags": "rover:dict(str, string)",
+          "defined-tags": "rover:dict(str, dict(str, object))",
+          "system-tags": "rover:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_size",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_shipping_address",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_workloads",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "super_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "unlock_passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enclosure_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact_phone_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_preference",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "oracle_shipping_tracking_url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_vendor",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_pickup_expected",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_import_requested",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_file_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_validation_code",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "update_rover_cluster",
+        "http": "PUT",
+        "path": "/roverClusters/{roverClusterId}",
+        "positionalArgs": ["rover_cluster_id", "update_rover_cluster_details"],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rover_cluster_details",
+        "responseType": "RoverCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_rover_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size",
+          "when": "cluster_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["customerShippingAddress"],
+          "transform": "parse_json_parameter",
+          "param": "customer_shipping_address",
+          "when": "customer_shipping_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterWorkloads"],
+          "transform": "parse_json_parameter",
+          "param": "cluster_workloads",
+          "when": "cluster_workloads is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["superUserPassword"],
+          "param": "super_user_password",
+          "when": "super_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleState"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleStateDetails"],
+          "param": "lifecycle_state_details",
+          "when": "lifecycle_state_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["unlockPassphrase"],
+          "param": "unlock_passphrase",
+          "when": "unlock_passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["enclosureType"],
+          "param": "enclosure_type",
+          "when": "enclosure_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContact"],
+          "param": "point_of_contact",
+          "when": "point_of_contact is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContactPhoneNumber"],
+          "param": "point_of_contact_phone_number",
+          "when": "point_of_contact_phone_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingPreference"],
+          "param": "shipping_preference",
+          "when": "shipping_preference is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["oracleShippingTrackingUrl"],
+          "param": "oracle_shipping_tracking_url",
+          "when": "oracle_shipping_tracking_url is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingVendor"],
+          "param": "shipping_vendor",
+          "when": "shipping_vendor is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["timePickupExpected"],
+          "param": "time_pickup_expected",
+          "when": "time_pickup_expected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["isImportRequested"],
+          "param": "is_import_requested",
+          "when": "is_import_requested is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importCompartmentId"],
+          "param": "import_compartment_id",
+          "when": "import_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importFileBucket"],
+          "param": "import_file_bucket",
+          "when": "import_file_bucket is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["dataValidationCode"],
+          "param": "data_validation_code",
+          "when": "data_validation_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["systemTags"],
+          "transform": "parse_json_parameter",
+          "param": "system_tags",
+          "when": "system_tags is not None"
+        }
+      ],
+      "sdkOperations": [
+        {
+          "client": "rover.rover_cluster",
+          "method": "get_rover_cluster",
+          "http": "GET",
+          "path": "/roverClusters/{roverClusterId}",
+          "positionalArgs": ["rover_cluster_id"],
+          "pathParams": {
+            "roverClusterId": "rover_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "RoverCluster"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18312,6 +22115,554 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "set_secrets_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "set_secrets_cluster_common.kwargs_request",
+            [
+              "dict",
+              [
+                "rover_cluster_id",
+                [
+                  "item",
+                  ["var", "set_secrets_cluster_common.kwargs"],
+                  "cluster_id"
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "or",
+              [
+                "item",
+                ["var", "set_secrets_cluster_common.kwargs"],
+                "super_user_password"
+              ],
+              [
+                "and",
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "super_user_password"
+                  ]
+                ],
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "unlock_passphrase"
+                  ]
+                ]
+              ]
+            ],
+            [
+              [
+                "let",
+                "set_secrets_cluster_common.super_user_password",
+                ["fn", "roverSecret", "super_user_password"]
+              ],
+              [
+                "if",
+                [
+                  "not",
+                  ["var", "set_secrets_cluster_common.super_user_password"]
+                ],
+                [
+                  [
+                    "usage",
+                    "Super user password cannot be whitespace or empty string"
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "set_secrets_cluster_common.kwargs_request"],
+                "super_user_password",
+                ["var", "set_secrets_cluster_common.super_user_password"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              [
+                "item",
+                ["var", "set_secrets_cluster_common.kwargs"],
+                "unlock_passphrase"
+              ],
+              [
+                "and",
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "super_user_password"
+                  ]
+                ],
+                [
+                  "not",
+                  [
+                    "item",
+                    ["var", "set_secrets_cluster_common.kwargs"],
+                    "unlock_passphrase"
+                  ]
+                ]
+              ]
+            ],
+            [
+              [
+                "let",
+                "set_secrets_cluster_common.unlock_passphrase",
+                ["fn", "roverSecret", "unlock_passphrase"]
+              ],
+              [
+                "if",
+                [
+                  "not",
+                  ["var", "set_secrets_cluster_common.unlock_passphrase"]
+                ],
+                [
+                  [
+                    "usage",
+                    "Unlock passphrase cannot be whitespace or empty string"
+                  ]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "set_secrets_cluster_common.kwargs_request"],
+                "unlock_passphrase",
+                ["var", "set_secrets_cluster_common.unlock_passphrase"]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "set_secrets_cluster_common.kwargs_request"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.update_rover_cluster",
+        "complexTypes": {
+          "customer-shipping-address": "rover:ShippingAddress",
+          "cluster-workloads": "rover:list[RoverWorkload]",
+          "freeform-tags": "rover:dict(str, string)",
+          "defined-tags": "rover:dict(str, dict(str, object))",
+          "system-tags": "rover:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_size",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_shipping_address",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_workloads",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "super_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "unlock_passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enclosure_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact_phone_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_preference",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "oracle_shipping_tracking_url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_vendor",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_pickup_expected",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_import_requested",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_file_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_validation_code",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "update_rover_cluster",
+        "http": "PUT",
+        "path": "/roverClusters/{roverClusterId}",
+        "positionalArgs": ["rover_cluster_id", "update_rover_cluster_details"],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rover_cluster_details",
+        "responseType": "RoverCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_rover_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size",
+          "when": "cluster_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["customerShippingAddress"],
+          "transform": "parse_json_parameter",
+          "param": "customer_shipping_address",
+          "when": "customer_shipping_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterWorkloads"],
+          "transform": "parse_json_parameter",
+          "param": "cluster_workloads",
+          "when": "cluster_workloads is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["superUserPassword"],
+          "param": "super_user_password",
+          "when": "super_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleState"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleStateDetails"],
+          "param": "lifecycle_state_details",
+          "when": "lifecycle_state_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["unlockPassphrase"],
+          "param": "unlock_passphrase",
+          "when": "unlock_passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["enclosureType"],
+          "param": "enclosure_type",
+          "when": "enclosure_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContact"],
+          "param": "point_of_contact",
+          "when": "point_of_contact is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContactPhoneNumber"],
+          "param": "point_of_contact_phone_number",
+          "when": "point_of_contact_phone_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingPreference"],
+          "param": "shipping_preference",
+          "when": "shipping_preference is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["oracleShippingTrackingUrl"],
+          "param": "oracle_shipping_tracking_url",
+          "when": "oracle_shipping_tracking_url is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingVendor"],
+          "param": "shipping_vendor",
+          "when": "shipping_vendor is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["timePickupExpected"],
+          "param": "time_pickup_expected",
+          "when": "time_pickup_expected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["isImportRequested"],
+          "param": "is_import_requested",
+          "when": "is_import_requested is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importCompartmentId"],
+          "param": "import_compartment_id",
+          "when": "import_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importFileBucket"],
+          "param": "import_file_bucket",
+          "when": "import_file_bucket is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["dataValidationCode"],
+          "param": "data_validation_code",
+          "when": "data_validation_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["systemTags"],
+          "transform": "parse_json_parameter",
+          "param": "system_tags",
+          "when": "system_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18427,6 +22778,128 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "show_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "if",
+            [
+              "and",
+              [
+                "fn",
+                "isstr",
+                ["item", ["var", "show_cluster_common.kwargs"], "cluster_id"]
+              ],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  [
+                    "call",
+                    "strip",
+                    [
+                      "item",
+                      ["var", "show_cluster_common.kwargs"],
+                      "cluster_id"
+                    ]
+                  ]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --cluster-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "show_cluster_common.result",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "get_rover_cluster_helper.cluster_id",
+                  ["item", ["var", "show_cluster_common.kwargs"], "cluster_id"]
+                ],
+                [
+                  "let",
+                  "get_rover_cluster_helper.kwargs_request",
+                  [
+                    "dict",
+                    [
+                      "opc_request_id",
+                      [
+                        "fn",
+                        "requestId",
+                        ["item", ["fn", "ctxObj"], "request_id"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "get_rover_cluster_helper.client",
+                  ["fn", "client", "rover", "rover_cluster"]
+                ],
+                [
+                  "return",
+                  [
+                    "sdk",
+                    0,
+                    ["var", "get_rover_cluster_helper.client"],
+                    [],
+                    [
+                      [
+                        "rover_cluster_id",
+                        ["var", "get_rover_cluster_helper.cluster_id"]
+                      ]
+                    ],
+                    ["var", "get_rover_cluster_helper.kwargs_request"]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["render", ["var", "show_cluster_common.result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "rover.rover_cluster",
+          "method": "get_rover_cluster",
+          "http": "GET",
+          "path": "/roverClusters/{roverClusterId}",
+          "positionalArgs": ["rover_cluster_id"],
+          "pathParams": {
+            "roverClusterId": "rover_cluster_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "RoverCluster"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18670,6 +23143,626 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "update_cluster_common.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "update_cluster_common.client",
+            ["fn", "client", "rover", "rover_cluster"]
+          ],
+          [
+            "let",
+            "update_cluster_common.kwargs",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "complex_shipping_address_param.kwargs",
+                  ["fn", "dict", ["var", "update_cluster_common.kwargs"]]
+                ],
+                [
+                  "set",
+                  ["var", "complex_shipping_address_param.kwargs"],
+                  "customer_shipping_address",
+                  ["dict"]
+                ],
+                [
+                  "let",
+                  "complex_shipping_address_param.empty_shipping_address",
+                  true
+                ],
+                [
+                  "let",
+                  "complex_shipping_address_param.customer_address_options",
+                  [
+                    "dict",
+                    ["addressee", "addressee"],
+                    ["care_of", "careOf"],
+                    ["address1", "address1"],
+                    ["address2", "address2"],
+                    ["address3", "address3"],
+                    ["address4", "address4"],
+                    ["city_or_locality", "cityOrLocality"],
+                    ["state_province_region", "stateOrRegion"],
+                    ["country", "country"],
+                    ["zip_postal_code", "zipcode"],
+                    ["phone_number", "phoneNumber"],
+                    ["email", "email"]
+                  ]
+                ],
+                [
+                  "for",
+                  [
+                    "complex_shipping_address_param.option",
+                    "complex_shipping_address_param.value"
+                  ],
+                  [
+                    "call",
+                    "items",
+                    [
+                      "var",
+                      "complex_shipping_address_param.customer_address_options"
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "in",
+                        ["var", "complex_shipping_address_param.option"],
+                        ["var", "complex_shipping_address_param.kwargs"]
+                      ],
+                      [
+                        [
+                          "if",
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ],
+                          [
+                            [
+                              "let",
+                              "complex_shipping_address_param.empty_shipping_address",
+                              false
+                            ]
+                          ],
+                          []
+                        ],
+                        [
+                          "set",
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            "customer_shipping_address"
+                          ],
+                          ["var", "complex_shipping_address_param.value"],
+                          [
+                            "item",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ]
+                        ],
+                        [
+                          "do",
+                          [
+                            "call",
+                            "pop",
+                            ["var", "complex_shipping_address_param.kwargs"],
+                            ["var", "complex_shipping_address_param.option"]
+                          ]
+                        ]
+                      ],
+                      []
+                    ]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "var",
+                    "complex_shipping_address_param.empty_shipping_address"
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "complex_shipping_address_param.kwargs"],
+                      "customer_shipping_address",
+                      null
+                    ]
+                  ],
+                  []
+                ],
+                ["return", ["var", "complex_shipping_address_param.kwargs"]]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "item",
+                ["var", "update_cluster_common.kwargs"],
+                "lifecycle_state_details"
+              ]
+            ],
+            [
+              [
+                "let",
+                "update_cluster_common.pending_lifecycle_state",
+                "PENDING_SUBMISSION"
+              ],
+              [
+                "do",
+                [
+                  "fn",
+                  "echo",
+                  [
+                    "bin",
+                    "+",
+                    "WARNING:Rover cluster will be updated with lifecycle state details ",
+                    ["var", "update_cluster_common.pending_lifecycle_state"]
+                  ],
+                  null,
+                  true,
+                  false
+                ]
+              ],
+              [
+                "set",
+                ["var", "update_cluster_common.kwargs"],
+                "lifecycle_state_details",
+                ["var", "update_cluster_common.pending_lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            [
+              "call",
+              "update",
+              ["var", "update_cluster_common.kwargs"],
+              [
+                "dict",
+                [
+                  "rover_cluster_id",
+                  [
+                    "item",
+                    ["var", "update_cluster_common.kwargs"],
+                    "cluster_id"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "do",
+            [
+              "call",
+              "pop",
+              ["var", "update_cluster_common.kwargs"],
+              "cluster_id"
+            ]
+          ],
+          ["invoke", [], ["var", "update_cluster_common.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.rover.src.oci_cli_rover_cluster.generated.rovercluster_cli.update_rover_cluster",
+        "complexTypes": {
+          "customer-shipping-address": "rover:ShippingAddress",
+          "cluster-workloads": "rover:list[RoverWorkload]",
+          "freeform-tags": "rover:dict(str, string)",
+          "defined-tags": "rover:dict(str, dict(str, object))",
+          "system-tags": "rover:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "rover_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_size",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_shipping_address",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_workloads",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "super_user_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state_details",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "unlock_passphrase",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enclosure_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "point_of_contact_phone_number",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_preference",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "oracle_shipping_tracking_url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shipping_vendor",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_pickup_expected",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_import_requested",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "import_file_bucket",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_validation_code",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "rover.rover_cluster",
+        "method": "update_rover_cluster",
+        "http": "PUT",
+        "path": "/roverClusters/{roverClusterId}",
+        "positionalArgs": ["rover_cluster_id", "update_rover_cluster_details"],
+        "pathParams": {
+          "roverClusterId": "rover_cluster_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_rover_cluster_details",
+        "responseType": "RoverCluster",
+        "paginated": false,
+        "lifecycleGetter": "get_rover_cluster"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["rover_cluster_id"],
+          "param": "rover_cluster_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterSize"],
+          "param": "cluster_size",
+          "when": "cluster_size is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["customerShippingAddress"],
+          "transform": "parse_json_parameter",
+          "param": "customer_shipping_address",
+          "when": "customer_shipping_address is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["clusterWorkloads"],
+          "transform": "parse_json_parameter",
+          "param": "cluster_workloads",
+          "when": "cluster_workloads is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["superUserPassword"],
+          "param": "super_user_password",
+          "when": "super_user_password is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleState"],
+          "param": "lifecycle_state",
+          "when": "lifecycle_state is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["lifecycleStateDetails"],
+          "param": "lifecycle_state_details",
+          "when": "lifecycle_state_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["unlockPassphrase"],
+          "param": "unlock_passphrase",
+          "when": "unlock_passphrase is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["enclosureType"],
+          "param": "enclosure_type",
+          "when": "enclosure_type is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContact"],
+          "param": "point_of_contact",
+          "when": "point_of_contact is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["pointOfContactPhoneNumber"],
+          "param": "point_of_contact_phone_number",
+          "when": "point_of_contact_phone_number is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingPreference"],
+          "param": "shipping_preference",
+          "when": "shipping_preference is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["oracleShippingTrackingUrl"],
+          "param": "oracle_shipping_tracking_url",
+          "when": "oracle_shipping_tracking_url is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["subscriptionId"],
+          "param": "subscription_id",
+          "when": "subscription_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["shippingVendor"],
+          "param": "shipping_vendor",
+          "when": "shipping_vendor is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["timePickupExpected"],
+          "param": "time_pickup_expected",
+          "when": "time_pickup_expected is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["isImportRequested"],
+          "param": "is_import_requested",
+          "when": "is_import_requested is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importCompartmentId"],
+          "param": "import_compartment_id",
+          "when": "import_compartment_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["importFileBucket"],
+          "param": "import_file_bucket",
+          "when": "import_file_bucket is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["dataValidationCode"],
+          "param": "data_validation_code",
+          "when": "data_validation_code is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_rover_cluster_details",
+          "key": ["systemTags"],
+          "transform": "parse_json_parameter",
+          "param": "system_tags",
+          "when": "system_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -19552,6 +24645,53 @@
           ["bundle_version", "str", "bundleVersion"],
           ["compartment_id", "str", "compartmentId"],
           ["bundle_name", "str", "bundleName"]
+        ]
+      },
+      "RoverCluster": {
+        "attributes": [
+          ["id", "str", "id"],
+          ["compartment_id", "str", "compartmentId"],
+          ["display_name", "str", "displayName"],
+          ["cluster_size", "int", "clusterSize"],
+          ["time_created", "datetime", "timeCreated"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["lifecycle_state_details", "str", "lifecycleStateDetails"],
+          [
+            "customer_shipping_address",
+            "ShippingAddress",
+            "customerShippingAddress"
+          ],
+          ["nodes", "list[RoverNodeSummary]", "nodes"],
+          ["enclosure_type", "str", "enclosureType"],
+          ["time_customer_received", "datetime", "timeCustomerReceived"],
+          ["time_customer_returned", "datetime", "timeCustomerReturned"],
+          ["delivery_tracking_info", "str", "deliveryTrackingInfo"],
+          ["cluster_workloads", "list[RoverWorkload]", "clusterWorkloads"],
+          ["cluster_type", "str", "clusterType"],
+          ["subscription_id", "str", "subscriptionId"],
+          ["exterior_door_code", "str", "exteriorDoorCode"],
+          ["interior_alarm_disarm_code", "str", "interiorAlarmDisarmCode"],
+          ["super_user_password", "str", "superUserPassword"],
+          ["unlock_passphrase", "str", "unlockPassphrase"],
+          ["point_of_contact", "str", "pointOfContact"],
+          ["point_of_contact_phone_number", "str", "pointOfContactPhoneNumber"],
+          ["shipping_preference", "str", "shippingPreference"],
+          ["oracle_shipping_tracking_url", "str", "oracleShippingTrackingUrl"],
+          ["shipping_vendor", "str", "shippingVendor"],
+          ["time_pickup_expected", "datetime", "timePickupExpected"],
+          ["time_return_window_starts", "datetime", "timeReturnWindowStarts"],
+          ["time_return_window_ends", "datetime", "timeReturnWindowEnds"],
+          ["return_shipping_label_uri", "str", "returnShippingLabelUri"],
+          ["is_import_requested", "bool", "isImportRequested"],
+          ["import_compartment_id", "str", "importCompartmentId"],
+          ["import_file_bucket", "str", "importFileBucket"],
+          ["data_validation_code", "str", "dataValidationCode"],
+          ["image_export_par", "str", "imageExportPar"],
+          ["master_key_id", "str", "masterKeyId"],
+          ["tags", "str", "tags"],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ]
       },
       "RoverClusterCollection": {

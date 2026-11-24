@@ -272,6 +272,11 @@ def wrapper_program(callback, client_map) -> dict | None:
         sdk_ops.append({"client": f"{spec_name}.{service_name}", **sdk.sdk_operation(cls, method)})
     wrapped = any(
         ast.unparse(d) in ("cli_util.wrap_exceptions", "wrap_exceptions")
+        or (
+            isinstance(d, ast.Call)
+            and wrapper_compiler._dotted(d.func)
+            in ("json_skeleton_utils.json_skeleton_generation_handler", "json_skeleton_generation_handler")
+        )
         for d in wrapper_compiler._fn_ast(callback).decorator_list
     )
     out = {"program": {"body": program, "wrapExceptions": wrapped}}

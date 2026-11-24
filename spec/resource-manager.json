@@ -8792,6 +8792,336 @@
         "files": ["tf_state_file"],
         "helpers": ["create_base64encoded_tf_state"]
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "tf_state_file", ["var", "kwargs"]],
+            [
+              [
+                "let",
+                "state_to_import",
+                [
+                  "fn",
+                  "expandvars",
+                  [
+                    "fn",
+                    "expanduser",
+                    ["item", ["var", "kwargs"], "tf_state_file"]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["fn", "exists", ["var", "state_to_import"]]],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "tf state file does not exist",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "if",
+                ["not", ["fn", "isfile", ["var", "state_to_import"]]],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "tf state must be a file.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "let",
+                "send_value",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "create_base64encoded_tf_state.tf_state",
+                      ["var", "state_to_import"]
+                    ],
+                    [
+                      "if",
+                      [
+                        "fn",
+                        "isfile",
+                        ["var", "create_base64encoded_tf_state.tf_state"]
+                      ],
+                      [
+                        [
+                          "let",
+                          "create_base64encoded_tf_state.tf_state_file",
+                          [
+                            "fn",
+                            "open",
+                            ["var", "create_base64encoded_tf_state.tf_state"],
+                            "rb"
+                          ]
+                        ],
+                        [
+                          "return",
+                          [
+                            "call",
+                            "decode",
+                            [
+                              "fn",
+                              "b64encode",
+                              [
+                                "call",
+                                "read",
+                                [
+                                  "var",
+                                  "create_base64encoded_tf_state.tf_state_file"
+                                ]
+                              ]
+                            ],
+                            "utf-8"
+                          ]
+                        ]
+                      ],
+                      []
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["var", "send_value"]],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "Internal error: Unable to generate encoded tf state",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  ["abort"]
+                ],
+                []
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "job_operation_details_tf_state_base64_encoded",
+                ["var", "send_value"]
+              ],
+              ["del", ["var", "kwargs"], "tf_state_file"]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.resource_manager.src.oci_cli_resource_manager.generated.resourcemanager_cli.create_job_create_import_tf_state_job_operation_details",
+        "complexTypes": {
+          "apply-job-plan-resolution": "resource_manager:ApplyJobPlanResolution",
+          "freeform-tags": "resource_manager:dict(str, string)",
+          "defined-tags": "resource_manager:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "stack_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "job_operation_details_tf_state_base64_encoded",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "operation",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "apply_job_plan_resolution",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "job_operation_details_is_provider_upgrade_required",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "resource_manager.resource_manager",
+        "method": "create_job",
+        "http": "POST",
+        "path": "/jobs",
+        "positionalArgs": ["create_job_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_job_details",
+        "responseType": "Job",
+        "paginated": false,
+        "lifecycleGetter": "get_job"
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobOperationDetails"],
+          "expr": "{}"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["stackId"],
+          "param": "stack_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobOperationDetails", "tfStateBase64Encoded"],
+          "param": "job_operation_details_tf_state_base64_encoded"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["operation"],
+          "param": "operation",
+          "when": "operation is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["applyJobPlanResolution"],
+          "transform": "parse_json_parameter",
+          "param": "apply_job_plan_resolution",
+          "when": "apply_job_plan_resolution is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobOperationDetails", "isProviderUpgradeRequired"],
+          "param": "job_operation_details_is_provider_upgrade_required",
+          "when": "job_operation_details_is_provider_upgrade_required is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_job_details",
+          "key": ["jobOperationDetails", "operation"],
+          "value": "IMPORT_TF_STATE"
+        }
+      ],
       "params": [
         {
           "kind": "option",

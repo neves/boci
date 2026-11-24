@@ -123,12 +123,15 @@ def _label(e, clients, local_names, module_globals=None):
     reason, source = str(e), e.source or ""
     if reason.startswith("helper ") and isinstance(e.__cause__, program.Unsupported):
         # A helper's blocker is the same capability wherever it occurs: label the cause,
-        # in the helper's own scope (its clients and locals).
-        helper = (module_globals or {}).get(reason[len("helper "):].split(":", 1)[0])
+        # in the helper's own scope (its clients, locals, and module globals).
+        helper = getattr(e, "helper_fn", None)
+        if helper is None:
+            helper = (module_globals or {}).get(reason[len("helper "):].split(":", 1)[0])
         fn = program._fn_ast(helper) if inspect.isfunction(helper) else None
+        next_globals = getattr(helper, "__globals__", module_globals)
         if fn is not None:
             clients, local_names = _clients(fn), _local_names(fn)
-        return _label(e.__cause__, clients, local_names, module_globals)
+        return _label(e.__cause__, clients, local_names, next_globals)
     callee = _callee(e.node, source)
     head = callee.split(".", 1)[0]
     if reason in ("call keywords",) or reason.startswith("call "):
@@ -228,7 +231,7 @@ def needs(fn, module_globals, clients):
         return values
 
     for _ in range(500):
-        compiler = program.Compiler(module_globals, local_names)
+        compiler = program.Compiler(module_globals, local_names, module_name=module_globals.get("__name__"))
         try:
             compiler.stmts(fn.body, {})
         except program.Unsupported as e:

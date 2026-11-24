@@ -58,6 +58,7 @@ import textwrap
 METHODS = {
     "get", "pop", "append", "insert", "setdefault", "split", "upper", "lower", "strip", "update",
     "read", "rstrip", "decode", "keys", "join", "format", "items",
+    "startswith", "endswith", "replace",
 }
 FUNCTIONS = {
     "json.dumps": "dumps",
@@ -145,12 +146,54 @@ CMP = {
 }
 
 
+MAX_INLINE_DEPTH = 12
+ISINSTANCE_TYPES = {
+    "str": "str",
+    "six.string_types": "str",
+    "tuple": "tuple",
+    "list": "list",
+    "dict": "dict",
+    "int": "int",
+    "bool": "bool",
+    "float": "float",
+    "bytes": "bytes",
+}
+
+
 class Unsupported(Exception):
     """Why a wrapper is outside the subset; `source` is the innermost offending node."""
 
     source = None
     line = None
     node = None
+    helper_fn = None
+
+
+def _fn_locals(fn):
+    args = fn.args
+    names = (
+        {a.arg for a in args.posonlyargs}
+        | {a.arg for a in args.args}
+        | {a.arg for a in args.kwonlyargs}
+    )
+    if args.vararg is not None:
+        names.add(args.vararg.arg)
+    if args.kwarg is not None:
+        names.add(args.kwarg.arg)
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store):
+            names.add(n.id)
+        elif isinstance(n, ast.ExceptHandler) and n.name:
+            names.add(n.name)
+    return names
+
+
+def _service_package(module_name):
+    if module_name and module_name.startswith("services."):
+        parts = module_name.split(".")
+        if len(parts) >= 2:
+            return ".".join(parts[:2])
+    return None
 
 
 def _fn_ast(fn):
@@ -186,14 +229,21 @@ def _blame(compile_node, node, scope):
 
 
 class Compiler:
-    def __init__(self, module_globals, local_names=()):
+    def __init__(self, module_globals, local_names=(), module_name=None):
         self.globals = module_globals
         self.locals = set(local_names)  # names the callback binds; never module constants
+        self.module_name = module_name or module_globals.get("__name__")
+        self.service_pkg = _service_package(self.module_name)
         self.targets = []  # the generated command objects ctx.invoke targets, in order
         self.clients = {}  # scoped variable name -> (spec_name, service_name)
         self.sdk_calls = []  # (spec_name, service_name, method) called directly, in order
         self._inlining = set()
         self._inline_counts = {}
+        self._temp_counter = 0
+
+    def _fresh_temp(self, prefix="$tmp"):
+        self._temp_counter += 1
+        return f"{prefix}{self._temp_counter}"
 
     def _is_cli_util_fn(self, func, name):
         dotted = _dotted(func)
@@ -206,6 +256,56 @@ class Compiler:
                 and getattr(fn, "__name__", None) == name
             )
         return False
+
+    def _compile_open(self, call, scope):
+        if any(isinstance(a, ast.Starred) for a in call.args) or len(call.args) > 2:
+            raise Unsupported("call open")
+        path_node = None
+        mode_node = None
+        if len(call.args) >= 1:
+            path_node = call.args[0]
+        if len(call.args) >= 2:
+            mode_node = call.args[1]
+        for kw in call.keywords:
+            if kw.arg == "file" and path_node is None:
+                path_node = kw.value
+            elif kw.arg == "mode" and mode_node is None:
+                mode_node = kw.value
+            else:
+                raise Unsupported("call open")
+        if path_node is None:
+            raise Unsupported("call open")
+        path_expr = self.expr(path_node, scope)
+        mode_expr = self.expr(mode_node, scope) if mode_node is not None else "r"
+        return ["fn", "open", path_expr, mode_expr]
+
+    def _resolve_helper(self, func, scope):
+        """Return a same-module or same-service-package Python function to inline, else None."""
+        if self.hand_coded(func, scope):
+            return None
+        helper = None
+        if isinstance(func, ast.Name):
+            if func.id in scope or func.id in self.locals:
+                return None
+            helper = self.globals.get(func.id)
+        elif isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+            if func.value.id in scope or func.value.id in self.locals:
+                return None
+            mod = self.globals.get(func.value.id)
+            if inspect.ismodule(mod):
+                helper = getattr(mod, func.attr, None)
+        if not inspect.isfunction(helper):
+            return None
+        if f"{helper.__module__}.{helper.__qualname__}" in HAND_CODED:
+            return None
+        helper_mod = getattr(helper, "__module__", None) or ""
+        if helper_mod == self.module_name:
+            return helper
+        if self.service_pkg is not None and (
+            helper_mod == self.service_pkg or helper_mod.startswith(self.service_pkg + ".")
+        ):
+            return helper
+        return None
 
     def stmts(self, body, scope):
         out = []
@@ -224,24 +324,33 @@ class Compiler:
             return []
         if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant):
             return []  # docstring / string comment
-        if isinstance(st, ast.Assign) and len(st.targets) == 1:
-            if isinstance(st.targets[0], ast.Attribute):
-                # Setting an attribute on an object (e.g. `result.data = data`); on a plain
-                # dict the Engine stops like Python's AttributeError.
-                try:
-                    target_obj = self.expr(st.targets[0].value, scope)
-                    value = self.expr(st.value, scope)
-                    return [["setAttr", target_obj, st.targets[0].attr, value, ast.unparse(st)]]
-                except Unsupported:
-                    return [["raise", ast.unparse(st)]]
+        if isinstance(st, ast.Assign):
+            if len(st.targets) == 1:
+                if isinstance(st.targets[0], ast.Attribute):
+                    # Setting an attribute on an object (e.g. `result.data = data`); on a plain
+                    # dict the Engine stops like Python's AttributeError.
+                    try:
+                        target_obj = self.expr(st.targets[0].value, scope)
+                        value = self.expr(st.value, scope)
+                        return [["setAttr", target_obj, st.targets[0].attr, value, ast.unparse(st)]]
+                    except Unsupported:
+                        return [["raise", ast.unparse(st)]]
+                value = self.expr(st.value, scope)
+                if (
+                    isinstance(st.targets[0], ast.Name)
+                    and isinstance(value, list) and len(value) == 4
+                    and value[0] == "fn" and value[1] == "client"
+                ):
+                    self.clients[self.name(st.targets[0].id, scope)] = (value[2], value[3])
+                return [self.assign(st.targets[0], value, scope)]
             value = self.expr(st.value, scope)
-            if (
-                isinstance(st.targets[0], ast.Name)
-                and isinstance(value, list) and len(value) == 4
-                and value[0] == "fn" and value[1] == "client"
-            ):
-                self.clients[self.name(st.targets[0].id, scope)] = (value[2], value[3])
-            return [self.assign(st.targets[0], value, scope)]
+            if not isinstance(value, list):
+                return [self.assign(t, value, scope) for t in st.targets]
+            tmp = self._fresh_temp("$assign")
+            out = [["let", tmp, value]]
+            for t in st.targets:
+                out.append(self.assign(t, ["var", tmp], scope))
+            return out
         if isinstance(st, ast.AugAssign):
             if type(st.op) not in BINOP:
                 raise Unsupported("augassign")
@@ -254,12 +363,20 @@ class Compiler:
             raise Unsupported("augassign target")
         if isinstance(st, ast.Return):
             return [["return", self.expr(st.value, scope) if st.value is not None else None]]
+        if isinstance(st, ast.Break):
+            return [["break"]]
+        if isinstance(st, ast.Continue):
+            return [["continue"]]
         if isinstance(st, ast.For):
-            if st.orelse or not isinstance(st.target, ast.Name):
+            if st.orelse:
                 raise Unsupported("for")
-            if any(isinstance(n, (ast.Break, ast.Continue)) for b in st.body for n in ast.walk(b)):
-                raise Unsupported("for break")
-            return [["for", self.name(st.target.id, scope), self.expr(st.iter, scope), self.stmts(st.body, scope)]]
+            if isinstance(st.target, ast.Name):
+                target = self.name(st.target.id, scope)
+            elif isinstance(st.target, ast.Tuple) and all(isinstance(e, ast.Name) for e in st.target.elts):
+                target = [self.name(e.id, scope) for e in st.target.elts]
+            else:
+                raise Unsupported("for")
+            return [["for", target, self.expr(st.iter, scope), self.stmts(st.body, scope)]]
         if isinstance(st, ast.Delete):
             out = []
             for t in st.targets:
@@ -268,7 +385,7 @@ class Compiler:
                 out.append(["del", self.expr(t.value, scope), self.expr(t.slice, scope)])
             return out
         if isinstance(st, ast.With):
-            # `with open(path, mode) as f:` only; closing the file after is invisible here.
+            # `with open(path, mode=...) as f:` only; closing the file after is invisible here.
             if len(st.items) != 1:
                 raise Unsupported("with")
             item = st.items[0]
@@ -276,10 +393,13 @@ class Compiler:
             if not (
                 isinstance(call, ast.Call) and _dotted(call.func) == "open"
                 and isinstance(item.optional_vars, ast.Name)
-                and len(call.args) == 2 and not call.keywords
             ):
                 raise Unsupported("with")
-            return [["let", self.name(item.optional_vars.id, scope), self.expr(call, scope)]] + self.stmts(st.body, scope)
+            try:
+                open_expr = self._compile_open(call, scope)
+            except Unsupported:
+                raise Unsupported("with")
+            return [["let", self.name(item.optional_vars.id, scope), open_expr]] + self.stmts(st.body, scope)
         if isinstance(st, ast.Try):
             if st.orelse or st.finalbody or not st.handlers:
                 raise Unsupported("try")
@@ -311,10 +431,12 @@ class Compiler:
                 return [["reraise"]]
             if (
                 isinstance(exc, ast.Call) and (_dotted(exc.func) or "").endswith("UsageError")
-                and len(exc.args) == 1 and isinstance(exc.args[0], ast.Constant)
-                and isinstance(exc.args[0].value, str)
+                and len(exc.args) == 1 and not exc.keywords
             ):
-                return [["usage", exc.args[0].value]]
+                try:
+                    return [["usage", self.expr(exc.args[0], scope)]]
+                except Unsupported:
+                    pass
             cls = (_dotted(exc.func) or "").rsplit(".", 1)[-1] if isinstance(exc, ast.Call) else ""
             if cls in RAISABLE and len(exc.args) == 1 and not exc.keywords:
                 try:
@@ -385,8 +507,11 @@ class Compiler:
                     self.expr(call.keywords[0].value, scope) if call.keywords else None
                 )
                 return [["exit", arg]]
-            if isinstance(call.func, ast.Name) and call.func.id in self.globals:
-                return self.inline(call, scope)
+            if self.hand_coded(call.func, scope):
+                return [["do", self.expr(call, scope)]]
+            helper = self._resolve_helper(call.func, scope)
+            if helper is not None:
+                return self.inline(call, scope, as_expr=False, helper=helper)
             return [["do", self.expr(call, scope)]]
         raise Unsupported(type(st).__name__)
 
@@ -399,44 +524,167 @@ class Compiler:
             return ["set", self.expr(target.value, scope), self.expr(target.slice, scope), value]
         raise Unsupported("assign target")
 
-    def inline(self, call, scope, as_expr=False):
-        """A module helper called with names, e.g. `process_health_checker_kwargs(kwargs)`."""
-        helper = self.globals[call.func.id]
+    def _compile_arg(self, arg_node, scope):
+        """Compile a helper call argument in the caller's scope.
+        Returns (kind, value, client_pair) where kind is 'ctx' or 'expr'."""
+        if isinstance(arg_node, ast.Name) and self.name(arg_node.id, scope) == "ctx":
+            return ("ctx", None, None)
+        target = self.resolve(arg_node)
+        if target is not None:
+            return ("expr", ["target", self.target_index(target)], None)
+        client_pair = None
+        if isinstance(arg_node, ast.Name):
+            client_pair = self.clients.get(self.name(arg_node.id, scope))
+        return ("expr", self.expr(arg_node, scope), client_pair)
+
+    def _compile_default(self, default_node, helper_globals, helper_module):
+        """Compile a helper parameter default expression in the helper's module scope."""
+        saved = (self.globals, self.locals, self.module_name)
+        self.globals = helper_globals
+        self.locals = set()
+        self.module_name = helper_module
+        try:
+            target = self.resolve(default_node)
+            if target is not None:
+                return ["target", self.target_index(target)]
+            return self.expr(default_node, {})
+        finally:
+            self.globals, self.locals, self.module_name = saved
+
+    def inline(self, call, scope, as_expr=False, helper=None):
+        """Inline a same-module or same-service-package Python helper function."""
+        if helper is None:
+            helper = self._resolve_helper(call.func, scope)
+        if helper is None:
+            raise Unsupported("helper")
+        label = _dotted(call.func) or getattr(helper, "__name__", "helper")
         if helper in self._inlining:
             raise Unsupported("helper recursion")
+        if len(self._inlining) >= MAX_INLINE_DEPTH:
+            raise Unsupported("helper depth")
         fn = _fn_ast(helper) if inspect.isfunction(helper) else None
-        if fn is None or call.keywords or fn.args.vararg or fn.args.kwarg:
+        if fn is None or fn.args.vararg is not None:
             raise Unsupported("helper")
-        if len(call.args) != len(fn.args.args):
+        if any(isinstance(a, ast.Starred) for a in call.args):
             raise Unsupported("helper args")
-        if not as_expr and not all(isinstance(a, ast.Name) for a in call.args):
-            raise Unsupported("helper args")
-        if any(isinstance(n, (ast.FunctionDef, ast.Lambda)) for st in fn.body for n in ast.walk(st)):
+        if any(
+            isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef, ast.Global, ast.Nonlocal))
+            for st in fn.body for n in ast.walk(st)
+        ):
             raise Unsupported("helper nested")
-        has_return = any(isinstance(n, ast.Return) for st in fn.body for n in ast.walk(st))
+
+        posonly = list(fn.args.posonlyargs)
+        pos_params = posonly + list(fn.args.args)
+        kwonly = list(fn.args.kwonlyargs)
+        posonly_names = {p.arg for p in posonly}
+        kw_eligible = {p.arg for p in fn.args.args} | {p.arg for p in kwonly}
+        all_params = pos_params + kwonly
+
+        if len(call.args) > len(pos_params):
+            raise Unsupported("helper args")
+
+        # Build default AST map (defaults are evaluated in helper's module scope).
+        defaults_map = {}
+        if fn.args.defaults:
+            offset = len(pos_params) - len(fn.args.defaults)
+            for p, d in zip(pos_params[offset:], fn.args.defaults):
+                defaults_map[p.arg] = d
+        for p, d in zip(kwonly, fn.args.kw_defaults):
+            if d is not None:
+                defaults_map[p.arg] = d
+
+        # Bind call arguments in the caller's scope before entering the helper.
+        bound = {}  # param_name -> (kind, value, client_pair)
+        for p, arg_node in zip(pos_params, call.args):
+            bound[p.arg] = self._compile_arg(arg_node, scope)
+
+        extra_kw_pairs = []
+        star_expr = None
+        for kw in call.keywords:
+            if kw.arg is None:
+                if star_expr is not None:
+                    raise Unsupported("two **")
+                star_expr = self.expr(kw.value, scope)
+            elif kw.arg in bound:
+                raise Unsupported("helper args")
+            elif kw.arg in kw_eligible:
+                bound[kw.arg] = self._compile_arg(kw.value, scope)
+            elif fn.args.kwarg is not None:
+                kind, val, _ = self._compile_arg(kw.value, scope)
+                if kind == "ctx":
+                    raise Unsupported("helper args")
+                extra_kw_pairs.append([kw.arg, val])
+            else:
+                raise Unsupported("helper args")
+
+        helper_globals = getattr(helper, "__globals__", self.globals)
+        helper_module = getattr(helper, "__module__", self.module_name)
+        helper_locals = _fn_locals(fn)
+
         seq = self._inline_counts.get(fn.name, 0)
         self._inline_counts[fn.name] = seq + 1
         prefix = fn.name if seq == 0 else f"{fn.name}${seq}"
-        inner = {}
-        for n in ast.walk(fn):
-            if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store):
-                inner[n.id] = f"{prefix}.{n.id}"
+        inner = {name: f"{prefix}.{name}" for name in helper_locals}
+
         prelude = []
-        for param, arg in zip(fn.args.args, call.args):
-            if isinstance(arg, ast.Name):
-                inner[param.arg] = self.name(arg.id, scope)
-            else:
-                local_param = f"{prefix}.{param.arg}"
-                inner[param.arg] = local_param
-                prelude.append(["let", local_param, self.expr(arg, scope)])
+        for p in all_params:
+            if p.arg in bound:
+                kind, val, client_pair = bound[p.arg]
+                if kind == "ctx":
+                    inner[p.arg] = "ctx"
+                else:
+                    local_p = inner[p.arg]
+                    prelude.append(["let", local_p, val])
+                    if client_pair is not None:
+                        self.clients[local_p] = client_pair
+
+        if star_expr is not None:
+            star_var = inner[fn.args.kwarg.arg] if fn.args.kwarg is not None else f"{prefix}.$star"
+            prelude.append(["let", star_var, ["fn", "dict", star_expr]])
+            for k, v_expr in extra_kw_pairs:
+                prelude.append(["set", ["var", star_var], k, v_expr])
+            for p in all_params:
+                if p.arg in bound:
+                    continue
+                if p.arg in posonly_names:
+                    if p.arg not in defaults_map:
+                        raise Unsupported("helper args")
+                    d_expr = self._compile_default(defaults_map[p.arg], helper_globals, helper_module)
+                    prelude.append(["let", inner[p.arg], d_expr])
+                elif p.arg in defaults_map:
+                    d_expr = self._compile_default(defaults_map[p.arg], helper_globals, helper_module)
+                    prelude.append(["let", inner[p.arg], ["call", "pop", ["var", star_var], p.arg, d_expr]])
+                else:
+                    prelude.append(["let", inner[p.arg], ["call", "pop", ["var", star_var], p.arg]])
+            if fn.args.kwarg is None:
+                prelude.append(["checkNoExtraKwargs", fn.name, star_var])
+        else:
+            for p in all_params:
+                if p.arg in bound:
+                    continue
+                if p.arg not in defaults_map:
+                    raise Unsupported("helper args")
+                d_expr = self._compile_default(defaults_map[p.arg], helper_globals, helper_module)
+                prelude.append(["let", inner[p.arg], d_expr])
+            if fn.args.kwarg is not None:
+                prelude.append(["let", inner[fn.args.kwarg.arg], ["dict", *extra_kw_pairs]])
+
+        has_return = any(isinstance(n, ast.Return) for st in fn.body for n in ast.walk(st))
+        saved = (self.globals, self.locals, self.module_name)
+        self.globals = helper_globals
+        self.locals = helper_locals
+        self.module_name = helper_module
         self._inlining.add(helper)
         try:
             body = prelude + self.stmts(fn.body, inner)
         except Unsupported as e:
             # Blame the call: the helper's own nodes aren't in the wrapper (bun run triage).
-            raise Unsupported(f"helper {call.func.id}: {e}") from e
+            err = Unsupported(f"helper {label}: {e}")
+            err.helper_fn = helper
+            raise err from e
         finally:
             self._inlining.discard(helper)
+            self.globals, self.locals, self.module_name = saved
         if as_expr:
             return ["evalBlock", body]
         if has_return:
@@ -620,11 +868,20 @@ class Compiler:
             return ["list", *(self.constant(v) for v in value)]
         raise Unsupported("global")
 
-    def hand_coded(self, func):
+    def hand_coded(self, func, scope=None):
         """The Engine's name for a module helper it hand-codes, else None."""
-        if not isinstance(func, ast.Name) or func.id in self.locals:
-            return None
-        fn = self.globals.get(func.id)
+        scope = scope or {}
+        fn = None
+        if isinstance(func, ast.Name):
+            if func.id in scope or func.id in self.locals:
+                return None
+            fn = self.globals.get(func.id)
+        elif isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+            if func.value.id in scope or func.value.id in self.locals:
+                return None
+            mod = self.globals.get(func.value.id)
+            if inspect.ismodule(mod):
+                fn = getattr(mod, func.attr, None)
         if not inspect.isfunction(fn):
             return None
         return HAND_CODED.get(f"{fn.__module__}.{fn.__qualname__}")
@@ -661,12 +918,20 @@ class Compiler:
             if node.id in ("True", "False", "None"):
                 return {"True": True, "False": False, "None": None}[node.id]
             if node.id not in scope and node.id not in self.locals and node.id in self.globals:
+                target = self.resolve(node)
+                if target is not None:
+                    return ["target", self.target_index(target)]
                 try:
                     return self.constant(self.globals[node.id])
                 except Unsupported:
                     pass  # a module or function: a NameError if the program reads it
             return ["var", self.name(node.id, scope)]
         if isinstance(node, ast.Subscript):
+            if isinstance(node.slice, ast.Slice):
+                lower = self.expr(node.slice.lower, scope) if node.slice.lower is not None else None
+                upper = self.expr(node.slice.upper, scope) if node.slice.upper is not None else None
+                step = self.expr(node.slice.step, scope) if node.slice.step is not None else None
+                return ["slice", self.expr(node.value, scope), lower, upper, step]
             return ["item", self.expr(node.value, scope), self.expr(node.slice, scope)]
         if isinstance(node, ast.Attribute):
             # ctx.obj (its 'config' set by build_client) and `client.get_namespace().data`
@@ -681,6 +946,8 @@ class Compiler:
             if isinstance(node.value, ast.Name) and self.name(node.value.id, scope) == "ctx":
                 if node.attr == "obj":
                     return ["fn", "ctxObj"]
+                if node.attr == "default_map":
+                    return ["fn", "ctxDefaultMap"]
                 raise Unsupported("attribute")
             call = node.value
             if (
@@ -696,6 +963,9 @@ class Compiler:
             while isinstance(base, ast.Attribute):
                 base = base.value
             if isinstance(base, ast.Name) and base.id not in scope and base.id not in self.locals:
+                target = self.resolve(node)
+                if target is not None:
+                    return ["target", self.target_index(target)]
                 raise Unsupported("attribute")
             return ["attr", node.attr, self.expr(node.value, scope)]
         if isinstance(node, ast.UnaryOp):
@@ -717,9 +987,15 @@ class Compiler:
                         break
             return [op, *vals]
         if isinstance(node, ast.Compare):
-            if len(node.ops) != 1 or type(node.ops[0]) not in CMP:
+            if not node.ops or any(type(op) not in CMP for op in node.ops):
                 raise Unsupported("compare")
-            return ["cmp", CMP[type(node.ops[0])], self.expr(node.left, scope), self.expr(node.comparators[0], scope)]
+            if len(node.ops) == 1:
+                return ["cmp", CMP[type(node.ops[0])], self.expr(node.left, scope), self.expr(node.comparators[0], scope)]
+            return [
+                "cmpChain",
+                self.expr(node.left, scope),
+                [[CMP[type(op)], self.expr(comp, scope)] for op, comp in zip(node.ops, node.comparators)],
+            ]
         if isinstance(node, ast.BinOp):
             if type(node.op) not in BINOP:
                 raise Unsupported("binop")
@@ -844,16 +1120,30 @@ class Compiler:
                     else:
                         keywords.append([kw.arg, self.expr(kw.value, scope)])
                 return ["waitUntil", pos, keywords, star]
+            if dotted == "open":
+                return self._compile_open(node, scope)
+            hand = self.hand_coded(node.func, scope)
+            if hand and not node.keywords:
+                return ["fn", hand, *(self.expr(a, scope) for a in node.args)]
+            helper = self._resolve_helper(node.func, scope)
+            if helper is not None:
+                return self.inline(node, scope, as_expr=True, helper=helper)
             if node.keywords and not (
                 dotted == "json.dumps"
                 and all(k.arg == "sort_keys" for k in node.keywords)
             ):
                 raise Unsupported("call keywords")
-            if (
-                dotted == "isinstance" and len(node.args) == 2
-                and _dotted(node.args[1]) == "six.string_types"
-            ):
-                return ["fn", "isstr", self.expr(node.args[0], scope)]
+            if dotted == "isinstance" and len(node.args) == 2:
+                type_arg = node.args[1]
+                t_dotted = _dotted(type_arg)
+                if t_dotted == "six.string_types" or t_dotted == "str":
+                    return ["fn", "isstr", self.expr(node.args[0], scope)]
+                if t_dotted in ISINSTANCE_TYPES:
+                    return ["fn", "isinstance", self.expr(node.args[0], scope), ISINSTANCE_TYPES[t_dotted]]
+                if isinstance(type_arg, ast.Tuple) and type_arg.elts:
+                    mapped = [ISINSTANCE_TYPES.get(_dotted(elt)) for elt in type_arg.elts]
+                    if all(m is not None for m in mapped):
+                        return ["fn", "isinstance", self.expr(node.args[0], scope), ["list", *mapped]]
             if dotted == "hasattr" and len(node.args) == 2 and isinstance(node.args[1], ast.Constant) and isinstance(node.args[1].value, str):
                 if isinstance(node.args[0], ast.Name):
                     client_pair = self.clients.get(self.name(node.args[0].id, scope))
@@ -891,9 +1181,6 @@ class Compiler:
                 and self.name(node.args[0].id, scope) == "ctx"
             ):
                 return ["fn", "tenancyFromConfig"]
-            hand = self.hand_coded(node.func)
-            if hand:
-                return ["fn", hand, *(self.expr(a, scope) for a in node.args)]
             if dotted in FUNCTIONS:
                 args = [self.expr(a, scope) for a in node.args]
                 if dotted == "json.dumps" and node.keywords:
@@ -904,21 +1191,6 @@ class Compiler:
                 return ["fn", FUNCTIONS[dotted], *args]
             if isinstance(node.func, ast.Attribute) and node.func.attr in METHODS:
                 return ["call", node.func.attr, self.expr(node.func.value, scope), *(self.expr(a, scope) for a in node.args)]
-            if (
-                isinstance(node.func, ast.Name)
-                and node.func.id in self.globals
-                and node.func.id not in self.locals
-            ):
-                snap = (
-                    list(self.targets),
-                    dict(self.clients),
-                    list(self.sdk_calls),
-                    dict(self._inline_counts),
-                )
-                try:
-                    return self.inline(node, scope, as_expr=True)
-                except Unsupported:
-                    self.targets, self.clients, self.sdk_calls, self._inline_counts = snap
             raise Unsupported(f"call {dotted}")
         raise Unsupported(type(node).__name__)
 
@@ -952,10 +1224,8 @@ def _compile_wrapper(callback):
     named = [a.arg for a in args.args]
     if named[:1] != ["ctx"] or args.kwonlyargs or args.defaults:
         raise Unsupported("signature: no ctx, keyword-only args or defaults")
-    local_names = set(named) | {"kwargs"} | {
-        n.id for n in ast.walk(fn) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
-    } | {h.name for h in ast.walk(fn) if isinstance(h, ast.ExceptHandler) and h.name}
-    compiler = Compiler(module_globals, local_names)
+    local_names = _fn_locals(fn) | {"kwargs"}
+    compiler = Compiler(module_globals, local_names, module_name=callback.__module__)
     # Click binds named parameters by name; the rest stay in **kwargs.
     prelude = [["let", a, ["call", "pop", ["var", "kwargs"], a]] for a in named[1:]]
     if args.kwarg is None:

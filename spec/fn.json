@@ -3106,6 +3106,696 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "source_details",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_build_archive_source_details.archive_source_details",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_direct_archive_details.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_direct_archive_details.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_direct_archive_details.archive_file",
+                        [
+                          "evalBlock",
+                          [
+                            [
+                              "let",
+                              "_read_archive_file_value.archive_file",
+                              [
+                                "call",
+                                "pop",
+                                ["var", "_build_direct_archive_details.kwargs"],
+                                "archive_file",
+                                null
+                              ]
+                            ],
+                            [
+                              "if",
+                              [
+                                "cmp",
+                                "is",
+                                [
+                                  "var",
+                                  "_read_archive_file_value.archive_file"
+                                ],
+                                null
+                              ],
+                              [["return", null]],
+                              []
+                            ],
+                            [
+                              "let",
+                              "_read_archive_file_value.archive_file_path",
+                              ["var", "_read_archive_file_value.archive_file"]
+                            ],
+                            [
+                              "if",
+                              [
+                                "call",
+                                "startswith",
+                                [
+                                  "call",
+                                  "lower",
+                                  [
+                                    "var",
+                                    "_read_archive_file_value.archive_file"
+                                  ]
+                                ],
+                                "file://"
+                              ],
+                              [
+                                [
+                                  "let",
+                                  "_read_archive_file_value.archive_file_path",
+                                  [
+                                    "slice",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file"
+                                    ],
+                                    ["fn", "len", "file://"],
+                                    null,
+                                    null
+                                  ]
+                                ]
+                              ],
+                              []
+                            ],
+                            [
+                              "let",
+                              "_read_archive_file_value.archive_file_path",
+                              [
+                                "fn",
+                                "expandvars",
+                                [
+                                  "fn",
+                                  "expanduser",
+                                  [
+                                    "var",
+                                    "_read_archive_file_value.archive_file_path"
+                                  ]
+                                ]
+                              ]
+                            ],
+                            [
+                              "if",
+                              [
+                                "not",
+                                [
+                                  "fn",
+                                  "exists",
+                                  [
+                                    "var",
+                                    "_read_archive_file_value.archive_file_path"
+                                  ]
+                                ]
+                              ],
+                              [
+                                [
+                                  "usage",
+                                  [
+                                    "call",
+                                    "format",
+                                    "Archive file '{}' does not exist.",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file"
+                                    ]
+                                  ]
+                                ]
+                              ],
+                              []
+                            ],
+                            [
+                              "if",
+                              [
+                                "not",
+                                [
+                                  "call",
+                                  "endswith",
+                                  [
+                                    "call",
+                                    "lower",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file_path"
+                                    ]
+                                  ],
+                                  ["list", ".zip", ".jar"]
+                                ]
+                              ],
+                              [
+                                [
+                                  "usage",
+                                  [
+                                    "call",
+                                    "format",
+                                    "Archive file '{}' must be a .zip or .jar file.",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file"
+                                    ]
+                                  ]
+                                ]
+                              ],
+                              []
+                            ],
+                            [
+                              "let",
+                              "_read_archive_file_value.archive",
+                              [
+                                "fn",
+                                "open",
+                                [
+                                  "var",
+                                  "_read_archive_file_value.archive_file_path"
+                                ],
+                                "rb"
+                              ]
+                            ],
+                            [
+                              "return",
+                              [
+                                "call",
+                                "decode",
+                                [
+                                  "fn",
+                                  "b64encode",
+                                  [
+                                    "call",
+                                    "read",
+                                    ["var", "_read_archive_file_value.archive"]
+                                  ]
+                                ],
+                                "utf-8"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_direct_archive_details.archive_file"
+                            ],
+                            null
+                          ],
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_direct_archive_details.include_if_empty"
+                            ]
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "dict",
+                          ["archiveSourceType", "DIRECT_ARCHIVE"],
+                          [
+                            "archiveFile",
+                            [
+                              "var",
+                              "_build_direct_archive_details.archive_file"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.runtime_config",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_fn_update_runtime_config.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_fn_update_runtime_config.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_fn_update_runtime_config.functions_runtime_name",
+                        [
+                          "call",
+                          "pop",
+                          ["var", "_build_fn_update_runtime_config.kwargs"],
+                          "functions_runtime_name",
+                          null
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_fn_update_runtime_config.functions_runtime_name"
+                            ],
+                            null
+                          ],
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_fn_update_runtime_config.include_if_empty"
+                            ]
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "dict",
+                          ["runtimeConfigType", "FUNCTION_UPDATE"],
+                          [
+                            "functionsRuntimeName",
+                            [
+                              "var",
+                              "_build_fn_update_runtime_config.functions_runtime_name"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.source_details",
+                  ["dict", ["sourceType", "ARCHIVE"]]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    [
+                      "var",
+                      "_build_archive_source_details.archive_source_details"
+                    ],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "archiveSourceDetails",
+                      [
+                        "var",
+                        "_build_archive_source_details.archive_source_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["var", "_build_archive_source_details.runtime_config"],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "runtimeConfig",
+                      ["var", "_build_archive_source_details.runtime_config"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.handler",
+                  [
+                    "call",
+                    "pop",
+                    ["var", "_build_archive_source_details.kwargs"],
+                    "handler",
+                    null
+                  ]
+                ],
+                [
+                  "let",
+                  "_add_if_present.payload",
+                  ["var", "_build_archive_source_details.source_details"]
+                ],
+                ["let", "_add_if_present.payload_key", "handler"],
+                [
+                  "let",
+                  "_add_if_present.value",
+                  ["var", "_build_archive_source_details.handler"]
+                ],
+                [
+                  "if",
+                  ["cmp", "isnot", ["var", "_add_if_present.value"], null],
+                  [
+                    [
+                      "set",
+                      ["var", "_add_if_present.payload"],
+                      ["var", "_add_if_present.payload_key"],
+                      ["var", "_add_if_present.value"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  ["var", "_build_archive_source_details.source_details"]
+                ]
+              ]
+            ]
+          ],
+          ["let", "_invoke_create.kwargs", ["var", "kwargs"]],
+          ["let", "_invoke_create.source_details", ["var", "source_details"]],
+          [
+            "let",
+            "_normalize_provisioned_concurrency.kwargs",
+            ["var", "_invoke_create.kwargs"]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "in",
+              "provisioned_concurrency",
+              ["var", "_normalize_provisioned_concurrency.kwargs"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_normalize_provisioned_concurrency.kwargs"],
+                "provisioned_concurrency_config",
+                [
+                  "call",
+                  "pop",
+                  ["var", "_normalize_provisioned_concurrency.kwargs"],
+                  "provisioned_concurrency"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "_invoke_create.kwargs"],
+            "source_details",
+            ["fn", "dumps", ["var", "_invoke_create.source_details"]]
+          ],
+          ["invoke", [], ["var", "_invoke_create.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.functions.src.oci_cli_functions_management.generated.functionsmanagement_cli.create_function",
+        "complexTypes": {
+          "source-details": "functions:CreateFunctionSourceDetails",
+          "config": "functions:dict(str, string)",
+          "provisioned-concurrency-config": "functions:FunctionProvisionedConcurrencyConfig",
+          "failure-destination": "functions:FailureDestinationDetails",
+          "success-destination": "functions:SuccessDestinationDetails",
+          "trace-config": "functions:FunctionTraceConfig",
+          "freeform-tags": "functions:dict(str, string)",
+          "defined-tags": "functions:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "application_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_in_mbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "provisioned_concurrency_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "detached_mode_timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "failure_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "success_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "trace_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "functions.functions_management",
+        "method": "create_function",
+        "http": "POST",
+        "path": "/functions",
+        "positionalArgs": ["create_function_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_function_details",
+        "responseType": "Function",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["applicationId"],
+          "param": "application_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["memoryInMBs"],
+          "param": "memory_in_mbs"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["config"],
+          "transform": "parse_json_parameter",
+          "param": "config",
+          "when": "config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["timeoutInSeconds"],
+          "param": "timeout_in_seconds",
+          "when": "timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["provisionedConcurrencyConfig"],
+          "transform": "parse_json_parameter",
+          "param": "provisioned_concurrency_config",
+          "when": "provisioned_concurrency_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["detachedModeTimeoutInSeconds"],
+          "param": "detached_mode_timeout_in_seconds",
+          "when": "detached_mode_timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["failureDestination"],
+          "transform": "parse_json_parameter",
+          "param": "failure_destination",
+          "when": "failure_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["successDestination"],
+          "transform": "parse_json_parameter",
+          "param": "success_destination",
+          "when": "success_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["traceConfig"],
+          "transform": "parse_json_parameter",
+          "param": "trace_config",
+          "when": "trace_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3638,6 +4328,760 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "source_details",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_build_archive_source_details.archive_source_details",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_direct_archive_details.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_direct_archive_details.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_direct_archive_details.archive_file",
+                        [
+                          "evalBlock",
+                          [
+                            [
+                              "let",
+                              "_read_archive_file_value.archive_file",
+                              [
+                                "call",
+                                "pop",
+                                ["var", "_build_direct_archive_details.kwargs"],
+                                "archive_file",
+                                null
+                              ]
+                            ],
+                            [
+                              "if",
+                              [
+                                "cmp",
+                                "is",
+                                [
+                                  "var",
+                                  "_read_archive_file_value.archive_file"
+                                ],
+                                null
+                              ],
+                              [["return", null]],
+                              []
+                            ],
+                            [
+                              "let",
+                              "_read_archive_file_value.archive_file_path",
+                              ["var", "_read_archive_file_value.archive_file"]
+                            ],
+                            [
+                              "if",
+                              [
+                                "call",
+                                "startswith",
+                                [
+                                  "call",
+                                  "lower",
+                                  [
+                                    "var",
+                                    "_read_archive_file_value.archive_file"
+                                  ]
+                                ],
+                                "file://"
+                              ],
+                              [
+                                [
+                                  "let",
+                                  "_read_archive_file_value.archive_file_path",
+                                  [
+                                    "slice",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file"
+                                    ],
+                                    ["fn", "len", "file://"],
+                                    null,
+                                    null
+                                  ]
+                                ]
+                              ],
+                              []
+                            ],
+                            [
+                              "let",
+                              "_read_archive_file_value.archive_file_path",
+                              [
+                                "fn",
+                                "expandvars",
+                                [
+                                  "fn",
+                                  "expanduser",
+                                  [
+                                    "var",
+                                    "_read_archive_file_value.archive_file_path"
+                                  ]
+                                ]
+                              ]
+                            ],
+                            [
+                              "if",
+                              [
+                                "not",
+                                [
+                                  "fn",
+                                  "exists",
+                                  [
+                                    "var",
+                                    "_read_archive_file_value.archive_file_path"
+                                  ]
+                                ]
+                              ],
+                              [
+                                [
+                                  "usage",
+                                  [
+                                    "call",
+                                    "format",
+                                    "Archive file '{}' does not exist.",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file"
+                                    ]
+                                  ]
+                                ]
+                              ],
+                              []
+                            ],
+                            [
+                              "if",
+                              [
+                                "not",
+                                [
+                                  "call",
+                                  "endswith",
+                                  [
+                                    "call",
+                                    "lower",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file_path"
+                                    ]
+                                  ],
+                                  ["list", ".zip", ".jar"]
+                                ]
+                              ],
+                              [
+                                [
+                                  "usage",
+                                  [
+                                    "call",
+                                    "format",
+                                    "Archive file '{}' must be a .zip or .jar file.",
+                                    [
+                                      "var",
+                                      "_read_archive_file_value.archive_file"
+                                    ]
+                                  ]
+                                ]
+                              ],
+                              []
+                            ],
+                            [
+                              "let",
+                              "_read_archive_file_value.archive",
+                              [
+                                "fn",
+                                "open",
+                                [
+                                  "var",
+                                  "_read_archive_file_value.archive_file_path"
+                                ],
+                                "rb"
+                              ]
+                            ],
+                            [
+                              "return",
+                              [
+                                "call",
+                                "decode",
+                                [
+                                  "fn",
+                                  "b64encode",
+                                  [
+                                    "call",
+                                    "read",
+                                    ["var", "_read_archive_file_value.archive"]
+                                  ]
+                                ],
+                                "utf-8"
+                              ]
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_direct_archive_details.archive_file"
+                            ],
+                            null
+                          ],
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_direct_archive_details.include_if_empty"
+                            ]
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "dict",
+                          ["archiveSourceType", "DIRECT_ARCHIVE"],
+                          [
+                            "archiveFile",
+                            [
+                              "var",
+                              "_build_direct_archive_details.archive_file"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.runtime_config",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_manual_runtime_config.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.functions_runtime_name_required",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.functions_runtime_version_id",
+                        [
+                          "call",
+                          "pop",
+                          ["var", "_build_manual_runtime_config.kwargs"],
+                          "functions_runtime_version_id",
+                          null
+                        ]
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.functions_runtime_name",
+                        [
+                          "call",
+                          "pop",
+                          ["var", "_build_manual_runtime_config.kwargs"],
+                          "functions_runtime_name",
+                          null
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.include_if_empty"
+                            ]
+                          ],
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_name"
+                            ],
+                            null
+                          ],
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_version_id"
+                            ],
+                            null
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.runtime_config",
+                        [
+                          "dict",
+                          ["runtimeConfigType", "MANUAL"],
+                          [
+                            "functionsRuntimeVersionId",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_version_id"
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "or",
+                          [
+                            "var",
+                            "_build_manual_runtime_config.functions_runtime_name_required"
+                          ],
+                          [
+                            "cmp",
+                            "isnot",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_name"
+                            ],
+                            null
+                          ]
+                        ],
+                        [
+                          [
+                            "set",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.runtime_config"
+                            ],
+                            "functionsRuntimeName",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_name"
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        ["var", "_build_manual_runtime_config.runtime_config"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.source_details",
+                  ["dict", ["sourceType", "ARCHIVE"]]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    [
+                      "var",
+                      "_build_archive_source_details.archive_source_details"
+                    ],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "archiveSourceDetails",
+                      [
+                        "var",
+                        "_build_archive_source_details.archive_source_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["var", "_build_archive_source_details.runtime_config"],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "runtimeConfig",
+                      ["var", "_build_archive_source_details.runtime_config"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.handler",
+                  [
+                    "call",
+                    "pop",
+                    ["var", "_build_archive_source_details.kwargs"],
+                    "handler",
+                    null
+                  ]
+                ],
+                [
+                  "let",
+                  "_add_if_present.payload",
+                  ["var", "_build_archive_source_details.source_details"]
+                ],
+                ["let", "_add_if_present.payload_key", "handler"],
+                [
+                  "let",
+                  "_add_if_present.value",
+                  ["var", "_build_archive_source_details.handler"]
+                ],
+                [
+                  "if",
+                  ["cmp", "isnot", ["var", "_add_if_present.value"], null],
+                  [
+                    [
+                      "set",
+                      ["var", "_add_if_present.payload"],
+                      ["var", "_add_if_present.payload_key"],
+                      ["var", "_add_if_present.value"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  ["var", "_build_archive_source_details.source_details"]
+                ]
+              ]
+            ]
+          ],
+          ["let", "_invoke_create.kwargs", ["var", "kwargs"]],
+          ["let", "_invoke_create.source_details", ["var", "source_details"]],
+          [
+            "let",
+            "_normalize_provisioned_concurrency.kwargs",
+            ["var", "_invoke_create.kwargs"]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "in",
+              "provisioned_concurrency",
+              ["var", "_normalize_provisioned_concurrency.kwargs"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_normalize_provisioned_concurrency.kwargs"],
+                "provisioned_concurrency_config",
+                [
+                  "call",
+                  "pop",
+                  ["var", "_normalize_provisioned_concurrency.kwargs"],
+                  "provisioned_concurrency"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "_invoke_create.kwargs"],
+            "source_details",
+            ["fn", "dumps", ["var", "_invoke_create.source_details"]]
+          ],
+          ["invoke", [], ["var", "_invoke_create.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.functions.src.oci_cli_functions_management.generated.functionsmanagement_cli.create_function",
+        "complexTypes": {
+          "source-details": "functions:CreateFunctionSourceDetails",
+          "config": "functions:dict(str, string)",
+          "provisioned-concurrency-config": "functions:FunctionProvisionedConcurrencyConfig",
+          "failure-destination": "functions:FailureDestinationDetails",
+          "success-destination": "functions:SuccessDestinationDetails",
+          "trace-config": "functions:FunctionTraceConfig",
+          "freeform-tags": "functions:dict(str, string)",
+          "defined-tags": "functions:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "application_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_in_mbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "provisioned_concurrency_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "detached_mode_timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "failure_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "success_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "trace_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "functions.functions_management",
+        "method": "create_function",
+        "http": "POST",
+        "path": "/functions",
+        "positionalArgs": ["create_function_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_function_details",
+        "responseType": "Function",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["applicationId"],
+          "param": "application_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["memoryInMBs"],
+          "param": "memory_in_mbs"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["config"],
+          "transform": "parse_json_parameter",
+          "param": "config",
+          "when": "config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["timeoutInSeconds"],
+          "param": "timeout_in_seconds",
+          "when": "timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["provisionedConcurrencyConfig"],
+          "transform": "parse_json_parameter",
+          "param": "provisioned_concurrency_config",
+          "when": "provisioned_concurrency_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["detachedModeTimeoutInSeconds"],
+          "param": "detached_mode_timeout_in_seconds",
+          "when": "detached_mode_timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["failureDestination"],
+          "transform": "parse_json_parameter",
+          "param": "failure_destination",
+          "when": "failure_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["successDestination"],
+          "transform": "parse_json_parameter",
+          "param": "success_destination",
+          "when": "success_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["traceConfig"],
+          "transform": "parse_json_parameter",
+          "param": "trace_config",
+          "when": "trace_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4195,6 +5639,583 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "source_details",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_build_archive_source_details.archive_source_details",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_object_storage_archive_details.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_object_storage_archive_details.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_object_storage_archive_details.archive_source_details",
+                        [
+                          "dict",
+                          ["archiveSourceType", "OBJECT_STORAGE_ARCHIVE"]
+                        ]
+                      ],
+                      [
+                        "for",
+                        [
+                          "_build_object_storage_archive_details.option_key",
+                          "_build_object_storage_archive_details.payload_key"
+                        ],
+                        [
+                          "list",
+                          ["list", "bucket_name", "bucketName"],
+                          ["list", "namespace", "namespace"],
+                          ["list", "object_name", "objectName"],
+                          ["list", "object_version_id", "objectVersionId"]
+                        ],
+                        [
+                          [
+                            "let",
+                            "_build_object_storage_archive_details.option_value",
+                            [
+                              "call",
+                              "pop",
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.kwargs"
+                              ],
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.option_key"
+                              ],
+                              null
+                            ]
+                          ],
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "isnot",
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.option_value"
+                              ],
+                              null
+                            ],
+                            [
+                              [
+                                "set",
+                                [
+                                  "var",
+                                  "_build_object_storage_archive_details.archive_source_details"
+                                ],
+                                [
+                                  "var",
+                                  "_build_object_storage_archive_details.payload_key"
+                                ],
+                                [
+                                  "var",
+                                  "_build_object_storage_archive_details.option_value"
+                                ]
+                              ]
+                            ],
+                            []
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_object_storage_archive_details.include_if_empty"
+                            ]
+                          ],
+                          [
+                            "cmp",
+                            "==",
+                            [
+                              "fn",
+                              "len",
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.archive_source_details"
+                              ]
+                            ],
+                            1
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_build_object_storage_archive_details.archive_source_details"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.runtime_config",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_fn_update_runtime_config.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_fn_update_runtime_config.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_fn_update_runtime_config.functions_runtime_name",
+                        [
+                          "call",
+                          "pop",
+                          ["var", "_build_fn_update_runtime_config.kwargs"],
+                          "functions_runtime_name",
+                          null
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_fn_update_runtime_config.functions_runtime_name"
+                            ],
+                            null
+                          ],
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_fn_update_runtime_config.include_if_empty"
+                            ]
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "dict",
+                          ["runtimeConfigType", "FUNCTION_UPDATE"],
+                          [
+                            "functionsRuntimeName",
+                            [
+                              "var",
+                              "_build_fn_update_runtime_config.functions_runtime_name"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.source_details",
+                  ["dict", ["sourceType", "ARCHIVE"]]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    [
+                      "var",
+                      "_build_archive_source_details.archive_source_details"
+                    ],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "archiveSourceDetails",
+                      [
+                        "var",
+                        "_build_archive_source_details.archive_source_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["var", "_build_archive_source_details.runtime_config"],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "runtimeConfig",
+                      ["var", "_build_archive_source_details.runtime_config"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.handler",
+                  [
+                    "call",
+                    "pop",
+                    ["var", "_build_archive_source_details.kwargs"],
+                    "handler",
+                    null
+                  ]
+                ],
+                [
+                  "let",
+                  "_add_if_present.payload",
+                  ["var", "_build_archive_source_details.source_details"]
+                ],
+                ["let", "_add_if_present.payload_key", "handler"],
+                [
+                  "let",
+                  "_add_if_present.value",
+                  ["var", "_build_archive_source_details.handler"]
+                ],
+                [
+                  "if",
+                  ["cmp", "isnot", ["var", "_add_if_present.value"], null],
+                  [
+                    [
+                      "set",
+                      ["var", "_add_if_present.payload"],
+                      ["var", "_add_if_present.payload_key"],
+                      ["var", "_add_if_present.value"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  ["var", "_build_archive_source_details.source_details"]
+                ]
+              ]
+            ]
+          ],
+          ["let", "_invoke_create.kwargs", ["var", "kwargs"]],
+          ["let", "_invoke_create.source_details", ["var", "source_details"]],
+          [
+            "let",
+            "_normalize_provisioned_concurrency.kwargs",
+            ["var", "_invoke_create.kwargs"]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "in",
+              "provisioned_concurrency",
+              ["var", "_normalize_provisioned_concurrency.kwargs"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_normalize_provisioned_concurrency.kwargs"],
+                "provisioned_concurrency_config",
+                [
+                  "call",
+                  "pop",
+                  ["var", "_normalize_provisioned_concurrency.kwargs"],
+                  "provisioned_concurrency"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "_invoke_create.kwargs"],
+            "source_details",
+            ["fn", "dumps", ["var", "_invoke_create.source_details"]]
+          ],
+          ["invoke", [], ["var", "_invoke_create.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.functions.src.oci_cli_functions_management.generated.functionsmanagement_cli.create_function",
+        "complexTypes": {
+          "source-details": "functions:CreateFunctionSourceDetails",
+          "config": "functions:dict(str, string)",
+          "provisioned-concurrency-config": "functions:FunctionProvisionedConcurrencyConfig",
+          "failure-destination": "functions:FailureDestinationDetails",
+          "success-destination": "functions:SuccessDestinationDetails",
+          "trace-config": "functions:FunctionTraceConfig",
+          "freeform-tags": "functions:dict(str, string)",
+          "defined-tags": "functions:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "application_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_in_mbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "provisioned_concurrency_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "detached_mode_timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "failure_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "success_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "trace_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "functions.functions_management",
+        "method": "create_function",
+        "http": "POST",
+        "path": "/functions",
+        "positionalArgs": ["create_function_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_function_details",
+        "responseType": "Function",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["applicationId"],
+          "param": "application_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["memoryInMBs"],
+          "param": "memory_in_mbs"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["config"],
+          "transform": "parse_json_parameter",
+          "param": "config",
+          "when": "config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["timeoutInSeconds"],
+          "param": "timeout_in_seconds",
+          "when": "timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["provisionedConcurrencyConfig"],
+          "transform": "parse_json_parameter",
+          "param": "provisioned_concurrency_config",
+          "when": "provisioned_concurrency_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["detachedModeTimeoutInSeconds"],
+          "param": "detached_mode_timeout_in_seconds",
+          "when": "detached_mode_timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["failureDestination"],
+          "transform": "parse_json_parameter",
+          "param": "failure_destination",
+          "when": "failure_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["successDestination"],
+          "transform": "parse_json_parameter",
+          "param": "success_destination",
+          "when": "success_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["traceConfig"],
+          "transform": "parse_json_parameter",
+          "param": "trace_config",
+          "when": "trace_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -4793,6 +6814,647 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "source_details",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_build_archive_source_details.archive_source_details",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_object_storage_archive_details.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_object_storage_archive_details.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_object_storage_archive_details.archive_source_details",
+                        [
+                          "dict",
+                          ["archiveSourceType", "OBJECT_STORAGE_ARCHIVE"]
+                        ]
+                      ],
+                      [
+                        "for",
+                        [
+                          "_build_object_storage_archive_details.option_key",
+                          "_build_object_storage_archive_details.payload_key"
+                        ],
+                        [
+                          "list",
+                          ["list", "bucket_name", "bucketName"],
+                          ["list", "namespace", "namespace"],
+                          ["list", "object_name", "objectName"],
+                          ["list", "object_version_id", "objectVersionId"]
+                        ],
+                        [
+                          [
+                            "let",
+                            "_build_object_storage_archive_details.option_value",
+                            [
+                              "call",
+                              "pop",
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.kwargs"
+                              ],
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.option_key"
+                              ],
+                              null
+                            ]
+                          ],
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "isnot",
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.option_value"
+                              ],
+                              null
+                            ],
+                            [
+                              [
+                                "set",
+                                [
+                                  "var",
+                                  "_build_object_storage_archive_details.archive_source_details"
+                                ],
+                                [
+                                  "var",
+                                  "_build_object_storage_archive_details.payload_key"
+                                ],
+                                [
+                                  "var",
+                                  "_build_object_storage_archive_details.option_value"
+                                ]
+                              ]
+                            ],
+                            []
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_object_storage_archive_details.include_if_empty"
+                            ]
+                          ],
+                          [
+                            "cmp",
+                            "==",
+                            [
+                              "fn",
+                              "len",
+                              [
+                                "var",
+                                "_build_object_storage_archive_details.archive_source_details"
+                              ]
+                            ],
+                            1
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_build_object_storage_archive_details.archive_source_details"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.runtime_config",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_build_manual_runtime_config.kwargs",
+                        ["var", "kwargs"]
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.functions_runtime_name_required",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.include_if_empty",
+                        true
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.functions_runtime_version_id",
+                        [
+                          "call",
+                          "pop",
+                          ["var", "_build_manual_runtime_config.kwargs"],
+                          "functions_runtime_version_id",
+                          null
+                        ]
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.functions_runtime_name",
+                        [
+                          "call",
+                          "pop",
+                          ["var", "_build_manual_runtime_config.kwargs"],
+                          "functions_runtime_name",
+                          null
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "and",
+                          [
+                            "not",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.include_if_empty"
+                            ]
+                          ],
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_name"
+                            ],
+                            null
+                          ],
+                          [
+                            "cmp",
+                            "is",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_version_id"
+                            ],
+                            null
+                          ]
+                        ],
+                        [["return", null]],
+                        []
+                      ],
+                      [
+                        "let",
+                        "_build_manual_runtime_config.runtime_config",
+                        [
+                          "dict",
+                          ["runtimeConfigType", "MANUAL"],
+                          [
+                            "functionsRuntimeVersionId",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_version_id"
+                            ]
+                          ]
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "or",
+                          [
+                            "var",
+                            "_build_manual_runtime_config.functions_runtime_name_required"
+                          ],
+                          [
+                            "cmp",
+                            "isnot",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_name"
+                            ],
+                            null
+                          ]
+                        ],
+                        [
+                          [
+                            "set",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.runtime_config"
+                            ],
+                            "functionsRuntimeName",
+                            [
+                              "var",
+                              "_build_manual_runtime_config.functions_runtime_name"
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        ["var", "_build_manual_runtime_config.runtime_config"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.source_details",
+                  ["dict", ["sourceType", "ARCHIVE"]]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    [
+                      "var",
+                      "_build_archive_source_details.archive_source_details"
+                    ],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "archiveSourceDetails",
+                      [
+                        "var",
+                        "_build_archive_source_details.archive_source_details"
+                      ]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "isnot",
+                    ["var", "_build_archive_source_details.runtime_config"],
+                    null
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_archive_source_details.source_details"],
+                      "runtimeConfig",
+                      ["var", "_build_archive_source_details.runtime_config"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "let",
+                  "_build_archive_source_details.handler",
+                  [
+                    "call",
+                    "pop",
+                    ["var", "_build_archive_source_details.kwargs"],
+                    "handler",
+                    null
+                  ]
+                ],
+                [
+                  "let",
+                  "_add_if_present.payload",
+                  ["var", "_build_archive_source_details.source_details"]
+                ],
+                ["let", "_add_if_present.payload_key", "handler"],
+                [
+                  "let",
+                  "_add_if_present.value",
+                  ["var", "_build_archive_source_details.handler"]
+                ],
+                [
+                  "if",
+                  ["cmp", "isnot", ["var", "_add_if_present.value"], null],
+                  [
+                    [
+                      "set",
+                      ["var", "_add_if_present.payload"],
+                      ["var", "_add_if_present.payload_key"],
+                      ["var", "_add_if_present.value"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  ["var", "_build_archive_source_details.source_details"]
+                ]
+              ]
+            ]
+          ],
+          ["let", "_invoke_create.kwargs", ["var", "kwargs"]],
+          ["let", "_invoke_create.source_details", ["var", "source_details"]],
+          [
+            "let",
+            "_normalize_provisioned_concurrency.kwargs",
+            ["var", "_invoke_create.kwargs"]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "in",
+              "provisioned_concurrency",
+              ["var", "_normalize_provisioned_concurrency.kwargs"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_normalize_provisioned_concurrency.kwargs"],
+                "provisioned_concurrency_config",
+                [
+                  "call",
+                  "pop",
+                  ["var", "_normalize_provisioned_concurrency.kwargs"],
+                  "provisioned_concurrency"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "_invoke_create.kwargs"],
+            "source_details",
+            ["fn", "dumps", ["var", "_invoke_create.source_details"]]
+          ],
+          ["invoke", [], ["var", "_invoke_create.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.functions.src.oci_cli_functions_management.generated.functionsmanagement_cli.create_function",
+        "complexTypes": {
+          "source-details": "functions:CreateFunctionSourceDetails",
+          "config": "functions:dict(str, string)",
+          "provisioned-concurrency-config": "functions:FunctionProvisionedConcurrencyConfig",
+          "failure-destination": "functions:FailureDestinationDetails",
+          "success-destination": "functions:SuccessDestinationDetails",
+          "trace-config": "functions:FunctionTraceConfig",
+          "freeform-tags": "functions:dict(str, string)",
+          "defined-tags": "functions:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "application_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_in_mbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "provisioned_concurrency_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "detached_mode_timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "failure_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "success_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "trace_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "functions.functions_management",
+        "method": "create_function",
+        "http": "POST",
+        "path": "/functions",
+        "positionalArgs": ["create_function_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_function_details",
+        "responseType": "Function",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["applicationId"],
+          "param": "application_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["memoryInMBs"],
+          "param": "memory_in_mbs"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["config"],
+          "transform": "parse_json_parameter",
+          "param": "config",
+          "when": "config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["timeoutInSeconds"],
+          "param": "timeout_in_seconds",
+          "when": "timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["provisionedConcurrencyConfig"],
+          "transform": "parse_json_parameter",
+          "param": "provisioned_concurrency_config",
+          "when": "provisioned_concurrency_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["detachedModeTimeoutInSeconds"],
+          "param": "detached_mode_timeout_in_seconds",
+          "when": "detached_mode_timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["failureDestination"],
+          "transform": "parse_json_parameter",
+          "param": "failure_destination",
+          "when": "failure_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["successDestination"],
+          "transform": "parse_json_parameter",
+          "param": "success_destination",
+          "when": "success_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["traceConfig"],
+          "transform": "parse_json_parameter",
+          "param": "trace_config",
+          "when": "trace_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5384,6 +8046,381 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "_invoke_create.kwargs", ["var", "kwargs"]],
+          [
+            "let",
+            "_invoke_create.source_details",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_build_container_source_details.kwargs",
+                  ["var", "kwargs"]
+                ],
+                ["let", "_build_container_source_details.image_required", true],
+                [
+                  "let",
+                  "_build_container_source_details.source_details",
+                  ["dict", ["sourceType", "CONTAINER_IMAGE"]]
+                ],
+                [
+                  "let",
+                  "_build_container_source_details.image",
+                  [
+                    "call",
+                    "pop",
+                    ["var", "_build_container_source_details.kwargs"],
+                    "image",
+                    null
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "or",
+                    ["var", "_build_container_source_details.image_required"],
+                    [
+                      "cmp",
+                      "isnot",
+                      ["var", "_build_container_source_details.image"],
+                      null
+                    ]
+                  ],
+                  [
+                    [
+                      "set",
+                      ["var", "_build_container_source_details.source_details"],
+                      "image",
+                      ["var", "_build_container_source_details.image"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "let",
+                  "_build_container_source_details.image_digest",
+                  [
+                    "call",
+                    "pop",
+                    ["var", "_build_container_source_details.kwargs"],
+                    "image_digest",
+                    null
+                  ]
+                ],
+                [
+                  "let",
+                  "_add_if_present.payload",
+                  ["var", "_build_container_source_details.source_details"]
+                ],
+                ["let", "_add_if_present.payload_key", "imageDigest"],
+                [
+                  "let",
+                  "_add_if_present.value",
+                  ["var", "_build_container_source_details.image_digest"]
+                ],
+                [
+                  "if",
+                  ["cmp", "isnot", ["var", "_add_if_present.value"], null],
+                  [
+                    [
+                      "set",
+                      ["var", "_add_if_present.payload"],
+                      ["var", "_add_if_present.payload_key"],
+                      ["var", "_add_if_present.value"]
+                    ]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  ["var", "_build_container_source_details.source_details"]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "_normalize_provisioned_concurrency.kwargs",
+            ["var", "_invoke_create.kwargs"]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "in",
+              "provisioned_concurrency",
+              ["var", "_normalize_provisioned_concurrency.kwargs"]
+            ],
+            [
+              [
+                "set",
+                ["var", "_normalize_provisioned_concurrency.kwargs"],
+                "provisioned_concurrency_config",
+                [
+                  "call",
+                  "pop",
+                  ["var", "_normalize_provisioned_concurrency.kwargs"],
+                  "provisioned_concurrency"
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "_invoke_create.kwargs"],
+            "source_details",
+            ["fn", "dumps", ["var", "_invoke_create.source_details"]]
+          ],
+          ["invoke", [], ["var", "_invoke_create.kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.functions.src.oci_cli_functions_management.generated.functionsmanagement_cli.create_function",
+        "complexTypes": {
+          "source-details": "functions:CreateFunctionSourceDetails",
+          "config": "functions:dict(str, string)",
+          "provisioned-concurrency-config": "functions:FunctionProvisionedConcurrencyConfig",
+          "failure-destination": "functions:FailureDestinationDetails",
+          "success-destination": "functions:SuccessDestinationDetails",
+          "trace-config": "functions:FunctionTraceConfig",
+          "freeform-tags": "functions:dict(str, string)",
+          "defined-tags": "functions:dict(str, dict(str, object))"
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "application_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_in_mbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "provisioned_concurrency_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "detached_mode_timeout_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "failure_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "success_destination",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "trace_config",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "functions.functions_management",
+        "method": "create_function",
+        "http": "POST",
+        "path": "/functions",
+        "positionalArgs": ["create_function_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_function_details",
+        "responseType": "Function",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["displayName"],
+          "param": "display_name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["applicationId"],
+          "param": "application_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["memoryInMBs"],
+          "param": "memory_in_mbs"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["config"],
+          "transform": "parse_json_parameter",
+          "param": "config",
+          "when": "config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["timeoutInSeconds"],
+          "param": "timeout_in_seconds",
+          "when": "timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["provisionedConcurrencyConfig"],
+          "transform": "parse_json_parameter",
+          "param": "provisioned_concurrency_config",
+          "when": "provisioned_concurrency_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["detachedModeTimeoutInSeconds"],
+          "param": "detached_mode_timeout_in_seconds",
+          "when": "detached_mode_timeout_in_seconds is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["failureDestination"],
+          "transform": "parse_json_parameter",
+          "param": "failure_destination",
+          "when": "failure_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["successDestination"],
+          "transform": "parse_json_parameter",
+          "param": "success_destination",
+          "when": "success_destination is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["traceConfig"],
+          "transform": "parse_json_parameter",
+          "param": "trace_config",
+          "when": "trace_config is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_function_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -5897,28 +8934,45 @@
               ]
             ]
           ],
+          ["let", "_invoke_create.kwargs", ["var", "kwargs"]],
+          ["let", "_invoke_create.source_details", ["var", "source_details"]],
+          [
+            "let",
+            "_normalize_provisioned_concurrency.kwargs",
+            ["var", "_invoke_create.kwargs"]
+          ],
           [
             "if",
-            ["cmp", "in", "provisioned_concurrency", ["var", "kwargs"]],
+            [
+              "cmp",
+              "in",
+              "provisioned_concurrency",
+              ["var", "_normalize_provisioned_concurrency.kwargs"]
+            ],
             [
               [
                 "set",
-                ["var", "kwargs"],
+                ["var", "_normalize_provisioned_concurrency.kwargs"],
                 "provisioned_concurrency_config",
-                ["call", "pop", ["var", "kwargs"], "provisioned_concurrency"]
+                [
+                  "call",
+                  "pop",
+                  ["var", "_normalize_provisioned_concurrency.kwargs"],
+                  "provisioned_concurrency"
+                ]
               ]
             ],
             []
           ],
           [
             "set",
-            ["var", "kwargs"],
+            ["var", "_invoke_create.kwargs"],
             "source_details",
-            ["fn", "dumps", ["var", "source_details"]]
+            ["fn", "dumps", ["var", "_invoke_create.source_details"]]
           ],
-          ["invoke", [], ["var", "kwargs"]]
+          ["invoke", [], ["var", "_invoke_create.kwargs"]]
         ],
-        "wrapExceptions": false
+        "wrapExceptions": true
       },
       "generated": {
         "callback": "services.functions.src.oci_cli_functions_management.generated.functionsmanagement_cli.create_function",

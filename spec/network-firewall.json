@@ -23189,6 +23189,505 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "service_details",
+            [
+              "fn",
+              "parse",
+              "service_details",
+              ["item", ["var", "kwargs"], "service_details"]
+            ]
+          ],
+          ["del", ["var", "kwargs"], "service_details"],
+          ["let", "service_type", ["item", ["var", "kwargs"], "type"]],
+          ["del", ["var", "kwargs"], "type"],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "service_details"], "portRanges"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "port_ranges",
+                ["item", ["var", "service_details"], "portRanges"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "service_details"], "name"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "name",
+                ["item", ["var", "service_details"], "name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "service_details"], "type"],
+                null
+              ]
+            ],
+            [
+              [
+                "let",
+                "service_details_type",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "_normalize_service_type.service_type",
+                      ["call", "get", ["var", "service_details"], "type"]
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "==",
+                        ["var", "_normalize_service_type.service_type"],
+                        "TCP"
+                      ],
+                      [["return", "TCP_SERVICE"]],
+                      []
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "==",
+                        ["var", "_normalize_service_type.service_type"],
+                        "UDP"
+                      ],
+                      [["return", "UDP_SERVICE"]],
+                      []
+                    ],
+                    ["return", ["var", "_normalize_service_type.service_type"]]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                ["cmp", "is", ["var", "service_type"], null],
+                [["let", "service_type", ["var", "service_details_type"]]],
+                [
+                  [
+                    "if",
+                    [
+                      "cmp",
+                      "!=",
+                      ["var", "service_details_type"],
+                      [
+                        "evalBlock",
+                        [
+                          [
+                            "let",
+                            "_normalize_service_type$1.service_type",
+                            ["var", "service_type"]
+                          ],
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              ["var", "_normalize_service_type$1.service_type"],
+                              "TCP"
+                            ],
+                            [["return", "TCP_SERVICE"]],
+                            []
+                          ],
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              ["var", "_normalize_service_type$1.service_type"],
+                              "UDP"
+                            ],
+                            [["return", "UDP_SERVICE"]],
+                            []
+                          ],
+                          [
+                            "return",
+                            ["var", "_normalize_service_type$1.service_type"]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "raise",
+                        "raise ValueError(\"type from service-details doesn't match with type provided as parameter\")",
+                        "ValueError",
+                        "type from service-details doesn't match with type provided as parameter"
+                      ]
+                    ],
+                    []
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.service_type",
+            ["var", "service_type"]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.tcp_command",
+            ["target", 0]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.udp_command",
+            ["target", 1]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.service_type",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_normalize_service_type$2.service_type",
+                  ["var", "_invoke_service_type_specific_command.service_type"]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "==",
+                    ["var", "_normalize_service_type$2.service_type"],
+                    "TCP"
+                  ],
+                  [["return", "TCP_SERVICE"]],
+                  []
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "==",
+                    ["var", "_normalize_service_type$2.service_type"],
+                    "UDP"
+                  ],
+                  [["return", "UDP_SERVICE"]],
+                  []
+                ],
+                ["return", ["var", "_normalize_service_type$2.service_type"]]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "==",
+              ["var", "_invoke_service_type_specific_command.service_type"],
+              "TCP_SERVICE"
+            ],
+            [
+              [
+                "invoke",
+                [],
+                ["var", "_invoke_service_type_specific_command.kwargs"],
+                ["var", "_invoke_service_type_specific_command.tcp_command"]
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["var", "_invoke_service_type_specific_command.service_type"],
+                  "UDP_SERVICE"
+                ],
+                [
+                  [
+                    "invoke",
+                    [],
+                    ["var", "_invoke_service_type_specific_command.kwargs"],
+                    ["var", "_invoke_service_type_specific_command.udp_command"]
+                  ]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise ValueError('Unknown service type: {}'.format(service_type))",
+                    "ValueError",
+                    [
+                      "call",
+                      "format",
+                      "Unknown service type: {}",
+                      [
+                        "var",
+                        "_invoke_service_type_specific_command.service_type"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.create_service_create_tcp_service_details",
+        "complexTypes": {
+          "port-ranges": "network_firewall:list[PortRange]"
+        },
+        "params": [
+          {
+            "name": "network_firewall_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "port_ranges",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "network_firewall.network_firewall",
+        "method": "create_service",
+        "http": "POST",
+        "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/services",
+        "positionalArgs": [
+          "network_firewall_policy_id",
+          "create_service_details"
+        ],
+        "pathParams": {
+          "networkFirewallPolicyId": "network_firewall_policy_id"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "create_service_details",
+        "responseType": "Service",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["network_firewall_policy_id"],
+          "param": "network_firewall_policy_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_service_details",
+          "key": ["name"],
+          "param": "name"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_service_details",
+          "key": ["portRanges"],
+          "transform": "parse_json_parameter",
+          "param": "port_ranges"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_service_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_service_details",
+          "key": ["type"],
+          "value": "TCP_SERVICE"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.create_service_create_udp_service_details",
+            "complexTypes": {
+              "port-ranges": "network_firewall:list[PortRange]"
+            },
+            "params": [
+              {
+                "name": "network_firewall_policy_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "port_ranges",
+                "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "description",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "network_firewall.network_firewall",
+            "method": "create_service",
+            "http": "POST",
+            "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/services",
+            "positionalArgs": [
+              "network_firewall_policy_id",
+              "create_service_details"
+            ],
+            "pathParams": {
+              "networkFirewallPolicyId": "network_firewall_policy_id"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "opc-retry-token": {
+                "arg": "opc_retry_token"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              }
+            },
+            "body": "create_service_details",
+            "responseType": "Service",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["network_firewall_policy_id"],
+              "param": "network_firewall_policy_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_service_details",
+              "key": ["name"],
+              "param": "name"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_service_details",
+              "key": ["portRanges"],
+              "transform": "parse_json_parameter",
+              "param": "port_ranges"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_service_details",
+              "key": ["description"],
+              "param": "description",
+              "when": "description is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "create_service_details",
+              "key": ["type"],
+              "value": "UDP_SERVICE"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -24148,6 +24647,517 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "service_details",
+            [
+              "fn",
+              "parse",
+              "service_details",
+              ["item", ["var", "kwargs"], "service_details"]
+            ]
+          ],
+          ["del", ["var", "kwargs"], "service_details"],
+          ["let", "service_type", ["item", ["var", "kwargs"], "type"]],
+          ["del", ["var", "kwargs"], "type"],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "service_details"], "portRanges"],
+                null
+              ]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "port_ranges",
+                ["item", ["var", "service_details"], "portRanges"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "not",
+              [
+                "cmp",
+                "is",
+                ["call", "get", ["var", "service_details"], "type"],
+                null
+              ]
+            ],
+            [
+              [
+                "let",
+                "service_details_type",
+                [
+                  "evalBlock",
+                  [
+                    [
+                      "let",
+                      "_normalize_service_type.service_type",
+                      ["call", "get", ["var", "service_details"], "type"]
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "==",
+                        ["var", "_normalize_service_type.service_type"],
+                        "TCP"
+                      ],
+                      [["return", "TCP_SERVICE"]],
+                      []
+                    ],
+                    [
+                      "if",
+                      [
+                        "cmp",
+                        "==",
+                        ["var", "_normalize_service_type.service_type"],
+                        "UDP"
+                      ],
+                      [["return", "UDP_SERVICE"]],
+                      []
+                    ],
+                    ["return", ["var", "_normalize_service_type.service_type"]]
+                  ]
+                ]
+              ],
+              [
+                "if",
+                [
+                  "cmp",
+                  "!=",
+                  ["var", "service_details_type"],
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_normalize_service_type$1.service_type",
+                        ["var", "service_type"]
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "==",
+                          ["var", "_normalize_service_type$1.service_type"],
+                          "TCP"
+                        ],
+                        [["return", "TCP_SERVICE"]],
+                        []
+                      ],
+                      [
+                        "if",
+                        [
+                          "cmp",
+                          "==",
+                          ["var", "_normalize_service_type$1.service_type"],
+                          "UDP"
+                        ],
+                        [["return", "UDP_SERVICE"]],
+                        []
+                      ],
+                      [
+                        "return",
+                        ["var", "_normalize_service_type$1.service_type"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise ValueError(\"type from service-details doesn't match with type provided as parameter\")",
+                    "ValueError",
+                    "type from service-details doesn't match with type provided as parameter"
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.service_type",
+            ["var", "service_type"]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.tcp_command",
+            ["target", 0]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.udp_command",
+            ["target", 1]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.kwargs",
+            ["fn", "dict", ["var", "kwargs"]]
+          ],
+          [
+            "let",
+            "_invoke_service_type_specific_command.service_type",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_normalize_service_type$2.service_type",
+                  ["var", "_invoke_service_type_specific_command.service_type"]
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "==",
+                    ["var", "_normalize_service_type$2.service_type"],
+                    "TCP"
+                  ],
+                  [["return", "TCP_SERVICE"]],
+                  []
+                ],
+                [
+                  "if",
+                  [
+                    "cmp",
+                    "==",
+                    ["var", "_normalize_service_type$2.service_type"],
+                    "UDP"
+                  ],
+                  [["return", "UDP_SERVICE"]],
+                  []
+                ],
+                ["return", ["var", "_normalize_service_type$2.service_type"]]
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "==",
+              ["var", "_invoke_service_type_specific_command.service_type"],
+              "TCP_SERVICE"
+            ],
+            [
+              [
+                "invoke",
+                [],
+                ["var", "_invoke_service_type_specific_command.kwargs"],
+                ["var", "_invoke_service_type_specific_command.tcp_command"]
+              ]
+            ],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["var", "_invoke_service_type_specific_command.service_type"],
+                  "UDP_SERVICE"
+                ],
+                [
+                  [
+                    "invoke",
+                    [],
+                    ["var", "_invoke_service_type_specific_command.kwargs"],
+                    ["var", "_invoke_service_type_specific_command.udp_command"]
+                  ]
+                ],
+                [
+                  [
+                    "raise",
+                    "raise ValueError('Unknown service type: {}'.format(service_type))",
+                    "ValueError",
+                    [
+                      "call",
+                      "format",
+                      "Unknown service type: {}",
+                      [
+                        "var",
+                        "_invoke_service_type_specific_command.service_type"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_service_update_tcp_service_details",
+        "complexTypes": {
+          "port-ranges": "network_firewall:list[PortRange]"
+        },
+        "params": [
+          {
+            "name": "network_firewall_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "service_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "port_ranges",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "description",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "network_firewall.network_firewall",
+        "method": "update_service",
+        "http": "PUT",
+        "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/services/{serviceName}",
+        "positionalArgs": [
+          "network_firewall_policy_id",
+          "service_name",
+          "update_service_details"
+        ],
+        "pathParams": {
+          "networkFirewallPolicyId": "network_firewall_policy_id",
+          "serviceName": "service_name"
+        },
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "if-match": {
+            "arg": "if_match"
+          },
+          "opc-request-id": {
+            "arg": "opc_request_id"
+          }
+        },
+        "body": "update_service_details",
+        "responseType": "Service",
+        "paginated": false
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["network_firewall_policy_id"],
+          "param": "network_firewall_policy_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["service_name"],
+          "param": "service_name"
+        },
+        {
+          "target": "kwarg",
+          "key": ["if_match"],
+          "param": "if_match",
+          "when": "if_match is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["opc_request_id"],
+          "transform": "use_or_generate_request_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_service_details",
+          "key": ["portRanges"],
+          "transform": "parse_json_parameter",
+          "param": "port_ranges"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_service_details",
+          "key": ["description"],
+          "param": "description",
+          "when": "description is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_service_details",
+          "key": ["type"],
+          "value": "TCP_SERVICE"
+        }
+      ],
+      "variants": [
+        {
+          "generated": {
+            "callback": "services.network_firewall.src.oci_cli_network_firewall.generated.networkfirewall_cli.update_service_update_udp_service_details",
+            "complexTypes": {
+              "port-ranges": "network_firewall:list[PortRange]"
+            },
+            "params": [
+              {
+                "name": "network_firewall_policy_id",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "service_name",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "port_ranges",
+                "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "description",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "if_match",
+                "typeClass": "click.types.StringParamType",
+                "multiple": false,
+                "isFlag": false
+              },
+              {
+                "name": "force",
+                "typeClass": "click.types.BoolParamType",
+                "multiple": false,
+                "isFlag": true,
+                "default": false
+              },
+              {
+                "name": "from_json",
+                "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+                "multiple": false,
+                "isFlag": false
+              }
+            ]
+          },
+          "operation": {
+            "client": "network_firewall.network_firewall",
+            "method": "update_service",
+            "http": "PUT",
+            "path": "/networkFirewallPolicies/{networkFirewallPolicyId}/services/{serviceName}",
+            "positionalArgs": [
+              "network_firewall_policy_id",
+              "service_name",
+              "update_service_details"
+            ],
+            "pathParams": {
+              "networkFirewallPolicyId": "network_firewall_policy_id",
+              "serviceName": "service_name"
+            },
+            "queryParams": {},
+            "headerParams": {
+              "accept": {
+                "value": "application/json"
+              },
+              "content-type": {
+                "value": "application/json"
+              },
+              "if-match": {
+                "arg": "if_match"
+              },
+              "opc-request-id": {
+                "arg": "opc_request_id"
+              }
+            },
+            "body": "update_service_details",
+            "responseType": "Service",
+            "paginated": false
+          },
+          "bindings": [
+            {
+              "target": "kwarg",
+              "key": ["network_firewall_policy_id"],
+              "param": "network_firewall_policy_id"
+            },
+            {
+              "target": "kwarg",
+              "key": ["service_name"],
+              "param": "service_name"
+            },
+            {
+              "target": "kwarg",
+              "key": ["if_match"],
+              "param": "if_match",
+              "when": "if_match is not None"
+            },
+            {
+              "target": "kwarg",
+              "key": ["opc_request_id"],
+              "transform": "use_or_generate_request_id"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_service_details",
+              "key": ["portRanges"],
+              "transform": "parse_json_parameter",
+              "param": "port_ranges"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_service_details",
+              "key": ["description"],
+              "param": "description",
+              "when": "description is not None"
+            },
+            {
+              "target": "body",
+              "bodyArg": "update_service_details",
+              "key": ["type"],
+              "value": "UDP_SERVICE"
+            }
+          ]
+        }
+      ],
       "params": [
         {
           "kind": "option",

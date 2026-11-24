@@ -215,17 +215,17 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `db patch-history list by-database`
 - [ ] `db system patch`
 - [ ] `fn function invoke`
-- [ ] `fn function create archive-function direct-archive fn-update-runtime-config`
-- [ ] `fn function create archive-function direct-archive manual-runtime-config`
-- [ ] `fn function create archive-function object-storage fn-update-runtime-config`
-- [ ] `fn function create archive-function object-storage manual-runtime-config`
-- [ ] `fn function create container-function`
+- [x] `fn function create archive-function direct-archive fn-update-runtime-config`
+- [x] `fn function create archive-function direct-archive manual-runtime-config`
+- [x] `fn function create archive-function object-storage fn-update-runtime-config`
+- [x] `fn function create archive-function object-storage manual-runtime-config`
+- [x] `fn function create container-function`
 - [x] `fn function create pbf-function`
 - [ ] `fn function delete`
 - [ ] `fn function update archive-function`
 - [ ] `fn function update container-function`
 - [ ] `fn function update pbf-function`
-- [ ] `resource-manager job create-import-tf-state-job`
+- [x] `resource-manager job create-import-tf-state-job`
 - [ ] `resource-manager job create-plan-rollback-job`
 - [x] `resource-manager job get-job-logs`
 - [ ] `resource-manager stack copy`
@@ -272,8 +272,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `database-management managed-database get-awr-db-report`
 - [ ] `dbtools-runtime connection execute-sql async`
 - [ ] `dbtools-runtime connection execute-sql sync`
-- [ ] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec create default`
-- [ ] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec update default`
+- [x] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec create default`
+- [x] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec update default`
 - [x] `devops project summarize-project-analytics`
 - [x] `devops repository summarize-repository-analytics`
 - [x] `generative-ai-data enrichment-jobs cancel`
@@ -285,8 +285,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `model-deployment inference-result predict`
 - [x] `mysql db-system start`
 - [x] `mysql db-system stop`
-- [ ] `network-firewall service create`
-- [ ] `network-firewall service update`
+- [x] `network-firewall service create`
+- [x] `network-firewall service update`
 - [ ] `ocvs sddc retrieve-sddc-operation-status`
 - [ ] Object Storage namespace lookup when `--namespace` is omitted. Cover the Engine path using the `GET /n` recording pattern from `os object copy`.
 - [ ] `os bucket delete`
@@ -328,29 +328,29 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `rover node request-approval`
 - [ ] `rover node setup-identity`
 - [x] `rover node show`
-- [ ] `rover node update`
+- [x] `rover node update`
 - [ ] `rover standalone-cluster add-workload`
-- [ ] `rover standalone-cluster change-compartment`
+- [x] `rover standalone-cluster change-compartment`
 - [ ] `rover standalone-cluster create`
-- [ ] `rover standalone-cluster delete`
+- [x] `rover standalone-cluster delete`
 - [ ] `rover standalone-cluster delete-workload`
 - [ ] `rover standalone-cluster get-certificate`
 - [ ] `rover standalone-cluster list-workloads`
-- [ ] `rover standalone-cluster request-approval`
-- [ ] `rover standalone-cluster set-secrets`
-- [ ] `rover standalone-cluster show`
-- [ ] `rover standalone-cluster update`
+- [x] `rover standalone-cluster request-approval`
+- [x] `rover standalone-cluster set-secrets`
+- [x] `rover standalone-cluster show`
+- [x] `rover standalone-cluster update`
 - [ ] `rover station-cluster add-workload`
-- [ ] `rover station-cluster change-compartment`
+- [x] `rover station-cluster change-compartment`
 - [ ] `rover station-cluster create`
-- [ ] `rover station-cluster delete`
+- [x] `rover station-cluster delete`
 - [ ] `rover station-cluster delete-workload`
 - [ ] `rover station-cluster get-certificate`
 - [ ] `rover station-cluster list-workloads`
-- [ ] `rover station-cluster request-approval`
-- [ ] `rover station-cluster set-secrets`
-- [ ] `rover station-cluster show`
-- [ ] `rover station-cluster update`
+- [x] `rover station-cluster request-approval`
+- [x] `rover station-cluster set-secrets`
+- [x] `rover station-cluster show`
+- [x] `rover station-cluster update`
 - [ ] `session terminate`
 - [ ] `setup bootstrap`
 - [ ] `setup find-installations`

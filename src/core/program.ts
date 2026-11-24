@@ -255,10 +255,12 @@ export class ProgramRenderData extends Error {
   }
 }
 
-/** Internal control-flow signal for Python `return` (never caught by `except Exception:`). */
+/** Internal control-flow signals for Python `return`/`break`/`continue` (never caught by `except Exception:`). */
 class ProgramReturn {
   constructor(readonly value: unknown) {}
 }
+class ProgramBreak {}
+class ProgramContinue {}
 
 /** `click.echo(...)`: caller writes text to stdout/stderr, increments `echoCount`, replays. */
 export class ProgramEcho extends Error {
@@ -336,6 +338,7 @@ export type ProgramContext = {
   tenancy?: () => string | null;
   namespace?: string;
   requestId?: string | null;
+  defaultMap?: Dict | null;
   env?: Record<string, string | undefined>;
   loadContextDefaults?: () => Dict;
   sdkResults?: ProgramSdkOutcome[];
@@ -914,6 +917,20 @@ export function runProgram(
           if (args.length === 0) return obj.entries();
           break;
       }
+    } else if (obj instanceof ProgramObject) {
+      const key = args[0] as string;
+      switch (method) {
+        case "get":
+          return typeof key === "string" && key in obj.fields
+            ? obj.fields[key]
+            : (args[1] ?? null);
+        case "keys":
+          if (args.length === 0) return Object.keys(obj.fields);
+          break;
+        case "items":
+          if (args.length === 0) return Object.entries(obj.fields);
+          break;
+      }
     } else if (isDict(obj)) {
       const key = args[0] as string;
       switch (method) {
@@ -1010,6 +1027,50 @@ export function runProgram(
             return obj.split(args[0]);
           if (args.length === 0) return obj.split(/\s+/).filter(Boolean);
           break;
+        case "startswith": {
+          const target = args[0];
+          if (typeof target === "string") return obj.startsWith(target);
+          if (
+            Array.isArray(target) &&
+            target.every((x) => typeof x === "string")
+          )
+            return target.some((x) => obj.startsWith(x));
+          break;
+        }
+        case "endswith": {
+          const target = args[0];
+          if (typeof target === "string") return obj.endsWith(target);
+          if (
+            Array.isArray(target) &&
+            target.every((x) => typeof x === "string")
+          )
+            return target.some((x) => obj.endsWith(x));
+          break;
+        }
+        case "replace": {
+          if (
+            (args.length === 2 || args.length === 3) &&
+            typeof args[0] === "string" &&
+            typeof args[1] === "string"
+          ) {
+            if (args.length === 2 || Number(args[2]) < 0)
+              return obj.replaceAll(args[0], args[1]);
+            const count = Number(args[2]);
+            if (!Number.isInteger(count)) break;
+            if (count === 0) return obj;
+            let out = obj;
+            let pos = 0;
+            for (let i = 0; i < count; i++) {
+              const idx = out.indexOf(args[0], pos);
+              if (idx < 0) break;
+              out =
+                out.slice(0, idx) + args[1] + out.slice(idx + args[0].length);
+              pos = idx + args[1].length + (args[0].length === 0 ? 1 : 0);
+            }
+            return out;
+          }
+          break;
+        }
       }
     } else if (obj instanceof ProgramFile && method === "read") {
       if (args.length === 0) return obj.read();
@@ -1039,6 +1100,8 @@ export function runProgram(
         let found: boolean;
         if (b instanceof ProgramHeaders)
           found = typeof a === "string" && b.has(a);
+        else if (b instanceof ProgramObject)
+          found = typeof a === "string" && a in b.fields;
         else if (isDict(b)) found = typeof a === "string" && a in b;
         else if (Array.isArray(b)) found = b.some((x) => pyEq(x, a));
         else if (typeof b === "string" && typeof a === "string")
@@ -1215,6 +1278,8 @@ export function runProgram(
       }
       case "ctxObj":
         return ctxObj;
+      case "ctxDefaultMap":
+        return context.defaultMap ?? null;
       case "client": {
         // cli_util.build_client: ctx.obj['config'] is the config it built from.
         const overrideRegion =
@@ -1266,8 +1331,36 @@ export function runProgram(
           throw new ProgramUnsupported("os.path.basename()");
         return basename(a);
       case "isstr":
-        // isinstance(a, six.string_types)
+        // isinstance(a, six.string_types) / isinstance(a, str)
         return typeof a === "string";
+      case "isinstance": {
+        const types = Array.isArray(b) ? (b as string[]) : [String(b)];
+        return types.some((t) => {
+          switch (t) {
+            case "str":
+              return typeof a === "string";
+            case "bool":
+              return typeof a === "boolean";
+            case "int":
+              return (
+                typeof a === "boolean" ||
+                (typeof a === "number" && Number.isInteger(a))
+              );
+            case "float":
+              return typeof a === "number";
+            case "tuple":
+              return Array.isArray(a) && pyTuples.has(a);
+            case "list":
+              return Array.isArray(a) && !pyTuples.has(a);
+            case "dict":
+              return isDict(a);
+            case "bytes":
+              return a instanceof Uint8Array;
+            default:
+              throw new ProgramUnsupported(`isinstance(${t})`);
+          }
+        });
+      }
       case "open":
         if (typeof a !== "string" || typeof b !== "string")
           throw new ProgramUnsupported("open()");
@@ -1332,6 +1425,45 @@ export function runProgram(
       }
       case "item":
         return item(evaluate(rest[0] as Expr), evaluate(rest[1] as Expr));
+      case "slice": {
+        const seq = evaluate(rest[0] as Expr);
+        const lower = rest[1] === null ? null : evaluate(rest[1] as Expr);
+        const upper = rest[2] === null ? null : evaluate(rest[2] as Expr);
+        const stepVal = rest[3] === null ? null : evaluate(rest[3] as Expr);
+        if (typeof seq !== "string" && !Array.isArray(seq))
+          throw new ProgramUnsupported("slice");
+        const step = stepVal === null || stepVal === undefined ? 1 : stepVal;
+        if (typeof step !== "number" || !Number.isInteger(step) || step === 0)
+          throw new ProgramUnsupported("slice step");
+        const len = seq.length;
+        const clamp = (raw: unknown, fallback: number): number => {
+          if (raw === null || raw === undefined) return fallback;
+          if (typeof raw !== "number" || !Number.isInteger(raw))
+            throw new ProgramUnsupported("slice index");
+          let i = raw < 0 ? raw + len : raw;
+          if (step > 0) return Math.max(0, Math.min(len, i));
+          return Math.max(-1, Math.min(len - 1, i));
+        };
+        const start = clamp(lower, step > 0 ? 0 : len - 1);
+        const stop = clamp(upper, step > 0 ? len : -1);
+        if (step === 1) return seq.slice(start, stop);
+        if (typeof seq === "string") {
+          let out = "";
+          if (step > 0) {
+            for (let i = start; i < stop; i += step) out += seq[i];
+          } else {
+            for (let i = start; i > stop; i += step) out += seq[i];
+          }
+          return out;
+        }
+        const out: unknown[] = [];
+        if (step > 0) {
+          for (let i = start; i < stop; i += step) out.push(seq[i]);
+        } else {
+          for (let i = start; i > stop; i += step) out.push(seq[i]);
+        }
+        return out;
+      }
       case "call":
         return call(
           rest[0] as string,
@@ -1581,6 +1713,15 @@ export function runProgram(
           evaluate(rest[1] as Expr),
           evaluate(rest[2] as Expr),
         );
+      case "cmpChain": {
+        let left = evaluate(rest[0] as Expr);
+        for (const [cmpOp, rhsExpr] of rest[1] as [string, Expr][]) {
+          const right = evaluate(rhsExpr);
+          if (!compare(cmpOp, left, right)) return false;
+          left = right;
+        }
+        return true;
+      }
       case "bin": {
         const opName = rest[0] as string;
         const a = evaluate(rest[1] as Expr);
@@ -1711,6 +1852,10 @@ export function runProgram(
         }
         case "return":
           throw new ProgramReturn(evaluate(rest[0] as Expr));
+        case "break":
+          throw new ProgramBreak();
+        case "continue":
+          throw new ProgramContinue();
         case "block":
           try {
             execute(rest[0] as Statement[]);
@@ -1744,8 +1889,14 @@ export function runProgram(
           break;
         case "for":
           for (const x of iterate(evaluate(rest[1] as Expr))) {
-            env[rest[0] as string] = x;
-            execute(rest[2] as Statement[]);
+            assign(rest[0], x);
+            try {
+              execute(rest[2] as Statement[]);
+            } catch (e) {
+              if (e instanceof ProgramBreak) break;
+              if (e instanceof ProgramContinue) continue;
+              throw e;
+            }
           }
           break;
         case "try":
@@ -1795,7 +1946,10 @@ export function runProgram(
           throw new ProgramExit(1, `${pyStr(arg)}\n`);
         }
         case "checkNoExtraKwargs": {
-          const extra = Object.keys(kwargs)[0];
+          const targetName = (rest[1] as string | undefined) ?? "kwargs";
+          const dict = targetName === "kwargs" ? kwargs : env[targetName];
+          if (!isDict(dict)) throw new ProgramUnsupported("checkNoExtraKwargs");
+          const extra = Object.keys(dict)[0];
           if (extra !== undefined) {
             throw new ProgramRaise(
               "TypeError",
@@ -1807,7 +1961,7 @@ export function runProgram(
         case "abort":
           throw new ProgramAbort();
         case "usage":
-          throw new ProgramUsageError(rest[0] as string);
+          throw new ProgramUsageError(pyStr(evaluate(rest[0] as Expr)));
         case "raise": {
           if (rest.length < 3) throw new ProgramUnsupported(rest[0] as string);
           const cls = rest[1] as string;

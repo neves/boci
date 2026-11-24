@@ -1574,4 +1574,264 @@ describe("runProgram", () => {
     });
     expect(errRes).toBeInstanceOf(ProgramServiceError);
   });
+
+  test("helper inlining compiles value returns, default/kw/star args, nested calls, shadowing, targets, and recursion guards", () => {
+    const pyScript = `
+import json, sys, types
+sys.path.insert(0, "tools/extract")
+import program
+
+class DummyCmd:
+    def __init__(self, name):
+        self.name = name
+        self.callback = lambda: None
+
+cmd_tcp = DummyCmd("tcp")
+cmd_udp = DummyCmd("udp")
+cmd_main = DummyCmd("main")
+
+# Sibling module inside the same services.demo package
+sibling = types.ModuleType("services.demo.sibling")
+sibling_src = """
+DEFAULT_TAG = "from-sibling"
+
+def sibling_enrich(d, tag=DEFAULT_TAG, *, suffix="!"):
+    d["tag"] = tag + suffix
+    return d["tag"]
+
+def sibling_copy(**kwargs):
+    kwargs.pop("drop", None)
+    kwargs["copied"] = True
+    return kwargs
+"""
+exec(compile(sibling_src, "<sibling>", "exec"), sibling.__dict__)
+# Give inspect.getsource access via monkeypatching _fn_ast for exec'd test helpers
+import ast
+_sources = {}
+def register_src(mod, src):
+    tree = ast.parse(src)
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef):
+            _sources[getattr(mod, node.name)] = node
+
+register_src(sibling, sibling_src)
+
+main_mod = types.ModuleType("services.demo.cli_extended")
+main_mod.__dict__["sibling"] = sibling
+main_mod.__dict__["sibling_copy"] = sibling.sibling_copy
+main_mod.__dict__["cmd_tcp"] = cmd_tcp
+main_mod.__dict__["cmd_udp"] = cmd_udp
+main_mod.__dict__["cmd_main"] = cmd_main
+
+main_src = """
+def _early_return(val, fallback="none"):
+    if val is None:
+        return fallback
+    return val.upper()
+
+def _shadow_helper(x, kwargs):
+    # Reassigning parameter x and local tmp must not clobber caller's x or tmp.
+    x = "shadowed"
+    tmp = "inner-tmp"
+    kwargs["seen_x"] = x
+    kwargs["seen_tmp"] = tmp
+    return _early_return(kwargs.get("a"), fallback="defaulted")
+
+def _dispatch(ctx, kind, tcp_cmd, udp_cmd, **kwargs):
+    if kind == "tcp":
+        ctx.invoke(tcp_cmd, **kwargs)
+    else:
+        ctx.invoke(udp_cmd, **kwargs)
+
+def wrapper_main(ctx, **kwargs):
+    x = "outer-x"
+    tmp = "outer-tmp"
+    res = _shadow_helper(x, kwargs)
+    tag = sibling.sibling_enrich(kwargs, suffix="?")
+    copied = sibling_copy(extra=1, **kwargs)
+    # Original kwargs must not be mutated by **kwargs copy in sibling_copy
+    kwargs["had_drop_after_copy"] = "drop" in kwargs
+    kwargs["res"] = res
+    kwargs["tag"] = tag
+    kwargs["outer_x"] = x
+    kwargs["outer_tmp"] = tmp
+    kwargs["copied_flag"] = copied["copied"]
+    kwargs["copied_extra"] = copied["extra"]
+    kwargs["copied_has_drop"] = "drop" in copied
+    _dispatch(ctx, kwargs.pop("kind"), cmd_tcp, cmd_udp, **kwargs)
+
+def _rec_a(x):
+    return _rec_b(x)
+
+def _rec_b(x):
+    return _rec_a(x)
+
+def wrapper_rec(ctx, **kwargs):
+    kwargs["v"] = _rec_a(1)
+    ctx.invoke(cmd_main, **kwargs)
+"""
+exec(compile(main_src, "<main>", "exec"), main_mod.__dict__)
+register_src(main_mod, main_src)
+
+orig_fn_ast = program._fn_ast
+program._fn_ast = lambda fn: _sources.get(fn) or orig_fn_ast(fn)
+orig_import = program.importlib.import_module
+program.importlib.import_module = lambda name: main_mod if name == "services.demo.cli_extended" else orig_import(name)
+
+prog, targets, sdk_calls = program.compile_wrapper(main_mod.wrapper_main)
+rec_err = program.why_unsupported(main_mod.wrapper_rec)
+print(json.dumps({
+    "program": prog,
+    "targets": [t.name for t in targets],
+    "sdkCalls": sdk_calls,
+    "recErr": str(rec_err),
+}))
+`;
+    const proc = Bun.spawnSync(["python3", "-c", pyScript], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    expect(proc.exitCode).toBe(0);
+    const compiled = JSON.parse(new TextDecoder().decode(proc.stdout)) as {
+      program: Statement[];
+      targets: string[];
+      sdkCalls: unknown[];
+      recErr: string;
+    };
+    expect(compiled.targets).toEqual(["tcp", "udp"]);
+    expect(compiled.sdkCalls).toEqual([]);
+    expect(compiled.recErr).toContain("helper recursion");
+
+    const testParams = [
+      { name: "a" },
+      { name: "kind" },
+      { name: "drop" },
+    ] as TypedParam[];
+    const tcpRes = runProgram(
+      compiled.program,
+      { a: "hi", kind: "tcp", drop: "yes" },
+      testParams,
+      parse,
+    );
+    expect(tcpRes.target).toBe(0);
+    expect(tcpRes.kwargs).toEqual({
+      a: "hi",
+      drop: "yes",
+      seen_x: "shadowed",
+      seen_tmp: "inner-tmp",
+      tag: "from-sibling?",
+      had_drop_after_copy: true,
+      res: "HI",
+      outer_x: "outer-x",
+      outer_tmp: "outer-tmp",
+      copied_flag: true,
+      copied_extra: 1,
+      copied_has_drop: false,
+    });
+
+    const udpRes = runProgram(
+      compiled.program,
+      { kind: "udp" },
+      testParams,
+      parse,
+    );
+    expect(udpRes.target).toBe(1);
+    expect(udpRes.kwargs?.res).toBe("defaulted");
+  });
+
+  test("for tuple unpacking, break/continue, slice, cmpChain, isinstance, ctxDefaultMap, and string methods", () => {
+    const program: Statement[] = [
+      ["let", "out", ["dict"]],
+      [
+        "for",
+        ["k", "v"],
+        ["call", "items", ["dict", ["a", 1], ["b", 2], ["c", 3]]],
+        [
+          ["if", ["cmp", "==", ["var", "k"], "a"], [["continue"]], []],
+          ["if", ["cmp", "==", ["var", "k"], "c"], [["break"]], []],
+          ["set", ["var", "out"], ["var", "k"], ["var", "v"]],
+        ],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "sliced",
+        ["slice", "file://hello.zip", 7, -4, null],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "starts",
+        ["call", "startswith", "file://x.zip", ["list", "http://", "file://"]],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "ends",
+        ["call", "endswith", "x.zip", ["list", ".zip", ".jar"]],
+      ],
+      ["set", ["var", "out"], "rep", ["call", "replace", "a_b_c", "_", "-", 1]],
+      [
+        "set",
+        ["var", "out"],
+        "chainTrue",
+        [
+          "cmpChain",
+          1,
+          [
+            ["<", 5],
+            ["<", 10],
+          ],
+        ],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "chainFalse",
+        [
+          "cmpChain",
+          5,
+          [
+            [">", 10],
+            [">", 15],
+          ],
+        ],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "isTuple",
+        ["fn", "isinstance", kw("ids"), "tuple"],
+      ],
+      [
+        "set",
+        ["var", "out"],
+        "defVal",
+        ["call", "get", ["fn", "ctxDefaultMap"], "fallback_key"],
+      ],
+      ["invoke", [["a", ["var", "out"]]], null],
+    ];
+    const res = runProgram(
+      program,
+      { ids: ["x"] },
+      params,
+      parse,
+      [],
+      undefined,
+      { defaultMap: { fallback_key: "from-json" } },
+    );
+    expect(res.kwargs).toEqual({
+      a: {
+        b: 2,
+        sliced: "hello",
+        starts: true,
+        ends: true,
+        rep: "a-b_c",
+        chainTrue: true,
+        chainFalse: false,
+        isTuple: true,
+        defVal: "from-json",
+      },
+    });
+  });
 });

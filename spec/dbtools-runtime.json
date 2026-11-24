@@ -5079,11 +5079,11 @@
           ],
           [
             "--http-port INTEGER",
-            "Specifies the HTTP listen port. 0 disables HTTP. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024–65535) is recommended."
+            "Specifies the HTTP listen port. 0 disables HTTP. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024\u201365535) is recommended."
           ],
           [
             "--https-port INTEGER",
-            "Specifies the HTTPS listen port. 0 disables HTTPS. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024–65535) is recommended. ORDS will use a self-signed certificate if a certificate bundle is not provided."
+            "Specifies the HTTPS listen port. 0 disables HTTPS. Use of ports below 1024 requires elevated (root) privileges and is generally discouraged; deployment on non-privileged ports (1024\u201365535) is recommended. ORDS will use a self-signed certificate if a certificate bundle is not provided."
           ],
           [
             "--certificate-bundle COMPLEX TYPE",
@@ -5542,7 +5542,7 @@
           ],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information. [required]"
+            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information. [required]"
           ],
           [
             "--pool-route-value TEXT",
@@ -6819,7 +6819,7 @@
           ["--pool-key TEXT", "The key of the pool config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information."
+            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information."
           ],
           [
             "--pool-route-value TEXT",
@@ -7438,7 +7438,7 @@
           ["--pool-key TEXT", "The key of the pool config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information. [required]"
+            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information. [required]"
           ],
           [
             "--content TEXT",
@@ -8484,7 +8484,7 @@
           ["--api-spec-key TEXT", "The key of the API spec config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information."
+            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information."
           ],
           [
             "--content TEXT",
@@ -8766,7 +8766,7 @@
           ["--pool-key TEXT", "The key of the pool config. [required]"],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information. [required]"
+            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information. [required]"
           ],
           [
             "--database-object-name TEXT",
@@ -8847,6 +8847,706 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["loadContextDefaults"],
+          [
+            "if",
+            [
+              "or",
+              ["call", "get", ["fn", "ctxObj"], "generate_param_json_input"],
+              [
+                "call",
+                "get",
+                ["fn", "ctxObj"],
+                "generate_full_command_json_input"
+              ]
+            ],
+            [["return", null]],
+            []
+          ],
+          [
+            "let",
+            "operations",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_resolve_multi_value_parameter.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter.parameter_name",
+                  "operations"
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter.parameter_value",
+                  [
+                    "call",
+                    "get",
+                    ["var", "_resolve_multi_value_parameter.kwargs"],
+                    ["var", "_resolve_multi_value_parameter.parameter_name"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "or",
+                    [
+                      "cmp",
+                      "is",
+                      ["var", "_resolve_multi_value_parameter.parameter_value"],
+                      null
+                    ],
+                    [
+                      "and",
+                      [
+                        "fn",
+                        "isinstance",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter.parameter_value"
+                        ],
+                        "tuple"
+                      ],
+                      [
+                        "cmp",
+                        "==",
+                        [
+                          "fn",
+                          "len",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter.parameter_value"
+                          ]
+                        ],
+                        0
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "and",
+                        ["fn", "ctxDefaultMap"],
+                        [
+                          "cmp",
+                          "in",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter.parameter_name"
+                          ],
+                          ["fn", "ctxDefaultMap"]
+                        ]
+                      ],
+                      [
+                        [
+                          "return",
+                          [
+                            "call",
+                            "get",
+                            ["fn", "ctxDefaultMap"],
+                            [
+                              "var",
+                              "_resolve_multi_value_parameter.parameter_name"
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    ["return", null]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_normalize_optional_multi_value.parameter_value",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter.parameter_value"
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "fn",
+                          "isinstance",
+                          [
+                            "var",
+                            "_normalize_optional_multi_value.parameter_value"
+                          ],
+                          "tuple"
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "fn",
+                                "len",
+                                [
+                                  "var",
+                                  "_normalize_optional_multi_value.parameter_value"
+                                ]
+                              ],
+                              0
+                            ],
+                            [["return", null]],
+                            []
+                          ],
+                          [
+                            "return",
+                            [
+                              "fn",
+                              "list",
+                              [
+                                "var",
+                                "_normalize_optional_multi_value.parameter_value"
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_normalize_optional_multi_value.parameter_value"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "security_schemes",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$1.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$1.parameter_name",
+                  "security_schemes"
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$1.parameter_value",
+                  [
+                    "call",
+                    "get",
+                    ["var", "_resolve_multi_value_parameter$1.kwargs"],
+                    ["var", "_resolve_multi_value_parameter$1.parameter_name"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "or",
+                    [
+                      "cmp",
+                      "is",
+                      [
+                        "var",
+                        "_resolve_multi_value_parameter$1.parameter_value"
+                      ],
+                      null
+                    ],
+                    [
+                      "and",
+                      [
+                        "fn",
+                        "isinstance",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$1.parameter_value"
+                        ],
+                        "tuple"
+                      ],
+                      [
+                        "cmp",
+                        "==",
+                        [
+                          "fn",
+                          "len",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$1.parameter_value"
+                          ]
+                        ],
+                        0
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "and",
+                        ["fn", "ctxDefaultMap"],
+                        [
+                          "cmp",
+                          "in",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$1.parameter_name"
+                          ],
+                          ["fn", "ctxDefaultMap"]
+                        ]
+                      ],
+                      [
+                        [
+                          "return",
+                          [
+                            "call",
+                            "get",
+                            ["fn", "ctxDefaultMap"],
+                            [
+                              "var",
+                              "_resolve_multi_value_parameter$1.parameter_name"
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    ["return", null]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_normalize_optional_multi_value$1.parameter_value",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$1.parameter_value"
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "fn",
+                          "isinstance",
+                          [
+                            "var",
+                            "_normalize_optional_multi_value$1.parameter_value"
+                          ],
+                          "tuple"
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "fn",
+                                "len",
+                                [
+                                  "var",
+                                  "_normalize_optional_multi_value$1.parameter_value"
+                                ]
+                              ],
+                              0
+                            ],
+                            [["return", null]],
+                            []
+                          ],
+                          [
+                            "return",
+                            [
+                              "fn",
+                              "list",
+                              [
+                                "var",
+                                "_normalize_optional_multi_value$1.parameter_value"
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_normalize_optional_multi_value$1.parameter_value"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "roles",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$2.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$2.parameter_name",
+                  "roles"
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$2.parameter_value",
+                  [
+                    "call",
+                    "get",
+                    ["var", "_resolve_multi_value_parameter$2.kwargs"],
+                    ["var", "_resolve_multi_value_parameter$2.parameter_name"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "or",
+                    [
+                      "cmp",
+                      "is",
+                      [
+                        "var",
+                        "_resolve_multi_value_parameter$2.parameter_value"
+                      ],
+                      null
+                    ],
+                    [
+                      "and",
+                      [
+                        "fn",
+                        "isinstance",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$2.parameter_value"
+                        ],
+                        "tuple"
+                      ],
+                      [
+                        "cmp",
+                        "==",
+                        [
+                          "fn",
+                          "len",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$2.parameter_value"
+                          ]
+                        ],
+                        0
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "and",
+                        ["fn", "ctxDefaultMap"],
+                        [
+                          "cmp",
+                          "in",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$2.parameter_name"
+                          ],
+                          ["fn", "ctxDefaultMap"]
+                        ]
+                      ],
+                      [
+                        [
+                          "return",
+                          [
+                            "call",
+                            "get",
+                            ["fn", "ctxDefaultMap"],
+                            [
+                              "var",
+                              "_resolve_multi_value_parameter$2.parameter_name"
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    ["return", null]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_normalize_optional_multi_value$2.parameter_value",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$2.parameter_value"
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "fn",
+                          "isinstance",
+                          [
+                            "var",
+                            "_normalize_optional_multi_value$2.parameter_value"
+                          ],
+                          "tuple"
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "fn",
+                                "len",
+                                [
+                                  "var",
+                                  "_normalize_optional_multi_value$2.parameter_value"
+                                ]
+                              ],
+                              0
+                            ],
+                            [["return", null]],
+                            []
+                          ],
+                          [
+                            "return",
+                            [
+                              "fn",
+                              "list",
+                              [
+                                "var",
+                                "_normalize_optional_multi_value$2.parameter_value"
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_normalize_optional_multi_value$2.parameter_value"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          ["let", "request_kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "request_kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "details",
+            [
+              "dict",
+              ["displayName", ["item", ["var", "kwargs"], "display_name"]],
+              [
+                "databaseObjectName",
+                ["item", ["var", "kwargs"], "database_object_name"]
+              ],
+              [
+                "databaseObjectType",
+                ["item", ["var", "kwargs"], "database_object_type"]
+              ],
+              ["type", "DEFAULT"]
+            ]
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "description"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "description",
+                ["call", "get", ["var", "kwargs"], "description"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["call", "get", ["var", "kwargs"], "alias"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "alias",
+                ["call", "get", ["var", "kwargs"], "alias"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "operations"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "operations",
+                ["fn", "parse", "operations", ["var", "operations"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "security_schemes"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "securitySchemes",
+                ["fn", "parse", "security_schemes", ["var", "security_schemes"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["call", "get", ["var", "kwargs"], "scope"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "scope",
+                ["call", "get", ["var", "kwargs"], "scope"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "roles"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "roles",
+                ["fn", "parse", "roles", ["var", "roles"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "database_tools_runtime", "database_tools_runtime"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                [
+                  "database_tools_database_api_gateway_config_id",
+                  ["item", ["var", "kwargs"], "database_api_gateway_config_id"]
+                ],
+                ["pool_key", ["item", ["var", "kwargs"], "pool_key"]],
+                [
+                  "create_database_tools_database_api_gateway_config_pool_auto_api_spec_details",
+                  ["var", "details"]
+                ]
+              ],
+              ["var", "request_kwargs"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database_tools_runtime.database_tools_runtime",
+          "method": "create_database_tools_database_api_gateway_config_pool_auto_api_spec",
+          "http": "POST",
+          "path": "/databaseToolsDatabaseApiGatewayConfigs/{databaseToolsDatabaseApiGatewayConfigId}/pools/{poolKey}/autoApiSpecs",
+          "positionalArgs": [
+            "database_tools_database_api_gateway_config_id",
+            "pool_key",
+            "create_database_tools_database_api_gateway_config_pool_auto_api_spec_details"
+          ],
+          "pathParams": {
+            "databaseToolsDatabaseApiGatewayConfigId": "database_tools_database_api_gateway_config_id",
+            "poolKey": "pool_key"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "create_database_tools_database_api_gateway_config_pool_auto_api_spec_details",
+          "responseType": "DatabaseToolsDatabaseApiGatewayConfigPoolAutoApiSpec"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9941,7 +10641,7 @@
           ],
           [
             "--display-name TEXT",
-            "A user-friendly name. Does not have to be unique, and it’s changeable. Avoid entering confidential information."
+            "A user-friendly name. Does not have to be unique, and it\u2019s changeable. Avoid entering confidential information."
           ],
           ["--database-object-name TEXT", "The name of the database object."],
           [
@@ -10026,6 +10726,800 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["loadContextDefaults"],
+          [
+            "if",
+            [
+              "or",
+              ["call", "get", ["fn", "ctxObj"], "generate_param_json_input"],
+              [
+                "call",
+                "get",
+                ["fn", "ctxObj"],
+                "generate_full_command_json_input"
+              ]
+            ],
+            [["return", null]],
+            []
+          ],
+          [
+            "let",
+            "operations",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_resolve_multi_value_parameter.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter.parameter_name",
+                  "operations"
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter.parameter_value",
+                  [
+                    "call",
+                    "get",
+                    ["var", "_resolve_multi_value_parameter.kwargs"],
+                    ["var", "_resolve_multi_value_parameter.parameter_name"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "or",
+                    [
+                      "cmp",
+                      "is",
+                      ["var", "_resolve_multi_value_parameter.parameter_value"],
+                      null
+                    ],
+                    [
+                      "and",
+                      [
+                        "fn",
+                        "isinstance",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter.parameter_value"
+                        ],
+                        "tuple"
+                      ],
+                      [
+                        "cmp",
+                        "==",
+                        [
+                          "fn",
+                          "len",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter.parameter_value"
+                          ]
+                        ],
+                        0
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "and",
+                        ["fn", "ctxDefaultMap"],
+                        [
+                          "cmp",
+                          "in",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter.parameter_name"
+                          ],
+                          ["fn", "ctxDefaultMap"]
+                        ]
+                      ],
+                      [
+                        [
+                          "return",
+                          [
+                            "call",
+                            "get",
+                            ["fn", "ctxDefaultMap"],
+                            [
+                              "var",
+                              "_resolve_multi_value_parameter.parameter_name"
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    ["return", null]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_normalize_optional_multi_value.parameter_value",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter.parameter_value"
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "fn",
+                          "isinstance",
+                          [
+                            "var",
+                            "_normalize_optional_multi_value.parameter_value"
+                          ],
+                          "tuple"
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "fn",
+                                "len",
+                                [
+                                  "var",
+                                  "_normalize_optional_multi_value.parameter_value"
+                                ]
+                              ],
+                              0
+                            ],
+                            [["return", null]],
+                            []
+                          ],
+                          [
+                            "return",
+                            [
+                              "fn",
+                              "list",
+                              [
+                                "var",
+                                "_normalize_optional_multi_value.parameter_value"
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_normalize_optional_multi_value.parameter_value"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "security_schemes",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$1.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$1.parameter_name",
+                  "security_schemes"
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$1.parameter_value",
+                  [
+                    "call",
+                    "get",
+                    ["var", "_resolve_multi_value_parameter$1.kwargs"],
+                    ["var", "_resolve_multi_value_parameter$1.parameter_name"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "or",
+                    [
+                      "cmp",
+                      "is",
+                      [
+                        "var",
+                        "_resolve_multi_value_parameter$1.parameter_value"
+                      ],
+                      null
+                    ],
+                    [
+                      "and",
+                      [
+                        "fn",
+                        "isinstance",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$1.parameter_value"
+                        ],
+                        "tuple"
+                      ],
+                      [
+                        "cmp",
+                        "==",
+                        [
+                          "fn",
+                          "len",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$1.parameter_value"
+                          ]
+                        ],
+                        0
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "and",
+                        ["fn", "ctxDefaultMap"],
+                        [
+                          "cmp",
+                          "in",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$1.parameter_name"
+                          ],
+                          ["fn", "ctxDefaultMap"]
+                        ]
+                      ],
+                      [
+                        [
+                          "return",
+                          [
+                            "call",
+                            "get",
+                            ["fn", "ctxDefaultMap"],
+                            [
+                              "var",
+                              "_resolve_multi_value_parameter$1.parameter_name"
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    ["return", null]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_normalize_optional_multi_value$1.parameter_value",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$1.parameter_value"
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "fn",
+                          "isinstance",
+                          [
+                            "var",
+                            "_normalize_optional_multi_value$1.parameter_value"
+                          ],
+                          "tuple"
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "fn",
+                                "len",
+                                [
+                                  "var",
+                                  "_normalize_optional_multi_value$1.parameter_value"
+                                ]
+                              ],
+                              0
+                            ],
+                            [["return", null]],
+                            []
+                          ],
+                          [
+                            "return",
+                            [
+                              "fn",
+                              "list",
+                              [
+                                "var",
+                                "_normalize_optional_multi_value$1.parameter_value"
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_normalize_optional_multi_value$1.parameter_value"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "roles",
+            [
+              "evalBlock",
+              [
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$2.kwargs",
+                  ["var", "kwargs"]
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$2.parameter_name",
+                  "roles"
+                ],
+                [
+                  "let",
+                  "_resolve_multi_value_parameter$2.parameter_value",
+                  [
+                    "call",
+                    "get",
+                    ["var", "_resolve_multi_value_parameter$2.kwargs"],
+                    ["var", "_resolve_multi_value_parameter$2.parameter_name"]
+                  ]
+                ],
+                [
+                  "if",
+                  [
+                    "or",
+                    [
+                      "cmp",
+                      "is",
+                      [
+                        "var",
+                        "_resolve_multi_value_parameter$2.parameter_value"
+                      ],
+                      null
+                    ],
+                    [
+                      "and",
+                      [
+                        "fn",
+                        "isinstance",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$2.parameter_value"
+                        ],
+                        "tuple"
+                      ],
+                      [
+                        "cmp",
+                        "==",
+                        [
+                          "fn",
+                          "len",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$2.parameter_value"
+                          ]
+                        ],
+                        0
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "and",
+                        ["fn", "ctxDefaultMap"],
+                        [
+                          "cmp",
+                          "in",
+                          [
+                            "var",
+                            "_resolve_multi_value_parameter$2.parameter_name"
+                          ],
+                          ["fn", "ctxDefaultMap"]
+                        ]
+                      ],
+                      [
+                        [
+                          "return",
+                          [
+                            "call",
+                            "get",
+                            ["fn", "ctxDefaultMap"],
+                            [
+                              "var",
+                              "_resolve_multi_value_parameter$2.parameter_name"
+                            ]
+                          ]
+                        ]
+                      ],
+                      []
+                    ],
+                    ["return", null]
+                  ],
+                  []
+                ],
+                [
+                  "return",
+                  [
+                    "evalBlock",
+                    [
+                      [
+                        "let",
+                        "_normalize_optional_multi_value$2.parameter_value",
+                        [
+                          "var",
+                          "_resolve_multi_value_parameter$2.parameter_value"
+                        ]
+                      ],
+                      [
+                        "if",
+                        [
+                          "fn",
+                          "isinstance",
+                          [
+                            "var",
+                            "_normalize_optional_multi_value$2.parameter_value"
+                          ],
+                          "tuple"
+                        ],
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              [
+                                "fn",
+                                "len",
+                                [
+                                  "var",
+                                  "_normalize_optional_multi_value$2.parameter_value"
+                                ]
+                              ],
+                              0
+                            ],
+                            [["return", null]],
+                            []
+                          ],
+                          [
+                            "return",
+                            [
+                              "fn",
+                              "list",
+                              [
+                                "var",
+                                "_normalize_optional_multi_value$2.parameter_value"
+                              ]
+                            ]
+                          ]
+                        ],
+                        []
+                      ],
+                      [
+                        "return",
+                        [
+                          "var",
+                          "_normalize_optional_multi_value$2.parameter_value"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            ["not", ["call", "get", ["var", "kwargs"], "force"]],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["cmp", "isnot", ["var", "operations"], null],
+                  ["cmp", "isnot", ["var", "security_schemes"], null],
+                  ["cmp", "isnot", ["var", "roles"], null]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        "WARNING: Updates to operations and security-schemes and roles will replace any existing values. Are you sure you want to continue?"
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "request_kwargs", ["dict"]],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "if_match"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "request_kwargs"],
+                "if_match",
+                ["call", "get", ["var", "kwargs"], "if_match"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "request_kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "details", ["dict", ["type", "DEFAULT"]]],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "display_name"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "displayName",
+                ["call", "get", ["var", "kwargs"], "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "database_object_name"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "databaseObjectName",
+                ["call", "get", ["var", "kwargs"], "database_object_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "database_object_type"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "databaseObjectType",
+                ["call", "get", ["var", "kwargs"], "database_object_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "cmp",
+              "isnot",
+              ["call", "get", ["var", "kwargs"], "description"],
+              null
+            ],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "description",
+                ["call", "get", ["var", "kwargs"], "description"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["call", "get", ["var", "kwargs"], "alias"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "alias",
+                ["call", "get", ["var", "kwargs"], "alias"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "operations"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "operations",
+                ["fn", "parse", "operations", ["var", "operations"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "security_schemes"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "securitySchemes",
+                ["fn", "parse", "security_schemes", ["var", "security_schemes"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["call", "get", ["var", "kwargs"], "scope"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "scope",
+                ["call", "get", ["var", "kwargs"], "scope"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "roles"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "roles",
+                ["fn", "parse", "roles", ["var", "roles"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "database_tools_runtime", "database_tools_runtime"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                [
+                  "database_tools_database_api_gateway_config_id",
+                  ["item", ["var", "kwargs"], "database_api_gateway_config_id"]
+                ],
+                ["pool_key", ["item", ["var", "kwargs"], "pool_key"]],
+                [
+                  "auto_api_spec_key",
+                  ["item", ["var", "kwargs"], "auto_api_spec_key"]
+                ],
+                [
+                  "update_database_tools_database_api_gateway_config_pool_auto_api_spec_details",
+                  ["var", "details"]
+                ]
+              ],
+              ["var", "request_kwargs"]
+            ]
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "database_tools_runtime.database_tools_runtime",
+          "method": "update_database_tools_database_api_gateway_config_pool_auto_api_spec",
+          "http": "PUT",
+          "path": "/databaseToolsDatabaseApiGatewayConfigs/{databaseToolsDatabaseApiGatewayConfigId}/pools/{poolKey}/autoApiSpecs/{autoApiSpecKey}",
+          "positionalArgs": [
+            "database_tools_database_api_gateway_config_id",
+            "pool_key",
+            "auto_api_spec_key",
+            "update_database_tools_database_api_gateway_config_pool_auto_api_spec_details"
+          ],
+          "pathParams": {
+            "databaseToolsDatabaseApiGatewayConfigId": "database_tools_database_api_gateway_config_id",
+            "poolKey": "pool_key",
+            "autoApiSpecKey": "auto_api_spec_key"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "update_database_tools_database_api_gateway_config_pool_auto_api_spec_details",
+          "responseType": "DatabaseToolsDatabaseApiGatewayConfigPoolAutoApiSpec"
+        }
+      ],
       "params": [
         {
           "kind": "option",

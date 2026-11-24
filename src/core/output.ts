@@ -117,7 +117,14 @@ function renderGeneratedResponse(
     }
   }
   const output: Record<string, unknown> = {};
-  if (hasBody) output.data = value;
+  if (
+    hasBody &&
+    value !== null &&
+    value !== undefined &&
+    value !== "" &&
+    !(Array.isArray(value) && value.length === 0)
+  )
+    output.data = value;
   const workRequestId = response.headers.get("opc-work-request-id");
   if (workRequestId !== null) output["opc-work-request-id"] = workRequestId;
   const etag = response.headers.get("etag");

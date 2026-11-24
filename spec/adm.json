@@ -7993,6 +7993,392 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "knowledge_base_id",
+            ["call", "pop", ["var", "kwargs"], "knowledge_base_id"]
+          ],
+          [
+            "let",
+            "build_type",
+            ["call", "pop", ["var", "kwargs"], "build_type"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "application_dependencies",
+            ["call", "pop", ["var", "kwargs"], "application_dependencies"]
+          ],
+          [
+            "let",
+            "configuration",
+            ["call", "pop", ["var", "kwargs"], "configuration"]
+          ],
+          [
+            "let",
+            "usage_data",
+            ["call", "pop", ["var", "kwargs"], "usage_data"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          ["let", "source", ["call", "pop", ["var", "kwargs"], "source"]],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "knowledgeBaseId",
+            ["var", "knowledge_base_id"]
+          ],
+          ["set", ["var", "_details"], "buildType", ["var", "build_type"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "application_dependencies"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "applicationDependencies",
+                [
+                  "fn",
+                  "parse",
+                  "application_dependencies",
+                  ["var", "application_dependencies"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "configuration"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "configuration",
+                ["fn", "parse", "configuration", ["var", "configuration"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "source"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "source",
+                ["fn", "parse", "source", ["var", "source"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "usage_data"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "usageData",
+                ["fn", "parse", "usage_data", ["var", "usage_data"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "adm", "application_dependency_management"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_vulnerability_audit_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "adm.application_dependency_management",
+          "method": "create_vulnerability_audit",
+          "http": "POST",
+          "path": "/vulnerabilityAudits",
+          "positionalArgs": ["create_vulnerability_audit_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "create_vulnerability_audit_details",
+          "responseType": "VulnerabilityAudit"
+        },
+        {
+          "client": "adm.application_dependency_management",
+          "method": "get_vulnerability_audit",
+          "http": "GET",
+          "path": "/vulnerabilityAudits/{vulnerabilityAuditId}",
+          "positionalArgs": ["vulnerability_audit_id"],
+          "pathParams": {
+            "vulnerabilityAuditId": "vulnerability_audit_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "VulnerabilityAudit"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8406,6 +8792,403 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "knowledge_base_id",
+            ["call", "pop", ["var", "kwargs"], "knowledge_base_id"]
+          ],
+          [
+            "let",
+            "build_type",
+            ["call", "pop", ["var", "kwargs"], "build_type"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "application_dependencies",
+            ["call", "pop", ["var", "kwargs"], "application_dependencies"]
+          ],
+          [
+            "let",
+            "configuration",
+            ["call", "pop", ["var", "kwargs"], "configuration"]
+          ],
+          [
+            "let",
+            "usage_data",
+            ["call", "pop", ["var", "kwargs"], "usage_data"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "let",
+            "source_description",
+            ["call", "pop", ["var", "kwargs"], "source_description"]
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "source", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "knowledgeBaseId",
+            ["var", "knowledge_base_id"]
+          ],
+          ["set", ["var", "_details"], "buildType", ["var", "build_type"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "application_dependencies"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "applicationDependencies",
+                [
+                  "fn",
+                  "parse",
+                  "application_dependencies",
+                  ["var", "application_dependencies"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "configuration"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "configuration",
+                ["fn", "parse", "configuration", ["var", "configuration"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "usage_data"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "usageData",
+                ["fn", "parse", "usage_data", ["var", "usage_data"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "source_description"], null],
+            [
+              [
+                "set",
+                ["item", ["var", "_details"], "source"],
+                "description",
+                ["var", "source_description"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "source"],
+            "type",
+            "EXTERNAL_RESOURCE"
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "adm", "application_dependency_management"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_vulnerability_audit_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "adm.application_dependency_management",
+          "method": "create_vulnerability_audit",
+          "http": "POST",
+          "path": "/vulnerabilityAudits",
+          "positionalArgs": ["create_vulnerability_audit_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "create_vulnerability_audit_details",
+          "responseType": "VulnerabilityAudit"
+        },
+        {
+          "client": "adm.application_dependency_management",
+          "method": "get_vulnerability_audit",
+          "http": "GET",
+          "path": "/vulnerabilityAudits/{vulnerabilityAuditId}",
+          "positionalArgs": ["vulnerability_audit_id"],
+          "pathParams": {
+            "vulnerabilityAuditId": "vulnerability_audit_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "VulnerabilityAudit"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8819,6 +9602,396 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "knowledge_base_id",
+            ["call", "pop", ["var", "kwargs"], "knowledge_base_id"]
+          ],
+          [
+            "let",
+            "build_type",
+            ["call", "pop", ["var", "kwargs"], "build_type"]
+          ],
+          [
+            "let",
+            "source_oci_resource_id",
+            ["call", "pop", ["var", "kwargs"], "source_oci_resource_id"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "application_dependencies",
+            ["call", "pop", ["var", "kwargs"], "application_dependencies"]
+          ],
+          [
+            "let",
+            "configuration",
+            ["call", "pop", ["var", "kwargs"], "configuration"]
+          ],
+          [
+            "let",
+            "usage_data",
+            ["call", "pop", ["var", "kwargs"], "usage_data"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "source", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "knowledgeBaseId",
+            ["var", "knowledge_base_id"]
+          ],
+          ["set", ["var", "_details"], "buildType", ["var", "build_type"]],
+          [
+            "set",
+            ["item", ["var", "_details"], "source"],
+            "ociResourceId",
+            ["var", "source_oci_resource_id"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "application_dependencies"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "applicationDependencies",
+                [
+                  "fn",
+                  "parse",
+                  "application_dependencies",
+                  ["var", "application_dependencies"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "configuration"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "configuration",
+                ["fn", "parse", "configuration", ["var", "configuration"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "usage_data"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "usageData",
+                ["fn", "parse", "usage_data", ["var", "usage_data"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "source"],
+            "type",
+            "OCI_RESOURCE"
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "adm", "application_dependency_management"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_vulnerability_audit_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "adm.application_dependency_management",
+          "method": "create_vulnerability_audit",
+          "http": "POST",
+          "path": "/vulnerabilityAudits",
+          "positionalArgs": ["create_vulnerability_audit_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "create_vulnerability_audit_details",
+          "responseType": "VulnerabilityAudit"
+        },
+        {
+          "client": "adm.application_dependency_management",
+          "method": "get_vulnerability_audit",
+          "http": "GET",
+          "path": "/vulnerabilityAudits/{vulnerabilityAuditId}",
+          "positionalArgs": ["vulnerability_audit_id"],
+          "pathParams": {
+            "vulnerabilityAuditId": "vulnerability_audit_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "VulnerabilityAudit"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9227,6 +10400,380 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "knowledge_base_id",
+            ["call", "pop", ["var", "kwargs"], "knowledge_base_id"]
+          ],
+          [
+            "let",
+            "build_type",
+            ["call", "pop", ["var", "kwargs"], "build_type"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "application_dependencies",
+            ["call", "pop", ["var", "kwargs"], "application_dependencies"]
+          ],
+          [
+            "let",
+            "configuration",
+            ["call", "pop", ["var", "kwargs"], "configuration"]
+          ],
+          [
+            "let",
+            "usage_data",
+            ["call", "pop", ["var", "kwargs"], "usage_data"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "source", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "knowledgeBaseId",
+            ["var", "knowledge_base_id"]
+          ],
+          ["set", ["var", "_details"], "buildType", ["var", "build_type"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "application_dependencies"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "applicationDependencies",
+                [
+                  "fn",
+                  "parse",
+                  "application_dependencies",
+                  ["var", "application_dependencies"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "configuration"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "configuration",
+                ["fn", "parse", "configuration", ["var", "configuration"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "usage_data"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "usageData",
+                ["fn", "parse", "usage_data", ["var", "usage_data"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          ["set", ["item", ["var", "_details"], "source"], "type", "UNKNOWN"],
+          [
+            "let",
+            "client",
+            ["fn", "client", "adm", "application_dependency_management"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_vulnerability_audit_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "adm.application_dependency_management",
+          "method": "create_vulnerability_audit",
+          "http": "POST",
+          "path": "/vulnerabilityAudits",
+          "positionalArgs": ["create_vulnerability_audit_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "body": "create_vulnerability_audit_details",
+          "responseType": "VulnerabilityAudit"
+        },
+        {
+          "client": "adm.application_dependency_management",
+          "method": "get_vulnerability_audit",
+          "http": "GET",
+          "path": "/vulnerabilityAudits/{vulnerabilityAuditId}",
+          "positionalArgs": ["vulnerability_audit_id"],
+          "pathParams": {
+            "vulnerabilityAuditId": "vulnerability_audit_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "VulnerabilityAudit"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -21885,6 +21885,253 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "db_system_id",
+            ["call", "pop", ["var", "kwargs"], "db_system_id"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "db_system_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "db_system_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --db-system-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "client", ["fn", "client", "mysql", "db_system"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["db_system_id", ["var", "db_system_id"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the work request has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["var", "db_system_id"]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the work request entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for work request to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "mysql.db_system",
+          "method": "start_db_system",
+          "http": "POST",
+          "path": "/dbSystems/{dbSystemId}/actions/start",
+          "positionalArgs": ["db_system_id"],
+          "pathParams": {
+            "dbSystemId": "db_system_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          }
+        },
+        {
+          "client": "mysql.db_system",
+          "method": "get_db_system",
+          "http": "GET",
+          "path": "/dbSystems/{dbSystemId}",
+          "positionalArgs": ["db_system_id"],
+          "pathParams": {
+            "dbSystemId": "db_system_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "if-none-match": {
+              "arg": "if_none_match"
+            }
+          },
+          "responseType": "DbSystem"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -22516,6 +22763,269 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "db_system_id",
+            ["call", "pop", ["var", "kwargs"], "db_system_id"]
+          ],
+          [
+            "let",
+            "shutdown_type",
+            ["call", "pop", ["var", "kwargs"], "shutdown_type"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "db_system_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "db_system_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --db-system-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          [
+            "set",
+            ["var", "_details"],
+            "shutdownType",
+            ["var", "shutdown_type"]
+          ],
+          ["let", "client", ["fn", "client", "mysql", "db_system"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["db_system_id", ["var", "db_system_id"]],
+                ["stop_db_system_details", ["var", "_details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the work request has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["var", "db_system_id"]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the work request entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for work request to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "mysql.db_system",
+          "method": "stop_db_system",
+          "http": "POST",
+          "path": "/dbSystems/{dbSystemId}/actions/stop",
+          "positionalArgs": ["db_system_id", "stop_db_system_details"],
+          "pathParams": {
+            "dbSystemId": "db_system_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "stop_db_system_details"
+        },
+        {
+          "client": "mysql.db_system",
+          "method": "get_db_system",
+          "http": "GET",
+          "path": "/dbSystems/{dbSystemId}",
+          "positionalArgs": ["db_system_id"],
+          "pathParams": {
+            "dbSystemId": "db_system_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "if-none-match": {
+              "arg": "if_none_match"
+            }
+          },
+          "responseType": "DbSystem"
+        }
+      ],
       "params": [
         {
           "kind": "option",

@@ -166,7 +166,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `compute volume-attachment list`
 - [x] `ce cluster create-kubeconfig`
 - [x] `ce cluster generate-token`
-- [ ] `iam compartment create`
+- [x] `iam compartment create`
 - [ ] `iam compartment list`
 - [ ] `iam db-token get`
 - [ ] `iam group add-user`
@@ -179,10 +179,10 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] `iam tag-namespace retire`
 - [x] `iam tag-namespace update`
 - [ ] `iam user list-groups`
-- [ ] `bv backup copy`
-- [ ] `bv boot-volume create`
-- [ ] `bv boot-volume-backup copy`
-- [ ] `bv volume create`
+- [x] `bv backup copy`
+- [x] `bv boot-volume create`
+- [x] `bv boot-volume-backup copy`
+- [x] `bv volume create`
 - [ ] `network remote-peering-connection connect`
 - [ ] `network vnic assign-ipv6`
 - [ ] `network vnic assign-private-ip`
@@ -192,27 +192,27 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 
 ### Database, Functions, Resource Manager, KMS and Artifacts
 
-- [ ] `db autonomous-database delete`
+- [x] `db autonomous-database delete`
 - [x] `db data-guard-association create from-existing-db-system`
 - [x] `db data-guard-association create from-existing-vm-cluster`
 - [x] `db data-guard-association create with-new-db-system`
-- [ ] `db data-guard-association failover`
-- [ ] `db data-guard-association reinstate`
-- [ ] `db data-guard-association switchover`
-- [ ] `db data-guard-association update`
+- [x] `db data-guard-association failover`
+- [x] `db data-guard-association reinstate`
+- [x] `db data-guard-association switchover`
+- [x] `db data-guard-association update`
 - [ ] `db database create`
 - [ ] `db database create-database-from-database`
 - [ ] `db database create-from-backup`
 - [ ] `db database create-from-database`
 - [ ] `db database create-standby-database`
-- [ ] `db database delete`
+- [x] `db database delete`
 - [ ] `db database list`
 - [ ] `db database patch`
 - [ ] `db db-home create`
-- [ ] `db patch get by-database`
-- [ ] `db patch list by-database`
-- [ ] `db patch-history get by-database`
-- [ ] `db patch-history list by-database`
+- [x] `db patch get by-database`
+- [x] `db patch list by-database`
+- [x] `db patch-history get by-database`
+- [x] `db patch-history list by-database`
 - [ ] `db system patch`
 - [ ] `fn function invoke`
 - [ ] `fn function create archive-function direct-archive fn-update-runtime-config`
@@ -231,9 +231,9 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `resource-manager stack copy`
 - [ ] `resource-manager stack create`
 - [ ] `resource-manager stack update`
-- [ ] `kms management key-version cancel-deletion`
-- [ ] `kms management key-version create`
-- [ ] `kms management key-version schedule-deletion`
+- [x] `kms management key-version cancel-deletion`
+- [x] `kms management key-version create`
+- [x] `kms management key-version schedule-deletion`
 - [ ] `artifacts container image list`
 - [ ] `artifacts container image-signature get-verify`
 - [ ] `artifacts container image-signature list`
@@ -243,27 +243,27 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 
 ### Remaining services
 
-- [ ] `adm vulnerability-audit create`
-- [ ] `adm vulnerability-audit create-vulnerability-audit-external-resource-vulnerability-audit-source`
-- [ ] `adm vulnerability-audit create-vulnerability-audit-oci-resource-vulnerability-audit-source`
-- [ ] `adm vulnerability-audit create-vulnerability-audit-unknown-source-vulnerability-audit-source`
+- [x] `adm vulnerability-audit create`
+- [x] `adm vulnerability-audit create-vulnerability-audit-external-resource-vulnerability-audit-source`
+- [x] `adm vulnerability-audit create-vulnerability-audit-oci-resource-vulnerability-audit-source`
+- [x] `adm vulnerability-audit create-vulnerability-audit-unknown-source-vulnerability-audit-source`
 - [ ] `apm-synthetics monitor create-sql-monitor`
 - [ ] `apm-synthetics monitor update-sql-monitor`
 - [ ] `audit event list`
-- [ ] `cloud-bridge discovery asset-source create`
-- [ ] `cloud-bridge discovery asset-source update`
-- [ ] `cloud-bridge inventory asset create`
-- [ ] `cloud-bridge inventory asset update`
-- [ ] `cloud-guard data-mask-rule create`
-- [ ] `cloud-guard data-mask-rule create-for-all-targets`
-- [ ] `cloud-guard data-mask-rule create-for-services`
-- [ ] `cloud-guard data-mask-rule create-for-targets`
-- [ ] `cloud-guard data-mask-rule update`
-- [ ] `cloud-guard data-mask-rule update-for-all-targets`
-- [ ] `cloud-guard data-mask-rule update-for-services`
-- [ ] `cloud-guard data-mask-rule update-for-targets`
-- [ ] `cloud-migrations target-asset create`
-- [ ] `cloud-migrations target-asset update`
+- [x] `cloud-bridge discovery asset-source create`
+- [x] `cloud-bridge discovery asset-source update`
+- [x] `cloud-bridge inventory asset create`
+- [x] `cloud-bridge inventory asset update`
+- [x] `cloud-guard data-mask-rule create`
+- [x] `cloud-guard data-mask-rule create-for-all-targets`
+- [x] `cloud-guard data-mask-rule create-for-services`
+- [x] `cloud-guard data-mask-rule create-for-targets`
+- [x] `cloud-guard data-mask-rule update`
+- [x] `cloud-guard data-mask-rule update-for-all-targets`
+- [x] `cloud-guard data-mask-rule update-for-services`
+- [x] `cloud-guard data-mask-rule update-for-targets`
+- [x] `cloud-migrations target-asset create`
+- [x] `cloud-migrations target-asset update`
 - [ ] `data-science job head-job-artifact`
 - [ ] `data-science model head-model-artifact`
 - [ ] `data-science pipeline head-step-artifact`
@@ -276,21 +276,21 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `dbtools-runtime database-api-gateway-config-pool-auto-api-spec update default`
 - [x] `devops project summarize-project-analytics`
 - [x] `devops repository summarize-repository-analytics`
-- [ ] `generative-ai-data enrichment-jobs cancel`
+- [x] `generative-ai-data enrichment-jobs cancel`
 - [ ] `identity-domains apps list`
 - [ ] `identity-domains groups list`
 - [ ] `identity-domains users list`
 - [ ] `iot digital-twin-instance update`
 - [x] `media-services media-stream stream-distribution-channel generate-session-token`
 - [x] `model-deployment inference-result predict`
-- [ ] `mysql db-system start`
-- [ ] `mysql db-system stop`
+- [x] `mysql db-system start`
+- [x] `mysql db-system stop`
 - [ ] `network-firewall service create`
 - [ ] `network-firewall service update`
 - [ ] `ocvs sddc retrieve-sddc-operation-status`
 - [ ] Object Storage namespace lookup when `--namespace` is omitted. Cover the Engine path using the `GET /n` recording pattern from `os object copy`.
 - [ ] `os bucket delete`
-- [ ] `os multipart abort`
+- [x] `os multipart abort`
 - [ ] `os object head`
 - [ ] `os object list`
 - [ ] `os object list-object-versions`
@@ -325,7 +325,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `rover node delete-workload`
 - [ ] `rover node get-certificate`
 - [ ] `rover node list-workload`
-- [ ] `rover node request-approval`
+- [x] `rover node request-approval`
 - [ ] `rover node setup-identity`
 - [ ] `rover node show`
 - [ ] `rover node update`
@@ -370,8 +370,8 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [ ] `generative-ai-sandbox sandbox-command stream`
 - [ ] `generative-ai-sandbox sandbox-command-event stream`
 - [ ] `generative-ai-sandbox sandbox-file read`
-- [ ] `kms management key restore-from-file`
-- [ ] `kms management vault restore-from-file`
+- [x] `kms management key restore-from-file`
+- [x] `kms management vault restore-from-file`
 - [ ] `management-dashboard dashboard export`
 - [ ] `model-deployment inference-result predict-with-response-stream`
 - [ ] `os object bulk-delete-versions`

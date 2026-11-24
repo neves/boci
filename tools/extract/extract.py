@@ -271,7 +271,7 @@ def wrapper_program(callback, client_map) -> dict | None:
             return None
         sdk_ops.append({"client": f"{spec_name}.{service_name}", **sdk.sdk_operation(cls, method)})
     wrapped = any(
-        ast.unparse(d) == "cli_util.wrap_exceptions"
+        ast.unparse(d) in ("cli_util.wrap_exceptions", "wrap_exceptions")
         for d in wrapper_compiler._fn_ast(callback).decorator_list
     )
     out = {"program": {"body": program, "wrapExceptions": wrapped}}

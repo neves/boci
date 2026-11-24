@@ -2,17 +2,23 @@ import { describe, expect, test } from "bun:test";
 import type { TypedParam } from "../../src/core/convert.ts";
 import { bindSdkArgs, type OperationResult } from "../../src/core/operation.ts";
 import {
+  ProgramEcho,
+  ProgramExit,
   ProgramFile,
   ProgramRaise,
   ProgramRender,
   ProgramResponse,
   ProgramSdkCall,
+  ProgramServiceError,
+  ProgramSleep,
   ProgramUnsupported,
   ProgramUsageError,
+  ProgramWaitUntil,
   runProgram,
   type Expr,
   type Statement,
 } from "../../src/core/program.ts";
+import { waitUntilResponse } from "../../src/core/waiter.ts";
 
 const params = [
   { name: "a" },
@@ -412,5 +418,449 @@ describe("runProgram", () => {
     expect(() =>
       bindSdkArgs(op, ["ns1"], { tag_namespace_id: "dup", tag_name: "t" }),
     ).toThrow(ProgramUnsupported);
+  });
+
+  test("ProgramResponse exposes case-insensitive .headers, .status, and snake_case model attributes", () => {
+    const models = {
+      Database: {
+        attributes: [
+          ["id", "str", "id"],
+          ["db_home_id", "str", "dbHomeId"],
+          ["compartment_id", "str", "compartmentId"],
+        ] as [string, string, string][],
+      },
+    };
+    const fakeResult = {
+      operation: {
+        client: "database.database",
+        method: "get_database",
+        http: "GET",
+        path: "/databases/{databaseId}",
+        queryParams: {},
+        responseType: "Database",
+      },
+      responseModels: models,
+      url: new URL("https://example.invalid/databases/db-1"),
+      response: new Response("{}", {
+        status: 202,
+        headers: { "OPC-Work-Request-Id": "wr-42" },
+      }),
+      raw: '{"id":"db-1","dbHomeId":"home-7"}',
+      allPages: false,
+      pageItems: [],
+    } as OperationResult;
+    const response = new ProgramResponse(fakeResult, {
+      id: "db-1",
+      dbHomeId: "home-7",
+    });
+
+    const program: Statement[] = [
+      ["let", "client", ["fn", "client", "database", "database"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [kw("a")], [], null]],
+      [
+        "invoke",
+        [
+          ["status", ["attr", "status", ["var", "res"]]],
+          [
+            "wr",
+            [
+              "item",
+              ["attr", "headers", ["var", "res"]],
+              "opc-work-request-id",
+            ],
+          ],
+          [
+            "wrGet",
+            [
+              "call",
+              "get",
+              ["attr", "headers", ["var", "res"]],
+              "OPC-WORK-REQUEST-ID",
+            ],
+          ],
+          [
+            "missingGet",
+            ["call", "get", ["attr", "headers", ["var", "res"]], "x-none", "d"],
+          ],
+          [
+            "hasWr",
+            [
+              "cmp",
+              "in",
+              "opc-work-request-id",
+              ["attr", "headers", ["var", "res"]],
+            ],
+          ],
+          ["home", ["attr", "db_home_id", ["attr", "data", ["var", "res"]]]],
+          [
+            "comp",
+            ["attr", "compartment_id", ["attr", "data", ["var", "res"]]],
+          ],
+        ],
+        null,
+      ],
+    ];
+    expect(
+      runProgram(program, { a: "db-1" }, params, parse, [], undefined, {
+        sdkResults: [response],
+      }).kwargs,
+    ).toEqual({
+      status: 202,
+      wr: "wr-42",
+      wrGet: "wr-42",
+      missingGet: "d",
+      hasWr: true,
+      home: "home-7",
+    });
+
+    // Missing header subscript raises KeyError.
+    const missingHeaderProg: Statement[] = [
+      ["let", "client", ["fn", "client", "database", "database"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [], [], null]],
+      ["do", ["item", ["attr", "headers", ["var", "res"]], "missing"]],
+    ];
+    expect(() =>
+      runProgram(missingHeaderProg, {}, params, parse, [], undefined, {
+        sdkResults: [response],
+      }),
+    ).toThrow(ProgramRaise);
+
+    // Invalid model attribute raises AttributeError with the model name.
+    const badAttrProg: Statement[] = [
+      ["let", "client", ["fn", "client", "database", "database"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [], [], null]],
+      ["do", ["attr", "nonexistent", ["attr", "data", ["var", "res"]]]],
+    ];
+    let attrErr: ProgramRaise | undefined;
+    try {
+      runProgram(badAttrProg, {}, params, parse, [], undefined, {
+        sdkResults: [response],
+      });
+    } catch (e) {
+      if (e instanceof ProgramRaise) attrErr = e;
+      else throw e;
+    }
+    expect(attrErr?.cls).toBe("AttributeError");
+    expect(attrErr?.message).toBe(
+      "'Database' object has no attribute 'nonexistent'",
+    );
+  });
+
+  test("click.echo, sys.exit, and time.sleep yield replayable effects and errors", () => {
+    const echoProg: Statement[] = [
+      ["do", ["fn", "echo", "hello", ["fn", "stderr"], true, false]],
+      ["do", ["fn", "echo", "inline", null, false, true]],
+      ["do", ["fn", "sleep", 2]],
+      ["exit", 2],
+    ];
+    const run = (ctx = {}) => {
+      try {
+        return runProgram(echoProg, {}, params, parse, [], undefined, ctx);
+      } catch (e) {
+        return e;
+      }
+    };
+    const e1 = run();
+    expect(e1).toBeInstanceOf(ProgramEcho);
+    expect((e1 as ProgramEcho).text).toBe("hello\n");
+    expect((e1 as ProgramEcho).toStderr).toBe(true);
+
+    const e2 = run({ echoCount: 1 });
+    expect(e2).toBeInstanceOf(ProgramEcho);
+    expect((e2 as ProgramEcho).text).toBe("inline");
+    expect((e2 as ProgramEcho).toStderr).toBe(true);
+
+    const e3 = run({ echoCount: 2 });
+    expect(e3).toBeInstanceOf(ProgramSleep);
+    expect((e3 as ProgramSleep).seconds).toBe(2);
+
+    const e4 = run({ echoCount: 2, sleepCount: 1 });
+    expect(e4).toBeInstanceOf(ProgramExit);
+    expect((e4 as ProgramExit).code).toBe(2);
+
+    // Negative sleep raises ValueError; sys.exit(str) sets exit code 1 + stderr output.
+    expect(() =>
+      runProgram([["do", ["fn", "sleep", -1]]], {}, params, parse),
+    ).toThrow(ProgramRaise);
+    let strExit: ProgramExit | undefined;
+    try {
+      runProgram(
+        [
+          [
+            "try",
+            [["exit", "bad state"]],
+            null,
+            [["do", ["fn", "echo", "caught", null, true, false]]],
+          ],
+        ],
+        {},
+        params,
+        parse,
+      );
+    } catch (e) {
+      if (e instanceof ProgramExit) strExit = e;
+      else throw e;
+    }
+    expect(strExit?.code).toBe(1);
+    expect(strExit?.output).toBe("bad state\n");
+  });
+
+  test("oci.wait_until, tryMulti, reraise, tuple formatting, and ctx.obj['region'] override", () => {
+    const waiterParams = [
+      { name: "wait_for_state", multiple: true },
+      { name: "destination_region" },
+    ] as TypedParam[];
+    const initResp = new ProgramResponse(
+      {
+        operation: {
+          client: "core.blockstorage",
+          method: "copy",
+          http: "POST",
+          path: "/",
+          queryParams: {},
+        },
+        url: new URL("https://example.invalid/"),
+        response: new Response('{"id":"b1"}', { status: 200 }),
+        raw: '{"id":"b1"}',
+        allPages: false,
+        pageItems: [],
+      } as OperationResult,
+      { id: "b1" },
+    );
+    const pollResp = new ProgramResponse(
+      {
+        operation: {
+          client: "core.blockstorage",
+          method: "get",
+          http: "GET",
+          path: "/b1",
+          queryParams: {},
+        },
+        url: new URL("https://example.invalid/b1"),
+        response: new Response('{"id":"b1","lifecycleState":"AVAILABLE"}', {
+          status: 200,
+        }),
+        raw: '{"id":"b1","lifecycleState":"AVAILABLE"}',
+        allPages: false,
+        pageItems: [],
+      } as OperationResult,
+      { id: "b1", lifecycleState: "AVAILABLE" },
+      { opIndex: 1, posArgs: ["b1"], kwArgs: {}, region: "us-phoenix-1" },
+    );
+    const prog: Statement[] = [
+      ["let", "client", ["fn", "client", "core", "blockstorage"]],
+      ["let", "res", ["sdk", 0, ["var", "client"], [], [], null]],
+      ["set", ["fn", "ctxObj"], "region", kw("destination_region")],
+      ["let", "client", ["fn", "client", "core", "blockstorage"]],
+      [
+        "tryMulti",
+        [
+          [
+            "do",
+            [
+              "fn",
+              "echo",
+              ["call", "format", "Waiting: {}", kw("wait_for_state")],
+              ["fn", "stderr"],
+              true,
+              false,
+            ],
+          ],
+          [
+            "let",
+            "res",
+            [
+              "waitUntil",
+              [
+                ["var", "client"],
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [["attr", "id", ["attr", "data", ["var", "res"]]]],
+                  [],
+                  null,
+                ],
+                "lifecycle_state",
+                kw("wait_for_state"),
+              ],
+              [],
+              ["dict", ["max_wait_seconds", 10]],
+            ],
+          ],
+        ],
+        [
+          [
+            "MaximumWaitTimeExceeded",
+            "e",
+            [
+              ["render", ["var", "res"]],
+              ["exit", 2],
+            ],
+          ],
+          ["Exception", null, [["render", ["var", "res"]], ["reraise"]]],
+        ],
+      ],
+      ["render", ["var", "res"]],
+    ];
+
+    const values = {
+      wait_for_state: ["AVAILABLE"],
+      destination_region: "us-phoenix-1",
+    };
+    // Step 1: echo formats Click tuple with trailing comma.
+    let err: unknown;
+    try {
+      runProgram(prog, values, waiterParams, parse, [], undefined, {
+        sdkResults: [initResp],
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ProgramEcho);
+    expect((err as ProgramEcho).text).toBe("Waiting: ('AVAILABLE',)\n");
+
+    // Step 2: second SDK call carries destination region from ctx.obj['region'].
+    try {
+      runProgram(prog, values, waiterParams, parse, [], undefined, {
+        sdkResults: [initResp],
+        echoCount: 1,
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ProgramSdkCall);
+    expect((err as ProgramSdkCall).region).toBe("us-phoenix-1");
+    expect((err as ProgramSdkCall).posArgs).toEqual(["b1"]);
+
+    // Step 3: waitUntil yields ProgramWaitUntil.
+    try {
+      runProgram(prog, values, waiterParams, parse, [], undefined, {
+        sdkResults: [initResp, pollResp],
+        echoCount: 1,
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ProgramWaitUntil);
+    expect((err as ProgramWaitUntil).states).toEqual(["AVAILABLE"]);
+    expect((err as ProgramWaitUntil).maxWaitSeconds).toBe(10);
+
+    // Step 4: MaximumWaitTimeExceeded enters first except -> render initial res -> exit 2.
+    const timeoutErr = new ProgramRaise("MaximumWaitTimeExceeded", "timed out");
+    try {
+      runProgram(prog, values, waiterParams, parse, [], undefined, {
+        sdkResults: [initResp, pollResp],
+        echoCount: 1,
+        waitResults: [timeoutErr],
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ProgramRender);
+    expect((err as ProgramRender).response).toBe(initResp);
+
+    try {
+      runProgram(prog, values, waiterParams, parse, [], undefined, {
+        sdkResults: [initResp, pollResp],
+        echoCount: 1,
+        renderedCount: 1,
+        waitResults: [timeoutErr],
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ProgramExit);
+    expect((err as ProgramExit).code).toBe(2);
+
+    // Step 5: ServiceError enters except Exception -> render initial res -> reraise ServiceError.
+    const svcErr = new ProgramServiceError({
+      ...pollResp.result,
+      response: new Response('{"code":"NotFound"}', { status: 404 }),
+    });
+    try {
+      runProgram(prog, values, waiterParams, parse, [], undefined, {
+        sdkResults: [initResp, svcErr],
+        echoCount: 1,
+        renderedCount: 1,
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBe(svcErr);
+  });
+
+  test("waitUntilResponse polls until state matches, handles timeout and errors", async () => {
+    const mk = (status: number, body: unknown): OperationResult => ({
+      operation: {
+        client: "c.c",
+        method: "get",
+        http: "GET",
+        path: "/",
+        queryParams: {},
+      },
+      url: new URL("https://example.invalid/"),
+      response: new Response(JSON.stringify(body), { status }),
+      raw: JSON.stringify(body),
+      allPages: false,
+      pageItems: [],
+    });
+    const sleeps: number[] = [];
+    const replies = [
+      mk(200, { lifecycleState: "PROVISIONING" }),
+      mk(200, { lifecycleState: "ACTIVE" }),
+    ];
+    let idx = 0;
+    const ok = await waitUntilResponse({
+      initial: mk(200, { lifecycleState: "CREATING" }),
+      property: "lifecycle_state",
+      states: ["ACTIVE"],
+      maxWaitSeconds: 60,
+      maxIntervalSeconds: 30,
+      poll: async () => replies[idx++]!,
+      sleep: async (s) => {
+        sleeps.push(s);
+      },
+    });
+    expect(ok.kind).toBe("response");
+    expect(sleeps).toEqual([1, 2]);
+
+    const timedOut = await waitUntilResponse({
+      initial: mk(200, { status: "IN_PROGRESS" }),
+      property: "status",
+      states: ["SUCCEEDED"],
+      maxWaitSeconds: 0,
+      poll: async () => mk(200, { status: "IN_PROGRESS" }),
+      sleep: async () => {},
+    });
+    expect(timedOut.kind).toBe("timeout");
+
+    const errored = await waitUntilResponse({
+      initial: mk(200, { status: "IN_PROGRESS" }),
+      property: "status",
+      states: ["SUCCEEDED"],
+      maxWaitSeconds: 60,
+      poll: async () => mk(404, { code: "NotFound" }),
+      sleep: async () => {},
+    });
+    expect(errored.kind).toBe("error");
+  });
+
+  test("checkNoExtraKwargs raises TypeError like Python when callback has no **kwargs", () => {
+    const program: Statement[] = [
+      ["let", "a", ["call", "pop", ["var", "kwargs"], "a"]],
+      ["checkNoExtraKwargs", "update_asset_source"],
+    ];
+    let err: ProgramRaise | undefined;
+    try {
+      runProgram(program, { a: 1 }, params, parse);
+    } catch (e) {
+      if (e instanceof ProgramRaise) err = e;
+      else throw e;
+    }
+    expect(err?.cls).toBe("TypeError");
+    expect(err?.message).toBe(
+      "update_asset_source() got an unexpected keyword argument 'b'",
+    );
   });
 });

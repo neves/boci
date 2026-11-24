@@ -211,6 +211,299 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "enrichment_job_id",
+            ["call", "pop", ["var", "kwargs"], "job_id"]
+          ],
+          [
+            "let",
+            "semantic_store_id",
+            ["call", "pop", ["var", "kwargs"], "semantic_store_id"]
+          ],
+          [
+            "let",
+            "if_match",
+            ["call", "pop", ["var", "kwargs"], "if_match", null]
+          ],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state", null]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds", null]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds", null]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "from_json", null]],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "semantic_store_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "semantic_store_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --semantic-store-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "enrichment_job_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "enrichment_job_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --job-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "operation_kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [
+              [
+                "set",
+                ["var", "operation_kwargs"],
+                "if_match",
+                ["var", "if_match"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["var", "operation_kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "client",
+            ["fn", "client", "generative_ai_data", "enrichment_job"]
+          ],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["semantic_store_id", ["var", "semantic_store_id"]],
+                ["enrichment_job_id", ["var", "enrichment_job_id"]]
+              ],
+              ["var", "operation_kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [
+                            ["var", "semantic_store_id"],
+                            ["var", "enrichment_job_id"]
+                          ],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "generative_ai_data.enrichment_job",
+          "method": "cancel_enrichment_job",
+          "http": "POST",
+          "path": "/semanticStores/{semanticStoreId}/enrichmentJobs/{enrichmentJobId}/actions/cancel",
+          "positionalArgs": ["semantic_store_id", "enrichment_job_id"],
+          "pathParams": {
+            "semanticStoreId": "semantic_store_id",
+            "enrichmentJobId": "enrichment_job_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "if-match": {
+              "arg": "if_match"
+            }
+          },
+          "responseType": "EnrichmentJob"
+        },
+        {
+          "client": "generative_ai_data.enrichment_job",
+          "method": "get_enrichment_job",
+          "http": "GET",
+          "path": "/semanticStores/{semanticStoreId}/enrichmentJobs/{enrichmentJobId}",
+          "positionalArgs": ["semantic_store_id", "enrichment_job_id"],
+          "pathParams": {
+            "semanticStoreId": "semantic_store_id",
+            "enrichmentJobId": "enrichment_job_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "EnrichmentJob"
+        }
+      ],
       "params": [
         {
           "kind": "option",

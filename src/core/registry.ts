@@ -390,7 +390,7 @@ export function engineSupports(command: Command): boolean {
         requestSupported(
           command.operation,
           command.bindings,
-          command.params,
+          command.generated?.params ?? command.params,
         )) &&
       (command.variants ?? []).every((v) =>
         requestSupported(v.operation, v.bindings, v.generated.params),

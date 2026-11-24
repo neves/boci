@@ -7,6 +7,85 @@ import {
 import { printResult, type OutputOptions } from "./output.ts";
 import type { ServiceSpec } from "./spec.ts";
 
+export type WaitUntilOutcome =
+  | { kind: "response"; result: OperationResult }
+  | { kind: "timeout" }
+  | { kind: "negative-interval" }
+  | { kind: "error"; result: OperationResult };
+
+function snakeToCamel(s: string): string {
+  return s.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());
+}
+
+function responsePropertyValue(
+  result: OperationResult,
+  property: string,
+): unknown {
+  let resource: Record<string, unknown>;
+  try {
+    resource = (JSON.parse(result.raw || "{}") ?? {}) as Record<
+      string,
+      unknown
+    >;
+  } catch {
+    return undefined;
+  }
+  const camel = snakeToCamel(property);
+  if (camel in resource) return resource[camel];
+  if (property in resource) return resource[property];
+  if (property === "status" && "lifecycleState" in resource)
+    return resource.lifecycleState;
+  return undefined;
+}
+
+/**
+ * Shared implementation of `oci.wait_until(client, response, property, states, ...)`.
+ * Checks `initial` first, then polls with `poll()` using exponential backoff (1, 2, 4, ...
+ * capped at `maxIntervalSeconds`) until the property enters `states` or `maxWaitSeconds`
+ * elapses.
+ */
+export async function waitUntilResponse(opts: {
+  initial: OperationResult;
+  property: string;
+  states: string[];
+  maxWaitSeconds?: number;
+  maxIntervalSeconds?: number;
+  succeedOnNotFound?: boolean;
+  poll: () => Promise<OperationResult>;
+  sleep?: (seconds: number) => Promise<void>;
+}): Promise<WaitUntilOutcome> {
+  const {
+    initial,
+    property,
+    states,
+    maxWaitSeconds = 1200,
+    maxIntervalSeconds = 30,
+    succeedOnNotFound = false,
+    poll,
+    sleep = (s) => Bun.sleep(s * 1000),
+  } = opts;
+  let current = initial;
+  let interval = 1;
+  let started: number | undefined;
+  for (;;) {
+    if (!current.response.ok) {
+      if (succeedOnNotFound && current.response.status === 404)
+        return { kind: "response", result: current };
+      return { kind: "error", result: current };
+    }
+    const value = responsePropertyValue(current, property);
+    if (typeof value === "string" && states.includes(value))
+      return { kind: "response", result: current };
+    started ??= performance.now();
+    if (performance.now() - started >= maxWaitSeconds * 1000)
+      return { kind: "timeout" };
+    if (interval < 0) return { kind: "negative-interval" };
+    await sleep(interval);
+    interval = Math.min(interval * 2, maxIntervalSeconds);
+    current = await poll();
+  }
+}
+
 export async function waitForState(
   io: Invocation,
   call: OperationCall & { spec: ServiceSpec },

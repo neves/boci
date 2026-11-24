@@ -60,26 +60,33 @@ import {
 } from "./click-file.ts";
 import { Exit, type Env, type Invocation } from "../lib/io.ts";
 import { parseJsonParameter, repr } from "./json-input.ts";
-import { waitForState } from "./waiter.ts";
+import { waitForState, waitUntilResponse } from "./waiter.ts";
 import {
   ProgramFile,
   type ProgramFiles,
   ProgramAbort,
   ProgramConfirm,
+  ProgramEcho,
+  ProgramExit,
   ProgramSecret,
+  ProgramSleep,
   type ProgramAnswer,
   ProgramLookup,
   ProgramRaise,
   ProgramRender,
   ProgramResponse,
   ProgramSdkCall,
+  ProgramServiceError,
+  type ProgramSdkOutcome,
   ProgramUnsupported,
   type ProgramContext,
   ProgramUsageError,
+  ProgramWaitUntil,
   runProgram,
 } from "./program.ts";
 import {
   type GeneratedCommand,
+  type OperationResult,
   usageCheckFailure,
   tierBCheckFailure,
   callOperation,
@@ -740,24 +747,84 @@ async function main(io: Invocation): Promise<void> {
               if (!result.response.ok) printResult(io, result, { rc });
               return String(JSON.parse(result.raw));
             },
-            sdkCall: async (opIndex, posArgs, kwArgs) => {
+            sdkCall: async (opIndex, posArgs, kwArgs, region) => {
               const op = specCmd.sdkOperations?.[opIndex];
               if (!op) throw new ProgramUnsupported(`sdk[${opIndex}]`);
+              const callRootValues =
+                region !== undefined ? { ...rootValues, region } : rootValues;
               const result = await callSdkOperation(io, {
                 operation: op,
                 posArgs,
                 kwArgs,
-                rootValues,
+                rootValues: callRootValues,
                 settings,
                 spec,
                 index,
               });
-              if (!result.response.ok) printResult(io, result, output);
-              return new ProgramResponse(result, parseSdkResponseData(result));
+              if (!result.response.ok) return new ProgramServiceError(result);
+              return new ProgramResponse(result, parseSdkResponseData(result), {
+                opIndex,
+                posArgs,
+                kwArgs,
+                region,
+              });
+            },
+            waitUntil: async (wait) => {
+              const call = wait.response.call;
+              if (!call)
+                throw new ProgramUnsupported("wait_until without sdk call");
+              const op = specCmd.sdkOperations?.[call.opIndex];
+              if (!op) throw new ProgramUnsupported(`sdk[${call.opIndex}]`);
+              const callRootValues =
+                call.region !== undefined
+                  ? { ...rootValues, region: call.region }
+                  : rootValues;
+              const outcome = await waitUntilResponse({
+                initial: wait.response.result,
+                property: wait.property,
+                states: wait.states,
+                maxWaitSeconds: wait.maxWaitSeconds,
+                maxIntervalSeconds: wait.maxIntervalSeconds,
+                succeedOnNotFound: wait.succeedOnNotFound,
+                poll: () =>
+                  callSdkOperation(io, {
+                    operation: op,
+                    posArgs: call.posArgs,
+                    kwArgs: call.kwArgs,
+                    rootValues: callRootValues,
+                    settings,
+                    spec,
+                    index,
+                  }),
+              });
+              switch (outcome.kind) {
+                case "response":
+                  return new ProgramResponse(
+                    outcome.result,
+                    parseSdkResponseData(outcome.result),
+                    call,
+                  );
+                case "timeout":
+                  return new ProgramRaise(
+                    "MaximumWaitTimeExceeded",
+                    "Maximum wait time has been exceeded.",
+                  );
+                case "negative-interval":
+                  return new ProgramRaise(
+                    "ValueError",
+                    "sleep length must be non-negative",
+                  );
+                case "error":
+                  return new ProgramServiceError(outcome.result);
+              }
             },
             render: (response) => {
               printResult(io, response.result, output);
             },
+            serviceError: (result) => {
+              printResult(io, result, output);
+            },
+            sleep: (seconds) => Bun.sleep(seconds * 1000),
           },
           [],
           {
@@ -915,8 +982,12 @@ type WrapperLookups = {
     opIndex: number,
     posArgs: unknown[],
     kwArgs: Record<string, unknown>,
-  ) => Promise<ProgramResponse>;
+    region?: string,
+  ) => Promise<ProgramSdkOutcome>;
+  waitUntil: (wait: ProgramWaitUntil) => Promise<ProgramSdkOutcome>;
   render: (response: ProgramResponse) => void;
+  serviceError: (result: OperationResult) => void;
+  sleep: (seconds: number) => Promise<void>;
 };
 
 /**
@@ -1084,17 +1155,18 @@ async function runWrapper(
       );
     }
     if (e instanceof ProgramSdkCall) {
-      let response: ProgramResponse;
+      let outcome: ProgramSdkOutcome;
       try {
-        response = await lookups.sdkCall(e.opIndex, e.posArgs, e.kwArgs);
+        outcome = await lookups.sdkCall(
+          e.opIndex,
+          e.posArgs,
+          e.kwArgs,
+          e.region,
+        );
       } catch (sdkErr) {
         if (sdkErr instanceof ProgramUnsupported) return "unsupported";
-        if (sdkErr instanceof ProgramRaise) {
-          if (!program.wrapExceptions) return "unsupported";
-          io.err(`${sdkErr.cls}: ${sdkErr.message}\n`);
-          throw new Exit(1);
-        }
-        throw sdkErr;
+        if (sdkErr instanceof ProgramRaise) outcome = sdkErr;
+        else throw sdkErr;
       }
       return runWrapper(
         io,
@@ -1106,7 +1178,31 @@ async function runWrapper(
         answers,
         {
           ...ctx,
-          sdkResults: [...(ctx.sdkResults ?? []), response],
+          sdkResults: [...(ctx.sdkResults ?? []), outcome],
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramWaitUntil) {
+      let outcome: ProgramSdkOutcome;
+      try {
+        outcome = await lookups.waitUntil(e);
+      } catch (waitErr) {
+        if (waitErr instanceof ProgramUnsupported) return "unsupported";
+        if (waitErr instanceof ProgramRaise) outcome = waitErr;
+        else throw waitErr;
+      }
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          waitResults: [...(ctx.waitResults ?? []), outcome],
         },
         stdin,
       );
@@ -1127,6 +1223,49 @@ async function runWrapper(
         },
         stdin,
       );
+    }
+    if (e instanceof ProgramEcho) {
+      if (e.toStderr) io.err(e.text);
+      else io.out(e.text);
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          echoCount: (ctx.echoCount ?? 0) + 1,
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramSleep) {
+      await lookups.sleep(e.seconds);
+      return runWrapper(
+        io,
+        command,
+        values,
+        usageText,
+        models,
+        lookups,
+        answers,
+        {
+          ...ctx,
+          sleepCount: (ctx.sleepCount ?? 0) + 1,
+        },
+        stdin,
+      );
+    }
+    if (e instanceof ProgramExit) {
+      if (e.output) io.err(e.output);
+      throw new Exit(e.code);
+    }
+    if (e instanceof ProgramServiceError) {
+      lookups.serviceError(e.result);
+      return undefined;
     }
     if (e instanceof ProgramAbort) {
       if (!program.wrapExceptions) return "unsupported";

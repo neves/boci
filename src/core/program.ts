@@ -7,6 +7,7 @@
 import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
 import { decodePythonUtf8 } from "../utils/utf8.ts";
+import { inheritedDiscriminator, type Model } from "./camelize.ts";
 import type { TypedParam } from "./convert.ts";
 import type { OperationResult } from "./operation.ts";
 import { kwarg, truthy } from "./checks.ts";
@@ -60,23 +61,119 @@ type Dict = Record<string, unknown>;
  */
 export class ProgramLookup extends Error {}
 
+/**
+ * Case-insensitive header mapping matching `oci.response.Response.headers`
+ * (`requests.structures.CaseInsensitiveDict`).
+ */
+export class ProgramHeaders {
+  private readonly map = new Map<string, [string, string]>();
+
+  constructor(init?: Headers | Record<string, string> | null) {
+    if (init instanceof Headers) {
+      init.forEach((value, key) => {
+        this.map.set(key.toLowerCase(), [key, value]);
+      });
+    } else if (init && typeof init === "object") {
+      for (const [key, value] of Object.entries(init)) {
+        this.map.set(key.toLowerCase(), [key, value]);
+      }
+    }
+  }
+
+  get size(): number {
+    return this.map.size;
+  }
+
+  has(key: string): boolean {
+    return this.map.has(key.toLowerCase());
+  }
+
+  get(key: string): string | undefined {
+    return this.map.get(key.toLowerCase())?.[1];
+  }
+
+  keys(): string[] {
+    return [...this.map.values()].map(([k]) => k);
+  }
+
+  entries(): [string, string][] {
+    return [...this.map.values()];
+  }
+}
+
+export type ProgramSdkCallRecord = {
+  opIndex: number;
+  posArgs: unknown[];
+  kwArgs: Dict;
+  region?: string;
+};
+
+type ModelMeta = {
+  models: Record<string, Model>;
+  type: string;
+};
+
+const modelMeta = new WeakMap<object, ModelMeta>();
+
+function tagModelData(
+  data: unknown,
+  models: Record<string, Model> | undefined,
+  typeName: string | undefined,
+): void {
+  if (!models || !typeName) return;
+  const listMatch = /^list\[(.*)\]$/.exec(typeName);
+  if (listMatch && Array.isArray(data)) {
+    const itemType = listMatch[1]!;
+    for (const elem of data) tagModelData(elem, models, itemType);
+    return;
+  }
+  if (
+    typeof data === "object" &&
+    data !== null &&
+    !Array.isArray(data) &&
+    typeName in models
+  ) {
+    modelMeta.set(data, { models, type: typeName });
+  }
+}
+
 /** An SDK operation response held by a program (`result = client.<method>(...)`). */
 export class ProgramResponse {
+  readonly headers: ProgramHeaders;
+  readonly status: number | null;
   constructor(
     readonly result: OperationResult,
     readonly data: unknown,
-  ) {}
+    readonly call?: ProgramSdkCallRecord,
+    headers?: Headers | Record<string, string>,
+  ) {
+    this.headers = new ProgramHeaders(headers ?? result?.response?.headers);
+    this.status = result?.response?.status ?? null;
+    tagModelData(data, result?.responseModels, result?.operation?.responseType);
+  }
+}
+
+/**
+ * A non-2xx SDK response raised inside a program (`oci.exceptions.ServiceError`).
+ * Catchable by `except ServiceError:` and `except Exception:`.
+ */
+export class ProgramServiceError extends Error {
+  constructor(readonly result: OperationResult) {
+    super(`ServiceError(${result.response.status})`);
+  }
 }
 
 /**
  * `client.<method>(*pos, **kw)` before the Engine has executed that SDK call: the caller
- * sends the HTTP request, appends a ProgramResponse to `context.sdkResults`, and replays.
+ * sends the HTTP request, appends a ProgramResponse (or error) to `context.sdkResults`,
+ * and replays.
  */
 export class ProgramSdkCall extends Error {
   constructor(
     readonly opIndex: number,
     readonly posArgs: unknown[],
     readonly kwArgs: Dict,
+    readonly region?: string,
   ) {
     super(`sdk[${opIndex}]`);
   }
@@ -92,17 +189,67 @@ export class ProgramRender extends Error {
   }
 }
 
+/** `click.echo(...)`: caller writes text to stdout/stderr, increments `echoCount`, replays. */
+export class ProgramEcho extends Error {
+  constructor(
+    readonly text: string,
+    readonly toStderr: boolean,
+  ) {
+    super("click.echo");
+  }
+}
+
+/** `sys.exit(...)`: terminates the command (not caught by `except Exception:`). */
+export class ProgramExit extends Error {
+  constructor(
+    readonly code: number,
+    readonly output?: string,
+  ) {
+    super(`sys.exit(${code})`);
+  }
+}
+
+/** `time.sleep(seconds)`: caller sleeps, increments `sleepCount`, replays. */
+export class ProgramSleep extends Error {
+  constructor(readonly seconds: number) {
+    super(`time.sleep(${seconds})`);
+  }
+}
+
+/**
+ * `oci.wait_until(client, response, property, states, **kw)`: caller polls the getter
+ * via the Engine's waiter, appends the outcome to `context.waitResults`, and replays.
+ */
+export class ProgramWaitUntil extends Error {
+  constructor(
+    readonly response: ProgramResponse,
+    readonly property: string,
+    readonly states: string[],
+    readonly maxWaitSeconds: number,
+    readonly maxIntervalSeconds: number,
+    readonly succeedOnNotFound: boolean,
+  ) {
+    super(`wait_until(${property})`);
+  }
+}
+
+export type ProgramSdkOutcome =
+  ProgramResponse | ProgramRaise | ProgramServiceError;
+
 /**
  * What a program reads outside its kwargs: the config region `build_client` puts in
  * `ctx.obj['config']`, `ctx.obj['request_id']`, the namespace `get_namespace()` returned,
- * and cached SDK responses / render count for deterministic replay.
+ * and cached SDK responses / side-effect counts for deterministic replay.
  */
 export type ProgramContext = {
   region?: () => string | undefined;
   namespace?: string;
   requestId?: string | null;
-  sdkResults?: ProgramResponse[];
+  sdkResults?: ProgramSdkOutcome[];
+  waitResults?: ProgramSdkOutcome[];
   renderedCount?: number;
+  echoCount?: number;
+  sleepCount?: number;
 };
 
 /**
@@ -175,12 +322,26 @@ const isDict = (v: unknown): v is Dict =>
   !(v instanceof ProgramTarget) &&
   !(v instanceof ProgramObject) &&
   !(v instanceof ProgramResponse) &&
+  !(v instanceof ProgramHeaders) &&
   !(v instanceof Error) &&
   !(v instanceof Uint8Array);
+
+const pyTruthy = (v: unknown): boolean => {
+  if (v instanceof ProgramHeaders) return v.size > 0;
+  if (
+    v instanceof ProgramResponse ||
+    v instanceof ProgramObject ||
+    v instanceof ProgramFile ||
+    v instanceof ProgramTarget
+  )
+    return true;
+  return truthy(v);
+};
 
 /** Python iteration: a list's items, a dict's keys, a str's characters, a file's lines. */
 function iterate(v: unknown): unknown[] {
   if (Array.isArray(v)) return v;
+  if (v instanceof ProgramHeaders) return v.keys();
   if (isDict(v)) return Object.keys(v);
   if (typeof v === "string") return [...v];
   if (v instanceof ProgramFile) return v.lines();
@@ -210,7 +371,15 @@ function pyEq(a: unknown, b: unknown): boolean {
   return false;
 }
 
-/** Python `str()` of a scalar. */
+/** Click `multiple=True` options arrive as Python tuples, not lists. */
+const pyTuples = new WeakSet<unknown[]>();
+
+function pyElemRepr(v: unknown): string {
+  if (typeof v === "string") return pyRepr(v);
+  return pyStr(v);
+}
+
+/** Python `str()` of a scalar, tuple, or list. */
 function pyStr(v: unknown): string {
   if (v === null || v === undefined) return "None";
   if (v === true) return "True";
@@ -218,7 +387,73 @@ function pyStr(v: unknown): string {
   if (typeof v === "string" || typeof v === "number") return String(v);
   // `except Exception as e: ... str(e)`
   if (v instanceof ProgramRaise) return v.message;
+  if (Array.isArray(v)) {
+    const parts = v.map(pyElemRepr);
+    if (pyTuples.has(v)) {
+      if (parts.length === 0) return "()";
+      if (parts.length === 1) return `(${parts[0]},)`;
+      return `(${parts.join(", ")})`;
+    }
+    return `[${parts.join(", ")}]`;
+  }
   throw new ProgramUnsupported("str() of a container");
+}
+
+function snakeToCamel(s: string): string {
+  return s.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase());
+}
+
+/** Resolve Python `snake_case` attribute lookup on a decoded OCI SDK model object. */
+function modelAttr(obj: Dict, attr: string): unknown {
+  const meta = modelMeta.get(obj);
+  if (meta) {
+    let modelName = meta.type;
+    let model = meta.models[modelName];
+    if (model) {
+      const disc = inheritedDiscriminator(meta.models, model);
+      if (disc && typeof obj[disc.field] === "string") {
+        const subName = Object.hasOwn(disc.values, obj[disc.field] as string)
+          ? (disc.values[obj[disc.field] as string] as string)
+          : disc.fallback;
+        if (meta.models[subName]) {
+          modelName = subName;
+          model = meta.models[subName];
+        }
+      }
+      const entry = model.attributes.find(([snake]) => snake === attr);
+      if (!entry) {
+        throw new ProgramRaise(
+          "AttributeError",
+          `'${modelName}' object has no attribute '${attr}'`,
+        );
+      }
+      const [snake, swaggerType, camel] = entry;
+      const val = camel in obj ? obj[camel] : snake in obj ? obj[snake] : null;
+      if (val !== null && val !== undefined) {
+        tagModelData(val, meta.models, swaggerType);
+      }
+      return val;
+    }
+  }
+  if (attr in obj) return obj[attr];
+  const camel = snakeToCamel(attr);
+  if (camel in obj) return obj[camel];
+  return null;
+}
+
+function matchesException(e: unknown, excType: string): boolean {
+  if (excType === "Exception")
+    return e instanceof ProgramRaise || e instanceof ProgramServiceError;
+  if (excType === "ServiceError") return e instanceof ProgramServiceError;
+  if (e instanceof ProgramRaise) {
+    if (e.cls === excType) return true;
+    if (
+      excType === "OSError" &&
+      (e.cls === "FileNotFoundError" || e.cls === "PermissionError")
+    )
+      return true;
+  }
+  return false;
 }
 
 /** Python `str.format` with positional fields only (`{}`, `{0}`), no format specs. */
@@ -423,6 +658,7 @@ export function runProgram(
     if ((p as { expose?: boolean }).expose === false) continue;
     const given = kwarg(p.name, values, params);
     const v = given instanceof ProgramFile ? given.reopen() : given;
+    if (p.multiple && Array.isArray(v)) pyTuples.add(v);
     kwargs[p.name] = v;
     if (values[p.name] === undefined) filled.set(p.name, v);
   }
@@ -431,12 +667,20 @@ export function runProgram(
   let target = 0;
   let asked = 0;
   let sdkCalled = 0;
+  let waitCalled = 0;
   let renderCalled = 0;
+  let echoCalled = 0;
+  let sleepCalled = 0;
+  const caught: Error[] = [];
   const ctxObj = new ProgramObject("ctx.obj", {
     request_id: context.requestId ?? null,
   });
 
   const item = (obj: unknown, key: unknown): unknown => {
+    if (obj instanceof ProgramHeaders && typeof key === "string") {
+      if (obj.has(key)) return obj.get(key);
+      throw new ProgramRaise("KeyError", pyRepr(key));
+    }
     if (obj instanceof ProgramObject && typeof key === "string") {
       if (key in obj.fields) return obj.fields[key];
       if (obj === ctxObj && key === "config")
@@ -459,7 +703,21 @@ export function runProgram(
   };
 
   const call = (method: string, obj: unknown, args: unknown[]): unknown => {
-    if (isDict(obj)) {
+    if (obj instanceof ProgramHeaders) {
+      const key = args[0] as string;
+      switch (method) {
+        case "get":
+          return typeof key === "string" && obj.has(key)
+            ? obj.get(key)
+            : (args[1] ?? null);
+        case "keys":
+          if (args.length === 0) return obj.keys();
+          break;
+        case "items":
+          if (args.length === 0) return obj.entries();
+          break;
+      }
+    } else if (isDict(obj)) {
       const key = args[0] as string;
       switch (method) {
         case "get":
@@ -546,7 +804,9 @@ export function runProgram(
       case "in":
       case "notin": {
         let found: boolean;
-        if (isDict(b)) found = typeof a === "string" && a in b;
+        if (b instanceof ProgramHeaders)
+          found = typeof a === "string" && b.has(a);
+        else if (isDict(b)) found = typeof a === "string" && a in b;
         else if (Array.isArray(b)) found = b.some((x) => pyEq(x, a));
         else if (typeof b === "string" && typeof a === "string")
           found = b.includes(a);
@@ -577,18 +837,59 @@ export function runProgram(
       case "parse": {
         // cli_util.parse_json_parameter(name, value, default=None, camelize_keys=True)
         const defaultVal = args.length >= 3 ? args[2] : null;
-        const camelize = args.length >= 4 ? truthy(args[3]) : true;
+        const camelize = args.length >= 4 ? pyTruthy(args[3]) : true;
         if (b === null || b === undefined) return defaultVal;
         return parse(String(a), b, camelize);
       }
       case "requestId":
-        return truthy(a)
+        return pyTruthy(a)
           ? String(a)
           : randomUUID().replaceAll("-", "").toUpperCase();
       case "str":
         return pyStr(a);
       case "bool":
-        return truthy(a);
+        return pyTruthy(a);
+      case "stderr":
+        return new ProgramObject("sys.stderr");
+      case "stdout":
+        return new ProgramObject("sys.stdout");
+      case "echo": {
+        // click.echo(message=None, file=None, nl=True, err=False)
+        const [message, file, nl = true, err = false] = args;
+        let toStderr = pyTruthy(err);
+        if (file !== null && file !== undefined) {
+          if (file instanceof ProgramObject && file.kind === "sys.stderr")
+            toStderr = true;
+          else if (!(
+            file instanceof ProgramObject && file.kind === "sys.stdout"
+          ))
+            throw new ProgramUnsupported("click.echo file");
+        }
+        const body =
+          message === null || message === undefined
+            ? ""
+            : typeof message === "string"
+              ? message
+              : message instanceof Uint8Array
+                ? decodePythonUtf8(message)
+                : pyStr(message);
+        const text = pyTruthy(nl) ? `${body}\n` : body;
+        const i = echoCalled++;
+        if (i < (context.echoCount ?? 0)) return null;
+        throw new ProgramEcho(text, toStderr);
+      }
+      case "sleep": {
+        if (typeof a !== "number" || !Number.isFinite(a))
+          throw new ProgramUnsupported("time.sleep()");
+        if (a < 0)
+          throw new ProgramRaise(
+            "ValueError",
+            "sleep length must be non-negative",
+          );
+        const i = sleepCalled++;
+        if (i < (context.sleepCount ?? 0)) return null;
+        throw new ProgramSleep(a);
+      }
       case "b64encode":
         if (!(a instanceof Uint8Array))
           throw new ProgramUnsupported("b64encode() of a str");
@@ -604,6 +905,7 @@ export function runProgram(
       case "dict": {
         // dict() / dict(pairs) / dict(a_dict): a new dict.
         if (args.length === 0) return {};
+        if (a instanceof ProgramHeaders) return Object.fromEntries(a.entries());
         if (isDict(a)) return { ...a };
         const out: Dict = {};
         for (const pair of iterate(a)) {
@@ -636,12 +938,19 @@ export function runProgram(
         return ctxObj;
       case "client": {
         // cli_util.build_client: ctx.obj['config'] is the config it built from.
-        const region = context.region?.();
+        const overrideRegion =
+          typeof ctxObj.fields.region === "string"
+            ? ctxObj.fields.region
+            : undefined;
+        const region = overrideRegion ?? context.region?.();
         ctxObj.fields.config = new ProgramObject(
           "config",
           region !== undefined ? { region } : {},
         );
-        return new ProgramObject(`${String(a)}.${String(b)}`);
+        return new ProgramObject(
+          `${String(a)}.${String(b)}`,
+          overrideRegion !== undefined ? { region: overrideRegion } : {},
+        );
       }
       case "namespace":
         if (
@@ -693,6 +1002,7 @@ export function runProgram(
           throw new ProgramUnsupported("os.path.isfile()");
         return files.isfile(a);
       case "items":
+        if (a instanceof ProgramHeaders) return a.entries();
         if (isDict(a)) return Object.entries(a);
         throw new ProgramUnsupported("iteritems()");
       case "list":
@@ -704,6 +1014,7 @@ export function runProgram(
         return items[0];
       }
       case "len":
+        if (a instanceof ProgramHeaders) return a.size;
         if (typeof a === "string" || Array.isArray(a)) return a.length;
         if (isDict(a)) return Object.keys(a).length;
         throw new ProgramUnsupported("len()");
@@ -728,7 +1039,7 @@ export function runProgram(
   /** A comprehension's loop variable(s) bound to `x`; true when every `if` holds. */
   const bind = (target: unknown, x: unknown, conds?: Expr[]): boolean => {
     assign(target, x);
-    return (conds ?? []).every((c) => truthy(evaluate(c)));
+    return (conds ?? []).every((c) => pyTruthy(evaluate(c)));
   };
 
   const evaluate = (e: Expr): unknown => {
@@ -751,7 +1062,22 @@ export function runProgram(
       case "attr": {
         const attr = rest[0] as string;
         const obj = evaluate(rest[1] as Expr);
-        if (obj instanceof ProgramResponse && attr === "data") return obj.data;
+        if (obj instanceof ProgramResponse) {
+          if (attr === "data") return obj.data;
+          if (attr === "headers") return obj.headers;
+          if (attr === "status") return obj.status;
+          throw new ProgramRaise(
+            "AttributeError",
+            `'Response' object has no attribute '${attr}'`,
+          );
+        }
+        if (obj === null || obj === undefined) {
+          throw new ProgramRaise(
+            "AttributeError",
+            `'NoneType' object has no attribute '${attr}'`,
+          );
+        }
+        if (isDict(obj)) return modelAttr(obj, attr);
         throw new ProgramUnsupported(`attribute .${attr}`);
       }
       case "sdk": {
@@ -775,8 +1101,66 @@ export function runProgram(
         }
         const i = sdkCalled++;
         const cached = context.sdkResults?.[i];
-        if (cached !== undefined) return cached;
-        throw new ProgramSdkCall(opIndex, pos, kw);
+        if (cached !== undefined) {
+          if (cached instanceof Error) throw cached;
+          return cached;
+        }
+        const region =
+          typeof clientObj.fields.region === "string"
+            ? clientObj.fields.region
+            : undefined;
+        throw new ProgramSdkCall(opIndex, pos, kw, region);
+      }
+      case "waitUntil": {
+        const pos = (rest[0] as Expr[]).map(evaluate);
+        const kwPairs = rest[1] as [string, Expr][];
+        const starExpr = rest[2] as Expr | null;
+        const kw: Dict = {};
+        if (starExpr !== null) {
+          const star = evaluate(starExpr);
+          if (!isDict(star))
+            throw new ProgramUnsupported("wait_until ** of a non-dict");
+          Object.assign(kw, star);
+        }
+        for (const [k, expr] of kwPairs) kw[k] = evaluate(expr);
+        const response = pos[1] ?? kw.response;
+        const property = pos[2] ?? kw.property;
+        const stateArg = pos[3] ?? kw.state;
+        if (
+          !(response instanceof ProgramResponse) ||
+          typeof property !== "string"
+        )
+          throw new ProgramUnsupported("oci.wait_until args");
+        const states = Array.isArray(stateArg)
+          ? stateArg.map(String)
+          : typeof stateArg === "string"
+            ? [stateArg]
+            : null;
+        if (!states) throw new ProgramUnsupported("oci.wait_until state");
+        const maxWait =
+          kw.max_wait_seconds !== undefined && kw.max_wait_seconds !== null
+            ? Number(kw.max_wait_seconds)
+            : 1200;
+        const maxInterval =
+          kw.max_interval_seconds !== undefined &&
+          kw.max_interval_seconds !== null
+            ? Number(kw.max_interval_seconds)
+            : 30;
+        const succeedOnNotFound = pyTruthy(kw.succeed_on_not_found ?? false);
+        const i = waitCalled++;
+        const cached = context.waitResults?.[i];
+        if (cached !== undefined) {
+          if (cached instanceof Error) throw cached;
+          return cached;
+        }
+        throw new ProgramWaitUntil(
+          response,
+          property,
+          states,
+          maxWait,
+          maxInterval,
+          succeedOnNotFound,
+        );
       }
       case "fn":
         return fn(rest[0] as string, rest.slice(1).map(evaluate));
@@ -811,12 +1195,12 @@ export function runProgram(
       case "target":
         return new ProgramTarget(rest[0] as number);
       case "not":
-        return !truthy(evaluate(rest[0] as Expr));
+        return !pyTruthy(evaluate(rest[0] as Expr));
       case "and": {
         let v: unknown = true;
         for (const part of rest) {
           v = evaluate(part);
-          if (!truthy(v)) return v;
+          if (!pyTruthy(v)) return v;
         }
         return v;
       }
@@ -824,7 +1208,7 @@ export function runProgram(
         let v: unknown = false;
         for (const part of rest) {
           v = evaluate(part);
-          if (truthy(v)) return v;
+          if (pyTruthy(v)) return v;
         }
         return v;
       }
@@ -844,7 +1228,7 @@ export function runProgram(
         throw new ProgramUnsupported(`TypeError: ${String(rest[0])}`);
       }
       case "ifexp":
-        return truthy(evaluate(rest[0] as Expr))
+        return pyTruthy(evaluate(rest[0] as Expr))
           ? evaluate(rest[1] as Expr)
           : evaluate(rest[2] as Expr);
     }
@@ -865,7 +1249,9 @@ export function runProgram(
           const obj = evaluate(rest[0] as Expr);
           const key = evaluate(rest[1] as Expr);
           const value = evaluate(rest[2] as Expr);
-          if (isDict(obj) && typeof key === "string") obj[key] = value;
+          if (obj === ctxObj && typeof key === "string")
+            ctxObj.fields[key] = value;
+          else if (isDict(obj) && typeof key === "string") obj[key] = value;
           else if (Array.isArray(obj) && typeof key === "number")
             obj[key < 0 ? obj.length + key : key] = value;
           else throw new ProgramUnsupported("item assignment");
@@ -884,7 +1270,7 @@ export function runProgram(
           break;
         case "if":
           execute(
-            (truthy(evaluate(rest[0] as Expr))
+            (pyTruthy(evaluate(rest[0] as Expr))
               ? rest[1]
               : rest[2]) as Statement[],
           );
@@ -900,11 +1286,57 @@ export function runProgram(
             execute(rest[0] as Statement[]);
           } catch (e) {
             // `except Exception`: what the Engine models as raised Python exceptions.
-            if (!(e instanceof ProgramRaise)) throw e;
+            if (!matchesException(e, "Exception")) throw e;
             if (rest[1] !== null) env[rest[1] as string] = e;
-            execute(rest[2] as Statement[]);
+            caught.push(e as Error);
+            try {
+              execute(rest[2] as Statement[]);
+            } finally {
+              caught.pop();
+            }
           }
           break;
+        case "tryMulti":
+          try {
+            execute(rest[0] as Statement[]);
+          } catch (e) {
+            const handlers = rest[1] as [string, string | null, Statement[]][];
+            const matched = handlers.find(([excType]) =>
+              matchesException(e, excType),
+            );
+            if (!matched) throw e;
+            if (matched[1] !== null) env[matched[1]] = e;
+            caught.push(e as Error);
+            try {
+              execute(matched[2]);
+            } finally {
+              caught.pop();
+            }
+          }
+          break;
+        case "reraise": {
+          const active = caught.at(-1);
+          if (!active)
+            throw new ProgramUnsupported("bare raise outside except");
+          throw active;
+        }
+        case "exit": {
+          const arg = evaluate(rest[0] as Expr);
+          if (arg === null || arg === undefined) throw new ProgramExit(0);
+          if (typeof arg === "boolean") throw new ProgramExit(arg ? 1 : 0);
+          if (typeof arg === "number") throw new ProgramExit(arg);
+          throw new ProgramExit(1, `${pyStr(arg)}\n`);
+        }
+        case "checkNoExtraKwargs": {
+          const extra = Object.keys(kwargs)[0];
+          if (extra !== undefined) {
+            throw new ProgramRaise(
+              "TypeError",
+              `${String(rest[0])}() got an unexpected keyword argument ${pyRepr(extra)}`,
+            );
+          }
+          break;
+        }
         case "abort":
           throw new ProgramAbort();
         case "usage":

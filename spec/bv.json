@@ -817,6 +817,285 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "volume_backup_id",
+            ["call", "pop", ["var", "kwargs"], "volume_backup_id"]
+          ],
+          [
+            "let",
+            "destination_region",
+            ["call", "pop", ["var", "kwargs"], "destination_region"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "kms_key_id",
+            ["call", "pop", ["var", "kwargs"], "kms_key_id"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "volume_backup_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "volume_backup_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --volume-backup-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "details", ["dict"]],
+          [
+            "set",
+            ["var", "details"],
+            "destinationRegion",
+            ["var", "destination_region"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "kms_key_id"], null],
+            [["set", ["var", "details"], "kmsKeyId", ["var", "kms_key_id"]]],
+            []
+          ],
+          ["let", "client", ["fn", "client", "core", "blockstorage"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["volume_backup_id", ["var", "volume_backup_id"]],
+                ["copy_volume_backup_details", ["var", "details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          ["set", ["fn", "ctxObj"], "region", ["var", "destination_region"]],
+          ["let", "client", ["fn", "client", "core", "blockstorage"]],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.blockstorage",
+          "method": "copy_volume_backup",
+          "http": "POST",
+          "path": "/volumeBackups/{volumeBackupId}/actions/copy",
+          "positionalArgs": ["volume_backup_id", "copy_volume_backup_details"],
+          "pathParams": {
+            "volumeBackupId": "volume_backup_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "copy_volume_backup_details",
+          "responseType": "VolumeBackup"
+        },
+        {
+          "client": "core.blockstorage",
+          "method": "get_volume_backup",
+          "http": "GET",
+          "path": "/volumeBackups/{volumeBackupId}",
+          "positionalArgs": ["volume_backup_id"],
+          "pathParams": {
+            "volumeBackupId": "volume_backup_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "VolumeBackup"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -3789,6 +4068,621 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "or",
+              [
+                "and",
+                ["item", ["var", "kwargs"], "source_boot_volume_id"],
+                ["item", ["var", "kwargs"], "boot_volume_backup_id"]
+              ],
+              [
+                "and",
+                ["item", ["var", "kwargs"], "source_boot_volume_id"],
+                ["item", ["var", "kwargs"], "source_volume_replica_id"]
+              ],
+              [
+                "and",
+                ["item", ["var", "kwargs"], "boot_volume_backup_id"],
+                ["item", ["var", "kwargs"], "source_volume_replica_id"]
+              ]
+            ],
+            [
+              [
+                "usage",
+                "You can only specify one of either --source-boot-volume-id, --boot-volume-backup-id or --source-volume-replica-id option"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "source_boot_volume_id"]],
+              ["not", ["item", ["var", "kwargs"], "boot_volume_backup_id"]],
+              ["not", ["item", ["var", "kwargs"], "source_volume_replica_id"]]
+            ],
+            [
+              [
+                "usage",
+                "An empty boot volume cannot be created. Please specify either --boot-volume-backup-id, --source-boot-volume-id or --source-volume-replica-id"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "source_boot_volume_id"]],
+              ["not", ["item", ["var", "kwargs"], "source_volume_replica_id"]]
+            ],
+            [
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "availability_domain"]],
+                [
+                  [
+                    "usage",
+                    "An availability domain must be specified when restoring a boot volume from backup"
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "core", "blockstorage"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "source_boot_volume_id"],
+            [
+              [
+                "let",
+                "source_boot_volume",
+                [
+                  "sdk",
+                  0,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "boot_volume_id",
+                      ["item", ["var", "kwargs"], "source_boot_volume_id"]
+                    ]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "compartment_id",
+                    [
+                      "attr",
+                      "compartment_id",
+                      ["attr", "data", ["var", "source_boot_volume"]]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "boot_volume_backup_id"],
+            [
+              [
+                "let",
+                "source_backup",
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "boot_volume_backup_id",
+                      ["item", ["var", "kwargs"], "boot_volume_backup_id"]
+                    ]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "compartment_id",
+                    [
+                      "attr",
+                      "compartment_id",
+                      ["attr", "data", ["var", "source_backup"]]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "source_volume_replica_id"],
+            [
+              [
+                "let",
+                "source_volume_replica",
+                [
+                  "sdk",
+                  2,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "boot_volume_replica_id",
+                      ["item", ["var", "kwargs"], "source_volume_replica_id"]
+                    ]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "availability_domain",
+                [
+                  "attr",
+                  "availability_domain",
+                  ["attr", "data", ["var", "source_volume_replica"]]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "compartment_id",
+                    [
+                      "attr",
+                      "compartment_id",
+                      ["attr", "data", ["var", "source_volume_replica"]]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              ["item", ["var", "kwargs"], "source_boot_volume_id"],
+              ["item", ["var", "kwargs"], "boot_volume_backup_id"],
+              ["item", ["var", "kwargs"], "source_volume_replica_id"]
+            ],
+            [
+              [
+                "if",
+                ["item", ["var", "kwargs"], "boot_volume_backup_id"],
+                [
+                  [
+                    "let",
+                    "source_details",
+                    [
+                      "dict",
+                      ["type", "bootVolumeBackup"],
+                      [
+                        "id",
+                        ["item", ["var", "kwargs"], "boot_volume_backup_id"]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    ["item", ["var", "kwargs"], "source_boot_volume_id"],
+                    [
+                      [
+                        "let",
+                        "source_details",
+                        [
+                          "dict",
+                          ["type", "bootVolume"],
+                          [
+                            "id",
+                            ["item", ["var", "kwargs"], "source_boot_volume_id"]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "let",
+                        "source_details",
+                        [
+                          "dict",
+                          ["type", "bootVolumeReplica"],
+                          [
+                            "id",
+                            [
+                              "item",
+                              ["var", "kwargs"],
+                              "source_volume_replica_id"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "source_details",
+                ["fn", "dumps", ["var", "source_details"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "source_boot_volume_id", null]
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "boot_volume_backup_id", null]
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "source_volume_replica_id", null]
+          ],
+          ["do", ["fn", "removeSkeleton", ["var", "kwargs"]]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_boot_volume",
+        "complexTypes": {
+          "defined-tags": "core:dict(str, dict(str, object))",
+          "freeform-tags": "core:dict(str, string)",
+          "source-details": "core:BootVolumeSourceDetails",
+          "boot-volume-replicas": "core:list[BootVolumeReplicaDetails]",
+          "autotune-policies": "core:list[AutotunePolicy]"
+        },
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_placement_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vpus_per_gb",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_tune_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "boot_volume_replicas",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autotune_policies",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "xrc_kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_boot_volume",
+        "http": "POST",
+        "path": "/bootVolumes",
+        "positionalArgs": ["create_boot_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_boot_volume_details",
+        "responseType": "BootVolume",
+        "paginated": false,
+        "lifecycleGetter": "get_boot_volume"
+      },
+      "bindings": [
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["availabilityDomain"],
+          "param": "availability_domain",
+          "when": "availability_domain is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["backupPolicyId"],
+          "param": "backup_policy_id",
+          "when": "backup_policy_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["kmsKeyId"],
+          "param": "kms_key_id",
+          "when": "kms_key_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["sizeInGBs"],
+          "param": "size_in_gbs",
+          "when": "size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["clusterPlacementGroupId"],
+          "param": "cluster_placement_group_id",
+          "when": "cluster_placement_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["vpusPerGB"],
+          "param": "vpus_per_gb",
+          "when": "vpus_per_gb is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["isAutoTuneEnabled"],
+          "param": "is_auto_tune_enabled",
+          "when": "is_auto_tune_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["bootVolumeReplicas"],
+          "transform": "parse_json_parameter",
+          "param": "boot_volume_replicas",
+          "when": "boot_volume_replicas is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["autotunePolicies"],
+          "transform": "parse_json_parameter",
+          "param": "autotune_policies",
+          "when": "autotune_policies is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_boot_volume_details",
+          "key": ["xrcKmsKeyId"],
+          "param": "xrc_kms_key_id",
+          "when": "xrc_kms_key_id is not None"
+        }
+      ],
+      "sdkOperations": [
+        {
+          "client": "core.blockstorage",
+          "method": "get_boot_volume",
+          "http": "GET",
+          "path": "/bootVolumes/{bootVolumeId}",
+          "positionalArgs": ["boot_volume_id"],
+          "pathParams": {
+            "bootVolumeId": "boot_volume_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "BootVolume"
+        },
+        {
+          "client": "core.blockstorage",
+          "method": "get_boot_volume_backup",
+          "http": "GET",
+          "path": "/bootVolumeBackups/{bootVolumeBackupId}",
+          "positionalArgs": ["boot_volume_backup_id"],
+          "pathParams": {
+            "bootVolumeBackupId": "boot_volume_backup_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "BootVolumeBackup"
+        },
+        {
+          "client": "core.blockstorage",
+          "method": "get_boot_volume_replica",
+          "http": "GET",
+          "path": "/bootVolumeReplicas/{bootVolumeReplicaId}",
+          "positionalArgs": ["boot_volume_replica_id"],
+          "pathParams": {
+            "bootVolumeReplicaId": "boot_volume_replica_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "BootVolumeReplica"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6968,6 +7862,292 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "boot_volume_backup_id",
+            ["call", "pop", ["var", "kwargs"], "boot_volume_backup_id"]
+          ],
+          [
+            "let",
+            "destination_region",
+            ["call", "pop", ["var", "kwargs"], "destination_region"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "kms_key_id",
+            ["call", "pop", ["var", "kwargs"], "kms_key_id"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "boot_volume_backup_id"]],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  ["call", "strip", ["var", "boot_volume_backup_id"]]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --boot-volume-backup-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "details", ["dict"]],
+          [
+            "set",
+            ["var", "details"],
+            "destinationRegion",
+            ["var", "destination_region"]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "kms_key_id"], null],
+            [["set", ["var", "details"], "kmsKeyId", ["var", "kms_key_id"]]],
+            []
+          ],
+          ["let", "client", ["fn", "client", "core", "blockstorage"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["boot_volume_backup_id", ["var", "boot_volume_backup_id"]],
+                ["copy_boot_volume_backup_details", ["var", "details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          ["set", ["fn", "ctxObj"], "region", ["var", "destination_region"]],
+          ["let", "client", ["fn", "client", "core", "blockstorage"]],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.blockstorage",
+          "method": "copy_boot_volume_backup",
+          "http": "POST",
+          "path": "/bootVolumeBackups/{bootVolumeBackupId}/actions/copy",
+          "positionalArgs": [
+            "boot_volume_backup_id",
+            "copy_boot_volume_backup_details"
+          ],
+          "pathParams": {
+            "bootVolumeBackupId": "boot_volume_backup_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "copy_boot_volume_backup_details",
+          "responseType": "BootVolumeBackup"
+        },
+        {
+          "client": "core.blockstorage",
+          "method": "get_boot_volume_backup",
+          "http": "GET",
+          "path": "/bootVolumeBackups/{bootVolumeBackupId}",
+          "positionalArgs": ["boot_volume_backup_id"],
+          "pathParams": {
+            "bootVolumeBackupId": "boot_volume_backup_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "BootVolumeBackup"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -10463,6 +11643,668 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "or",
+              [
+                "and",
+                ["item", ["var", "kwargs"], "source_volume_id"],
+                ["item", ["var", "kwargs"], "volume_backup_id"]
+              ],
+              [
+                "and",
+                ["item", ["var", "kwargs"], "source_volume_id"],
+                ["item", ["var", "kwargs"], "source_volume_replica_id"]
+              ],
+              [
+                "and",
+                ["item", ["var", "kwargs"], "volume_backup_id"],
+                ["item", ["var", "kwargs"], "source_volume_replica_id"]
+              ]
+            ],
+            [
+              [
+                "usage",
+                "You can only specify one of either --volume-backup-id, --source-volume-id or --source-volume-replica-id option"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "source_volume_id"]],
+              ["not", ["item", ["var", "kwargs"], "source_volume_replica_id"]]
+            ],
+            [
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "availability_domain"]],
+                [
+                  [
+                    "usage",
+                    "An availability domain must be specified when creating an empty volume or restoring a volume from a backup"
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "source_volume_id"]],
+              ["not", ["item", ["var", "kwargs"], "volume_backup_id"]],
+              ["not", ["item", ["var", "kwargs"], "source_volume_replica_id"]],
+              ["not", ["item", ["var", "kwargs"], "compartment_id"]]
+            ],
+            [
+              [
+                "usage",
+                "A compartment ID must be specified when creating an empty volume"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["item", ["var", "kwargs"], "size_in_mbs"],
+              ["item", ["var", "kwargs"], "size_in_gbs"]
+            ],
+            [
+              [
+                "usage",
+                "You cannot specify both --size-in-mbs and --size-in-gbs"
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "core", "blockstorage"]],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "source_volume_id"],
+            [
+              [
+                "let",
+                "source_volume",
+                [
+                  "sdk",
+                  0,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "volume_id",
+                      ["item", ["var", "kwargs"], "source_volume_id"]
+                    ]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "compartment_id",
+                    [
+                      "attr",
+                      "compartment_id",
+                      ["attr", "data", ["var", "source_volume"]]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "volume_backup_id"],
+            [
+              [
+                "let",
+                "source_backup",
+                [
+                  "sdk",
+                  1,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "volume_backup_id",
+                      ["item", ["var", "kwargs"], "volume_backup_id"]
+                    ]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "compartment_id",
+                    [
+                      "attr",
+                      "compartment_id",
+                      ["attr", "data", ["var", "source_backup"]]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "source_volume_replica_id"],
+            [
+              [
+                "let",
+                "source_volume_replica",
+                [
+                  "sdk",
+                  2,
+                  ["var", "client"],
+                  [],
+                  [
+                    [
+                      "block_volume_replica_id",
+                      ["item", ["var", "kwargs"], "source_volume_replica_id"]
+                    ]
+                  ],
+                  null
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "availability_domain",
+                [
+                  "attr",
+                  "availability_domain",
+                  ["attr", "data", ["var", "source_volume_replica"]]
+                ]
+              ],
+              [
+                "if",
+                ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+                [
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "compartment_id",
+                    [
+                      "attr",
+                      "compartment_id",
+                      ["attr", "data", ["var", "source_volume_replica"]]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "or",
+              ["item", ["var", "kwargs"], "source_volume_id"],
+              ["item", ["var", "kwargs"], "volume_backup_id"],
+              ["item", ["var", "kwargs"], "source_volume_replica_id"]
+            ],
+            [
+              [
+                "if",
+                ["item", ["var", "kwargs"], "volume_backup_id"],
+                [
+                  [
+                    "let",
+                    "source_details",
+                    [
+                      "dict",
+                      ["type", "volumeBackup"],
+                      ["id", ["item", ["var", "kwargs"], "volume_backup_id"]]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "if",
+                    ["item", ["var", "kwargs"], "source_volume_id"],
+                    [
+                      [
+                        "let",
+                        "source_details",
+                        [
+                          "dict",
+                          ["type", "volume"],
+                          [
+                            "id",
+                            ["item", ["var", "kwargs"], "source_volume_id"]
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "let",
+                        "source_details",
+                        [
+                          "dict",
+                          ["type", "blockVolumeReplica"],
+                          [
+                            "id",
+                            [
+                              "item",
+                              ["var", "kwargs"],
+                              "source_volume_replica_id"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "source_details",
+                ["fn", "dumps", ["var", "source_details"]]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "source_volume_id", null]],
+          ["do", ["call", "pop", ["var", "kwargs"], "volume_backup_id", null]],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "source_volume_replica_id", null]
+          ],
+          ["do", ["fn", "removeSkeleton", ["var", "kwargs"]]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.core.src.oci_cli_blockstorage.generated.blockstorage_cli.create_volume",
+        "complexTypes": {
+          "defined-tags": "core:dict(str, dict(str, object))",
+          "freeform-tags": "core:dict(str, string)",
+          "source-details": "core:VolumeSourceDetails",
+          "block-volume-replicas": "core:list[BlockVolumeReplicaDetails]",
+          "autotune-policies": "core:list[AutotunePolicy]"
+        },
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_policy_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vpus_per_gb",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_placement_group_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "size_in_mbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "volume_backup_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_tune_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "block_volume_replicas",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autotune_policies",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "xrc_kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_reservations_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "core.blockstorage",
+        "method": "create_volume",
+        "http": "POST",
+        "path": "/volumes",
+        "positionalArgs": ["create_volume_details"],
+        "pathParams": {},
+        "queryParams": {},
+        "headerParams": {
+          "accept": {
+            "value": "application/json"
+          },
+          "content-type": {
+            "value": "application/json"
+          },
+          "opc-retry-token": {
+            "arg": "opc_retry_token"
+          }
+        },
+        "body": "create_volume_details",
+        "responseType": "Volume",
+        "paginated": false,
+        "lifecycleGetter": "get_volume"
+      },
+      "bindings": [
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["compartmentId"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["availabilityDomain"],
+          "param": "availability_domain",
+          "when": "availability_domain is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["backupPolicyId"],
+          "param": "backup_policy_id",
+          "when": "backup_policy_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["definedTags"],
+          "transform": "parse_json_parameter",
+          "param": "defined_tags",
+          "when": "defined_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["displayName"],
+          "param": "display_name",
+          "when": "display_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["freeformTags"],
+          "transform": "parse_json_parameter",
+          "param": "freeform_tags",
+          "when": "freeform_tags is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["kmsKeyId"],
+          "param": "kms_key_id",
+          "when": "kms_key_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["vpusPerGB"],
+          "param": "vpus_per_gb",
+          "when": "vpus_per_gb is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["clusterPlacementGroupId"],
+          "param": "cluster_placement_group_id",
+          "when": "cluster_placement_group_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["sizeInGBs"],
+          "param": "size_in_gbs",
+          "when": "size_in_gbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["sizeInMBs"],
+          "param": "size_in_mbs",
+          "when": "size_in_mbs is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["sourceDetails"],
+          "transform": "parse_json_parameter",
+          "param": "source_details",
+          "when": "source_details is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["volumeBackupId"],
+          "param": "volume_backup_id",
+          "when": "volume_backup_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["isAutoTuneEnabled"],
+          "param": "is_auto_tune_enabled",
+          "when": "is_auto_tune_enabled is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["blockVolumeReplicas"],
+          "transform": "parse_json_parameter",
+          "param": "block_volume_replicas",
+          "when": "block_volume_replicas is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["autotunePolicies"],
+          "transform": "parse_json_parameter",
+          "param": "autotune_policies",
+          "when": "autotune_policies is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["xrcKmsKeyId"],
+          "param": "xrc_kms_key_id",
+          "when": "xrc_kms_key_id is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_volume_details",
+          "key": ["isReservationsEnabled"],
+          "param": "is_reservations_enabled",
+          "when": "is_reservations_enabled is not None"
+        }
+      ],
+      "sdkOperations": [
+        {
+          "client": "core.blockstorage",
+          "method": "get_volume",
+          "http": "GET",
+          "path": "/volumes/{volumeId}",
+          "positionalArgs": ["volume_id"],
+          "pathParams": {
+            "volumeId": "volume_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Volume"
+        },
+        {
+          "client": "core.blockstorage",
+          "method": "get_volume_backup",
+          "http": "GET",
+          "path": "/volumeBackups/{volumeBackupId}",
+          "positionalArgs": ["volume_backup_id"],
+          "pathParams": {
+            "volumeBackupId": "volume_backup_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "VolumeBackup"
+        },
+        {
+          "client": "core.blockstorage",
+          "method": "get_block_volume_replica",
+          "http": "GET",
+          "path": "/blockVolumeReplicas/{blockVolumeReplicaId}",
+          "positionalArgs": ["block_volume_replica_id"],
+          "pathParams": {
+            "blockVolumeReplicaId": "block_volume_replica_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "BlockVolumeReplica"
+        }
+      ],
       "params": [
         {
           "kind": "option",

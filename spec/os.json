@@ -2794,6 +2794,172 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "namespace", ["call", "pop", ["var", "kwargs"], "namespace"]],
+          [
+            "let",
+            "bucket_name",
+            ["call", "pop", ["var", "kwargs"], "bucket_name"]
+          ],
+          [
+            "let",
+            "object_name",
+            ["call", "pop", ["var", "kwargs"], "object_name"]
+          ],
+          ["let", "upload_id", ["call", "pop", ["var", "kwargs"], "upload_id"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          [
+            "let",
+            "client",
+            ["fn", "client", "object_storage", "object_storage"]
+          ],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "tryMulti",
+                [
+                  [
+                    "let",
+                    "response",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [
+                        ["var", "namespace"],
+                        ["var", "bucket_name"],
+                        ["var", "object_name"],
+                        ["var", "upload_id"]
+                      ],
+                      [["limit", 1]],
+                      null
+                    ]
+                  ],
+                  ["render", ["var", "response"]],
+                  [
+                    "if",
+                    ["cmp", "==", ["attr", "status", ["var", "response"]], 200],
+                    [
+                      [
+                        "if",
+                        [
+                          "not",
+                          [
+                            "fn",
+                            "confirm",
+                            "WARNING: Are you sure you want to permanently remove this incomplete upload?"
+                          ]
+                        ],
+                        [["abort"]],
+                        []
+                      ]
+                    ],
+                    []
+                  ]
+                ],
+                [["ServiceError", null, [["reraise"]]]]
+              ]
+            ],
+            []
+          ],
+          [
+            "render",
+            [
+              "sdk",
+              1,
+              ["var", "client"],
+              [
+                ["var", "namespace"],
+                ["var", "bucket_name"],
+                ["var", "object_name"],
+                ["var", "upload_id"]
+              ],
+              [],
+              null
+            ]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "object_storage.object_storage",
+          "method": "list_multipart_upload_parts",
+          "http": "GET",
+          "path": "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+          "positionalArgs": [
+            "namespace_name",
+            "bucket_name",
+            "object_name",
+            "upload_id"
+          ],
+          "pathParams": {
+            "namespaceName": "namespace_name",
+            "bucketName": "bucket_name",
+            "objectName": "object_name"
+          },
+          "queryParams": {
+            "uploadId": {
+              "arg": "upload_id"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-client-request-id": {
+              "arg": "opc_client_request_id"
+            }
+          },
+          "responseType": "list[MultipartUploadPartSummary]"
+        },
+        {
+          "client": "object_storage.object_storage",
+          "method": "abort_multipart_upload",
+          "http": "DELETE",
+          "path": "/n/{namespaceName}/b/{bucketName}/u/{objectName}",
+          "positionalArgs": [
+            "namespace_name",
+            "bucket_name",
+            "object_name",
+            "upload_id"
+          ],
+          "pathParams": {
+            "namespaceName": "namespace_name",
+            "bucketName": "bucket_name",
+            "objectName": "object_name"
+          },
+          "queryParams": {
+            "uploadId": {
+              "arg": "upload_id"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-client-request-id": {
+              "arg": "opc_client_request_id"
+            }
+          }
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -18504,6 +18670,14 @@
           ["upload_id", "str", "uploadId"],
           ["time_created", "datetime", "timeCreated"],
           ["storage_tier", "str", "storageTier"]
+        ]
+      },
+      "MultipartUploadPartSummary": {
+        "attributes": [
+          ["etag", "str", "etag"],
+          ["md5", "str", "md5"],
+          ["size", "int", "size"],
+          ["part_number", "int", "partNumber"]
         ]
       },
       "NamespaceMetadata": {

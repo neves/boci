@@ -925,7 +925,13 @@ export async function callOperation(
   const pathParams: Record<string, string> = {};
   for (const [name, arg] of Object.entries(operation.pathParams ?? {})) {
     const value = boundValue(arg);
-    if (value !== undefined) pathParams[name] = String(value);
+    if (value === undefined || value === null || isBlank(value)) {
+      io.err(
+        `ValueError: Parameter ${name} cannot be None, whitespace or empty string\n`,
+      );
+      throw new Exit(1);
+    }
+    pathParams[name] = String(value);
   }
   const queryParams: [string, string][] = [];
   for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
@@ -1078,16 +1084,26 @@ export function bindSdkArgs(
 
 /** Decode an SDK operation's response body into its `.data` value. */
 export function parseSdkResponseData(result: OperationResult): unknown {
-  if (
-    !result.response.ok ||
-    !result.operation.responseType ||
-    result.raw.trim().length === 0
-  )
-    return null;
+  if (!result.response.ok || !result.operation.responseType) return null;
+  if (result.raw.trim().length === 0) {
+    // Python SDK deserializes an empty 200 body into an empty model instance when a model
+    // responseType is declared (all attributes default to None).
+    return result.responseModels &&
+      result.operation.responseType in result.responseModels
+      ? {}
+      : null;
+  }
   try {
     const parsed: unknown = JSON.parse(result.raw);
     if (typeof parsed === "string") return parsed;
     if (result.operation.responseType === "str") return result.raw;
+    if (
+      Array.isArray(parsed) &&
+      parsed.length === 0 &&
+      result.responseModels &&
+      result.operation.responseType in result.responseModels
+    )
+      return {};
     return parsed;
   } catch {
     return result.raw;

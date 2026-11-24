@@ -50,6 +50,7 @@ and named callback parameters are popped from kwargs first, as Click binds them.
 """
 
 import ast
+import functools
 import importlib
 import inspect
 import textwrap
@@ -77,7 +78,37 @@ FUNCTIONS = {
     "open": "open",
     "os.path.exists": "exists",
     "os.path.isfile": "isfile",
+    "time.sleep": "sleep",
 }
+# Exception types accepted in `except <type>:` handlers.
+CATCHABLE = {
+    "Exception": "Exception",
+    "oci.exceptions.MaximumWaitTimeExceeded": "MaximumWaitTimeExceeded",
+    "exceptions.MaximumWaitTimeExceeded": "MaximumWaitTimeExceeded",
+    "MaximumWaitTimeExceeded": "MaximumWaitTimeExceeded",
+    "oci.exceptions.ServiceError": "ServiceError",
+    "exceptions.ServiceError": "ServiceError",
+    "ServiceError": "ServiceError",
+    "ValueError": "ValueError",
+    "KeyError": "KeyError",
+    "AttributeError": "AttributeError",
+    "TypeError": "TypeError",
+    "FileNotFoundError": "FileNotFoundError",
+    "PermissionError": "PermissionError",
+    "OSError": "OSError",
+}
+
+
+@functools.lru_cache(maxsize=None)
+def _client_has_method(spec_name: str, service_name: str, attr: str) -> bool:
+    """Whether the SDK client class defines callable `attr` (for `hasattr(client, ...)`)."""
+    from oci_cli import dynamic_loader
+    from oci_cli.cli_clients import CLIENT_MAP
+
+    if spec_name not in CLIENT_MAP:
+        dynamic_loader.load_service_dir(spec_name)
+    cls = CLIENT_MAP.get(spec_name, {}).get(service_name)
+    return cls is not None and hasattr(cls, attr) and callable(getattr(cls, attr, None))
 # Module helpers outside the subset (re.split, enumerate, return), hand-coded in the
 # Engine as named functions (src/core/program.ts, ticket 20).
 HAND_CODED = {
@@ -207,18 +238,34 @@ class Compiler:
                 raise Unsupported("with")
             return [["let", self.name(item.optional_vars.id, scope), self.expr(call, scope)]] + self.stmts(st.body, scope)
         if isinstance(st, ast.Try):
-            # `try: body except Exception as e: handler` only (ticket 23).
-            if st.orelse or st.finalbody or len(st.handlers) != 1:
+            if st.orelse or st.finalbody or not st.handlers:
                 raise Unsupported("try")
-            handler = st.handlers[0]
-            if _dotted(handler.type) != "Exception":
-                raise Unsupported("except")
-            name = self.name(handler.name, scope) if handler.name else None
-            return [["try", self.stmts(st.body, scope), name, self.stmts(handler.body, scope)]]
+            compiled_handlers = []
+            for handler in st.handlers:
+                if handler.type is None:
+                    exc_type = "Exception"
+                else:
+                    dotted = _dotted(handler.type)
+                    exc_type = CATCHABLE.get(dotted)
+                    if exc_type is None:
+                        raise Unsupported("except")
+                hname = self.name(handler.name, scope) if handler.name else None
+                compiled_handlers.append([exc_type, hname, self.stmts(handler.body, scope)])
+            body = self.stmts(st.body, scope)
+            if len(compiled_handlers) == 1 and compiled_handlers[0][0] == "Exception":
+                return [["try", body, compiled_handlers[0][1], compiled_handlers[0][2]]]
+            return [["tryMulti", body, compiled_handlers]]
         if isinstance(st, ast.If):
-            return [["if", self.expr(st.test, scope), self.stmts(st.body, scope), self.stmts(st.orelse, scope)]]
+            test = self.expr(st.test, scope)
+            if test is False:
+                return self.stmts(st.orelse, scope)
+            if test is True:
+                return self.stmts(st.body, scope)
+            return [["if", test, self.stmts(st.body, scope), self.stmts(st.orelse, scope)]]
         if isinstance(st, ast.Raise):
             exc = st.exc
+            if exc is None:
+                return [["reraise"]]
             if (
                 isinstance(exc, ast.Call) and (_dotted(exc.func) or "").endswith("UsageError")
                 and len(exc.args) == 1 and isinstance(exc.args[0], ast.Constant)
@@ -245,6 +292,15 @@ class Compiler:
                 return [["render", self.expr(call.args[0], scope)]]
             if _dotted(call.func) == "ctx.abort" and not call.args:
                 return [["abort"]]
+            if _dotted(call.func) == "sys.exit":
+                if len(call.args) > 1 or any(k.arg != "status" for k in call.keywords):
+                    raise Unsupported("call sys.exit")
+                if call.args and call.keywords:
+                    raise Unsupported("call sys.exit")
+                arg = self.expr(call.args[0], scope) if call.args else (
+                    self.expr(call.keywords[0].value, scope) if call.keywords else None
+                )
+                return [["exit", arg]]
             if isinstance(call.func, ast.Name) and call.func.id in self.globals:
                 return self.inline(call, scope)
             return [["do", self.expr(call, scope)]]
@@ -404,10 +460,17 @@ class Compiler:
         if isinstance(node, ast.Attribute):
             # ctx.obj (its 'config' set by build_client) and `client.get_namespace().data`
             # (a request the Engine makes, then runs the program again): ticket 23.
-            if _dotted(node) == "file.name":
+            dotted = _dotted(node)
+            if dotted == "sys.stderr":
+                return ["fn", "stderr"]
+            if dotted == "sys.stdout":
+                return ["fn", "stdout"]
+            if dotted == "file.name":
                 return ["fn", "fileName", self.expr(node.value, scope)]
-            if isinstance(node.value, ast.Name) and self.name(node.value.id, scope) == "ctx" and node.attr == "obj":
-                return ["fn", "ctxObj"]
+            if isinstance(node.value, ast.Name) and self.name(node.value.id, scope) == "ctx":
+                if node.attr == "obj":
+                    return ["fn", "ctxObj"]
+                raise Unsupported("attribute")
             call = node.value
             if (
                 node.attr == "data" and isinstance(call, ast.Call)
@@ -415,9 +478,15 @@ class Compiler:
                 and not call.args and not call.keywords
             ):
                 return ["fn", "namespace", self.expr(call.func.value, scope)]
-            if node.attr == "data":
-                return ["attr", "data", self.expr(node.value, scope)]
-            raise Unsupported("attribute")
+            # Reject SDK client method references (e.g. client.list_events) and module/global attrs.
+            if isinstance(node.value, ast.Name) and self.name(node.value.id, scope) in self.clients:
+                raise Unsupported("attribute")
+            base = node.value
+            while isinstance(base, ast.Attribute):
+                base = base.value
+            if isinstance(base, ast.Name) and base.id not in scope and base.id not in self.locals:
+                raise Unsupported("attribute")
+            return ["attr", node.attr, self.expr(node.value, scope)]
         if isinstance(node, ast.UnaryOp):
             if isinstance(node.op, ast.Not):
                 return ["not", self.expr(node.operand, scope)]
@@ -426,7 +495,16 @@ class Compiler:
             raise Unsupported("unary")
         if isinstance(node, ast.BoolOp):
             op = "and" if isinstance(node.op, ast.And) else "or"
-            return [op, *(self.expr(v, scope) for v in node.values)]
+            vals = [self.expr(v, scope) for v in node.values]
+            if op == "and":
+                if all(v is True for v in vals):
+                    return True
+                for v in vals:
+                    if v is False:
+                        return False
+                    if v is not True:
+                        break
+            return [op, *vals]
         if isinstance(node, ast.Compare):
             if len(node.ops) != 1 or type(node.ops[0]) not in CMP:
                 raise Unsupported("compare")
@@ -479,6 +557,38 @@ class Compiler:
                             args.append(None)
                         args.append(kw_map["camelize_keys"])
                 return ["fn", "parse", *args]
+            if dotted == "click.echo":
+                # click.echo(message=None, file=None, nl=True, err=False, color=None)
+                if any(isinstance(a, ast.Starred) for a in node.args) or len(node.args) > 4:
+                    raise Unsupported("call click.echo")
+                params = [None, None, True, False]
+                set_slots = set()
+                for idx, a in enumerate(node.args):
+                    params[idx] = self.expr(a, scope)
+                    set_slots.add(idx)
+                slot_of = {"message": 0, "file": 1, "nl": 2, "err": 3}
+                for kw in node.keywords:
+                    if kw.arg == "color":
+                        continue
+                    if kw.arg not in slot_of or slot_of[kw.arg] in set_slots:
+                        raise Unsupported("call keywords")
+                    params[slot_of[kw.arg]] = self.expr(kw.value, scope)
+                    set_slots.add(slot_of[kw.arg])
+                return ["fn", "echo", *params]
+            if dotted == "oci.wait_until":
+                if any(isinstance(a, ast.Starred) for a in node.args):
+                    raise Unsupported("call oci.wait_until")
+                pos = [self.expr(a, scope) for a in node.args]
+                keywords = []
+                star = None
+                for kw in node.keywords:
+                    if kw.arg is None:
+                        if star is not None:
+                            raise Unsupported("two **")
+                        star = self.expr(kw.value, scope)
+                    else:
+                        keywords.append([kw.arg, self.expr(kw.value, scope)])
+                return ["waitUntil", pos, keywords, star]
             if node.keywords and not (
                 dotted == "json.dumps"
                 and all(k.arg == "sort_keys" for k in node.keywords)
@@ -489,8 +599,25 @@ class Compiler:
                 and _dotted(node.args[1]) == "six.string_types"
             ):
                 return ["fn", "isstr", self.expr(node.args[0], scope)]
-            if dotted == "hasattr" and len(node.args) == 2 and ast.unparse(node.args[1]) == "'name'":
-                return ["fn", "hasName", self.expr(node.args[0], scope)]
+            if dotted == "hasattr" and len(node.args) == 2 and isinstance(node.args[1], ast.Constant) and isinstance(node.args[1].value, str):
+                if isinstance(node.args[0], ast.Name):
+                    client_pair = self.clients.get(self.name(node.args[0].id, scope))
+                    if client_pair is not None:
+                        return _client_has_method(*client_pair, node.args[1].value)
+                if node.args[1].value == "name":
+                    return ["fn", "hasName", self.expr(node.args[0], scope)]
+            if (
+                dotted == "callable" and len(node.args) == 1
+                and isinstance(node.args[0], ast.Call)
+                and _dotted(node.args[0].func) == "getattr"
+                and len(node.args[0].args) == 2 and not node.args[0].keywords
+                and isinstance(node.args[0].args[0], ast.Name)
+                and isinstance(node.args[0].args[1], ast.Constant)
+                and isinstance(node.args[0].args[1].value, str)
+            ):
+                client_pair = self.clients.get(self.name(node.args[0].args[0].id, scope))
+                if client_pair is not None:
+                    return _client_has_method(*client_pair, node.args[0].args[1].value)
             if dotted == "os.path.basename" and len(node.args) == 1:
                 return ["fn", "basename", self.expr(node.args[0], scope)]
             if dotted in ("build_client", "cli_util.build_client"):
@@ -550,6 +677,8 @@ def _compile_wrapper(callback):
     compiler = Compiler(module_globals, local_names)
     # Click binds named parameters by name; the rest stay in **kwargs.
     prelude = [["let", a, ["call", "pop", ["var", "kwargs"], a]] for a in named[1:]]
+    if args.kwarg is None:
+        prelude.append(["checkNoExtraKwargs", fn.name])
     if (callback.__module__, fn.name) == (
         "services.generative_ai_sandbox.src.oci_cli_generative_ai_sandbox.generative_ai_sandbox_cli_extended",
         "write_sandbox_file_extended",

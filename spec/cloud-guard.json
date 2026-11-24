@@ -5754,6 +5754,356 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "target_selected",
+            ["call", "pop", ["var", "kwargs"], "target_selected"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "description",
+            ["call", "pop", ["var", "kwargs"], "description"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "displayName", ["var", "display_name"]],
+          [
+            "set",
+            ["var", "_details"],
+            "compartmentId",
+            ["var", "compartment_id"]
+          ],
+          ["set", ["var", "_details"], "iamGroupId", ["var", "iam_group_id"]],
+          [
+            "set",
+            ["var", "_details"],
+            "targetSelected",
+            ["fn", "parse", "target_selected", ["var", "target_selected"]]
+          ],
+          [
+            "set",
+            ["var", "_details"],
+            "dataMaskCategories",
+            [
+              "fn",
+              "parse",
+              "data_mask_categories",
+              ["var", "data_mask_categories"]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "description"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "description",
+                ["var", "description"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "lifecycleState",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_data_mask_rule_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "create_data_mask_rule",
+          "http": "POST",
+          "path": "/dataMaskRules",
+          "positionalArgs": ["create_data_mask_rule_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "create_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6177,6 +6527,352 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "description",
+            ["call", "pop", ["var", "kwargs"], "description"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "targetSelected", ["dict"]],
+          ["set", ["var", "_details"], "displayName", ["var", "display_name"]],
+          [
+            "set",
+            ["var", "_details"],
+            "compartmentId",
+            ["var", "compartment_id"]
+          ],
+          ["set", ["var", "_details"], "iamGroupId", ["var", "iam_group_id"]],
+          [
+            "set",
+            ["var", "_details"],
+            "dataMaskCategories",
+            [
+              "fn",
+              "parse",
+              "data_mask_categories",
+              ["var", "data_mask_categories"]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "description"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "description",
+                ["var", "description"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "lifecycleState",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "targetSelected"],
+            "kind",
+            "ALL"
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_data_mask_rule_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "create_data_mask_rule",
+          "http": "POST",
+          "path": "/dataMaskRules",
+          "positionalArgs": ["create_data_mask_rule_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "create_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -6587,6 +7283,370 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "description",
+            ["call", "pop", ["var", "kwargs"], "description"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "target_selected_values",
+            ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "targetSelected", ["dict"]],
+          ["set", ["var", "_details"], "displayName", ["var", "display_name"]],
+          [
+            "set",
+            ["var", "_details"],
+            "compartmentId",
+            ["var", "compartment_id"]
+          ],
+          ["set", ["var", "_details"], "iamGroupId", ["var", "iam_group_id"]],
+          [
+            "set",
+            ["var", "_details"],
+            "dataMaskCategories",
+            [
+              "fn",
+              "parse",
+              "data_mask_categories",
+              ["var", "data_mask_categories"]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "description"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "description",
+                ["var", "description"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "lifecycleState",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "target_selected_values"], null],
+            [
+              [
+                "set",
+                ["item", ["var", "_details"], "targetSelected"],
+                "values",
+                ["var", "target_selected_values"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "targetSelected"],
+            "kind",
+            "TARGETTYPES"
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_data_mask_rule_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "create_data_mask_rule",
+          "http": "POST",
+          "path": "/dataMaskRules",
+          "positionalArgs": ["create_data_mask_rule_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "create_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -7021,6 +8081,375 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "description",
+            ["call", "pop", ["var", "kwargs"], "description"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "lifecycle_state",
+            ["call", "pop", ["var", "kwargs"], "lifecycle_state"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          [
+            "let",
+            "target_selected_values",
+            ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "targetSelected", ["dict"]],
+          ["set", ["var", "_details"], "displayName", ["var", "display_name"]],
+          [
+            "set",
+            ["var", "_details"],
+            "compartmentId",
+            ["var", "compartment_id"]
+          ],
+          ["set", ["var", "_details"], "iamGroupId", ["var", "iam_group_id"]],
+          [
+            "set",
+            ["var", "_details"],
+            "dataMaskCategories",
+            [
+              "fn",
+              "parse",
+              "data_mask_categories",
+              ["var", "data_mask_categories"]
+            ]
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "description"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "description",
+                ["var", "description"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "lifecycle_state"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "lifecycleState",
+                ["var", "lifecycle_state"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "target_selected_values"], null],
+            [
+              [
+                "set",
+                ["item", ["var", "_details"], "targetSelected"],
+                "values",
+                [
+                  "fn",
+                  "parse",
+                  "target_selected_values",
+                  ["var", "target_selected_values"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "targetSelected"],
+            "kind",
+            "TARGETIDS"
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [["create_data_mask_rule_details", ["var", "_details"]]],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "create_data_mask_rule",
+          "http": "POST",
+          "path": "/dataMaskRules",
+          "positionalArgs": ["create_data_mask_rule_details"],
+          "pathParams": {},
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "create_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8369,6 +9798,439 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "data_mask_rule_id",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "target_selected",
+            ["call", "pop", ["var", "kwargs"], "target_selected"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "data_mask_rule_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "data_mask_rule_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --data-mask-rule-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["var", "target_selected"],
+                  ["var", "data_mask_categories"],
+                  ["var", "freeform_tags"],
+                  ["var", "defined_tags"]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        "WARNING: Updates to target-selected and data-mask-categories and freeform-tags and defined-tags will replace any existing values. Are you sure you want to continue?"
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "iam_group_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "iamGroupId",
+                ["var", "iam_group_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "target_selected"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "targetSelected",
+                ["fn", "parse", "target_selected", ["var", "target_selected"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_categories"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskCategories",
+                [
+                  "fn",
+                  "parse",
+                  "data_mask_categories",
+                  ["var", "data_mask_categories"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["data_mask_rule_id", ["var", "data_mask_rule_id"]],
+                ["update_data_mask_rule_details", ["var", "_details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "update_data_mask_rule",
+          "http": "PUT",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": [
+            "data_mask_rule_id",
+            "update_data_mask_rule_details"
+          ],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "update_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -8800,6 +10662,427 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "data_mask_rule_id",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "data_mask_rule_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "data_mask_rule_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --data-mask-rule-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["var", "data_mask_categories"],
+                  ["var", "freeform_tags"],
+                  ["var", "defined_tags"]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        "WARNING: Updates to data-mask-categories and freeform-tags and defined-tags will replace any existing values. Are you sure you want to continue?"
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "targetSelected", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "iam_group_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "iamGroupId",
+                ["var", "iam_group_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_categories"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskCategories",
+                [
+                  "fn",
+                  "parse",
+                  "data_mask_categories",
+                  ["var", "data_mask_categories"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "targetSelected"],
+            "kind",
+            "ALL"
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["data_mask_rule_id", ["var", "data_mask_rule_id"]],
+                ["update_data_mask_rule_details", ["var", "_details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "update_data_mask_rule",
+          "http": "PUT",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": [
+            "data_mask_rule_id",
+            "update_data_mask_rule_details"
+          ],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "update_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9218,6 +11501,445 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "data_mask_rule_id",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "let",
+            "target_selected_values",
+            ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "data_mask_rule_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "data_mask_rule_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --data-mask-rule-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["var", "data_mask_categories"],
+                  ["var", "freeform_tags"],
+                  ["var", "defined_tags"]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        "WARNING: Updates to data-mask-categories and freeform-tags and defined-tags will replace any existing values. Are you sure you want to continue?"
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "targetSelected", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "iam_group_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "iamGroupId",
+                ["var", "iam_group_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_categories"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskCategories",
+                [
+                  "fn",
+                  "parse",
+                  "data_mask_categories",
+                  ["var", "data_mask_categories"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "target_selected_values"], null],
+            [
+              [
+                "set",
+                ["item", ["var", "_details"], "targetSelected"],
+                "values",
+                ["var", "target_selected_values"]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "targetSelected"],
+            "kind",
+            "TARGETTYPES"
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["data_mask_rule_id", ["var", "data_mask_rule_id"]],
+                ["update_data_mask_rule_details", ["var", "_details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "update_data_mask_rule",
+          "http": "PUT",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": [
+            "data_mask_rule_id",
+            "update_data_mask_rule_details"
+          ],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "update_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -9660,6 +12382,450 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          ["let", "force", ["call", "pop", ["var", "kwargs"], "force"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          [
+            "let",
+            "data_mask_rule_id",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_id"]
+          ],
+          [
+            "let",
+            "display_name",
+            ["call", "pop", ["var", "kwargs"], "display_name"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "iam_group_id",
+            ["call", "pop", ["var", "kwargs"], "iam_group_id"]
+          ],
+          [
+            "let",
+            "data_mask_categories",
+            ["call", "pop", ["var", "kwargs"], "data_mask_categories"]
+          ],
+          [
+            "let",
+            "data_mask_rule_status",
+            ["call", "pop", ["var", "kwargs"], "data_mask_rule_status"]
+          ],
+          [
+            "let",
+            "freeform_tags",
+            ["call", "pop", ["var", "kwargs"], "freeform_tags"]
+          ],
+          [
+            "let",
+            "defined_tags",
+            ["call", "pop", ["var", "kwargs"], "defined_tags"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "let",
+            "target_selected_values",
+            ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "data_mask_rule_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "data_mask_rule_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --data-mask-rule-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["var", "force"]],
+            [
+              [
+                "if",
+                [
+                  "or",
+                  ["var", "data_mask_categories"],
+                  ["var", "freeform_tags"],
+                  ["var", "defined_tags"]
+                ],
+                [
+                  [
+                    "if",
+                    [
+                      "not",
+                      [
+                        "fn",
+                        "confirm",
+                        "WARNING: Updates to data-mask-categories and freeform-tags and defined-tags will replace any existing values. Are you sure you want to continue?"
+                      ]
+                    ],
+                    [["abort"]],
+                    []
+                  ]
+                ],
+                []
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          ["let", "_details", ["dict"]],
+          ["set", ["var", "_details"], "targetSelected", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "displayName",
+                ["var", "display_name"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "compartment_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "compartmentId",
+                ["var", "compartment_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "iam_group_id"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "iamGroupId",
+                ["var", "iam_group_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_categories"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskCategories",
+                [
+                  "fn",
+                  "parse",
+                  "data_mask_categories",
+                  ["var", "data_mask_categories"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "data_mask_rule_status"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "dataMaskRuleStatus",
+                ["var", "data_mask_rule_status"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "freeformTags",
+                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              [
+                "set",
+                ["var", "_details"],
+                "definedTags",
+                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "target_selected_values"], null],
+            [
+              [
+                "set",
+                ["item", ["var", "_details"], "targetSelected"],
+                "values",
+                [
+                  "fn",
+                  "parse",
+                  "target_selected_values",
+                  ["var", "target_selected_values"]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "set",
+            ["item", ["var", "_details"], "targetSelected"],
+            "kind",
+            "TARGETIDS"
+          ],
+          ["let", "client", ["fn", "client", "cloud_guard", "cloud_guard"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["data_mask_rule_id", ["var", "data_mask_rule_id"]],
+                ["update_data_mask_rule_details", ["var", "_details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "tryMulti",
+                [
+                  ["let", "wait_period_kwargs", ["dict"]],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "max_wait_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_wait_seconds",
+                        ["var", "max_wait_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "if",
+                    ["cmp", "isnot", ["var", "wait_interval_seconds"], null],
+                    [
+                      [
+                        "set",
+                        ["var", "wait_period_kwargs"],
+                        "max_interval_seconds",
+                        ["var", "wait_interval_seconds"]
+                      ]
+                    ],
+                    []
+                  ],
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      [
+                        "call",
+                        "format",
+                        "Action completed. Waiting until the resource has entered state: {}",
+                        ["var", "wait_for_state"]
+                      ],
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ],
+                  [
+                    "let",
+                    "result",
+                    [
+                      "waitUntil",
+                      [
+                        ["var", "client"],
+                        [
+                          "sdk",
+                          1,
+                          ["var", "client"],
+                          [["attr", "id", ["attr", "data", ["var", "result"]]]],
+                          [],
+                          null
+                        ],
+                        "lifecycle_state",
+                        ["var", "wait_for_state"]
+                      ],
+                      [],
+                      ["var", "wait_period_kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "MaximumWaitTimeExceeded",
+                    "e",
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Failed to wait until the resource entered the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["exit", 2]
+                    ]
+                  ],
+                  [
+                    "Exception",
+                    null,
+                    [
+                      [
+                        "do",
+                        [
+                          "fn",
+                          "echo",
+                          "Encountered error while waiting for resource to enter the specified state. Outputting last known resource state",
+                          ["fn", "stderr"],
+                          true,
+                          false
+                        ]
+                      ],
+                      ["render", ["var", "result"]],
+                      ["reraise"]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "update_data_mask_rule",
+          "http": "PUT",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": [
+            "data_mask_rule_id",
+            "update_data_mask_rule_details"
+          ],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "body": "update_data_mask_rule_details",
+          "responseType": "DataMaskRule"
+        },
+        {
+          "client": "cloud_guard.cloud_guard",
+          "method": "get_data_mask_rule",
+          "http": "GET",
+          "path": "/dataMaskRules/{dataMaskRuleId}",
+          "positionalArgs": ["data_mask_rule_id"],
+          "pathParams": {
+            "dataMaskRuleId": "data_mask_rule_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            }
+          },
+          "responseType": "DataMaskRule"
+        }
+      ],
       "params": [
         {
           "kind": "option",

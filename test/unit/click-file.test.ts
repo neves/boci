@@ -39,3 +39,14 @@ test("Click program input reports missing named files", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("Click program write modes reject directory targets before opening", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "boci-click-file-"));
+  try {
+    await expect(openClickFileForProgram(io(dir), ".", "wb")).rejects.toThrow(
+      "Is a directory",
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

@@ -9,7 +9,9 @@ export function readConfigFile(path: string): string | null {
     if (
       error instanceof Error &&
       "code" in error &&
-      ["ENOENT", "EACCES", "EPERM", "EISDIR"].includes(String(error.code))
+      ["ENOENT", "ENOTDIR", "EACCES", "EPERM", "EISDIR"].includes(
+        String(error.code),
+      )
     ) {
       return null;
     }

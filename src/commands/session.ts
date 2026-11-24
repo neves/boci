@@ -841,9 +841,8 @@ export async function runSessionImport(
   const defaultTokenDirectory = `${expandUser("~", io.env).replace(/[\\/]+$/, "")}/.oci/sessions`;
   const importedResourcesDir = `${defaultTokenDirectory}/${archivedProfileName}`;
   const resolvedTokenDir = normalizePosixPath(resolve(defaultTokenDirectory));
-  const resolvedResourcesDir = resolve(importedResourcesDir).replaceAll(
-    "\\",
-    "/",
+  const resolvedResourcesDir = normalizePosixPath(
+    resolve(importedResourcesDir),
   );
   if (
     resolvedResourcesDir !== resolvedTokenDir &&

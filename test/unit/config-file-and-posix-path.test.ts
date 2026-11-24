@@ -13,6 +13,7 @@ describe("shared config and path helpers", () => {
       await writeFile(file, "[DEFAULT]\n");
       expect(readConfigFile(file)).toBe("[DEFAULT]\n");
       expect(readConfigFile(join(dir, "missing"))).toBeNull();
+      expect(readConfigFile(join(dir, "config", "nested"))).toBeNull();
       expect(readConfigFile(dir)).toBeNull();
       const subdir = join(dir, "subdir");
       await mkdir(subdir);

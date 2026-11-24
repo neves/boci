@@ -124,7 +124,21 @@ export async function openClickFileForProgram(
   rawPath: string,
   mode: string,
 ): Promise<ProgramFile> {
-  if (/[wa]/.test(mode)) return new ProgramFile(mode, undefined, rawPath);
+  if (/[wa]/.test(mode)) {
+    if (rawPath !== "-") {
+      const resolved = resolve(io.cwd, rawPath);
+      try {
+        if (existsSync(resolved) && statSync(resolved).isDirectory()) {
+          throw new BadParameter(`${pyRepr(rawPath)}: Is a directory`);
+        }
+        checkFileAccessibility(resolved, "w");
+      } catch (e) {
+        if (e instanceof BadParameter) throw e;
+        throw new BadParameter(`${pyRepr(rawPath)}: ${osErrorReason(e)}`);
+      }
+    }
+    return new ProgramFile(mode, undefined, rawPath);
+  }
   if (rawPath === "-")
     return new ProgramFile(mode, await readStdinBytes(io), rawPath);
   const resolved = resolve(io.cwd, rawPath);

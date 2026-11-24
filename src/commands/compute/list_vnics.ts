@@ -1,12 +1,7 @@
 import { Exit } from "../../lib/io.ts";
-import {
-  callOperation,
-  type GeneratedCommand,
-  type OperationCall,
-} from "../../core/operation.ts";
 import { printResult, renderDocument, renderModel } from "../../core/output.ts";
-import { loadService } from "../../core/spec.ts";
 import type { CustomCommandContext } from "../../core/registry.ts";
+import { callComputeOperation } from "./shared.ts";
 
 const ATTACHMENTS = "vnic-attachment list";
 const INSTANCE_GET = "instance get";
@@ -57,21 +52,12 @@ export async function runComputeInstanceListVnics(
     rawOutput: ctx.rootValues.raw_output,
     rc: ctx.rc,
   };
-  const rootCall = {
-    rootValues: ctx.rootValues,
-    settings: ctx.settings,
-    spec: ctx.spec,
-    index: ctx.index,
-  };
   const run = async (
     name: string,
     args: Record<string, unknown>,
     service?: string,
   ) => {
-    const spec = service ? await loadService(service) : ctx.spec;
-    const command = spec.commands[name] as GeneratedCommand;
-    const call: OperationCall = { ...rootCall, command, spec, values: args };
-    return callOperation(ctx.io, call);
+    return callComputeOperation(ctx, service ?? ctx.spec.service, name, args);
   };
 
   if (!compartmentId) {

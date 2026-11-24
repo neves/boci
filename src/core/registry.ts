@@ -65,6 +65,14 @@ function lazyOsOutput<T>(
 export const CUSTOM_HANDLERS = new Map<string, CustomCommandHandler>([
   ["compute instance list-vnics", computeHandler],
   [
+    "compute instance attach-vnic",
+    async (ctx) => {
+      const { runComputeInstanceAttachVnic } =
+        await import("../commands/compute/attach_vnic.ts");
+      await runComputeInstanceAttachVnic(ctx);
+    },
+  ],
+  [
     "profile current",
     async (ctx) => {
       const { runProfileCurrent } = await import("../commands/profile.ts");

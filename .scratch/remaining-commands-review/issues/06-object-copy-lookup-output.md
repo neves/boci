@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The implicit-namespace success case compares the lookup and copy requests and the complete stdout against the golden.
-- [ ] A failed lookup reports the Reference CLI error and prevents the copy request.
+- [x] The implicit-namespace success case compares the lookup and copy requests and the complete stdout against the golden.
+- [x] A failed lookup reports the Reference CLI error and prevents the copy request.

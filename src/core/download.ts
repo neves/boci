@@ -35,7 +35,11 @@ export async function writeDownload(
         try {
           fd = openSync(resolve(io.cwd, path), "w");
         } catch (error) {
-          if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+          if (
+            error instanceof Error &&
+            "code" in error &&
+            error.code === "ENOENT"
+          ) {
             io.err("FileError: No such file or directory\n");
             throw new Exit(1);
           }

@@ -6,7 +6,14 @@ import { openClickFileForProgram } from "../../src/core/click-file.ts";
 import type { Invocation } from "../../src/lib/io.ts";
 
 const io = (cwd: string, stdin?: string): Invocation => ({
-  argv: [], env: {}, cwd, stdin, out() {}, err() {}, isTTY: () => false, columns: () => undefined,
+  argv: [],
+  env: {},
+  cwd,
+  stdin,
+  out() {},
+  err() {},
+  isTTY: () => false,
+  columns: () => undefined,
 });
 
 test("Click program input reads named bytes and stdin", async () => {
@@ -25,7 +32,9 @@ test("Click program input reads named bytes and stdin", async () => {
 test("Click program input reports missing named files", async () => {
   const dir = await mkdtemp(join(tmpdir(), "boci-click-file-"));
   try {
-    await expect(openClickFileForProgram(io(dir), "missing", "r")).rejects.toThrow("No such file or directory");
+    await expect(
+      openClickFileForProgram(io(dir), "missing", "r"),
+    ).rejects.toThrow("No such file or directory");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

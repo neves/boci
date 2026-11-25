@@ -25,6 +25,11 @@ export type OperationSpec = {
   headerParams?: Record<string, { arg?: string; value?: string }>;
   body?: string;
   enforce_content_headers?: boolean;
+  paginated?: boolean;
+  /** Generated callback checks `if sort_by and not availability_domain and not all_pages:`. */
+  sortByRequiresAd?: boolean;
+  /** Generated callback prompts `WARNING: Updates to ...` unless `--force`, for these params. */
+  updateConfirm?: string[];
 };
 
 export type HelpDoc = {

@@ -202,6 +202,49 @@ def hidden_lifecycle_getters(commands, clients, client_map):
             }}
 
 
+def _update_confirm_params(fn: ast.FunctionDef) -> list[str] | None:
+    """Generated `if not force: if p1 or p2 ...: if not click.confirm(...): ctx.abort()`."""
+    for st in fn.body:
+        if isinstance(st, ast.Assign) and len(st.targets) == 1 and isinstance(st.targets[0], ast.Name):
+            if st.targets[0].id in ("kwargs", "client", "_details"):
+                break
+        if (
+            isinstance(st, ast.If)
+            and isinstance(st.test, ast.UnaryOp)
+            and isinstance(st.test.op, ast.Not)
+            and isinstance(st.test.operand, ast.Name)
+            and st.test.operand.id == "force"
+            and len(st.body) == 1
+            and isinstance(st.body[0], ast.If)
+        ):
+            inner = st.body[0]
+            if (
+                len(inner.body) == 1
+                and isinstance(inner.body[0], ast.If)
+                and "click.confirm(" in ast.unparse(inner.body[0].test)
+            ):
+                if isinstance(inner.test, ast.Name):
+                    return [inner.test.id]
+                if (
+                    isinstance(inner.test, ast.BoolOp)
+                    and isinstance(inner.test.op, ast.Or)
+                    and all(isinstance(v, ast.Name) for v in inner.test.values)
+                ):
+                    return [v.id for v in inner.test.values]
+    return None
+
+
+def _has_sort_by_requires_ad(fn: ast.FunctionDef) -> bool:
+    """Generated `if sort_by and not availability_domain and not all_pages: raise click.UsageError(...)`."""
+    for st in fn.body:
+        if isinstance(st, ast.Assign) and len(st.targets) == 1 and isinstance(st.targets[0], ast.Name):
+            if st.targets[0].id in ("kwargs", "client", "_details"):
+                break
+        if isinstance(st, ast.If) and "You must provide an --availability-domain when doing a --sort-by" in ast.unparse(st):
+            return True
+    return False
+
+
 def command_operation(callback, client_map) -> tuple:
     """Return (client_key, operation, other_operations) for a generated callback."""
     fn = _fn_ast(callback)
@@ -249,6 +292,11 @@ def command_operation(callback, client_map) -> tuple:
     # Deep copy: sdk_operation is cached and Tier A delegates rename nested params in place.
     op = copy.deepcopy(sdk_operation(cls, ops[0]))
     op = {"client": key, **op, "paginated": paginated}
+    if _has_sort_by_requires_ad(fn):
+        op["sortByRequiresAd"] = True
+    update_confirm = _update_confirm_params(fn)
+    if update_confirm:
+        op["updateConfirm"] = update_confirm
     if "work_request_client" in clients:
         op["workRequestClient"] = ".".join(clients["work_request_client"])
     getter = lifecycle_getter(fn)
@@ -492,7 +540,8 @@ def custom_delegate(callback, client_map, custom_params):
         delegate["checks"] = usage_checks
     if blank_checks or usage_checks:
         delegate["wrapExceptions"] = any(
-            ast.unparse(d) == "cli_util.wrap_exceptions" for d in fn.decorator_list
+            ast.unparse(d) in ("cli_util.wrap_exceptions", "wrap_exceptions")
+            for d in fn.decorator_list
         )
     return "A", delegate
 

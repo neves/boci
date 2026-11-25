@@ -27,7 +27,7 @@ import { resolveInstancePrincipal } from "./instance-principal.ts";
 import { resolveResourcePrincipal } from "./resource-principal.ts";
 import { Exit, type Invocation } from "../lib/io.ts";
 import { pyStrip } from "../lib/configparser.ts";
-import { failingCheck, type UsageCheck } from "./checks.ts";
+import { failingCheck, truthy, type UsageCheck } from "./checks.ts";
 import { loadFileContents, parseJsonParameter } from "./json-input.ts";
 import {
   ProgramFile,
@@ -68,6 +68,10 @@ export type OperationCall = {
   serviceClient?: ServiceClient;
   /** Shared stdin reader when invoked after wrapper prompts. */
   stdin?: StdinReader;
+  /** Delete confirmation already ran before wrapper/validation checks. */
+  skipDeleteConfirm?: boolean;
+  /** Update confirmation already ran before JSON parameter parsing. */
+  skipUpdateConfirm?: boolean;
 };
 
 export type OperationResult = {
@@ -158,35 +162,72 @@ export type GeneratedCommand = Pick<
   bindings?: Record<string, unknown>[];
 };
 
-const COMPLEX_TYPE_CLASS =
-  "oci_cli.custom_types.cli_complex_type.CliComplexType";
+export function hasDeleteConfirm(
+  command: Pick<ServiceSpec["commands"][string], "operation" | "params">,
+): boolean {
+  return (
+    (command.params ?? []).some(
+      (p) => p.callback === "oci_cli.cli_util.confirmation_callback",
+    ) || command.operation?.http === "DELETE"
+  );
+}
 
-function replacedBodyParams(command: GeneratedCommand) {
-  if (!command.params?.some((p) => p.name === "force")) return [];
-  const bodyBindings = (command.bindings ?? []).filter(
-    (b) => b.target === "body" && Array.isArray(b.key) && b.key.length === 1,
+export async function confirmDeleteIfNeeded(
+  io: Invocation,
+  command: Pick<ServiceSpec["commands"][string], "operation" | "params">,
+  values: Record<string, unknown>,
+  stdin?: StdinReader,
+): Promise<boolean> {
+  if (!hasDeleteConfirm(command) || values.force === true) return false;
+  const confirmed = await confirmUnderWrapExceptions(
+    io,
+    "Are you sure you want to delete this resource?",
+    false,
+    stdin,
   );
-  return command.params.filter(
-    (p) =>
-      (p.typeClass === COMPLEX_TYPE_CLASS || p.multiple === true) &&
-      bodyBindings.some((b) => b.param === p.name),
+  if (!confirmed) {
+    io.err("Abort: \n");
+    throw new Exit(1);
+  }
+  return true;
+}
+
+export async function confirmUpdateIfNeeded(
+  io: Invocation,
+  command: Pick<ServiceSpec["commands"][string], "operation" | "delegate">,
+  values: Record<string, unknown>,
+  stdin?: StdinReader,
+): Promise<boolean> {
+  if (values.force === true) return false;
+  const confirmParams = command.operation?.updateConfirm;
+  if (!confirmParams?.length) return false;
+  const renames = command.delegate?.renames ?? {};
+  if (
+    !confirmParams.some((genName) =>
+      hasUpdateValue(values[renames[genName] ?? genName]),
+    )
+  )
+    return false;
+  const names = confirmParams.map((p) => p.replaceAll("_", "-")).join(" and ");
+  const confirmed = await confirmUnderWrapExceptions(
+    io,
+    `WARNING: Updates to ${names} will replace any existing values. Are you sure you want to continue?`,
+    false,
+    stdin,
   );
+  if (!confirmed) {
+    io.err("Abort: \n");
+    throw new Exit(1);
+  }
+  return true;
 }
 
 const isBlank = (value: unknown) =>
   typeof value === "string" && pyStrip(value) === "";
 
-/**
- * The first UsageError the command raises before any request: a Tier A wrapper's own
- * blank checks, then its other argument checks (`wrapped` says whether the wrapper has
- * wrap_exceptions), then the generated callback's blank check of each path param, named
- * by the generated option (always under wrap_exceptions).
- */
-export function usageCheckFailure(
-  command: Pick<
-    ServiceSpec["commands"][string],
-    "delegate" | "operation" | "params"
-  >,
+/** A Tier A wrapper's own blank checks and compiled argument checks. */
+export function wrapperUsageCheckFailure(
+  command: Pick<ServiceSpec["commands"][string], "delegate" | "params">,
   values: Record<string, unknown>,
 ): { message: string; wrapped: boolean } | undefined {
   const delegate = command.delegate;
@@ -200,7 +241,19 @@ export function usageCheckFailure(
   const failed = failingCheck(delegate?.checks, values, command.params ?? []);
   if (failed !== undefined)
     return { message: failed, wrapped: delegate?.wrapExceptions === true };
-  const renames = delegate?.renames ?? {};
+  return undefined;
+}
+
+/**
+ * The generated callback's own UsageError checks (always under wrap_exceptions):
+ * path-param blank checks, `--all` with truthy `--limit`, and `--sort-by` without
+ * `--availability-domain` or `--all`.
+ */
+export function generatedUsageCheckFailure(
+  command: Pick<ServiceSpec["commands"][string], "delegate" | "operation">,
+  values: Record<string, unknown>,
+): { message: string; wrapped: boolean } | undefined {
+  const renames = command.delegate?.renames ?? {};
   for (const arg of Object.values(command.operation?.pathParams ?? {})) {
     if (!isBlank(values[arg])) continue;
     const generated =
@@ -210,7 +263,48 @@ export function usageCheckFailure(
       wrapped: true,
     };
   }
+  if (
+    command.operation?.paginated !== false &&
+    truthy(values.all_pages) &&
+    truthy(values.limit)
+  ) {
+    return {
+      message:
+        "If you provide the --all option you cannot provide the --limit option",
+      wrapped: true,
+    };
+  }
+  if (
+    command.operation?.sortByRequiresAd &&
+    truthy(values.sort_by) &&
+    !truthy(values.availability_domain) &&
+    !truthy(values.all_pages)
+  ) {
+    return {
+      message:
+        "You must provide an --availability-domain when doing a --sort-by, unless you specify the --all parameter",
+      wrapped: true,
+    };
+  }
   return undefined;
+}
+
+/**
+ * The first UsageError the command raises before any request: a Tier A wrapper's own
+ * blank checks, then its other argument checks (`wrapped` says whether the wrapper has
+ * wrap_exceptions), then the generated callback's own checks (always under wrap_exceptions).
+ */
+export function usageCheckFailure(
+  command: Pick<
+    ServiceSpec["commands"][string],
+    "delegate" | "operation" | "params"
+  >,
+  values: Record<string, unknown>,
+): { message: string; wrapped: boolean } | undefined {
+  return (
+    wrapperUsageCheckFailure(command, values) ??
+    generatedUsageCheckFailure(command, values)
+  );
 }
 
 /**
@@ -235,7 +329,13 @@ export function tierBCheckFailure(
 }
 
 function hasUpdateValue(value: unknown): boolean {
-  if (value === undefined || value === null || value === false || value === "")
+  if (
+    value === undefined ||
+    value === null ||
+    value === false ||
+    value === 0 ||
+    value === ""
+  )
     return false;
   if (Array.isArray(value)) return value.length > 0;
   return true;
@@ -884,47 +984,38 @@ export async function callOperation(
 ): Promise<OperationResult> {
   const { command, values, rootValues, settings, spec, index } = call;
   const operation = command.operation as OperationSpec;
-  if (operation.http === "DELETE" && values.force !== true) {
-    const confirmed = await confirmUnderWrapExceptions(
-      io,
-      "Are you sure you want to delete this resource?",
-      false,
-      call.stdin,
+  if (!call.skipDeleteConfirm) {
+    await confirmDeleteIfNeeded(io, command, values, call.stdin);
+  }
+  if (
+    operation.paginated !== false &&
+    truthy(values.all_pages) &&
+    truthy(values.limit)
+  ) {
+    io.err(
+      "UsageError: If you provide the --all option you cannot provide the --limit option\n",
     );
-    if (!confirmed) {
-      io.err("Abort: \n");
-      throw new Exit(1);
-    }
-  } else if (values.force !== true) {
-    const replaced = replacedBodyParams(command);
-    if (replaced.some((p) => hasUpdateValue(values[p.name]))) {
-      const names = replaced
-        .map((p) => p.name.replaceAll("_", "-"))
-        .join(" and ");
-      const confirmed = await confirmUnderWrapExceptions(
-        io,
-        `WARNING: Updates to ${names} will replace any existing values. Are you sure you want to continue?`,
-        false,
-        call.stdin,
-      );
-      if (!confirmed) {
-        io.err("Abort: \n");
-        throw new Exit(1);
-      }
-    }
+    throw new Exit(1);
+  }
+  if (
+    operation.sortByRequiresAd &&
+    truthy(values.sort_by) &&
+    !truthy(values.availability_domain) &&
+    !truthy(values.all_pages)
+  ) {
+    io.err(
+      "UsageError: You must provide an --availability-domain when doing a --sort-by, unless you specify the --all parameter\n",
+    );
+    throw new Exit(1);
+  }
+  if (!call.skipUpdateConfirm) {
+    await confirmUpdateIfNeeded(io, command, values, call.stdin);
   }
   const keys = keyTypes(command, spec.models);
   let requestBody: string | Uint8Array = "";
   // A file-like body: the SDK signer defaults its content-type to octet-stream.
   let streamBody = false;
-  if (operation.http === "GET") {
-    if (values.all_pages === true && values.limit !== undefined) {
-      io.err(
-        "UsageError: If you provide the --all option you cannot provide the --limit option\n",
-      );
-      throw new Exit(1);
-    }
-  } else {
+  if (operation.http !== "GET") {
     const built = buildRequestBody(io, command, values, rootValues, keys);
     streamBody = built instanceof ProgramFile;
     requestBody = built instanceof ProgramFile ? built.read() : built;
@@ -960,6 +1051,30 @@ export async function callOperation(
     }
     pathParams[name] = String(value);
   }
+  const queryOrder = Object.keys(operation.queryParams ?? {});
+  const upsertQueryParam = (
+    params: [string, string][],
+    key: string,
+    val: string,
+  ) => {
+    const existing = params.findIndex(([k]) => k === key);
+    if (existing >= 0) {
+      params[existing] = [key, val];
+      return;
+    }
+    const targetRank = queryOrder.indexOf(key);
+    if (targetRank >= 0) {
+      const insertAt = params.findIndex(([k]) => {
+        const rank = queryOrder.indexOf(k);
+        return rank >= 0 && rank > targetRank;
+      });
+      if (insertAt >= 0) {
+        params.splice(insertAt, 0, [key, val]);
+        return;
+      }
+    }
+    params.push([key, val]);
+  };
   const queryParams: [string, string][] = [];
   for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
     const value = arg ? boundValue(arg) : undefined;
@@ -969,9 +1084,7 @@ export async function callOperation(
   const limit = values.limit;
   const pageSize = values.page_size;
   if ((allPages || limit !== undefined) && pageSize !== undefined) {
-    const existing = queryParams.findIndex(([k]) => k === "limit");
-    if (existing >= 0) queryParams[existing] = ["limit", String(pageSize)];
-    else queryParams.push(["limit", String(pageSize)]);
+    upsertQueryParam(queryParams, "limit", String(pageSize));
   }
   const baseHeaders: Record<string, string> =
     operation.http === "GET"
@@ -1015,15 +1128,8 @@ export async function callOperation(
     Boolean(operation.responseType) &&
     operation.responseType !== "stream";
   do {
-    const pageIndex = queryParams.findIndex(([k]) => k === "page");
-    const pageQuery = queryParams.map(
-      ([name, value]) =>
-        (name === "page" && page !== null ? [name, page] : [name, value]) as [
-          string,
-          string,
-        ],
-    );
-    if (page !== null && pageIndex < 0) pageQuery.push(["page", page]);
+    const pageQuery: [string, string][] = queryParams.map(([k, v]) => [k, v]);
+    if (page !== null) upsertQueryParam(pageQuery, "page", page);
     const sent = await sendServiceRequest(io, sc, {
       method: operation.http,
       pathTemplate: operation.path,

@@ -113,7 +113,11 @@ import {
   type GeneratedCommand,
   type OperationResult,
   applyConfigEnvVars,
+  confirmDeleteIfNeeded,
+  confirmUpdateIfNeeded,
+  generatedUsageCheckFailure,
   usageCheckFailure,
+  wrapperUsageCheckFailure,
   tierBCheckFailure,
   callBaseClientApi,
   callOperation,
@@ -695,51 +699,28 @@ async function main(io: Invocation): Promise<void> {
             specCmd.program &&
             (specCmd.sdkOperations?.length || specCmd.program.rawRequests),
           )));
-    if (!customHandler) {
-      // A Tier A wrapper's own checks run before it delegates; the generated callback
-      // then checks its path params first thing (both before JSON parsing). A Tier B
-      // wrapper's compiled checks run too, though its happy path may not be implemented.
-      // Object Storage looks the namespace up (a request) before any callback runs.
-      const namespaceFirst =
-        name === "os" &&
-        (specCmd.params ?? []).some(
-          (p) =>
-            (p.name === "namespace" || p.name === "namespace_name") &&
-            values[p.name] === undefined,
-        );
-      // A programmed wrapper the Engine runs raises its own checks as it runs (below).
-      const failure =
-        specCmd.program && engineRoute
-          ? undefined
-          : engineRoute
-            ? usageCheckFailure(specCmd, values)
-            : namespaceFirst
-              ? undefined
-              : tierBCheckFailure(specCmd, values);
-      if (failure?.wrapped === false)
-        showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
-      if (failure) {
-        io.err(`UsageError: ${failure.message}\n`);
-        throw new Exit(1);
+    const parseComplexParams = () => {
+      // The command oci runs (a Tier A wrapper's delegate) camelizes keys by its types.
+      const keys = customHandler ? undefined : keyTypes(specCmd, spec.models);
+      const renames = specCmd.delegate?.renames ?? {};
+      for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
+        if (values[p.name] !== undefined && isComplexParam(p)) {
+          const parsedAs =
+            Object.entries(renames).find(
+              ([, custom]) => custom === p.name,
+            )?.[0] ?? p.name;
+          values[p.name] = parseJsonParameter(
+            io,
+            parsedAs,
+            values[p.name],
+            keys,
+          );
+        }
       }
-    }
-    // A programmed wrapper sees complex options as the strings Click gives it (an
-    // empty "{}" is truthy); it and the generated command parse them where oci does.
-    const parseFirst = !(engineRoute && specCmd.program);
-    // The command oci runs (a Tier A wrapper's delegate) camelizes keys by its types.
-    const keys = customHandler ? undefined : keyTypes(specCmd, spec.models);
-    const renames = specCmd.delegate?.renames ?? {};
-    for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
-      if (parseFirst && values[p.name] !== undefined && isComplexParam(p)) {
-        const parsedAs =
-          Object.entries(renames).find(
-            ([, custom]) => custom === p.name,
-          )?.[0] ?? p.name;
-        values[p.name] = parseJsonParameter(io, parsedAs, values[p.name], keys);
-      }
-    }
+    };
 
     if (customHandler) {
+      parseComplexParams();
       await customHandler({
         io,
         values,
@@ -756,7 +737,39 @@ async function main(io: Invocation): Promise<void> {
       return;
     }
 
+    if (!engineRoute) {
+      // A Tier B wrapper's compiled checks run too, though its happy path may not be
+      // implemented. Object Storage looks the namespace up (a request) before any callback.
+      const namespaceFirst =
+        name === "os" &&
+        (specCmd.params ?? []).some(
+          (p) =>
+            (p.name === "namespace" || p.name === "namespace_name") &&
+            values[p.name] === undefined,
+        );
+      const failure = namespaceFirst
+        ? undefined
+        : tierBCheckFailure(specCmd, values);
+      if (failure?.wrapped === false)
+        showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
+      if (failure) {
+        io.err(`UsageError: ${failure.message}\n`);
+        throw new Exit(1);
+      }
+      parseComplexParams();
+      await notImplemented(io, argv, commandPath);
+      return;
+    }
+
     if (engineRoute) {
+      // An unwrapped Tier A wrapper runs its own checks before invoking the generated
+      // command's wrap_exceptions (and therefore before delete confirmation).
+      if (!specCmd.program && specCmd.delegate?.wrapExceptions === false) {
+        const failure = wrapperUsageCheckFailure(specCmd, values);
+        if (failure) {
+          showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
+        }
+      }
       if (name === "os") {
         const nsParam = (specCmd.params ?? []).find(
           (p) =>
@@ -792,12 +805,32 @@ async function main(io: Invocation): Promise<void> {
       let command: GeneratedCommand = specCmd;
       let callValues = values;
       let stdin: StdinReader | undefined;
+      let skipDeleteConfirm = false;
+      let skipUpdateConfirm = false;
       const output: OutputOptions = {
         query: rootValues.query,
         output: rootValues.output,
         rawOutput: rootValues.raw_output,
         rc,
       };
+      if (!specCmd.program) {
+        stdin = createStdinReader(io);
+        await confirmDeleteIfNeeded(io, specCmd, values, stdin);
+        skipDeleteConfirm = true;
+        const failure =
+          (specCmd.delegate?.wrapExceptions !== false
+            ? wrapperUsageCheckFailure(specCmd, values)
+            : undefined) ?? generatedUsageCheckFailure(specCmd, values);
+        if (failure?.wrapped === false)
+          showPatched(io, usage(io, commandPath, cmd.helpDoc), failure.message);
+        if (failure) {
+          io.err(`UsageError: ${failure.message}\n`);
+          throw new Exit(1);
+        }
+        await confirmUpdateIfNeeded(io, specCmd, values, stdin);
+        skipUpdateConfirm = true;
+        parseComplexParams();
+      }
       if (specCmd.program) {
         stdin = createStdinReader(io);
         const wrapperRootValues: Record<string, unknown> = { ...rootValues };
@@ -928,12 +961,12 @@ async function main(io: Invocation): Promise<void> {
           };
         };
         // @cli_util.confirm_delete_option prompts inside wrap_exceptions before the callback runs.
+        const hasWrapperDeleteConfirm = (specCmd.params ?? []).some(
+          (p) => p.callback === "oci_cli.cli_util.confirmation_callback",
+        );
         if (
           specCmd.program.wrapExceptions &&
-          !specCmd.generated &&
-          (specCmd.params ?? []).some(
-            (p) => p.callback === "oci_cli.cli_util.confirmation_callback",
-          ) &&
+          hasWrapperDeleteConfirm &&
           values.force !== true
         ) {
           const confirmed = await confirmUnderWrapExceptions(
@@ -946,6 +979,7 @@ async function main(io: Invocation): Promise<void> {
             io.err("Abort: \n");
             throw new Exit(1);
           }
+          skipDeleteConfirm = true;
         }
         const generated = await runWrapper(
           io,
@@ -1600,6 +1634,18 @@ async function main(io: Invocation): Promise<void> {
           )
             ? { ...generated.kwargs, force: true }
             : generated.kwargs;
+        if (!skipDeleteConfirm) {
+          await confirmDeleteIfNeeded(
+            io,
+            {
+              operation: command.operation,
+              params: hasWrapperDeleteConfirm ? specCmd.params : command.params,
+            },
+            callValues,
+            stdin,
+          );
+          skipDeleteConfirm = true;
+        }
         const failure = usageCheckFailure(command, callValues);
         if (failure) {
           io.err(`UsageError: ${failure.message}\n`);
@@ -1614,6 +1660,8 @@ async function main(io: Invocation): Promise<void> {
         spec,
         index,
         stdin,
+        skipDeleteConfirm,
+        skipUpdateConfirm,
       };
       const result = await callOperation(io, call);
       const downloadTo = outputBinding(command);

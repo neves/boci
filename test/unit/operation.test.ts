@@ -149,6 +149,7 @@ test("callOperation prompts before replacing complex params unless --force is se
       method: "update_thing",
       http: "PUT",
       path: "/things",
+      updateConfirm: ["freeform_tags", "defined_tags"],
     },
     params: [
       {
@@ -317,8 +318,8 @@ test("without --all only the first page is fetched", async () => {
   expect(result.response.headers.get("opc-next-page")).toBe("p2");
 });
 
-test("--all with --limit is a usage error before any request", async () => {
-  using fake = startFakeEndpoint();
+test("--all with --limit is a usage error before any request (unless limit is 0)", async () => {
+  using fake = startFakeEndpoint({ status: 200, body: [] });
   const { io, err } = invocation();
   const thrown = await callOperation(
     io,
@@ -327,6 +328,29 @@ test("--all with --limit is a usage error before any request", async () => {
   expect(thrown).toBeInstanceOf(Exit);
   expect((thrown as Exit).code).toBe(1);
   expect(err.join("")).toContain("--all option you cannot provide the --limit");
+  expect(fake.requests).toHaveLength(0);
+
+  // Python `if all_pages and limit:` treats 0 as falsy, so --limit 0 is allowed with --all.
+  await callOperation(io, call(fake.url, { all_pages: true, limit: 0 }));
+  expect(fake.requests).toHaveLength(1);
+});
+
+test("sortByRequiresAd rejects --sort-by without --availability-domain or --all", async () => {
+  using fake = startFakeEndpoint();
+  const command = {
+    ...listThings,
+    operation: { ...listThings.operation, sortByRequiresAd: true },
+  } as unknown as GeneratedCommand;
+  const { io, err } = invocation();
+  const thrown = await callOperation(
+    io,
+    call(fake.url, { sort_by: "TIMECREATED" }, {}, command),
+  ).catch((e: unknown) => e);
+  expect(thrown).toBeInstanceOf(Exit);
+  expect((thrown as Exit).code).toBe(1);
+  expect(err.join("")).toContain(
+    "--availability-domain when doing a --sort-by",
+  );
   expect(fake.requests).toHaveLength(0);
 });
 

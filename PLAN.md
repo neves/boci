@@ -410,7 +410,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz (full sweep): match work-request client errors in `compute instance change-compartment` (seed 42).
 - [x] Fuzz (full sweep): match `compute instance-console-connection get-plink-connection-string` edge cases (seed 42).
 - [x] Fuzz (full sweep): match `compute console-history get-content` download output (seed 42).
-- [ ] Fuzz (full sweep): match IAM listing wrapper edge cases (`iam compartment list`/`group list-users`/`user list-groups`; seed 42).
+- [x] Fuzz (full sweep): match first-use auto-prompt output ordering on non-terminal stdout (`iam compartment list`/`group list-users`/`user list-groups`; seed 42).
 - [ ] Fuzz (full sweep): match `network remote-peering-connection connect` invalid `--peer-region-name` handling (seed 42).
 - [ ] Fuzz (full sweep): match `db database delete` edge cases (seed 42).
 - [ ] Fuzz (full sweep): match `rover {node,station-cluster} delete-workload` edge cases (seed 42).

@@ -6791,5 +6791,149 @@
         "fuzz-file.txt": "boci fuzz file\r\nline 2 ✓\n"
       }
     }
+  },
+  {
+    "id": "fuzz-iam-compartment-list-b1fcc5d4",
+    "key": "iam compartment list",
+    "argv": [
+      "iam",
+      "compartment",
+      "list",
+      "--compartment-id",
+      "-leading-dash",
+      "--sort-by",
+      "NAME",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "opc-request-id": "fuzz-opc-request-id"
+        },
+        "body": [
+          {
+            "name": "",
+            "description": "ünïcödé ✓",
+            "timeCreated": "2024-01-02T03:04:05.123456+00:00",
+            "inactiveStatus": -1,
+            "isAccessible": true,
+            "freeformTags": {
+              "key1": "with space",
+              "Key-2": "a,b"
+            },
+            "definedTags": {},
+            "fuzzUnknownField": "x"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fuzz-iam-group-list-users-a47adf64",
+    "key": "iam group list-users",
+    "argv": [
+      "iam",
+      "group",
+      "list-users",
+      "--compartment-id",
+      "-leading-dash",
+      "--group-id",
+      "-leading-dash",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "opc-request-id": "fuzz-opc-request-id",
+          "etag": "fuzz-etag"
+        },
+        "body": [
+          {
+            "id": "a,b",
+            "groupId": "slash/and?query=1&x",
+            "userId": "-leading-dash",
+            "lifecycleState": "fuzz-value",
+            "inactiveStatus": null
+          },
+          {
+            "id": "ocid1.test.oc1..aaaaaaaafuzz",
+            "userId": "ocid1.test.oc1..aaaaaaaafuzz",
+            "timeCreated": "2024-01-02T03:04:05.123Z",
+            "lifecycleState": "fuzz-value",
+            "inactiveStatus": 2147483648
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fuzz-iam-user-list-groups-5a4d6063",
+    "key": "iam user list-groups",
+    "argv": [
+      "iam",
+      "user",
+      "list-groups",
+      "--compartment-id",
+      "fuzz-value",
+      "--user-id",
+      "-leading-dash",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": {
+      "status": 503,
+      "headers": {
+        "opc-request-id": "fuzz-opc-request-id"
+      },
+      "body": "<html>not json</html>"
+    }
+  },
+  {
+    "id": "fuzz-iam-user-list-groups-9c8d6dd8",
+    "key": "iam user list-groups",
+    "argv": [
+      "iam",
+      "user",
+      "list-groups",
+      "--compartment-id",
+      "-leading-dash",
+      "--user-id",
+      "ocid1.test.oc1..aaaaaaaafuzz",
+      "--limit",
+      "-1",
+      "--query",
+      "[data]",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": [
+      {
+        "status": 200,
+        "headers": {
+          "opc-request-id": "fuzz-opc-request-id"
+        },
+        "body": [
+          {
+            "compartmentId": "with space",
+            "userId": "",
+            "timeCreated": "2024-01-02T03:04:05.123Z",
+            "lifecycleState": "with space",
+            "inactiveStatus": 0,
+            "fuzzUnknownField": "x"
+          },
+          {
+            "compartmentId": "ünïcödé ✓",
+            "timeCreated": "2024-01-02T03:04:05Z",
+            "lifecycleState": "a,b",
+            "inactiveStatus": -1
+          }
+        ]
+      }
+    ]
   }
 ]

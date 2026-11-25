@@ -2718,8 +2718,8 @@ async function runAutoPrompt(
     io.cwd,
     expandUser("~/suggestion_variable.txt", io.env),
   );
-  if (!existsSync(suggestionPath)) {
-    io.out(INTERACTIVE_SUGGESTION_MESSAGE);
+  let showSuggestion = !existsSync(suggestionPath);
+  if (showSuggestion) {
     try {
       writeFileSync(suggestionPath, "1", "utf8");
     } catch {
@@ -2727,103 +2727,126 @@ async function runAutoPrompt(
     }
   }
 
-  if (!("OCI_OPS_CLI_TOOLS_IMPORT" in io.env)) {
-    const isInstancePrincipal = settings.auth === "instance_principal";
-    const isResourcePrincipal = settings.auth === "resource_principal";
-    const isOkeWorkload = settings.auth === "oke_workload_identity";
-    const configOptional =
-      isInstancePrincipal || isResourcePrincipal || isOkeWorkload;
-    const hasEnvConfig =
-      io.env.OCI_CLI_USER !== undefined &&
-      io.env.OCI_CLI_TENANCY !== undefined &&
-      io.env.OCI_CLI_FINGERPRINT !== undefined &&
-      io.env.OCI_CLI_REGION !== undefined &&
-      (io.env.OCI_CLI_KEY_FILE !== undefined ||
-        io.env.OCI_CLI_KEY_CONTENT !== undefined);
+  const flushSuggestion = () => {
+    if (!showSuggestion) return;
+    showSuggestion = false;
+    io.out(INTERACTIVE_SUGGESTION_MESSAGE);
+  };
+  if (io.isTTY(1)) flushSuggestion();
 
-    let config: Config = {};
-    let configLoaded = false;
-    if (!hasEnvConfig) {
-      try {
-        config = fromFile(
-          settings.configFile,
-          settings.profile,
-          io.env,
-          io.cwd,
-        );
-        configLoaded = true;
-        if (debug) {
-          const keys = Object.keys(config)
-            .map((k) => pyRepr(k))
-            .join(", ");
-          io.err(`DEBUG:oci_cli.cli_util:Config File: dict_keys([${keys}])\n`);
-        }
-      } catch (e) {
-        if (e instanceof ConfigError) {
-          if (e.type === "ConfigFileNotFound") {
-            if (!configOptional) {
-              const expanded = expandUser(settings.configFile, io.env);
-              const prompt =
-                settings.auth === "security_token"
-                  ? "Do you want to create a new config file with a CLI session profile that can be used with --auth security_token? [Y/n]: "
-                  : "Do you want to create a new config file? [Y/n]: ";
-              io.out(
-                `ERROR: Could not find config file at ${expanded}\n${prompt}`,
-              );
-              const reader = createStdinReader(io);
-              while (true) {
-                const line = await reader.readLine();
-                if (line === null) {
-                  io.err("Aborted!\n");
-                  throw new Exit(1);
-                }
-                const answer = line.trim().toLowerCase();
-                if (answer === "n" || answer === "no") throw new Exit(1);
-                if (answer === "" || answer === "y" || answer === "yes") {
-                  await notImplemented(io, argv, "oci setup config");
-                }
-                io.out(`Error: invalid input\n${prompt}`);
-              }
-            }
-          } else if (
-            (e.type === "ProfileNotFound" || e.type === "InvalidKeyFilePath") &&
-            (isInstancePrincipal || isResourcePrincipal)
-          ) {
-            config = {};
-          } else {
-            io.err(`ERROR: ${e.message}\n`);
-            throw new Exit(1);
+  try {
+    if (!("OCI_OPS_CLI_TOOLS_IMPORT" in io.env)) {
+      const isInstancePrincipal = settings.auth === "instance_principal";
+      const isResourcePrincipal = settings.auth === "resource_principal";
+      const isOkeWorkload = settings.auth === "oke_workload_identity";
+      const configOptional =
+        isInstancePrincipal || isResourcePrincipal || isOkeWorkload;
+      const hasEnvConfig =
+        io.env.OCI_CLI_USER !== undefined &&
+        io.env.OCI_CLI_TENANCY !== undefined &&
+        io.env.OCI_CLI_FINGERPRINT !== undefined &&
+        io.env.OCI_CLI_REGION !== undefined &&
+        (io.env.OCI_CLI_KEY_FILE !== undefined ||
+          io.env.OCI_CLI_KEY_CONTENT !== undefined);
+
+      let config: Config = {};
+      let configLoaded = false;
+      if (!hasEnvConfig) {
+        try {
+          config = fromFile(
+            settings.configFile,
+            settings.profile,
+            io.env,
+            io.cwd,
+          );
+          configLoaded = true;
+          if (debug) {
+            const keys = Object.keys(config)
+              .map((k) => pyRepr(k))
+              .join(", ");
+            io.err(
+              `DEBUG:oci_cli.cli_util:Config File: dict_keys([${keys}])\n`,
+            );
           }
-        } else {
-          throw e;
+        } catch (e) {
+          if (e instanceof ConfigError) {
+            if (e.type === "ConfigFileNotFound") {
+              if (!configOptional) {
+                const expanded = expandUser(settings.configFile, io.env);
+                const prompt =
+                  settings.auth === "security_token"
+                    ? "Do you want to create a new config file with a CLI session profile that can be used with --auth security_token? [Y/n]: "
+                    : "Do you want to create a new config file? [Y/n]: ";
+                flushSuggestion();
+                io.out(
+                  `ERROR: Could not find config file at ${expanded}\n${prompt}`,
+                );
+                const reader = createStdinReader(io);
+                while (true) {
+                  const line = await reader.readLine();
+                  if (line === null) {
+                    io.err("Aborted!\n");
+                    throw new Exit(1);
+                  }
+                  const answer = line.trim().toLowerCase();
+                  if (answer === "n" || answer === "no") throw new Exit(1);
+                  if (answer === "" || answer === "y" || answer === "yes") {
+                    await notImplemented(io, argv, "oci setup config");
+                  }
+                  io.out(`Error: invalid input\n${prompt}`);
+                }
+              }
+            } else if (
+              (e.type === "ProfileNotFound" ||
+                e.type === "InvalidKeyFilePath") &&
+              (isInstancePrincipal || isResourcePrincipal)
+            ) {
+              config = {};
+            } else {
+              io.err(`ERROR: ${e.message}\n`);
+              throw new Exit(1);
+            }
+          } else {
+            throw e;
+          }
         }
       }
-    }
 
-    const suppressPermWarning =
-      (io.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? "").toLowerCase() ===
-      "true";
-    if (configLoaded && !suppressPermWarning) {
-      warnFilePermissions(io, configPath(settings.configFile, io.env, io.cwd));
-    }
-    applyConfigEnvVars(config, io.env, (key) => {
-      if (debug) {
-        io.err(`DEBUG:oci_cli.cli_util:${key}: Environment Variable\n`);
+      const suppressPermWarning =
+        (
+          io.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? ""
+        ).toLowerCase() === "true";
+      if (configLoaded && !suppressPermWarning) {
+        warnFilePermissions(
+          io,
+          configPath(settings.configFile, io.env, io.cwd),
+        );
       }
-    });
-    if (debug) {
-      io.err(
-        "DEBUG:oci_cli.cli_util:region: Environment Variable or Parameter\n",
-      );
+      applyConfigEnvVars(config, io.env, (key) => {
+        if (debug) {
+          io.err(`DEBUG:oci_cli.cli_util:${key}: Environment Variable\n`);
+        }
+      });
+      if (debug) {
+        io.err(
+          "DEBUG:oci_cli.cli_util:region: Environment Variable or Parameter\n",
+        );
+      }
     }
-  }
 
-  if (!io.isTTY(0)) {
-    io.out("> oci \r\n");
-    io.err("Warning: Input is not a terminal (fd=0).\n\nAborted!\n");
-    throw new Exit(1);
+    if (!io.isTTY(0)) {
+      // prompt_toolkit writes through the binary stream before flushing Python stdout.
+      io.out("> oci ");
+      flushSuggestion();
+      io.out("\r\n");
+      io.err("Warning: Input is not a terminal (fd=0).\n\nAborted!\n");
+      throw new Exit(1);
+    }
+    flushSuggestion();
+    return await notImplemented(io, argv, "oci -i");
+  } finally {
+    flushSuggestion();
   }
-  return await notImplemented(io, argv, "oci -i");
 }
 
 /** cli_root.get_key_file: configparser read of the config (missing file → none). */

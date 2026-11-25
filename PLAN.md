@@ -405,4 +405,12 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz (full sweep): match wrapper attribute errors for list-valued detail options (`network-firewall {application,decryption-profile,mapped-secret,nat-rule,service,tunnel-inspection-rule} {create,update}`; seed 42).
 - [x] Fuzz (full sweep): match string concatenation errors in `resource-manager stack copy` (seed 42).
 - [x] Fuzz (full sweep): match wrapper attribute errors on missing values (`rover {node,standalone-cluster,station-cluster} list-workload(s)`; seed 42).
-- [ ] Fuzz (full sweep): custom command edge cases and error output. Match `oci` on `os object head`/`restore` and `os multipart abort`, `compute instance list-vnics`/`change-compartment`, `compute instance-console-connection get-plink-connection-string`, `compute console-history get-content` (spurious `Downloading file`), `iam compartment list`/`group list-users`/`user list-groups`, `network remote-peering-connection connect` (invalid `--peer-region-name`), `db database delete`, `rover {node,station-cluster} delete-workload`, and usage-error prefixes on `data-science ml-app-instance-view update`/`fn function create archive-function object-storage fn-update-runtime-config`/`generative-ai-data generate-sql-jobs generate` (seed 42).
+- [x] Fuzz (full sweep): match empty or invalid implicit Object Storage namespaces (`os object head`/`restore`, `os multipart abort`; seed 42).
+- [ ] Fuzz (full sweep): match Compute instance wrapper edge cases (`compute instance list-vnics`/`change-compartment`; seed 42).
+- [ ] Fuzz (full sweep): match `compute instance-console-connection get-plink-connection-string` edge cases (seed 42).
+- [ ] Fuzz (full sweep): match `compute console-history get-content` download output (seed 42).
+- [ ] Fuzz (full sweep): match IAM listing wrapper edge cases (`iam compartment list`/`group list-users`/`user list-groups`; seed 42).
+- [ ] Fuzz (full sweep): match `network remote-peering-connection connect` invalid `--peer-region-name` handling (seed 42).
+- [ ] Fuzz (full sweep): match `db database delete` edge cases (seed 42).
+- [ ] Fuzz (full sweep): match `rover {node,station-cluster} delete-workload` edge cases (seed 42).
+- [ ] Fuzz (full sweep): match usage-error prefixes on `data-science ml-app-instance-view update`/`fn function create archive-function object-storage fn-update-runtime-config`/`generative-ai-data generate-sql-jobs generate` (seed 42).

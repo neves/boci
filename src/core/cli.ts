@@ -823,11 +823,32 @@ async function main(io: Invocation): Promise<void> {
             );
             throw new Exit(1);
           }
+          // The SDK decodes quoted strings and preserves all other response text.
+          let namespace = nsResult.raw;
           try {
-            values[nsParam.name] = String(JSON.parse(nsResult.raw));
+            const decoded: unknown = JSON.parse(namespace);
+            if (typeof decoded === "string") namespace = decoded;
           } catch {
-            values[nsParam.name] = nsResult.raw;
+            // The namespace endpoint also accepts unquoted names.
           }
+          if (namespace === "") {
+            io.err(
+              `${usage(io, commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${nsParam.name.replaceAll("_", "-")}.\n`,
+            );
+            throw new Exit(1);
+          }
+          try {
+            validateOsNamespace(namespace);
+          } catch (e) {
+            if (e instanceof BadParameter)
+              showPatched(
+                io,
+                usage(io, commandPath, cmd.helpDoc),
+                `Invalid value for ${errorHint(nsParam)}: ${e.message}`,
+              );
+            throw e;
+          }
+          values[nsParam.name] = namespace;
         }
       }
       let command: GeneratedCommand = specCmd;

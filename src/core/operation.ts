@@ -1532,21 +1532,27 @@ export function parseSdkResponseData(result: OperationResult): unknown {
       ? {}
       : null;
   }
+  let parsed: unknown;
   try {
-    const parsed: unknown = JSON.parse(result.raw);
-    if (typeof parsed === "string") return parsed;
-    if (result.operation.responseType === "str") return result.raw;
-    if (
-      Array.isArray(parsed) &&
-      parsed.length === 0 &&
-      result.responseModels &&
-      result.operation.responseType in result.responseModels
-    )
-      return {};
-    return parsed;
+    parsed = JSON.parse(result.raw);
   } catch {
     return result.raw;
   }
+  if (typeof parsed === "string") return parsed;
+  if (result.operation.responseType === "str") return result.raw;
+  const model = result.responseModels?.[result.operation.responseType];
+  if (Array.isArray(parsed) && model) {
+    // The SDK tests each wire key for membership before populating a model.
+    // A list of objects contains none of those keys, so its fields stay None.
+    if (model.attributes.some(([, , wire]) => parsed.includes(wire))) {
+      throw new ProgramRaise(
+        "TypeError",
+        "list indices must be integers or slices, not str",
+      );
+    }
+    return {};
+  }
+  return parsed;
 }
 
 const COLLECTION_SEPARATORS: Record<string, string> = {

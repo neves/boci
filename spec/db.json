@@ -90486,15 +90486,88 @@
         "data-collection-options": "database:DataCollectionOptions"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["json-dumps", "file-read"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_cloud_vm_cluster"
+        ],
+        "files": ["ssh_authorized_keys_file"]
+      },
+      "program": {
+        "body": [
+          [
+            "set",
+            ["var", "kwargs"],
+            "cloud_exadata_infrastructure_id",
+            ["item", ["var", "kwargs"], "cloud_exa_infra_id"]
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "is_sparse_diskgroup_enabled",
+            ["item", ["var", "kwargs"], "is_sparse_diskgroup"]
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "is_local_backup_enabled",
+            ["item", ["var", "kwargs"], "is_local_backup"]
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ssh_authorized_keys_file", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "ssh_authorized_keys_file"]
+            ],
+            [
+              [
+                "let",
+                "content",
+                [
+                  "map",
+                  ["item", ["var", "kwargs"], "ssh_authorized_keys_file"],
+                  "line",
+                  ["call", "rstrip", ["var", "line"], "\n"]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "ssh_public_keys",
+                ["fn", "dumps", ["var", "content"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "vault_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "exascale_db_storage_vault_id",
+                ["item", ["var", "kwargs"], "vault_id"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "cloud_exa_infra_id"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "is_sparse_diskgroup"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "is_local_backup"]],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "ssh_authorized_keys_file"]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "vault_id"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.create_cloud_vm_cluster",
-        "renames": {
-          "cloud_exadata_infrastructure_id": "cloud_exa_infra_id",
-          "is_sparse_diskgroup_enabled": "is_sparse_diskgroup",
-          "is_local_backup_enabled": "is_local_backup",
-          "exascale_db_storage_vault_id": "vault_id"
-        },
         "complexTypes": {
           "db-servers": "database:list[string]",
           "ssh-public-keys": "database:list[string]",
@@ -90506,7 +90579,285 @@
           "data-collection-options": "database:DataCollectionOptions",
           "file-system-configuration-details": "database:list[FileSystemConfigurationDetail]",
           "cloud-automation-update-details": "database:CloudAutomationUpdateDetails"
-        }
+        },
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cloud_exadata_infrastructure_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "hostname",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_keys",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "gi_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocpu_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "memory_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_node_storage_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_tbs",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_servers",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "reco_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sparse_storage_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_sparse_diskgroup_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_local_backup_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_zone",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scan_listener_port_tcp",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scan_listener_port_tcp_ssl",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_zone_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_network_nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_collection_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "file_system_configuration_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cloud_automation_update_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "exascale_db_storage_vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vm_cluster_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vm_file_system_storage_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vm_backup_storage_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_dry_run",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -90584,7 +90935,7 @@
           "target": "body",
           "bodyArg": "create_cloud_vm_cluster_details",
           "key": ["cloudExadataInfrastructureId"],
-          "param": "cloud_exa_infra_id"
+          "param": "cloud_exadata_infrastructure_id"
         },
         {
           "target": "body",
@@ -90597,7 +90948,7 @@
           "bodyArg": "create_cloud_vm_cluster_details",
           "key": ["sshPublicKeys"],
           "transform": "parse_json_parameter",
-          "value": null
+          "param": "ssh_public_keys"
         },
         {
           "target": "body",
@@ -90694,15 +91045,15 @@
           "target": "body",
           "bodyArg": "create_cloud_vm_cluster_details",
           "key": ["isSparseDiskgroupEnabled"],
-          "param": "is_sparse_diskgroup",
-          "when": "is_sparse_diskgroup is not None"
+          "param": "is_sparse_diskgroup_enabled",
+          "when": "is_sparse_diskgroup_enabled is not None"
         },
         {
           "target": "body",
           "bodyArg": "create_cloud_vm_cluster_details",
           "key": ["isLocalBackupEnabled"],
-          "param": "is_local_backup",
-          "when": "is_local_backup is not None"
+          "param": "is_local_backup_enabled",
+          "when": "is_local_backup_enabled is not None"
         },
         {
           "target": "body",
@@ -90814,8 +91165,8 @@
           "target": "body",
           "bodyArg": "create_cloud_vm_cluster_details",
           "key": ["exascaleDbStorageVaultId"],
-          "param": "vault_id",
-          "when": "vault_id is not None"
+          "param": "exascale_db_storage_vault_id",
+          "when": "exascale_db_storage_vault_id is not None"
         },
         {
           "target": "body",
@@ -146708,13 +147059,81 @@
         "data-collection-options": "database:DataCollectionOptions"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["json-dumps", "file-read"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_exadb_vm_cluster"
+        ],
+        "files": ["ssh_authorized_keys_file"]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "scan_listener_port_tcps", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "scan_listener_port_tcp_ssl",
+                ["item", ["var", "kwargs"], "scan_listener_port_tcps"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ssh_authorized_keys_file", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "ssh_authorized_keys_file"]
+            ],
+            [
+              [
+                "let",
+                "content",
+                [
+                  "map",
+                  ["item", ["var", "kwargs"], "ssh_authorized_keys_file"],
+                  "line",
+                  ["call", "rstrip", ["var", "line"], "\n"]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "ssh_public_keys",
+                ["fn", "dumps", ["var", "content"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "vault_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "exascale_db_storage_vault_id",
+                ["item", ["var", "kwargs"], "vault_id"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "scan_listener_port_tcps"]],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "ssh_authorized_keys_file"]
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "vault_id"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.create_exadb_vm_cluster",
-        "renames": {
-          "scan_listener_port_tcp_ssl": "scan_listener_port_tcps",
-          "exascale_db_storage_vault_id": "vault_id"
-        },
         "complexTypes": {
           "ssh-public-keys": "database:list[string]",
           "vm-file-system-storage": "database:ExadbVmClusterStorageDetails",
@@ -146724,7 +147143,219 @@
           "defined-tags": "database:dict(str, dict(str, object))",
           "security-attributes": "database:dict(str, dict(str, object))",
           "data-collection-options": "database:DataCollectionOptions"
-        }
+        },
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "hostname",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_keys",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shape",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "total_e_cpu_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enabled_e_cpu_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vm_file_system_storage",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "exascale_db_storage_vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "grid_image_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cluster_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_zone",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scan_listener_port_tcp",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scan_listener_port_tcp_ssl",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_zone_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_network_nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_collection_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "shape_attribute",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -146800,7 +147431,7 @@
           "bodyArg": "create_exadb_vm_cluster_details",
           "key": ["sshPublicKeys"],
           "transform": "parse_json_parameter",
-          "value": null
+          "param": "ssh_public_keys"
         },
         {
           "target": "body",
@@ -146837,7 +147468,7 @@
           "target": "body",
           "bodyArg": "create_exadb_vm_cluster_details",
           "key": ["exascaleDbStorageVaultId"],
-          "param": "vault_id"
+          "param": "exascale_db_storage_vault_id"
         },
         {
           "target": "body",
@@ -146884,8 +147515,8 @@
           "target": "body",
           "bodyArg": "create_exadb_vm_cluster_details",
           "key": ["scanListenerPortTcpSsl"],
-          "param": "scan_listener_port_tcps",
-          "when": "scan_listener_port_tcps is not None"
+          "param": "scan_listener_port_tcp_ssl",
+          "when": "scan_listener_port_tcp_ssl is not None"
         },
         {
           "target": "body",
@@ -150362,10 +150993,53 @@
         "data-collection-options": "database:DataCollectionOptions"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["json-dumps", "file-read"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_exadb_vm_cluster"
+        ],
+        "files": ["ssh_authorized_keys_file"]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "ssh_authorized_keys_file", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "ssh_authorized_keys_file"]
+            ],
+            [
+              [
+                "let",
+                "content",
+                [
+                  "map",
+                  ["item", ["var", "kwargs"], "ssh_authorized_keys_file"],
+                  "line",
+                  ["call", "rstrip", ["var", "line"], "\n"]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "ssh_public_keys",
+                ["fn", "dumps", ["var", "content"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "ssh_authorized_keys_file"]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.update_exadb_vm_cluster",
-        "renames": {},
         "complexTypes": {
           "vm-file-system-storage": "database:ExadbVmClusterStorageDetails",
           "ssh-public-keys": "database:list[string]",
@@ -150375,7 +151049,154 @@
           "defined-tags": "database:dict(str, dict(str, object))",
           "security-attributes": "database:dict(str, dict(str, object))",
           "data-collection-options": "database:DataCollectionOptions"
-        }
+        },
+        "params": [
+          {
+            "name": "exadb_vm_cluster_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "total_e_cpu_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "enabled_e_cpu_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vm_file_system_storage",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "node_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ssh_public_keys",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_network_nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_collection_options",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "system_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "grid_image_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "update_action",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -150478,6 +151299,14 @@
           "key": ["licenseModel"],
           "param": "license_model",
           "when": "license_model is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_exadb_vm_cluster_details",
+          "key": ["sshPublicKeys"],
+          "transform": "parse_json_parameter",
+          "param": "ssh_public_keys",
+          "when": "ssh_public_keys is not None"
         },
         {
           "target": "body",

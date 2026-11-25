@@ -402,7 +402,7 @@ def custom_delegate(callback, client_map, custom_params):
         if chain and chain[0] == "kwargs" and chain[1][0] in custom_params:
             if kw.arg != chain[1][0]:
                 renames[kw.arg] = chain[1][0]
-    computed = (ast.UnaryOp, ast.BinOp, ast.BoolOp, ast.Compare, ast.IfExp)
+    computed = (ast.UnaryOp, ast.BinOp, ast.BoolOp, ast.Compare, ast.IfExp, ast.ListComp)
     for st in ast.walk(ast.Module(body=fn.body[:-1], type_ignores=[])):
         # A computed value (e.g. `not kwargs['no_hooks']`) is logic, not a rename.
         if isinstance(st, ast.Assign) and isinstance(st.value, computed):

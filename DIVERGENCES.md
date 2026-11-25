@@ -67,6 +67,14 @@ Every entry needs a reason. An entry marked **unresolved** is one the loop gave 
 - **Verification:** `BOCI_PARITY_ALL=1 bun test test/parity -t 'generated-request-'` — 3,180 passed, 0 failed (includes all 662 generated PUT cases, plus generated POST/PATCH cases). `bun test test/unit/operation.test.ts -t 'generated PUT signs Python-compatible JSON bytes'` passes.
 - **State:** resolved by serializing generated JSON bodies with Python-compatible separators and ASCII escaping before signing.
 
+### Direct request bodies with non-ASCII text
+
+- **Invocation:** `oci cloud-migrations migration-plan import --migration-plan-id a,b --import-migration-plan-details 'ünïcödé ✓'` against the Parity endpoint.
+- **Reference CLI:** advertises a length of nine characters and hashes the full UTF-8 encoding. The HTTP server reads the first nine bytes as the request body.
+- **boci:** sends those nine bytes and signs the same length and digest as the Reference CLI.
+- **Why:** Bun previously sent the full encoding with a different wire length, which invalidated the signature.
+- **State:** resolved. Five promoted fuzz cases verify the received body and RSA signature. The migration plan case also checks the captured length and digest.
+
 ### `os object get` (multipart): part failure omits Python traceback
 
 - **Invocation:** `oci os object get -ns myns -bn mybucket --name fail-big.bin --file out.bin` when a ranged GET part returns an HTTP error

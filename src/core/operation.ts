@@ -1006,6 +1006,15 @@ export async function sendServiceRequest(
     body: opts.body ?? "",
   };
   prepareContentLength(req);
+  let wireBody = req.body;
+  if (typeof wireBody === "string" && /[^\x00-\x7f]/.test(wireBody)) {
+    const bytes = new TextEncoder().encode(wireBody);
+    const length = Number(req.headers["content-length"]);
+    // requests frames a Python str by character count, while the SDK hashes
+    // the full UTF-8 encoding. Send the byte prefix the server reads under
+    // that Content-Length and keep the original body for the signer.
+    wireBody = bytes.subarray(0, length);
+  }
   const maxAttempts = opts.noRetry ? 1 : sc.maxAttempts;
   let response: Response;
   let raw = "";
@@ -1039,9 +1048,7 @@ export async function sendServiceRequest(
       const init: RequestInit & { decompress?: boolean } = {
         method: req.method,
         headers: req.headers,
-        ...(req.body !== "" && req.body !== undefined
-          ? { body: req.body }
-          : {}),
+        ...(wireBody !== "" ? { body: wireBody } : {}),
         ...(readTimer === undefined ? {} : { signal: controller.signal }),
         ...(opts.decompress === false ? { decompress: false } : {}),
       };
@@ -1054,7 +1061,7 @@ export async function sendServiceRequest(
           : await fetchWithConnectionTimeout(
               io,
               url,
-              req,
+              { ...req, body: wireBody },
               sc.connectionTimeout * 1000,
               controller.signal,
               opts.decompress,

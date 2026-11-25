@@ -76,6 +76,8 @@ export type OperationCall = {
   skipDeleteConfirm?: boolean;
   /** Update confirmation already ran before JSON parameter parsing. */
   skipUpdateConfirm?: boolean;
+  /** Complex parameter values already parsed by the CLI callback. */
+  parsedJsonParams?: ReadonlySet<string>;
   /** Apply the Generated callback's SDK list pagination. */
   paginateSdk?: boolean;
 };
@@ -161,6 +163,18 @@ export function keyTypes(
     complexTypes: command.delegate?.complexTypes ?? command.complexTypes,
     models,
   };
+}
+
+/** A wrapper's Leaf parameter name as seen by the generated callback. */
+export function generatedParameterName(
+  command: GeneratedCommand,
+  parameter: string,
+): string {
+  return (
+    Object.entries(command.delegate?.renames ?? {}).find(
+      ([, custom]) => custom === parameter,
+    )?.[0] ?? parameter
+  );
 }
 
 export type GeneratedCommand = Pick<
@@ -381,6 +395,7 @@ function boundValueFor(
   rootValues: Record<string, unknown>,
   arg: string,
   keys: KeyTypes,
+  parsedJsonParams?: ReadonlySet<string>,
 ): unknown {
   const bindings =
     command.bindings?.filter(
@@ -406,8 +421,16 @@ function boundValueFor(
     if (typeof item.param === "string") {
       let candidate = values[item.param];
       if (candidate !== undefined) {
-        if (item.transform === "parse_json_parameter") {
-          candidate = parseJsonParameter(io, item.param, candidate, keys);
+        if (
+          item.transform === "parse_json_parameter" &&
+          !parsedJsonParams?.has(item.param)
+        ) {
+          candidate = parseJsonParameter(
+            io,
+            generatedParameterName(command, item.param),
+            candidate,
+            keys,
+          );
         }
         result = candidate;
       }
@@ -458,6 +481,7 @@ function buildRequestBody(
   values: Record<string, unknown>,
   rootValues: Record<string, unknown>,
   keys: KeyTypes,
+  parsedJsonParams?: ReadonlySet<string>,
 ): string | Uint8Array | ProgramFile {
   const body: Record<string, unknown> = {};
   let hasBodyBindings = false;
@@ -487,14 +511,16 @@ function buildRequestBody(
       target = target[part] as Record<string, unknown>;
     }
     if (binding.transform === "parse_json_parameter") {
-      target[binding.key.at(-1) as string] = parseJsonParameter(
-        io,
-        typeof binding.param === "string"
-          ? binding.param
-          : (binding.key.at(-1) as string),
-        value,
-        keys,
-      );
+      const key = binding.key.at(-1) as string;
+      const parameter = typeof binding.param === "string" ? binding.param : key;
+      target[key] = parsedJsonParams?.has(parameter)
+        ? value
+        : parseJsonParameter(
+            io,
+            generatedParameterName(command, parameter),
+            value,
+            keys,
+          );
     } else if (
       typeof value === "string" &&
       value.toLowerCase().startsWith("file://")
@@ -512,6 +538,7 @@ function buildRequestBody(
       rootValues,
       command.operation.body,
       keys,
+      parsedJsonParams,
     );
     if (direct === undefined || direct === null) {
       return command.params?.some(
@@ -1163,12 +1190,27 @@ export async function callOperation(
   // A file-like body: the SDK signer defaults its content-type to octet-stream.
   let streamBody = false;
   if (operation.http !== "GET") {
-    const built = buildRequestBody(io, command, values, rootValues, keys);
+    const built = buildRequestBody(
+      io,
+      command,
+      values,
+      rootValues,
+      keys,
+      call.parsedJsonParams,
+    );
     streamBody = built instanceof ProgramFile;
     requestBody = built instanceof ProgramFile ? built.read() : built;
   }
   const boundValue = (arg: string) =>
-    boundValueFor(io, command, values, rootValues, arg, keys);
+    boundValueFor(
+      io,
+      command,
+      values,
+      rootValues,
+      arg,
+      keys,
+      call.parsedJsonParams,
+    );
   const client = spec.clients[operation.client] as Record<string, unknown>;
   const hasNoneRetry =
     command.bindings?.some((b) => b.transform === "NoneRetryStrategy") === true;

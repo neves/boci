@@ -127,6 +127,7 @@ import {
   callSdkOperation,
   confirmUnderWrapExceptions,
   createServiceClient,
+  generatedParameterName,
   keyTypes,
   outputBinding,
   parseSdkResponseData,
@@ -722,22 +723,19 @@ async function main(io: Invocation): Promise<void> {
             specCmd.program &&
             (specCmd.sdkOperations?.length || specCmd.program.rawRequests),
           )));
+    const parsedJsonParams = new Set<string>();
     const parseComplexParams = () => {
       // The command oci runs (a Tier A wrapper's delegate) camelizes keys by its types.
       const keys = customHandler ? undefined : keyTypes(specCmd, spec.models);
-      const renames = specCmd.delegate?.renames ?? {};
       for (const p of processingOrder(parsed.order, cmd.params ?? [])) {
         if (values[p.name] !== undefined && isComplexParam(p)) {
-          const parsedAs =
-            Object.entries(renames).find(
-              ([, custom]) => custom === p.name,
-            )?.[0] ?? p.name;
           values[p.name] = parseJsonParameter(
             io,
-            parsedAs,
+            generatedParameterName(specCmd, p.name),
             values[p.name],
             keys,
           );
+          parsedJsonParams.add(p.name);
         }
       }
     };
@@ -1685,6 +1683,7 @@ async function main(io: Invocation): Promise<void> {
         stdin,
         skipDeleteConfirm,
         skipUpdateConfirm,
+        parsedJsonParams,
         paginateSdk: true,
       };
       const result = await callOperation(io, call);

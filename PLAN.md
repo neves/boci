@@ -401,7 +401,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz (full sweep): match flags omitted by the wrapper (`db pluggable-database local-clone`; seed 42).
 - [x] Fuzz (full sweep): match nested model type errors (`db database create-database-from-database`; seed 42).
 - [x] Fuzz (full sweep): deserialize array replies to SDK model defaults in custom wrappers (`network vnic assign-private-ip`, `db patch-history list by-database`; seed 42).
-- [ ] Fuzz (full sweep): match wrapper SDK list deserialization and indexing errors (`db database list`, `db database create-from-database`; seed 42).
+- [x] Fuzz (full sweep): match wrapper SDK list deserialization and indexing errors (`db database list`, `db database create-from-database`; seed 42).
 - [ ] Fuzz (full sweep): match wrapper attribute errors for list-valued detail options (`network-firewall {application,decryption-profile,mapped-secret,nat-rule,service,tunnel-inspection-rule} {create,update}`; seed 42).
 - [ ] Fuzz (full sweep): match string concatenation errors in `resource-manager stack copy` (seed 42).
 - [ ] Fuzz (full sweep): match wrapper attribute errors on missing values (`rover {node,standalone-cluster,station-cluster} list-workload(s)`; seed 42).

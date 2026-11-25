@@ -2118,8 +2118,21 @@ export function runProgram(
       typeof key === "number"
     ) {
       const i = key < 0 ? obj.length + key : key;
-      if (i < 0 || i >= obj.length) throw new ProgramUnsupported("IndexError");
+      if (i < 0 || i >= obj.length) {
+        throw new ProgramRaise(
+          "IndexError",
+          Array.isArray(obj)
+            ? "list index out of range"
+            : "string index out of range",
+        );
+      }
       return obj[i];
+    }
+    if (obj === null || obj === undefined) {
+      throw new ProgramRaise(
+        "TypeError",
+        "'NoneType' object is not subscriptable",
+      );
     }
     throw new ProgramUnsupported("subscript");
   };

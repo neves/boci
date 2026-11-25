@@ -1384,7 +1384,7 @@ export async function callOperation(
           }
           const result = await sendPage(params);
           if (!result.response.ok) return new ProgramServiceError(result);
-          const data = parseSdkResponseData(result);
+          const data = parseSdkResponseData(result, { sdkList: false });
           const listItems =
             isListResponse &&
             data &&
@@ -1502,7 +1502,10 @@ export function bindSdkArgs(
 }
 
 /** Decode an SDK operation's response body into its `.data` value. */
-export function parseSdkResponseData(result: OperationResult): unknown {
+export function parseSdkResponseData(
+  result: OperationResult,
+  { sdkList = true }: { sdkList?: boolean } = {},
+): unknown {
   if (!result.response.ok || !result.operation.responseType) return null;
   if (
     result.operation.responseType === "stream" &&
@@ -1524,23 +1527,25 @@ export function parseSdkResponseData(result: OperationResult): unknown {
       result.url.toString(),
     );
   }
-  if (result.raw.trim().length === 0) {
+  const type = result.operation.responseType;
+  const deserializeList = sdkList && type.startsWith("list[");
+  if (!deserializeList && result.raw.trim().length === 0) {
     // Python SDK deserializes an empty 200 body into an empty model instance when a model
     // responseType is declared (all attributes default to None).
-    return result.responseModels &&
-      result.operation.responseType in result.responseModels
-      ? {}
-      : null;
+    return result.responseModels && type in result.responseModels ? {} : null;
   }
-  let parsed: unknown;
+  let parsed: unknown = result.raw;
   try {
     parsed = JSON.parse(result.raw);
   } catch {
-    return result.raw;
+    // The SDK deserializes the raw string when JSON parsing fails.
+  }
+  if (deserializeList) {
+    return deserializeSdkList(parsed, type, result.responseModels);
   }
   if (typeof parsed === "string") return parsed;
-  if (result.operation.responseType === "str") return result.raw;
-  const model = result.responseModels?.[result.operation.responseType];
+  if (type === "str") return result.raw;
+  const model = result.responseModels?.[type];
   if (Array.isArray(parsed) && model) {
     // The SDK tests each wire key for membership before populating a model.
     // A list of objects contains none of those keys, so its fields stay None.
@@ -1553,6 +1558,58 @@ export function parseSdkResponseData(result: OperationResult): unknown {
     return {};
   }
   return parsed;
+}
+
+function deserializeSdkList(
+  value: unknown,
+  type: string,
+  models?: Models[string],
+): unknown {
+  if (value === null) return value;
+  const elementType = type.slice(5, -1);
+  let items: unknown[];
+  if (Array.isArray(value)) items = value;
+  else if (typeof value === "string") items = [...value];
+  else if (typeof value === "object" && value !== undefined)
+    items = Object.keys(value);
+  else {
+    throw new ProgramRaise(
+      "TypeError",
+      `'${sdkScalarType(value)}' object is not iterable`,
+    );
+  }
+  const model = models?.[elementType];
+  return items.map((item) => {
+    if (elementType.startsWith("list["))
+      return deserializeSdkList(item, elementType, models);
+    if (!model || item === null || item === undefined) return item;
+    if (typeof item === "string" || Array.isArray(item)) {
+      // Python tests for membership before using a model field's wire key as an index.
+      if (model.attributes.some(([, , wire]) => item.includes(wire))) {
+        throw new ProgramRaise(
+          "TypeError",
+          typeof item === "string"
+            ? "string indices must be integers, not 'str'"
+            : "list indices must be integers or slices, not str",
+        );
+      }
+      return {};
+    }
+    if (typeof item !== "object") {
+      throw new ProgramRaise(
+        "TypeError",
+        `argument of type '${sdkScalarType(item)}' is not iterable`,
+      );
+    }
+    return item;
+  });
+}
+
+function sdkScalarType(value: unknown): string {
+  if (typeof value === "boolean") return "bool";
+  if (typeof value === "number")
+    return Number.isInteger(value) ? "int" : "float";
+  return "NoneType";
 }
 
 const COLLECTION_SEPARATORS: Record<string, string> = {

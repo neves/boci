@@ -1927,7 +1927,6 @@ async function promptForValue(
     out(p);
     const line = await stdin.readLine();
     if (line === null) {
-      out("\n");
       io.err(wrapExceptions ? "Abort: \n" : "Aborted!\n");
       throw new Exit(1);
     }

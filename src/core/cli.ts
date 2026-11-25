@@ -1685,7 +1685,7 @@ async function main(io: Invocation): Promise<void> {
         stdin,
         skipDeleteConfirm,
         skipUpdateConfirm,
-        paginateLimit: true,
+        paginateSdk: true,
       };
       const result = await callOperation(io, call);
       const downloadTo = outputBinding(command);

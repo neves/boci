@@ -38,6 +38,7 @@ import {
   ProgramUnsupported,
 } from "./program.ts";
 import { paginateSdkList } from "./pagination.ts";
+import { ModelDeserializationError, renderModel } from "./output.ts";
 import {
   SecurityTokenDecodeError,
   SecurityTokenKeyError,
@@ -75,8 +76,8 @@ export type OperationCall = {
   skipDeleteConfirm?: boolean;
   /** Update confirmation already ran before JSON parameter parsing. */
   skipUpdateConfirm?: boolean;
-  /** Apply the Generated callback's client-side --limit handling. */
-  paginateLimit?: boolean;
+  /** Apply the Generated callback's SDK list pagination. */
+  paginateSdk?: boolean;
 };
 
 export type OperationResult = {
@@ -95,8 +96,8 @@ export type OperationResult = {
   pageItems: unknown[];
   /** With --all on a collection model operation, every page's raw body in order. */
   rawPages?: string[];
-  /** Aggregated --limit data, with collection fields already converted. */
-  limitedData?: { value: unknown };
+  /** Aggregated SDK list data, with collection fields already converted. */
+  paginatedData?: { value: unknown };
   /** SDK client serviceName for ServiceError.target_service. */
   targetService?: string;
   /** Outbound opc-request-id header, used by ServiceError when the response omits it. */
@@ -1230,8 +1231,13 @@ export async function callOperation(
   const allPages = values.all_pages === true;
   const limit = values.limit;
   const pageSize = values.page_size;
+  const paginateSdkAll =
+    call.paginateSdk &&
+    allPages &&
+    Boolean(operation.responseType) &&
+    operation.responseType !== "stream";
   const paginateLimit =
-    call.paginateLimit &&
+    call.paginateSdk &&
     operation.paginated === true &&
     operation.queryParams?.limit?.arg === "limit" &&
     !allPages &&
@@ -1239,7 +1245,7 @@ export async function callOperation(
   if (
     !paginateLimit &&
     (allPages || limit !== undefined) &&
-    pageSize !== undefined
+    (paginateSdkAll ? truthy(pageSize) : pageSize !== undefined)
   ) {
     upsertQueryParam(queryParams, "limit", String(pageSize));
   }
@@ -1306,17 +1312,21 @@ export async function callOperation(
     };
   };
   const isListResponse = Boolean(operation.responseType?.startsWith("list["));
-  if (paginateLimit) {
+  if (paginateSdkAll || paginateLimit) {
     try {
       const outcome = await paginateSdkList({
-        mode: "limit",
+        mode: allPages ? "all" : "limit",
         multipleKeys: false,
         recordLimit: limit,
         pageSize,
-        kwArgs: { limit },
+        kwArgs: allPages
+          ? { sort_by: values.sort_by, sort_order: values.sort_order }
+          : { limit },
         fetchPage: async (kwargs) => {
           const params = [...queryParams];
-          upsertQueryParam(params, "limit", String(kwargs.limit));
+          if (paginateLimit) {
+            upsertQueryParam(params, "limit", String(kwargs.limit));
+          }
           if (typeof kwargs.page === "string") {
             upsertQueryParam(params, "page", kwargs.page);
           }
@@ -1331,15 +1341,25 @@ export async function callOperation(
             Array.isArray(data.items)
               ? data.items
               : data;
+          if (paginateSdkAll) {
+            // The SDK deserializes each reply before the CLI follows its next-page token.
+            renderModel(
+              listItems,
+              operation.responseType!,
+              result.responseModels,
+            );
+          }
           return new ProgramResponse(result, listItems);
         },
       });
       if (outcome instanceof ProgramRaise) throw outcome;
       if (outcome instanceof ProgramServiceError) return outcome.result;
-      return { ...outcome.result, limitedData: { value: outcome.data } };
+      return { ...outcome.result, paginatedData: { value: outcome.data } };
     } catch (e) {
-      if (!(e instanceof ProgramRaise)) throw e;
-      io.err(`${e.cls}: ${e.message}\n`);
+      if (e instanceof ProgramRaise) io.err(`${e.cls}: ${e.message}\n`);
+      else if (e instanceof ModelDeserializationError)
+        io.err(`${e.pythonType}: ${e.message}\n`);
+      else throw e;
       throw new Exit(1);
     }
   }

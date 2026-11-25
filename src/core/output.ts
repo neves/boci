@@ -97,8 +97,8 @@ export function printResult(
     throw new Exit(1);
   }
   try {
-    if (result.limitedData) {
-      const data = result.limitedData.value;
+    if (result.paginatedData) {
+      const data = result.paginatedData.value;
       renderCliData(
         io,
         operation.responseType?.startsWith("list[")

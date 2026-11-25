@@ -88,6 +88,8 @@ export type OperationResult = {
   rawPages?: string[];
   /** SDK client serviceName for ServiceError.target_service. */
   targetService?: string;
+  /** Outbound opc-request-id header, used by ServiceError when the response omits it. */
+  requestId?: string;
 };
 
 export type ClientSettings = {
@@ -135,6 +137,7 @@ export type ServiceResponse = {
   url: URL;
   response: Response;
   raw: string;
+  requestId?: string;
 };
 
 /** How the command that parses complex params camelizes their keys (ticket 19). */
@@ -861,7 +864,7 @@ export async function sendServiceRequest(
     io.err(`DEBUG:oci.base_client: Request: ${req.method} ${req.url}\n`);
     io.err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
   }
-  return { url, response, raw };
+  return { url, response, raw, requestId: req.headers["opc-request-id"] };
 }
 
 /** The parameter a download command streams the response body into (its `--file`). */
@@ -1001,6 +1004,7 @@ export async function callOperation(
   let firstUrl: URL | undefined;
   let response: Response;
   let raw: string;
+  let lastRequestId: string | undefined;
   const pageItems: unknown[] = [];
   const rawPages: string[] = [];
   let nextPage: string | null = null;
@@ -1036,6 +1040,7 @@ export async function callOperation(
     firstUrl ??= sent.url;
     response = sent.response;
     raw = sent.raw;
+    lastRequestId = sent.requestId;
     nextPage = response.headers.get("opc-next-page");
     if (paginateAll && response.ok) {
       if (isListResponse) {
@@ -1069,6 +1074,7 @@ export async function callOperation(
     pageItems,
     ...(rawPages.length > 0 ? { rawPages } : {}),
     targetService: sc.targetService,
+    ...(lastRequestId !== undefined ? { requestId: lastRequestId } : {}),
   };
 }
 
@@ -1286,6 +1292,7 @@ export async function callSdkOperation(
     allPages: false,
     pageItems: [],
     targetService: sc.targetService,
+    ...(sent.requestId !== undefined ? { requestId: sent.requestId } : {}),
   };
 }
 
@@ -1414,6 +1421,7 @@ export async function callBaseClientApi(
     allPages: false,
     pageItems: [],
     targetService: sc.targetService,
+    ...(sent.requestId !== undefined ? { requestId: sent.requestId } : {}),
   };
 }
 

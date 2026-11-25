@@ -1,0 +1,209 @@
+[
+  {
+    "id": "service-error-409-incorrect-state",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 409,
+      "headers": { "opc-request-id": "err-req-1" },
+      "body": { "code": "IncorrectState", "message": "wrong state" }
+    }
+  },
+  {
+    "id": "service-error-409-lock-conflict",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 409,
+      "headers": { "opc-request-id": "err-req-2" },
+      "body": { "code": "LockConflict", "message": "locked" }
+    }
+  },
+  {
+    "id": "service-error-409-other",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 409,
+      "headers": { "opc-request-id": "err-req-3" },
+      "body": { "code": "Conflict", "message": "conflict" }
+    }
+  },
+  {
+    "id": "service-error-501-not-transient",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 501,
+      "headers": { "opc-request-id": "err-req-4" },
+      "body": { "code": "NotImplemented", "message": "not impl" }
+    }
+  },
+  {
+    "id": "service-error-502-transient",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 502,
+      "headers": { "opc-request-id": "err-req-5" },
+      "body": { "code": "BadGateway", "message": "bad gateway" }
+    }
+  },
+  {
+    "id": "service-error-504-transient",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 504,
+      "headers": { "opc-request-id": "err-req-6" },
+      "body": { "code": "GatewayTimeout", "message": "timeout" }
+    }
+  },
+  {
+    "id": "service-error-compute-500-not-transient",
+    "key": "compute instance list",
+    "argv": [
+      "compute",
+      "instance",
+      "list",
+      "--compartment-id",
+      "ocid1.compartment.oc1..aaaaaaaafake",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": {
+      "status": 500,
+      "headers": { "opc-request-id": "err-req-7" },
+      "body": { "code": "InternalServerError", "message": "boom" }
+    }
+  },
+  {
+    "id": "service-error-stream-500-not-transient",
+    "key": "streaming stream group get",
+    "argv": [
+      "streaming",
+      "stream",
+      "group",
+      "get",
+      "--stream-id",
+      "ocid1.stream.oc1..aaaaaaaafake",
+      "--group-name",
+      "g1",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": {
+      "status": 500,
+      "headers": { "opc-request-id": "err-req-8" },
+      "body": { "code": "InternalServerError", "message": "boom" }
+    }
+  },
+  {
+    "id": "service-error-response-headers",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 404,
+      "headers": {
+        "opc-request-id": "err-req-9",
+        "etag": "err-etag",
+        "opc-work-request-id": "err-wr",
+        "opc-next-page": "err-page"
+      },
+      "body": { "code": "NotFound", "message": "not found" }
+    }
+  },
+  {
+    "id": "service-error-extra-camel-keys",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 400,
+      "headers": { "opc-request-id": "err-req-10" },
+      "body": {
+        "code": "InvalidParameter",
+        "message": "bad param",
+        "originalMessage": "orig msg",
+        "originalMessageTemplate": "tpl",
+        "targetService": "should_not_override",
+        "status": 999
+      }
+    }
+  },
+  {
+    "id": "service-error-empty-body",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 500,
+      "headers": { "opc-request-id": "err-req-11" },
+      "body": ""
+    }
+  },
+  {
+    "id": "service-error-json-string-body",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 400,
+      "headers": { "opc-request-id": "err-req-12" },
+      "body": "\"plain json string\""
+    }
+  },
+  {
+    "id": "service-error-json-array-body",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 400,
+      "headers": { "opc-request-id": "err-req-13" },
+      "body": [1, "two"]
+    }
+  },
+  {
+    "id": "service-error-empty-message-field",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 400,
+      "headers": { "opc-request-id": "err-req-14" },
+      "body": { "code": "InvalidParameter", "message": "" }
+    }
+  },
+  {
+    "id": "service-error-missing-message-field",
+    "key": "os ns get",
+    "argv": ["os", "ns", "get", "--no-retry", "--endpoint", "{endpoint}"],
+    "replies": {
+      "status": 400,
+      "headers": { "opc-request-id": "err-req-15" },
+      "body": { "code": "InvalidParameter" }
+    }
+  },
+  {
+    "id": "service-error-missing-opc-request-id-with-flag",
+    "key": "streaming stream group get",
+    "argv": [
+      "streaming",
+      "stream",
+      "group",
+      "get",
+      "--stream-id",
+      "ocid1.stream.oc1..aaaaaaaafake",
+      "--group-name",
+      "g1",
+      "--request-id",
+      "CLIENTREQ123",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "replies": {
+      "status": 404,
+      "headers": {},
+      "body": { "code": "NotFound", "message": "not found" }
+    }
+  }
+]

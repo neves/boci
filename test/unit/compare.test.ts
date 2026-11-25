@@ -106,6 +106,11 @@ test("only the top-level timestamp of a recognized stderr exception is masked", 
   );
   expect(
     normalizeRun(
+      run({ stderr: a.replace("ServiceError:", "TransientServiceError:") }),
+    ).stderr,
+  ).toContain('"timestamp": "<timestamp>"');
+  expect(
+    normalizeRun(
       run({ stderr: a.replace("ServiceError:", "UnrelatedException:") }),
     ).stderr,
   ).toContain("2026-01-01");

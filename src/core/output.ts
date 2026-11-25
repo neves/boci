@@ -76,9 +76,18 @@ export function printResult(
   result: OperationResult,
   options: OutputOptions,
 ): void {
-  const { operation, url, response, raw, targetService } = result;
+  const { operation, url, response, raw, targetService, requestId } = result;
   if (!response.ok) {
-    io.err(formatServiceError(operation, url, response, raw, targetService));
+    io.err(
+      formatServiceError(
+        operation,
+        url,
+        response,
+        raw,
+        targetService,
+        requestId,
+      ),
+    );
     throw new Exit(1);
   }
   try {
@@ -102,39 +111,113 @@ export function printResult(
   }
 }
 
+/**
+ * OCI Python SDK clients that do NOT enable DEFAULT_CIRCUIT_BREAKER_STRATEGY by default.
+ * All other generated service clients enable it, turning transient statuses into
+ * TransientServiceError instead of ServiceError.
+ */
+const NO_DEFAULT_CIRCUIT_BREAKER_SERVICES = new Set(["compute", "stream"]);
+
+function isTransientServiceError(
+  status: number,
+  code: unknown,
+  targetService?: string,
+): boolean {
+  if (
+    targetService !== undefined &&
+    NO_DEFAULT_CIRCUIT_BREAKER_SERVICES.has(targetService)
+  ) {
+    return false;
+  }
+  if (
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504
+  ) {
+    return true;
+  }
+  return (
+    status === 409 && (code === "IncorrectState" || code === "LockConflict")
+  );
+}
+
+/** Match `oci.util.camel_to_snake` for extra fields on a ServiceError JSON body. */
+function camelToSnake(name: string): string {
+  return name
+    .replace(/(.)([A-Z][a-z]+)/g, "$1_$2")
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .toLowerCase();
+}
+
 export function formatServiceError(
   operation: Pick<OperationSpec, "http" | "method">,
   url: URL | string,
   response: Response,
   raw: string,
   targetService?: string,
+  requestId?: string,
 ): string {
-  let details: Record<string, unknown> = {};
+  let deserialized: unknown = raw;
+  let parsedJson = false;
   try {
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
-      details = parsed as Record<string, unknown>;
+    deserialized = JSON.parse(raw);
+    parsedJson = true;
   } catch {
-    // Non-JSON error bodies still produce the standard ServiceError envelope.
+    // Non-JSON error bodies stay as the raw string (BaseClient.deserialize_response_data).
   }
+  let code: unknown = null;
+  let rawMessage: unknown;
+  let extraDetails: Record<string, unknown> | undefined;
+  if (parsedJson && isPlainObject(deserialized)) {
+    if ("code" in deserialized) code = deserialized.code;
+    if ("message" in deserialized) rawMessage = deserialized.message;
+    extraDetails = deserialized;
+  } else {
+    rawMessage = deserialized;
+  }
+  let message: string;
+  if (rawMessage === undefined || rawMessage === null) {
+    message = `The service returned error code ${response.status}`;
+  } else {
+    const msgStr =
+      typeof rawMessage === "string"
+        ? rawMessage
+        : formatPythonRepr(rawMessage);
+    message = msgStr || `The service returned error code ${response.status}`;
+  }
+  const rawUrl = typeof url === "string" ? url : url.toString();
+  const queryIndex = rawUrl.indexOf("?");
+  const endpointUrl = queryIndex >= 0 ? rawUrl.slice(0, queryIndex) : rawUrl;
   const timestamp = new Date().toISOString().replace(/Z$/, "000+00:00");
   const serviceError: Record<string, unknown> = {
-    code: null,
-    message: `The service returned error code ${response.status}`,
+    code,
+    message,
     ...(targetService !== undefined ? { target_service: targetService } : {}),
-    ...details,
     client_version: "Oracle-PythonSDK/2.192.0, Oracle-PythonCLI/3.96.3",
     logging_tips:
       "Please run the OCI CLI command using --debug flag to find more debug information.",
-    "opc-request-id": response.headers.get("opc-request-id") ?? "",
+    "opc-request-id": response.headers.get("opc-request-id") || requestId || "",
     operation_name: operation.method,
-    request_endpoint: `${operation.http} ${url.toString()}`,
+    request_endpoint: `${operation.http} ${endpointUrl}`,
     status: response.status,
     timestamp,
     troubleshooting_tips:
       "See [https://docs.oracle.com/iaas/Content/API/References/apierrors.htm] for more information about resolving this error. If you are unable to resolve this issue, run this CLI command with --debug option and contact Oracle support and provide them the full error message.",
   };
-  return `ServiceError:\n${JSON.stringify(sortJson(serviceError), null, 4)}\n`;
+  if (extraDetails) {
+    for (const [k, v] of Object.entries(extraDetails)) {
+      const snake = camelToSnake(k);
+      if (!(snake in serviceError)) {
+        serviceError[snake] = v;
+      }
+    }
+  }
+  const excName = isTransientServiceError(response.status, code, targetService)
+    ? "TransientServiceError"
+    : "ServiceError";
+  return `${excName}:\n${JSON.stringify(sortJson(serviceError), null, 4)}\n`;
 }
 
 function renderGeneratedResponse(

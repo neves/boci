@@ -450,3 +450,105 @@ test("a failed call prints the ServiceError envelope and exits 1", () => {
   });
   expect(Object.keys(envelope)).toEqual(Object.keys(envelope).sort());
 });
+
+test("formatServiceError matches TransientServiceError, query stripping, non-JSON bodies, and extra keys", () => {
+  const { io, err } = invocation();
+  const runErr = (
+    body: unknown,
+    opts: {
+      status: number;
+      headers?: Record<string, string>;
+      url?: string;
+      targetService?: string;
+      requestId?: string;
+    },
+  ) => {
+    err.length = 0;
+    const raw = typeof body === "string" ? body : JSON.stringify(body);
+    try {
+      printResult(
+        io,
+        {
+          ...result(body, { status: opts.status, headers: opts.headers }),
+          url: new URL(opts.url ?? "https://things.example/v1/things?limit=5"),
+          raw,
+          targetService: opts.targetService ?? "object_storage",
+          requestId: opts.requestId,
+        },
+        { rc },
+      );
+    } catch (e) {
+      if (!(e instanceof Exit)) throw e;
+    }
+    return err.join("");
+  };
+
+  // 429/500/502/503/504 and 409 IncorrectState/LockConflict -> TransientServiceError
+  for (const status of [429, 500, 502, 503, 504]) {
+    const out = runErr({ code: "Err", message: "retry" }, { status });
+    expect(out.startsWith("TransientServiceError:\n")).toBe(true);
+    const env = JSON.parse(out.slice("TransientServiceError:\n".length));
+    expect(env.request_endpoint).toBe("GET https://things.example/v1/things");
+  }
+  expect(
+    runErr({ code: "IncorrectState", message: "m" }, { status: 409 }),
+  ).toStartWith("TransientServiceError:\n");
+  expect(
+    runErr({ code: "LockConflict", message: "m" }, { status: 409 }),
+  ).toStartWith("TransientServiceError:\n");
+  expect(
+    runErr({ code: "Conflict", message: "m" }, { status: 409 }),
+  ).toStartWith("ServiceError:\n");
+  expect(
+    runErr({ code: "NotImplemented", message: "m" }, { status: 501 }),
+  ).toStartWith("ServiceError:\n");
+
+  // Clients without default circuit breaker stay ServiceError on 500
+  expect(
+    runErr(
+      { code: "InternalServerError", message: "boom" },
+      { status: 500, targetService: "compute" },
+    ),
+  ).toStartWith("ServiceError:\n");
+  expect(
+    runErr(
+      { code: "InternalServerError", message: "boom" },
+      { status: 500, targetService: "stream" },
+    ),
+  ).toStartWith("ServiceError:\n");
+
+  // Non-JSON body, empty body, JSON array body, and extra camelCase keys
+  const htmlEnv = JSON.parse(
+    runErr("<html>bad</html>", { status: 503 }).slice(
+      "TransientServiceError:\n".length,
+    ),
+  );
+  expect(htmlEnv.code).toBeNull();
+  expect(htmlEnv.message).toBe("<html>bad</html>");
+
+  const emptyEnv = JSON.parse(
+    runErr("", { status: 500 }).slice("TransientServiceError:\n".length),
+  );
+  expect(emptyEnv.message).toBe("The service returned error code 500");
+
+  const arrEnv = JSON.parse(
+    runErr([1, "two"], { status: 400 }).slice("ServiceError:\n".length),
+  );
+  expect(arrEnv.message).toBe("[1, 'two']");
+
+  const extraEnv = JSON.parse(
+    runErr(
+      {
+        code: "InvalidParameter",
+        message: "",
+        originalMessage: "orig",
+        targetService: "ignored",
+      },
+      { status: 400, requestId: "REQ-FALLBACK" },
+    ).slice("ServiceError:\n".length),
+  );
+  expect(extraEnv.message).toBe("The service returned error code 400");
+  expect(extraEnv.original_message).toBe("orig");
+  expect(extraEnv.target_service).toBe("object_storage");
+  expect(extraEnv["opc-request-id"]).toBe("REQ-FALLBACK");
+});

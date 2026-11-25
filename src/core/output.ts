@@ -97,6 +97,19 @@ export function printResult(
     throw new Exit(1);
   }
   try {
+    if (result.limitedData) {
+      const data = result.limitedData.value;
+      renderCliData(
+        io,
+        operation.responseType?.startsWith("list[")
+          ? renderModel(data, operation.responseType, result.responseModels)
+          : data,
+        response.headers,
+        options,
+        { hasAllPagesParam: true },
+      );
+      return;
+    }
     renderGeneratedResponse(
       io,
       operation,

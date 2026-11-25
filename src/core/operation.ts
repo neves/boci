@@ -33,8 +33,11 @@ import {
   ProgramFile,
   ProgramHttpResponse,
   ProgramRaise,
+  ProgramResponse,
+  ProgramServiceError,
   ProgramUnsupported,
 } from "./program.ts";
+import { paginateSdkList } from "./pagination.ts";
 import {
   SecurityTokenDecodeError,
   SecurityTokenKeyError,
@@ -72,6 +75,8 @@ export type OperationCall = {
   skipDeleteConfirm?: boolean;
   /** Update confirmation already ran before JSON parameter parsing. */
   skipUpdateConfirm?: boolean;
+  /** Apply the Generated callback's client-side --limit handling. */
+  paginateLimit?: boolean;
 };
 
 export type OperationResult = {
@@ -90,6 +95,8 @@ export type OperationResult = {
   pageItems: unknown[];
   /** With --all on a collection model operation, every page's raw body in order. */
   rawPages?: string[];
+  /** Aggregated --limit data, with collection fields already converted. */
+  limitedData?: { value: unknown };
   /** SDK client serviceName for ServiceError.target_service. */
   targetService?: string;
   /** Outbound opc-request-id header, used by ServiceError when the response omits it. */
@@ -1223,7 +1230,17 @@ export async function callOperation(
   const allPages = values.all_pages === true;
   const limit = values.limit;
   const pageSize = values.page_size;
-  if ((allPages || limit !== undefined) && pageSize !== undefined) {
+  const paginateLimit =
+    call.paginateLimit &&
+    operation.paginated === true &&
+    operation.queryParams?.limit?.arg === "limit" &&
+    !allPages &&
+    typeof limit === "number";
+  if (
+    !paginateLimit &&
+    (allPages || limit !== undefined) &&
+    pageSize !== undefined
+  ) {
     upsertQueryParam(queryParams, "limit", String(pageSize));
   }
   const baseHeaders: Record<string, string> =
@@ -1259,15 +1276,78 @@ export async function callOperation(
     operation.headerParams?.["opc-request-id"] !== undefined
       ? "opc-request-id"
       : "opc-client-request-id";
+  const responseModels = spec.models?.[operation.client.split(".")[0]!];
+  const sendPage = async (
+    params: [string, string][],
+  ): Promise<OperationResult> => {
+    const { url, response, raw, requestId } = await sendServiceRequest(io, sc, {
+      method: operation.http,
+      pathTemplate: operation.path,
+      pathParams,
+      queryParams: params,
+      headers: baseHeaders,
+      body: requestBody,
+      requestIdHeader,
+      noRetry: hasNoneRetry,
+      // A download (`--file` bound to the output) streams a successful body to the file.
+      rawResponse: outputBinding(command) !== undefined,
+      enforceContentHeaders: operation.enforce_content_headers,
+    });
+    return {
+      operation,
+      responseModels,
+      url,
+      response,
+      raw,
+      allPages,
+      pageItems: [],
+      targetService: sc.targetService,
+      ...(requestId !== undefined ? { requestId } : {}),
+    };
+  };
+  const isListResponse = Boolean(operation.responseType?.startsWith("list["));
+  if (paginateLimit) {
+    try {
+      const outcome = await paginateSdkList({
+        mode: "limit",
+        multipleKeys: false,
+        recordLimit: limit,
+        pageSize,
+        kwArgs: { limit },
+        fetchPage: async (kwargs) => {
+          const params = [...queryParams];
+          upsertQueryParam(params, "limit", String(kwargs.limit));
+          if (typeof kwargs.page === "string") {
+            upsertQueryParam(params, "page", kwargs.page);
+          }
+          const result = await sendPage(params);
+          if (!result.response.ok) return new ProgramServiceError(result);
+          const data = parseSdkResponseData(result);
+          const listItems =
+            isListResponse &&
+            data &&
+            typeof data === "object" &&
+            "items" in data &&
+            Array.isArray(data.items)
+              ? data.items
+              : data;
+          return new ProgramResponse(result, listItems);
+        },
+      });
+      if (outcome instanceof ProgramRaise) throw outcome;
+      if (outcome instanceof ProgramServiceError) return outcome.result;
+      return { ...outcome.result, limitedData: { value: outcome.data } };
+    } catch (e) {
+      if (!(e instanceof ProgramRaise)) throw e;
+      io.err(`${e.cls}: ${e.message}\n`);
+      throw new Exit(1);
+    }
+  }
   let firstUrl: URL | undefined;
-  let response: Response;
-  let raw: string;
-  let lastRequestId: string | undefined;
+  let lastResult: OperationResult;
   const pageItems: unknown[] = [];
   const rawPages: string[] = [];
-  let nextPage: string | null = null;
   let page = queryParams.find(([k]) => k === "page")?.[1] ?? null;
-  const isListResponse = Boolean(operation.responseType?.startsWith("list["));
   const paginateAll =
     allPages &&
     Boolean(operation.responseType) &&
@@ -1275,24 +1355,9 @@ export async function callOperation(
   do {
     const pageQuery: [string, string][] = queryParams.map(([k, v]) => [k, v]);
     if (page !== null) upsertQueryParam(pageQuery, "page", page);
-    const sent = await sendServiceRequest(io, sc, {
-      method: operation.http,
-      pathTemplate: operation.path,
-      pathParams,
-      queryParams: pageQuery,
-      headers: baseHeaders,
-      body: requestBody,
-      requestIdHeader,
-      noRetry: hasNoneRetry,
-      enforceContentHeaders: operation.enforce_content_headers,
-      // A download (`--file` bound to the output) streams a successful body to the file.
-      rawResponse: outputBinding(command) !== undefined,
-    });
-    firstUrl ??= sent.url;
-    response = sent.response;
-    raw = sent.raw;
-    lastRequestId = sent.requestId;
-    nextPage = response.headers.get("opc-next-page");
+    lastResult = await sendPage(pageQuery);
+    firstUrl ??= lastResult.url;
+    const { response, raw } = lastResult;
     if (paginateAll && response.ok) {
       if (isListResponse) {
         try {
@@ -1312,20 +1377,14 @@ export async function callOperation(
         rawPages.push(raw);
       }
     }
-    page = nextPage;
+    page = response.headers.get("opc-next-page");
     if (!paginateAll || !response.ok) break;
   } while (page !== null);
   return {
-    operation,
-    responseModels: spec.models?.[operation.client.split(".")[0]!],
+    ...lastResult,
     url: firstUrl,
-    response,
-    raw,
-    allPages,
     pageItems,
     ...(rawPages.length > 0 ? { rawPages } : {}),
-    targetService: sc.targetService,
-    ...(lastRequestId !== undefined ? { requestId: lastRequestId } : {}),
   };
 }
 

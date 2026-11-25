@@ -98,8 +98,31 @@ export function isConnectionError(e: unknown): e is Error {
   const code = (e as { code?: unknown }).code;
   return (
     typeof code === "string" &&
+    !/^ERR_(HTTP_)?INVALID_/i.test(code) &&
     !/CERT|SSL|TLS|SELF_SIGNED|UNABLE_TO_VERIFY|ABORT/i.test(code)
   );
+}
+
+/**
+ * Whether an exception thrown while sending a request should be retried, matching the
+ * OCI SDK's TimeoutConnectionAndServiceErrorRetryChecker (timeouts, connection errors,
+ * and TLS/SSL transport errors; never local encoding, invalid header, or type errors).
+ */
+export function isRetryableTransportError(e: unknown): boolean {
+  if (e instanceof ConnectionPhaseTimeout) return true;
+  if (e instanceof DOMException && e.name === "TimeoutError") return true;
+  if (isCertificateError(e) || isConnectionError(e)) return true;
+  if (e instanceof Error && !(e instanceof DOMException)) {
+    const code = (e as { code?: unknown }).code;
+    if (
+      typeof code === "string" &&
+      !/^ERR_(HTTP_)?INVALID_/i.test(code) &&
+      /SSL|TLS/i.test(code)
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export class ConnectionPhaseTimeout extends Error {

@@ -8,6 +8,7 @@ import {
   connectionErrorReport,
   isConnectionError,
   isCertificateError,
+  isRetryableTransportError,
   fetchWithConnectionTimeout,
 } from "./connection-timeout.ts";
 import { existsSync, readFileSync } from "node:fs";
@@ -777,6 +778,7 @@ export async function sendServiceRequest(
         ? ["date", "(request-target)", "host", "opc-obo-token"]
         : undefined,
     );
+    assertLatin1Headers(io, req.headers);
     const controller = new AbortController();
     const readTimer =
       sc.connectionTimeout !== undefined || sc.readTimeout === undefined
@@ -820,7 +822,7 @@ export async function sendServiceRequest(
       }
     } catch (e) {
       if (readTimer !== undefined) clearTimeout(readTimer);
-      if (attempt >= maxAttempts) {
+      if (attempt >= maxAttempts || !isRetryableTransportError(e)) {
         if (sc.rootValues.debug !== true) {
           if (e instanceof ConnectionPhaseTimeout) {
             io.err(e.report());
@@ -1552,6 +1554,7 @@ export async function callRawSessionRequest(
           : undefined,
       );
     }
+    assertLatin1Headers(io, req.headers);
     try {
       const init: RequestInit = {
         method: req.method,
@@ -1570,7 +1573,7 @@ export async function callRawSessionRequest(
       content = new Uint8Array(await response.arrayBuffer());
       text = new TextDecoder("utf-8", { fatal: false }).decode(content);
     } catch (e) {
-      if (attempt >= maxAttempts) throw e;
+      if (attempt >= maxAttempts || !isRetryableTransportError(e)) throw e;
       const delay = Math.min(
         1000 * 2 ** (attempt - 1) + Math.random() * 1000,
         30000,
@@ -1600,6 +1603,51 @@ function timeoutSecondsFor(value: unknown): number | undefined {
   const seconds = Number(value);
   if (Number.isFinite(seconds) && seconds > 0) return seconds;
   return undefined;
+}
+
+/**
+ * Python's http.client encodes HTTP header values as latin-1 before sending; characters
+ * outside 0x00..0xFF raise UnicodeEncodeError without retrying.
+ */
+function assertLatin1Headers(
+  io: Invocation,
+  headers: Record<string, string>,
+): void {
+  for (const value of Object.values(headers)) {
+    let pos = 0;
+    let start = -1;
+    let firstCp = 0;
+    let end = -1;
+    for (const ch of value) {
+      const cp = ch.codePointAt(0)!;
+      if (cp > 0xff) {
+        if (start === -1) {
+          start = pos;
+          firstCp = cp;
+        }
+        end = pos + 1;
+      } else if (start !== -1) {
+        break;
+      }
+      pos++;
+    }
+    if (start !== -1) {
+      if (end === start + 1) {
+        const escaped =
+          firstCp < 0x10000
+            ? `\\u${firstCp.toString(16).padStart(4, "0")}`
+            : `\\U${firstCp.toString(16).padStart(8, "0")}`;
+        io.err(
+          `UnicodeEncodeError: 'latin-1' codec can't encode character '${escaped}' in position ${start}: ordinal not in range(256)\n`,
+        );
+      } else {
+        io.err(
+          `UnicodeEncodeError: 'latin-1' codec can't encode characters in position ${start}-${end - 1}: ordinal not in range(256)\n`,
+        );
+      }
+      throw new Exit(1);
+    }
+  }
 }
 
 function retryableResponse(response: Response, raw: string): boolean {

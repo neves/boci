@@ -5,7 +5,11 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { RegionsSpec } from "../../src/core/endpoint.ts";
-import { fetchWithConnectionTimeout } from "../../src/core/connection-timeout.ts";
+import {
+  fetchWithConnectionTimeout,
+  isConnectionError,
+  isRetryableTransportError,
+} from "../../src/core/connection-timeout.ts";
 import { Exit, type Invocation } from "../../src/lib/io.ts";
 import {
   type GeneratedCommand,
@@ -444,4 +448,90 @@ test("connection timeout preserves redirected request bytes and compressed downl
     redirect.stop(true);
     target.stop(true);
   }
+});
+
+test("non-latin-1 request headers fail with UnicodeEncodeError without retrying", async () => {
+  using fake = startFakeEndpoint();
+  const headerCmd = {
+    kind: "generated",
+    operation: {
+      client: "things",
+      method: "get_thing",
+      http: "GET",
+      path: "/things",
+      headerParams: { "if-match": { arg: "if_match" } },
+    },
+    bindings: [{ target: "kwarg", key: "if_match", param: "if_match" }],
+  } as unknown as GeneratedCommand;
+
+  const cases: [string, string][] = [
+    [
+      "ünïcödé ✓",
+      "UnicodeEncodeError: 'latin-1' codec can't encode character '\\u2713' in position 8: ordinal not in range(256)\n",
+    ],
+    [
+      "a✓✓b",
+      "UnicodeEncodeError: 'latin-1' codec can't encode characters in position 1-2: ordinal not in range(256)\n",
+    ],
+    [
+      "😀",
+      "UnicodeEncodeError: 'latin-1' codec can't encode character '\\U0001f600' in position 0: ordinal not in range(256)\n",
+    ],
+  ];
+
+  for (const [value, expectedErr] of cases) {
+    const { io, err } = invocation();
+    const thrown = await callOperation(
+      io,
+      call(fake.url, { if_match: value }, {}, headerCmd),
+    ).catch((e: unknown) => e);
+    expect(thrown).toBeInstanceOf(Exit);
+    expect((thrown as Exit).code).toBe(1);
+    expect(err.join("")).toBe(expectedErr);
+  }
+  expect(sleep).not.toHaveBeenCalled();
+  expect(fake.requests).toHaveLength(0);
+});
+
+test("does not retry non-transport fetch errors (invalid header value)", async () => {
+  using fake = startFakeEndpoint();
+  const headerCmd = {
+    kind: "generated",
+    operation: {
+      client: "things",
+      method: "get_thing",
+      http: "GET",
+      path: "/things",
+      headerParams: { "if-match": { arg: "if_match" } },
+    },
+    bindings: [{ target: "kwarg", key: "if_match", param: "if_match" }],
+  } as unknown as GeneratedCommand;
+
+  for (const root of [{}, { connection_timeout: 1 }]) {
+    const { io } = invocation();
+    await expect(
+      callOperation(
+        io,
+        call(fake.url, { if_match: "bad\nvalue" }, root, headerCmd),
+      ),
+    ).rejects.toThrow();
+  }
+  expect(sleep).not.toHaveBeenCalled();
+  expect(fake.requests).toHaveLength(0);
+
+  const invalidChar = Object.assign(new TypeError("Invalid character"), {
+    code: "ERR_INVALID_CHAR",
+  });
+  expect(isConnectionError(invalidChar)).toBe(false);
+  expect(isRetryableTransportError(invalidChar)).toBe(false);
+  const refused = Object.assign(new TypeError("refused"), {
+    code: "ECONNREFUSED",
+  });
+  expect(isConnectionError(refused)).toBe(true);
+  expect(isRetryableTransportError(refused)).toBe(true);
+  expect(
+    isRetryableTransportError(
+      new DOMException("Response read timed out", "TimeoutError"),
+    ),
+  ).toBe(true);
 });

@@ -385,7 +385,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz: hangs. boci runs past 60 s where oci returns (e.g. `network vcn topology get`, `network vcn patch`, `identity-domains my-smtp-credential delete`, `opsi database-insights update-mds-my-sql-database`; seed 42).
 - [x] Fuzz: SDK model deserialisation. Unknown enum values print as `UNKNOWN_ENUM_VALUE`; datetimes keep microseconds (`.123000+00:00`); unknown response fields are dropped; nulls and polymorphic subtypes print like the SDK.
 - [x] Fuzz: service error output. `TransientServiceError` for 429/5xx, response headers (`etag`, `opc-work-request-id`, …) in the error body, non-JSON error bodies.
-- [ ] Fuzz: invalid `--query`. JMESPath `ParseError` message and exit 1 instead of a JavaScript stack trace or exit 0.
+- [x] Fuzz: invalid `--query`. JMESPath `ParseError` message and exit 1 instead of a JavaScript stack trace or exit 0.
 - [ ] Fuzz: `--query` results with `--output table` and `--raw-output` (e.g. `length(data)` with `--output table` fails in oci with `TypeError`).
 - [ ] Fuzz: command validation rules (e.g. `bv volume list --sort-by` without `--availability-domain`; `--all` with `--limit`; confirmation `Abort:` on wrapper commands).
 - [ ] Fuzz: request encoding of unusual values (non-latin-1 header values make oci fail with `UnicodeEncodeError`; empty strings, `&`/`?`/`/` in path and query values; repeated `multiple` options).

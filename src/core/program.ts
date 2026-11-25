@@ -6,7 +6,7 @@
  */
 import { createDecipheriv, randomUUID } from "node:crypto";
 import { basename, resolve } from "node:path";
-import { applyQuery } from "../lib/query.ts";
+import { JMESPathError, applyQuery, compileQuery } from "../lib/query.ts";
 import { expandHomeDir } from "../utils/expandHomeDir.ts";
 import { decodePythonUtf8 } from "../utils/utf8.ts";
 import { isZipBuffer } from "../utils/zip.ts";
@@ -2321,7 +2321,14 @@ export function runProgram(
       }
     } else if (obj instanceof ProgramJmespath) {
       if (method === "search" && args.length === 1) {
-        return applyQuery(args[0], obj.expression);
+        try {
+          return applyQuery(args[0], obj.expression);
+        } catch (err) {
+          if (err instanceof JMESPathError) {
+            throw new ProgramRaise(err.pythonName, err.message);
+          }
+          throw err;
+        }
       }
     } else if (obj instanceof Uint8Array && method === "decode") {
       if (args.length === 0 || /^utf-?8$/i.test(String(args[0])))
@@ -2751,8 +2758,11 @@ export function runProgram(
             : null;
         if (!rawQuery) return null;
         try {
-          applyQuery({}, rawQuery);
+          compileQuery(rawQuery);
         } catch (err) {
+          if (err instanceof JMESPathError) {
+            throw new ProgramRaise(err.pythonName, err.message);
+          }
           throw new ProgramRaise(
             "Exception",
             err instanceof Error ? err.message : String(err),

@@ -4,7 +4,12 @@
 import { Exit, type Invocation } from "../lib/io.ts";
 import { inheritedDiscriminator, type Models } from "./camelize.ts";
 import type { OperationResult } from "./operation.ts";
-import { applyQuery } from "../lib/query.ts";
+import {
+  type CompiledExpression,
+  JMESPathError,
+  compileQuery,
+  writeJmespathError,
+} from "../lib/query.ts";
 import type { Rc } from "./rc.ts";
 import type { OperationSpec } from "./spec.ts";
 
@@ -315,12 +320,12 @@ function renderGeneratedResponse(
     if (key === "opc-next-page" && allPages) continue;
     output[key] = headerVal;
   }
-  if (response.headers.get("opc-next-page") !== null && !allPages) {
+  const printed = renderDocument(io, output, options);
+  if (printed && response.headers.get("opc-next-page") !== null && !allPages) {
     io.err(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
   }
-  renderDocument(io, output, options);
 }
 
 export const DISPLAY_HEADERS = new Set([
@@ -348,6 +353,43 @@ const isDisplayTruthy = (v: unknown): boolean => {
   return true;
 };
 
+function resolveAndCompileQuery(
+  io: Invocation,
+  options: OutputOptions,
+): CompiledExpression | null {
+  let query = options.query;
+  if (typeof query !== "string" || query.length === 0) return null;
+  if (query.startsWith("query://")) {
+    const queryName = query.slice("query://".length);
+    query = options.rc.cannedQueries[queryName];
+    if (query === undefined) {
+      io.err(
+        `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${options.rc.path}\n`,
+      );
+      throw new Exit(1);
+    }
+  }
+  try {
+    return compileQuery(query as string);
+  } catch (err) {
+    if (err instanceof JMESPathError) writeJmespathError(io, err);
+    throw err;
+  }
+}
+
+function searchQuery(
+  io: Invocation,
+  expression: CompiledExpression,
+  value: unknown,
+): unknown {
+  try {
+    return expression.search(value);
+  } catch (err) {
+    if (err instanceof JMESPathError) writeJmespathError(io, err);
+    throw err;
+  }
+}
+
 /**
  * Matches `oci_cli.cli_util.render(data, headers, ctx, display_all_headers=False,
  * nest_data_in_data_attribute=True)`.
@@ -369,6 +411,7 @@ export function renderCliData(
       displayDict = isPlainObject(data) ? { ...data } : data;
     }
   }
+  const expression = resolveAndCompileQuery(io, options);
   let opcNextPage: unknown = undefined;
   if (headers) {
     for (const [rawKey, value] of headers) {
@@ -382,21 +425,10 @@ export function renderCliData(
       }
     }
   }
-  let query = options.query;
-  if (typeof query === "string" && query.startsWith("query://")) {
-    const queryName = query.slice("query://".length);
-    query = options.rc.cannedQueries[queryName];
-    if (query === undefined) {
-      io.err(
-        `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${options.rc.path}\n`,
-      );
-      throw new Exit(1);
-    }
-  }
   if (isDisplayTruthy(displayDict)) {
-    const hasQuery = typeof query === "string";
+    const hasQuery = expression !== null;
     const displayData = hasQuery
-      ? applyQuery(displayDict, query as string)
+      ? searchQuery(io, expression, displayDict)
       : displayDict;
     if (displayData === null) {
       io.err("Query returned empty result, no output to show.\n");
@@ -427,24 +459,14 @@ export function renderCliData(
   }
 }
 
-/** Render an already-shaped response document (data and/or headers) with --query/--output/--raw-output. */
+/** Render an already-shaped response document (data and/or headers) with --query/--output/--raw-output.
+ * Returns false if `--query` returned an empty result and returned early (skipping pagination notices). */
 export function renderDocument(
   io: Invocation,
   output: unknown,
   options: OutputOptions,
-): void {
-  const { rc } = options;
-  let query = options.query;
-  if (typeof query === "string" && query.startsWith("query://")) {
-    const queryName = query.slice("query://".length);
-    query = rc.cannedQueries[queryName];
-    if (query === undefined) {
-      io.err(
-        `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${rc.path}\n`,
-      );
-      throw new Exit(1);
-    }
-  }
+): boolean {
+  const expression = resolveAndCompileQuery(io, options);
   if (
     output === null ||
     output === undefined ||
@@ -453,11 +475,12 @@ export function renderDocument(
       !Array.isArray(output) &&
       Object.keys(output).length === 0)
   )
-    return;
-  const hasQuery = typeof query === "string";
-  const rendered = hasQuery ? applyQuery(output, query as string) : output;
+    return true;
+  const hasQuery = expression !== null;
+  const rendered = hasQuery ? searchQuery(io, expression, output) : output;
   if (rendered === null || (Array.isArray(rendered) && rendered.length === 0)) {
     io.err("Query returned empty result, no output to show.\n");
+    return false;
   } else {
     const format = options.output ?? "json";
     const tableValue =
@@ -475,6 +498,7 @@ export function renderDocument(
       io.out(`${rendered}\n`);
     else io.out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
   }
+  return true;
 }
 
 function compareCodepoints(a: string, b: string): number {

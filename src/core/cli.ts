@@ -157,6 +157,12 @@ const MISSING_OPTION_DELEGATES = new Map([
   ],
 ]);
 
+// The SQL job wrappers clear Click's collected missing options before delegation.
+const CLEARS_MISSING_OPTIONS = new Set([
+  "generative-ai-data generate-sql-jobs generate",
+  "generative-ai-data generate-sql-jobs get",
+]);
+
 function usage(io: Invocation, commandPath: string, doc: HelpDoc): string {
   const f = new HelpFormatter(helpWidth(io));
   f.writeUsage(commandPath, doc.usage);
@@ -723,19 +729,20 @@ async function main(io: Invocation): Promise<void> {
       }
       if (p.required && !p.isFlag) missing.push(p.name.replaceAll("_", "-"));
     }
-    if (missing.length) {
-      const delegate = MISSING_OPTION_DELEGATES.get(canon.join(" "));
+    const commandKey = canon.join(" ");
+    if (missing.length && !CLEARS_MISSING_OPTIONS.has(commandKey)) {
+      const delegate = MISSING_OPTION_DELEGATES.get(commandKey);
       const usagePath = delegate ? `${commandPath} ${delegate}` : commandPath;
       io.err(
         `${usage(io, usagePath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
       );
       throw new Exit(1);
     }
-    const customHandler = CUSTOM_HANDLERS.get(canon.join(" "));
+    const customHandler = CUSTOM_HANDLERS.get(commandKey);
     const http = specCmd.operation?.http ?? "";
     const engineRoute =
       (key === "ns get" && name === "os") ||
-      (isImplemented(canon.join(" "), specCmd) &&
+      (isImplemented(commandKey, specCmd) &&
         (["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH"].includes(http) ||
           Boolean(
             specCmd.program &&

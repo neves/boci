@@ -407,7 +407,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz (full sweep): match wrapper attribute errors on missing values (`rover {node,standalone-cluster,station-cluster} list-workload(s)`; seed 42).
 - [x] Fuzz (full sweep): match empty or invalid implicit Object Storage namespaces (`os object head`/`restore`, `os multipart abort`; seed 42).
 - [x] Fuzz (full sweep): match SDK list deserialization in `compute instance list-vnics` (seed 42).
-- [ ] Fuzz (full sweep): match work-request client errors in `compute instance change-compartment` (seed 42).
+- [x] Fuzz (full sweep): match work-request client errors in `compute instance change-compartment` (seed 42).
 - [ ] Fuzz (full sweep): match `compute instance-console-connection get-plink-connection-string` edge cases (seed 42).
 - [ ] Fuzz (full sweep): match `compute console-history get-content` download output (seed 42).
 - [ ] Fuzz (full sweep): match IAM listing wrapper edge cases (`iam compartment list`/`group list-users`/`user list-groups`; seed 42).

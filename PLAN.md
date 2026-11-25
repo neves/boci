@@ -412,6 +412,6 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz (full sweep): match `compute console-history get-content` download output (seed 42).
 - [x] Fuzz (full sweep): match first-use auto-prompt output ordering on non-terminal stdout (`iam compartment list`/`group list-users`/`user list-groups`; seed 42).
 - [x] Fuzz (full sweep): match `network remote-peering-connection connect` invalid `--peer-region-name` handling (seed 42).
-- [ ] Fuzz (full sweep): match `db database delete` edge cases (seed 42).
+- [x] Fuzz (full sweep): match `db database delete` edge cases (seed 42).
 - [ ] Fuzz (full sweep): match `rover {node,station-cluster} delete-workload` edge cases (seed 42).
 - [ ] Fuzz (full sweep): match usage-error prefixes on `data-science ml-app-instance-view update`/`fn function create archive-function object-storage fn-update-runtime-config`/`generative-ai-data generate-sql-jobs generate` (seed 42).

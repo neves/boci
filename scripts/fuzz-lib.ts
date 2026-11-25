@@ -108,6 +108,7 @@ const TEXT = [
   "ünïcödé ✓",
   "a,b",
   "slash/and?query=1&x",
+  "-leading-dash",
   "",
 ];
 const INTEGERS = ["0", "1", "7", "100", "-1"];

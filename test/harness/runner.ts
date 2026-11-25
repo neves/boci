@@ -153,10 +153,18 @@ export async function runInProcess(
   opts: RunOptions = {},
 ): Promise<Run> {
   installProxySafetyNet();
+  const mayMutateHome =
+    opts.env?.OCI_CLI_AUTO_PROMPT !== undefined ||
+    argv.some(
+      (a) =>
+        a === "--cli-auto-prompt" ||
+        (a.startsWith("-") && !a.startsWith("--") && a.includes("i")),
+    );
   const isolated = Boolean(
     opts.captureFiles?.length ||
     opts.captureFileModes?.length ||
-    opts.httpsProxy,
+    opts.httpsProxy ||
+    mayMutateHome,
   );
   const sb = isolated
     ? await createSandbox(opts.config, opts.sandbox)

@@ -83,16 +83,21 @@ export const OUTPUT_MASKS: [RegExp, string, string][] = [
   ],
 ];
 
-/** Only mask the top-level timestamp in recognized exception envelopes on stderr. */
+/** Only mask the top-level timestamp in recognized exception envelopes and metrics debug logs on stderr. */
 export function maskStderr(s: string): string {
-  return applyMasks(s).replace(
-    /^(?:TransientServiceError|ServiceError|RequestException|SSLException|ConnectTimeout):\n\{\n[\s\S]*?^\}/gm,
-    (envelope) =>
-      envelope.replace(
-        /^(    "timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?(?:\+00:00)?(",?)$/m,
-        "$1<timestamp>$2",
-      ),
-  );
+  return applyMasks(s)
+    .replace(
+      /^(?:TransientServiceError|ServiceError|RequestException|SSLException|ConnectTimeout):\n\{\n[\s\S]*?^\}/gm,
+      (envelope) =>
+        envelope.replace(
+          /^(    "timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?(?:\+00:00)?(",?)$/m,
+          "$1<timestamp>$2",
+        ),
+    )
+    .replace(
+      /^(DEBUG:oci_cli\.cli_metrics: )\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{6}\+00:00(: )/gm,
+      "$1<timestamp>$2",
+    );
 }
 
 /**

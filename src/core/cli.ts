@@ -17,9 +17,11 @@ import { dirname, join, resolve } from "node:path";
 import { checkFileAccessibility } from "../lib/accessibility.ts";
 import { isZipBuffer } from "../utils/zip.ts";
 import {
+  type Config,
   ConfigError,
   DEFAULT_LOCATION,
   DEFAULT_PROFILE,
+  configPath,
   expandUser,
   fromFile,
 } from "./config.ts";
@@ -129,6 +131,7 @@ import {
   outputBinding,
   parseSdkResponseData,
   sendServiceRequest,
+  warnFilePermissions,
 } from "./operation.ts";
 import { printResult, renderCliData, type OutputOptions } from "./output.ts";
 import {
@@ -299,10 +302,26 @@ async function main(io: Invocation): Promise<void> {
       }
     : index.rootHelpDoc;
 
-  // 2. No subcommand: invoke_without_command → root callback → echo_help.
+  const autoPrompt =
+    rootValues.cli_auto_prompt === true || "OCI_CLI_AUTO_PROMPT" in io.env;
+  const debug = rootValues.debug === true;
+
+  // 2. No subcommand: invoke_without_command → root callback → echo_help (unless -i / OCI_CLI_AUTO_PROMPT).
   if (rest.length === 0) {
-    await printRootHelp(io, index, rootHelpDoc);
-    throw new Exit(0);
+    if (!autoPrompt) {
+      await printRootHelp(io, index, rootHelpDoc);
+      throw new Exit(0);
+    }
+    if (has(root.opts, "max_retries") && root.opts.no_retry === true) {
+      showPatched(
+        io,
+        rootUsage(),
+        "The option --max-retries is not applicable when using the --no-retry flag.",
+      );
+    }
+    const settings = resolveRootSettings(io, rootValues, rc, rootUsage);
+    logRootDebugMetrics(io, debug);
+    await runAutoPrompt(io, argv, debug, settings);
   }
 
   // boci-only Extension commands (ADR 0005): handled before OCI config/key checks.
@@ -354,7 +373,11 @@ async function main(io: Invocation): Promise<void> {
     );
   }
   const settings = resolveRootSettings(io, rootValues, rc, rootUsage);
-  if (typedName !== "profile") checkKeyForSecurity(io, settings); // invoked_subcommand is the typed name
+  logRootDebugMetrics(io, debug);
+  if (!autoPrompt && typedName !== "profile") checkKeyForSecurity(io, settings); // invoked_subcommand is the typed name
+  if (autoPrompt) {
+    await runAutoPrompt(io, argv, debug, settings);
+  }
   const helpRequested = root.opts.help === true;
 
   // 5. Walk groups down to the leaf. `path` holds names as typed (Click's info_name,
@@ -2630,6 +2653,148 @@ function checkKeyForSecurity(io: Invocation, s: RootSettings) {
     "For more information, refer to https://docs.oracle.com/iaas/Content/API/Concepts/apisigningkey.htm. " +
     "To suppress the warning, set the env variable SUPPRESS_LABEL_WARNING=True";
   io.err(`${style(message, "yellow", io.isTTY(2))}\n`);
+}
+
+/** oci.base_client.utc_now() format: " YYYY-MM-DD HH:MM:SS.ffffff+00:00: ". */
+function utcNow(): string {
+  const iso = new Date().toISOString();
+  return ` ${iso.slice(0, 10)} ${iso.slice(11, 23)}000+00:00: `;
+}
+
+/** cli_metrics.Metrics.update_metric("NUM_INVOCATIONS", debug). */
+function logRootDebugMetrics(io: Invocation, debug: boolean): void {
+  if (!debug) return;
+  if (!("OCI_CLI_METRICS_PATH" in io.env)) {
+    io.err(`DEBUG:oci_cli.cli_metrics:${utcNow()}Metrics is not enabled\n`);
+  }
+}
+
+const INTERACTIVE_SUGGESTION_MESSAGE =
+  "Learn more about interactive features in CLI by watching our informative video on YouTube -> " +
+  "https://www.youtube.com/watch?v=lX29Xw1Te54&ab_channel=OracleLearning \n" +
+  "Also see https://docs.oracle.com/iaas/Content/API/SDKDocs/cliusing_topic-Using_Interactive_Mode.htm\n";
+
+/**
+ * interactive.cli_interactive.start_interactive_shell:
+ * Triggered by `-i` / `--cli-auto-prompt` (including via Click short-option clusters
+ * like `--compartment-id -leading-dash`) or `OCI_CLI_AUTO_PROMPT`.
+ */
+async function runAutoPrompt(
+  io: Invocation,
+  argv: string[],
+  debug: boolean,
+  settings: RootSettings,
+): Promise<never> {
+  const suggestionPath = resolve(
+    io.cwd,
+    expandUser("~/suggestion_variable.txt", io.env),
+  );
+  if (!existsSync(suggestionPath)) {
+    io.out(INTERACTIVE_SUGGESTION_MESSAGE);
+    try {
+      writeFileSync(suggestionPath, "1", "utf8");
+    } catch {
+      // Ignore unwritable home directories.
+    }
+  }
+
+  if (!("OCI_OPS_CLI_TOOLS_IMPORT" in io.env)) {
+    const isInstancePrincipal = settings.auth === "instance_principal";
+    const isResourcePrincipal = settings.auth === "resource_principal";
+    const isOkeWorkload = settings.auth === "oke_workload_identity";
+    const configOptional =
+      isInstancePrincipal || isResourcePrincipal || isOkeWorkload;
+    const hasEnvConfig =
+      io.env.OCI_CLI_USER !== undefined &&
+      io.env.OCI_CLI_TENANCY !== undefined &&
+      io.env.OCI_CLI_FINGERPRINT !== undefined &&
+      io.env.OCI_CLI_REGION !== undefined &&
+      (io.env.OCI_CLI_KEY_FILE !== undefined ||
+        io.env.OCI_CLI_KEY_CONTENT !== undefined);
+
+    let config: Config = {};
+    let configLoaded = false;
+    if (!hasEnvConfig) {
+      try {
+        config = fromFile(
+          settings.configFile,
+          settings.profile,
+          io.env,
+          io.cwd,
+        );
+        configLoaded = true;
+        if (debug) {
+          const keys = Object.keys(config)
+            .map((k) => pyRepr(k))
+            .join(", ");
+          io.err(`DEBUG:oci_cli.cli_util:Config File: dict_keys([${keys}])\n`);
+        }
+      } catch (e) {
+        if (e instanceof ConfigError) {
+          if (e.type === "ConfigFileNotFound") {
+            if (!configOptional) {
+              const expanded = expandUser(settings.configFile, io.env);
+              const prompt =
+                settings.auth === "security_token"
+                  ? "Do you want to create a new config file with a CLI session profile that can be used with --auth security_token? [Y/n]: "
+                  : "Do you want to create a new config file? [Y/n]: ";
+              io.out(
+                `ERROR: Could not find config file at ${expanded}\n${prompt}`,
+              );
+              const reader = createStdinReader(io);
+              while (true) {
+                const line = await reader.readLine();
+                if (line === null) {
+                  io.err("Aborted!\n");
+                  throw new Exit(1);
+                }
+                const answer = line.trim().toLowerCase();
+                if (answer === "n" || answer === "no") throw new Exit(1);
+                if (answer === "" || answer === "y" || answer === "yes") {
+                  await notImplemented(io, argv, "oci setup config");
+                }
+                io.out(`Error: invalid input\n${prompt}`);
+              }
+            }
+          } else if (
+            (e.type === "ProfileNotFound" || e.type === "InvalidKeyFilePath") &&
+            (isInstancePrincipal || isResourcePrincipal)
+          ) {
+            config = {};
+          } else {
+            io.err(`ERROR: ${e.message}\n`);
+            throw new Exit(1);
+          }
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    const suppressPermWarning =
+      (io.env.OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING ?? "").toLowerCase() ===
+      "true";
+    if (configLoaded && !suppressPermWarning) {
+      warnFilePermissions(io, configPath(settings.configFile, io.env, io.cwd));
+    }
+    applyConfigEnvVars(config, io.env, (key) => {
+      if (debug) {
+        io.err(`DEBUG:oci_cli.cli_util:${key}: Environment Variable\n`);
+      }
+    });
+    if (debug) {
+      io.err(
+        "DEBUG:oci_cli.cli_util:region: Environment Variable or Parameter\n",
+      );
+    }
+  }
+
+  if (!io.isTTY(0)) {
+    io.out("> oci \r\n");
+    io.err("Warning: Input is not a terminal (fd=0).\n\nAborted!\n");
+    throw new Exit(1);
+  }
+  return await notImplemented(io, argv, "oci -i");
 }
 
 /** cli_root.get_key_file: configparser read of the config (missing file → none). */

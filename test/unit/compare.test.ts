@@ -116,6 +116,14 @@ test("only the top-level timestamp of a recognized stderr exception is masked", 
   ).toContain("2026-01-01");
 });
 
+test("metrics debug log timestamps are masked on stderr", () => {
+  const line =
+    "DEBUG:oci_cli.cli_metrics: 2026-11-25 04:20:05.292692+00:00: Metrics is not enabled\n";
+  expect(normalizeRun(run({ stderr: line })).stderr).toBe(
+    "DEBUG:oci_cli.cli_metrics: <timestamp>: Metrics is not enabled\n",
+  );
+});
+
 describe("requestOnlyMismatch", () => {
   const norm = (over: Partial<Run> = {}) => normalizeRun(run(over));
 

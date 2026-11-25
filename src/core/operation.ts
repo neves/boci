@@ -1936,10 +1936,12 @@ const OCI_CONFIG_ENV_VARS: Record<string, string> = {
 export function applyConfigEnvVars(
   config: Config,
   env: Record<string, string | undefined>,
+  onOverride?: (key: string) => void,
 ): void {
   for (const [envVar, key] of Object.entries(OCI_CONFIG_ENV_VARS)) {
     if (env[envVar] !== undefined) {
       config[key] = env[envVar] as string;
+      onOverride?.(key);
     }
   }
 }

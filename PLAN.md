@@ -389,5 +389,5 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz: `--query` results with `--output table` and `--raw-output` (e.g. `length(data)` with `--output table` fails in oci with `TypeError`).
 - [x] Fuzz: command validation rules (e.g. `bv volume list --sort-by` without `--availability-domain`; `--all` with `--limit`; confirmation `Abort:` on wrapper commands).
 - [x] Fuzz: request encoding of unusual values (non-latin-1 header values make oci fail with `UnicodeEncodeError`; empty strings, `&`/`?`/`/` in path and query values; repeated `multiple` options).
-- [ ] Fuzz: option values starting with `-` parse as Click short-option clusters (e.g. `--compartment-id -leading-dash` enters interactive mode in oci). Re-add `-leading-dash` to the TEXT pool in scripts/fuzz-lib.ts.
+- [x] Fuzz: option values starting with `-` parse as Click short-option clusters (e.g. `--compartment-id -leading-dash` enters interactive mode in oci). Re-add `-leading-dash` to the TEXT pool in scripts/fuzz-lib.ts.
 - [ ] Fuzz: full sweep. `bun run fuzz` over every command with `--iterations 3`; split what remains into items by cause.

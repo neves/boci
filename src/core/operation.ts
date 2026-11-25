@@ -521,6 +521,8 @@ function buildRequestBody(
             value,
             keys,
           );
+    } else if (binding.transform === "read" && value instanceof ProgramFile) {
+      target[binding.key.at(-1) as string] = value.read();
     } else if (
       typeof value === "string" &&
       value.toLowerCase().startsWith("file://")

@@ -586,9 +586,16 @@ async function main(io: Invocation): Promise<void> {
       try {
         values[p.name] = convert(p, value, index.datetime);
         if (
-          (specCmd.program || (name === "fn" && key === "function invoke")) &&
           p.typeClass === "click.types.File" &&
-          typeof values[p.name] === "string"
+          typeof values[p.name] === "string" &&
+          (specCmd.program ||
+            (name === "fn" && key === "function invoke") ||
+            specCmd.bindings?.some(
+              (binding) =>
+                binding.target === "body" &&
+                binding.param === p.name &&
+                binding.transform === "read",
+            ))
         ) {
           values[p.name] = await openClickFileForProgram(
             io,

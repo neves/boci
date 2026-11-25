@@ -116,7 +116,7 @@ async function readStdinBytes(io: Invocation): Promise<Uint8Array> {
 }
 
 /**
- * A `click.File(mode)` option for a programmed Tier B wrapper: read modes open (and here
+ * A `click.File(mode)` option: read modes open (and here
  * read) the file during option conversion, `-` being stdin; write modes stay lazy.
  */
 export async function openClickFileForProgram(

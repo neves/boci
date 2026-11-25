@@ -2423,17 +2423,18 @@ export function runProgram(
         }
     }
     if (
-      method === "get" &&
-      (Array.isArray(obj) ||
-        obj === null ||
-        obj === undefined ||
-        typeof obj === "string" ||
-        typeof obj === "number" ||
-        typeof obj === "boolean")
+      (method === "lower" && typeof obj !== "string") ||
+      (method === "get" &&
+        (Array.isArray(obj) ||
+          obj === null ||
+          obj === undefined ||
+          typeof obj === "string" ||
+          typeof obj === "number" ||
+          typeof obj === "boolean"))
     ) {
       throw new ProgramRaise(
         "AttributeError",
-        `'${pyTypeName(obj)}' object has no attribute 'get'`,
+        `'${pyTypeName(obj)}' object has no attribute '${method}'`,
       );
     }
     throw new ProgramUnsupported(`${method}()`);

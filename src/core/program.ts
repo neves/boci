@@ -738,9 +738,10 @@ export function serializeSdkBody(
   return serializeModelValue(value, models);
 }
 
-function serializedTypeName(value: unknown): string {
+function pyTypeName(value: unknown): string {
   if (value === null || value === undefined) return "NoneType";
   if (value instanceof ProgramModel) return value.name;
+  if (value instanceof Uint8Array) return "bytes";
   if (Array.isArray(value)) return pyTuples.has(value) ? "tuple" : "list";
   if (typeof value === "number")
     return Number.isInteger(value) ? "int" : "float";
@@ -779,7 +780,7 @@ function serializeModelValue(
     if (!valid) {
       throw new ProgramRaise(
         "TypeError",
-        `Field ${field} with value ${pyStr(v)} was expected to be of type ${type} but was of type ${serializedTypeName(v)}`,
+        `Field ${field} with value ${pyStr(v)} was expected to be of type ${type} but was of type ${pyTypeName(v)}`,
       );
     }
   }
@@ -2432,7 +2433,7 @@ export function runProgram(
     ) {
       throw new ProgramRaise(
         "AttributeError",
-        `'${serializedTypeName(obj)}' object has no attribute 'get'`,
+        `'${pyTypeName(obj)}' object has no attribute 'get'`,
       );
     }
     throw new ProgramUnsupported(`${method}()`);
@@ -3981,8 +3982,13 @@ export function runProgram(
       }
       if (Array.isArray(b)) return [...a, ...b];
     }
-    if (opName === "+" && typeof a === "string" && typeof b === "string")
-      return a + b;
+    if (opName === "+" && typeof a === "string") {
+      if (typeof b === "string") return a + b;
+      throw new ProgramRaise(
+        "TypeError",
+        `can only concatenate str (not "${pyTypeName(b)}") to str`,
+      );
+    }
     if (opName === "+" && a instanceof Uint8Array && b instanceof Uint8Array) {
       const merged = new Uint8Array(a.length + b.length);
       merged.set(a, 0);

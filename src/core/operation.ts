@@ -1144,10 +1144,14 @@ export async function sendServiceRequest(
   return { url, response, raw, requestId: req.headers["opc-request-id"] };
 }
 
-/** The parameter a download command streams the response body into (its `--file`). */
-export function outputBinding(command: GeneratedCommand): string | undefined {
+/** The file parameter and write mode for a download command's response body. */
+export function outputBinding(
+  command: GeneratedCommand,
+): { param: string; direct: boolean } | undefined {
   const binding = command.bindings?.find((b) => b.target === "output");
-  return typeof binding?.param === "string" ? binding.param : undefined;
+  if (typeof binding?.param === "string") {
+    return { param: binding.param, direct: binding.direct === true };
+  }
 }
 
 /**

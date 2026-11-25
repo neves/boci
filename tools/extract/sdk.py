@@ -741,6 +741,12 @@ def command_bindings(callback, sdk_method: str, params: set) -> list:
             and isinstance(node.func.value, ast.Name)
             and node.func.value.id in params
         ):
-            bindings.append({"target": "output", "key": [], "param": node.func.value.id})
+            binding = {"target": "output", "key": [], "param": node.func.value.id}
+            # A direct response-data write opens the file even for an empty body.
+            if len(node.args) == 1:
+                data = node.args[0]
+                if isinstance(data, ast.Attribute) and data.attr == "data":
+                    binding["direct"] = True
+            bindings.append(binding)
             break
     return bindings

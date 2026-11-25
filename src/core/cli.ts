@@ -1717,11 +1717,12 @@ async function main(io: Invocation): Promise<void> {
       const result = await callOperation(io, call);
       const downloadTo = outputBinding(command);
       if (downloadTo !== undefined && result.response.ok) {
-        const file = callValues[downloadTo];
+        const file = callValues[downloadTo.param];
         await writeDownload(
           io,
           result.response,
           file instanceof ProgramFile ? (file.name ?? "") : String(file),
+          { createEmpty: downloadTo.direct, showProgress: !downloadTo.direct },
         );
         return;
       }

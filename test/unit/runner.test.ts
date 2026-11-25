@@ -23,3 +23,12 @@ test("boci is runnable through the runner", async () => {
   const run = await runCli(CLIS.boci, ["--version"]);
   expect(typeof run.exitCode).toBe("number");
 });
+
+test("kills a spawned process that exceeds timeoutMs", async () => {
+  const sleeper = ["bun", "-e", "await Bun.sleep(60_000)"];
+  const started = performance.now();
+  await expect(runCli(sleeper, [], { timeoutMs: 250 })).rejects.toThrow(
+    /timeout after 0\.25s/,
+  );
+  expect(performance.now() - started).toBeLessThan(3000);
+});

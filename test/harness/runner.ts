@@ -63,15 +63,25 @@ export type RunOptions = {
   captureFiles?: string[];
   /** Paths relative to the sandbox HOME whose Unix mode bits to read back after the command finishes. */
   captureFileModes?: string[];
+  /** Kill the spawned process and reject if it runs longer than this many milliseconds. */
+  timeoutMs?: number;
 };
 
 /** Starts one CLI process and collects what it printed; Bun.spawn unless replaced. */
 export type Launcher = (
   cmd: string[],
-  io: { cwd: string; env: Record<string, string>; stdin?: string },
+  io: {
+    cwd: string;
+    env: Record<string, string>;
+    stdin?: string;
+    timeoutMs?: number;
+  },
 ) => Promise<{ stdout: string; stderr: string; exitCode: number }>;
 
-export const spawnLauncher: Launcher = async (cmd, { cwd, env, stdin }) => {
+export const spawnLauncher: Launcher = async (
+  cmd,
+  { cwd, env, stdin, timeoutMs },
+) => {
   const proc = Bun.spawn(cmd, {
     cwd,
     env,
@@ -79,12 +89,30 @@ export const spawnLauncher: Launcher = async (cmd, { cwd, env, stdin }) => {
     stdout: "pipe",
     stderr: "pipe",
   });
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-    proc.exited,
-  ]);
-  return { stdout, stderr, exitCode };
+  let timedOut = false;
+  const timer =
+    timeoutMs === undefined
+      ? undefined
+      : setTimeout(() => {
+          timedOut = true;
+          try {
+            proc.kill("SIGKILL");
+          } catch {}
+        }, timeoutMs);
+  const stdoutP = new Response(proc.stdout).text().catch(() => "");
+  const stderrP = new Response(proc.stderr).text().catch(() => "");
+  try {
+    const exitCode = await proc.exited;
+    if (timedOut) {
+      proc.stdout.cancel().catch(() => {});
+      proc.stderr.cancel().catch(() => {});
+      throw new Error(`timeout after ${(timeoutMs ?? 0) / 1000}s`);
+    }
+    const [stdout, stderr] = await Promise.all([stdoutP, stderrP]);
+    return { stdout, stderr, exitCode };
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 };
 
 export async function runCli(
@@ -120,6 +148,7 @@ export async function runCli(
         ...substituteEnv(opts.env, sb, fake.url, metadata),
       },
       stdin: opts.stdin,
+      ...(opts.timeoutMs === undefined ? {} : { timeoutMs: opts.timeoutMs }),
     },
   );
   const files = await readCapturedFiles(sb.home, opts.captureFiles);

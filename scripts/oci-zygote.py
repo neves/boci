@@ -20,8 +20,11 @@ import atexit
 import gc
 import json
 import os
+import select
+import signal
 import sys
 import threading
+import time
 
 ENTRY = os.environ.pop("BOCI_OCI_ENTRY", "oci")
 
@@ -47,22 +50,95 @@ LOADED = service_of(first)
 gc.freeze()  # imported objects stay out of GC passes, so children don't copy their pages
 
 
+STDIN_BUF = b""
+ACTIVE_CHILD = None
+
+
 def read_line():
-    buf = b""
-    while not buf.endswith(b"\n"):
+    global STDIN_BUF
+    while b"\n" not in STDIN_BUF:
         chunk = os.read(0, 65536)
         if not chunk:
             return None
-        buf += chunk
-    return buf
+        STDIN_BUF += chunk
+    i = STDIN_BUF.index(b"\n")
+    line = STDIN_BUF[: i + 1]
+    STDIN_BUF = STDIN_BUF[i + 1 :]
+    return line
 
 
 def reply(obj):
     os.write(1, (json.dumps(obj) + "\n").encode())
 
 
+def kill_child(pid):
+    try:
+        os.killpg(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    try:
+        os.waitpid(pid, 0)
+    except ChildProcessError:
+        pass
+
+
+def wait_child(pid, timeout_ms):
+    global STDIN_BUF
+    deadline = None if timeout_ms is None else time.monotonic() + timeout_ms / 1000.0
+    pidfd = None
+    if hasattr(os, "pidfd_open"):
+        try:
+            pidfd = os.pidfd_open(pid, 0)
+        except OSError:
+            pidfd = None
+    try:
+        while True:
+            wpid, status = os.waitpid(pid, os.WNOHANG)
+            if wpid == pid:
+                return os.waitstatus_to_exitcode(status), False
+            remaining = None if deadline is None else deadline - time.monotonic()
+            if remaining is not None and remaining <= 0:
+                kill_child(pid)
+                return None, True
+            if pidfd is not None:
+                readable, _, _ = select.select([pidfd, 0], [], [], remaining)
+                if pidfd in readable:
+                    continue
+                if 0 in readable:
+                    chunk = os.read(0, 65536)
+                    if not chunk:
+                        kill_child(pid)
+                        os._exit(0)
+                    STDIN_BUF += chunk
+            else:
+                sleep_s = 0.02 if remaining is None else min(0.02, remaining)
+                readable, _, _ = select.select([0], [], [], sleep_s)
+                if 0 in readable:
+                    chunk = os.read(0, 65536)
+                    if not chunk:
+                        kill_child(pid)
+                        os._exit(0)
+                    STDIN_BUF += chunk
+    finally:
+        if pidfd is not None:
+            os.close(pidfd)
+
+
+def _handle_term(signum, _frame):
+    if ACTIVE_CHILD is not None:
+        kill_child(ACTIVE_CHILD)
+    os._exit(128 + signum)
+
+
 def serve():
     """Returns in a forked child, ready to run the CLI; exits the zygote at EOF."""
+    global ACTIVE_CHILD
+    signal.signal(signal.SIGTERM, _handle_term)
+    signal.signal(signal.SIGINT, _handle_term)
     while True:
         line = read_line()
         if line is None:
@@ -78,10 +154,27 @@ def serve():
             continue
         pid = os.fork()
         if pid == 0:
+            try:
+                os.setpgid(0, 0)
+            except OSError:
+                pass
+            signal.signal(signal.SIGTERM, signal.SIG_DFL)
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
             setup(req)
             return
-        _, status = os.waitpid(pid, 0)
-        reply({"exitCode": os.waitstatus_to_exitcode(status)})
+        try:
+            os.setpgid(pid, pid)
+        except OSError:
+            pass
+        ACTIVE_CHILD = pid
+        try:
+            code, timed_out = wait_child(pid, req.get("timeoutMs"))
+        finally:
+            ACTIVE_CHILD = None
+        if timed_out:
+            reply({"timedOut": True})
+        else:
+            reply({"exitCode": code})
 
 
 def setup(req):

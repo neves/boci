@@ -149,19 +149,31 @@ type Mismatch = {
   oci: NormalizedRun & { files?: Record<string, string> };
   boci: NormalizedRun & { files?: Record<string, string> };
 };
+type TimedOut = {
+  key: string;
+  id: string;
+  argv: string[];
+  error: string;
+};
 const mismatches: Mismatch[] = [];
+const timedOut: TimedOut[] = [];
 const goldens = new Map<string, NormalizedRun>();
 let done = 0;
 let matched = 0;
 let timeouts = 0;
 
 function withTimeout<T>(p: Promise<T>, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   return Promise.race([
     p,
-    Bun.sleep(timeoutMs).then(() => {
-      throw new Error(`timeout after ${timeoutMs / 1000}s: ${label}`);
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`timeout after ${timeoutMs / 1000}s: ${label}`));
+      }, timeoutMs);
     }),
-  ]);
+  ]).finally(() => {
+    if (timer !== undefined) clearTimeout(timer);
+  });
 }
 
 const observe = (run: Run) => ({
@@ -170,20 +182,27 @@ const observe = (run: Run) => ({
 });
 
 async function runOne(inv: Invocation, launch: Launcher) {
-  const opts = { ...inv, captureFiles: inv.captureFiles };
+  const opts = { ...inv, captureFiles: inv.captureFiles, timeoutMs };
   let oci: Run;
   let boci: Run;
   try {
-    oci = await withTimeout(runCli(CLIS.oci, inv.argv, opts, launch), "oci");
-    boci = await withTimeout(
-      values["boci-bin"]
-        ? runCli([join(ROOT, values["boci-bin"])], inv.argv, opts)
-        : runInProcess(inv.argv, opts),
-      "boci",
-    );
+    oci = await runCli(CLIS.oci, inv.argv, opts, launch);
   } catch (e) {
     timeouts++;
-    console.log(`\n${inv.id}: ${(e as Error).message}`);
+    const error = `oci: ${(e as Error).message}`;
+    timedOut.push({ key: inv.key, id: inv.id, argv: inv.argv, error });
+    console.log(`\n${inv.id}: ${error}`);
+    return;
+  }
+  try {
+    boci = values["boci-bin"]
+      ? await runCli([join(ROOT, values["boci-bin"])], inv.argv, opts)
+      : await withTimeout(runInProcess(inv.argv, opts), "boci");
+  } catch (e) {
+    timeouts++;
+    const error = `boci: ${(e as Error).message}`;
+    timedOut.push({ key: inv.key, id: inv.id, argv: inv.argv, error });
+    console.log(`\n${inv.id}: ${error}`);
     return;
   }
   const expected = observe(oci);
@@ -227,6 +246,10 @@ async function worker() {
             .slice(0, 100)
             .padEnd(100),
         );
+      else if (done % 1000 === 0)
+        console.log(
+          `${done}/${invocations.length} · ${mismatches.length} mismatches · ${timeouts} timeouts · ${inv.key}`,
+        );
     }
   } finally {
     await launch.close();
@@ -241,7 +264,7 @@ if (process.stdout.isTTY) process.stdout.write("\n");
 const reportFile = join(ROOT, ".fuzz", `${seed}.json`);
 await Bun.write(
   reportFile,
-  `${JSON.stringify({ seed, referenceVersion, invocations: invocations.length, matched, timeouts, mismatches }, null, 2)}\n`,
+  `${JSON.stringify({ seed, referenceVersion, invocations: invocations.length, matched, timeouts, timedOut, mismatches }, null, 2)}\n`,
 );
 
 const byKey = new Map<string, Mismatch[]>();

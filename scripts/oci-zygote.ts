@@ -24,6 +24,7 @@ class Zygote {
   private readonly proc;
   private readonly lines;
   private buf = "";
+  private dead = false;
   constructor(
     py: string,
     oci: string,
@@ -43,23 +44,78 @@ class Zygote {
   }
   async request(
     req: object,
-  ): Promise<{ exitCode?: number; fallback?: boolean }> {
+    timeoutMs?: number,
+  ): Promise<{ exitCode?: number; fallback?: boolean; timedOut?: boolean }> {
     this.proc.stdin.write(`${JSON.stringify(req)}\n`);
     await this.proc.stdin.flush();
-    while (!this.buf.includes("\n")) {
-      const { value, done } = await this.lines.read();
-      if (done)
-        throw new Error(`oci zygote exited (${await this.proc.exited})`);
-      this.buf += value;
+    const readReply = async () => {
+      while (!this.buf.includes("\n")) {
+        const { value, done } = await this.lines.read();
+        if (done)
+          throw new Error(`oci zygote exited (${await this.proc.exited})`);
+        this.buf += value;
+      }
+      const i = this.buf.indexOf("\n");
+      const line = this.buf.slice(0, i);
+      this.buf = this.buf.slice(i + 1);
+      return JSON.parse(line) as {
+        exitCode?: number;
+        fallback?: boolean;
+        timedOut?: boolean;
+      };
+    };
+    if (timeoutMs === undefined) return readReply();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        readReply(),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => {
+            reject(
+              new Error(
+                `timeout after ${timeoutMs / 1000}s (zygote unresponsive)`,
+              ),
+            );
+          }, timeoutMs + 2000);
+        }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
     }
-    const i = this.buf.indexOf("\n");
-    const line = this.buf.slice(0, i);
-    this.buf = this.buf.slice(i + 1);
-    return JSON.parse(line);
+  }
+  async kill() {
+    if (this.dead) return;
+    this.dead = true;
+    try {
+      this.proc.stdin.end();
+    } catch {}
+    try {
+      this.proc.kill("SIGKILL");
+    } catch {}
+    this.lines.cancel().catch(() => {});
+    await this.proc.exited;
   }
   async close() {
-    this.proc.stdin.end();
-    await this.proc.exited;
+    if (this.dead) return;
+    this.dead = true;
+    try {
+      this.proc.stdin.end();
+    } catch {}
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const exited = await Promise.race([
+      this.proc.exited.then(() => true),
+      new Promise<false>((resolve) => {
+        timer = setTimeout(() => resolve(false), 2000);
+      }),
+    ]);
+    if (timer !== undefined) clearTimeout(timer);
+    if (!exited) {
+      try {
+        this.proc.kill("SIGKILL");
+      } catch {}
+      this.lines.cancel().catch(() => {});
+      await this.proc.exited;
+    }
   }
 }
 
@@ -97,12 +153,26 @@ export async function zygoteLauncher(): Promise<ZygoteLauncher> {
     };
     try {
       if (paths.stdin) await Bun.write(paths.stdin, io.stdin ?? "");
-      const r = await zygote.request({
-        argv: args,
-        env: io.env,
-        cwd: io.cwd,
-        ...paths,
-      });
+      let r: { exitCode?: number; fallback?: boolean; timedOut?: boolean };
+      try {
+        r = await zygote.request(
+          {
+            argv: args,
+            env: io.env,
+            cwd: io.cwd,
+            ...paths,
+            ...(io.timeoutMs === undefined ? {} : { timeoutMs: io.timeoutMs }),
+          },
+          io.timeoutMs,
+        );
+      } catch (e) {
+        await zygote.kill();
+        zygote = undefined;
+        key = undefined;
+        throw e;
+      }
+      if (r.timedOut)
+        throw new Error(`timeout after ${(io.timeoutMs ?? 0) / 1000}s`);
       if (r.fallback) return fallback(cmd, io);
       const result = {
         stdout: await Bun.file(paths.stdout).text(),

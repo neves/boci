@@ -1,0 +1,126 @@
+[
+  {
+    "id": "network-remote-peering-connect-invalid-region",
+    "key": "network remote-peering-connection connect",
+    "argv": [
+      "network",
+      "remote-peering-connection",
+      "connect",
+      "--remote-peering-connection-id",
+      "ocid1.remotepeeringconnection.oc1..fuzz",
+      "--peer-id",
+      "ocid1.remotepeeringconnection.oc1..peer",
+      "--peer-region-name",
+      "US-ASHBURN-1",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "requestOnly": true,
+    "replies": [
+      {
+        "body": [
+          {
+            "key": "IAD",
+            "name": "us-ashburn-1"
+          },
+          {
+            "key": "PHX",
+            "name": "us-phoenix-1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "network-remote-peering-connect-valid-region",
+    "key": "network remote-peering-connection connect",
+    "argv": [
+      "network",
+      "remote-peering-connection",
+      "connect",
+      "--remote-peering-connection-id",
+      "ocid1.remotepeeringconnection.oc1..fuzz",
+      "--peer-id",
+      "ocid1.remotepeeringconnection.oc1..peer",
+      "--peer-region-name",
+      "us-phoenix-1",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "requestOnly": true,
+    "replies": [
+      {
+        "body": [
+          {
+            "key": "IAD",
+            "name": "us-ashburn-1"
+          },
+          {
+            "key": "PHX",
+            "name": "us-phoenix-1"
+          }
+        ]
+      },
+      {
+        "status": 204
+      }
+    ]
+  },
+  {
+    "id": "network-remote-peering-connect-region-lookup-fails",
+    "key": "network remote-peering-connection connect",
+    "argv": [
+      "network",
+      "remote-peering-connection",
+      "connect",
+      "--remote-peering-connection-id",
+      "ocid1.remotepeeringconnection.oc1..fuzz",
+      "--peer-id",
+      "ocid1.remotepeeringconnection.oc1..peer",
+      "--peer-region-name",
+      "unlisted-region",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "requestOnly": true,
+    "replies": [
+      {
+        "status": 403,
+        "body": {
+          "code": "NotAuthorizedOrNotFound",
+          "message": "Access denied"
+        }
+      },
+      {
+        "status": 204
+      }
+    ]
+  },
+  {
+    "id": "network-remote-peering-connect-null-region-list",
+    "key": "network remote-peering-connection connect",
+    "argv": [
+      "network",
+      "remote-peering-connection",
+      "connect",
+      "--remote-peering-connection-id",
+      "ocid1.remotepeeringconnection.oc1..fuzz",
+      "--peer-id",
+      "ocid1.remotepeeringconnection.oc1..peer",
+      "--peer-region-name",
+      "unlisted-region",
+      "--no-retry",
+      "--endpoint",
+      "{endpoint}"
+    ],
+    "requestOnly": true,
+    "replies": [
+      {
+        "body": "null"
+      }
+    ]
+  }
+]

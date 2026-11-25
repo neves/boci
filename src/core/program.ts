@@ -701,19 +701,24 @@ export class ProgramModel {
     this.attrs[attr] = value;
   }
 
-  toWireDict(): Dict {
+  toWireDict(models?: Record<string, Model>, field?: string): Dict {
     const out: Dict = {};
-    if (this.attrMap.size > 0) {
-      for (const [snake, wire] of this.attrMap) {
+    if (this.model?.attributes.length) {
+      for (const [snake, type, wire] of this.model.attributes) {
         const val = this.attrs[snake];
         if (val !== undefined && val !== null) {
-          out[wire] = serializeModelValue(val);
+          out[wire] = serializeModelValue(
+            val,
+            models,
+            type,
+            field ? `${field}.${snake}` : snake,
+          );
         }
       }
     } else {
       for (const [k, val] of Object.entries(this.attrs)) {
         if (val !== undefined && val !== null) {
-          out[snakeToCamel(k)] = serializeModelValue(val);
+          out[snakeToCamel(k)] = serializeModelValue(val, models, undefined, k);
         }
       }
     }
@@ -725,15 +730,79 @@ export class ProgramModel {
   }
 }
 
-function serializeModelValue(v: unknown): unknown {
-  if (v instanceof ProgramModel) return v.toWireDict();
-  if (Array.isArray(v)) return v.map(serializeModelValue);
-  if (isDict(v)) {
-    const out: Dict = {};
-    for (const [k, val] of Object.entries(v)) {
-      out[k] = serializeModelValue(val);
+/** OCI validates declared swagger types while serializing instantiated SDK models. */
+export function serializeSdkBody(
+  value: unknown,
+  models?: Record<string, Model>,
+): unknown {
+  return serializeModelValue(value, models);
+}
+
+function serializedTypeName(value: unknown): string {
+  if (value instanceof ProgramModel) return value.name;
+  if (Array.isArray(value)) return pyTuples.has(value) ? "tuple" : "list";
+  if (typeof value === "number")
+    return Number.isInteger(value) ? "int" : "float";
+  if (typeof value === "string") return "str";
+  if (typeof value === "boolean") return "bool";
+  return "dict";
+}
+
+function serializeModelValue(
+  v: unknown,
+  models?: Record<string, Model>,
+  type?: string,
+  field?: string,
+): unknown {
+  if (models && type && v !== null && v !== undefined) {
+    const model = Object.hasOwn(models, type) ? models[type] : undefined;
+    let valid = true;
+    if (type.startsWith("dict(")) valid = isDict(v);
+    else if (type.startsWith("list[")) valid = Array.isArray(v);
+    else if (type === "str") valid = typeof v === "string";
+    else if (type === "bool") valid = typeof v === "boolean";
+    else if (type === "int" || type === "float")
+      valid = typeof v === "number" || typeof v === "boolean";
+    else if (model && !isDict(v)) {
+      const discriminator =
+        typeof model.discriminator === "object"
+          ? model.discriminator
+          : undefined;
+      valid =
+        v instanceof ProgramModel &&
+        (v.name === type ||
+          v.model?.discriminator === type ||
+          discriminator?.fallback === v.name ||
+          Object.values(discriminator?.values ?? {}).includes(v.name));
     }
-    return out;
+    if (!valid) {
+      throw new ProgramRaise(
+        "TypeError",
+        `Field ${field} with value ${pyStr(v)} was expected to be of type ${type} but was of type ${serializedTypeName(v)}`,
+      );
+    }
+  }
+  if (v instanceof ProgramModel) return v.toWireDict(models, field);
+  if (Array.isArray(v)) {
+    const itemType = type?.match(/list\[(.+?)\]$/)?.[1];
+    const itemField = field ? `${field}[*]` : undefined;
+    return v.map((item) =>
+      serializeModelValue(item, models, itemType, itemField),
+    );
+  }
+  if (isDict(v)) {
+    const valueType = type?.match(/dict\(str, (.+?)\)$/)?.[1];
+    return Object.fromEntries(
+      Object.entries(v).map(([key, val]) => [
+        key,
+        serializeModelValue(
+          val,
+          models,
+          valueType,
+          field ? `${field}.${key}` : key,
+        ),
+      ]),
+    );
   }
   return v;
 }

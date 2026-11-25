@@ -36,6 +36,7 @@ import {
   ProgramResponse,
   ProgramServiceError,
   ProgramUnsupported,
+  serializeSdkBody,
 } from "./program.ts";
 import { paginateSdkList } from "./pagination.ts";
 import { ModelDeserializationError, renderModel } from "./output.ts";
@@ -1580,7 +1581,8 @@ export async function callSdkOperation(
     } else if (typeof direct === "string") {
       requestBody = direct;
     } else {
-      requestBody = serializeRequestJson(direct);
+      const models = spec.models?.[operation.client.split(".")[0]!];
+      requestBody = serializeRequestJson(serializeSdkBody(direct, models));
     }
   }
   const client = spec.clients[operation.client] as Record<string, unknown>;
@@ -1716,7 +1718,8 @@ export async function callBaseClientApi(
     } else if (body instanceof Uint8Array || typeof body === "string") {
       requestBody = body;
     } else {
-      requestBody = serializeRequestJson(body);
+      const models = spec.models?.[operation.client.split(".")[0]!];
+      requestBody = serializeRequestJson(serializeSdkBody(body, models));
     }
   }
   const client = spec.clients[operation.client] as Record<string, unknown>;

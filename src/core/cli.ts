@@ -148,6 +148,15 @@ const PROG = "oci";
 const INTERACTIVE_SUGGESTION =
   "For OCI CLI commands and parameters suggestion, auto completion and other useful features, try the Interactive mode by typing `oci -i`.";
 
+// These wrappers report missing options from the child context created by Click's ctx.invoke.
+const MISSING_OPTION_DELEGATES = new Map([
+  ["data-science ml-app-instance-view update", "update"],
+  [
+    "fn function create archive-function object-storage fn-update-runtime-config",
+    "create",
+  ],
+]);
+
 function usage(io: Invocation, commandPath: string, doc: HelpDoc): string {
   const f = new HelpFormatter(helpWidth(io));
   f.writeUsage(commandPath, doc.usage);
@@ -715,8 +724,10 @@ async function main(io: Invocation): Promise<void> {
       if (p.required && !p.isFlag) missing.push(p.name.replaceAll("_", "-"));
     }
     if (missing.length) {
+      const delegate = MISSING_OPTION_DELEGATES.get(canon.join(" "));
+      const usagePath = delegate ? `${commandPath} ${delegate}` : commandPath;
       io.err(
-        `${usage(io, commandPath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
+        `${usage(io, usagePath, cmd.helpDoc)}\n\nError: Missing option(s) --${missing.join(", --")}.\n`,
       );
       throw new Exit(1);
     }

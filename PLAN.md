@@ -414,4 +414,5 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 - [x] Fuzz (full sweep): match `network remote-peering-connection connect` invalid `--peer-region-name` handling (seed 42).
 - [x] Fuzz (full sweep): match `db database delete` edge cases (seed 42).
 - [x] Fuzz (full sweep): match `rover {node,station-cluster} delete-workload` edge cases (seed 42).
-- [ ] Fuzz (full sweep): match usage-error prefixes on `data-science ml-app-instance-view update`/`fn function create archive-function object-storage fn-update-runtime-config`/`generative-ai-data generate-sql-jobs generate` (seed 42).
+- [x] Fuzz (full sweep): match delegated missing-option usage paths on `data-science ml-app-instance-view update`/`fn function create archive-function object-storage fn-update-runtime-config` (seed 42).
+- [ ] Fuzz (full sweep): match SDK errors after `generative-ai-data generate-sql-jobs generate` clears missing-option errors (seed 42).

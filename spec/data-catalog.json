@@ -51755,12 +51755,136 @@
         "filters": "data_catalog:FacetedSearchFilterRequest"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": [],
+      "survey": {
+        "invokes": [
+          "services.data_catalog.src.oci_cli_data_catalog.generated.datacatalog_cli.search_criteria"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "query_text", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "query_text"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "query_parameterconflict",
+                ["item", ["var", "kwargs"], "query_text"]
+              ]
+            ],
+            []
+          ],
+          ["do", ["call", "pop", ["var", "kwargs"], "query_text"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.data_catalog.src.oci_cli_data_catalog.generated.datacatalog_cli.search_criteria",
-        "renames": {
-          "query_parameterconflict": "query_text"
-        }
+        "complexTypes": {
+          "dimensions": "data_catalog:list[string]",
+          "sort": "data_catalog:list[FacetedSearchSortRequest]",
+          "filters": "data_catalog:FacetedSearchFilterRequest"
+        },
+        "params": [
+          {
+            "name": "catalog_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "query_parameterconflict",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "faceted_query",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "dimensions",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sort",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "filters",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "lifecycle_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "timeout",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sort_by",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "sort_order",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "limit",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "page",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "data_catalog.data_catalog",
@@ -51875,8 +51999,8 @@
           "target": "body",
           "bodyArg": "search_criteria_details",
           "key": ["query"],
-          "param": "query_text",
-          "when": "query_text is not None"
+          "param": "query_parameterconflict",
+          "when": "query_parameterconflict is not None"
         },
         {
           "target": "body",

@@ -425,6 +425,14 @@ def custom_delegate(callback, client_map, custom_params):
         ):
             continue
         if isinstance(st, ast.If):
+            # Testing a keyword value can suppress a supplied false or empty value.
+            # A Tier A rename can only preserve a guard that checks for presence.
+            conditions = st.test.values if isinstance(st.test, ast.BoolOp) else [st.test]
+            if any(
+                (chain := _subscript_chain(condition)) and chain[0] == "kwargs"
+                for condition in conditions
+            ):
+                return "B", None
             # The callback body is deliberately kept conservative: only recognized
             # kwargs renames, pop calls and `del kwargs[...]` are accepted.
             if not all(_rename_stmt(child) for child in st.body + st.orelse):

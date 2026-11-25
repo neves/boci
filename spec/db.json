@@ -29192,13 +29192,56 @@
         "db-tools-details": "database:list[DatabaseTool]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_autonomous_database_create_autonomous_database_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "maintenance_schedule_type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "autonomous_maintenance_schedule_type",
+                ["item", ["var", "kwargs"], "maintenance_schedule_type"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "maintenance_schedule_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_acl_enabled", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_acl_enabled"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_access_control_enabled",
+                ["item", ["var", "kwargs"], "is_acl_enabled"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_acl_enabled"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.create_autonomous_database_create_autonomous_database_details",
-        "renames": {
-          "autonomous_maintenance_schedule_type": "maintenance_schedule_type",
-          "is_access_control_enabled": "is_acl_enabled"
-        },
         "complexTypes": {
           "encryption-key": "database:AutonomousDatabaseEncryptionKeyDetails",
           "whitelisted-ips": "database:list[string]",
@@ -29213,7 +29256,375 @@
           "scheduled-operations": "database:list[ScheduledOperationDetails]",
           "db-tools-details": "database:list[DatabaseTool]",
           "transportable-tablespace": "database:ImportTransportableTablespaceDetails"
-        }
+        },
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "character_set",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ncharacter_set",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_retention_period_in_days",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocpu_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_workload",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_tbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_free_tier",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "encryption_key",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "byol_compute_count_limit",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_preview_version_with_service_terms_accepted",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_dev_tier",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_dedicated",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_container_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "in_memory_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_access_control_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "whitelisted_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "are_primary_whitelisted_ips_used",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "standby_whitelisted_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_data_guard_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_local_data_guard_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_label",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_ip",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_contacts",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_mtls_connection_required",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_pool_leader_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_pool_summary",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_maintenance_schedule_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_database_maintenance_window",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scheduled_operations",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_for_storage_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_edition",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_tools_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_backup_retention_locked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secret_version_number",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "transportable_tablespace",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_dry_run",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -29457,8 +29868,8 @@
           "target": "body",
           "bodyArg": "create_autonomous_database_details",
           "key": ["isAccessControlEnabled"],
-          "param": "is_acl_enabled",
-          "when": "is_acl_enabled is not None"
+          "param": "is_access_control_enabled",
+          "when": "is_access_control_enabled is not None"
         },
         {
           "target": "body",
@@ -29591,8 +30002,8 @@
           "target": "body",
           "bodyArg": "create_autonomous_database_details",
           "key": ["autonomousMaintenanceScheduleType"],
-          "param": "maintenance_schedule_type",
-          "when": "maintenance_schedule_type is not None"
+          "param": "autonomous_maintenance_schedule_type",
+          "when": "autonomous_maintenance_schedule_type is not None"
         },
         {
           "target": "body",
@@ -45696,13 +46107,56 @@
         "db-tools-details": "database:list[DatabaseTool]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_autonomous_database_create_autonomous_database_clone_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "maintenance_schedule_type", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "autonomous_maintenance_schedule_type",
+                ["item", ["var", "kwargs"], "maintenance_schedule_type"]
+              ],
+              [
+                "do",
+                ["call", "pop", ["var", "kwargs"], "maintenance_schedule_type"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_acl_enabled", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_acl_enabled"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_access_control_enabled",
+                ["item", ["var", "kwargs"], "is_acl_enabled"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_acl_enabled"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.create_autonomous_database_create_autonomous_database_clone_details",
-        "renames": {
-          "autonomous_maintenance_schedule_type": "maintenance_schedule_type",
-          "is_access_control_enabled": "is_acl_enabled"
-        },
         "complexTypes": {
           "encryption-key": "database:AutonomousDatabaseEncryptionKeyDetails",
           "whitelisted-ips": "database:list[string]",
@@ -45717,7 +46171,387 @@
           "scheduled-operations": "database:list[ScheduledOperationDetails]",
           "db-tools-details": "database:list[DatabaseTool]",
           "transportable-tablespace": "database:ImportTransportableTablespaceDetails"
-        }
+        },
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "clone_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subscription_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "character_set",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ncharacter_set",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_retention_period_in_days",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocpu_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_workload",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_tbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_free_tier",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "kms_key_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vault_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "encryption_key",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "byol_compute_count_limit",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_preview_version_with_service_terms_accepted",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_dev_tier",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_dedicated",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_container_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "in_memory_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_access_control_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "whitelisted_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "are_primary_whitelisted_ips_used",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "standby_whitelisted_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_data_guard_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_local_data_guard_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_label",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_ip",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_contacts",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_mtls_connection_required",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_pool_leader_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_pool_summary",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_maintenance_schedule_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_database_maintenance_window",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scheduled_operations",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_for_storage_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_edition",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_tools_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_backup_retention_locked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secret_version_number",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "transportable_tablespace",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_dry_run",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -45973,8 +46807,8 @@
           "target": "body",
           "bodyArg": "create_autonomous_database_details",
           "key": ["isAccessControlEnabled"],
-          "param": "is_acl_enabled",
-          "when": "is_acl_enabled is not None"
+          "param": "is_access_control_enabled",
+          "when": "is_access_control_enabled is not None"
         },
         {
           "target": "body",
@@ -46107,8 +46941,8 @@
           "target": "body",
           "bodyArg": "create_autonomous_database_details",
           "key": ["autonomousMaintenanceScheduleType"],
-          "param": "maintenance_schedule_type",
-          "when": "maintenance_schedule_type is not None"
+          "param": "autonomous_maintenance_schedule_type",
+          "when": "autonomous_maintenance_schedule_type is not None"
         },
         {
           "target": "body",
@@ -58270,12 +59104,39 @@
         "db-tools-details": "database:list[DatabaseTool]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_autonomous_database"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_acl_enabled", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_acl_enabled"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_access_control_enabled",
+                ["item", ["var", "kwargs"], "is_acl_enabled"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_acl_enabled"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.update_autonomous_database",
-        "renames": {
-          "is_access_control_enabled": "is_acl_enabled"
-        },
         "complexTypes": {
           "long-term-backup-schedule": "database:LongTermBackUpScheduleDetails",
           "freeform-tags": "database:dict(str, string)",
@@ -58292,7 +59153,466 @@
           "db-tools-details": "database:list[DatabaseTool]",
           "vanity-url-details": "database:VanityUrlDetails",
           "encryption-key": "database:AutonomousDatabaseEncryptionKeyDetails"
-        }
+        },
+        "params": [
+          {
+            "name": "autonomous_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "backup_retention_period_in_days",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "in_memory_percentage",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "local_adg_auto_failover_max_data_loss_limit",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cpu_core_count",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "long_term_backup_schedule",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_dev_tier",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compute_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "ocpu_count",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_tbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "data_storage_size_in_gbs",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_free_tier",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_scheduled_ad_update",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_disable_ad_update_schedule",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_schedule_ad_update_to_earliest",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "security_attributes",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_workload",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "license_model",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "byol_compute_count_limit",
+            "typeClass": "click.types.FloatParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_access_control_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "whitelisted_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "are_primary_whitelisted_ips_used",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "standby_whitelisted_ips",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_refreshable_clone",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "refreshable_mode",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_local_data_guard_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_data_guard_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "peer_db_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "open_mode",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "permission_level",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "subnet_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_label",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_ip",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "nsg_ids",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "auto_refresh_frequency_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "auto_refresh_point_lag_in_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_of_auto_refresh_start",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "customer_contacts",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_mtls_connection_required",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_pool_leader_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "resource_pool_summary",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_maintenance_schedule_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "autonomous_database_maintenance_window",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_maintenance_pause_until",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scheduled_maintenance_window",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_scheduled_maintenance_window_update",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_backup_retention_locked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "time_scheduled_db_version_upgrade",
+            "typeClass": "oci_cli.custom_types.cli_datetime.CliDatetime",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_disable_db_version_upgrade_schedule",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_schedule_db_version_upgrade_to_earliest",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "scheduled_operations",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_auto_scaling_for_storage_enabled",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_edition",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "db_tools_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "vanity_url_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secret_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "secret_version_number",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "encryption_key",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_disconnect_peer",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "local_adg_resource_pool_leader_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_dry_run",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -58552,8 +59872,8 @@
           "target": "body",
           "bodyArg": "update_autonomous_database_details",
           "key": ["isAccessControlEnabled"],
-          "param": "is_acl_enabled",
-          "when": "is_acl_enabled is not None"
+          "param": "is_access_control_enabled",
+          "when": "is_access_control_enabled is not None"
         },
         {
           "target": "body",
@@ -64675,12 +65995,54 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_autonomous_database_wallet"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "autonomous_database_id",
+                ["item", ["var", "kwargs"], "id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "id"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.get_autonomous_database_wallet",
-        "renames": {
-          "autonomous_database_id": "id"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "autonomous_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -64689,7 +66051,7 @@
         "path": "/autonomousDatabases/{autonomousDatabaseId}/wallet",
         "positionalArgs": ["autonomous_database_id"],
         "pathParams": {
-          "autonomousDatabaseId": "id"
+          "autonomousDatabaseId": "autonomous_database_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -64710,7 +66072,7 @@
         {
           "target": "kwarg",
           "key": ["autonomous_database_id"],
-          "param": "id"
+          "param": "autonomous_database_id"
         },
         {
           "target": "kwarg",
@@ -64935,12 +66297,90 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.update_autonomous_database_wallet"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "autonomous_database_id",
+                ["item", ["var", "kwargs"], "id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "id"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.update_autonomous_database_wallet",
-        "renames": {
-          "autonomous_database_id": "id"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "autonomous_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_rotate",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "grace_period",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "opc_dry_run",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -64952,7 +66392,7 @@
           "update_autonomous_database_wallet_details"
         ],
         "pathParams": {
-          "autonomousDatabaseId": "id"
+          "autonomousDatabaseId": "autonomous_database_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -64977,7 +66417,7 @@
         {
           "target": "kwarg",
           "key": ["autonomous_database_id"],
-          "param": "id"
+          "param": "autonomous_database_id"
         },
         {
           "target": "kwarg",
@@ -108923,17 +110363,211 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": [],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.convert_to_pdb_pdb_conversion_to_new_database_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "cdb_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "cdb_name"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_cdb_name",
+                ["item", ["var", "kwargs"], "cdb_name"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "cdb_name"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "cdb_admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "cdb_admin_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_cdb_admin_password",
+                ["item", ["var", "kwargs"], "cdb_admin_password"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "cdb_admin_password"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "non_cdb_tde_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "non_cdb_tde_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_non_cdb_tde_wallet_password",
+                ["item", ["var", "kwargs"], "non_cdb_tde_password"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "non_cdb_tde_password"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "additional_cdb_params", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "additional_cdb_params"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_additional_cdb_params",
+                ["item", ["var", "kwargs"], "additional_cdb_params"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "cdb_tde_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "cdb_tde_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_cdb_tde_wallet_password",
+                ["item", ["var", "kwargs"], "cdb_tde_password"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pdb_admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "pdb_admin_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_pdb_admin_password",
+                ["item", ["var", "kwargs"], "pdb_admin_password"]
+              ]
+            ],
+            []
+          ],
+          ["set", ["var", "kwargs"], "action", "CONVERT"],
+          ["do", ["call", "pop", ["var", "kwargs"], "additional_cdb_params"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "pdb_admin_password"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "cdb_tde_password"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.convert_to_pdb_pdb_conversion_to_new_database_details",
-        "renames": {
-          "convert_to_pdb_target_details_cdb_name": "cdb_name",
-          "convert_to_pdb_target_details_cdb_admin_password": "cdb_admin_password",
-          "convert_to_pdb_target_details_non_cdb_tde_wallet_password": "non_cdb_tde_password",
-          "convert_to_pdb_target_details_additional_cdb_params": "additional_cdb_params",
-          "convert_to_pdb_target_details_cdb_tde_wallet_password": "cdb_tde_password",
-          "convert_to_pdb_target_details_pdb_admin_password": "pdb_admin_password"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "action",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_cdb_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_cdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_non_cdb_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_pdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_cdb_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_additional_cdb_params",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -108991,57 +110625,52 @@
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["action"],
-          "value": "CONVERT"
+          "param": "action"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "cdbName"],
-          "param": "cdb_name"
+          "param": "convert_to_pdb_target_details_cdb_name"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "cdbAdminPassword"],
-          "param": "cdb_admin_password"
+          "param": "convert_to_pdb_target_details_cdb_admin_password"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "nonCdbTdeWalletPassword"],
-          "param": "non_cdb_tde_password"
+          "param": "convert_to_pdb_target_details_non_cdb_tde_wallet_password"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "pdbAdminPassword"],
-          "param": "pdb_admin_password",
-          "when": "pdb_admin_password is not None"
+          "param": "convert_to_pdb_target_details_pdb_admin_password",
+          "when": "convert_to_pdb_target_details_pdb_admin_password is not None"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "cdbTdeWalletPassword"],
-          "param": "cdb_tde_password",
-          "when": "cdb_tde_password is not None"
+          "param": "convert_to_pdb_target_details_cdb_tde_wallet_password",
+          "when": "convert_to_pdb_target_details_cdb_tde_wallet_password is not None"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "additionalCdbParams"],
-          "param": "additional_cdb_params",
-          "when": "additional_cdb_params is not None"
+          "param": "convert_to_pdb_target_details_additional_cdb_params",
+          "when": "convert_to_pdb_target_details_additional_cdb_params is not None"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "target"],
           "value": "NEW_DATABASE"
-        },
-        {
-          "target": "kwarg",
-          "key": ["action"],
-          "value": "CONVERT"
         }
       ],
       "params": [
@@ -109377,17 +111006,211 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": [],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.convert_to_pdb_pdb_conversion_to_new_database_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "cdb_name", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "cdb_name"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_cdb_name",
+                ["item", ["var", "kwargs"], "cdb_name"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "cdb_name"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "cdb_admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "cdb_admin_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_cdb_admin_password",
+                ["item", ["var", "kwargs"], "cdb_admin_password"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "cdb_admin_password"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "non_cdb_tde_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "non_cdb_tde_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_non_cdb_tde_wallet_password",
+                ["item", ["var", "kwargs"], "non_cdb_tde_password"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "non_cdb_tde_password"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "additional_cdb_params", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "additional_cdb_params"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_additional_cdb_params",
+                ["item", ["var", "kwargs"], "additional_cdb_params"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "cdb_tde_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "cdb_tde_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_cdb_tde_wallet_password",
+                ["item", ["var", "kwargs"], "cdb_tde_password"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "pdb_admin_password", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "pdb_admin_password"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "convert_to_pdb_target_details_pdb_admin_password",
+                ["item", ["var", "kwargs"], "pdb_admin_password"]
+              ]
+            ],
+            []
+          ],
+          ["set", ["var", "kwargs"], "action", "PRECHECK"],
+          ["do", ["call", "pop", ["var", "kwargs"], "additional_cdb_params"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "pdb_admin_password"]],
+          ["do", ["call", "pop", ["var", "kwargs"], "cdb_tde_password"]],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.convert_to_pdb_pdb_conversion_to_new_database_details",
-        "renames": {
-          "convert_to_pdb_target_details_cdb_name": "cdb_name",
-          "convert_to_pdb_target_details_cdb_admin_password": "cdb_admin_password",
-          "convert_to_pdb_target_details_non_cdb_tde_wallet_password": "non_cdb_tde_password",
-          "convert_to_pdb_target_details_additional_cdb_params": "additional_cdb_params",
-          "convert_to_pdb_target_details_cdb_tde_wallet_password": "cdb_tde_password",
-          "convert_to_pdb_target_details_pdb_admin_password": "pdb_admin_password"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "action",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_cdb_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_cdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_non_cdb_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_pdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_cdb_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "convert_to_pdb_target_details_additional_cdb_params",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -109445,57 +111268,52 @@
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["action"],
-          "value": "PRECHECK"
+          "param": "action"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "cdbName"],
-          "param": "cdb_name"
+          "param": "convert_to_pdb_target_details_cdb_name"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "cdbAdminPassword"],
-          "param": "cdb_admin_password"
+          "param": "convert_to_pdb_target_details_cdb_admin_password"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "nonCdbTdeWalletPassword"],
-          "param": "non_cdb_tde_password"
+          "param": "convert_to_pdb_target_details_non_cdb_tde_wallet_password"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "pdbAdminPassword"],
-          "param": "pdb_admin_password",
-          "when": "pdb_admin_password is not None"
+          "param": "convert_to_pdb_target_details_pdb_admin_password",
+          "when": "convert_to_pdb_target_details_pdb_admin_password is not None"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "cdbTdeWalletPassword"],
-          "param": "cdb_tde_password",
-          "when": "cdb_tde_password is not None"
+          "param": "convert_to_pdb_target_details_cdb_tde_wallet_password",
+          "when": "convert_to_pdb_target_details_cdb_tde_wallet_password is not None"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "additionalCdbParams"],
-          "param": "additional_cdb_params",
-          "when": "additional_cdb_params is not None"
+          "param": "convert_to_pdb_target_details_additional_cdb_params",
+          "when": "convert_to_pdb_target_details_additional_cdb_params is not None"
         },
         {
           "target": "body",
           "bodyArg": "convert_to_pdb_details",
           "key": ["convertToPdbTargetDetails", "target"],
           "value": "NEW_DATABASE"
-        },
-        {
-          "target": "kwarg",
-          "key": ["action"],
-          "value": "PRECHECK"
         }
       ],
       "params": [
@@ -131014,14 +132832,134 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_database_software_image_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "is_older_version_acknowledged", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_is_older_version_acknowledged",
+                ["item", ["var", "kwargs"], "is_older_version_acknowledged"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "database_software_image_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "database_software_image_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_database_software_image_id",
+                ["item", ["var", "kwargs"], "database_software_image_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "options", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "options"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_options",
+                ["item", ["var", "kwargs"], "options"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "database_software_image_id"],
+          ["del", ["var", "kwargs"], "options"],
+          ["del", ["var", "kwargs"], "is_older_version_acknowledged"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_database_software_image_details",
-        "renames": {
-          "database_upgrade_source_details_is_older_version_acknowledged": "is_older_version_acknowledged",
-          "database_upgrade_source_details_database_software_image_id": "database_software_image_id",
-          "database_upgrade_source_details_options": "options"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "action",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_database_software_image_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_options",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -131085,21 +133023,21 @@
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "databaseSoftwareImageId"],
-          "param": "database_software_image_id"
+          "param": "database_upgrade_source_details_database_software_image_id"
         },
         {
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "isOlderVersionAcknowledged"],
-          "param": "is_older_version_acknowledged",
-          "when": "is_older_version_acknowledged is not None"
+          "param": "database_upgrade_source_details_is_older_version_acknowledged",
+          "when": "database_upgrade_source_details_is_older_version_acknowledged is not None"
         },
         {
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "options"],
-          "param": "options",
-          "when": "options is not None"
+          "param": "database_upgrade_source_details_options",
+          "when": "database_upgrade_source_details_options is not None"
         },
         {
           "target": "body",
@@ -131393,14 +133331,134 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_db_home_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "is_older_version_acknowledged", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_is_older_version_acknowledged",
+                ["item", ["var", "kwargs"], "is_older_version_acknowledged"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_home_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_home_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_db_home_id",
+                ["item", ["var", "kwargs"], "db_home_id"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "options", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "options"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_options",
+                ["item", ["var", "kwargs"], "options"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "db_home_id"],
+          ["del", ["var", "kwargs"], "options"],
+          ["del", ["var", "kwargs"], "is_older_version_acknowledged"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_db_home_details",
-        "renames": {
-          "database_upgrade_source_details_is_older_version_acknowledged": "is_older_version_acknowledged",
-          "database_upgrade_source_details_db_home_id": "db_home_id",
-          "database_upgrade_source_details_options": "options"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "action",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_db_home_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_options",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -131464,21 +133522,21 @@
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "dbHomeId"],
-          "param": "db_home_id"
+          "param": "database_upgrade_source_details_db_home_id"
         },
         {
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "isOlderVersionAcknowledged"],
-          "param": "is_older_version_acknowledged",
-          "when": "is_older_version_acknowledged is not None"
+          "param": "database_upgrade_source_details_is_older_version_acknowledged",
+          "when": "database_upgrade_source_details_is_older_version_acknowledged is not None"
         },
         {
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "options"],
-          "param": "options",
-          "when": "options is not None"
+          "param": "database_upgrade_source_details_options",
+          "when": "database_upgrade_source_details_options is not None"
         },
         {
           "target": "body",
@@ -131775,14 +133833,134 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_db_version_details"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "is_older_version_acknowledged", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_is_older_version_acknowledged",
+                ["item", ["var", "kwargs"], "is_older_version_acknowledged"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "db_version", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "db_version"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_db_version",
+                ["item", ["var", "kwargs"], "db_version"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "options", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "options"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_upgrade_source_details_options",
+                ["item", ["var", "kwargs"], "options"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "db_version"],
+          ["del", ["var", "kwargs"], "options"],
+          ["del", ["var", "kwargs"], "is_older_version_acknowledged"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.upgrade_database_database_upgrade_with_db_version_details",
-        "renames": {
-          "database_upgrade_source_details_is_older_version_acknowledged": "is_older_version_acknowledged",
-          "database_upgrade_source_details_db_version": "db_version",
-          "database_upgrade_source_details_options": "options"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "action",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_db_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "database_upgrade_source_details_options",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -131846,21 +134024,21 @@
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "dbVersion"],
-          "param": "db_version"
+          "param": "database_upgrade_source_details_db_version"
         },
         {
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "isOlderVersionAcknowledged"],
-          "param": "is_older_version_acknowledged",
-          "when": "is_older_version_acknowledged is not None"
+          "param": "database_upgrade_source_details_is_older_version_acknowledged",
+          "when": "database_upgrade_source_details_is_older_version_acknowledged is not None"
         },
         {
           "target": "body",
           "bodyArg": "upgrade_database_details",
           "key": ["databaseUpgradeSourceDetails", "options"],
-          "param": "options",
-          "when": "options is not None"
+          "param": "database_upgrade_source_details_options",
+          "when": "database_upgrade_source_details_options is not None"
         },
         {
           "target": "body",
@@ -138945,12 +141123,60 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_db_system_upgrade_history_entry"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "upgrade_history_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "upgrade_history_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "upgrade_history_entry_id",
+                ["item", ["var", "kwargs"], "upgrade_history_id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "upgrade_history_id"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.get_db_system_upgrade_history_entry",
-        "renames": {
-          "upgrade_history_entry_id": "upgrade_history_id"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "db_system_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "upgrade_history_entry_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -138960,7 +141186,7 @@
         "positionalArgs": ["db_system_id", "upgrade_history_entry_id"],
         "pathParams": {
           "dbSystemId": "db_system_id",
-          "upgradeHistoryEntryId": "upgrade_history_id"
+          "upgradeHistoryEntryId": "upgrade_history_entry_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -138986,7 +141212,7 @@
         {
           "target": "kwarg",
           "key": ["upgrade_history_entry_id"],
-          "param": "upgrade_history_id"
+          "param": "upgrade_history_entry_id"
         },
         {
           "target": "kwarg",
@@ -188222,19 +190448,158 @@
         "defined-tags": "database:dict(str, dict(str, object))"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.create_pluggable_database"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "create_pdb_backup", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "should_create_pdb_backup",
+                ["item", ["var", "kwargs"], "create_pdb_backup"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "create_pdb_backup"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "in", "cdb_admin_password", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "container_database_admin_password",
+                ["item", ["var", "kwargs"], "cdb_admin_password"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "cdb_admin_password"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_pdb_admin_acc_locked", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_pdb_admin_acc_locked"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "should_pdb_admin_account_be_locked",
+                ["item", ["var", "kwargs"], "is_pdb_admin_acc_locked"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_pdb_admin_acc_locked"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.create_pluggable_database",
-        "renames": {
-          "should_create_pdb_backup": "create_pdb_backup",
-          "container_database_admin_password": "cdb_admin_password",
-          "should_pdb_admin_account_be_locked": "is_pdb_admin_acc_locked"
-        },
         "complexTypes": {
           "pdb-creation-type-details": "database:CreatePluggableDatabaseCreationTypeDetails",
           "freeform-tags": "database:dict(str, string)",
           "defined-tags": "database:dict(str, dict(str, object))"
-        }
+        },
+        "params": [
+          {
+            "name": "pdb_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "container_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_pdb_admin_account_be_locked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "container_database_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_create_pdb_backup",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_creation_type_details",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -188299,22 +190664,30 @@
           "target": "body",
           "bodyArg": "create_pluggable_database_details",
           "key": ["shouldPdbAdminAccountBeLocked"],
-          "param": "is_pdb_admin_acc_locked",
-          "when": "is_pdb_admin_acc_locked is not None"
+          "param": "should_pdb_admin_account_be_locked",
+          "when": "should_pdb_admin_account_be_locked is not None"
         },
         {
           "target": "body",
           "bodyArg": "create_pluggable_database_details",
           "key": ["containerDatabaseAdminPassword"],
-          "param": "cdb_admin_password",
-          "when": "cdb_admin_password is not None"
+          "param": "container_database_admin_password",
+          "when": "container_database_admin_password is not None"
         },
         {
           "target": "body",
           "bodyArg": "create_pluggable_database_details",
           "key": ["shouldCreatePdbBackup"],
-          "param": "create_pdb_backup",
-          "when": "create_pdb_backup is not None"
+          "param": "should_create_pdb_backup",
+          "when": "should_create_pdb_backup is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_pluggable_database_details",
+          "key": ["pdbCreationTypeDetails"],
+          "transform": "parse_json_parameter",
+          "param": "pdb_creation_type_details",
+          "when": "pdb_creation_type_details is not None"
         },
         {
           "target": "body",
@@ -193112,12 +195485,102 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.local_clone_pluggable_database"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_pdb_admin_acc_locked", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_pdb_admin_acc_locked"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "should_pdb_admin_account_be_locked",
+                ["item", ["var", "kwargs"], "is_pdb_admin_acc_locked"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_pdb_admin_acc_locked"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.local_clone_pluggable_database",
-        "renames": {
-          "should_pdb_admin_account_be_locked": "is_pdb_admin_acc_locked"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "cloned_pdb_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pluggable_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_pdb_admin_account_be_locked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -193195,8 +195658,8 @@
           "target": "body",
           "bodyArg": "local_clone_pluggable_database_details",
           "key": ["shouldPdbAdminAccountBeLocked"],
-          "param": "is_pdb_admin_acc_locked",
-          "when": "is_pdb_admin_acc_locked is not None"
+          "param": "should_pdb_admin_account_be_locked",
+          "when": "should_pdb_admin_account_be_locked is not None"
         }
       ],
       "params": [
@@ -195012,12 +197475,114 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.remote_clone_pluggable_database"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "is_pdb_admin_acc_locked", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "is_pdb_admin_acc_locked"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "should_pdb_admin_account_be_locked",
+                ["item", ["var", "kwargs"], "is_pdb_admin_acc_locked"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "is_pdb_admin_acc_locked"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.remote_clone_pluggable_database",
-        "renames": {
-          "should_pdb_admin_account_be_locked": "is_pdb_admin_acc_locked"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "target_container_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "source_container_db_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "cloned_pdb_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pluggable_database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "pdb_admin_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "target_tde_wallet_password",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "should_pdb_admin_account_be_locked",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -195107,8 +197672,8 @@
           "target": "body",
           "bodyArg": "remote_clone_pluggable_database_details",
           "key": ["shouldPdbAdminAccountBeLocked"],
-          "param": "is_pdb_admin_acc_locked",
-          "when": "is_pdb_admin_acc_locked is not None"
+          "param": "should_pdb_admin_account_be_locked",
+          "when": "should_pdb_admin_account_be_locked is not None"
         }
       ],
       "params": [
@@ -218574,13 +221139,132 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.upgrade_db_system"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "snapshot_retention_period", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "snapshot_retention_period"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "snapshot_retention_period_in_days",
+                ["item", ["var", "kwargs"], "snapshot_retention_period"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "force", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "force"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "is_snapshot_retention_days_force_updated",
+                ["item", ["var", "kwargs"], "force"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "snapshot_retention_period"],
+          ["del", ["var", "kwargs"], "force"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.upgrade_db_system",
-        "renames": {
-          "snapshot_retention_period_in_days": "snapshot_retention_period",
-          "is_snapshot_retention_days_force_updated": "force"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "db_system_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "action",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "snapshot_retention_period_in_days",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "new_gi_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "new_os_version",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_older_version_acknowledged",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_snapshot_retention_days_force_updated",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -218641,8 +221325,8 @@
           "target": "body",
           "bodyArg": "upgrade_db_system_details",
           "key": ["snapshotRetentionPeriodInDays"],
-          "param": "snapshot_retention_period",
-          "when": "snapshot_retention_period is not None"
+          "param": "snapshot_retention_period_in_days",
+          "when": "snapshot_retention_period_in_days is not None"
         },
         {
           "target": "body",
@@ -218669,8 +221353,8 @@
           "target": "body",
           "bodyArg": "upgrade_db_system_details",
           "key": ["isSnapshotRetentionDaysForceUpdated"],
-          "param": "force",
-          "when": "force is not None"
+          "param": "is_snapshot_retention_days_force_updated",
+          "when": "is_snapshot_retention_days_force_updated is not None"
         }
       ],
       "params": [
@@ -220090,12 +222774,60 @@
         "params": {}
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["kwargs-del"],
+      "survey": {
+        "invokes": [
+          "services.database.src.oci_cli_database.generated.database_cli.get_database_upgrade_history_entry"
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["cmp", "in", "upgrade_history_id", ["var", "kwargs"]],
+              ["item", ["var", "kwargs"], "upgrade_history_id"]
+            ],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "upgrade_history_entry_id",
+                ["item", ["var", "kwargs"], "upgrade_history_id"]
+              ]
+            ],
+            []
+          ],
+          ["del", ["var", "kwargs"], "upgrade_history_id"],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database.src.oci_cli_database.generated.database_cli.get_database_upgrade_history_entry",
-        "renames": {
-          "upgrade_history_entry_id": "upgrade_history_id"
-        }
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "database_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "upgrade_history_entry_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database.database",
@@ -220105,7 +222837,7 @@
         "positionalArgs": ["database_id", "upgrade_history_entry_id"],
         "pathParams": {
           "databaseId": "database_id",
-          "upgradeHistoryEntryId": "upgrade_history_id"
+          "upgradeHistoryEntryId": "upgrade_history_entry_id"
         },
         "queryParams": {},
         "headerParams": {
@@ -220131,7 +222863,7 @@
         {
           "target": "kwarg",
           "key": ["upgrade_history_entry_id"],
-          "param": "upgrade_history_id"
+          "param": "upgrade_history_entry_id"
         },
         {
           "target": "kwarg",

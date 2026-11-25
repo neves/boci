@@ -28,15 +28,21 @@ export async function runComputeInstanceConsolePlink(
   }
 
   const connection = JSON.parse(result.raw) as {
-    connectionString?: unknown;
-    instanceId?: unknown;
-    id?: unknown;
+    connectionString?: string | null;
+    instanceId?: string | null;
+    id?: string | null;
   };
-  const host =
-    typeof connection.connectionString === "string"
-      ? connection.connectionString.match(INTERMEDIATE_HOST)?.[0]
-      : undefined;
-  if (!host) throw new TypeError("Invalid instance console connection string");
+  if (connection.connectionString == null) {
+    ctx.io.err(
+      "TypeError: expected string or bytes-like object, got 'NoneType'\n",
+    );
+    throw new Exit(1);
+  }
+  const host = INTERMEDIATE_HOST.exec(connection.connectionString)?.[0];
+  if (!host) {
+    ctx.io.err("AttributeError: 'NoneType' object has no attribute 'group'\n");
+    throw new Exit(1);
+  }
 
   const keyFile = ctx.values.private_key_file;
   const localPort = ctx.values.local_vnc_port ?? 5900;

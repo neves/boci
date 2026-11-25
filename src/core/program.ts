@@ -20,7 +20,7 @@ import {
 } from "./convert.ts";
 import type { RegionsSpec } from "./endpoint.ts";
 import type { OperationResult } from "./operation.ts";
-import { renderModel } from "./output.ts";
+import { ModelDeserializationError, renderModel } from "./output.ts";
 import { expandVars } from "./rc.ts";
 import { kwarg, truthy } from "./checks.ts";
 
@@ -975,7 +975,16 @@ export function toDictValue(v: unknown, snakeCase = false): unknown {
   if (Array.isArray(v)) return v.map((elem) => toDictValue(elem, snakeCase));
   if (isDict(v)) {
     const meta = modelMeta.get(v);
-    if (meta) return renderModel(v, meta.type, meta.models, snakeCase);
+    if (meta) {
+      try {
+        return renderModel(v, meta.type, meta.models, snakeCase);
+      } catch (e) {
+        if (e instanceof ModelDeserializationError) {
+          throw new ProgramRaise(e.pythonType, e.message);
+        }
+        throw e;
+      }
+    }
     return Object.fromEntries(
       Object.entries(v).map(([k, val]) => [k, toDictValue(val, snakeCase)]),
     );

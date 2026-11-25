@@ -6708,6 +6708,9 @@
           ["secret_type", "str", "secretType"],
           ["registry_endpoint", "str", "registryEndpoint"]
         ],
+        "enums": {
+          "secret_type": ["BASIC", "VAULT"]
+        },
         "discriminator": "ImagePullSecret"
       },
       "Container": {
@@ -6746,13 +6749,60 @@
             "containerRestartAttemptCount"
           ],
           ["security_context", "SecurityContext", "securityContext"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ContainerCapabilities": {
         "attributes": [
           ["add_capabilities", "list[str]", "addCapabilities"],
           ["drop_capabilities", "list[str]", "dropCapabilities"]
-        ]
+        ],
+        "enums": {
+          "add_capabilities": [
+            "CAP_CHOWN",
+            "CAP_DAC_OVERRIDE",
+            "CAP_FSETID",
+            "CAP_FOWNER",
+            "CAP_MKNOD",
+            "CAP_NET_RAW",
+            "CAP_SETGID",
+            "CAP_SETUID",
+            "CAP_SETFCAP",
+            "CAP_SETPCAP",
+            "CAP_NET_BIND_SERVICE",
+            "CAP_SYS_CHROOT",
+            "CAP_KILL",
+            "CAP_AUDIT_WRITE",
+            "ALL"
+          ],
+          "drop_capabilities": [
+            "CAP_CHOWN",
+            "CAP_DAC_OVERRIDE",
+            "CAP_FSETID",
+            "CAP_FOWNER",
+            "CAP_MKNOD",
+            "CAP_NET_RAW",
+            "CAP_SETGID",
+            "CAP_SETUID",
+            "CAP_SETFCAP",
+            "CAP_SETPCAP",
+            "CAP_NET_BIND_SERVICE",
+            "CAP_SYS_CHROOT",
+            "CAP_KILL",
+            "CAP_AUDIT_WRITE",
+            "ALL"
+          ]
+        }
       },
       "ContainerCollection": {
         "attributes": [["items", "list[ContainerSummary]", "items"]]
@@ -6770,6 +6820,9 @@
           ["volume_type", "str", "volumeType"],
           ["configs", "list[ContainerConfigFile]", "configs"]
         ],
+        "enums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"]
+        },
         "discriminator": "ContainerVolume"
       },
       "ContainerDnsConfig": {
@@ -6785,6 +6838,10 @@
           ["volume_type", "str", "volumeType"],
           ["backing_store", "str", "backingStore"]
         ],
+        "enums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"],
+          "backing_store": ["EPHEMERAL_STORAGE", "MEMORY"]
+        },
         "discriminator": "ContainerVolume"
       },
       "ContainerHealthCheck": {
@@ -6800,6 +6857,11 @@
           ["status_details", "str", "statusDetails"],
           ["failure_action", "str", "failureAction"]
         ],
+        "enums": {
+          "health_check_type": ["HTTP", "TCP"],
+          "status": ["HEALTHY", "UNHEALTHY", "UNKNOWN"],
+          "failure_action": ["KILL", "NONE"]
+        },
         "discriminator": {
           "field": "healthCheckType",
           "values": {
@@ -6825,6 +6887,11 @@
           ["port", "int", "port"],
           ["headers", "list[HealthCheckHttpHeader]", "headers"]
         ],
+        "enums": {
+          "health_check_type": ["HTTP", "TCP"],
+          "status": ["HEALTHY", "UNHEALTHY", "UNKNOWN"],
+          "failure_action": ["KILL", "NONE"]
+        },
         "discriminator": "ContainerHealthCheck"
       },
       "ContainerInstance": {
@@ -6862,7 +6929,19 @@
             "ContainerInstanceSecurityContext",
             "securityContext"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "container_restart_policy": ["ALWAYS", "NEVER", "ON_FAILURE"]
+        }
       },
       "ContainerInstanceCollection": {
         "attributes": [["items", "list[ContainerInstanceSummary]", "items"]]
@@ -6875,6 +6954,9 @@
       },
       "ContainerInstanceSecurityContext": {
         "attributes": [["security_context_type", "str", "securityContextType"]],
+        "enums": {
+          "security_context_type": ["LINUX"]
+        },
         "discriminator": {
           "field": "securityContextType",
           "values": {
@@ -6950,6 +7032,9 @@
           ["mount_command", "OciFssMountCommand", "mountCommand"],
           ["subnet_id", "str", "subnetId"]
         ],
+        "enums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"]
+        },
         "discriminator": "ContainerVolume"
       },
       "ContainerResourceConfig": {
@@ -6997,6 +7082,11 @@
           ["failure_action", "str", "failureAction"],
           ["port", "int", "port"]
         ],
+        "enums": {
+          "health_check_type": ["HTTP", "TCP"],
+          "status": ["HEALTHY", "UNHEALTHY", "UNKNOWN"],
+          "failure_action": ["KILL", "NONE"]
+        },
         "discriminator": "ContainerHealthCheck"
       },
       "ContainerVnic": {
@@ -7007,6 +7097,9 @@
           ["name", "str", "name"],
           ["volume_type", "str", "volumeType"]
         ],
+        "enums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"]
+        },
         "discriminator": {
           "field": "volumeType",
           "values": {
@@ -7024,6 +7117,9 @@
           ["username", "str", "username"],
           ["password", "str", "password"]
         ],
+        "strictEnums": {
+          "secret_type": ["BASIC", "VAULT"]
+        },
         "discriminator": "CreateImagePullSecretDetails"
       },
       "CreateContainerConfigFileVolumeDetails": {
@@ -7032,6 +7128,9 @@
           ["volume_type", "str", "volumeType"],
           ["configs", "list[ContainerConfigFile]", "configs"]
         ],
+        "strictEnums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"]
+        },
         "discriminator": "CreateContainerVolumeDetails"
       },
       "CreateContainerDetails": {
@@ -7080,6 +7179,9 @@
           ["volume_type", "str", "volumeType"],
           ["backing_store", "str", "backingStore"]
         ],
+        "strictEnums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"]
+        },
         "discriminator": "CreateContainerVolumeDetails"
       },
       "CreateContainerHealthCheckDetails": {
@@ -7093,6 +7195,10 @@
           ["timeout_in_seconds", "int", "timeoutInSeconds"],
           ["failure_action", "str", "failureAction"]
         ],
+        "strictEnums": {
+          "health_check_type": ["HTTP", "TCP"],
+          "failure_action": ["KILL", "NONE"]
+        },
         "discriminator": {
           "field": "healthCheckType",
           "values": {
@@ -7116,6 +7222,10 @@
           ["port", "int", "port"],
           ["headers", "list[HealthCheckHttpHeader]", "headers"]
         ],
+        "strictEnums": {
+          "health_check_type": ["HTTP", "TCP"],
+          "failure_action": ["KILL", "NONE"]
+        },
         "discriminator": "CreateContainerHealthCheckDetails"
       },
       "CreateContainerInstanceSecurityContextDetails": {
@@ -7144,6 +7254,9 @@
           ["mount_command", "CreateOciFssMountCommandDetails", "mountCommand"],
           ["subnet_id", "str", "subnetId"]
         ],
+        "strictEnums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"]
+        },
         "discriminator": "CreateContainerVolumeDetails"
       },
       "CreateContainerResourceConfigDetails": {
@@ -7164,6 +7277,10 @@
           ["failure_action", "str", "failureAction"],
           ["port", "int", "port"]
         ],
+        "strictEnums": {
+          "health_check_type": ["HTTP", "TCP"],
+          "failure_action": ["KILL", "NONE"]
+        },
         "discriminator": "CreateContainerHealthCheckDetails"
       },
       "CreateContainerVnicDetails": {
@@ -7184,6 +7301,9 @@
           ["name", "str", "name"],
           ["volume_type", "str", "volumeType"]
         ],
+        "strictEnums": {
+          "volume_type": ["EMPTYDIR", "CONFIGFILE", "OCI_FSS_FILE_SYSTEM"]
+        },
         "discriminator": {
           "field": "volumeType",
           "values": {
@@ -7199,6 +7319,9 @@
           ["secret_type", "str", "secretType"],
           ["registry_endpoint", "str", "registryEndpoint"]
         ],
+        "strictEnums": {
+          "secret_type": ["BASIC", "VAULT"]
+        },
         "discriminator": {
           "field": "secretType",
           "values": {
@@ -7214,6 +7337,9 @@
           ["fs_group", "int", "fsGroup"],
           ["fs_group_change_policy", "str", "fsGroupChangePolicy"]
         ],
+        "strictEnums": {
+          "fs_group_change_policy": ["ALWAYS", "ON_ROOT_MISMATCH"]
+        },
         "discriminator": "CreateContainerInstanceSecurityContextDetails"
       },
       "CreateLinuxSecurityContextDetails": {
@@ -7233,6 +7359,9 @@
       },
       "CreateOciFssExportDetails": {
         "attributes": [["oci_fss_export_type", "str", "ociFssExportType"]],
+        "strictEnums": {
+          "oci_fss_export_type": ["OCID"]
+        },
         "discriminator": {
           "field": "ociFssExportType",
           "values": {
@@ -7246,6 +7375,9 @@
           ["oci_fss_export_type", "str", "ociFssExportType"],
           ["id", "str", "id"]
         ],
+        "strictEnums": {
+          "oci_fss_export_type": ["OCID"]
+        },
         "discriminator": "CreateOciFssExportDetails"
       },
       "CreateOciFssMountCommandDetails": {
@@ -7267,6 +7399,9 @@
         "attributes": [
           ["oci_fss_mount_target_type", "str", "ociFssMountTargetType"]
         ],
+        "strictEnums": {
+          "oci_fss_mount_target_type": ["OCID"]
+        },
         "discriminator": {
           "field": "ociFssMountTargetType",
           "values": {
@@ -7280,6 +7415,9 @@
           ["oci_fss_mount_target_type", "str", "ociFssMountTargetType"],
           ["id", "str", "id"]
         ],
+        "strictEnums": {
+          "oci_fss_mount_target_type": ["OCID"]
+        },
         "discriminator": "CreateOciFssMountTargetDetails"
       },
       "CreateOciFssSecurityDetails": {
@@ -7287,6 +7425,9 @@
           ["auth", "str", "auth"],
           ["is_encrypted_in_transit", "bool", "isEncryptedInTransit"]
         ],
+        "strictEnums": {
+          "auth": ["SYS"]
+        },
         "discriminator": {
           "field": "auth",
           "values": {
@@ -7300,6 +7441,9 @@
           ["auth", "str", "auth"],
           ["is_encrypted_in_transit", "bool", "isEncryptedInTransit"]
         ],
+        "strictEnums": {
+          "auth": ["SYS"]
+        },
         "discriminator": "CreateOciFssSecurityDetails"
       },
       "CreateSecurityContextDetails": {
@@ -7318,6 +7462,9 @@
           ["registry_endpoint", "str", "registryEndpoint"],
           ["secret_id", "str", "secretId"]
         ],
+        "strictEnums": {
+          "secret_type": ["BASIC", "VAULT"]
+        },
         "discriminator": "CreateImagePullSecretDetails"
       },
       "CreateVolumeMountDetails": {
@@ -7340,6 +7487,9 @@
           ["secret_type", "str", "secretType"],
           ["registry_endpoint", "str", "registryEndpoint"]
         ],
+        "enums": {
+          "secret_type": ["BASIC", "VAULT"]
+        },
         "discriminator": {
           "field": "secretType",
           "values": {
@@ -7355,6 +7505,10 @@
           ["fs_group", "int", "fsGroup"],
           ["fs_group_change_policy", "str", "fsGroupChangePolicy"]
         ],
+        "enums": {
+          "security_context_type": ["LINUX"],
+          "fs_group_change_policy": ["ALWAYS", "ON_ROOT_MISMATCH"]
+        },
         "discriminator": "ContainerInstanceSecurityContext"
       },
       "LinuxSecurityContext": {
@@ -7370,10 +7524,16 @@
           ["is_root_file_system_readonly", "bool", "isRootFileSystemReadonly"],
           ["capabilities", "ContainerCapabilities", "capabilities"]
         ],
+        "enums": {
+          "security_context_type": ["LINUX"]
+        },
         "discriminator": "SecurityContext"
       },
       "OciFssExport": {
         "attributes": [["oci_fss_export_type", "str", "ociFssExportType"]],
+        "enums": {
+          "oci_fss_export_type": ["OCID"]
+        },
         "discriminator": {
           "field": "ociFssExportType",
           "values": {
@@ -7387,6 +7547,9 @@
           ["oci_fss_export_type", "str", "ociFssExportType"],
           ["id", "str", "id"]
         ],
+        "enums": {
+          "oci_fss_export_type": ["OCID"]
+        },
         "discriminator": "OciFssExport"
       },
       "OciFssMountCommand": {
@@ -7404,6 +7567,9 @@
         "attributes": [
           ["oci_fss_mount_target_type", "str", "ociFssMountTargetType"]
         ],
+        "enums": {
+          "oci_fss_mount_target_type": ["OCID"]
+        },
         "discriminator": {
           "field": "ociFssMountTargetType",
           "values": {
@@ -7417,6 +7583,9 @@
           ["oci_fss_mount_target_type", "str", "ociFssMountTargetType"],
           ["id", "str", "id"]
         ],
+        "enums": {
+          "oci_fss_mount_target_type": ["OCID"]
+        },
         "discriminator": "OciFssMountTarget"
       },
       "OciFssSecurity": {
@@ -7424,6 +7593,9 @@
           ["auth", "str", "auth"],
           ["is_encrypted_in_transit", "bool", "isEncryptedInTransit"]
         ],
+        "enums": {
+          "auth": ["SYS"]
+        },
         "discriminator": {
           "field": "auth",
           "values": {
@@ -7437,10 +7609,16 @@
           ["auth", "str", "auth"],
           ["is_encrypted_in_transit", "bool", "isEncryptedInTransit"]
         ],
+        "enums": {
+          "auth": ["SYS"]
+        },
         "discriminator": "OciFssSecurity"
       },
       "SecurityContext": {
         "attributes": [["security_context_type", "str", "securityContextType"]],
+        "enums": {
+          "security_context_type": ["LINUX"]
+        },
         "discriminator": {
           "field": "securityContextType",
           "values": {
@@ -7477,6 +7655,9 @@
           ["registry_endpoint", "str", "registryEndpoint"],
           ["secret_id", "str", "secretId"]
         ],
+        "enums": {
+          "secret_type": ["BASIC", "VAULT"]
+        },
         "discriminator": "ImagePullSecret"
       },
       "VolumeMount": {
@@ -7499,7 +7680,27 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_CONTAINER_INSTANCE",
+            "UPDATE_CONTAINER_INSTANCE",
+            "DELETE_CONTAINER_INSTANCE",
+            "MOVE_CONTAINER_INSTANCE",
+            "START_CONTAINER_INSTANCE",
+            "STOP_CONTAINER_INSTANCE",
+            "RESTART_CONTAINER_INSTANCE",
+            "UPDATE_CONTAINER"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -7526,7 +7727,17 @@
           ["action_type", "str", "actionType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -7539,7 +7750,27 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_CONTAINER_INSTANCE",
+            "UPDATE_CONTAINER_INSTANCE",
+            "DELETE_CONTAINER_INSTANCE",
+            "MOVE_CONTAINER_INSTANCE",
+            "START_CONTAINER_INSTANCE",
+            "STOP_CONTAINER_INSTANCE",
+            "RESTART_CONTAINER_INSTANCE",
+            "UPDATE_CONTAINER"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestSummaryCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]

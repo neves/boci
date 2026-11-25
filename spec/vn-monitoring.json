@@ -4487,6 +4487,9 @@
             "zprIngressSecurityAction"
           ]
         ],
+        "enums": {
+          "type": ["VISIBLE", "ACCESS_DENIED"]
+        },
         "discriminator": "TrafficNode"
       },
       "AllowedSecurityAction": {
@@ -4499,6 +4502,20 @@
             "allowedSecurityActionDetails"
           ]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "AllowedSecurityActionDetails": {
@@ -4513,6 +4530,18 @@
       },
       "AllowedSecurityConfiguration": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -4535,6 +4564,21 @@
           ["instance_id", "str", "instanceId"],
           ["vnic_id", "str", "vnicId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "DeniedSecurityAction": {
@@ -4547,6 +4591,20 @@
             "deniedSecurityActionDetails"
           ]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "DeniedSecurityActionDetails": {
@@ -4571,7 +4629,17 @@
           ["id", "str", "id"],
           ["route_provenance", "str", "routeProvenance"],
           ["attributes", "object", "attributes"]
-        ]
+        ],
+        "enums": {
+          "destination_type": ["CIDR_BLOCK", "SERVICE_CIDR_BLOCK"],
+          "route_type": ["STATIC", "DYNAMIC"],
+          "route_provenance": [
+            "STATIC",
+            "VCN",
+            "VIRTUAL_CIRCUIT",
+            "IPSEC_TUNNEL"
+          ]
+        }
       },
       "DrgRoutingConfiguration": {
         "attributes": [
@@ -4579,6 +4647,9 @@
           ["drg_route_table_id", "str", "drgRouteTableId"],
           ["route_rule", "DrgRouteRule", "routeRule"]
         ],
+        "enums": {
+          "type": ["VCN", "DRG"]
+        },
         "discriminator": "ForwardedRoutingConfiguration"
       },
       "EgressSecurityListConfiguration": {
@@ -4587,6 +4658,18 @@
           ["security_list_id", "str", "securityListId"],
           ["security_rule", "EgressSecurityRule", "securityRule"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "EgressSecurityRule": {
@@ -4598,7 +4681,10 @@
           ["protocol", "str", "protocol"],
           ["tcp_options", "TcpOptions", "tcpOptions"],
           ["udp_options", "UdpOptions", "udpOptions"]
-        ]
+        ],
+        "enums": {
+          "destination_type": ["CIDR_BLOCK", "SERVICE_CIDR_BLOCK"]
+        }
       },
       "EgressTrafficSpec": {
         "attributes": [
@@ -4614,6 +4700,21 @@
       },
       "Endpoint": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -4642,6 +4743,10 @@
             "forwardedRoutingActionDetails"
           ]
         ],
+        "enums": {
+          "action": ["FORWARDED", "NO_ROUTE", "INDETERMINATE"],
+          "action_type": ["EXPLICIT", "IMPLICIT", "NOT_SUPPORTED"]
+        },
         "discriminator": "RoutingAction"
       },
       "ForwardedRoutingActionDetails": {
@@ -4656,6 +4761,9 @@
       },
       "ForwardedRoutingConfiguration": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["VCN", "DRG"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -4677,6 +4785,9 @@
           ["icmp_code", "int", "icmpCode"],
           ["icmp_type", "int", "icmpType"]
         ],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": "ProtocolParameters"
       },
       "IcmpTrafficProtocolParameters": {
@@ -4685,6 +4796,9 @@
           ["icmp_code", "int", "icmpCode"],
           ["icmp_type", "int", "icmpType"]
         ],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": "TrafficProtocolParameters"
       },
       "IndeterminateRoutingAction": {
@@ -4692,6 +4806,10 @@
           ["action", "str", "action"],
           ["action_type", "str", "actionType"]
         ],
+        "enums": {
+          "action": ["FORWARDED", "NO_ROUTE", "INDETERMINATE"],
+          "action_type": ["EXPLICIT", "IMPLICIT", "NOT_SUPPORTED"]
+        },
         "discriminator": "RoutingAction"
       },
       "IngressSecurityListConfiguration": {
@@ -4700,6 +4818,18 @@
           ["security_list_id", "str", "securityListId"],
           ["security_rule", "IngressSecurityRule", "securityRule"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "IngressSecurityRule": {
@@ -4711,13 +4841,31 @@
           ["source_type", "str", "sourceType"],
           ["tcp_options", "TcpOptions", "tcpOptions"],
           ["udp_options", "UdpOptions", "udpOptions"]
-        ]
+        ],
+        "enums": {
+          "source_type": ["CIDR_BLOCK", "SERVICE_CIDR_BLOCK"]
+        }
       },
       "IpAddressEndpoint": {
         "attributes": [
           ["type", "str", "type"],
           ["address", "str", "address"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "LoadBalancerEndpoint": {
@@ -4725,6 +4873,21 @@
           ["type", "str", "type"],
           ["load_balancer_id", "str", "loadBalancerId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "LoadBalancerListenerEndpoint": {
@@ -4733,6 +4896,21 @@
           ["listener_id", "str", "listenerId"],
           ["load_balancer_id", "str", "loadBalancerId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "NetworkLoadBalancerEndpoint": {
@@ -4740,6 +4918,21 @@
           ["type", "str", "type"],
           ["network_load_balancer_id", "str", "networkLoadBalancerId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "NetworkLoadBalancerListenerEndpoint": {
@@ -4748,6 +4941,21 @@
           ["listener_id", "str", "listenerId"],
           ["network_load_balancer_id", "str", "networkLoadBalancerId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "NetworkingTopology": {
@@ -4762,6 +4970,9 @@
           ["limited_entities", "list[str]", "limitedEntities"],
           ["time_created", "datetime", "timeCreated"]
         ],
+        "enums": {
+          "type": ["NETWORKING", "VCN", "SUBNET", "PATH"]
+        },
         "discriminator": "Topology"
       },
       "NoRouteRoutingAction": {
@@ -4774,6 +4985,10 @@
             "noRouteRoutingActionDetails"
           ]
         ],
+        "enums": {
+          "action": ["FORWARDED", "NO_ROUTE", "INDETERMINATE"],
+          "action_type": ["EXPLICIT", "IMPLICIT", "NOT_SUPPORTED"]
+        },
         "discriminator": "RoutingAction"
       },
       "NoRouteRoutingActionDetails": {
@@ -4789,6 +5004,18 @@
           ["nsg_id", "str", "nsgId"],
           ["security_rule", "SecurityRule", "securityRule"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "OnPremEndpoint": {
@@ -4796,6 +5023,21 @@
           ["type", "str", "type"],
           ["address", "str", "address"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "Path": {
@@ -4811,6 +5053,9 @@
           ["paths", "list[Path]", "paths"],
           ["time_created", "datetime", "timeCreated"]
         ],
+        "enums": {
+          "result_type": ["PATH_ANALYSIS"]
+        },
         "discriminator": "WorkRequestResult"
       },
       "PathAnalyzerTest": {
@@ -4829,7 +5074,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "PathAnalyzerTestCollection": {
         "attributes": [["items", "list[PathAnalyzerTestSummary]", "items"]]
@@ -4864,6 +5112,9 @@
           ["limited_entities", "list[str]", "limitedEntities"],
           ["time_created", "datetime", "timeCreated"]
         ],
+        "enums": {
+          "type": ["NETWORKING", "VCN", "SUBNET", "PATH"]
+        },
         "discriminator": "Topology"
       },
       "PortRange": {
@@ -4877,10 +5128,28 @@
           ["type", "str", "type"],
           ["psa_id", "str", "psaId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "ProtocolParameters": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -4902,13 +5171,20 @@
           ["destination", "str", "destination"],
           ["destination_type", "str", "destinationType"],
           ["network_entity_id", "str", "networkEntityId"]
-        ]
+        ],
+        "enums": {
+          "destination_type": ["CIDR_BLOCK", "SERVICE_CIDR_BLOCK"]
+        }
       },
       "RoutingAction": {
         "attributes": [
           ["action", "str", "action"],
           ["action_type", "str", "actionType"]
         ],
+        "enums": {
+          "action": ["FORWARDED", "NO_ROUTE", "INDETERMINATE"],
+          "action_type": ["EXPLICIT", "IMPLICIT", "NOT_SUPPORTED"]
+        },
         "discriminator": {
           "field": "action",
           "values": {
@@ -4924,6 +5200,20 @@
           ["action", "str", "action"],
           ["action_type", "str", "actionType"]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": {
           "field": "action",
           "values": {
@@ -4956,7 +5246,20 @@
           ["tcp_options", "TcpOptions", "tcpOptions"],
           ["time_created", "datetime", "timeCreated"],
           ["udp_options", "UdpOptions", "udpOptions"]
-        ]
+        ],
+        "enums": {
+          "destination_type": [
+            "CIDR_BLOCK",
+            "SERVICE_CIDR_BLOCK",
+            "NETWORK_SECURITY_GROUP"
+          ],
+          "direction": ["EGRESS", "INGRESS"],
+          "source_type": [
+            "CIDR_BLOCK",
+            "SERVICE_CIDR_BLOCK",
+            "NETWORK_SECURITY_GROUP"
+          ]
+        }
       },
       "StatefulEgressSecurityListConfiguration": {
         "attributes": [
@@ -4964,6 +5267,18 @@
           ["security_list_id", "str", "securityListId"],
           ["security_rule", "IngressSecurityRule", "securityRule"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "StatefulIngressSecurityListConfiguration": {
@@ -4972,6 +5287,18 @@
           ["security_list_id", "str", "securityListId"],
           ["security_rule", "EgressSecurityRule", "securityRule"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "StatefulNsgConfiguration": {
@@ -4980,6 +5307,18 @@
           ["nsg_id", "str", "nsgId"],
           ["security_rule", "SecurityRule", "securityRule"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "StatefulZprConfiguration": {
@@ -4987,6 +5326,18 @@
           ["type", "str", "type"],
           ["zpr_policy", "ZprPolicy", "zprPolicy"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "SubnetEndpoint": {
@@ -4995,6 +5346,21 @@
           ["address", "str", "address"],
           ["subnet_id", "str", "subnetId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "SubnetTopology": {
@@ -5010,6 +5376,9 @@
           ["time_created", "datetime", "timeCreated"],
           ["subnet_id", "str", "subnetId"]
         ],
+        "enums": {
+          "type": ["NETWORKING", "VCN", "SUBNET", "PATH"]
+        },
         "discriminator": "Topology"
       },
       "TcpOptions": {
@@ -5024,6 +5393,9 @@
           ["source_port", "int", "sourcePort"],
           ["destination_port", "int", "destinationPort"]
         ],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": "ProtocolParameters"
       },
       "TcpTrafficProtocolParameters": {
@@ -5032,6 +5404,9 @@
           ["source_port", "int", "sourcePort"],
           ["destination_port", "int", "destinationPort"]
         ],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": "TrafficProtocolParameters"
       },
       "Topology": {
@@ -5046,6 +5421,9 @@
           ["limited_entities", "list[str]", "limitedEntities"],
           ["time_created", "datetime", "timeCreated"]
         ],
+        "enums": {
+          "type": ["NETWORKING", "VCN", "SUBNET", "PATH"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -5068,6 +5446,9 @@
             "associatedWithDetails"
           ]
         ],
+        "enums": {
+          "type": ["CONTAINS", "ASSOCIATED_WITH", "ROUTES_TO"]
+        },
         "discriminator": "TopologyEntityRelationship"
       },
       "TopologyAssociatedWithRelationshipDetails": {
@@ -5079,6 +5460,9 @@
           ["id2", "str", "id2"],
           ["type", "str", "type"]
         ],
+        "enums": {
+          "type": ["CONTAINS", "ASSOCIATED_WITH", "ROUTES_TO"]
+        },
         "discriminator": "TopologyEntityRelationship"
       },
       "TopologyEntityRelationship": {
@@ -5087,6 +5471,9 @@
           ["id2", "str", "id2"],
           ["type", "str", "type"]
         ],
+        "enums": {
+          "type": ["CONTAINS", "ASSOCIATED_WITH", "ROUTES_TO"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -5108,6 +5495,9 @@
             "routeRuleDetails"
           ]
         ],
+        "enums": {
+          "type": ["CONTAINS", "ASSOCIATED_WITH", "ROUTES_TO"]
+        },
         "discriminator": "TopologyEntityRelationship"
       },
       "TopologyRoutesToRelationshipDetails": {
@@ -5116,7 +5506,10 @@
           ["destination", "str", "destination"],
           ["route_table_id", "str", "routeTableId"],
           ["route_type", "str", "routeType"]
-        ]
+        ],
+        "enums": {
+          "route_type": ["STATIC", "DYNAMIC"]
+        }
       },
       "TrafficNode": {
         "attributes": [
@@ -5140,6 +5533,9 @@
             "zprIngressSecurityAction"
           ]
         ],
+        "enums": {
+          "type": ["VISIBLE", "ACCESS_DENIED"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -5151,6 +5547,9 @@
       },
       "TrafficProtocolParameters": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -5166,7 +5565,10 @@
           ["reachability_status", "str", "reachabilityStatus"],
           ["nodes", "list[TrafficNode]", "nodes"],
           ["route_analysis_description", "str", "routeAnalysisDescription"]
-        ]
+        ],
+        "enums": {
+          "reachability_status": ["REACHABLE", "UNREACHABLE", "INDETERMINATE"]
+        }
       },
       "UdpOptions": {
         "attributes": [
@@ -5180,6 +5582,9 @@
           ["source_port", "int", "sourcePort"],
           ["destination_port", "int", "destinationPort"]
         ],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": "ProtocolParameters"
       },
       "UdpTrafficProtocolParameters": {
@@ -5188,6 +5593,9 @@
           ["source_port", "int", "sourcePort"],
           ["destination_port", "int", "destinationPort"]
         ],
+        "enums": {
+          "type": ["TCP", "UDP", "ICMP"]
+        },
         "discriminator": "TrafficProtocolParameters"
       },
       "VcnRoutingConfiguration": {
@@ -5196,6 +5604,9 @@
           ["vcn_route_table_id", "str", "vcnRouteTableId"],
           ["route_rule", "RouteRule", "routeRule"]
         ],
+        "enums": {
+          "type": ["VCN", "DRG"]
+        },
         "discriminator": "ForwardedRoutingConfiguration"
       },
       "VcnTopology": {
@@ -5211,6 +5622,9 @@
           ["time_created", "datetime", "timeCreated"],
           ["vcn_id", "str", "vcnId"]
         ],
+        "enums": {
+          "type": ["NETWORKING", "VCN", "SUBNET", "PATH"]
+        },
         "discriminator": "Topology"
       },
       "VisibleTrafficNode": {
@@ -5237,6 +5651,9 @@
           ["entity_id", "str", "entityId"],
           ["transformation_description", "str", "transformationDescription"]
         ],
+        "enums": {
+          "type": ["VISIBLE", "ACCESS_DENIED"]
+        },
         "discriminator": "TrafficNode"
       },
       "VlanEndpoint": {
@@ -5245,6 +5662,21 @@
           ["address", "str", "address"],
           ["vlan_id", "str", "vlanId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "VnicEndpoint": {
@@ -5253,6 +5685,21 @@
           ["address", "str", "address"],
           ["vnic_id", "str", "vnicId"]
         ],
+        "enums": {
+          "type": [
+            "IP_ADDRESS",
+            "SUBNET",
+            "COMPUTE_INSTANCE",
+            "VNIC",
+            "LOAD_BALANCER",
+            "LOAD_BALANCER_LISTENER",
+            "NETWORK_LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER_LISTENER",
+            "VLAN",
+            "ON_PREM",
+            "PRIVATE_SERVICE_ACCESS"
+          ]
+        },
         "discriminator": "Endpoint"
       },
       "WorkRequest": {
@@ -5266,7 +5713,18 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": ["CREATE_PATH_ANALYSIS_RESULT"],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -5293,10 +5751,22 @@
           ["action_type", "str", "actionType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestResult": {
         "attributes": [["result_type", "str", "resultType"]],
+        "enums": {
+          "result_type": ["PATH_ANALYSIS"]
+        },
         "discriminator": {
           "field": "resultType",
           "values": {
@@ -5319,7 +5789,18 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": ["CREATE_PATH_ANALYSIS_RESULT"],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestSummaryCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]
@@ -5334,6 +5815,20 @@
             "allowedSecurityActionDetails"
           ]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "ZprAllowedSecurityActionDetails": {
@@ -5356,6 +5851,20 @@
             "zprCidrUnsupportedSecurityActionDetails"
           ]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "ZprCidrUnsupportedSecurityActionDetails": {
@@ -5369,6 +5878,18 @@
           ["type", "str", "type"],
           ["zpr_policy", "ZprPolicy", "zprPolicy"]
         ],
+        "enums": {
+          "type": [
+            "NSG",
+            "STATEFUL_NSG",
+            "INGRESS_SECURITY_LIST",
+            "STATEFUL_INGRESS_SECURITY_LIST",
+            "EGRESS_SECURITY_LIST",
+            "STATEFUL_EGRESS_SECURITY_LIST",
+            "ZPR",
+            "STATEFUL_ZPR"
+          ]
+        },
         "discriminator": "AllowedSecurityConfiguration"
       },
       "ZprDeniedSecurityAction": {
@@ -5381,6 +5902,20 @@
             "zprDeniedSecurityActionDetails"
           ]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "ZprDeniedSecurityActionDetails": {
@@ -5394,6 +5929,20 @@
           ["action", "str", "action"],
           ["action_type", "str", "actionType"]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "ZprNsgUnsupportedSecurityAction": {
@@ -5406,6 +5955,20 @@
             "zprNsgUnsupportedSecurityActionDetails"
           ]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "ZprNsgUnsupportedSecurityActionDetails": {
@@ -5425,6 +5988,20 @@
           ["action", "str", "action"],
           ["action_type", "str", "actionType"]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       },
       "ZprPolicyNotEvaluatedSlNsgDeniedSecurityAction": {
@@ -5432,6 +6009,20 @@
           ["action", "str", "action"],
           ["action_type", "str", "actionType"]
         ],
+        "enums": {
+          "action": [
+            "ALLOWED",
+            "DENIED",
+            "ZPR_DENIED",
+            "ZPR_ALLOWED",
+            "ZPR_CIDR_UNSUPPORTED",
+            "ZPR_NSG_UNSUPPORTED",
+            "ZPR_POLICY_NOT_EVALUATED_MISSING_ROUTE",
+            "ZPR_POLICY_NOT_EVALUATED_SL_NSG_DENIED",
+            "ZPR_MISSING_POLICY"
+          ],
+          "action_type": ["EXPLICIT", "IMPLICIT"]
+        },
         "discriminator": "SecurityAction"
       }
     }

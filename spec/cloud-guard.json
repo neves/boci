@@ -5822,6 +5822,7 @@
             "defined_tags",
             ["call", "pop", ["var", "kwargs"], "defined_tags"]
           ],
+          ["checkNoExtraKwargs", "create_data_mask_rule_extended"],
           ["let", "kwargs", ["dict"]],
           [
             "set",
@@ -6590,6 +6591,10 @@
             "defined_tags",
             ["call", "pop", ["var", "kwargs"], "defined_tags"]
           ],
+          [
+            "checkNoExtraKwargs",
+            "create_data_mask_rule_all_targets_selected_extended"
+          ],
           ["let", "kwargs", ["dict"]],
           [
             "set",
@@ -7350,6 +7355,10 @@
             "let",
             "target_selected_values",
             ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          [
+            "checkNoExtraKwargs",
+            "create_data_mask_rule_target_resource_types_selected_extended"
           ],
           ["let", "kwargs", ["dict"]],
           [
@@ -8148,6 +8157,10 @@
             "let",
             "target_selected_values",
             ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          [
+            "checkNoExtraKwargs",
+            "create_data_mask_rule_target_ids_selected_extended"
           ],
           ["let", "kwargs", ["dict"]],
           [
@@ -9863,6 +9876,7 @@
             ["call", "pop", ["var", "kwargs"], "defined_tags"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "update_data_mask_rule"],
           [
             "if",
             [
@@ -10723,6 +10737,10 @@
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
           [
+            "checkNoExtraKwargs",
+            "update_data_mask_rule_all_targets_selected_extended"
+          ],
+          [
             "if",
             [
               "and",
@@ -11565,6 +11583,10 @@
             "let",
             "target_selected_values",
             ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          [
+            "checkNoExtraKwargs",
+            "update_data_mask_rule_target_resource_types_selected_extended"
           ],
           [
             "if",
@@ -12446,6 +12468,10 @@
             "let",
             "target_selected_values",
             ["call", "pop", ["var", "kwargs"], "target_selected_values"]
+          ],
+          [
+            "checkNoExtraKwargs",
+            "update_data_mask_rule_target_ids_selected_extended"
           ],
           [
             "if",
@@ -59234,6 +59260,12 @@
           ["start_policy_type", "str", "startPolicyType"],
           ["query_start_time", "datetime", "queryStartTime"]
         ],
+        "enums": {
+          "start_policy_type": [
+            "NO_DELAY_START_POLICY",
+            "ABSOLUTE_TIME_START_POLICY"
+          ]
+        },
         "discriminator": "ContinuousQueryStartPolicy"
       },
       "ActivityProblemAggregation": {
@@ -59256,7 +59288,10 @@
           ["property_type", "str", "propertyType"],
           ["key", "str", "key"],
           ["value", "str", "value"]
-        ]
+        ],
+        "enums": {
+          "property_type": ["HINT", "RANGE"]
+        }
       },
       "AdhocQuery": {
         "attributes": [
@@ -59277,7 +59312,27 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "status": [
+            "CREATING",
+            "CREATED",
+            "IN_PROGRESS",
+            "PARTIALLY_COMPLETED",
+            "EXPIRED",
+            "COMPLETED",
+            "FAILED"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "AdhocQueryCollection": {
         "attributes": [
@@ -59304,7 +59359,18 @@
           ["failed_count", "str", "failedCount"],
           ["succeeded_count", "str", "succeededCount"],
           ["expired_count", "str", "expiredCount"]
-        ]
+        ],
+        "enums": {
+          "regional_status": [
+            "CREATING",
+            "CREATED",
+            "IN_PROGRESS",
+            "PARTIALLY_COMPLETED",
+            "EXPIRED",
+            "COMPLETED",
+            "FAILED"
+          ]
+        }
       },
       "AdhocQueryResource": {
         "attributes": [
@@ -59328,7 +59394,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "state": [
+            "ACCEPTED",
+            "CREATED",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "PARTIALLY_COMPLETED",
+            "FAILED",
+            "EXPIRED"
+          ]
+        }
       },
       "AdhocQuerySummary": {
         "attributes": [
@@ -59349,10 +59426,33 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "status": [
+            "CREATING",
+            "CREATED",
+            "IN_PROGRESS",
+            "PARTIALLY_COMPLETED",
+            "EXPIRED",
+            "COMPLETED",
+            "FAILED"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "AllTargetsSelected": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["ALL", "TARGETTYPES", "TARGETIDS"]
+        },
         "discriminator": "TargetSelected"
       },
       "CandidateResponderRule": {
@@ -59369,10 +59469,17 @@
           ["composite_operator", "str", "compositeOperator"],
           ["right_operand", "Condition", "rightOperand"]
         ],
+        "enums": {
+          "kind": ["COMPOSITE", "SIMPLE"],
+          "composite_operator": ["AND", "OR"]
+        },
         "discriminator": "Condition"
       },
       "Condition": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["COMPOSITE", "SIMPLE"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -59407,20 +59514,47 @@
           ["description", "str", "description"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ConditionOperator": {
         "attributes": [
           ["name", "str", "name"],
           ["display_name", "str", "displayName"]
-        ]
+        ],
+        "enums": {
+          "name": [
+            "AND",
+            "OR",
+            "IN",
+            "NOT_IN",
+            "EQUALS",
+            "NOT_EQUALS",
+            "LESS_THAN",
+            "GREATER_THAN",
+            "RANGE"
+          ]
+        }
       },
       "ConfigValue": {
         "attributes": [
           ["list_type", "str", "listType"],
           ["managed_list_type", "str", "managedListType"],
           ["value", "str", "value"]
-        ]
+        ],
+        "enums": {
+          "list_type": ["MANAGED", "CUSTOM"]
+        }
       },
       "Configuration": {
         "attributes": [
@@ -59432,10 +59566,19 @@
             "serviceConfigurations"
           ],
           ["self_manage_resources", "bool", "selfManageResources"]
-        ]
+        ],
+        "enums": {
+          "status": ["ENABLED", "DISABLED"]
+        }
       },
       "ContinuousQueryStartPolicy": {
         "attributes": [["start_policy_type", "str", "startPolicyType"]],
+        "enums": {
+          "start_policy_type": [
+            "NO_DELAY_START_POLICY",
+            "ABSOLUTE_TIME_START_POLICY"
+          ]
+        },
         "discriminator": {
           "field": "startPolicyType",
           "values": {
@@ -59458,7 +59601,10 @@
           ["recommendation", "str", "recommendation"],
           ["data_source_id", "str", "dataSourceId"],
           ["entities_mappings", "list[EntitiesMapping]", "entitiesMappings"]
-        ]
+        ],
+        "strictEnums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "CreateTargetDetectorRecipeDetails": {
         "attributes": [
@@ -59498,7 +59644,27 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "data_mask_categories": [
+            "ACTOR",
+            "PII",
+            "PHI",
+            "FINANCIAL",
+            "LOCATION",
+            "CUSTOM"
+          ],
+          "data_mask_rule_status": ["ENABLED", "DISABLED"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DataMaskRuleCollection": {
         "attributes": [
@@ -59523,7 +59689,27 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "data_mask_categories": [
+            "ACTOR",
+            "PII",
+            "PHI",
+            "FINANCIAL",
+            "LOCATION",
+            "CUSTOM"
+          ],
+          "data_mask_rule_status": ["ENABLED", "DISABLED"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DataSource": {
         "attributes": [
@@ -59550,7 +59736,20 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"],
+          "status": ["ENABLED", "DISABLED"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DataSourceCollection": {
         "attributes": [
@@ -59562,6 +59761,9 @@
         "attributes": [
           ["data_source_feed_provider", "str", "dataSourceFeedProvider"]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"]
+        },
         "discriminator": {
           "field": "dataSourceFeedProvider",
           "values": {
@@ -59581,6 +59783,9 @@
         "attributes": [
           ["data_source_feed_provider", "str", "dataSourceFeedProvider"]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"]
+        },
         "discriminator": {
           "field": "dataSourceFeedProvider",
           "values": {
@@ -59598,7 +59803,10 @@
           ["status", "str", "status"],
           ["comments", "str", "comments"],
           ["event_info", "DataSourceEventInfo", "eventInfo"]
-        ]
+        ],
+        "enums": {
+          "status": ["SUCCESS", "FAILURE"]
+        }
       },
       "DataSourceMappingInfo": {
         "attributes": [
@@ -59630,12 +59838,28 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"],
+          "status": ["ENABLED", "DISABLED"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DataSourceSummaryDetails": {
         "attributes": [
           ["data_source_feed_provider", "str", "dataSourceFeedProvider"]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"]
+        },
         "discriminator": {
           "field": "dataSourceFeedProvider",
           "values": {
@@ -59650,7 +59874,18 @@
           ["id", "str", "id"],
           ["description", "str", "description"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DetectorCollection": {
         "attributes": [["items", "list[DetectorSummary]", "items"]]
@@ -59686,7 +59921,10 @@
           ["recommendation", "str", "recommendation"],
           ["data_source_id", "str", "dataSourceId"],
           ["entities_mappings", "list[EntitiesMapping]", "entitiesMappings"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "DetectorRecipe": {
         "attributes": [
@@ -59716,7 +59954,33 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["target_ids", "list[str]", "targetIds"]
-        ]
+        ],
+        "enums": {
+          "detector_recipe_type": [
+            "LIMITED",
+            "BASIC",
+            "STANDARD",
+            "ENTERPRISE"
+          ],
+          "owner": ["CUSTOMER", "ORACLE"],
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DetectorRecipeCollection": {
         "attributes": [
@@ -59749,7 +60013,44 @@
           ["data_source_id", "str", "dataSourceId"],
           ["entities_mappings", "list[EntitiesMapping]", "entitiesMappings"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "managed_list_types": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DetectorRecipeDetectorRuleCollection": {
         "attributes": [
@@ -59781,7 +60082,44 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["data_source_id", "str", "dataSourceId"],
           ["entities_mappings", "list[EntitiesMapping]", "entitiesMappings"]
-        ]
+        ],
+        "enums": {
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "managed_list_types": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DetectorRecipeSummary": {
         "attributes": [
@@ -59805,7 +60143,33 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "detector_recipe_type": [
+            "LIMITED",
+            "BASIC",
+            "STANDARD",
+            "ENTERPRISE"
+          ],
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DetectorRule": {
         "attributes": [
@@ -59828,7 +60192,44 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "managed_list_types": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DetectorRuleCollection": {
         "attributes": [["items", "list[DetectorRuleSummary]", "items"]]
@@ -59855,7 +60256,44 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
-        ]
+        ],
+        "enums": {
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "managed_list_types": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DetectorSummary": {
         "attributes": [
@@ -59863,14 +60301,28 @@
           ["description", "str", "description"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "EntitiesMapping": {
         "attributes": [
           ["display_name", "str", "displayName"],
           ["query_field", "str", "queryField"],
           ["entity_type", "str", "entityType"]
-        ]
+        ],
+        "enums": {
+          "entity_type": ["EXTERNAL_IP", "INTERNAL_IP", "TEXT", "JSON_LIST"]
+        }
       },
       "EntityDetails": {
         "attributes": [
@@ -59910,6 +60362,9 @@
           ["logging_query_type", "str", "loggingQueryType"],
           ["key_entities_count", "int", "keyEntitiesCount"]
         ],
+        "enums": {
+          "logging_query_type": ["INSIGHT"]
+        },
         "discriminator": "LoggingQueryDetails"
       },
       "InstanceSecurityServiceConfiguration": {
@@ -59917,6 +60372,10 @@
           ["service_configuration_type", "str", "serviceConfigurationType"],
           ["status", "str", "status"]
         ],
+        "enums": {
+          "service_configuration_type": ["INSTANCE_SECURITY"],
+          "status": ["ENABLED", "DISABLED"]
+        },
         "discriminator": "ServiceConfiguration"
       },
       "LoggingEventInfo": {
@@ -59927,6 +60386,9 @@
           ["operator", "str", "operator"],
           ["log_result", "str", "logResult"]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"]
+        },
         "discriminator": "DataSourceEventInfo"
       },
       "LoggingQueryDataSourceDetails": {
@@ -59946,6 +60408,17 @@
             "loggingQueryDetails"
           ]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"],
+          "operator": [
+            "EQUAL",
+            "GREATER",
+            "GREATERTHANEQUALTO",
+            "LESS",
+            "LESSTHANEQUALTO"
+          ],
+          "logging_query_type": ["INSIGHT"]
+        },
         "discriminator": "DataSourceDetails"
       },
       "LoggingQueryDataSourceSummaryDetails": {
@@ -59963,10 +60436,16 @@
             "regionStatusDetail"
           ]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"]
+        },
         "discriminator": "DataSourceSummaryDetails"
       },
       "LoggingQueryDetails": {
         "attributes": [["logging_query_type", "str", "loggingQueryType"]],
+        "enums": {
+          "logging_query_type": ["INSIGHT"]
+        },
         "discriminator": {
           "field": "loggingQueryType",
           "values": {
@@ -59994,7 +60473,37 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "list_type": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "feed_provider": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ManagedListCollection": {
         "attributes": [
@@ -60021,7 +60530,37 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "list_type": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "feed_provider": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ManagedListTypeCollection": {
         "attributes": [
@@ -60036,10 +60575,27 @@
           ["group", "str", "group"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "NoDelayStartPolicy": {
         "attributes": [["start_policy_type", "str", "startPolicyType"]],
+        "enums": {
+          "start_policy_type": [
+            "NO_DELAY_START_POLICY",
+            "ABSOLUTE_TIME_START_POLICY"
+          ]
+        },
         "discriminator": "ContinuousQueryStartPolicy"
       },
       "OperatorSummary": {
@@ -60051,7 +60607,10 @@
           ["filter_type", "str", "filterType"],
           ["operators", "list[ConditionOperator]", "operators"],
           ["multi_list_types", "list[str]", "multiListTypes"]
-        ]
+        ],
+        "enums": {
+          "filter_type": ["CONDITION", "CONFIG"]
+        }
       },
       "PackageDetail": {
         "attributes": [
@@ -60114,7 +60673,20 @@
           ["impacted_resource_name", "str", "impactedResourceName"],
           ["impacted_resource_type", "str", "impactedResourceType"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"],
+          "lifecycle_state": ["ACTIVE", "INACTIVE"],
+          "lifecycle_detail": ["OPEN", "RESOLVED", "DISMISSED", "DELETED"],
+          "detector_id": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ]
+        }
       },
       "ProblemAggregation": {
         "attributes": [
@@ -60191,7 +60763,24 @@
           ["delta", "str", "delta"],
           ["comment", "str", "comment"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "actor_type": [
+            "CLOUD_GUARD_SERVICE",
+            "CORRELATION",
+            "RESPONDER",
+            "USER"
+          ],
+          "lifecycle_detail": ["OPEN", "RESOLVED", "DISMISSED", "DELETED"],
+          "event_status": [
+            "REOPEN",
+            "OPEN",
+            "UPDATE",
+            "RESOLVE",
+            "DISMISS",
+            "DELETE"
+          ]
+        }
       },
       "ProblemSummary": {
         "attributes": [
@@ -60213,7 +60802,20 @@
           ["regions", "list[str]", "regions"],
           ["target_id", "str", "targetId"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"],
+          "lifecycle_state": ["ACTIVE", "INACTIVE"],
+          "lifecycle_detail": ["OPEN", "RESOLVED", "DISMISSED", "DELETED"],
+          "detector_id": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ]
+        }
       },
       "ProblemTrendAggregation": {
         "attributes": [
@@ -60248,7 +60850,21 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["name", "str", "name"],
           ["description", "str", "description"]
-        ]
+        ],
+        "enums": {
+          "type": ["DETECTOR_PROBLEMS", "RESOLVED_PROBLEMS"],
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "lifecycle_detail": ["OPEN", "RESOLVED", "DISMISSED"]
+        }
       },
       "RecommendationSummaryCollection": {
         "attributes": [
@@ -60260,7 +60876,10 @@
         "attributes": [
           ["region", "str", "region"],
           ["status", "str", "status"]
-        ]
+        ],
+        "enums": {
+          "status": ["PROVISIONING", "FAILED", "SUCCEEDED"]
+        }
       },
       "Resource": {
         "attributes": [
@@ -60285,7 +60904,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR", "NONE"]
+        }
       },
       "ResourceAdditionalDetails": {
         "attributes": [["os_info", "str", "osInfo"]]
@@ -60299,7 +60921,10 @@
           ["related_resource_id", "str", "relatedResourceId"],
           ["message", "str", "message"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "type": ["FULL", "DELETE"]
+        }
       },
       "ResourcePortCollection": {
         "attributes": [["items", "list[ResourcePortSummary]", "items"]]
@@ -60334,7 +60959,10 @@
           ["time_last_occurred", "datetime", "timeLastOccurred"],
           ["tactics", "list[TacticSummary]", "tactics"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "ResourceProfileCollection": {
         "attributes": [
@@ -60433,7 +61061,10 @@
           ["score_timestamp", "float", "scoreTimestamp"],
           ["risk_score", "float", "riskScore"],
           ["risk_level", "str", "riskLevel"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "ResourceRiskScoreAggregationCollection": {
         "attributes": [
@@ -60459,7 +61090,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR", "NONE"]
+        }
       },
       "ResourceTypeCollection": {
         "attributes": [
@@ -60490,7 +61124,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR", "NONE"]
+        }
       },
       "ResourceVulnerabilityCollection": {
         "attributes": [["items", "list[ResourceVulnerabilitySummary]", "items"]]
@@ -60503,7 +61140,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR", "NONE"]
+        }
       },
       "ResponderActivityCollection": {
         "attributes": [["items", "list[ResponderActivitySummary]", "items"]]
@@ -60519,7 +61159,20 @@
           ["responder_execution_status", "str", "responderExecutionStatus"],
           ["time_created", "datetime", "timeCreated"],
           ["message", "str", "message"]
-        ]
+        ],
+        "enums": {
+          "responder_type": ["REMEDIATION", "NOTIFICATION"],
+          "responder_activity_type": ["STARTED", "COMPLETED"],
+          "responder_execution_status": [
+            "STARTED",
+            "AWAITING_CONFIRMATION",
+            "AWAITING_INPUT",
+            "SUCCEEDED",
+            "FAILED",
+            "SKIPPED",
+            "ALL"
+          ]
+        }
       },
       "ResponderConfiguration": {
         "attributes": [
@@ -60551,7 +61204,20 @@
             "responderRuleExecutionDetails"
           ],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "responder_rule_type": ["REMEDIATION", "NOTIFICATION"],
+          "responder_execution_status": [
+            "STARTED",
+            "AWAITING_CONFIRMATION",
+            "AWAITING_INPUT",
+            "SUCCEEDED",
+            "FAILED",
+            "SKIPPED",
+            "ALL"
+          ],
+          "responder_execution_mode": ["MANUAL", "AUTOMATED", "ALL"]
+        }
       },
       "ResponderExecutionAggregation": {
         "attributes": [
@@ -60593,7 +61259,20 @@
             "ResponderRuleExecutionDetails",
             "responderRuleExecutionDetails"
           ]
-        ]
+        ],
+        "enums": {
+          "responder_rule_type": ["REMEDIATION", "NOTIFICATION"],
+          "responder_execution_status": [
+            "STARTED",
+            "AWAITING_CONFIRMATION",
+            "AWAITING_INPUT",
+            "SUCCEEDED",
+            "FAILED",
+            "SKIPPED",
+            "ALL"
+          ],
+          "responder_execution_mode": ["MANUAL", "AUTOMATED", "ALL"]
+        }
       },
       "ResponderExecutionTrendAggregation": {
         "attributes": [
@@ -60633,7 +61312,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ResponderRecipeCollection": {
         "attributes": [
@@ -60656,7 +61347,20 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "type": ["REMEDIATION", "NOTIFICATION"],
+          "supported_modes": ["AUTOACTION", "USERACTION"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ResponderRecipeResponderRuleCollection": {
         "attributes": [
@@ -60677,7 +61381,20 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
-        ]
+        ],
+        "enums": {
+          "type": ["REMEDIATION", "NOTIFICATION"],
+          "supported_modes": ["AUTOACTION", "USERACTION"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ResponderRecipeSummary": {
         "attributes": [
@@ -60699,7 +61416,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ResponderRule": {
         "attributes": [
@@ -60715,7 +61444,20 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "type": ["REMEDIATION", "NOTIFICATION"],
+          "supported_modes": ["AUTOACTION", "USERACTION"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ResponderRuleCollection": {
         "attributes": [
@@ -60729,7 +61471,10 @@
           ["configurations", "list[ResponderConfiguration]", "configurations"],
           ["is_enabled", "bool", "isEnabled"],
           ["mode", "str", "mode"]
-        ]
+        ],
+        "enums": {
+          "mode": ["AUTOACTION", "USERACTION"]
+        }
       },
       "ResponderRuleExecutionDetails": {
         "attributes": [
@@ -60750,7 +61495,20 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
-        ]
+        ],
+        "enums": {
+          "type": ["REMEDIATION", "NOTIFICATION"],
+          "supported_modes": ["AUTOACTION", "USERACTION"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "RiskScoreAggregation": {
         "attributes": [
@@ -60772,7 +61530,10 @@
         "attributes": [
           ["key", "str", "key"],
           ["value", "list[str]", "value"]
-        ]
+        ],
+        "enums": {
+          "key": ["CATEGORY"]
+        }
       },
       "SavedQuery": {
         "attributes": [
@@ -60787,7 +61548,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "SavedQueryCollection": {
         "attributes": [
@@ -60810,7 +61582,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ScheduledQueryDataSourceObjDetails": {
         "attributes": [
@@ -60824,6 +61607,9 @@
             "scheduledQueryScopeDetails"
           ]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"]
+        },
         "discriminator": "DataSourceDetails"
       },
       "ScheduledQueryDataSourceSummaryObjDetails": {
@@ -60842,6 +61628,9 @@
             "regionStatusDetail"
           ]
         ],
+        "enums": {
+          "data_source_feed_provider": ["LOGGINGQUERY", "SCHEDULEDQUERY"]
+        },
         "discriminator": "DataSourceSummaryDetails"
       },
       "ScheduledQueryScopeDetail": {
@@ -60869,7 +61658,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "SecurityPolicyCollection": {
         "attributes": [
@@ -60897,7 +61698,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "SecurityRecipe": {
         "attributes": [
@@ -60914,7 +61727,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "SecurityRecipeCollection": {
         "attributes": [
@@ -60940,14 +61765,29 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "SecurityScoreAggregation": {
         "attributes": [
           ["dimensions_map", "dict(str, str)", "dimensionsMap"],
           ["security_rating", "str", "securityRating"],
           ["security_score", "int", "securityScore"]
-        ]
+        ],
+        "enums": {
+          "security_rating": ["EXCELLENT", "GOOD", "FAIR", "POOR", "NA"]
+        }
       },
       "SecurityScoreAggregationCollection": {
         "attributes": [["items", "list[SecurityScoreAggregation]", "items"]]
@@ -60959,7 +61799,10 @@
           ["duration_in_seconds", "int", "durationInSeconds"],
           ["security_rating", "str", "securityRating"],
           ["security_score", "int", "securityScore"]
-        ]
+        ],
+        "enums": {
+          "security_rating": ["EXCELLENT", "GOOD", "FAIR", "POOR", "NA"]
+        }
       },
       "SecurityScoreTrendAggregationCollection": {
         "attributes": [
@@ -60987,7 +61830,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "SecurityZoneCollection": {
         "attributes": [
@@ -61014,7 +61868,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "SecurityZoneTargetDetails": {
         "attributes": [
@@ -61027,12 +61892,23 @@
             "targetSecurityZoneRecipes"
           ]
         ],
+        "enums": {
+          "target_resource_type": [
+            "COMPARTMENT",
+            "ERPCLOUD",
+            "HCMCLOUD",
+            "SECURITY_ZONE"
+          ]
+        },
         "discriminator": "TargetDetails"
       },
       "ServiceConfiguration": {
         "attributes": [
           ["service_configuration_type", "str", "serviceConfigurationType"]
         ],
+        "enums": {
+          "service_configuration_type": ["INSTANCE_SECURITY"]
+        },
         "discriminator": {
           "field": "serviceConfigurationType",
           "values": {
@@ -61071,7 +61947,18 @@
           ["regions", "list[str]", "regions"],
           ["additional_details", "dict(str, str)", "additionalDetails"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "classification_status": [
+            "FALSE_NEGATIVE",
+            "TRUE_NEGATIVE",
+            "FALSE_POSITIVE",
+            "TRUE_POSITIVE",
+            "NOT_CLASSIFIED"
+          ],
+          "severity": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"],
+          "confidence": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "SightingCollection": {
         "attributes": [
@@ -61147,7 +62034,18 @@
           ["time_first_occurred", "datetime", "timeFirstOccurred"],
           ["time_last_occurred", "datetime", "timeLastOccurred"],
           ["regions", "list[str]", "regions"]
-        ]
+        ],
+        "enums": {
+          "classification_status": [
+            "FALSE_NEGATIVE",
+            "TRUE_NEGATIVE",
+            "FALSE_POSITIVE",
+            "TRUE_POSITIVE",
+            "NOT_CLASSIFIED"
+          ],
+          "severity": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"],
+          "confidence": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "SightingType": {
         "attributes": [
@@ -61167,6 +62065,11 @@
           ["value", "str", "value"],
           ["value_type", "str", "valueType"]
         ],
+        "enums": {
+          "kind": ["COMPOSITE", "SIMPLE"],
+          "operator": ["IN", "NOT_IN", "EQUALS", "NOT_EQUALS"],
+          "value_type": ["MANAGED", "CUSTOM"]
+        },
         "discriminator": "Condition"
       },
       "TacticCollection": {
@@ -61209,7 +62112,24 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "target_resource_type": [
+            "COMPARTMENT",
+            "ERPCLOUD",
+            "HCMCLOUD",
+            "SECURITY_ZONE"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "TargetCollection": {
         "attributes": [
@@ -61219,6 +62139,14 @@
       },
       "TargetDetails": {
         "attributes": [["target_resource_type", "str", "targetResourceType"]],
+        "enums": {
+          "target_resource_type": [
+            "COMPARTMENT",
+            "ERPCLOUD",
+            "HCMCLOUD",
+            "SECURITY_ZONE"
+          ]
+        },
         "discriminator": {
           "field": "targetResourceType",
           "values": {
@@ -61238,7 +62166,10 @@
           ["problem_threshold", "int", "problemThreshold"],
           ["target_types", "list[str]", "targetTypes"],
           ["sighting_types", "list[SightingType]", "sightingTypes"]
-        ]
+        ],
+        "enums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "TargetDetectorRecipe": {
         "attributes": [
@@ -61265,7 +62196,28 @@
           ["locks", "list[ResourceLock]", "locks"],
           ["detector_recipe_type", "str", "detectorRecipeType"],
           ["source_data_retention", "int", "sourceDataRetention"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "detector_recipe_type": ["LIMITED", "BASIC", "STANDARD", "ENTERPRISE"]
+        }
       },
       "TargetDetectorRecipeCollection": {
         "attributes": [
@@ -61293,7 +62245,44 @@
           ["data_source_id", "str", "dataSourceId"],
           ["entities_mappings", "list[EntitiesMapping]", "entitiesMappings"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "managed_list_types": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "TargetDetectorRecipeDetectorRuleCollection": {
         "attributes": [
@@ -61321,7 +62310,44 @@
           ["data_source_id", "str", "dataSourceId"],
           ["entities_mappings", "list[EntitiesMapping]", "entitiesMappings"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "managed_list_types": [
+            "CIDR_BLOCK",
+            "USERS",
+            "GROUPS",
+            "IPV4ADDRESS",
+            "IPV6ADDRESS",
+            "RESOURCE_OCID",
+            "REGION",
+            "COUNTRY",
+            "STATE",
+            "CITY",
+            "TAGS",
+            "GENERIC",
+            "FUSION_APPS_ROLE",
+            "FUSION_APPS_PERMISSION",
+            "NAMESPACE_SELECTOR",
+            "POD_RESOURCE_SELECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "TargetDetectorRecipeSummary": {
         "attributes": [
@@ -61339,13 +62365,37 @@
           ["locks", "list[ResourceLock]", "locks"],
           ["detector_recipe_type", "str", "detectorRecipeType"],
           ["source_data_retention", "int", "sourceDataRetention"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "detector": [
+            "IAAS_ACTIVITY_DETECTOR",
+            "IAAS_CONFIGURATION_DETECTOR",
+            "IAAS_THREAT_DETECTOR",
+            "IAAS_LOG_INSIGHT_DETECTOR",
+            "IAAS_INSTANCE_SECURITY_DETECTOR",
+            "IAAS_CONTAINER_SECURITY_DETECTOR"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "detector_recipe_type": ["LIMITED", "BASIC", "STANDARD", "ENTERPRISE"]
+        }
       },
       "TargetIdsSelected": {
         "attributes": [
           ["kind", "str", "kind"],
           ["values", "list[str]", "values"]
         ],
+        "enums": {
+          "kind": ["ALL", "TARGETTYPES", "TARGETIDS"]
+        },
         "discriminator": "TargetSelected"
       },
       "TargetResourceTypesSelected": {
@@ -61353,6 +62403,10 @@
           ["kind", "str", "kind"],
           ["values", "list[str]", "values"]
         ],
+        "enums": {
+          "kind": ["ALL", "TARGETTYPES", "TARGETIDS"],
+          "values": ["COMPARTMENT", "ERPCLOUD", "HCMCLOUD", "SECURITY_ZONE"]
+        },
         "discriminator": "TargetSelected"
       },
       "TargetResponderRecipe": {
@@ -61376,7 +62430,10 @@
             "effectiveResponderRules"
           ],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"]
+        }
       },
       "TargetResponderRecipeCollection": {
         "attributes": [
@@ -61398,7 +62455,20 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
-        ]
+        ],
+        "enums": {
+          "type": ["REMEDIATION", "NOTIFICATION"],
+          "supported_modes": ["AUTOACTION", "USERACTION"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "TargetResponderRecipeResponderRuleCollection": {
         "attributes": [
@@ -61419,7 +62489,20 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
-        ]
+        ],
+        "enums": {
+          "type": ["REMEDIATION", "NOTIFICATION"],
+          "supported_modes": ["AUTOACTION", "USERACTION"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "TargetResponderRecipeSummary": {
         "attributes": [
@@ -61434,10 +62517,25 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "owner": ["CUSTOMER", "ORACLE"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "TargetSelected": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["ALL", "TARGETTYPES", "TARGETIDS"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -61463,7 +62561,24 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "target_resource_type": [
+            "COMPARTMENT",
+            "ERPCLOUD",
+            "HCMCLOUD",
+            "SECURITY_ZONE"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "TechniqueCollection": {
         "attributes": [
@@ -61494,7 +62609,10 @@
           ["recommendation", "str", "recommendation"],
           ["data_source_id", "str", "dataSourceId"],
           ["entities_mappings", "list[EntitiesMapping]", "entitiesMappings"]
-        ]
+        ],
+        "strictEnums": {
+          "risk_level": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "MINOR"]
+        }
       },
       "UpdateResponderRecipeResponderRule": {
         "attributes": [
@@ -61547,7 +62665,10 @@
           ["condition", "Condition", "condition"],
           ["configurations", "list[ResponderConfiguration]", "configurations"],
           ["mode", "str", "mode"]
-        ]
+        ],
+        "strictEnums": {
+          "mode": ["AUTOACTION", "USERACTION"]
+        }
       },
       "WlpAgent": {
         "attributes": [
@@ -61599,7 +62720,19 @@
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "operation_type": ["CREATE", "UPDATE", "DELETE", "MOVE"],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -61630,7 +62763,17 @@
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"],
           ["metadata", "dict(str, str)", "metadata"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -61643,7 +62786,19 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": ["CREATE", "UPDATE", "DELETE", "MOVE"],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestSummaryCollection": {
         "attributes": [

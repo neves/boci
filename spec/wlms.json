@@ -11244,7 +11244,10 @@
           ["weblogic_version", "str", "weblogicVersion"],
           ["middleware_type", "list[str]", "middlewareType"],
           ["os_arch", "str", "osArch"]
-        ]
+        ],
+        "enums": {
+          "middleware_type": ["FMW", "WLS", "OPATCH"]
+        }
       },
       "Backup": {
         "attributes": [
@@ -11254,13 +11257,20 @@
           ["backup_location", "str", "backupLocation"],
           ["content_type", "str", "contentType"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "type": ["LOCAL_FILE"],
+          "content_type": ["BINARY"]
+        }
       },
       "BackupCollection": {
         "attributes": [["items", "list[BackupSummary]", "items"]]
       },
       "BackupContent": {
         "attributes": [["content_type", "str", "contentType"]],
+        "enums": {
+          "content_type": ["BINARY"]
+        },
         "discriminator": {
           "field": "contentType",
           "values": {
@@ -11277,19 +11287,29 @@
           ["backup_location", "str", "backupLocation"],
           ["content_type", "str", "contentType"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "type": ["LOCAL_FILE"],
+          "content_type": ["BINARY"]
+        }
       },
       "BackupToRestore": {
         "attributes": [
           ["id", "str", "id"],
           ["content_type", "str", "contentType"]
-        ]
+        ],
+        "strictEnums": {
+          "content_type": ["BINARY"]
+        }
       },
       "BinaryBackupContent": {
         "attributes": [
           ["content_type", "str", "contentType"],
           ["middleware", "MiddlewareBinaryBackupContent", "middleware"]
         ],
+        "enums": {
+          "content_type": ["BINARY"]
+        },
         "discriminator": "BackupContent"
       },
       "Configuration": {
@@ -11410,7 +11430,10 @@
           ["server_check_name", "str", "serverCheckName"],
           ["server_check_result_id", "str", "serverCheckResultId"],
           ["server_check_result", "str", "serverCheckResult"]
-        ]
+        ],
+        "enums": {
+          "server_check_status": ["OK", "WARNING", "FAILURE"]
+        }
       },
       "Server": {
         "attributes": [
@@ -11433,7 +11456,15 @@
           ["managed_instance_id", "str", "managedInstanceId"],
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "latest_patches_status": [
+            "ON_LATEST_PATCHES",
+            "PATCHING_REQUIRED",
+            "UNKNOWN"
+          ],
+          "patch_readiness_status": ["OK", "WARNING", "ERROR", "UNKNOWN"]
+        }
       },
       "ServerCollection": {
         "attributes": [["items", "list[ServerSummary]", "items"]]
@@ -11459,7 +11490,15 @@
           ["managed_instance_id", "str", "managedInstanceId"],
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "latest_patches_status": [
+            "ON_LATEST_PATCHES",
+            "PATCHING_REQUIRED",
+            "UNKNOWN"
+          ],
+          "patch_readiness_status": ["OK", "WARNING", "ERROR", "UNKNOWN"]
+        }
       },
       "ServerToRestore": {
         "attributes": [
@@ -11505,7 +11544,11 @@
             "str",
             "managedServerStopScriptPath"
           ]
-        ]
+        ],
+        "strictEnums": {
+          "admin_server_control_mode": ["USE_NODE_MANAGER", "USE_SCRIPTS"],
+          "managed_server_control_mode": ["USE_NODE_MANAGER", "USE_SCRIPTS"]
+        }
       },
       "WlsDomain": {
         "attributes": [
@@ -11528,7 +11571,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "patch_readiness_status": ["OK", "WARNING", "ERROR", "UNKNOWN"],
+          "lifecycle_state": [
+            "ACTIVE",
+            "CREATING",
+            "DELETED",
+            "DELETING",
+            "FAILED",
+            "NEEDS_ATTENTION",
+            "UPDATING"
+          ]
+        }
       },
       "WlsDomainCollection": {
         "attributes": [["items", "list[WlsDomainSummary]", "items"]]
@@ -11556,7 +11611,11 @@
             "str",
             "managedServerStopScriptPath"
           ]
-        ]
+        ],
+        "enums": {
+          "admin_server_control_mode": ["USE_NODE_MANAGER", "USE_SCRIPTS"],
+          "managed_server_control_mode": ["USE_NODE_MANAGER", "USE_SCRIPTS"]
+        }
       },
       "WlsDomainCredential": {
         "attributes": [
@@ -11564,7 +11623,14 @@
           ["strategy", "str", "strategy"],
           ["user_secret_id", "str", "userSecretId"],
           ["password_secret_id", "str", "passwordSecretId"]
-        ]
+        ],
+        "enums": {
+          "strategy": [
+            "USE_DOMAIN_CONFIG",
+            "USE_NODE_MANAGER_CONFIG",
+            "USE_SECRETS"
+          ]
+        }
       },
       "WlsDomainCredentialCollection": {
         "attributes": [["items", "list[WlsDomainCredentialSummary]", "items"]]
@@ -11590,7 +11656,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "patch_readiness_status": ["OK", "WARNING", "ERROR", "UNKNOWN"]
+        }
       },
       "WorkRequest": {
         "attributes": [
@@ -11604,7 +11673,28 @@
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "START_WLSDOMAIN",
+            "STOP_WLSDOMAIN",
+            "RESTART_WLSDOMAIN",
+            "SCAN_WLSDOMAIN",
+            "APPLY_PATCH",
+            "SCAN_MANAGED_INSTANCE",
+            "RESTORE_BACKUP"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "NEEDS_ATTENTION",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -11632,7 +11722,17 @@
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"],
           ["metadata", "dict(str, str)", "metadata"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -11646,7 +11746,28 @@
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "START_WLSDOMAIN",
+            "STOP_WLSDOMAIN",
+            "RESTART_WLSDOMAIN",
+            "SCAN_WLSDOMAIN",
+            "APPLY_PATCH",
+            "SCAN_MANAGED_INSTANCE",
+            "RESTORE_BACKUP"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "NEEDS_ATTENTION",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestSummaryCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]

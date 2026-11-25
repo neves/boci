@@ -5124,6 +5124,7 @@
             ["call", "pop", ["var", "kwargs"], "time_expires"]
           ],
           ["let", "asset_ids", ["call", "pop", ["var", "kwargs"], "asset_ids"]],
+          ["checkNoExtraKwargs", "generate_session_token"],
           ["let", "kwargs", ["dict"]],
           [
             "set",
@@ -24226,6 +24227,11 @@
           ["edge_token_key", "str", "edgeTokenKey"],
           ["edge_token_salt", "str", "edgeTokenSalt"]
         ],
+        "enums": {
+          "type": ["EDGE", "AKAMAI_MANUAL"],
+          "origin_auth_sign_type": ["ForwardURL"],
+          "origin_auth_sign_encryption": ["SHA256-HMAC"]
+        },
         "discriminator": "StreamCdnConfigSection"
       },
       "DashStreamPackagingConfig": {
@@ -24245,10 +24251,17 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
         ],
+        "enums": {
+          "stream_packaging_format": ["HLS", "DASH"],
+          "lifecycle_state": ["ACTIVE", "NEEDS_ATTENTION", "DELETED"]
+        },
         "discriminator": "StreamPackagingConfig"
       },
       "EdgeStreamCdnConfig": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["EDGE", "AKAMAI_MANUAL"]
+        },
         "discriminator": "StreamCdnConfigSection"
       },
       "HlsStreamPackagingConfig": {
@@ -24268,6 +24281,10 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
         ],
+        "enums": {
+          "stream_packaging_format": ["HLS", "DASH"],
+          "lifecycle_state": ["ACTIVE", "NEEDS_ATTENTION", "DELETED"]
+        },
         "discriminator": "StreamPackagingConfig"
       },
       "IngestStreamDistributionChannelResult": {
@@ -24280,7 +24297,21 @@
           ["bucket_name", "str", "bucketName"],
           ["object_name", "str", "objectName"],
           ["id", "str", "id"]
-        ]
+        ],
+        "enums": {
+          "asset_type": [
+            "AUDIO",
+            "VIDEO",
+            "PLAYLIST",
+            "IMAGE",
+            "CAPTION_FILE",
+            "TRANSCRIPTION_JOB",
+            "VISION_JOB",
+            "TEXT_ANALYSIS",
+            "INPUT_FILE",
+            "OTHER"
+          ]
+        }
       },
       "MediaAsset": {
         "attributes": [
@@ -24312,7 +24343,25 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "type": [
+            "AUDIO",
+            "VIDEO",
+            "PLAYLIST",
+            "IMAGE",
+            "CAPTION_FILE",
+            "UNKNOWN"
+          ]
+        }
       },
       "MediaAssetCollection": {
         "attributes": [["items", "list[MediaAssetSummary]", "items"]]
@@ -24326,7 +24375,15 @@
           ["metadata_ref", "str", "metadataRef"],
           ["media_workflow_job_id", "str", "mediaWorkflowJobId"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "NEEDS_ATTENTION",
+            "UPDATING"
+          ]
+        }
       },
       "MediaAssetDistributionChannelAttachmentCollection": {
         "attributes": [
@@ -24347,7 +24404,15 @@
           ["metadata_ref", "str", "metadataRef"],
           ["media_workflow_job_id", "str", "mediaWorkflowJobId"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "NEEDS_ATTENTION",
+            "UPDATING"
+          ]
+        }
       },
       "MediaAssetSummary": {
         "attributes": [
@@ -24364,13 +24429,34 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "type": [
+            "AUDIO",
+            "VIDEO",
+            "PLAYLIST",
+            "IMAGE",
+            "CAPTION_FILE",
+            "UNKNOWN"
+          ]
+        }
       },
       "MediaAssetTag": {
         "attributes": [
           ["type", "str", "type"],
           ["value", "str", "value"]
-        ]
+        ],
+        "enums": {
+          "type": ["USER", "SYSTEM"]
+        }
       },
       "MediaWorkflow": {
         "attributes": [
@@ -24393,7 +24479,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "NEEDS_ATTENTION", "DELETED"]
+        }
       },
       "MediaWorkflowCollection": {
         "attributes": [["items", "list[MediaWorkflowSummary]", "items"]]
@@ -24412,7 +24501,10 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "MediaWorkflowConfigurationCollection": {
         "attributes": [
@@ -24463,7 +24555,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "REJECTED",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "MediaWorkflowJobCollection": {
         "attributes": [["items", "list[MediaWorkflowJobSummary]", "items"]]
@@ -24547,7 +24651,10 @@
           ["related_resource_id", "str", "relatedResourceId"],
           ["message", "str", "message"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "type": ["FULL", "DELETE"]
+        }
       },
       "SessionToken": {
         "attributes": [["token", "str", "token"]]
@@ -24568,13 +24675,19 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "NEEDS_ATTENTION", "DELETED"]
+        }
       },
       "StreamCdnConfigCollection": {
         "attributes": [["items", "list[StreamCdnConfigSummary]", "items"]]
       },
       "StreamCdnConfigSection": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["EDGE", "AKAMAI_MANUAL"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -24614,7 +24727,10 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "NEEDS_ATTENTION", "DELETED"]
+        }
       },
       "StreamDistributionChannelCollection": {
         "attributes": [
@@ -24653,6 +24769,10 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["locks", "list[ResourceLock]", "locks"]
         ],
+        "enums": {
+          "stream_packaging_format": ["HLS", "DASH"],
+          "lifecycle_state": ["ACTIVE", "NEEDS_ATTENTION", "DELETED"]
+        },
         "discriminator": {
           "field": "streamPackagingFormat",
           "values": {
@@ -24667,6 +24787,9 @@
       },
       "StreamPackagingConfigEncryption": {
         "attributes": [["algorithm", "str", "algorithm"]],
+        "enums": {
+          "algorithm": ["NONE", "AES128"]
+        },
         "discriminator": {
           "field": "algorithm",
           "values": {
@@ -24681,10 +24804,16 @@
           ["algorithm", "str", "algorithm"],
           ["kms_key_id", "str", "kmsKeyId"]
         ],
+        "enums": {
+          "algorithm": ["NONE", "AES128"]
+        },
         "discriminator": "StreamPackagingConfigEncryption"
       },
       "StreamPackagingConfigEncryptionNone": {
         "attributes": [["algorithm", "str", "algorithm"]],
+        "enums": {
+          "algorithm": ["NONE", "AES128"]
+        },
         "discriminator": "StreamPackagingConfigEncryption"
       },
       "StreamPackagingConfigSummary": {

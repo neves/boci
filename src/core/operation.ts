@@ -84,6 +84,8 @@ export type OperationResult = {
   allPages: boolean;
   /** With --all on a list operation, every page's items in order. */
   pageItems: unknown[];
+  /** With --all on a collection model operation, every page's raw body in order. */
+  rawPages?: string[];
   /** SDK client serviceName for ServiceError.target_service. */
   targetService?: string;
 };
@@ -1000,8 +1002,14 @@ export async function callOperation(
   let response: Response;
   let raw: string;
   const pageItems: unknown[] = [];
+  const rawPages: string[] = [];
   let nextPage: string | null = null;
   let page = queryParams.find(([k]) => k === "page")?.[1] ?? null;
+  const isListResponse = Boolean(operation.responseType?.startsWith("list["));
+  const paginateAll =
+    allPages &&
+    Boolean(operation.responseType) &&
+    operation.responseType !== "stream";
   do {
     const pageIndex = queryParams.findIndex(([k]) => k === "page");
     const pageQuery = queryParams.map(
@@ -1029,27 +1037,27 @@ export async function callOperation(
     response = sent.response;
     raw = sent.raw;
     nextPage = response.headers.get("opc-next-page");
-    if (
-      allPages &&
-      response.ok &&
-      operation.responseType?.startsWith("list[")
-    ) {
-      try {
-        const parsed: unknown = JSON.parse(raw);
-        if (Array.isArray(parsed)) pageItems.push(...parsed);
-        else if (
-          parsed &&
-          typeof parsed === "object" &&
-          "items" in parsed &&
-          Array.isArray(parsed.items)
-        )
-          pageItems.push(...parsed.items);
-      } catch {
-        // Keep ordinary response handling for a malformed list body.
+    if (paginateAll && response.ok) {
+      if (isListResponse) {
+        try {
+          const parsed: unknown = JSON.parse(raw);
+          if (Array.isArray(parsed)) pageItems.push(...parsed);
+          else if (
+            parsed &&
+            typeof parsed === "object" &&
+            "items" in parsed &&
+            Array.isArray(parsed.items)
+          )
+            pageItems.push(...parsed.items);
+        } catch {
+          // Keep ordinary response handling for a malformed list body.
+        }
+      } else {
+        rawPages.push(raw);
       }
     }
     page = nextPage;
-    if (!allPages || !operation.responseType?.startsWith("list[")) break;
+    if (!paginateAll || !response.ok) break;
   } while (page !== null);
   return {
     operation,
@@ -1059,6 +1067,7 @@ export async function callOperation(
     raw,
     allPages,
     pageItems,
+    ...(rawPages.length > 0 ? { rawPages } : {}),
     targetService: sc.targetService,
   };
 }

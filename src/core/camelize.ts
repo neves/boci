@@ -5,6 +5,10 @@
 export type Model = {
   /** [snake_case name, swagger type, attribute_map (camelCase) name] */
   attributes: [string, string, string][];
+  /** Allowed values for enum attributes whose setter maps unknown values to UNKNOWN_ENUM_VALUE. */
+  enums?: Record<string, string[]>;
+  /** Allowed values for enum attributes whose setter raises ValueError on unknown values. */
+  strictEnums?: Record<string, string[]>;
   /** get_subtype's discriminator, or the name of the class that defines it. */
   discriminator?:
     | string

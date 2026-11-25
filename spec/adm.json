@@ -8058,6 +8058,7 @@
             ["call", "pop", ["var", "kwargs"], "defined_tags"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "create_vulnerability_audit_extended"],
           ["let", "kwargs", ["dict"]],
           [
             "if",
@@ -8860,6 +8861,10 @@
             "let",
             "source_description",
             ["call", "pop", ["var", "kwargs"], "source_description"]
+          ],
+          [
+            "checkNoExtraKwargs",
+            "create_vulnerability_audit_external_resource_vulnerability_audit_source_extended"
           ],
           ["let", "kwargs", ["dict"]],
           [
@@ -9671,6 +9676,10 @@
             ["call", "pop", ["var", "kwargs"], "defined_tags"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "checkNoExtraKwargs",
+            "create_vulnerability_audit_oci_resource_vulnerability_audit_source_extended"
+          ],
           ["let", "kwargs", ["dict"]],
           [
             "if",
@@ -10464,6 +10473,10 @@
             ["call", "pop", ["var", "kwargs"], "defined_tags"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          [
+            "checkNoExtraKwargs",
+            "create_vulnerability_audit_unknown_source_vulnerability_audit_source_extended"
+          ],
           ["let", "kwargs", ["dict"]],
           [
             "if",
@@ -14771,6 +14784,19 @@
           ],
           ["pipeline_properties", "PipelineProperties", "pipelineProperties"]
         ],
+        "enums": {
+          "status": [
+            "CREATED",
+            "IN_PROGRESS",
+            "SUCCEEDED",
+            "FAILED",
+            "CANCELING",
+            "CANCELED"
+          ],
+          "type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "previous_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "next_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        },
         "discriminator": "RemediationRunStage"
       },
       "DetectConfiguration": {
@@ -14788,7 +14814,18 @@
             "maxPermissibleCvssV3Score"
           ],
           ["max_permissible_severity", "str", "maxPermissibleSeverity"]
-        ]
+        ],
+        "enums": {
+          "upgrade_policy": ["NEAREST"],
+          "max_permissible_severity": [
+            "UNSET",
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ]
+        }
       },
       "DetectStage": {
         "attributes": [
@@ -14803,6 +14840,19 @@
           ["next_stage_type", "str", "nextStageType"],
           ["audit_id", "str", "auditId"]
         ],
+        "enums": {
+          "status": [
+            "CREATED",
+            "IN_PROGRESS",
+            "SUCCEEDED",
+            "FAILED",
+            "CANCELING",
+            "CANCELED"
+          ],
+          "type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "previous_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "next_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        },
         "discriminator": "RemediationRunStage"
       },
       "ExternalResourceVulnerabilityAuditSource": {
@@ -14810,6 +14860,9 @@
           ["type", "str", "type"],
           ["description", "str", "description"]
         ],
+        "enums": {
+          "type": ["EXTERNAL_RESOURCE", "OCI_RESOURCE", "UNKNOWN"]
+        },
         "discriminator": "VulnerabilityAuditSource"
       },
       "ExternalScmConfiguration": {
@@ -14823,6 +14876,10 @@
           ["username", "str", "username"],
           ["pat_secret_id", "str", "patSecretId"]
         ],
+        "enums": {
+          "scm_type": ["OCI_CODE_REPOSITORY", "EXTERNAL_SCM"],
+          "external_scm_type": ["GITHUB", "GITLAB"]
+        },
         "discriminator": "ScmConfiguration"
       },
       "GitHubActionsConfiguration": {
@@ -14834,6 +14891,15 @@
           ["workflow_name", "str", "workflowName"],
           ["additional_parameters", "dict(str, str)", "additionalParameters"]
         ],
+        "enums": {
+          "build_service_type": [
+            "OCI_DEVOPS_BUILD",
+            "GITLAB_PIPELINE",
+            "GITHUB_ACTIONS",
+            "JENKINS_PIPELINE",
+            "NONE"
+          ]
+        },
         "discriminator": "VerifyConfiguration"
       },
       "GitLabPipelineConfiguration": {
@@ -14845,6 +14911,15 @@
           ["trigger_secret_id", "str", "triggerSecretId"],
           ["additional_parameters", "dict(str, str)", "additionalParameters"]
         ],
+        "enums": {
+          "build_service_type": [
+            "OCI_DEVOPS_BUILD",
+            "GITLAB_PIPELINE",
+            "GITHUB_ACTIONS",
+            "JENKINS_PIPELINE",
+            "NONE"
+          ]
+        },
         "discriminator": "VerifyConfiguration"
       },
       "JenkinsPipelineConfiguration": {
@@ -14856,6 +14931,15 @@
           ["job_name", "str", "jobName"],
           ["additional_parameters", "dict(str, str)", "additionalParameters"]
         ],
+        "enums": {
+          "build_service_type": [
+            "OCI_DEVOPS_BUILD",
+            "GITLAB_PIPELINE",
+            "GITHUB_ACTIONS",
+            "JENKINS_PIPELINE",
+            "NONE"
+          ]
+        },
         "discriminator": "VerifyConfiguration"
       },
       "KnowledgeBase": {
@@ -14869,7 +14953,17 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "FAILED",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "KnowledgeBaseCollection": {
         "attributes": [["items", "list[KnowledgeBaseSummary]", "items"]]
@@ -14895,6 +14989,15 @@
       },
       "NoneVerifyConfiguration": {
         "attributes": [["build_service_type", "str", "buildServiceType"]],
+        "enums": {
+          "build_service_type": [
+            "OCI_DEVOPS_BUILD",
+            "GITLAB_PIPELINE",
+            "GITHUB_ACTIONS",
+            "JENKINS_PIPELINE",
+            "NONE"
+          ]
+        },
         "discriminator": "VerifyConfiguration"
       },
       "OciCodeRepositoryConfiguration": {
@@ -14905,6 +15008,9 @@
           ["is_automerge_enabled", "bool", "isAutomergeEnabled"],
           ["oci_code_repository_id", "str", "ociCodeRepositoryId"]
         ],
+        "enums": {
+          "scm_type": ["OCI_CODE_REPOSITORY", "EXTERNAL_SCM"]
+        },
         "discriminator": "ScmConfiguration"
       },
       "OciDevOpsBuildConfiguration": {
@@ -14913,6 +15019,15 @@
           ["pipeline_id", "str", "pipelineId"],
           ["additional_parameters", "dict(str, str)", "additionalParameters"]
         ],
+        "enums": {
+          "build_service_type": [
+            "OCI_DEVOPS_BUILD",
+            "GITLAB_PIPELINE",
+            "GITHUB_ACTIONS",
+            "JENKINS_PIPELINE",
+            "NONE"
+          ]
+        },
         "discriminator": "VerifyConfiguration"
       },
       "OciResourceVulnerabilityAuditSource": {
@@ -14920,6 +15035,9 @@
           ["type", "str", "type"],
           ["oci_resource_id", "str", "ociResourceId"]
         ],
+        "enums": {
+          "type": ["EXTERNAL_RESOURCE", "OCI_RESOURCE", "UNKNOWN"]
+        },
         "discriminator": "VulnerabilityAuditSource"
       },
       "PipelineProperties": {
@@ -14952,6 +15070,19 @@
             "pullRequestProperties"
           ]
         ],
+        "enums": {
+          "status": [
+            "CREATED",
+            "IN_PROGRESS",
+            "SUCCEEDED",
+            "FAILED",
+            "CANCELING",
+            "CANCELED"
+          ],
+          "type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "previous_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "next_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        },
         "discriminator": "RemediationRunStage"
       },
       "RelatedVulnerabilityReference": {
@@ -14989,7 +15120,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "INACTIVE",
+            "FAILED",
+            "DELETING",
+            "DELETED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "RemediationRecipeCollection": {
         "attributes": [["items", "list[RemediationRecipeSummary]", "items"]]
@@ -15026,7 +15169,21 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "remediation_run_source": ["MANUAL", "KNOWLEDGE_BASE"],
+          "current_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "lifecycle_state": [
+            "ACCEPTED",
+            "CANCELED",
+            "CANCELING",
+            "FAILED",
+            "IN_PROGRESS",
+            "SUCCEEDED",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "RemediationRunCollection": {
         "attributes": [["items", "list[RemediationRunSummary]", "items"]]
@@ -15043,6 +15200,19 @@
           ["previous_stage_type", "str", "previousStageType"],
           ["next_stage_type", "str", "nextStageType"]
         ],
+        "enums": {
+          "status": [
+            "CREATED",
+            "IN_PROGRESS",
+            "SUCCEEDED",
+            "FAILED",
+            "CANCELING",
+            "CANCELED"
+          ],
+          "type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "previous_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "next_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -15066,7 +15236,10 @@
           ["type", "str", "type"],
           ["summary", "str", "summary"],
           ["remediation_run_id", "str", "remediationRunId"]
-        ]
+        ],
+        "enums": {
+          "type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        }
       },
       "RemediationRunSummary": {
         "attributes": [
@@ -15084,7 +15257,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "current_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        }
       },
       "ScmConfiguration": {
         "attributes": [
@@ -15093,6 +15269,9 @@
           ["build_file_location", "str", "buildFileLocation"],
           ["is_automerge_enabled", "bool", "isAutomergeEnabled"]
         ],
+        "enums": {
+          "scm_type": ["OCI_CODE_REPOSITORY", "EXTERNAL_SCM"]
+        },
         "discriminator": {
           "field": "scmType",
           "values": {
@@ -15109,10 +15288,16 @@
           ["time_finished", "datetime", "timeFinished"],
           ["type", "str", "type"],
           ["summary", "str", "summary"]
-        ]
+        ],
+        "enums": {
+          "type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        }
       },
       "UnknownSourceVulnerabilityAuditSource": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["EXTERNAL_RESOURCE", "OCI_RESOURCE", "UNKNOWN"]
+        },
         "discriminator": "VulnerabilityAuditSource"
       },
       "UsageDataDetails": {
@@ -15136,6 +15321,15 @@
       },
       "VerifyConfiguration": {
         "attributes": [["build_service_type", "str", "buildServiceType"]],
+        "enums": {
+          "build_service_type": [
+            "OCI_DEVOPS_BUILD",
+            "GITLAB_PIPELINE",
+            "GITHUB_ACTIONS",
+            "JENKINS_PIPELINE",
+            "NONE"
+          ]
+        },
         "discriminator": {
           "field": "buildServiceType",
           "values": {
@@ -15166,6 +15360,19 @@
           ],
           ["pipeline_properties", "PipelineProperties", "pipelineProperties"]
         ],
+        "enums": {
+          "status": [
+            "CREATED",
+            "IN_PROGRESS",
+            "SUCCEEDED",
+            "FAILED",
+            "CANCELING",
+            "CANCELED"
+          ],
+          "type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "previous_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"],
+          "next_stage_type": ["DETECT", "RECOMMEND", "VERIFY", "APPLY"]
+        },
         "discriminator": "RemediationRunStage"
       },
       "Vulnerability": {
@@ -15183,7 +15390,10 @@
             "matchingVulnerableArtifactVersionRanges"
           ],
           ["metrics", "list[VulnerabilityMetric]", "metrics"]
-        ]
+        ],
+        "enums": {
+          "severity": ["NONE", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        }
       },
       "VulnerabilityAudit": {
         "attributes": [
@@ -15228,7 +15438,38 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACTIVE",
+            "CREATING",
+            "DELETED",
+            "DELETING",
+            "FAILED"
+          ],
+          "lifecycle_details": [
+            "USAGE_DATA_NOT_FOUND_OR_NOT_AUTHORIZED",
+            "USAGE_DATA_PARSE_FAILED",
+            "USAGE_DATA_COMPRESSED_SIZE_LIMIT_EXCEEDED",
+            "USAGE_DATA_UNCOMPRESSED_SIZE_LIMIT_EXCEEDED",
+            "USAGE_DATA_UNKNOWN_ERROR"
+          ],
+          "max_observed_severity": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ],
+          "max_observed_severity_with_ignored": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ],
+          "build_type": ["MAVEN", "UNSET"]
+        }
       },
       "VulnerabilityAuditCollection": {
         "attributes": [["items", "list[VulnerabilityAuditSummary]", "items"]]
@@ -15247,10 +15488,23 @@
           ],
           ["max_permissible_severity", "str", "maxPermissibleSeverity"],
           ["exclusions", "list[str]", "exclusions"]
-        ]
+        ],
+        "enums": {
+          "max_permissible_severity": [
+            "UNSET",
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ]
+        }
       },
       "VulnerabilityAuditSource": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["EXTERNAL_RESOURCE", "OCI_RESOURCE", "UNKNOWN"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -15299,7 +15553,23 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "max_observed_severity": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ],
+          "max_observed_severity_with_ignored": [
+            "NONE",
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ]
+        }
       },
       "VulnerabilityDetails": {
         "attributes": [
@@ -15319,7 +15589,10 @@
           ["references", "list[str]", "references"],
           ["vulnerability_summary", "str", "vulnerabilitySummary"],
           ["vulnerability_description", "str", "vulnerabilityDescription"]
-        ]
+        ],
+        "enums": {
+          "severity": ["NONE", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        }
       },
       "VulnerabilityDetailsCollection": {
         "attributes": [["items", "list[VulnerabilityDetails]", "items"]]
@@ -15351,7 +15624,30 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_REMEDIATION_RECIPE",
+            "DELETE_REMEDIATION_RECIPE",
+            "MOVE_REMEDIATION_RECIPE",
+            "UPDATE_REMEDIATION_RECIPE",
+            "ACTIVATE_REMEDIATION_RECIPE",
+            "DEACTIVATE_REMEDIATION_RECIPE",
+            "CREATE_KNOWLEDGE_BASE",
+            "DELETE_KNOWLEDGE_BASE",
+            "MOVE_KNOWLEDGE_BASE",
+            "UPDATE_KNOWLEDGE_BASE"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -15379,7 +15675,17 @@
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"],
           ["metadata", "dict(str, str)", "metadata"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -15395,7 +15701,30 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_REMEDIATION_RECIPE",
+            "DELETE_REMEDIATION_RECIPE",
+            "MOVE_REMEDIATION_RECIPE",
+            "UPDATE_REMEDIATION_RECIPE",
+            "ACTIVATE_REMEDIATION_RECIPE",
+            "DEACTIVATE_REMEDIATION_RECIPE",
+            "CREATE_KNOWLEDGE_BASE",
+            "DELETE_KNOWLEDGE_BASE",
+            "MOVE_KNOWLEDGE_BASE",
+            "UPDATE_KNOWLEDGE_BASE"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestSummaryCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]

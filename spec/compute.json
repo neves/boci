@@ -54,6 +54,16 @@
       "dualStackByDefault": false,
       "serviceName": "compute"
     },
+    "core.virtual_network": {
+      "class": "oci.core.virtual_network_client.VirtualNetworkClient",
+      "regionalClient": true,
+      "basePath": "/20160918",
+      "endpointTemplate": "https://iaas.{region}.{dualStack?ds.oci.:}{secondLevelDomain}",
+      "endpointServiceName": "iaas",
+      "endpointTemplatePerRealm": {},
+      "dualStackByDefault": false,
+      "serviceName": "virtual_network"
+    },
     "work_requests.work_request": {
       "class": "oci.work_requests.work_request_client.WorkRequestClient",
       "regionalClient": true,
@@ -26761,6 +26771,7 @@
             "export_format",
             ["call", "pop", ["var", "kwargs"], "export_format"]
           ],
+          ["checkNoExtraKwargs", "export_image_to_object"],
           ["let", "export_image_details", ["dict"]],
           [
             "set",
@@ -26799,16 +26810,23 @@
             ],
             []
           ],
+          ["let", "export_image_internal.image_id", ["var", "image_id"]],
+          [
+            "let",
+            "export_image_internal.export_image_details",
+            ["var", "export_image_details"]
+          ],
+          ["let", "export_image_internal.if_match", ["var", "if_match"]],
           ["let", "export_image_internal.kwargs", ["dict"]],
           [
             "if",
-            ["cmp", "isnot", ["var", "if_match"], null],
+            ["cmp", "isnot", ["var", "export_image_internal.if_match"], null],
             [
               [
                 "set",
                 ["var", "export_image_internal.kwargs"],
                 "if_match",
-                ["var", "if_match"]
+                ["var", "export_image_internal.if_match"]
               ]
             ],
             []
@@ -26827,8 +26845,11 @@
               ["var", "export_image_internal.client"],
               [],
               [
-                ["image_id", ["var", "image_id"]],
-                ["export_image_details", ["var", "export_image_details"]]
+                ["image_id", ["var", "export_image_internal.image_id"]],
+                [
+                  "export_image_details",
+                  ["var", "export_image_internal.export_image_details"]
+                ]
               ],
               ["var", "export_image_internal.kwargs"]
             ]
@@ -27073,6 +27094,7 @@
             "export_format",
             ["call", "pop", ["var", "kwargs"], "export_format"]
           ],
+          ["checkNoExtraKwargs", "export_image_to_uri"],
           ["let", "export_image_details", ["dict"]],
           [
             "set",
@@ -27099,16 +27121,23 @@
             ],
             []
           ],
+          ["let", "export_image_internal.image_id", ["var", "image_id"]],
+          [
+            "let",
+            "export_image_internal.export_image_details",
+            ["var", "export_image_details"]
+          ],
+          ["let", "export_image_internal.if_match", ["var", "if_match"]],
           ["let", "export_image_internal.kwargs", ["dict"]],
           [
             "if",
-            ["cmp", "isnot", ["var", "if_match"], null],
+            ["cmp", "isnot", ["var", "export_image_internal.if_match"], null],
             [
               [
                 "set",
                 ["var", "export_image_internal.kwargs"],
                 "if_match",
-                ["var", "if_match"]
+                ["var", "export_image_internal.if_match"]
               ]
             ],
             []
@@ -27127,8 +27156,11 @@
               ["var", "export_image_internal.client"],
               [],
               [
-                ["image_id", ["var", "image_id"]],
-                ["export_image_details", ["var", "export_image_details"]]
+                ["image_id", ["var", "export_image_internal.image_id"]],
+                [
+                  "export_image_details",
+                  ["var", "export_image_internal.export_image_details"]
+                ]
               ],
               ["var", "export_image_internal.kwargs"]
             ]
@@ -27546,6 +27578,7 @@
             "freeform_tags",
             ["call", "pop", ["var", "kwargs"], "freeform_tags"]
           ],
+          ["checkNoExtraKwargs", "import_image_from_object"],
           ["let", "import_image_details", ["dict"]],
           [
             "set",
@@ -27610,68 +27643,124 @@
             ],
             []
           ],
+          [
+            "let",
+            "import_image_internal.compartment_id",
+            ["var", "compartment_id"]
+          ],
+          [
+            "let",
+            "import_image_internal.display_name",
+            ["var", "display_name"]
+          ],
+          [
+            "let",
+            "import_image_internal.import_image_details",
+            ["var", "import_image_details"]
+          ],
+          ["let", "import_image_internal.launch_mode", ["var", "launch_mode"]],
+          [
+            "let",
+            "import_image_internal.defined_tags",
+            ["var", "defined_tags"]
+          ],
+          [
+            "let",
+            "import_image_internal.freeform_tags",
+            ["var", "freeform_tags"]
+          ],
           ["let", "import_image_internal.kwargs", ["dict"]],
           ["let", "import_image_internal.details", ["dict"]],
           [
             "set",
             ["var", "import_image_internal.details"],
             "compartmentId",
-            ["var", "compartment_id"]
+            ["var", "import_image_internal.compartment_id"]
           ],
           [
             "set",
             ["var", "import_image_internal.details"],
             "imageSourceDetails",
-            ["var", "import_image_details"]
+            ["var", "import_image_internal.import_image_details"]
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.display_name"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "displayName",
-                ["var", "display_name"]
+                ["var", "import_image_internal.display_name"]
               ]
             ],
             []
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.defined_tags"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "definedTags",
-                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+                [
+                  "fn",
+                  "parse",
+                  "defined_tags",
+                  ["var", "import_image_internal.defined_tags"]
+                ]
               ]
             ],
             []
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.freeform_tags"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "freeformTags",
-                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+                [
+                  "fn",
+                  "parse",
+                  "freeform_tags",
+                  ["var", "import_image_internal.freeform_tags"]
+                ]
               ]
             ],
             []
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "launch_mode"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.launch_mode"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "launchMode",
-                ["var", "launch_mode"]
+                ["var", "import_image_internal.launch_mode"]
               ]
             ],
             []
@@ -28108,6 +28197,7 @@
             "freeform_tags",
             ["call", "pop", ["var", "kwargs"], "freeform_tags"]
           ],
+          ["checkNoExtraKwargs", "import_image_from_uri"],
           ["let", "import_image_details", ["dict"]],
           [
             "set",
@@ -28155,68 +28245,124 @@
             ],
             []
           ],
+          [
+            "let",
+            "import_image_internal.compartment_id",
+            ["var", "compartment_id"]
+          ],
+          [
+            "let",
+            "import_image_internal.display_name",
+            ["var", "display_name"]
+          ],
+          [
+            "let",
+            "import_image_internal.import_image_details",
+            ["var", "import_image_details"]
+          ],
+          ["let", "import_image_internal.launch_mode", ["var", "launch_mode"]],
+          [
+            "let",
+            "import_image_internal.defined_tags",
+            ["var", "defined_tags"]
+          ],
+          [
+            "let",
+            "import_image_internal.freeform_tags",
+            ["var", "freeform_tags"]
+          ],
           ["let", "import_image_internal.kwargs", ["dict"]],
           ["let", "import_image_internal.details", ["dict"]],
           [
             "set",
             ["var", "import_image_internal.details"],
             "compartmentId",
-            ["var", "compartment_id"]
+            ["var", "import_image_internal.compartment_id"]
           ],
           [
             "set",
             ["var", "import_image_internal.details"],
             "imageSourceDetails",
-            ["var", "import_image_details"]
+            ["var", "import_image_internal.import_image_details"]
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "display_name"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.display_name"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "displayName",
-                ["var", "display_name"]
+                ["var", "import_image_internal.display_name"]
               ]
             ],
             []
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "defined_tags"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.defined_tags"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "definedTags",
-                ["fn", "parse", "defined_tags", ["var", "defined_tags"]]
+                [
+                  "fn",
+                  "parse",
+                  "defined_tags",
+                  ["var", "import_image_internal.defined_tags"]
+                ]
               ]
             ],
             []
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "freeform_tags"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.freeform_tags"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "freeformTags",
-                ["fn", "parse", "freeform_tags", ["var", "freeform_tags"]]
+                [
+                  "fn",
+                  "parse",
+                  "freeform_tags",
+                  ["var", "import_image_internal.freeform_tags"]
+                ]
               ]
             ],
             []
           ],
           [
             "if",
-            ["cmp", "isnot", ["var", "launch_mode"], null],
+            [
+              "cmp",
+              "isnot",
+              ["var", "import_image_internal.launch_mode"],
+              null
+            ],
             [
               [
                 "set",
                 ["var", "import_image_internal.details"],
                 "launchMode",
-                ["var", "launch_mode"]
+                ["var", "import_image_internal.launch_mode"]
               ]
             ],
             []
@@ -32723,6 +32869,151 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          [
+            "let",
+            "instance_id",
+            ["call", "pop", ["var", "kwargs"], "instance_id"]
+          ],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "wait_for_state",
+            ["call", "pop", ["var", "kwargs"], "wait_for_state"]
+          ],
+          [
+            "let",
+            "max_wait_seconds",
+            ["call", "pop", ["var", "kwargs"], "max_wait_seconds"]
+          ],
+          [
+            "let",
+            "wait_interval_seconds",
+            ["call", "pop", ["var", "kwargs"], "wait_interval_seconds"]
+          ],
+          ["checkNoExtraKwargs", "change_instance_compartment"],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "instance_id"]],
+              [
+                "cmp",
+                "==",
+                ["fn", "len", ["call", "strip", ["var", "instance_id"]]],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --instance-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "if_match"], null],
+            [["set", ["var", "kwargs"], "if_match", ["var", "if_match"]]],
+            []
+          ],
+          [
+            "set",
+            ["var", "kwargs"],
+            "opc_request_id",
+            ["fn", "requestId", ["item", ["fn", "ctxObj"], "request_id"]]
+          ],
+          [
+            "let",
+            "details",
+            ["dict", ["compartmentId", ["var", "compartment_id"]]]
+          ],
+          ["let", "client", ["fn", "client", "core", "compute"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                ["instance_id", ["var", "instance_id"]],
+                ["change_instance_compartment_details", ["var", "details"]]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "let",
+            "work_request_client",
+            ["fn", "client", "core", "work_request"]
+          ],
+          [
+            "if",
+            ["var", "wait_for_state"],
+            [
+              [
+                "do",
+                [
+                  "fn",
+                  "echo",
+                  "Unable to wait for the work request to enter the specified state",
+                  ["fn", "stderr"],
+                  true,
+                  false
+                ]
+              ]
+            ],
+            []
+          ],
+          ["render", ["var", "result"]]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "change_instance_compartment",
+          "http": "POST",
+          "path": "/instances/{instanceId}/actions/changeCompartment",
+          "positionalArgs": [
+            "instance_id",
+            "change_instance_compartment_details"
+          ],
+          "pathParams": {
+            "instanceId": "instance_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            },
+            "if-match": {
+              "arg": "if_match"
+            },
+            "opc-request-id": {
+              "arg": "opc_request_id"
+            },
+            "opc-retry-token": {
+              "arg": "opc_retry_token"
+            }
+          },
+          "body": "change_instance_compartment_details"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -38691,6 +38982,398 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "compartment_id",
+            ["call", "pop", ["var", "kwargs"], "compartment_id"]
+          ],
+          [
+            "let",
+            "availability_domain",
+            ["call", "pop", ["var", "kwargs"], "availability_domain"]
+          ],
+          [
+            "let",
+            "instance_id",
+            ["call", "pop", ["var", "kwargs"], "instance_id"]
+          ],
+          ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
+          ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["let", "all_pages", ["call", "pop", ["var", "kwargs"], "all_pages"]],
+          ["let", "page_size", ["call", "pop", ["var", "kwargs"], "page_size"]],
+          ["checkNoExtraKwargs", "list_vnics"],
+          [
+            "if",
+            ["and", ["var", "all_pages"], ["var", "limit"]],
+            [
+              [
+                "usage",
+                "If you provide the --all option you cannot provide the --limit option"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            [
+              "and",
+              ["not", ["var", "compartment_id"]],
+              ["not", ["var", "instance_id"]]
+            ],
+            [["usage", "--compartment-id or --instance-id must be provided"]],
+            []
+          ],
+          ["let", "client", ["fn", "client", "core", "compute"]],
+          [
+            "if",
+            ["not", ["var", "compartment_id"]],
+            [
+              [
+                "let",
+                "compartment_id",
+                [
+                  "attr",
+                  "compartment_id",
+                  [
+                    "attr",
+                    "data",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [["instance_id", ["var", "instance_id"]]],
+                      null
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "availability_domain"], null],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "availability_domain",
+                ["var", "availability_domain"]
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "limit"], null],
+            [["set", ["var", "kwargs"], "limit", ["var", "limit"]]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "isnot", ["var", "page"], null],
+            [["set", ["var", "kwargs"], "page", ["var", "page"]]],
+            []
+          ],
+          [
+            "if",
+            ["var", "all_pages"],
+            [
+              [
+                "if",
+                ["var", "page_size"],
+                [["set", ["var", "kwargs"], "limit", ["var", "page_size"]]],
+                []
+              ],
+              [
+                "let",
+                "vnic_attachments_result",
+                [
+                  "listCall",
+                  "all",
+                  false,
+                  1,
+                  ["var", "client"],
+                  [false, false],
+                  [
+                    ["compartment_id", ["var", "compartment_id"]],
+                    ["instance_id", ["var", "instance_id"]]
+                  ],
+                  ["var", "kwargs"]
+                ]
+              ]
+            ],
+            [
+              [
+                "if",
+                ["cmp", "isnot", ["var", "limit"], null],
+                [
+                  [
+                    "let",
+                    "vnic_attachments_result",
+                    [
+                      "listCall",
+                      "limit",
+                      false,
+                      1,
+                      ["var", "client"],
+                      [
+                        ["var", "limit"],
+                        ["var", "page_size"]
+                      ],
+                      [
+                        ["compartment_id", ["var", "compartment_id"]],
+                        ["instance_id", ["var", "instance_id"]]
+                      ],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "let",
+                    "vnic_attachments_result",
+                    [
+                      "sdk",
+                      1,
+                      ["var", "client"],
+                      [],
+                      [
+                        ["compartment_id", ["var", "compartment_id"]],
+                        ["instance_id", ["var", "instance_id"]]
+                      ],
+                      ["var", "kwargs"]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "let",
+            "networking_client",
+            ["fn", "client", "core", "virtual_network"]
+          ],
+          ["let", "result", ["list"]],
+          [
+            "for",
+            "vnic_attachment",
+            ["attr", "data", ["var", "vnic_attachments_result"]],
+            [
+              [
+                "if",
+                [
+                  "cmp",
+                  "==",
+                  ["attr", "lifecycle_state", ["var", "vnic_attachment"]],
+                  "ATTACHED"
+                ],
+                [
+                  [
+                    "tryMulti",
+                    [
+                      [
+                        "let",
+                        "vnic",
+                        [
+                          "attr",
+                          "data",
+                          [
+                            "sdk",
+                            2,
+                            ["var", "networking_client"],
+                            [["attr", "vnic_id", ["var", "vnic_attachment"]]],
+                            [],
+                            null
+                          ]
+                        ]
+                      ],
+                      [
+                        "do",
+                        ["call", "append", ["var", "result"], ["var", "vnic"]]
+                      ]
+                    ],
+                    [
+                      [
+                        "ServiceError",
+                        "service_error",
+                        [
+                          [
+                            "if",
+                            [
+                              "cmp",
+                              "==",
+                              ["attr", "status", ["var", "service_error"]],
+                              404
+                            ],
+                            [
+                              [
+                                "do",
+                                [
+                                  "fn",
+                                  "echo",
+                                  [
+                                    "call",
+                                    "format",
+                                    "Either VNIC with ID {} does not exist or you are not authorized to access it.",
+                                    [
+                                      "attr",
+                                      "vnic_id",
+                                      ["var", "vnic_attachment"]
+                                    ]
+                                  ],
+                                  ["fn", "stderr"],
+                                  true,
+                                  false
+                                ]
+                              ]
+                            ],
+                            [["reraise"]]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "or",
+              ["not", ["var", "result"]],
+              ["not", ["fn", "len", ["var", "result"]]]
+            ],
+            [
+              [
+                "if",
+                ["var", "instance_id"],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "No VNICs found for this instance. Please check that the instance is in RUNNING state.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ]
+                ],
+                [
+                  [
+                    "do",
+                    [
+                      "fn",
+                      "echo",
+                      "No VNICs found under this compartment. Please check that the compartment has instances in RUNNING state.",
+                      ["fn", "stderr"],
+                      true,
+                      false
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          [
+            "renderData",
+            ["var", "result"],
+            ["attr", "headers", ["var", "vnic_attachments_result"]],
+            false,
+            true
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "get_instance",
+          "http": "GET",
+          "path": "/instances/{instanceId}",
+          "positionalArgs": ["instance_id"],
+          "pathParams": {
+            "instanceId": "instance_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Instance"
+        },
+        {
+          "client": "core.compute",
+          "method": "list_vnic_attachments",
+          "http": "GET",
+          "path": "/vnicAttachments",
+          "positionalArgs": ["compartment_id"],
+          "pathParams": {},
+          "queryParams": {
+            "availabilityDomain": {
+              "arg": "availability_domain"
+            },
+            "compartmentId": {
+              "arg": "compartment_id"
+            },
+            "instanceId": {
+              "arg": "instance_id"
+            },
+            "limit": {
+              "arg": "limit"
+            },
+            "page": {
+              "arg": "page"
+            },
+            "vnicId": {
+              "arg": "vnic_id"
+            }
+          },
+          "headerParams": {
+            "accept": {
+              "value": "application/json, application/x-json-stream"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "list[VnicAttachment]"
+        },
+        {
+          "client": "core.virtual_network",
+          "method": "get_vnic",
+          "http": "GET",
+          "path": "/vnics/{vnicId}",
+          "positionalArgs": ["vnic_id"],
+          "pathParams": {
+            "vnicId": "vnic_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Vnic"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -44258,6 +44941,7 @@
             "freeform_tags",
             ["call", "pop", ["var", "kwargs"], "freeform_tags"]
           ],
+          ["checkNoExtraKwargs", "create_instance_console_connection"],
           [
             "let",
             "kwargs",
@@ -44967,6 +45651,168 @@
       },
       "kind": "custom",
       "tier": "C",
+      "program": {
+        "body": [
+          ["let", "from_json", ["call", "pop", ["var", "kwargs"], "from_json"]],
+          [
+            "let",
+            "instance_console_connection_id",
+            ["call", "pop", ["var", "kwargs"], "instance_console_connection_id"]
+          ],
+          [
+            "let",
+            "private_key_file",
+            ["call", "pop", ["var", "kwargs"], "private_key_file"]
+          ],
+          [
+            "let",
+            "local_vnc_port",
+            ["call", "pop", ["var", "kwargs"], "local_vnc_port"]
+          ],
+          [
+            "let",
+            "ssh_proxy_port",
+            ["call", "pop", ["var", "kwargs"], "ssh_proxy_port"]
+          ],
+          ["checkNoExtraKwargs", "get_plink_connection_string"],
+          [
+            "if",
+            [
+              "and",
+              ["fn", "isstr", ["var", "instance_console_connection_id"]],
+              [
+                "cmp",
+                "==",
+                [
+                  "fn",
+                  "len",
+                  ["call", "strip", ["var", "instance_console_connection_id"]]
+                ],
+                0
+              ]
+            ],
+            [
+              [
+                "usage",
+                "Parameter --instance-console-connection-id cannot be whitespace or empty string"
+              ]
+            ],
+            []
+          ],
+          ["let", "kwargs", ["dict"]],
+          ["let", "client", ["fn", "client", "core", "compute"]],
+          [
+            "let",
+            "result",
+            [
+              "sdk",
+              0,
+              ["var", "client"],
+              [],
+              [
+                [
+                  "instance_console_connection_id",
+                  ["var", "instance_console_connection_id"]
+                ]
+              ],
+              ["var", "kwargs"]
+            ]
+          ],
+          [
+            "let",
+            "instance_console_connection",
+            ["attr", "data", ["var", "result"]]
+          ],
+          [
+            "if",
+            ["cmp", "is", ["var", "local_vnc_port"], null],
+            [["let", "local_vnc_port", 5900]],
+            []
+          ],
+          [
+            "if",
+            ["cmp", "is", ["var", "ssh_proxy_port"], null],
+            [["let", "ssh_proxy_port", 5905]],
+            []
+          ],
+          [
+            "let",
+            "m",
+            [
+              "call",
+              "search",
+              ["var", "re"],
+              "(instance-console\\.[a-z0-9-]+\\.(oraclecloud|oracleiaas)\\.com)",
+              [
+                "attr",
+                "connection_string",
+                ["var", "instance_console_connection"]
+              ]
+            ]
+          ],
+          ["let", "intermediate_host", ["call", "group", ["var", "m"], 0]],
+          [
+            "let",
+            "connection_template",
+            "Start-Job {{echo N | plink -ssh -N -i \"{private_key_file}\" -P 443 -l {instance_console_connection_id} {intermediate_host} -L {ssh_proxy_port}:{instance_id}:{ssh_proxy_port}}}; sleep 5 ; plink -L {local_vnc_port}:localhost:5900 localhost -P {ssh_proxy_port} -N -i \"{private_key_file}\" -l {instance_console_connection_id}"
+          ],
+          [
+            "let",
+            "connection_string",
+            [
+              "format",
+              ["var", "connection_template"],
+              [],
+              [
+                [
+                  "instance_id",
+                  [
+                    "attr",
+                    "instance_id",
+                    ["var", "instance_console_connection"]
+                  ]
+                ],
+                [
+                  "instance_console_connection_id",
+                  ["attr", "id", ["var", "instance_console_connection"]]
+                ],
+                ["intermediate_host", ["var", "intermediate_host"]],
+                ["private_key_file", ["var", "private_key_file"]],
+                ["local_vnc_port", ["var", "local_vnc_port"]],
+                ["ssh_proxy_port", ["var", "ssh_proxy_port"]]
+              ],
+              null
+            ]
+          ],
+          [
+            "do",
+            ["fn", "echo", ["var", "connection_string"], null, true, false]
+          ]
+        ],
+        "wrapExceptions": true
+      },
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "get_instance_console_connection",
+          "http": "GET",
+          "path": "/instanceConsoleConnections/{instanceConsoleConnectionId}",
+          "positionalArgs": ["instance_console_connection_id"],
+          "pathParams": {
+            "instanceConsoleConnectionId": "instance_console_connection_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "InstanceConsoleConnection"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -51795,6 +52641,225 @@
         ],
         "wrapExceptions": true
       },
+      "program": {
+        "body": [
+          [
+            "if",
+            [
+              "and",
+              ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+              ["not", ["item", ["var", "kwargs"], "instance_id"]]
+            ],
+            [
+              [
+                "usage",
+                "Either --compartment-id or --instance-id has to be provided"
+              ]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["not", ["item", ["var", "kwargs"], "compartment_id"]],
+            [
+              ["let", "client", ["fn", "client", "core", "compute"]],
+              [
+                "set",
+                ["var", "kwargs"],
+                "compartment_id",
+                [
+                  "attr",
+                  "compartment_id",
+                  [
+                    "attr",
+                    "data",
+                    [
+                      "sdk",
+                      0,
+                      ["var", "client"],
+                      [],
+                      [
+                        [
+                          "instance_id",
+                          ["item", ["var", "kwargs"], "instance_id"]
+                        ]
+                      ],
+                      null
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            []
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
+        "callback": "services.core.src.oci_cli_compute.generated.compute_cli.list_volume_attachments",
+        "complexTypes": {},
+        "params": [
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "availability_domain",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "limit",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "page",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "instance_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "volume_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "all_pages",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "page_size",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
+      },
+      "operation": {
+        "client": "core.compute",
+        "method": "list_volume_attachments",
+        "http": "GET",
+        "path": "/volumeAttachments",
+        "positionalArgs": ["compartment_id"],
+        "pathParams": {},
+        "queryParams": {
+          "availabilityDomain": {
+            "arg": "availability_domain"
+          },
+          "compartmentId": {
+            "arg": "compartment_id"
+          },
+          "limit": {
+            "arg": "limit"
+          },
+          "page": {
+            "arg": "page"
+          },
+          "instanceId": {
+            "arg": "instance_id"
+          },
+          "volumeId": {
+            "arg": "volume_id"
+          }
+        },
+        "headerParams": {
+          "accept": {
+            "value": "application/json, application/x-json-stream"
+          },
+          "content-type": {
+            "value": "application/json"
+          }
+        },
+        "responseType": "list[VolumeAttachment]",
+        "paginated": true
+      },
+      "bindings": [
+        {
+          "target": "kwarg",
+          "key": ["compartment_id"],
+          "param": "compartment_id"
+        },
+        {
+          "target": "kwarg",
+          "key": ["availability_domain"],
+          "param": "availability_domain",
+          "when": "availability_domain is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "limit",
+          "when": "limit is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["page"],
+          "param": "page",
+          "when": "page is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["instance_id"],
+          "param": "instance_id",
+          "when": "instance_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["volume_id"],
+          "param": "volume_id",
+          "when": "volume_id is not None"
+        },
+        {
+          "target": "kwarg",
+          "key": ["limit"],
+          "param": "page_size",
+          "when": "all_pages and page_size"
+        }
+      ],
+      "sdkOperations": [
+        {
+          "client": "core.compute",
+          "method": "get_instance",
+          "http": "GET",
+          "path": "/instances/{instanceId}",
+          "positionalArgs": ["instance_id"],
+          "pathParams": {
+            "instanceId": "instance_id"
+          },
+          "queryParams": {},
+          "headerParams": {
+            "accept": {
+              "value": "application/json"
+            },
+            "content-type": {
+              "value": "application/json"
+            }
+          },
+          "responseType": "Instance"
+        }
+      ],
       "params": [
         {
           "kind": "option",
@@ -52936,6 +54001,20 @@
           ],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "AmdMilanBmGpuPlatformConfig": {
@@ -52972,6 +54051,20 @@
           ],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "PlatformConfig"
       },
       "AmdMilanBmLaunchInstancePlatformConfig": {
@@ -53009,6 +54102,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "AmdMilanBmPlatformConfig": {
@@ -53046,6 +54153,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "PlatformConfig"
       },
       "AmdRomeBmGpuLaunchInstancePlatformConfig": {
@@ -53082,6 +54203,20 @@
           ],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "AmdRomeBmGpuPlatformConfig": {
@@ -53118,6 +54253,20 @@
           ],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "PlatformConfig"
       },
       "AmdRomeBmLaunchInstancePlatformConfig": {
@@ -53155,6 +54304,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "AmdRomeBmPlatformConfig": {
@@ -53192,6 +54355,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "PlatformConfig"
       },
       "AmdVmLaunchInstancePlatformConfig": {
@@ -53211,6 +54388,19 @@
             "isSymmetricMultiThreadingEnabled"
           ]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "AmdVmPlatformConfig": {
@@ -53230,6 +54420,19 @@
             "isSymmetricMultiThreadingEnabled"
           ]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ]
+        },
         "discriminator": "PlatformConfig"
       },
       "AmdVmUpdateInstancePlatformConfig": {
@@ -53241,6 +54444,9 @@
             "isSymmetricMultiThreadingEnabled"
           ]
         ],
+        "strictEnums": {
+          "type": ["AMD_VM", "INTEL_VM"]
+        },
         "discriminator": "UpdateInstancePlatformConfig"
       },
       "AppCatalogListing": {
@@ -53265,7 +54471,18 @@
           ["compatible_shapes", "list[str]", "compatibleShapes"],
           ["accessible_ports", "list[int]", "accessiblePorts"],
           ["allowed_actions", "list[str]", "allowedActions"]
-        ]
+        ],
+        "enums": {
+          "allowed_actions": [
+            "SNAPSHOT",
+            "BOOT_VOLUME_DETACH",
+            "PRESERVE_BOOT_VOLUME",
+            "SERIAL_CONSOLE_ACCESS",
+            "BOOT_RECOVERY",
+            "BACKUP_BOOT_VOLUME",
+            "CAPTURE_CONSOLE_HISTORY"
+          ]
+        }
       },
       "AppCatalogListingResourceVersionAgreements": {
         "attributes": [
@@ -53323,6 +54540,9 @@
           ["source", "str", "source"],
           ["default_value", "bool", "defaultValue"]
         ],
+        "enums": {
+          "source": ["GLOBAL", "IMAGE"]
+        },
         "discriminator": "ImageCapabilitySchemaDescriptor"
       },
       "BootVolumeAttachment": {
@@ -53347,7 +54567,11 @@
             "isEncryptionInTransitEnabled"
           ],
           ["encryption_in_transit_type", "str", "encryptionInTransitType"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ATTACHING", "ATTACHED", "DETACHING", "DETACHED"],
+          "encryption_in_transit_type": ["NONE", "BM_ENCRYPTION_IN_TRANSIT"]
+        }
       },
       "BsNvmeAttachmentsConfig": {
         "attributes": [
@@ -53408,7 +54632,14 @@
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["nvmes", "int", "nvmes"],
           ["baseline_ocpu_utilization", "str", "baselineOcpuUtilization"]
-        ]
+        ],
+        "enums": {
+          "baseline_ocpu_utilization": [
+            "BASELINE_1_8",
+            "BASELINE_1_2",
+            "BASELINE_1_1"
+          ]
+        }
       },
       "CapacityReportShapeAvailability": {
         "attributes": [
@@ -53421,7 +54652,14 @@
           ],
           ["available_count", "int", "availableCount"],
           ["availability_status", "str", "availabilityStatus"]
-        ]
+        ],
+        "enums": {
+          "availability_status": [
+            "OUT_OF_HOST_CAPACITY",
+            "HARDWARE_NOT_SUPPORTED",
+            "AVAILABLE"
+          ]
+        }
       },
       "CapacityReservationInstanceSummary": {
         "attributes": [
@@ -53440,6 +54678,9 @@
       },
       "CapacitySource": {
         "attributes": [["capacity_type", "str", "capacityType"]],
+        "enums": {
+          "capacity_type": ["DEDICATED"]
+        },
         "discriminator": {
           "field": "capacityType",
           "values": {
@@ -53516,7 +54757,17 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["time_created", "datetime", "timeCreated"],
           ["used_instance_count", "int", "usedInstanceCount"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACTIVE",
+            "CREATING",
+            "UPDATING",
+            "MOVING",
+            "DELETED",
+            "DELETING"
+          ]
+        }
       },
       "ComputeCapacityReservationInstanceShapeSummary": {
         "attributes": [
@@ -53551,7 +54802,16 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACTIVE",
+            "CREATING",
+            "UPDATING",
+            "DELETED",
+            "DELETING"
+          ]
+        }
       },
       "ComputeCapacityTopologyCollection": {
         "attributes": [
@@ -53587,7 +54847,10 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "ComputeClusterCollection": {
         "attributes": [["items", "list[ComputeClusterSummary]", "items"]]
@@ -53600,6 +54863,13 @@
           ["target_memory_fabric_ids", "list[str]", "targetMemoryFabricIds"],
           ["logical_placement_constraint", "str", "logicalPlacementConstraint"]
         ],
+        "enums": {
+          "logical_placement_constraint": [
+            "SINGLE_TIER",
+            "SINGLE_BLOCK",
+            "PACKED_DISTRIBUTION_MULTI_BLOCK"
+          ]
+        },
         "discriminator": "PlacementConstraintDetails"
       },
       "ComputeClusterSummary": {
@@ -53686,7 +54956,16 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["display_name", "str", "displayName"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "ComputeGpuMemoryClusterCollection": {
         "attributes": [
@@ -53710,7 +54989,22 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["display_name", "str", "displayName"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "MOVING",
+            "PROVISIONING",
+            "RUNNING",
+            "STARTING",
+            "STOPPING",
+            "STOPPED",
+            "SUSPENDING",
+            "SUSPENDED",
+            "CREATING_IMAGE",
+            "TERMINATING",
+            "TERMINATED"
+          ]
+        }
       },
       "ComputeGpuMemoryClusterScaleConfig": {
         "attributes": [
@@ -53768,7 +55062,22 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["display_name", "str", "displayName"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "AVAILABLE",
+            "OCCUPIED",
+            "PROVISIONING",
+            "DEGRADED",
+            "UNAVAILABLE"
+          ],
+          "fabric_health": ["HEALTHY", "UNHEALTHY"],
+          "firmware_update_state": [
+            "WILL_UPDATE",
+            "NO_UPDATE",
+            "SKIP_RECYCLE_ENABLED"
+          ]
+        }
       },
       "ComputeGpuMemoryFabricCollection": {
         "attributes": [
@@ -53802,7 +55111,14 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["display_name", "str", "displayName"]
-        ]
+        ],
+        "enums": {
+          "firmware_update_state": [
+            "WILL_UPDATE",
+            "NO_UPDATE",
+            "SKIP_RECYCLE_ENABLED"
+          ]
+        }
       },
       "ComputeHost": {
         "attributes": [
@@ -53843,7 +55159,25 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["display_name", "str", "displayName"],
           ["freeform_tags", "dict(str, str)", "freeformTags"]
-        ]
+        ],
+        "enums": {
+          "configuration_state": [
+            "CONFORMANT",
+            "NON_CONFORMANT",
+            "CHECKING",
+            "PRE_APPLYING",
+            "APPLYING",
+            "UNKNOWN"
+          ],
+          "health": ["HEALTHY", "UNHEALTHY"],
+          "lifecycle_state": [
+            "AVAILABLE",
+            "OCCUPIED",
+            "PROVISIONING",
+            "REPAIR",
+            "UNAVAILABLE"
+          ]
+        }
       },
       "ComputeHostCollection": {
         "attributes": [["items", "list[ComputeHostSummary]", "items"]]
@@ -53854,7 +55188,19 @@
           ["configuration_state", "str", "configurationState"],
           ["firmware_bundle_id", "str", "firmwareBundleId"],
           ["recycle_level", "str", "recycleLevel"]
-        ]
+        ],
+        "enums": {
+          "type": ["FIRMWARE", "RECYCLE"],
+          "configuration_state": [
+            "CONFORMANT",
+            "NON_CONFORMANT",
+            "CHECKING",
+            "PRE_APPLYING",
+            "APPLYING",
+            "UNKNOWN"
+          ],
+          "recycle_level": ["SKIP_RECYCLE", "FULL_RECYCLE"]
+        }
       },
       "ComputeHostConfigurationData": {
         "attributes": [
@@ -53884,7 +55230,10 @@
             "bool",
             "isTargetedPlacementRequired"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "ComputeHostGroupCollection": {
         "attributes": [["items", "list[ComputeHostGroupSummary]", "items"]]
@@ -53977,7 +55326,10 @@
             "schemaData"
           ],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["CREATING", "ACTIVE", "DELETED"]
+        }
       },
       "ComputeImageCapabilitySchemaSummary": {
         "attributes": [
@@ -54029,7 +55381,15 @@
           ["instance_id", "str", "instanceId"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "REQUESTED",
+            "GETTING-HISTORY",
+            "SUCCEEDED",
+            "FAILED"
+          ]
+        }
       },
       "CreateCapacityReportShapeAvailabilityDetails": {
         "attributes": [
@@ -54099,6 +55459,9 @@
           ["capacity_type", "str", "capacityType"],
           ["compartment_id", "str", "compartmentId"]
         ],
+        "enums": {
+          "capacity_type": ["DEDICATED"]
+        },
         "discriminator": "CapacitySource"
       },
       "DedicatedVmHost": {
@@ -54133,7 +55496,17 @@
           ],
           ["capacity_bins", "list[CapacityBin]", "capacityBins"],
           ["compute_bare_metal_host_id", "str", "computeBareMetalHostId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DedicatedVmHostInstanceShapeSummary": {
         "attributes": [
@@ -54186,7 +55559,17 @@
             "float",
             "remainingLocalVolumeInGBs"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "Device": {
         "attributes": [
@@ -54226,6 +55609,18 @@
             "isVolumeCreatedDuringLaunch"
           ]
         ],
+        "enums": {
+          "lifecycle_state": ["ATTACHING", "ATTACHED", "DETACHING", "DETACHED"],
+          "iscsi_login_state": [
+            "UNKNOWN",
+            "LOGGING_IN",
+            "LOGIN_SUCCEEDED",
+            "LOGIN_FAILED",
+            "LOGGING_OUT",
+            "LOGOUT_SUCCEEDED",
+            "LOGOUT_FAILED"
+          ]
+        },
         "discriminator": "VolumeAttachment"
       },
       "EnumIntegerImageCapabilityDescriptor": {
@@ -54235,6 +55630,9 @@
           ["values", "list[int]", "values"],
           ["default_value", "int", "defaultValue"]
         ],
+        "enums": {
+          "source": ["GLOBAL", "IMAGE"]
+        },
         "discriminator": "ImageCapabilitySchemaDescriptor"
       },
       "EnumStringImageCapabilitySchemaDescriptor": {
@@ -54244,6 +55642,9 @@
           ["values", "list[str]", "values"],
           ["default_value", "str", "defaultValue"]
         ],
+        "enums": {
+          "source": ["GLOBAL", "IMAGE"]
+        },
         "discriminator": "ImageCapabilitySchemaDescriptor"
       },
       "FirmwareBundle": {
@@ -54261,7 +55662,10 @@
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "INACTIVE", "DELETE_SCHEDULED"]
+        }
       },
       "FirmwareBundleSummary": {
         "attributes": [
@@ -54324,6 +55728,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "GenericBmPlatformConfig": {
@@ -54361,6 +55779,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        },
         "discriminator": "PlatformConfig"
       },
       "HostGroupConfiguration": {
@@ -54374,7 +55806,11 @@
             "quickRecycleSettings"
           ],
           ["state", "str", "state"]
-        ]
+        ],
+        "enums": {
+          "recycle_level": ["SKIP_RECYCLE", "FULL_RECYCLE"],
+          "state": ["VALID", "INVALID"]
+        }
       },
       "HostGroupPlacementConstraintDetails": {
         "attributes": [
@@ -54428,6 +55864,19 @@
             "isAgentAutoIscsiLoginEnabled"
           ]
         ],
+        "enums": {
+          "lifecycle_state": ["ATTACHING", "ATTACHED", "DETACHING", "DETACHED"],
+          "iscsi_login_state": [
+            "UNKNOWN",
+            "LOGGING_IN",
+            "LOGIN_SUCCEEDED",
+            "LOGIN_FAILED",
+            "LOGGING_OUT",
+            "LOGOUT_SUCCEEDED",
+            "LOGOUT_FAILED"
+          ],
+          "encryption_in_transit_type": ["NONE", "BM_ENCRYPTION_IN_TRANSIT"]
+        },
         "discriminator": "VolumeAttachment"
       },
       "Image": {
@@ -54449,13 +55898,34 @@
           ["size_in_mbs", "int", "sizeInMBs"],
           ["billable_size_in_gbs", "int", "billableSizeInGBs"],
           ["time_created", "datetime", "timeCreated"]
-        ]
+        ],
+        "enums": {
+          "launch_mode": [
+            "NATIVE",
+            "EMULATED",
+            "PARAVIRTUALIZED",
+            "ACCELERATEDPV",
+            "CUSTOM"
+          ],
+          "lifecycle_state": [
+            "PROVISIONING",
+            "IMPORTING",
+            "AVAILABLE",
+            "EXPORTING",
+            "DISABLED",
+            "DELETED"
+          ],
+          "listing_type": ["COMMUNITY", "NONE"]
+        }
       },
       "ImageCapabilitySchemaDescriptor": {
         "attributes": [
           ["descriptor_type", "str", "descriptorType"],
           ["source", "str", "source"]
         ],
+        "enums": {
+          "source": ["GLOBAL", "IMAGE"]
+        },
         "discriminator": {
           "field": "descriptorType",
           "values": {
@@ -54501,6 +55971,9 @@
           ["source_image_type", "str", "sourceImageType"],
           ["source_type", "str", "sourceType"]
         ],
+        "strictEnums": {
+          "source_image_type": ["QCOW2", "VMDK"]
+        },
         "discriminator": {
           "field": "sourceType",
           "values": {
@@ -54520,6 +55993,9 @@
           ["namespace_name", "str", "namespaceName"],
           ["object_name", "str", "objectName"]
         ],
+        "strictEnums": {
+          "source_image_type": ["QCOW2", "VMDK"]
+        },
         "discriminator": "ImageSourceDetails"
       },
       "ImageSourceViaObjectStorageUriDetails": {
@@ -54530,6 +56006,9 @@
           ["source_type", "str", "sourceType"],
           ["source_uri", "str", "sourceUri"]
         ],
+        "strictEnums": {
+          "source_image_type": ["QCOW2", "VMDK"]
+        },
         "discriminator": "ImageSourceDetails"
       },
       "Instance": {
@@ -54590,7 +56069,28 @@
           ["platform_config", "PlatformConfig", "platformConfig"],
           ["instance_configuration_id", "str", "instanceConfigurationId"],
           ["licensing_configs", "list[LicensingConfig]", "licensingConfigs"]
-        ]
+        ],
+        "enums": {
+          "security_attributes_state": ["STABLE", "UPDATING"],
+          "launch_mode": [
+            "NATIVE",
+            "EMULATED",
+            "PARAVIRTUALIZED",
+            "ACCELERATEDPV",
+            "CUSTOM"
+          ],
+          "lifecycle_state": [
+            "MOVING",
+            "PROVISIONING",
+            "RUNNING",
+            "STARTING",
+            "STOPPING",
+            "STOPPED",
+            "CREATING_IMAGE",
+            "TERMINATING",
+            "TERMINATED"
+          ]
+        }
       },
       "InstanceAgentConfig": {
         "attributes": [
@@ -54614,13 +56114,19 @@
         "attributes": [
           ["name", "str", "name"],
           ["desired_state", "str", "desiredState"]
-        ]
+        ],
+        "enums": {
+          "desired_state": ["ENABLED", "DISABLED"]
+        }
       },
       "InstanceAvailabilityConfig": {
         "attributes": [
           ["is_live_migration_preferred", "bool", "isLiveMigrationPreferred"],
           ["recovery_action", "str", "recoveryAction"]
-        ]
+        ],
+        "enums": {
+          "recovery_action": ["RESTORE_INSTANCE", "STOP_INSTANCE"]
+        }
       },
       "InstanceConsoleConnection": {
         "attributes": [
@@ -54634,7 +56140,16 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["service_host_key_fingerprint", "str", "serviceHostKeyFingerprint"],
           ["vnc_connection_string", "str", "vncConnectionString"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACTIVE",
+            "CREATING",
+            "DELETED",
+            "DELETING",
+            "FAILED"
+          ]
+        }
       },
       "InstanceCredentials": {
         "attributes": [
@@ -54673,7 +56188,36 @@
           ["correlation_token", "str", "correlationToken"],
           ["can_delete_local_storage", "bool", "canDeleteLocalStorage"],
           ["additional_details", "dict(str, str)", "additionalDetails"]
-        ]
+        ],
+        "enums": {
+          "maintenance_category": [
+            "EMERGENCY",
+            "MANDATORY",
+            "FLEXIBLE",
+            "OPTIONAL",
+            "NOTIFICATION"
+          ],
+          "maintenance_reason": [
+            "EVACUATION",
+            "ENVIRONMENTAL_FACTORS",
+            "DECOMMISSION",
+            "HARDWARE_REPLACEMENT",
+            "FIRMWARE_UPDATE",
+            "SECURITY_UPDATE"
+          ],
+          "instance_action": ["REBOOT_MIGRATION", "TERMINATE", "STOP", "NONE"],
+          "alternative_resolution_actions": ["REBOOT_MIGRATION", "TERMINATE"],
+          "lifecycle_state": [
+            "SCHEDULED",
+            "QUEUED",
+            "STARTED",
+            "PROCESSING",
+            "SUCCEEDED",
+            "FAILED",
+            "CANCELED"
+          ],
+          "created_by": ["CUSTOMER", "SYSTEM"]
+        }
       },
       "InstanceMaintenanceEventSummary": {
         "attributes": [
@@ -54703,7 +56247,10 @@
           ["created_by", "str", "createdBy"],
           ["description", "str", "description"],
           ["correlation_token", "str", "correlationToken"]
-        ]
+        ],
+        "enums": {
+          "alternative_resolution_actions": ["REBOOT_MIGRATION", "TERMINATE"]
+        }
       },
       "InstanceMaintenanceReboot": {
         "attributes": [
@@ -54757,7 +56304,10 @@
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["resource_management", "str", "resourceManagement"]
-        ]
+        ],
+        "enums": {
+          "resource_management": ["DYNAMIC", "STATIC"]
+        }
       },
       "InstanceShapeConfig": {
         "attributes": [
@@ -54783,7 +56333,15 @@
           ["vcpus", "int", "vcpus"],
           ["resource_management", "str", "resourceManagement"],
           ["local_volume_size_in_gbs", "int", "localVolumeSizeInGBs"]
-        ]
+        ],
+        "enums": {
+          "baseline_ocpu_utilization": [
+            "BASELINE_1_8",
+            "BASELINE_1_2",
+            "BASELINE_1_1"
+          ],
+          "resource_management": ["DYNAMIC", "STATIC"]
+        }
       },
       "InstanceSourceDetails": {
         "attributes": [["source_type", "str", "sourceType"]],
@@ -54855,6 +56413,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS1", "NPS2"]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "IntelIcelakeBmPlatformConfig": {
@@ -54882,6 +56454,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS1", "NPS2"]
+        },
         "discriminator": "PlatformConfig"
       },
       "IntelSkylakeBmLaunchInstancePlatformConfig": {
@@ -54909,6 +56495,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS1", "NPS2"]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "IntelSkylakeBmPlatformConfig": {
@@ -54936,6 +56536,20 @@
           ["percentage_of_cores_enabled", "int", "percentageOfCoresEnabled"],
           ["config_map", "dict(str, str)", "configMap"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ],
+          "numa_nodes_per_socket": ["NPS1", "NPS2"]
+        },
         "discriminator": "PlatformConfig"
       },
       "IntelVmLaunchInstancePlatformConfig": {
@@ -54955,6 +56569,19 @@
             "isSymmetricMultiThreadingEnabled"
           ]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ]
+        },
         "discriminator": "LaunchInstancePlatformConfig"
       },
       "IntelVmPlatformConfig": {
@@ -54974,6 +56601,19 @@
             "isSymmetricMultiThreadingEnabled"
           ]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ]
+        },
         "discriminator": "PlatformConfig"
       },
       "IntelVmUpdateInstancePlatformConfig": {
@@ -54985,6 +56625,9 @@
             "isSymmetricMultiThreadingEnabled"
           ]
         ],
+        "strictEnums": {
+          "type": ["AMD_VM", "INTEL_VM"]
+        },
         "discriminator": "UpdateInstancePlatformConfig"
       },
       "Ipv6AddressIpv6SubnetCidrPairDetails": {
@@ -55015,6 +56658,9 @@
             "isAgentAutoIscsiLoginEnabled"
           ]
         ],
+        "strictEnums": {
+          "encryption_in_transit_type": ["NONE", "BM_ENCRYPTION_IN_TRANSIT"]
+        },
         "discriminator": "LaunchAttachVolumeDetails"
       },
       "LaunchAttachNvmeVolumeDetails": {
@@ -55080,6 +56726,9 @@
       },
       "LaunchCreateVolumeDetails": {
         "attributes": [["volume_creation_type", "str", "volumeCreationType"]],
+        "strictEnums": {
+          "volume_creation_type": ["ATTRIBUTES"]
+        },
         "discriminator": {
           "field": "volumeCreationType",
           "values": {
@@ -55097,6 +56746,9 @@
           ["vpus_per_gb", "int", "vpusPerGB"],
           ["size_in_gbs", "int", "sizeInGBs"]
         ],
+        "strictEnums": {
+          "volume_creation_type": ["ATTRIBUTES"]
+        },
         "discriminator": "LaunchCreateVolumeDetails"
       },
       "LaunchInstanceAgentConfigDetails": {
@@ -55115,13 +56767,24 @@
         "attributes": [
           ["is_live_migration_preferred", "bool", "isLiveMigrationPreferred"],
           ["recovery_action", "str", "recoveryAction"]
-        ]
+        ],
+        "strictEnums": {
+          "recovery_action": ["RESTORE_INSTANCE", "STOP_INSTANCE"]
+        }
       },
       "LaunchInstanceLicensingConfig": {
         "attributes": [
           ["type", "str", "type"],
           ["license_type", "str", "licenseType"]
         ],
+        "enums": {
+          "type": ["WINDOWS"],
+          "license_type": [
+            "OCI_PROVIDED",
+            "BRING_YOUR_OWN_LICENSE",
+            "PARTNER_PROVIDED"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -55142,6 +56805,19 @@
           ["is_measured_boot_enabled", "bool", "isMeasuredBootEnabled"],
           ["is_memory_encryption_enabled", "bool", "isMemoryEncryptionEnabled"]
         ],
+        "strictEnums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -55167,13 +56843,29 @@
           ["nvmes", "int", "nvmes"],
           ["resource_management", "str", "resourceManagement"],
           ["local_volume_size_in_gbs", "int", "localVolumeSizeInGBs"]
-        ]
+        ],
+        "strictEnums": {
+          "baseline_ocpu_utilization": [
+            "BASELINE_1_8",
+            "BASELINE_1_2",
+            "BASELINE_1_1"
+          ],
+          "resource_management": ["DYNAMIC", "STATIC"]
+        }
       },
       "LaunchInstanceWindowsLicensingConfig": {
         "attributes": [
           ["type", "str", "type"],
           ["license_type", "str", "licenseType"]
         ],
+        "enums": {
+          "type": ["WINDOWS"],
+          "license_type": [
+            "OCI_PROVIDED",
+            "BRING_YOUR_OWN_LICENSE",
+            "PARTNER_PROVIDED"
+          ]
+        },
         "discriminator": "LaunchInstanceLicensingConfig"
       },
       "LaunchOptions": {
@@ -55197,14 +56889,42 @@
             "bool",
             "isConsistentVolumeNamingEnabled"
           ]
-        ]
+        ],
+        "enums": {
+          "boot_volume_type": [
+            "ISCSI",
+            "SCSI",
+            "IDE",
+            "VFIO",
+            "PARAVIRTUALIZED",
+            "NVME"
+          ],
+          "firmware": ["BIOS", "UEFI_64"],
+          "network_type": ["E1000", "VFIO", "PARAVIRTUALIZED", "ACCELERATEDPV"],
+          "remote_data_volume_type": [
+            "ISCSI",
+            "SCSI",
+            "IDE",
+            "VFIO",
+            "PARAVIRTUALIZED",
+            "NVME"
+          ]
+        }
       },
       "LicensingConfig": {
         "attributes": [
           ["type", "str", "type"],
           ["license_type", "str", "licenseType"],
           ["os_version", "str", "osVersion"]
-        ]
+        ],
+        "enums": {
+          "type": ["WINDOWS"],
+          "license_type": [
+            "OCI_PROVIDED",
+            "BRING_YOUR_OWN_LICENSE",
+            "PARTNER_PROVIDED"
+          ]
+        }
       },
       "MeasuredBootEntry": {
         "attributes": [
@@ -55237,7 +56957,14 @@
             "customerDesiredFirmwareBundleId"
           ],
           ["fabric_recycle_level", "str", "fabricRecycleLevel"]
-        ]
+        ],
+        "enums": {
+          "fabric_recycle_level": [
+            "FULL_RECYCLE",
+            "SKIP_RECYCLE",
+            "OPPORTUNISTIC_FULL_RECYCLE"
+          ]
+        }
       },
       "MultipathDevice": {
         "attributes": [
@@ -55278,6 +57005,18 @@
             "isVolumeCreatedDuringLaunch"
           ]
         ],
+        "enums": {
+          "lifecycle_state": ["ATTACHING", "ATTACHED", "DETACHING", "DETACHED"],
+          "iscsi_login_state": [
+            "UNKNOWN",
+            "LOGGING_IN",
+            "LOGIN_SUCCEEDED",
+            "LOGIN_FAILED",
+            "LOGGING_OUT",
+            "LOGOUT_SUCCEEDED",
+            "LOGOUT_FAILED"
+          ]
+        },
         "discriminator": "VolumeAttachment"
       },
       "ParavirtualizedVolumeAttachment": {
@@ -55312,6 +57051,18 @@
             "isVolumeCreatedDuringLaunch"
           ]
         ],
+        "enums": {
+          "lifecycle_state": ["ATTACHING", "ATTACHED", "DETACHING", "DETACHED"],
+          "iscsi_login_state": [
+            "UNKNOWN",
+            "LOGGING_IN",
+            "LOGIN_SUCCEEDED",
+            "LOGIN_FAILED",
+            "LOGGING_OUT",
+            "LOGOUT_SUCCEEDED",
+            "LOGOUT_FAILED"
+          ]
+        },
         "discriminator": "VolumeAttachment"
       },
       "PercentageOfCoresEnabledOptions": {
@@ -55345,6 +57096,19 @@
           ["is_measured_boot_enabled", "bool", "isMeasuredBootEnabled"],
           ["is_memory_encryption_enabled", "bool", "isMemoryEncryptionEnabled"]
         ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -55374,6 +57138,9 @@
       },
       "PreemptionAction": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["TERMINATE"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -55389,7 +57156,10 @@
         "attributes": [
           ["recycle_level", "str", "recycleLevel"],
           ["compute_host_group_id", "str", "computeHostGroupId"]
-        ]
+        ],
+        "enums": {
+          "recycle_level": ["SKIP_RECYCLE", "FULL_RECYCLE"]
+        }
       },
       "Shape": {
         "attributes": [
@@ -55469,7 +57239,16 @@
             "recommendedAlternatives"
           ],
           ["platform_names", "list[str]", "platformNames"]
-        ]
+        ],
+        "enums": {
+          "baseline_ocpu_utilizations": [
+            "BASELINE_1_8",
+            "BASELINE_1_2",
+            "BASELINE_1_1"
+          ],
+          "billing_type": ["ALWAYS_FREE", "LIMITED_FREE", "PAID"],
+          "supported_resource_management": ["DYNAMIC", "STATIC"]
+        }
       },
       "ShapeAccessControlServiceEnabledPlatformOptions": {
         "attributes": [
@@ -55526,7 +57305,10 @@
         "attributes": [
           ["service_allowed_values", "list[str]", "allowedValues"],
           ["default_value", "str", "defaultValue"]
-        ]
+        ],
+        "enums": {
+          "service_allowed_values": ["NPS0", "NPS1", "NPS2", "NPS4", "NPS6"]
+        }
       },
       "ShapeOcpuOptions": {
         "attributes": [
@@ -55588,7 +57370,20 @@
             "PercentageOfCoresEnabledOptions",
             "percentageOfCoresEnabledOptions"
           ]
-        ]
+        ],
+        "enums": {
+          "type": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "AMD_VM",
+            "INTEL_VM"
+          ]
+        }
       },
       "ShapeSecureBootOptions": {
         "attributes": [
@@ -55629,6 +57424,9 @@
           ["type", "str", "type"],
           ["preserve_boot_volume", "bool", "preserveBootVolume"]
         ],
+        "enums": {
+          "type": ["TERMINATE"]
+        },
         "discriminator": "PreemptionAction"
       },
       "UpdateCapacitySourceDetails": {
@@ -55668,13 +57466,24 @@
         "attributes": [
           ["is_live_migration_preferred", "bool", "isLiveMigrationPreferred"],
           ["recovery_action", "str", "recoveryAction"]
-        ]
+        ],
+        "strictEnums": {
+          "recovery_action": ["RESTORE_INSTANCE", "STOP_INSTANCE"]
+        }
       },
       "UpdateInstanceLicensingConfig": {
         "attributes": [
           ["type", "str", "type"],
           ["license_type", "str", "licenseType"]
         ],
+        "strictEnums": {
+          "type": ["WINDOWS"],
+          "license_type": [
+            "OCI_PROVIDED",
+            "BRING_YOUR_OWN_LICENSE",
+            "PARTNER_PROVIDED"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -55685,6 +57494,9 @@
       },
       "UpdateInstancePlatformConfig": {
         "attributes": [["type", "str", "type"]],
+        "strictEnums": {
+          "type": ["AMD_VM", "INTEL_VM"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -55703,7 +57515,15 @@
           ["nvmes", "int", "nvmes"],
           ["resource_management", "str", "resourceManagement"],
           ["local_volume_size_in_gbs", "int", "localVolumeSizeInGBs"]
-        ]
+        ],
+        "strictEnums": {
+          "baseline_ocpu_utilization": [
+            "BASELINE_1_8",
+            "BASELINE_1_2",
+            "BASELINE_1_1"
+          ],
+          "resource_management": ["DYNAMIC", "STATIC"]
+        }
       },
       "UpdateInstanceSourceDetails": {
         "attributes": [
@@ -55754,6 +57574,14 @@
           ["type", "str", "type"],
           ["license_type", "str", "licenseType"]
         ],
+        "strictEnums": {
+          "type": ["WINDOWS"],
+          "license_type": [
+            "OCI_PROVIDED",
+            "BRING_YOUR_OWN_LICENSE",
+            "PARTNER_PROVIDED"
+          ]
+        },
         "discriminator": "UpdateInstanceLicensingConfig"
       },
       "UpdateLaunchOptions": {
@@ -55765,7 +57593,48 @@
             "bool",
             "isPvEncryptionInTransitEnabled"
           ]
-        ]
+        ],
+        "strictEnums": {
+          "boot_volume_type": ["ISCSI", "PARAVIRTUALIZED", "NVME"],
+          "network_type": ["VFIO", "PARAVIRTUALIZED", "ACCELERATEDPV"]
+        }
+      },
+      "Vnic": {
+        "attributes": [
+          ["availability_domain", "str", "availabilityDomain"],
+          ["compartment_id", "str", "compartmentId"],
+          ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
+          ["display_name", "str", "displayName"],
+          [
+            "security_attributes",
+            "dict(str, dict(str, object))",
+            "securityAttributes"
+          ],
+          ["freeform_tags", "dict(str, str)", "freeformTags"],
+          ["hostname_label", "str", "hostnameLabel"],
+          ["id", "str", "id"],
+          ["is_primary", "bool", "isPrimary"],
+          ["lifecycle_state", "str", "lifecycleState"],
+          ["mac_address", "str", "macAddress"],
+          ["nsg_ids", "list[str]", "nsgIds"],
+          ["vlan_id", "str", "vlanId"],
+          ["private_ip", "str", "privateIp"],
+          ["public_ip", "str", "publicIp"],
+          ["skip_source_dest_check", "bool", "skipSourceDestCheck"],
+          ["subnet_id", "str", "subnetId"],
+          ["system_tags", "dict(str, dict(str, object))", "systemTags"],
+          ["time_created", "datetime", "timeCreated"],
+          ["ipv6_addresses", "list[str]", "ipv6Addresses"],
+          ["route_table_id", "str", "routeTableId"]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "PROVISIONING",
+            "AVAILABLE",
+            "TERMINATING",
+            "TERMINATED"
+          ]
+        }
       },
       "VnicAttachment": {
         "attributes": [
@@ -55781,7 +57650,10 @@
           ["time_created", "datetime", "timeCreated"],
           ["vlan_tag", "int", "vlanTag"],
           ["vnic_id", "str", "vnicId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ATTACHING", "ATTACHED", "DETACHING", "DETACHED"]
+        }
       },
       "VolumeAttachment": {
         "attributes": [
@@ -55815,6 +57687,18 @@
             "isVolumeCreatedDuringLaunch"
           ]
         ],
+        "enums": {
+          "lifecycle_state": ["ATTACHING", "ATTACHED", "DETACHING", "DETACHED"],
+          "iscsi_login_state": [
+            "UNKNOWN",
+            "LOGGING_IN",
+            "LOGIN_SUCCEEDED",
+            "LOGIN_FAILED",
+            "LOGGING_OUT",
+            "LOGOUT_SUCCEEDED",
+            "LOGOUT_FAILED"
+          ]
+        },
         "discriminator": {
           "field": "attachmentType",
           "values": {
@@ -55839,7 +57723,17 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestResource": {
         "attributes": [
@@ -55847,7 +57741,16 @@
           ["entity_type", "str", "entityType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "RELATED",
+            "IN_PROGRESS"
+          ]
+        }
       }
     }
   }

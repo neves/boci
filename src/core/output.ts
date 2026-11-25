@@ -18,6 +18,55 @@ export type OutputOptions = {
   rc: Pick<Rc, "cannedQueries" | "path">;
 };
 
+export class ModelDeserializationError extends Error {
+  constructor(
+    readonly pythonType: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+const floatFields = new WeakMap<object, Set<string>>();
+const floatArrays = new WeakSet<unknown[]>();
+const floatDicts = new WeakSet<object>();
+
+export function formatPythonFloat(n: number): string {
+  if (Object.is(n, -0)) return "-0.0";
+  if (!Number.isFinite(n)) return String(n);
+  const abs = Math.abs(n);
+  if (abs !== 0 && (abs >= 1e16 || abs < 1e-4)) {
+    return n.toExponential().replace(/e([+-])(\d)$/, "e$10$2");
+  }
+  const s = String(n);
+  return s.includes(".") || s.includes("e") ? s : `${s}.0`;
+}
+
+function formatSdkDatetime(value: string): string {
+  const m =
+    /^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}:\d{2})(?:\.(\d+))?)?(Z|z|[+-]\d{2}:?\d{2})?$/.exec(
+      value.trim(),
+    );
+  if (!m) return value.replace(/Z$/, "+00:00");
+  const [, datePart, timePart = "00:00:00", fracRaw, tzRaw] = m;
+  let frac = "";
+  if (fracRaw) {
+    const micros = fracRaw.slice(0, 6).padEnd(6, "0");
+    if (micros !== "000000") frac = `.${micros}`;
+  }
+  let tz = "+00:00";
+  if (tzRaw && tzRaw !== "Z" && tzRaw !== "z") {
+    tz = tzRaw.includes(":") ? tzRaw : `${tzRaw.slice(0, 3)}:${tzRaw.slice(3)}`;
+    if (tz === "-00:00") tz = "+00:00";
+  }
+  return `${datePart}T${timePart}${frac}${tz}`;
+}
+
+function formatSdkDate(value: string): string {
+  const m = /^(\d{4}-\d{2}-\d{2})/.exec(value.trim());
+  return m ? m[1]! : value;
+}
+
 /**
  * Print the result on the invocation's sinks. A non-2xx response prints the ServiceError
  * and ends the invocation with Exit(1), as does an undefined canned query.
@@ -32,16 +81,25 @@ export function printResult(
     io.err(formatServiceError(operation, url, response, raw, targetService));
     throw new Exit(1);
   }
-  renderGeneratedResponse(
-    io,
-    operation,
-    response,
-    raw,
-    result.responseModels,
-    result.pageItems,
-    result.allPages,
-    options,
-  );
+  try {
+    renderGeneratedResponse(
+      io,
+      operation,
+      response,
+      raw,
+      result.responseModels,
+      result.pageItems,
+      result.allPages,
+      options,
+      result.rawPages,
+    );
+  } catch (e) {
+    if (e instanceof ModelDeserializationError) {
+      io.err(`${e.pythonType}: ${e.message}\n`);
+      throw new Exit(1);
+    }
+    throw e;
+  }
 }
 
 export function formatServiceError(
@@ -88,12 +146,52 @@ function renderGeneratedResponse(
   pageItems: unknown[],
   allPages: boolean,
   options: OutputOptions,
+  rawPages?: string[],
 ): void {
-  const hasBody = Boolean(operation.responseType) && raw.trim().length > 0;
+  const isWrappedCollectionAll =
+    allPages &&
+    Boolean(operation.responseType) &&
+    !operation.responseType!.startsWith("list[") &&
+    Boolean(rawPages?.length);
+  const hasBody =
+    isWrappedCollectionAll ||
+    (Boolean(operation.responseType) && raw.trim().length > 0);
   let value: unknown;
-  if (hasBody) {
+  if (isWrappedCollectionAll && rawPages) {
+    const aggregated: Record<string, unknown[]> = {};
+    for (const pageRaw of rawPages) {
+      const trimmed = pageRaw.trim();
+      if (trimmed.length === 0) continue;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(pageRaw);
+      } catch {
+        continue;
+      }
+      const rendered = renderModel(parsed, operation.responseType!, models);
+      if (isPlainObject(rendered)) {
+        for (const [k, v] of Object.entries(rendered)) {
+          if (Array.isArray(v)) {
+            if (!aggregated[k]) {
+              aggregated[k] = [];
+              if (floatArrays.has(v)) floatArrays.add(aggregated[k]!);
+            }
+            aggregated[k]!.push(...v);
+          }
+        }
+      }
+    }
+    value = aggregated;
+  } else if (hasBody) {
+    let parsed: unknown;
+    let parsedOk = false;
     try {
-      const parsed: unknown = JSON.parse(raw);
+      parsed = JSON.parse(raw);
+      parsedOk = true;
+    } catch {
+      value = raw;
+    }
+    if (parsedOk) {
       value =
         typeof parsed === "string"
           ? parsed
@@ -112,26 +210,29 @@ function renderGeneratedResponse(
                 operation.responseType!,
                 models,
               );
-    } catch {
-      value = raw;
     }
   }
   const output: Record<string, unknown> = {};
+  const isEmptyDict =
+    isPlainObject(value) &&
+    Object.keys(value).length === 0 &&
+    (isWrappedCollectionAll || !models?.[operation.responseType ?? ""]);
   if (
     hasBody &&
     value !== null &&
     value !== undefined &&
     value !== "" &&
-    !(Array.isArray(value) && value.length === 0)
+    !(Array.isArray(value) && value.length === 0) &&
+    !isEmptyDict
   )
     output.data = value;
-  const workRequestId = response.headers.get("opc-work-request-id");
-  if (workRequestId !== null) output["opc-work-request-id"] = workRequestId;
-  const etag = response.headers.get("etag");
-  const hasNextPage = response.headers.get("opc-next-page");
-  if (etag !== null) output.etag = etag;
-  if (hasNextPage !== null && !allPages) {
-    output["opc-next-page"] = hasNextPage;
+  for (const [rawKey, headerVal] of response.headers) {
+    const key = rawKey.toLowerCase();
+    if (!DISPLAY_HEADERS.has(key)) continue;
+    if (key === "opc-next-page" && allPages) continue;
+    output[key] = headerVal;
+  }
+  if (response.headers.get("opc-next-page") !== null && !allPages) {
     io.err(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
@@ -198,18 +299,18 @@ export function renderCliData(
       }
     }
   }
-  if (isDisplayTruthy(displayDict)) {
-    let query = options.query;
-    if (typeof query === "string" && query.startsWith("query://")) {
-      const queryName = query.slice("query://".length);
-      query = options.rc.cannedQueries[queryName];
-      if (query === undefined) {
-        io.err(
-          `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${options.rc.path}\n`,
-        );
-        throw new Exit(1);
-      }
+  let query = options.query;
+  if (typeof query === "string" && query.startsWith("query://")) {
+    const queryName = query.slice("query://".length);
+    query = options.rc.cannedQueries[queryName];
+    if (query === undefined) {
+      io.err(
+        `UsageError: Query ${queryName} is not defined in your OCI CLI configuration file: ${options.rc.path}\n`,
+      );
+      throw new Exit(1);
     }
+  }
+  if (isDisplayTruthy(displayDict)) {
     const hasQuery = typeof query === "string";
     const displayData = hasQuery
       ? applyQuery(displayDict, query as string)
@@ -250,15 +351,6 @@ export function renderDocument(
   options: OutputOptions,
 ): void {
   const { rc } = options;
-  if (
-    output === null ||
-    output === undefined ||
-    (Array.isArray(output) && output.length === 0) ||
-    (typeof output === "object" &&
-      !Array.isArray(output) &&
-      Object.keys(output).length === 0)
-  )
-    return;
   let query = options.query;
   if (typeof query === "string" && query.startsWith("query://")) {
     const queryName = query.slice("query://".length);
@@ -270,35 +362,99 @@ export function renderDocument(
       throw new Exit(1);
     }
   }
-  const rendered =
-    typeof query === "string" ? applyQuery(output, query) : output;
+  if (
+    output === null ||
+    output === undefined ||
+    (Array.isArray(output) && output.length === 0) ||
+    (typeof output === "object" &&
+      !Array.isArray(output) &&
+      Object.keys(output).length === 0)
+  )
+    return;
+  const hasQuery = typeof query === "string";
+  const rendered = hasQuery ? applyQuery(output, query as string) : output;
   if (rendered === null || (Array.isArray(rendered) && rendered.length === 0)) {
     io.err("Query returned empty result, no output to show.\n");
   } else {
     const format = options.output ?? "json";
     const tableValue =
-      rendered &&
-      typeof rendered === "object" &&
-      !Array.isArray(rendered) &&
-      "data" in rendered
-        ? (rendered as Record<string, unknown>).data
+      !hasQuery && isPlainObject(rendered) && "data" in rendered
+        ? rendered.data
         : rendered;
-    if (format === "table") io.out(renderTable(tableValue));
-    else if (options.rawOutput && typeof rendered === "string")
+    if (format === "table") {
+      io.out(renderTable(tableValue));
+      if (isPlainObject(output) && "data" in output) {
+        for (const [key, value] of Object.entries(output)) {
+          if (key !== "data") io.err(`${key}: ${String(value)}\n`);
+        }
+      }
+    } else if (options.rawOutput && typeof rendered === "string")
       io.out(`${rendered}\n`);
     else io.out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
   }
 }
 
-function sortJson(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(sortJson);
-  if (value && typeof value === "object")
+function compareCodepoints(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+const jsonRaw = (JSON as unknown as { rawJSON(s: string): unknown }).rawJSON;
+
+function sortJson(value: unknown, asFloat = false): unknown {
+  if (asFloat && typeof value === "number" && Number.isFinite(value)) {
+    return jsonRaw(formatPythonFloat(value));
+  }
+  if (Array.isArray(value)) {
+    const isFloatArr = floatArrays.has(value);
+    return value.map((item) => sortJson(item, isFloatArr));
+  }
+  if (value && typeof value === "object") {
+    const isFloatDict = floatDicts.has(value);
+    const floats = floatFields.get(value);
     return Object.fromEntries(
       Object.entries(value)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([k, v]) => [k, sortJson(v)]),
+        .sort(([a], [b]) => compareCodepoints(a, b))
+        .map(([k, v]) => [
+          k,
+          sortJson(v, isFloatDict || Boolean(floats?.has(k))),
+        ]),
     );
+  }
   return value;
+}
+
+function applyEnum(
+  name: string,
+  fieldType: string,
+  value: unknown,
+  allowed: string[],
+  strict: boolean,
+): unknown {
+  const formatAllowed = () => `[${allowed.map((v) => `'${v}'`).join(", ")}]`;
+  if (fieldType === "list[str]" && Array.isArray(value)) {
+    return value.map((item) => {
+      if (item === null || item === undefined) return item;
+      const str = String(item);
+      if (allowed.includes(str)) return item;
+      if (strict) {
+        throw new ModelDeserializationError(
+          "ValueError",
+          `Invalid value for \`${name}\`, must be None or one of ${formatAllowed()}`,
+        );
+      }
+      return "UNKNOWN_ENUM_VALUE";
+    });
+  }
+  if (value === null || value === undefined) return value;
+  const str = String(value);
+  if (allowed.includes(str)) return value;
+  if (strict) {
+    throw new ModelDeserializationError(
+      "ValueError",
+      `Invalid value for \`${name}\`, must be None or one of ${formatAllowed()}`,
+    );
+  }
+  return "UNKNOWN_ENUM_VALUE";
 }
 
 export function renderModel(
@@ -307,28 +463,62 @@ export function renderModel(
   models?: Models[string],
   snakeCase = false,
 ): unknown {
+  if (value === null || value === undefined) return value;
   if (type === "datetime" && typeof value === "string")
-    return value.replace(/Z$/, "+00:00");
-  if (value === null || typeof value !== "object") return value;
+    return formatSdkDatetime(value);
+  if (type === "date" && typeof value === "string") return formatSdkDate(value);
+  if (type === "int") {
+    if (typeof value === "number") return Math.trunc(value);
+    if (typeof value === "boolean") return value ? 1 : 0;
+    if (typeof value === "string" && /^[+-]?\d+$/.test(value.trim()))
+      return Number.parseInt(value, 10);
+    return value;
+  }
+  if (type === "float") {
+    if (typeof value === "boolean") return value ? 1 : 0;
+    if (typeof value === "string" && value.trim() !== "") {
+      const n = Number(value);
+      if (!Number.isNaN(n)) return n;
+    }
+    return value;
+  }
+  if (type === "bool") {
+    return typeof value === "boolean" ? value : Boolean(value);
+  }
+  if (type === "str") {
+    if (typeof value === "string") return value;
+    if (typeof value === "boolean") return value ? "True" : "False";
+    if (typeof value === "number") return String(value);
+    return value;
+  }
+  if (typeof value !== "object") return value;
   if (Array.isArray(value)) {
     const element = /^list\[(.*)\]$/.exec(type)?.[1];
-    return element
+    const mapped = element
       ? value.map((item) => renderModel(item, element, models, snakeCase))
       : value;
+    if (element === "float") floatArrays.add(mapped);
+    return mapped;
   }
   const data = value as Record<string, unknown>;
   const dictValue = /^dict\([^,]+, (.*)\)$/.exec(type)?.[1];
-  if (dictValue)
-    return Object.fromEntries(
+  if (dictValue) {
+    const mapped = Object.fromEntries(
       Object.entries(data).map(([key, item]) => [
         key,
         renderModel(item, dictValue, models, snakeCase),
       ]),
     );
+    if (dictValue === "float") floatDicts.add(mapped);
+    return mapped;
+  }
   let model = models?.[type];
   if (!model) return data;
   const disc = inheritedDiscriminator(models?.[type] ? models : {}, model);
   if (disc && typeof disc !== "string") {
+    if (!Object.hasOwn(data, disc.field)) {
+      throw new ModelDeserializationError("KeyError", `'${disc.field}'`);
+    }
     const key = data[disc.field];
     const subtype =
       typeof key === "string" && Object.hasOwn(disc.values, key)
@@ -336,45 +526,81 @@ export function renderModel(
         : disc.fallback;
     model = models?.[subtype!] ?? model;
   }
-  return Object.fromEntries(
-    model.attributes.map(([name, fieldType, wire]) => [
-      snakeCase ? name : name.replaceAll("_", "-"),
-      renderModel(
-        model === models?.LoadBalancer &&
-          name === "lifecycle_state" &&
-          typeof data[wire] === "string" &&
-          ![
-            "CREATING",
-            "ACTIVE",
-            "UPDATING",
-            "DELETING",
-            "DELETED",
-            "FAILED",
-            "INACTIVE",
-            "TERMINATING",
-            "TERMINATED",
-            "PROVISIONING",
-            "AVAILABLE",
-            "UNKNOWN_ENUM_VALUE",
-          ].includes(data[wire] as string)
-          ? "UNKNOWN_ENUM_VALUE"
-          : Object.hasOwn(data, wire)
-            ? data[wire]
-            : Object.hasOwn(data, name)
-              ? data[name]
-              : null,
-        fieldType,
-        models,
-        snakeCase,
-      ),
-    ]),
-  );
+  const out: Record<string, unknown> = {};
+  let floats: Set<string> | undefined;
+  for (const [name, fieldType, wire] of model.attributes) {
+    const outKey = snakeCase ? name : name.replaceAll("_", "-");
+    const rawVal = Object.hasOwn(data, wire)
+      ? data[wire]
+      : Object.hasOwn(data, name)
+        ? data[name]
+        : null;
+    let fieldVal = renderModel(rawVal, fieldType, models, snakeCase);
+    const allowed = model.enums?.[name];
+    const strictAllowed = model.strictEnums?.[name];
+    if (allowed) {
+      fieldVal = applyEnum(name, fieldType, fieldVal, allowed, false);
+    } else if (strictAllowed) {
+      fieldVal = applyEnum(name, fieldType, fieldVal, strictAllowed, true);
+    }
+    if (fieldType === "float" && typeof fieldVal === "number") {
+      (floats ??= new Set()).add(outKey);
+    }
+    out[outKey] = fieldVal;
+  }
+  if (floats) floatFields.set(out, floats);
+  return out;
+}
+
+function formatPythonStringRepr(s: string): string {
+  const quote = s.includes("'") && !s.includes('"') ? '"' : "'";
+  let out = quote;
+  for (const ch of s) {
+    if (ch === "\\") out += "\\\\";
+    else if (ch === quote) out += `\\${quote}`;
+    else if (ch === "\n") out += "\\n";
+    else if (ch === "\r") out += "\\r";
+    else if (ch === "\t") out += "\\t";
+    else out += ch;
+  }
+  return out + quote;
+}
+
+function formatPythonRepr(value: unknown, asFloat = false): string {
+  if (value === null || value === undefined) return "None";
+  if (typeof value === "boolean") return value ? "True" : "False";
+  if (typeof value === "number")
+    return asFloat ? formatPythonFloat(value) : String(value);
+  if (typeof value === "string") return formatPythonStringRepr(value);
+  if (Array.isArray(value)) {
+    const isFloatArr = floatArrays.has(value);
+    return `[${value.map((item) => formatPythonRepr(item, isFloatArr)).join(", ")}]`;
+  }
+  if (typeof value === "object") {
+    const isFloatDict = floatDicts.has(value);
+    const floats = floatFields.get(value);
+    const entries = Object.entries(value as Record<string, unknown>).map(
+      ([k, v]) =>
+        `${formatPythonStringRepr(k)}: ${formatPythonRepr(v, isFloatDict || Boolean(floats?.has(k)))}`,
+    );
+    return `{${entries.join(", ")}}`;
+  }
+  return String(value);
+}
+
+function formatTableCell(value: unknown, asFloat = false): string {
+  if (value === undefined) return "";
+  if (value === null) return "None";
+  if (typeof value === "boolean") return value ? "True" : "False";
+  if (typeof value === "number")
+    return asFloat ? formatPythonFloat(value) : String(value);
+  if (typeof value === "string") return value;
+  return formatPythonRepr(value, asFloat);
 }
 
 function renderTable(value: unknown): string {
-  const rows: unknown[][] = Array.isArray(value)
-    ? value.map((item) => (Array.isArray(item) ? item : [item]))
-    : [Array.isArray(value) ? value : [value]];
+  type Cell = { value: unknown; asFloat: boolean };
+  const rows: Cell[][] = [];
   let headers: string[];
   if (
     Array.isArray(value) &&
@@ -390,25 +616,57 @@ function renderTable(value: unknown): string {
           cols.add(key);
       }
     }
-    headers = [...cols].sort();
-    for (let i = 0; i < rows.length; i++)
-      rows[i] = headers.map(
-        (key) => (value[i] as Record<string, unknown>)[key],
+    headers = [...cols].sort(compareCodepoints);
+    for (const entry of value) {
+      const rec =
+        entry && typeof entry === "object" && !Array.isArray(entry)
+          ? (entry as Record<string, unknown>)
+          : {};
+      const isFloatDict = floatDicts.has(rec);
+      const floats = floatFields.get(rec);
+      rows.push(
+        headers.map((key) => ({
+          value: Object.hasOwn(rec, key) ? rec[key] : undefined,
+          asFloat: isFloatDict || Boolean(floats?.has(key)),
+        })),
       );
+    }
   } else if (value && typeof value === "object" && !Array.isArray(value)) {
-    headers = Object.keys(value as Record<string, unknown>).sort();
-    rows[0] = headers.map((key) => (value as Record<string, unknown>)[key]);
+    const rec = value as Record<string, unknown>;
+    const isFloatDict = floatDicts.has(rec);
+    const floats = floatFields.get(rec);
+    headers = Object.keys(rec).sort(compareCodepoints);
+    rows.push(
+      headers.map((key) => ({
+        value: rec[key],
+        asFloat: isFloatDict || Boolean(floats?.has(key)),
+      })),
+    );
   } else {
-    const width = rows.reduce((max, row) => Math.max(max, row.length), 0);
+    const rawRows: unknown[][] = Array.isArray(value)
+      ? value.map((item) => (Array.isArray(item) ? item : [item]))
+      : [Array.isArray(value) ? value : [value]];
+    const isFloatArr = Array.isArray(value) && floatArrays.has(value);
+    const width = rawRows.reduce((max, row) => Math.max(max, row.length), 0);
     headers = Array.from({ length: width }, (_, i) => `Column${i + 1}`);
+    for (const row of rawRows) {
+      rows.push(row.map((cell) => ({ value: cell, asFloat: isFloatArr })));
+    }
   }
-  const cell = (v: unknown) =>
-    v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v);
+  const formatted = rows.map((row) =>
+    headers.map((_, i) => {
+      const cell = row[i];
+      return cell ? formatTableCell(cell.value, cell.asFloat) : "";
+    }),
+  );
   const widths = headers.map((header, i) =>
-    Math.max(header.length, ...rows.map((row) => cell(row[i]).length)),
+    Math.max(
+      [...header].length,
+      ...formatted.map((row) => [...(row[i] ?? "")].length),
+    ),
   );
   const border = `+${widths.map((w) => `-${"-".repeat(w)}-`).join("+")}+`;
   const line = (values: string[]) =>
-    `| ${values.map((v, i) => v.padEnd(widths[i] ?? 0)).join(" | ")} |`;
-  return `${border}\n${line(headers)}\n${border}\n${rows.map((row) => line(headers.map((_, i) => cell(row[i])))).join("\n")}${rows.length ? "\n" : ""}${border}\n`;
+    `| ${values.map((v, i) => v + " ".repeat(Math.max(0, (widths[i] ?? 0) - [...v].length))).join(" | ")} |`;
+  return `${border}\n${line(headers)}\n${border}\n${formatted.map((row) => line(row)).join("\n")}${formatted.length ? "\n" : ""}${border}\n`;
 }

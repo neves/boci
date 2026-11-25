@@ -11837,7 +11837,17 @@
             "str",
             "openSearchDashboardCertificateId"
           ]
-        ]
+        ],
+        "enums": {
+          "cluster_certificate_mode": [
+            "OCI_CERTIFICATES_SERVICE",
+            "OPENSEARCH_SERVICE"
+          ],
+          "dashboard_certificate_mode": [
+            "OCI_CERTIFICATES_SERVICE",
+            "OPENSEARCH_SERVICE"
+          ]
+        }
       },
       "CreateMaintenanceDetails": {
         "attributes": [
@@ -11857,7 +11867,13 @@
             "int",
             "loadBalancerMaxBandwidthInMbps"
           ]
-        ]
+        ],
+        "enums": {
+          "load_balancer_service_type": [
+            "LOAD_BALANCER",
+            "NETWORK_LOAD_BALANCER"
+          ]
+        }
       },
       "MaintenanceDetails": {
         "attributes": [
@@ -11865,7 +11881,10 @@
           ["start_time", "datetime", "startTime"],
           ["end_time", "datetime", "endTime"],
           ["notification_email_ids", "list[str]", "notificationEmailIds"]
-        ]
+        ],
+        "enums": {
+          "state": ["SCHEDULED", "RESCHEDULED", "TO_BE_SCHEDULED"]
+        }
       },
       "OpensearchCluster": {
         "attributes": [
@@ -11993,7 +12012,23 @@
             "RemoteReindexTrustConfig",
             "remoteReindexTrustConfig"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACTIVE",
+            "CREATING",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "master_node_host_type": ["FLEX", "BM"],
+          "data_node_host_type": ["FLEX", "BM"],
+          "search_node_host_type": ["FLEX"],
+          "coordinator_node_host_type": ["FLEX"],
+          "ml_node_host_type": ["FLEX"],
+          "security_mode": ["DISABLED", "PERMISSIVE", "ENFORCING"]
+        }
       },
       "OpensearchClusterBackup": {
         "attributes": [
@@ -12015,7 +12050,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "backup_type": ["SCHEDULED", "MANUAL"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "OpensearchClusterBackupCollection": {
         "attributes": [
@@ -12082,7 +12128,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "pipeline_mode": ["RUNNING", "STOPPED"]
+        }
       },
       "OpensearchClusterPipelineCollection": {
         "attributes": [
@@ -12148,7 +12205,10 @@
             "RemoteReindexTrustConfig",
             "remoteReindexTrustConfig"
           ]
-        ]
+        ],
+        "enums": {
+          "security_mode": ["DISABLED", "PERMISSIVE", "ENFORCING"]
+        }
       },
       "OpensearchPipelineReverseConnectionEndpoint": {
         "attributes": [
@@ -12179,13 +12239,19 @@
           ["is_skip_unavailable", "bool", "isSkipUnavailable"],
           ["seed_cluster_id", "str", "seedClusterId"],
           ["mode", "str", "mode"]
-        ]
+        ],
+        "enums": {
+          "mode": ["SEARCH_ONLY", "REPLICATION_ONLY", "SEARCH_AND_REPLICATION"]
+        }
       },
       "PlainPasswordSecurityUserPasswordDetails": {
         "attributes": [
           ["source_type", "str", "sourceType"],
           ["plain_password", "str", "plainPassword"]
         ],
+        "strictEnums": {
+          "source_type": ["PLAIN_PASSWORD", "OCI_VAULT_SECRET"]
+        },
         "discriminator": "SecurityUserPasswordDetails"
       },
       "RemoteReindexSourceDetails": {
@@ -12232,6 +12298,9 @@
       },
       "SecurityUserPasswordDetails": {
         "attributes": [["source_type", "str", "sourceType"]],
+        "strictEnums": {
+          "source_type": ["PLAIN_PASSWORD", "OCI_VAULT_SECRET"]
+        },
         "discriminator": {
           "field": "sourceType",
           "values": {
@@ -12254,6 +12323,9 @@
           ["source_type", "str", "sourceType"],
           ["vault_secret_id", "str", "vaultSecretId"]
         ],
+        "strictEnums": {
+          "source_type": ["PLAIN_PASSWORD", "OCI_VAULT_SECRET"]
+        },
         "discriminator": "SecurityUserPasswordDetails"
       },
       "WorkRequest": {
@@ -12267,7 +12339,35 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_OPENSEARCH_CLUSTER",
+            "UPDATE_OPENSEARCH_CLUSTER",
+            "DELETE_OPENSEARCH_CLUSTER",
+            "MOVE_OPENSEARCH_CLUSTER",
+            "RESTORE_OPENSEARCH_CLUSTER",
+            "BACKUP_OPENSEARCH_CLUSTER",
+            "UPDATE_OPENSEARCH_CLUSTER_BACKUP",
+            "MOVE_OPENSEARCH_CLUSTER_BACKUP",
+            "DELETE_OPENSEARCH_CLUSTER_BACKUP",
+            "CREATE_OPENSEARCH_PIPELINE",
+            "UPDATE_OPENSEARCH_PIPELINE",
+            "DELETE_OPENSEARCH_PIPELINE",
+            "UPDATE_OPENSEARCH_CLUSTER_SECURITY_CONFIG",
+            "UPDATE_OPENSEARCH_CROSS_CLUSTER_CONFIG",
+            "UPDATE_OPENSEARCH_CLUSTER_REVERSE_CONNECTION_ENDPOINTS",
+            "CONFIGURE_REMOTE_CLUSTER"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestCollection": {
         "attributes": [["items", "list[WorkRequest]", "items"]]
@@ -12297,7 +12397,16 @@
           ["action_type", "str", "actionType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED"
+          ]
+        }
       }
     }
   }

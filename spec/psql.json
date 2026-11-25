@@ -24381,7 +24381,17 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "source_type": ["SCHEDULED", "MANUAL", "PITR", "COPIED"],
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "BackupCollection": {
         "attributes": [["items", "list[BackupSummary]", "items"]]
@@ -24400,7 +24410,10 @@
           ["state_details", "str", "stateDetails"],
           ["backup_id", "str", "backupId"],
           ["region", "str", "region"]
-        ]
+        ],
+        "enums": {
+          "state": ["NOT_STARTED", "COPYING", "COPIED", "FAILED"]
+        }
       },
       "BackupPolicy": {
         "attributes": [
@@ -24408,6 +24421,9 @@
           ["retention_days", "int", "retentionDays"],
           ["copy_policy", "BackupCopyPolicy", "copyPolicy"]
         ],
+        "enums": {
+          "kind": ["DAILY", "WEEKLY", "MONTHLY", "NONE"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -24429,6 +24445,14 @@
             "isHavingRestoreConfigOverrides"
           ]
         ],
+        "enums": {
+          "source_type": [
+            "BACKUP",
+            "NONE",
+            "POINT_IN_TIME_DB_SYSTEM",
+            "DB_SYSTEM"
+          ]
+        },
         "discriminator": "SourceDetails"
       },
       "BackupSummary": {
@@ -24494,7 +24518,11 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETING", "DELETED", "FAILED"],
+          "config_type": ["DEFAULT", "CUSTOM", "COPIED"]
+        }
       },
       "ConfigurationCollection": {
         "attributes": [["items", "list[ConfigurationSummary]", "items"]]
@@ -24560,6 +24588,9 @@
           ["copy_policy", "BackupCopyPolicy", "copyPolicy"],
           ["backup_start", "str", "backupStart"]
         ],
+        "enums": {
+          "kind": ["DAILY", "WEEKLY", "MONTHLY", "NONE"]
+        },
         "discriminator": "BackupPolicy"
       },
       "DateTimeRangeCapability": {
@@ -24578,7 +24609,18 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DbInstanceEndpoint": {
         "attributes": [
@@ -24620,7 +24662,26 @@
             "kerberosAuthDetails"
           ],
           ["odsp_insight_details", "OdspInsightDetails", "odspInsightDetails"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ],
+          "system_type": ["OCI_OPTIMIZED_STORAGE"],
+          "system_role": [
+            "STANDALONE_DB_SYSTEM",
+            "PRIMARY_DB_SYSTEM",
+            "WARM_STANDBY_DB_SYSTEM",
+            "PILOT_LIGHT_DB_SYSTEM"
+          ]
+        }
       },
       "DbSystemCollection": {
         "attributes": [["items", "list[DbSystemSummary]", "items"]]
@@ -24692,7 +24753,16 @@
             "DefaultConfigurationDetails",
             "configurationDetails"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DefaultConfigurationCollection": {
         "attributes": [["items", "list[DefaultConfigurationSummary]", "items"]]
@@ -24717,10 +24787,16 @@
       },
       "DisabledInsightDetails": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["ENABLED", "DISABLED"]
+        },
         "discriminator": "OdspInsightDetails"
       },
       "DisabledKerberosAuthDetails": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["ENABLED", "DISABLED"]
+        },
         "discriminator": "KerberosAuthDetails"
       },
       "EnabledInsightDetails": {
@@ -24728,6 +24804,9 @@
           ["kind", "str", "kind"],
           ["odsp_insight_list", "list[OdspInsight]", "odspInsightList"]
         ],
+        "enums": {
+          "kind": ["ENABLED", "DISABLED"]
+        },
         "discriminator": "OdspInsightDetails"
       },
       "EnabledKerberosAuthDetails": {
@@ -24740,6 +24819,9 @@
             "backupCredentials"
           ]
         ],
+        "enums": {
+          "kind": ["ENABLED", "DISABLED"]
+        },
         "discriminator": "KerberosAuthDetails"
       },
       "Endpoint": {
@@ -24754,7 +24836,10 @@
           ["type", "str", "type"],
           ["min_seconds", "int", "minSeconds"],
           ["max_seconds", "int", "maxSeconds"]
-        ]
+        ],
+        "enums": {
+          "type": ["FIXED", "CLIENT_INPUT", "BACKEND_DETERMINED"]
+        }
       },
       "InsightCapabilityCollection": {
         "attributes": [["items", "list[InsightCapabilitySummary]", "items"]]
@@ -24768,13 +24853,19 @@
             "list[InsightDataTypeCapability]",
             "dataTypeCapabilities"
           ]
-        ]
+        ],
+        "enums": {
+          "insight_type": ["QUERY_INSIGHT"]
+        }
       },
       "InsightDataContract": {
         "attributes": [
           ["kind", "str", "kind"],
           ["unit", "str", "unit"]
-        ]
+        ],
+        "enums": {
+          "kind": ["TIME_SERIES", "TABLE", "SUMMARY"]
+        }
       },
       "InsightDataTypeCapability": {
         "attributes": [
@@ -24791,7 +24882,10 @@
           ["sorting", "SortingCapability", "sorting"],
           ["pagination", "PaginationCapability", "pagination"],
           ["limits", "InsightLimits", "limits"]
-        ]
+        ],
+        "enums": {
+          "insight_data_type": ["AAS_TIME_SERIES", "TOP_QUERIES"]
+        }
       },
       "InsightFilterCapability": {
         "attributes": [
@@ -24809,6 +24903,9 @@
       },
       "KerberosAuthDetails": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["ENABLED", "DISABLED"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -24847,6 +24944,9 @@
           ["backup_start", "str", "backupStart"],
           ["days_of_the_month", "list[int]", "daysOfTheMonth"]
         ],
+        "enums": {
+          "kind": ["DAILY", "WEEKLY", "MONTHLY", "NONE"]
+        },
         "discriminator": "BackupPolicy"
       },
       "NetworkDetails": {
@@ -24867,14 +24967,28 @@
           ["retention_days", "int", "retentionDays"],
           ["copy_policy", "BackupCopyPolicy", "copyPolicy"]
         ],
+        "enums": {
+          "kind": ["DAILY", "WEEKLY", "MONTHLY", "NONE"]
+        },
         "discriminator": "BackupPolicy"
       },
       "NonePitrPolicy": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["STANDARD", "NONE"]
+        },
         "discriminator": "PitrPolicy"
       },
       "NoneSourceDetails": {
         "attributes": [["source_type", "str", "sourceType"]],
+        "enums": {
+          "source_type": [
+            "BACKUP",
+            "NONE",
+            "POINT_IN_TIME_DB_SYSTEM",
+            "DB_SYSTEM"
+          ]
+        },
         "discriminator": "SourceDetails"
       },
       "OciOptimizedStorageDetails": {
@@ -24891,10 +25005,16 @@
         "attributes": [
           ["insight_type", "str", "insightType"],
           ["retention_period_in_days", "int", "retentionPeriodInDays"]
-        ]
+        ],
+        "enums": {
+          "insight_type": ["QUERY_INSIGHT"]
+        }
       },
       "OdspInsightDetails": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["ENABLED", "DISABLED"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -24913,6 +25033,9 @@
       },
       "PasswordDetails": {
         "attributes": [["password_type", "str", "passwordType"]],
+        "strictEnums": {
+          "password_type": ["PLAIN_TEXT", "VAULT_SECRET"]
+        },
         "discriminator": {
           "field": "passwordType",
           "values": {
@@ -24930,6 +25053,18 @@
           ["selected_item", "str", "selectedItem"],
           ["position", "str", "position"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ],
+          "position": ["BEFORE", "AFTER"]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchInstruction": {
@@ -24937,6 +25072,17 @@
           ["operation", "str", "operation"],
           ["selection", "str", "selection"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": {
           "field": "operation",
           "values": {
@@ -24957,6 +25103,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchMoveInstruction": {
@@ -24966,6 +25123,18 @@
           ["_from", "str", "from"],
           ["position", "str", "position"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ],
+          "position": ["AT", "BEFORE", "AFTER"]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchProhibitInstruction": {
@@ -24974,6 +25143,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchRemoveInstruction": {
@@ -24981,6 +25161,17 @@
           ["operation", "str", "operation"],
           ["selection", "str", "selection"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchReplaceInstruction": {
@@ -24989,6 +25180,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchRequireInstruction": {
@@ -24997,6 +25199,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PitrDetails": {
@@ -25007,10 +25220,16 @@
             "list[PitrTimeWindow]",
             "recoveryTimeWindows"
           ]
-        ]
+        ],
+        "enums": {
+          "pitr_state": ["ACTIVE", "UPDATING", "INACTIVE"]
+        }
       },
       "PitrPolicy": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["STANDARD", "NONE"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -25031,6 +25250,9 @@
           ["password_type", "str", "passwordType"],
           ["password", "str", "password"]
         ],
+        "strictEnums": {
+          "password_type": ["PLAIN_TEXT", "VAULT_SECRET"]
+        },
         "discriminator": "PasswordDetails"
       },
       "PointInTimeDbSystemSourceDetails": {
@@ -25039,6 +25261,14 @@
           ["db_system_id", "str", "dbSystemId"],
           ["time_to_restore", "datetime", "timeToRestore"]
         ],
+        "enums": {
+          "source_type": [
+            "BACKUP",
+            "NONE",
+            "POINT_IN_TIME_DB_SYSTEM",
+            "DB_SYSTEM"
+          ]
+        },
         "discriminator": "SourceDetails"
       },
       "PrimaryDbInstanceDetails": {
@@ -25049,6 +25279,14 @@
           ["source_type", "str", "sourceType"],
           ["primary_db_system_id", "str", "primaryDbSystemId"]
         ],
+        "enums": {
+          "source_type": [
+            "BACKUP",
+            "NONE",
+            "POINT_IN_TIME_DB_SYSTEM",
+            "DB_SYSTEM"
+          ]
+        },
         "discriminator": "SourceDetails"
       },
       "ReplicationConfig": {
@@ -25097,7 +25335,10 @@
         "attributes": [
           ["field", "str", "field"],
           ["order", "str", "order"]
-        ]
+        ],
+        "enums": {
+          "order": ["ASC", "DESC"]
+        }
       },
       "SourceBackupDetails": {
         "attributes": [
@@ -25107,6 +25348,14 @@
       },
       "SourceDetails": {
         "attributes": [["source_type", "str", "sourceType"]],
+        "enums": {
+          "source_type": [
+            "BACKUP",
+            "NONE",
+            "POINT_IN_TIME_DB_SYSTEM",
+            "DB_SYSTEM"
+          ]
+        },
         "discriminator": {
           "field": "sourceType",
           "values": {
@@ -25123,6 +25372,9 @@
           ["kind", "str", "kind"],
           ["restore_days", "int", "restoreDays"]
         ],
+        "enums": {
+          "kind": ["STANDARD", "NONE"]
+        },
         "discriminator": "PitrPolicy"
       },
       "StorageDetails": {
@@ -25144,7 +25396,10 @@
         "attributes": [
           ["apply_config", "str", "applyConfig"],
           ["config_id", "str", "configId"]
-        ]
+        ],
+        "strictEnums": {
+          "apply_config": ["RESTART", "RELOAD"]
+        }
       },
       "UpdateNetworkDetails": {
         "attributes": [
@@ -25170,6 +25425,9 @@
           ["secret_id", "str", "secretId"],
           ["secret_version", "str", "secretVersion"]
         ],
+        "strictEnums": {
+          "password_type": ["PLAIN_TEXT", "VAULT_SECRET"]
+        },
         "discriminator": "PasswordDetails"
       },
       "WeeklyBackupPolicy": {
@@ -25180,6 +25438,18 @@
           ["days_of_the_week", "list[str]", "daysOfTheWeek"],
           ["backup_start", "str", "backupStart"]
         ],
+        "enums": {
+          "kind": ["DAILY", "WEEKLY", "MONTHLY", "NONE"],
+          "days_of_the_week": [
+            "SUNDAY",
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY"
+          ]
+        },
         "discriminator": "BackupPolicy"
       },
       "WorkRequest": {
@@ -25193,7 +25463,28 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_POSTGRESQL_DB_SYSTEM",
+            "UPDATE_POSTGRESQL_DB_SYSTEM",
+            "DELETE_POSTGRESQL_DB_SYSTEM",
+            "MOVE_POSTGRESQL_DB_SYSTEM",
+            "CREATE_POSTGRESQL_DB_SYSTEM_BACKUP",
+            "UPDATE_POSTGRESQL_DB_SYSTEM_BACKUP",
+            "DELETE_POSTGRESQL_DB_SYSTEM_BACKUP",
+            "MOVE_POSTGRESQL_DB_SYSTEM_BACKUP"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -25221,7 +25512,17 @@
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"],
           ["metadata", "dict(str, str)", "metadata"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -25234,7 +25535,28 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_POSTGRESQL_DB_SYSTEM",
+            "UPDATE_POSTGRESQL_DB_SYSTEM",
+            "DELETE_POSTGRESQL_DB_SYSTEM",
+            "MOVE_POSTGRESQL_DB_SYSTEM",
+            "CREATE_POSTGRESQL_DB_SYSTEM_BACKUP",
+            "UPDATE_POSTGRESQL_DB_SYSTEM_BACKUP",
+            "DELETE_POSTGRESQL_DB_SYSTEM_BACKUP",
+            "MOVE_POSTGRESQL_DB_SYSTEM_BACKUP"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestSummaryCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]

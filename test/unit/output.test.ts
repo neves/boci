@@ -122,10 +122,14 @@ test("response subtype discriminator is inherited through named models", () => {
   });
 });
 
-test("keeps model-specific lifecycle states and preserves other model states", () => {
+test("maps unknown enum values to UNKNOWN_ENUM_VALUE from model enums", () => {
   const { io, out } = invocation();
   const lbResult = result(
-    { lifecycleState: "FUTURE_STATE" },
+    {
+      lifecycleState: "FUTURE_STATE",
+      actions: ["ALLOW", "UNKNOWN_ONE", null],
+      nullableState: null,
+    },
     {},
     {
       operation: {
@@ -138,15 +142,26 @@ test("keeps model-specific lifecycle states and preserves other model states", (
       },
       responseModels: {
         LoadBalancer: {
-          attributes: [["lifecycle_state", "str", "lifecycleState"]],
+          attributes: [
+            ["lifecycle_state", "str", "lifecycleState"],
+            ["actions", "list[str]", "actions"],
+            ["nullable_state", "str", "nullableState"],
+          ],
+          enums: {
+            lifecycle_state: ["CREATING", "ACTIVE"],
+            actions: ["ALLOW", "DENY"],
+            nullable_state: ["ON", "OFF"],
+          },
         },
       },
     },
   );
   printResult(io, lbResult, { rc });
-  expect(JSON.parse(out.join("")).data["lifecycle-state"]).toBe(
-    "UNKNOWN_ENUM_VALUE",
-  );
+  expect(JSON.parse(out.join("")).data).toEqual({
+    "lifecycle-state": "UNKNOWN_ENUM_VALUE",
+    actions: ["ALLOW", "UNKNOWN_ENUM_VALUE", null],
+    "nullable-state": null,
+  });
 
   const other = invocation();
   printResult(
@@ -161,6 +176,192 @@ test("keeps model-specific lifecycle states and preserves other model states", (
   expect(JSON.parse(other.out.join("")).data["lifecycle-state"]).toBe(
     "FUTURE_STATE",
   );
+});
+
+test("deserializes datetimes with microseconds, floats as 0.0, drops unknown fields, and sorts keys by codepoint", () => {
+  const { io, out } = invocation();
+  const res = result(
+    {
+      timeMillis: "2024-01-02T03:04:05.123Z",
+      timeZero: "2024-01-02T03:04:05.000Z",
+      timeOffset: "2024-01-02T03:04:05.123456+05:30",
+      cpus: 0,
+      tags: { "k ✓": "a", "Key-2": "b" },
+      extraUnknown: "drop-me",
+    },
+    {},
+    {
+      operation: {
+        client: "things",
+        method: "get_thing",
+        http: "GET",
+        path: "/things/1",
+        responseType: "Detail",
+        queryParams: {},
+      },
+      responseModels: {
+        Detail: {
+          attributes: [
+            ["time_millis", "datetime", "timeMillis"],
+            ["time_zero", "datetime", "timeZero"],
+            ["time_offset", "datetime", "timeOffset"],
+            ["cpus", "float", "cpus"],
+            ["tags", "dict(str, str)", "tags"],
+          ],
+        },
+      },
+    },
+  );
+  printResult(io, res, { rc });
+  const text = out.join("");
+  expect(text).toContain('"cpus": 0.0');
+  expect(text).toContain('"time-millis": "2024-01-02T03:04:05.123000+00:00"');
+  expect(text).toContain('"time-zero": "2024-01-02T03:04:05+00:00"');
+  expect(text).toContain('"time-offset": "2024-01-02T03:04:05.123456+05:30"');
+  expect(text).not.toContain("extraUnknown");
+  expect(text.indexOf('"Key-2"')).toBeLessThan(text.indexOf('"k ✓"'));
+});
+
+test("polymorphic response raises KeyError when discriminator is missing", () => {
+  const { io, out, err } = invocation();
+  const res = result(
+    { name: "x" },
+    {},
+    {
+      operation: {
+        client: "things",
+        method: "get_poly",
+        http: "GET",
+        path: "/poly/1",
+        responseType: "Sub",
+        queryParams: {},
+      },
+      responseModels: {
+        Base: {
+          attributes: [["kind", "str", "kind"]],
+          discriminator: {
+            field: "kind",
+            values: { SUB: "Sub" },
+            fallback: "Base",
+          },
+        },
+        Sub: {
+          attributes: [
+            ["kind", "str", "kind"],
+            ["name", "str", "name"],
+          ],
+          discriminator: "Base",
+        },
+      },
+    },
+  );
+  expect(() => printResult(io, res, { rc })).toThrow(Exit);
+  expect(out).toEqual([]);
+  expect(err.join("")).toBe("KeyError: 'kind'\n");
+});
+
+test("--all on a collection model aggregates only list attributes across pages", () => {
+  const { io, out } = invocation();
+  const baseOp = {
+    client: "things",
+    method: "list_collection",
+    http: "GET",
+    path: "/things",
+    responseType: "ThingCollection",
+    queryParams: {},
+  };
+  const models = {
+    ThingCollection: {
+      attributes: [
+        ["count", "int", "count"],
+        ["items", "list[Thing]", "items"],
+      ] as [string, string, string][],
+    },
+    Thing: {
+      attributes: [["display_name", "str", "displayName"]] as [
+        string,
+        string,
+        string,
+      ][],
+    },
+  };
+  printResult(
+    io,
+    result(
+      {},
+      {},
+      {
+        operation: baseOp,
+        responseModels: models,
+        allPages: true,
+        rawPages: [
+          JSON.stringify({ count: 1 }),
+          JSON.stringify({ items: [{ displayName: "one" }] }),
+        ],
+      },
+    ),
+    { rc },
+  );
+  expect(JSON.parse(out.join(""))).toEqual({
+    data: { items: [{ "display-name": "one" }] },
+  });
+
+  const empty = invocation();
+  printResult(
+    empty.io,
+    result(
+      {},
+      { headers: { etag: "e1" } },
+      {
+        operation: baseOp,
+        responseModels: models,
+        allPages: true,
+        rawPages: [JSON.stringify({})],
+      },
+    ),
+    { rc },
+  );
+  expect(JSON.parse(empty.out.join(""))).toEqual({ etag: "e1" });
+});
+
+test("table renders None, booleans, python repr dicts, and extra headers on stderr", () => {
+  const { io, out, err } = invocation();
+  const res = result(
+    {
+      name: null,
+      flag: false,
+      nested: { b: null, a: "x" },
+    },
+    { headers: { etag: "e1" } },
+    {
+      operation: {
+        client: "things",
+        method: "get_row",
+        http: "GET",
+        path: "/row/1",
+        responseType: "Row",
+        queryParams: {},
+      },
+      responseModels: {
+        Row: {
+          attributes: [
+            ["name", "str", "name"],
+            ["flag", "bool", "flag"],
+            ["nested", "Nested", "nested"],
+          ],
+        },
+        Nested: {
+          attributes: [
+            ["b", "str", "b"],
+            ["a", "str", "a"],
+          ],
+        },
+      },
+    },
+  );
+  printResult(io, res, { output: "table", rc });
+  expect(out.join("")).toContain("| False | None | {'b': None, 'a': 'x'} |");
+  expect(err.join("")).toBe("etag: e1\n");
 });
 
 test("table renders the data's rows with padded columns", () => {

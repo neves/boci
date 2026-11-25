@@ -1,9 +1,9 @@
 // Pagination helpers matching `oci_cli.cli_util.list_call_get_all_results`,
 // `list_call_get_up_to_limit`, and their `*_multiple_keys` variants.
 import { truthy } from "./checks.ts";
-import type { Models } from "./camelize.ts";
+import { inheritedDiscriminator, type Models } from "./camelize.ts";
 import type { OperationResult } from "./operation.ts";
-import { renderModel } from "./output.ts";
+import { ModelDeserializationError, renderModel } from "./output.ts";
 import {
   modelAttr,
   ProgramRaise,
@@ -30,7 +30,22 @@ export function collectionAttributes(
   result: OperationResult,
   data: Record<string, unknown>,
 ): CollectionAttribute[] {
-  const model = result.responseModels?.[result.operation.responseType ?? ""];
+  const models = result.responseModels;
+  let model = models?.[result.operation.responseType ?? ""];
+  if (model && models) {
+    const disc = inheritedDiscriminator(models, model);
+    if (disc && typeof disc !== "string") {
+      if (!Object.hasOwn(data, disc.field)) {
+        throw new ProgramRaise("KeyError", `'${disc.field}'`);
+      }
+      const key = data[disc.field];
+      const subtype =
+        typeof key === "string" && Object.hasOwn(disc.values, key)
+          ? disc.values[key]
+          : disc.fallback;
+      model = models[subtype!] ?? model;
+    }
+  }
   const attributes = model
     ? model.attributes.map(([snake, type, wire]) => ({ snake, wire, type }))
     : Object.keys(data).map((wire) => ({
@@ -122,7 +137,15 @@ function renderCollectionField(
   type: string | undefined,
   models?: Models[string],
 ): unknown {
-  return type ? renderModel(value, type, models) : value;
+  if (!type) return value;
+  try {
+    return renderModel(value, type, models);
+  } catch (e) {
+    if (e instanceof ModelDeserializationError) {
+      throw new ProgramRaise(e.pythonType, e.message);
+    }
+    throw e;
+  }
 }
 
 function pyTypeName(v: unknown): string {

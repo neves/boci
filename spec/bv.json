@@ -855,6 +855,7 @@
             "kms_key_id",
             ["call", "pop", ["var", "kwargs"], "kms_key_id"]
           ],
+          ["checkNoExtraKwargs", "copy_volume_backup"],
           [
             "if",
             [
@@ -7900,6 +7901,7 @@
             "kms_key_id",
             ["call", "pop", ["var", "kwargs"], "kms_key_id"]
           ],
+          ["checkNoExtraKwargs", "copy_boot_volume_backup"],
           [
             "if",
             [
@@ -22772,6 +22774,9 @@
     "core": {
       "AutotunePolicy": {
         "attributes": [["autotune_type", "str", "autotuneType"]],
+        "enums": {
+          "autotune_type": ["DETACHED_VOLUME", "PERFORMANCE_BASED"]
+        },
         "discriminator": {
           "field": "autotuneType",
           "values": {
@@ -22797,7 +22802,17 @@
           ["total_data_transferred_in_gbs", "int", "totalDataTransferredInGBs"],
           ["volume_group_replica_id", "str", "volumeGroupReplicaId"],
           ["kms_key_id", "str", "kmsKeyId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "PROVISIONING",
+            "AVAILABLE",
+            "ACTIVATING",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY"
+          ]
+        }
       },
       "BlockVolumeReplicaDetails": {
         "attributes": [
@@ -22842,7 +22857,17 @@
             "bootVolumeReplicas"
           ],
           ["autotune_policies", "list[AutotunePolicy]", "autotunePolicies"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "PROVISIONING",
+            "RESTORING",
+            "AVAILABLE",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY"
+          ]
+        }
       },
       "BootVolumeBackup": {
         "attributes": [
@@ -22874,7 +22899,19 @@
             "isIndefiniteRetentionEnabled"
           ],
           ["volume_group_backup_id", "str", "volumeGroupBackupId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "AVAILABLE",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY",
+            "REQUEST_RECEIVED"
+          ],
+          "source_type": ["MANUAL", "SCHEDULED"],
+          "type": ["FULL", "INCREMENTAL"]
+        }
       },
       "BootVolumeKmsKey": {
         "attributes": [["kms_key_id", "str", "kmsKeyId"]]
@@ -22896,7 +22933,17 @@
           ["total_data_transferred_in_gbs", "int", "totalDataTransferredInGBs"],
           ["volume_group_replica_id", "str", "volumeGroupReplicaId"],
           ["kms_key_id", "str", "kmsKeyId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "PROVISIONING",
+            "AVAILABLE",
+            "ACTIVATING",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY"
+          ]
+        }
       },
       "BootVolumeReplicaDetails": {
         "attributes": [
@@ -22958,26 +23005,38 @@
       },
       "DetachedVolumeAutotunePolicy": {
         "attributes": [["autotune_type", "str", "autotuneType"]],
+        "enums": {
+          "autotune_type": ["DETACHED_VOLUME", "PERFORMANCE_BASED"]
+        },
         "discriminator": "AutotunePolicy"
       },
       "MemberReplica": {
         "attributes": [
           ["volume_replica_id", "str", "volumeReplicaId"],
           ["membership_state", "str", "membershipState"]
-        ]
+        ],
+        "enums": {
+          "membership_state": ["ADD_PENDING", "STABLE", "REMOVE_PENDING"]
+        }
       },
       "PerformanceBasedAutotunePolicy": {
         "attributes": [
           ["autotune_type", "str", "autotuneType"],
           ["max_vpus_per_gb", "int", "maxVpusPerGB"]
         ],
+        "enums": {
+          "autotune_type": ["DETACHED_VOLUME", "PERFORMANCE_BASED"]
+        },
         "discriminator": "AutotunePolicy"
       },
       "RetentionDuration": {
         "attributes": [
           ["retention_time_unit", "str", "retentionTimeUnit"],
           ["retention_time_amount", "int", "retentionTimeAmount"]
-        ]
+        ],
+        "enums": {
+          "retention_time_unit": ["YEARS", "DAYS"]
+        }
       },
       "Volume": {
         "attributes": [
@@ -23007,7 +23066,17 @@
           ],
           ["autotune_policies", "list[AutotunePolicy]", "autotunePolicies"],
           ["is_reservations_enabled", "bool", "isReservationsEnabled"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "PROVISIONING",
+            "RESTORING",
+            "AVAILABLE",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY"
+          ]
+        }
       },
       "VolumeBackup": {
         "attributes": [
@@ -23040,7 +23109,19 @@
             "isIndefiniteRetentionEnabled"
           ],
           ["volume_group_backup_id", "str", "volumeGroupBackupId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "AVAILABLE",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY",
+            "REQUEST_RECEIVED"
+          ],
+          "source_type": ["MANUAL", "SCHEDULED"],
+          "type": ["FULL", "INCREMENTAL"]
+        }
       },
       "VolumeBackupPolicy": {
         "attributes": [
@@ -23078,7 +23159,42 @@
           ["retention_period", "RetentionDuration", "retentionPeriod"],
           ["is_prevent_deletion_enabled", "bool", "isPreventDeletionEnabled"],
           ["is_retention_lock_enabled", "bool", "isRetentionLockEnabled"]
-        ]
+        ],
+        "enums": {
+          "backup_type": ["FULL", "INCREMENTAL"],
+          "period": [
+            "ONE_HOUR",
+            "ONE_DAY",
+            "ONE_WEEK",
+            "ONE_MONTH",
+            "ONE_YEAR"
+          ],
+          "offset_type": ["STRUCTURED", "NUMERIC_SECONDS"],
+          "day_of_week": [
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY",
+            "SUNDAY"
+          ],
+          "month": [
+            "JANUARY",
+            "FEBRUARY",
+            "MARCH",
+            "APRIL",
+            "MAY",
+            "JUNE",
+            "JULY",
+            "AUGUST",
+            "SEPTEMBER",
+            "OCTOBER",
+            "NOVEMBER",
+            "DECEMBER"
+          ],
+          "time_zone": ["UTC", "REGIONAL_DATA_CENTER_TIME"]
+        }
       },
       "VolumeGroup": {
         "attributes": [
@@ -23100,7 +23216,17 @@
             "list[VolumeGroupReplicaInfo]",
             "volumeGroupReplicas"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "PROVISIONING",
+            "AVAILABLE",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY",
+            "UPDATE_PENDING"
+          ]
+        }
       },
       "VolumeGroupBackup": {
         "attributes": [
@@ -23131,7 +23257,20 @@
             "bool",
             "isIndefiniteRetentionEnabled"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "COMMITTED",
+            "AVAILABLE",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY",
+            "REQUEST_RECEIVED"
+          ],
+          "source_type": ["MANUAL", "SCHEDULED"],
+          "type": ["FULL", "INCREMENTAL"]
+        }
       },
       "VolumeGroupReplica": {
         "attributes": [
@@ -23147,7 +23286,17 @@
           ["time_created", "datetime", "timeCreated"],
           ["member_replicas", "list[MemberReplica]", "memberReplicas"],
           ["time_last_synced", "datetime", "timeLastSynced"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "PROVISIONING",
+            "AVAILABLE",
+            "ACTIVATING",
+            "TERMINATING",
+            "TERMINATED",
+            "FAULTY"
+          ]
+        }
       },
       "VolumeGroupReplicaDetails": {
         "attributes": [

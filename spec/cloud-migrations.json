@@ -10506,6 +10506,7 @@
             "ms_license",
             ["call", "pop", ["var", "kwargs"], "ms_license"]
           ],
+          ["checkNoExtraKwargs", "create_target_asset"],
           ["let", "kwargs", ["dict"]],
           [
             "set",
@@ -12215,6 +12216,7 @@
             ["call", "pop", ["var", "kwargs"], "ms_license"]
           ],
           ["let", "user_spec", ["call", "pop", ["var", "kwargs"], "user_spec"]],
+          ["checkNoExtraKwargs", "update_target_asset"],
           [
             "if",
             [
@@ -14760,6 +14762,10 @@
           ["strategy_type", "str", "strategyType"],
           ["adjustment_multiplier", "float", "adjustmentMultiplier"]
         ],
+        "enums": {
+          "resource_type": ["CPU", "MEMORY", "ALL"],
+          "strategy_type": ["AS_IS", "AVERAGE", "PEAK", "PERCENTILE"]
+        },
         "discriminator": "ResourceAssessmentStrategy"
       },
       "AvailableShapeSummary": {
@@ -14806,6 +14812,12 @@
           ["metric_type", "str", "metricType"],
           ["metric_time_window", "str", "metricTimeWindow"]
         ],
+        "enums": {
+          "resource_type": ["CPU", "MEMORY", "ALL"],
+          "strategy_type": ["AS_IS", "AVERAGE", "PEAK", "PERCENTILE"],
+          "metric_type": ["AUTO", "HISTORICAL", "RUNTIME"],
+          "metric_time_window": ["1d", "7d", "30d"]
+        },
         "discriminator": "ResourceAssessmentStrategy"
       },
       "CompatibilityMessage": {
@@ -14813,7 +14825,22 @@
           ["severity", "str", "severity"],
           ["name", "str", "name"],
           ["message", "str", "message"]
-        ]
+        ],
+        "enums": {
+          "severity": ["ERROR", "WARNING", "INFO"],
+          "name": [
+            "NOT_ENOUGH_DATA",
+            "INVALID_DATA",
+            "CPU_COMPATIBILITY_WARNING",
+            "CPU_METRIC_INFO",
+            "MEMORY_COMPATIBILITY_WARNING",
+            "MEMORY_METRIC_INFO",
+            "VNICS_COMPATIBILITY_WARNING",
+            "BANDWIDTH_COMPATIBILITY_WARNING",
+            "GPU_COMPATIBILITY_WARNING",
+            "OS_WARNING"
+          ]
+        }
       },
       "ComputeCostEstimation": {
         "attributes": [
@@ -14897,13 +14924,19 @@
           ["volume_id", "str", "volumeId"],
           ["volume_type", "str", "volumeType"],
           ["unmodified_volume_id", "str", "unmodifiedVolumeId"]
-        ]
+        ],
+        "enums": {
+          "volume_type": ["BOOT", "BLOCK"]
+        }
       },
       "InstanceAgentPluginConfigDetails": {
         "attributes": [
           ["name", "str", "name"],
           ["desired_state", "str", "desiredState"]
-        ]
+        ],
+        "enums": {
+          "desired_state": ["ENABLED", "DISABLED"]
+        }
       },
       "InstanceOptions": {
         "attributes": [
@@ -14989,7 +15022,14 @@
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["baseline_ocpu_utilization", "str", "baselineOcpuUtilization"]
-        ]
+        ],
+        "enums": {
+          "baseline_ocpu_utilization": [
+            "BASELINE_1_8",
+            "BASELINE_1_2",
+            "BASELINE_1_1"
+          ]
+        }
       },
       "Migration": {
         "attributes": [
@@ -15012,7 +15052,19 @@
             "dict(str, dict(str, object))",
             "securityAttributes"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "NEEDS_ATTENTION",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "migration_type": ["OCI", "OLVM"]
+        }
       },
       "MigrationAsset": {
         "attributes": [
@@ -15047,7 +15099,19 @@
             "dict(str, DestinationDisk)",
             "destinationDisks"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "NEEDS_ATTENTION",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "notifications": ["OUT_OF_DATE", "SOURCE_REMOVED"]
+        }
       },
       "MigrationAssetCollection": {
         "attributes": [["items", "list[MigrationAssetSummary]", "items"]]
@@ -15083,7 +15147,10 @@
             "dict(str, DestinationDisk)",
             "destinationDisks"
           ]
-        ]
+        ],
+        "enums": {
+          "notifications": ["OUT_OF_DATE", "SOURCE_REMOVED"]
+        }
       },
       "MigrationCollection": {
         "attributes": [["items", "list[MigrationSummary]", "items"]]
@@ -15114,7 +15181,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "NEEDS_ATTENTION",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "MigrationPlanCollection": {
         "attributes": [["items", "list[MigrationPlanSummary]", "items"]]
@@ -15199,6 +15277,18 @@
           ["migration_asset", "MigrationAsset", "migrationAsset"],
           ["ms_license", "str", "msLicense"]
         ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "NEEDS_ATTENTION",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "type": ["INSTANCE", "OLVM_INSTANCE"]
+        },
         "discriminator": "TargetAsset"
       },
       "OlvmTargetAssetSummary": {
@@ -15224,6 +15314,9 @@
           ["migration_asset", "MigrationAssetSummary", "migrationAsset"],
           ["ms_license", "str", "msLicense"]
         ],
+        "enums": {
+          "type": ["INSTANCE", "OLVM_INSTANCE"]
+        },
         "discriminator": "TargetAssetSummary"
       },
       "OlvmTargetEnvironment": {
@@ -15235,6 +15328,9 @@
           ["olvm_templates", "dict(str, str)", "olvmTemplates"],
           ["preferred_shape_type", "str", "preferredShapeType"]
         ],
+        "enums": {
+          "target_environment_type": ["VM_TARGET_ENV", "OLVM_TARGET_ENV"]
+        },
         "discriminator": "TargetEnvironment"
       },
       "OsImageEstimation": {
@@ -15255,6 +15351,12 @@
           ["metric_type", "str", "metricType"],
           ["metric_time_window", "str", "metricTimeWindow"]
         ],
+        "enums": {
+          "resource_type": ["CPU", "MEMORY", "ALL"],
+          "strategy_type": ["AS_IS", "AVERAGE", "PEAK", "PERCENTILE"],
+          "metric_type": ["AUTO", "HISTORICAL", "RUNTIME"],
+          "metric_time_window": ["1d", "7d", "30d"]
+        },
         "discriminator": "ResourceAssessmentStrategy"
       },
       "PercentileResourceAssessmentStrategy": {
@@ -15265,6 +15367,12 @@
           ["adjustment_multiplier", "float", "adjustmentMultiplier"],
           ["metric_time_window", "str", "metricTimeWindow"]
         ],
+        "enums": {
+          "resource_type": ["CPU", "MEMORY", "ALL"],
+          "strategy_type": ["AS_IS", "AVERAGE", "PEAK", "PERCENTILE"],
+          "percentile": ["P50", "P90", "P95", "P99"],
+          "metric_time_window": ["1d", "7d", "30d"]
+        },
         "discriminator": "ResourceAssessmentStrategy"
       },
       "PreemptibleInstanceConfigDetails": {
@@ -15274,6 +15382,9 @@
       },
       "PreemptionAction": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["TERMINATE"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -15286,7 +15397,13 @@
         "attributes": [
           ["replication_location_type", "str", "replicationLocationType"],
           ["metadata", "object", "metadata"]
-        ]
+        ],
+        "enums": {
+          "replication_location_type": [
+            "OCI_OBJECT_STORE",
+            "OLVM_STORAGE_DOMAIN"
+          ]
+        }
       },
       "ReplicationProgress": {
         "attributes": [
@@ -15311,7 +15428,11 @@
           ["last_replication_status", "str", "lastReplicationStatus"],
           ["last_replication_sub_status", "str", "lastReplicationSubStatus"],
           ["last_replication_error", "str", "lastReplicationError"]
-        ]
+        ],
+        "enums": {
+          "status": ["NONE", "IN_PROGRESS"],
+          "last_replication_status": ["NONE", "COMPLETED", "FAILED"]
+        }
       },
       "ReplicationSchedule": {
         "attributes": [
@@ -15326,7 +15447,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "NEEDS_ATTENTION",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ReplicationScheduleCollection": {
         "attributes": [["items", "list[ReplicationScheduleSummary]", "items"]]
@@ -15351,6 +15483,10 @@
           ["resource_type", "str", "resourceType"],
           ["strategy_type", "str", "strategyType"]
         ],
+        "enums": {
+          "resource_type": ["CPU", "MEMORY", "ALL"],
+          "strategy_type": ["AS_IS", "AVERAGE", "PEAK", "PERCENTILE"]
+        },
         "discriminator": {
           "field": "strategyType",
           "values": {
@@ -15395,6 +15531,18 @@
           ["time_assessed", "datetime", "timeAssessed"],
           ["migration_asset", "MigrationAsset", "migrationAsset"]
         ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "NEEDS_ATTENTION",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "type": ["INSTANCE", "OLVM_INSTANCE"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -15429,6 +15577,9 @@
           ["time_assessed", "datetime", "timeAssessed"],
           ["migration_asset", "MigrationAssetSummary", "migrationAsset"]
         ],
+        "enums": {
+          "type": ["INSTANCE", "OLVM_INSTANCE"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -15443,6 +15594,9 @@
           ["target_compartment_id", "str", "targetCompartmentId"],
           ["target_environment_type", "str", "targetEnvironmentType"]
         ],
+        "enums": {
+          "target_environment_type": ["VM_TARGET_ENV", "OLVM_TARGET_ENV"]
+        },
         "discriminator": {
           "field": "targetEnvironmentType",
           "values": {
@@ -15457,6 +15611,9 @@
           ["type", "str", "type"],
           ["preserve_boot_volume", "bool", "preserveBootVolume"]
         ],
+        "enums": {
+          "type": ["TERMINATE"]
+        },
         "discriminator": "PreemptionAction"
       },
       "VmTargetAsset": {
@@ -15487,6 +15644,28 @@
           ["user_spec", "LaunchInstanceDetails", "userSpec"],
           ["recommended_spec", "LaunchInstanceDetails", "recommendedSpec"]
         ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "NEEDS_ATTENTION",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "type": ["INSTANCE", "OLVM_INSTANCE"],
+          "preferred_shape_type": [
+            "VM",
+            "VM_INTEL",
+            "VM_INTEL_Standard",
+            "VM_INTEL_DensIO",
+            "VM_INTEL_GPU",
+            "VM_INTEL_Optimized",
+            "VM_AMD",
+            "VM_AMD_Standard"
+          ]
+        },
         "discriminator": "TargetAsset"
       },
       "VmTargetAssetSummary": {
@@ -15516,6 +15695,9 @@
           ["user_spec", "LaunchInstanceDetails", "userSpec"],
           ["recommended_spec", "LaunchInstanceDetails", "recommendedSpec"]
         ],
+        "enums": {
+          "type": ["INSTANCE", "OLVM_INSTANCE"]
+        },
         "discriminator": "TargetAssetSummary"
       },
       "VmTargetEnvironment": {
@@ -15530,6 +15712,9 @@
           ["ms_license", "str", "msLicense"],
           ["preferred_shape_type", "str", "preferredShapeType"]
         ],
+        "enums": {
+          "target_environment_type": ["VM_TARGET_ENV", "OLVM_TARGET_ENV"]
+        },
         "discriminator": "TargetEnvironment"
       },
       "VolumeCostEstimation": {
@@ -15555,7 +15740,45 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_MIGRATION",
+            "UPDATE_MIGRATION",
+            "REFRESH_MIGRATION",
+            "DELETE_MIGRATION",
+            "MOVE_MIGRATION",
+            "START_ASSET_REPLICATION",
+            "START_MIGRATION_REPLICATION",
+            "CREATE_REPLICATION_SCHEDULE",
+            "UPDATE_REPLICATION_SCHEDULE",
+            "DELETE_REPLICATION_SCHEDULE",
+            "MOVE_REPLICATION_SCHEDULE",
+            "CREATE_MIGRATION_PLAN",
+            "UPDATE_MIGRATION_PLAN",
+            "DELETE_MIGRATION_PLAN",
+            "MOVE_MIGRATION_PLAN",
+            "REFRESH_MIGRATION_PLAN",
+            "EXECUTE_MIGRATION_PLAN",
+            "REFRESH_MIGRATION_ASSET",
+            "CREATE_MIGRATION_ASSET",
+            "DELETE_MIGRATION_ASSET",
+            "CREATE_TARGET_ASSET",
+            "UPDATE_TARGET_ASSET",
+            "DELETE_TARGET_ASSET",
+            "PREPARE_TARGET_ASSET"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -15582,7 +15805,17 @@
           ["action_type", "str", "actionType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -15598,7 +15831,45 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_MIGRATION",
+            "UPDATE_MIGRATION",
+            "REFRESH_MIGRATION",
+            "DELETE_MIGRATION",
+            "MOVE_MIGRATION",
+            "START_ASSET_REPLICATION",
+            "START_MIGRATION_REPLICATION",
+            "CREATE_REPLICATION_SCHEDULE",
+            "UPDATE_REPLICATION_SCHEDULE",
+            "DELETE_REPLICATION_SCHEDULE",
+            "MOVE_REPLICATION_SCHEDULE",
+            "CREATE_MIGRATION_PLAN",
+            "UPDATE_MIGRATION_PLAN",
+            "DELETE_MIGRATION_PLAN",
+            "MOVE_MIGRATION_PLAN",
+            "REFRESH_MIGRATION_PLAN",
+            "EXECUTE_MIGRATION_PLAN",
+            "REFRESH_MIGRATION_ASSET",
+            "CREATE_MIGRATION_ASSET",
+            "DELETE_MIGRATION_ASSET",
+            "CREATE_TARGET_ASSET",
+            "UPDATE_TARGET_ASSET",
+            "DELETE_TARGET_ASSET",
+            "PREPARE_TARGET_ASSET"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "WAITING",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "WorkRequestSummaryCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]

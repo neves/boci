@@ -383,7 +383,7 @@ Ordered by the extractor's custom list, simplest first. Expand this rung into on
 `bun run fuzz` (scripts/fuzz.ts) runs random spec-valid invocations through both CLIs against random model-shaped replies. Per item: reproduce with the seed and command given, `--promote` the mismatches into `test/parity/cases/fuzz-found.json` (goldens included), make them pass, and fix by cause, not per command. Findings from `bun run fuzz --limit 300 --seed 42`.
 
 - [x] Fuzz: hangs. boci runs past 60 s where oci returns (e.g. `network vcn topology get`, `network vcn patch`, `identity-domains my-smtp-credential delete`, `opsi database-insights update-mds-my-sql-database`; seed 42).
-- [ ] Fuzz: SDK model deserialisation. Unknown enum values print as `UNKNOWN_ENUM_VALUE`; datetimes keep microseconds (`.123000+00:00`); unknown response fields are dropped; nulls and polymorphic subtypes print like the SDK.
+- [x] Fuzz: SDK model deserialisation. Unknown enum values print as `UNKNOWN_ENUM_VALUE`; datetimes keep microseconds (`.123000+00:00`); unknown response fields are dropped; nulls and polymorphic subtypes print like the SDK.
 - [ ] Fuzz: service error output. `TransientServiceError` for 429/5xx, response headers (`etag`, `opc-work-request-id`, …) in the error body, non-JSON error bodies.
 - [ ] Fuzz: invalid `--query`. JMESPath `ParseError` message and exit 1 instead of a JavaScript stack trace or exit 0.
 - [ ] Fuzz: `--query` results with `--output table` and `--raw-output` (e.g. `length(data)` with `--output table` fails in oci with `TypeError`).

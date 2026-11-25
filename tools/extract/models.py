@@ -83,21 +83,63 @@ def collect(metadata: dict | None, pool: dict) -> None:
     _collect(pending, pool, MODULE_TO_TYPE_MAPPINGS)
 
 
+def _enum_info(cls, attr: str) -> tuple[str, list[str]] | None:
+    """If attr's setter validates allowed_values, return ('unknown'|'strict', allowed_values)."""
+    prop = getattr(cls, attr, None)
+    if not isinstance(prop, property) or prop.fset is None:
+        return None
+    code = prop.fset.__code__
+    if "allowed_values" not in code.co_varnames:
+        return None
+    if "UNKNOWN_ENUM_VALUE" in code.co_consts:
+        mode = "unknown"
+    elif "ValueError" in code.co_names:
+        mode = "strict"
+    else:
+        return None
+    tree = ast.parse(textwrap.dedent(inspect.getsource(prop.fset)))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "allowed_values":
+                    if isinstance(node.value, ast.List) and all(
+                        isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+                        for elt in node.value.elts
+                    ):
+                        return mode, [elt.value for elt in node.value.elts]
+    return None
+
+
 def _collect(pending, pool, mappings):
     while pending:
         module, name = pending.pop()
         mapping = mappings.get(module, {})
         if name not in mapping or name in pool.get(module, {}):
             continue
-        instance = mapping[name]()
+        cls = mapping[name]
+        instance = cls()
         model = {
             "attributes": [
                 [snake, instance.swagger_types[snake], camel]
                 for snake, camel in instance.attribute_map.items()
             ]
         }
+        enums = {}
+        strict_enums = {}
+        for snake in instance.attribute_map:
+            info = _enum_info(cls, snake)
+            if info:
+                mode, allowed = info
+                if mode == "unknown":
+                    enums[snake] = allowed
+                else:
+                    strict_enums[snake] = allowed
+        if enums:
+            model["enums"] = enums
+        if strict_enums:
+            model["strictEnums"] = strict_enums
         pending += [(module, _referenced(a[1])) for a in model["attributes"]]
-        disc = _discriminator(mapping[name])
+        disc = _discriminator(cls)
         if isinstance(disc, str):
             model["discriminator"] = disc
             pending.append((module, disc))

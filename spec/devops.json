@@ -57713,6 +57713,7 @@
           ["let", "group_by", ["call", "pop", ["var", "kwargs"], "group_by"]],
           ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
           ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["checkNoExtraKwargs", "summarize_project_repository_analytics"],
           [
             "if",
             [
@@ -76116,6 +76117,7 @@
           ["let", "group_by", ["call", "pop", ["var", "kwargs"], "group_by"]],
           ["let", "limit", ["call", "pop", ["var", "kwargs"], "limit"]],
           ["let", "page", ["call", "pop", ["var", "kwargs"], "page"]],
+          ["checkNoExtraKwargs", "summarize_repository_analytics"],
           [
             "if",
             [
@@ -88741,6 +88743,9 @@
           ["wait_type", "str", "waitType"],
           ["wait_duration", "str", "waitDuration"]
         ],
+        "enums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": "WaitCriteria"
       },
       "AbsoluteWaitCriteriaSummary": {
@@ -88748,6 +88753,9 @@
           ["wait_type", "str", "waitType"],
           ["wait_duration", "str", "waitDuration"]
         ],
+        "enums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": "WaitCriteriaSummary"
       },
       "ActualBuildRunnerShapeConfig": {
@@ -88761,7 +88769,10 @@
           ["subject_id", "str", "subjectId"],
           ["action", "str", "action"],
           ["reason", "str", "reason"]
-        ]
+        ],
+        "enums": {
+          "action": ["APPROVE", "REJECT"]
+        }
       },
       "ApprovalActivitySummary": {
         "attributes": [
@@ -88772,10 +88783,23 @@
           ["activity_type", "str", "activityType"],
           ["status", "str", "status"]
         ],
+        "enums": {
+          "activity_type": [
+            "LIFECYCLE",
+            "APPROVAL",
+            "COMMIT",
+            "REVIEWER",
+            "COMMENT"
+          ],
+          "status": ["APPROVED", "UNAPPROVED"]
+        },
         "discriminator": "PullRequestActivitySummary"
       },
       "ApprovalPolicy": {
         "attributes": [["approval_policy_type", "str", "approvalPolicyType"]],
+        "enums": {
+          "approval_policy_type": ["COUNT_BASED_APPROVAL"]
+        },
         "discriminator": {
           "field": "approvalPolicyType",
           "values": {
@@ -88805,10 +88829,21 @@
           ["reviewers", "list[PrincipalDetails]", "reviewers"],
           ["level", "str", "level"]
         ],
+        "enums": {
+          "type": ["CONFLICT", "APPROVAL_RULE", "BUILD"],
+          "status": ["NEEDS_APPROVAL", "SUCCEEDED"],
+          "level": ["PROJECT", "REPOSITORY"]
+        },
         "discriminator": "MergeCheck"
       },
       "AutomatedDeployStageRollbackPolicy": {
         "attributes": [["policy_type", "str", "policyType"]],
+        "enums": {
+          "policy_type": [
+            "AUTOMATED_STAGE_ROLLBACK_POLICY",
+            "NO_STAGE_ROLLBACK_POLICY"
+          ]
+        },
         "discriminator": "DeployStageRollbackPolicy"
       },
       "BackendSetIpCollection": {
@@ -88837,6 +88872,17 @@
           ["username", "str", "username"],
           ["app_password", "str", "appPassword"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB_ACCESS_TOKEN",
+            "GITLAB_ACCESS_TOKEN",
+            "GITLAB_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_CLOUD_APP_PASSWORD",
+            "VBS_ACCESS_TOKEN"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Connection"
       },
       "BitbucketCloudAppPasswordConnectionSummary": {
@@ -88870,6 +88916,18 @@
           ["trigger_id", "str", "triggerId"],
           ["trigger_info", "TriggerInfo", "triggerInfo"]
         ],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "BitbucketCloudBuildSource": {
@@ -88880,6 +88938,17 @@
           ["branch", "str", "branch"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildSource"
       },
       "BitbucketCloudFilter": {
@@ -88889,6 +88958,14 @@
           ["include", "BitbucketCloudFilterAttributes", "include"],
           ["exclude", "BitbucketCloudFilterExclusionAttributes", "exclude"]
         ],
+        "enums": {
+          "events": [
+            "PUSH",
+            "PULL_REQUEST_CREATED",
+            "PULL_REQUEST_UPDATED",
+            "PULL_REQUEST_MERGED"
+          ]
+        },
         "discriminator": "Filter"
       },
       "BitbucketCloudFilterAttributes": {
@@ -88920,6 +88997,18 @@
           ["trigger_url", "str", "triggerUrl"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Trigger"
       },
       "BitbucketCloudTriggerCreateResult": {
@@ -88986,6 +89075,17 @@
           ["base_url", "str", "baseUrl"],
           ["tls_verify_config", "TlsVerifyConfig", "tlsVerifyConfig"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB_ACCESS_TOKEN",
+            "GITLAB_ACCESS_TOKEN",
+            "GITLAB_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_CLOUD_APP_PASSWORD",
+            "VBS_ACCESS_TOKEN"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Connection"
       },
       "BitbucketServerBuildRunSource": {
@@ -88994,6 +89094,18 @@
           ["trigger_id", "str", "triggerId"],
           ["trigger_info", "TriggerInfo", "triggerInfo"]
         ],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "BitbucketServerBuildSource": {
@@ -89004,6 +89116,17 @@
           ["branch", "str", "branch"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildSource"
       },
       "BitbucketServerFilter": {
@@ -89012,6 +89135,14 @@
           ["events", "list[str]", "events"],
           ["include", "BitbucketServerFilterAttributes", "include"]
         ],
+        "enums": {
+          "events": [
+            "PUSH",
+            "PULL_REQUEST_OPENED",
+            "PULL_REQUEST_MODIFIED",
+            "PULL_REQUEST_MERGED"
+          ]
+        },
         "discriminator": "Filter"
       },
       "BitbucketServerFilterAttributes": {
@@ -89064,6 +89195,18 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["trigger_url", "str", "triggerUrl"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Trigger"
       },
       "BitbucketServerTriggerCreateResult": {
@@ -89112,6 +89255,9 @@
           ["build_run_id", "str", "buildRunId"],
           ["build_status", "str", "buildStatus"]
         ],
+        "enums": {
+          "type": ["CONFLICT", "APPROVAL_RULE", "BUILD"]
+        },
         "discriminator": "MergeCheck"
       },
       "BuildOutputs": {
@@ -89157,7 +89303,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "BuildPipelineCollection": {
         "attributes": [["items", "list[BuildPipelineSummary]", "items"]]
@@ -89194,6 +89351,22 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ],
+        "enums": {
+          "build_pipeline_stage_type": [
+            "WAIT",
+            "BUILD",
+            "DELIVER_ARTIFACT",
+            "TRIGGER_DEPLOYMENT_PIPELINE"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": {
           "field": "buildPipelineStageType",
           "values": {
@@ -89230,6 +89403,16 @@
             "buildPipelineStagePredecessors"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": {
           "field": "buildPipelineStageType",
           "values": {
@@ -89318,7 +89501,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETING"
+          ]
+        }
       },
       "BuildRunArgument": {
         "attributes": [
@@ -89363,6 +89557,18 @@
       },
       "BuildRunSource": {
         "attributes": [["source_type", "str", "sourceType"]],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": {
           "field": "sourceType",
           "values": {
@@ -89411,6 +89617,9 @@
       },
       "BuildRunnerShapeConfig": {
         "attributes": [["build_runner_type", "str", "buildRunnerType"]],
+        "enums": {
+          "build_runner_type": ["CUSTOM", "DEFAULT"]
+        },
         "discriminator": {
           "field": "buildRunnerType",
           "values": {
@@ -89427,6 +89636,17 @@
           ["repository_url", "str", "repositoryUrl"],
           ["branch", "str", "branch"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": {
           "field": "connectionType",
           "values": {
@@ -89485,6 +89705,23 @@
           ],
           ["private_access_config", "NetworkChannel", "privateAccessConfig"]
         ],
+        "enums": {
+          "build_pipeline_stage_type": [
+            "WAIT",
+            "BUILD",
+            "DELIVER_ARTIFACT",
+            "TRIGGER_DEPLOYMENT_PIPELINE"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "image": ["OL7_X86_64_STANDARD_10", "OL8_X86_64_STANDARD_10"]
+        },
         "discriminator": "BuildPipelineStage"
       },
       "BuildStageRunProgress": {
@@ -89527,6 +89764,17 @@
           ],
           ["private_access_config", "NetworkChannel", "privateAccessConfig"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ],
+          "image": ["OL7_X86_64_STANDARD_10", "OL8_X86_64_STANDARD_10"]
+        },
         "discriminator": "BuildPipelineStageRunProgress"
       },
       "BuildStageRunStep": {
@@ -89535,7 +89783,10 @@
           ["state", "str", "state"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "state": ["WAITING", "IN_PROGRESS", "FAILED", "SUCCEEDED"]
+        }
       },
       "BuildStageSummary": {
         "attributes": [
@@ -89585,6 +89836,9 @@
           ["tls_verify_mode", "str", "tlsVerifyMode"],
           ["ca_certificate_bundle_id", "str", "caCertificateBundleId"]
         ],
+        "enums": {
+          "tls_verify_mode": ["CA_CERTIFICATE_VERIFY"]
+        },
         "discriminator": "TlsVerifyConfig"
       },
       "CommentActivitySummary": {
@@ -89596,6 +89850,15 @@
           ["activity_type", "str", "activityType"],
           ["comment_id", "str", "commentId"]
         ],
+        "enums": {
+          "activity_type": [
+            "LIFECYCLE",
+            "APPROVAL",
+            "COMMIT",
+            "REVIEWER",
+            "COMMENT"
+          ]
+        },
         "discriminator": "PullRequestActivitySummary"
       },
       "CommitActivitySummary": {
@@ -89608,6 +89871,15 @@
           ["commits_added", "list[RepositoryCommit]", "commitsAdded"],
           ["commits_removed", "list[RepositoryCommit]", "commitsRemoved"]
         ],
+        "enums": {
+          "activity_type": [
+            "LIFECYCLE",
+            "APPROVAL",
+            "COMMIT",
+            "REVIEWER",
+            "COMMENT"
+          ]
+        },
         "discriminator": "PullRequestActivitySummary"
       },
       "CommitAnalyticsAuthorCollection": {
@@ -89676,6 +89948,37 @@
             "productionLoadBalancerConfig"
           ]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ComputeInstanceGroupBlueGreenDeployStageExecutionProgress": {
@@ -89698,6 +90001,19 @@
           ],
           ["environment_id", "str", "environmentId"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ComputeInstanceGroupBlueGreenDeployStageSummary": {
@@ -89779,6 +90095,37 @@
             "computeInstanceGroupBlueGreenDeploymentDeployStageId"
           ]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ComputeInstanceGroupBlueGreenTrafficShiftDeployStageExecutionProgress": {
@@ -89801,6 +90148,19 @@
           ],
           ["environment_id", "str", "environmentId"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ComputeInstanceGroupBlueGreenTrafficShiftDeployStageSummary": {
@@ -89837,6 +90197,9 @@
           ["selector_type", "str", "selectorType"],
           ["compute_instance_ids", "list[str]", "computeInstanceIds"]
         ],
+        "enums": {
+          "selector_type": ["INSTANCE_IDS", "INSTANCE_QUERY"]
+        },
         "discriminator": "ComputeInstanceGroupSelector"
       },
       "ComputeInstanceGroupByQuerySelector": {
@@ -89845,6 +90208,9 @@
           ["region", "str", "region"],
           ["query", "str", "query"]
         ],
+        "enums": {
+          "selector_type": ["INSTANCE_IDS", "INSTANCE_QUERY"]
+        },
         "discriminator": "ComputeInstanceGroupSelector"
       },
       "ComputeInstanceGroupCanaryApprovalDeployStage": {
@@ -89875,6 +90241,37 @@
           ],
           ["approval_policy", "ApprovalPolicy", "approvalPolicy"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ComputeInstanceGroupCanaryApprovalDeployStageExecutionProgress": {
@@ -89897,6 +90294,19 @@
           ],
           ["approval_actions", "list[ApprovalAction]", "approvalActions"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ComputeInstanceGroupCanaryApprovalDeployStageSummary": {
@@ -89977,6 +90387,37 @@
             "productionLoadBalancerConfig"
           ]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ComputeInstanceGroupCanaryDeployStageExecutionProgress": {
@@ -89998,6 +90439,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ComputeInstanceGroupCanaryDeployStageSummary": {
@@ -90082,6 +90536,37 @@
             "rolloutPolicy"
           ]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ComputeInstanceGroupCanaryTrafficShiftDeployStageExecutionProgress": {
@@ -90103,6 +90588,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ComputeInstanceGroupCanaryTrafficShiftDeployStageSummary": {
@@ -90165,6 +90663,22 @@
             "computeInstanceGroupSelectors"
           ]
         ],
+        "enums": {
+          "deploy_environment_type": [
+            "OKE_CLUSTER",
+            "COMPUTE_INSTANCE_GROUP",
+            "FUNCTION"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ]
+        },
         "discriminator": "DeployEnvironment"
       },
       "ComputeInstanceGroupDeployEnvironmentSummary": {
@@ -90240,6 +90754,37 @@
           ],
           ["load_balancer_config", "LoadBalancerConfig", "loadBalancerConfig"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ComputeInstanceGroupDeployStageExecutionProgress": {
@@ -90261,6 +90806,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ComputeInstanceGroupDeployStageSummary": {
@@ -90312,6 +90870,12 @@
       },
       "ComputeInstanceGroupFailurePolicy": {
         "attributes": [["policy_type", "str", "policyType"]],
+        "enums": {
+          "policy_type": [
+            "COMPUTE_INSTANCE_GROUP_FAILURE_POLICY_BY_COUNT",
+            "COMPUTE_INSTANCE_GROUP_FAILURE_POLICY_BY_PERCENTAGE"
+          ]
+        },
         "discriminator": {
           "field": "policyType",
           "values": {
@@ -90326,6 +90890,12 @@
           ["policy_type", "str", "policyType"],
           ["failure_count", "int", "failureCount"]
         ],
+        "enums": {
+          "policy_type": [
+            "COMPUTE_INSTANCE_GROUP_FAILURE_POLICY_BY_COUNT",
+            "COMPUTE_INSTANCE_GROUP_FAILURE_POLICY_BY_PERCENTAGE"
+          ]
+        },
         "discriminator": "ComputeInstanceGroupFailurePolicy"
       },
       "ComputeInstanceGroupFailurePolicyByPercentage": {
@@ -90333,6 +90903,12 @@
           ["policy_type", "str", "policyType"],
           ["failure_percentage", "int", "failurePercentage"]
         ],
+        "enums": {
+          "policy_type": [
+            "COMPUTE_INSTANCE_GROUP_FAILURE_POLICY_BY_COUNT",
+            "COMPUTE_INSTANCE_GROUP_FAILURE_POLICY_BY_PERCENTAGE"
+          ]
+        },
         "discriminator": "ComputeInstanceGroupFailurePolicy"
       },
       "ComputeInstanceGroupLinearRolloutPolicyByCount": {
@@ -90341,6 +90917,12 @@
           ["batch_delay_in_seconds", "int", "batchDelayInSeconds"],
           ["batch_count", "int", "batchCount"]
         ],
+        "enums": {
+          "policy_type": [
+            "COMPUTE_INSTANCE_GROUP_LINEAR_ROLLOUT_POLICY_BY_COUNT",
+            "COMPUTE_INSTANCE_GROUP_LINEAR_ROLLOUT_POLICY_BY_PERCENTAGE"
+          ]
+        },
         "discriminator": "ComputeInstanceGroupRolloutPolicy"
       },
       "ComputeInstanceGroupLinearRolloutPolicyByPercentage": {
@@ -90349,6 +90931,12 @@
           ["batch_delay_in_seconds", "int", "batchDelayInSeconds"],
           ["batch_percentage", "int", "batchPercentage"]
         ],
+        "enums": {
+          "policy_type": [
+            "COMPUTE_INSTANCE_GROUP_LINEAR_ROLLOUT_POLICY_BY_COUNT",
+            "COMPUTE_INSTANCE_GROUP_LINEAR_ROLLOUT_POLICY_BY_PERCENTAGE"
+          ]
+        },
         "discriminator": "ComputeInstanceGroupRolloutPolicy"
       },
       "ComputeInstanceGroupRolloutPolicy": {
@@ -90356,6 +90944,12 @@
           ["policy_type", "str", "policyType"],
           ["batch_delay_in_seconds", "int", "batchDelayInSeconds"]
         ],
+        "enums": {
+          "policy_type": [
+            "COMPUTE_INSTANCE_GROUP_LINEAR_ROLLOUT_POLICY_BY_COUNT",
+            "COMPUTE_INSTANCE_GROUP_LINEAR_ROLLOUT_POLICY_BY_PERCENTAGE"
+          ]
+        },
         "discriminator": {
           "field": "policyType",
           "values": {
@@ -90367,6 +90961,9 @@
       },
       "ComputeInstanceGroupSelector": {
         "attributes": [["selector_type", "str", "selectorType"]],
+        "enums": {
+          "selector_type": ["INSTANCE_IDS", "INSTANCE_QUERY"]
+        },
         "discriminator": {
           "field": "selectorType",
           "values": {
@@ -90384,6 +90981,10 @@
           ["type", "str", "type"],
           ["status", "str", "status"]
         ],
+        "enums": {
+          "type": ["CONFLICT", "APPROVAL_RULE", "BUILD"],
+          "status": ["SUCCEEDED", "FAILED"]
+        },
         "discriminator": "MergeCheck"
       },
       "Connection": {
@@ -90407,6 +91008,17 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB_ACCESS_TOKEN",
+            "GITLAB_ACCESS_TOKEN",
+            "GITLAB_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_CLOUD_APP_PASSWORD",
+            "VBS_ACCESS_TOKEN"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": {
           "field": "connectionType",
           "values": {
@@ -90462,10 +91074,16 @@
           ["result", "str", "result"],
           ["time_validated", "datetime", "timeValidated"],
           ["message", "str", "message"]
-        ]
+        ],
+        "enums": {
+          "result": ["PASS", "FAIL"]
+        }
       },
       "ContainerConfig": {
         "attributes": [["container_config_type", "str", "containerConfigType"]],
+        "enums": {
+          "container_config_type": ["CONTAINER_INSTANCE_CONFIG"]
+        },
         "discriminator": {
           "field": "containerConfigType",
           "values": {
@@ -90483,6 +91101,9 @@
           ["shape_config", "ShapeConfig", "shapeConfig"],
           ["network_channel", "NetworkChannel", "networkChannel"]
         ],
+        "enums": {
+          "container_config_type": ["CONTAINER_INSTANCE_CONFIG"]
+        },
         "discriminator": "ContainerConfig"
       },
       "ContainerRegistryDeliveredArtifact": {
@@ -90493,6 +91114,9 @@
           ["delivered_artifact_hash", "str", "deliveredArtifactHash"],
           ["image_uri", "str", "imageUri"]
         ],
+        "enums": {
+          "artifact_type": ["GENERIC_ARTIFACT", "OCIR"]
+        },
         "discriminator": "DeliveredArtifact"
       },
       "CountBasedApprovalPolicy": {
@@ -90500,6 +91124,9 @@
           ["approval_policy_type", "str", "approvalPolicyType"],
           ["number_of_approvals_required", "int", "numberOfApprovalsRequired"]
         ],
+        "enums": {
+          "approval_policy_type": ["COUNT_BASED_APPROVAL"]
+        },
         "discriminator": "ApprovalPolicy"
       },
       "CreateAbsoluteWaitCriteriaDetails": {
@@ -90507,6 +91134,9 @@
           ["wait_type", "str", "waitType"],
           ["wait_duration", "str", "waitDuration"]
         ],
+        "strictEnums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": "CreateWaitCriteriaDetails"
       },
       "CreateDeployPipelineDeploymentDetails": {
@@ -90607,6 +91237,9 @@
       },
       "CreateWaitCriteriaDetails": {
         "attributes": [["wait_type", "str", "waitType"]],
+        "strictEnums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": {
           "field": "waitType",
           "values": {
@@ -90621,10 +91254,16 @@
           ["ocpus", "int", "ocpus"],
           ["memory_in_gbs", "int", "memoryInGBs"]
         ],
+        "enums": {
+          "build_runner_type": ["CUSTOM", "DEFAULT"]
+        },
         "discriminator": "BuildRunnerShapeConfig"
       },
       "DefaultBuildRunnerShapeConfig": {
         "attributes": [["build_runner_type", "str", "buildRunnerType"]],
+        "enums": {
+          "build_runner_type": ["CUSTOM", "DEFAULT"]
+        },
         "discriminator": "BuildRunnerShapeConfig"
       },
       "DeliverArtifact": {
@@ -90663,6 +91302,22 @@
             "deliverArtifactCollection"
           ]
         ],
+        "enums": {
+          "build_pipeline_stage_type": [
+            "WAIT",
+            "BUILD",
+            "DELIVER_ARTIFACT",
+            "TRIGGER_DEPLOYMENT_PIPELINE"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "BuildPipelineStage"
       },
       "DeliverArtifactStageRunProgress": {
@@ -90684,6 +91339,16 @@
             "deliveredArtifacts"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": "BuildPipelineStageRunProgress"
       },
       "DeliverArtifactStageSummary": {
@@ -90721,6 +91386,9 @@
           ["output_artifact_name", "str", "outputArtifactName"],
           ["artifact_type", "str", "artifactType"]
         ],
+        "enums": {
+          "artifact_type": ["GENERIC_ARTIFACT", "OCIR"]
+        },
         "discriminator": {
           "field": "artifactType",
           "values": {
@@ -90754,7 +91422,28 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "deploy_artifact_type": [
+            "DEPLOYMENT_SPEC",
+            "JOB_SPEC",
+            "KUBERNETES_MANIFEST",
+            "GENERIC_FILE",
+            "DOCKER_IMAGE",
+            "HELM_CHART",
+            "HELM_COMMAND_SPEC",
+            "COMMAND_SPEC"
+          ],
+          "argument_substitution_mode": ["NONE", "SUBSTITUTE_PLACEHOLDERS"],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DeployArtifactCollection": {
         "attributes": [["items", "list[DeployArtifactSummary]", "items"]]
@@ -90775,6 +91464,15 @@
         "attributes": [
           ["deploy_artifact_source_type", "str", "deployArtifactSourceType"]
         ],
+        "enums": {
+          "deploy_artifact_source_type": [
+            "INLINE",
+            "OCIR",
+            "GENERIC_ARTIFACT",
+            "HELM_CHART",
+            "HELM_COMMAND_SPEC"
+          ]
+        },
         "discriminator": {
           "field": "deployArtifactSourceType",
           "values": {
@@ -90831,6 +91529,22 @@
             "securityAttributes"
           ]
         ],
+        "enums": {
+          "deploy_environment_type": [
+            "OKE_CLUSTER",
+            "COMPUTE_INSTANCE_GROUP",
+            "FUNCTION"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ]
+        },
         "discriminator": {
           "field": "deployEnvironmentType",
           "values": {
@@ -90904,7 +91618,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "DeployPipelineArtifact": {
         "attributes": [
@@ -90970,6 +91695,22 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["cm_url", "str", "cmUrl"]
         ],
+        "enums": {
+          "deployment_type": [
+            "PIPELINE_DEPLOYMENT",
+            "PIPELINE_REDEPLOYMENT",
+            "SINGLE_STAGE_DEPLOYMENT",
+            "SINGLE_STAGE_REDEPLOYMENT"
+          ],
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": "Deployment"
       },
       "DeployPipelineDeploymentSummary": {
@@ -91077,6 +91818,22 @@
           ["cm_url", "str", "cmUrl"],
           ["previous_deployment_id", "str", "previousDeploymentId"]
         ],
+        "enums": {
+          "deployment_type": [
+            "PIPELINE_DEPLOYMENT",
+            "PIPELINE_REDEPLOYMENT",
+            "SINGLE_STAGE_DEPLOYMENT",
+            "SINGLE_STAGE_REDEPLOYMENT"
+          ],
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": "Deployment"
       },
       "DeployPipelineRedeploymentSummary": {
@@ -91165,6 +91922,37 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": {
           "field": "deployStageType",
           "values": {
@@ -91213,6 +92001,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": {
           "field": "deployStageType",
           "values": {
@@ -91253,7 +92054,10 @@
           ["state", "str", "state"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "state": ["WAITING", "IN_PROGRESS", "FAILED", "SUCCEEDED", "CANCELED"]
+        }
       },
       "DeployStageOverrideArgument": {
         "attributes": [
@@ -91273,6 +92077,12 @@
       },
       "DeployStageRollbackPolicy": {
         "attributes": [["policy_type", "str", "policyType"]],
+        "enums": {
+          "policy_type": [
+            "AUTOMATED_STAGE_ROLLBACK_POLICY",
+            "NO_STAGE_ROLLBACK_POLICY"
+          ]
+        },
         "discriminator": {
           "field": "policyType",
           "values": {
@@ -91377,6 +92187,22 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["cm_url", "str", "cmUrl"]
         ],
+        "enums": {
+          "deployment_type": [
+            "PIPELINE_DEPLOYMENT",
+            "PIPELINE_REDEPLOYMENT",
+            "SINGLE_STAGE_DEPLOYMENT",
+            "SINGLE_STAGE_REDEPLOYMENT"
+          ],
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": {
           "field": "deploymentType",
           "values": {
@@ -91460,6 +92286,18 @@
           ["trigger_info", "TriggerInfo", "triggerInfo"],
           ["repository_id", "str", "repositoryId"]
         ],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "DevopsCodeRepositoryBuildSource": {
@@ -91470,6 +92308,17 @@
           ["branch", "str", "branch"],
           ["repository_id", "str", "repositoryId"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildSource"
       },
       "DevopsCodeRepositoryFilter": {
@@ -91483,6 +92332,9 @@
             "exclude"
           ]
         ],
+        "enums": {
+          "events": ["PUSH", "PULL_REQUEST_CREATED", "PULL_REQUEST_UPDATED"]
+        },
         "discriminator": "Filter"
       },
       "DevopsCodeRepositoryFilterAttributes": {
@@ -91513,6 +92365,18 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["repository_id", "str", "repositoryId"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Trigger"
       },
       "DevopsCodeRepositoryTriggerCreateResult": {
@@ -91572,7 +92436,10 @@
           ["target_line", "int", "targetLine"],
           ["line_content", "str", "lineContent"],
           ["conflict_marker", "str", "conflictMarker"]
-        ]
+        ],
+        "enums": {
+          "conflict_marker": ["BASE", "TARGET", "MARKER", "NONE"]
+        }
       },
       "DiffResponse": {
         "attributes": [
@@ -91676,7 +92543,10 @@
           ["sync_status", "str", "syncStatus"],
           ["repository_id", "str", "repositoryId"],
           ["branch_name", "str", "branchName"]
-        ]
+        ],
+        "enums": {
+          "sync_status": ["IN_SYNC", "SYNC_IN_PROGRESS", "OUT_OF_SYNC"]
+        }
       },
       "FunctionDeployEnvironment": {
         "attributes": [
@@ -91700,6 +92570,22 @@
           ],
           ["function_id", "str", "functionId"]
         ],
+        "enums": {
+          "deploy_environment_type": [
+            "OKE_CLUSTER",
+            "COMPUTE_INSTANCE_GROUP",
+            "FUNCTION"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ]
+        },
         "discriminator": "DeployEnvironment"
       },
       "FunctionDeployEnvironmentSummary": {
@@ -91761,6 +92647,37 @@
           ["max_memory_in_mbs", "int", "maxMemoryInMBs"],
           ["function_timeout_in_seconds", "int", "functionTimeoutInSeconds"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "FunctionDeployStageExecutionProgress": {
@@ -91782,6 +92699,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "FunctionDeployStageSummary": {
@@ -91831,6 +92761,9 @@
           ["path", "str", "path"],
           ["version", "str", "version"]
         ],
+        "enums": {
+          "artifact_type": ["GENERIC_ARTIFACT", "OCIR"]
+        },
         "discriminator": "DeliveredArtifact"
       },
       "GenericDeployArtifactSource": {
@@ -91840,6 +92773,15 @@
           ["deploy_artifact_path", "str", "deployArtifactPath"],
           ["deploy_artifact_version", "str", "deployArtifactVersion"]
         ],
+        "enums": {
+          "deploy_artifact_source_type": [
+            "INLINE",
+            "OCIR",
+            "GENERIC_ARTIFACT",
+            "HELM_CHART",
+            "HELM_COMMAND_SPEC"
+          ]
+        },
         "discriminator": "DeployArtifactSource"
       },
       "GithubAccessTokenConnection": {
@@ -91864,6 +92806,17 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["access_token", "str", "accessToken"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB_ACCESS_TOKEN",
+            "GITLAB_ACCESS_TOKEN",
+            "GITLAB_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_CLOUD_APP_PASSWORD",
+            "VBS_ACCESS_TOKEN"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Connection"
       },
       "GithubAccessTokenConnectionSummary": {
@@ -91896,6 +92849,18 @@
           ["trigger_id", "str", "triggerId"],
           ["trigger_info", "TriggerInfo", "triggerInfo"]
         ],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "GithubBuildSource": {
@@ -91906,6 +92871,17 @@
           ["branch", "str", "branch"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildSource"
       },
       "GithubFilter": {
@@ -91915,6 +92891,15 @@
           ["include", "GithubFilterAttributes", "include"],
           ["exclude", "GithubFilterExclusionAttributes", "exclude"]
         ],
+        "enums": {
+          "events": [
+            "PUSH",
+            "PULL_REQUEST_CREATED",
+            "PULL_REQUEST_UPDATED",
+            "PULL_REQUEST_REOPENED",
+            "PULL_REQUEST_MERGED"
+          ]
+        },
         "discriminator": "Filter"
       },
       "GithubFilterAttributes": {
@@ -91946,6 +92931,18 @@
           ["trigger_url", "str", "triggerUrl"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Trigger"
       },
       "GithubTriggerCreateResult": {
@@ -92011,6 +93008,17 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["access_token", "str", "accessToken"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB_ACCESS_TOKEN",
+            "GITLAB_ACCESS_TOKEN",
+            "GITLAB_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_CLOUD_APP_PASSWORD",
+            "VBS_ACCESS_TOKEN"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Connection"
       },
       "GitlabAccessTokenConnectionSummary": {
@@ -92043,6 +93051,18 @@
           ["trigger_id", "str", "triggerId"],
           ["trigger_info", "TriggerInfo", "triggerInfo"]
         ],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "GitlabBuildSource": {
@@ -92053,6 +93073,17 @@
           ["branch", "str", "branch"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildSource"
       },
       "GitlabFilter": {
@@ -92062,6 +93093,15 @@
           ["include", "GitlabFilterAttributes", "include"],
           ["exclude", "GitlabFilterExclusionAttributes", "exclude"]
         ],
+        "enums": {
+          "events": [
+            "PUSH",
+            "PULL_REQUEST_CREATED",
+            "PULL_REQUEST_UPDATED",
+            "PULL_REQUEST_REOPENED",
+            "PULL_REQUEST_MERGED"
+          ]
+        },
         "discriminator": "Filter"
       },
       "GitlabFilterAttributes": {
@@ -92098,6 +93138,17 @@
           ["base_url", "str", "baseUrl"],
           ["tls_verify_config", "TlsVerifyConfig", "tlsVerifyConfig"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB_ACCESS_TOKEN",
+            "GITLAB_ACCESS_TOKEN",
+            "GITLAB_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_CLOUD_APP_PASSWORD",
+            "VBS_ACCESS_TOKEN"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Connection"
       },
       "GitlabServerAccessTokenConnectionSummary": {
@@ -92132,6 +93183,18 @@
           ["trigger_id", "str", "triggerId"],
           ["trigger_info", "TriggerInfo", "triggerInfo"]
         ],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "GitlabServerBuildSource": {
@@ -92142,6 +93205,17 @@
           ["branch", "str", "branch"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildSource"
       },
       "GitlabServerFilter": {
@@ -92151,6 +93225,15 @@
           ["include", "GitlabServerFilterAttributes", "include"],
           ["exclude", "GitlabServerFilterExclusionAttributes", "exclude"]
         ],
+        "enums": {
+          "events": [
+            "PUSH",
+            "PULL_REQUEST_CREATED",
+            "PULL_REQUEST_UPDATED",
+            "PULL_REQUEST_REOPENED",
+            "PULL_REQUEST_MERGED"
+          ]
+        },
         "discriminator": "Filter"
       },
       "GitlabServerFilterAttributes": {
@@ -92181,6 +93264,18 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["trigger_url", "str", "triggerUrl"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Trigger"
       },
       "GitlabServerTriggerCreateResult": {
@@ -92241,6 +93336,18 @@
           ["trigger_url", "str", "triggerUrl"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Trigger"
       },
       "GitlabTriggerCreateResult": {
@@ -92290,6 +93397,16 @@
           ["base64_encoded_content", "str", "base64EncodedContent"],
           ["helm_artifact_source_type", "str", "helmArtifactSourceType"]
         ],
+        "enums": {
+          "deploy_artifact_source_type": [
+            "INLINE",
+            "OCIR",
+            "GENERIC_ARTIFACT",
+            "HELM_CHART",
+            "HELM_COMMAND_SPEC"
+          ],
+          "helm_artifact_source_type": ["INLINE"]
+        },
         "discriminator": "DeployArtifactSource"
       },
       "HelmDiffArgument": {
@@ -92323,6 +93440,15 @@
             "helmVerificationKeySource"
           ]
         ],
+        "enums": {
+          "deploy_artifact_source_type": [
+            "INLINE",
+            "OCIR",
+            "GENERIC_ARTIFACT",
+            "HELM_CHART",
+            "HELM_COMMAND_SPEC"
+          ]
+        },
         "discriminator": "DeployArtifactSource"
       },
       "HelmSetValue": {
@@ -92345,6 +93471,15 @@
           ["deploy_artifact_source_type", "str", "deployArtifactSourceType"],
           ["base64_encoded_content", "str", "base64EncodedContent"]
         ],
+        "enums": {
+          "deploy_artifact_source_type": [
+            "INLINE",
+            "OCIR",
+            "GENERIC_ARTIFACT",
+            "HELM_CHART",
+            "HELM_COMMAND_SPEC"
+          ]
+        },
         "discriminator": "DeployArtifactSource"
       },
       "InlinePublicKeyVerificationKeySource": {
@@ -92353,6 +93488,13 @@
           ["current_public_key", "str", "currentPublicKey"],
           ["previous_public_key", "str", "previousPublicKey"]
         ],
+        "enums": {
+          "verification_key_source_type": [
+            "VAULT_SECRET",
+            "INLINE_PUBLIC_KEY",
+            "NONE"
+          ]
+        },
         "discriminator": "VerificationKeySource"
       },
       "InvokeFunctionDeployStage": {
@@ -92385,6 +93527,37 @@
           ["is_async", "bool", "isAsync"],
           ["is_validation_enabled", "bool", "isValidationEnabled"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "InvokeFunctionDeployStageExecutionProgress": {
@@ -92406,6 +93579,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "InvokeFunctionDeployStageSummary": {
@@ -92479,6 +93665,38 @@
           ["load_balancer_config", "LoadBalancerConfig", "loadBalancerConfig"],
           ["rollback_policy", "DeployStageRollbackPolicy", "rollbackPolicy"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "traffic_shift_target": ["AUTO_SELECT", "BLUE", "GREEN"]
+        },
         "discriminator": "DeployStage"
       },
       "LoadBalancerTrafficShiftDeployStageExecutionProgress": {
@@ -92500,6 +93718,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "LoadBalancerTrafficShiftDeployStageSummary": {
@@ -92566,6 +93797,37 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["approval_policy", "ApprovalPolicy", "approvalPolicy"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ManualApprovalDeployStageExecutionProgress": {
@@ -92588,6 +93850,19 @@
           ],
           ["approval_actions", "list[ApprovalAction]", "approvalActions"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ManualApprovalDeployStageSummary": {
@@ -92617,10 +93892,25 @@
       },
       "ManualBuildRunSource": {
         "attributes": [["source_type", "str", "sourceType"]],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "MergeCheck": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["CONFLICT", "APPROVAL_RULE", "BUILD"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -92638,7 +93928,10 @@
         ]
       },
       "MergeChecks": {
-        "attributes": [["last_build_succeeded", "str", "lastBuildSucceeded"]]
+        "attributes": [["last_build_succeeded", "str", "lastBuildSucceeded"]],
+        "enums": {
+          "last_build_succeeded": ["ENABLED", "DISABLED"]
+        }
       },
       "MergeSettings": {
         "attributes": [
@@ -92648,7 +93941,18 @@
             "list[MergeStrategy]",
             "allowedMergeStrategies"
           ]
-        ]
+        ],
+        "enums": {
+          "default_merge_strategy": [
+            "MERGE_COMMIT",
+            "FAST_FORWARD",
+            "FAST_FORWARD_ONLY",
+            "REBASE_AND_MERGE",
+            "REBASE_AND_FAST_FORWARD",
+            "SQUASH",
+            "SQUASH_FAST_FORWARD_ONLY"
+          ]
+        }
       },
       "MirrorRepositoryConfig": {
         "attributes": [
@@ -92659,6 +93963,12 @@
       },
       "NetworkChannel": {
         "attributes": [["network_channel_type", "str", "networkChannelType"]],
+        "enums": {
+          "network_channel_type": [
+            "PRIVATE_ENDPOINT_CHANNEL",
+            "SERVICE_VNIC_CHANNEL"
+          ]
+        },
         "discriminator": {
           "field": "networkChannelType",
           "values": {
@@ -92675,6 +93985,9 @@
           ["namespace_b", "str", "namespaceB"],
           ["ingress_name", "str", "ingressName"]
         ],
+        "enums": {
+          "strategy_type": ["NGINX_BLUE_GREEN_STRATEGY"]
+        },
         "discriminator": "OkeBlueGreenStrategy"
       },
       "NginxCanaryStrategy": {
@@ -92683,16 +93996,32 @@
           ["namespace", "str", "namespace"],
           ["ingress_name", "str", "ingressName"]
         ],
+        "enums": {
+          "strategy_type": ["NGINX_CANARY_STRATEGY"]
+        },
         "discriminator": "OkeCanaryStrategy"
       },
       "NoDeployStageRollbackPolicy": {
         "attributes": [["policy_type", "str", "policyType"]],
+        "enums": {
+          "policy_type": [
+            "AUTOMATED_STAGE_ROLLBACK_POLICY",
+            "NO_STAGE_ROLLBACK_POLICY"
+          ]
+        },
         "discriminator": "DeployStageRollbackPolicy"
       },
       "NoneVerificationKeySource": {
         "attributes": [
           ["verification_key_source_type", "str", "verificationKeySourceType"]
         ],
+        "enums": {
+          "verification_key_source_type": [
+            "VAULT_SECRET",
+            "INLINE_PUBLIC_KEY",
+            "NONE"
+          ]
+        },
         "discriminator": "VerificationKeySource"
       },
       "NotificationConfig": {
@@ -92704,6 +94033,15 @@
           ["image_uri", "str", "imageUri"],
           ["image_digest", "str", "imageDigest"]
         ],
+        "enums": {
+          "deploy_artifact_source_type": [
+            "INLINE",
+            "OCIR",
+            "GENERIC_ARTIFACT",
+            "HELM_CHART",
+            "HELM_COMMAND_SPEC"
+          ]
+        },
         "discriminator": "DeployArtifactSource"
       },
       "OkeBlueGreenDeployStage": {
@@ -92739,6 +94077,37 @@
           ],
           ["blue_green_strategy", "OkeBlueGreenStrategy", "blueGreenStrategy"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "OkeBlueGreenDeployStageExecutionProgress": {
@@ -92761,6 +94130,19 @@
           ],
           ["namespace", "str", "namespace"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "OkeBlueGreenDeployStageSummary": {
@@ -92800,6 +94182,9 @@
       },
       "OkeBlueGreenStrategy": {
         "attributes": [["strategy_type", "str", "strategyType"]],
+        "enums": {
+          "strategy_type": ["NGINX_BLUE_GREEN_STRATEGY"]
+        },
         "discriminator": {
           "field": "strategyType",
           "values": {
@@ -92831,6 +94216,37 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["oke_blue_green_deploy_stage_id", "str", "okeBlueGreenDeployStageId"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "OkeBlueGreenTrafficShiftDeployStageExecutionProgress": {
@@ -92853,6 +94269,19 @@
           ],
           ["namespace", "str", "namespace"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "OkeBlueGreenTrafficShiftDeployStageSummary": {
@@ -92908,6 +94337,37 @@
           ],
           ["approval_policy", "ApprovalPolicy", "approvalPolicy"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "OkeCanaryApprovalDeployStageExecutionProgress": {
@@ -92930,6 +94390,19 @@
           ],
           ["approval_actions", "list[ApprovalAction]", "approvalActions"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "OkeCanaryApprovalDeployStageSummary": {
@@ -92995,6 +94468,37 @@
           ],
           ["canary_strategy", "OkeCanaryStrategy", "canaryStrategy"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "OkeCanaryDeployStageExecutionProgress": {
@@ -93017,6 +94521,19 @@
           ],
           ["namespace", "str", "namespace"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "OkeCanaryDeployStageSummary": {
@@ -93056,6 +94573,9 @@
       },
       "OkeCanaryStrategy": {
         "attributes": [["strategy_type", "str", "strategyType"]],
+        "enums": {
+          "strategy_type": ["NGINX_CANARY_STRATEGY"]
+        },
         "discriminator": {
           "field": "strategyType",
           "values": {
@@ -93092,6 +94612,37 @@
             "rolloutPolicy"
           ]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "OkeCanaryTrafficShiftDeployStageExecutionProgress": {
@@ -93113,6 +94664,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "OkeCanaryTrafficShiftDeployStageSummary": {
@@ -93168,6 +94732,22 @@
           ["cluster_id", "str", "clusterId"],
           ["network_channel", "NetworkChannel", "networkChannel"]
         ],
+        "enums": {
+          "deploy_environment_type": [
+            "OKE_CLUSTER",
+            "COMPUTE_INSTANCE_GROUP",
+            "FUNCTION"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ]
+        },
         "discriminator": "DeployEnvironment"
       },
       "OkeClusterDeployEnvironmentSummary": {
@@ -93229,6 +94809,37 @@
           ["namespace", "str", "namespace"],
           ["rollback_policy", "DeployStageRollbackPolicy", "rollbackPolicy"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "OkeDeployStageExecutionProgress": {
@@ -93250,6 +94861,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "OkeDeployStageSummary": {
@@ -93340,6 +94964,38 @@
           ["should_not_wait", "bool", "shouldNotWait"],
           ["is_debug_enabled", "bool", "isDebugEnabled"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "purpose": ["EXECUTE_HELM_UPGRADE", "EXECUTE_HELM_COMMAND"]
+        },
         "discriminator": "DeployStage"
       },
       "OkeHelmChartDeployStageSummary": {
@@ -93394,6 +95050,9 @@
           ["should_not_wait", "bool", "shouldNotWait"],
           ["is_debug_enabled", "bool", "isDebugEnabled"]
         ],
+        "enums": {
+          "purpose": ["EXECUTE_HELM_UPGRADE", "EXECUTE_HELM_COMMAND"]
+        },
         "discriminator": "DeployStageSummary"
       },
       "OkeHelmChartDeploymentStageExecutionProgress": {
@@ -93420,6 +95079,19 @@
           ["namespace", "str", "namespace"],
           ["helm_diff", "str", "helmDiff"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "PatchInsertInstruction": {
@@ -93430,6 +95102,18 @@
           ["selected_item", "str", "selectedItem"],
           ["position", "str", "position"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ],
+          "position": ["BEFORE", "AFTER"]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchInstruction": {
@@ -93437,6 +95121,17 @@
           ["operation", "str", "operation"],
           ["selection", "str", "selection"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": {
           "field": "operation",
           "values": {
@@ -93457,6 +95152,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchMoveInstruction": {
@@ -93466,6 +95172,18 @@
           ["_from", "str", "from"],
           ["position", "str", "position"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ],
+          "position": ["AT", "BEFORE", "AFTER"]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchProhibitInstruction": {
@@ -93474,6 +95192,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchRemoveInstruction": {
@@ -93481,6 +95210,17 @@
           ["operation", "str", "operation"],
           ["selection", "str", "selection"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchReplaceInstruction": {
@@ -93489,6 +95229,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchRequireInstruction": {
@@ -93497,6 +95248,17 @@
           ["selection", "str", "selection"],
           ["value", "object", "value"]
         ],
+        "strictEnums": {
+          "operation": [
+            "REQUIRE",
+            "PROHIBIT",
+            "REPLACE",
+            "INSERT",
+            "REMOVE",
+            "MOVE",
+            "MERGE"
+          ]
+        },
         "discriminator": "PatchInstruction"
       },
       "PrincipalDetails": {
@@ -93505,7 +95267,11 @@
           ["principal_name", "str", "principalName"],
           ["principal_type", "str", "principalType"],
           ["principal_state", "str", "principalState"]
-        ]
+        ],
+        "enums": {
+          "principal_type": ["SERVICE", "USER", "INSTANCE", "RESOURCE"],
+          "principal_state": ["ACTIVE", "INACTIVE", "SUPPRESSED"]
+        }
       },
       "PrivateEndpointChannel": {
         "attributes": [
@@ -93513,6 +95279,12 @@
           ["subnet_id", "str", "subnetId"],
           ["nsg_ids", "list[str]", "nsgIds"]
         ],
+        "enums": {
+          "network_channel_type": [
+            "PRIVATE_ENDPOINT_CHANNEL",
+            "SERVICE_VNIC_CHANNEL"
+          ]
+        },
         "discriminator": "NetworkChannel"
       },
       "Project": {
@@ -93530,7 +95302,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "ProjectCollection": {
         "attributes": [["items", "list[ProjectSummary]", "items"]]
@@ -93540,7 +95323,10 @@
           ["project_id", "str", "projectId"],
           ["user_id", "str", "userId"],
           ["notification_preference", "str", "notificationPreference"]
-        ]
+        ],
+        "enums": {
+          "notification_preference": ["WATCH", "IGNORE", "MENTION"]
+        }
       },
       "ProjectRepositorySettings": {
         "attributes": [
@@ -93571,7 +95357,10 @@
           ["protection_levels", "list[str]", "protectionLevels"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "protection_levels": ["READ_ONLY", "PULL_REQUEST_MERGE_ONLY"]
+        }
       },
       "ProtectedBranchCollection": {
         "attributes": [["items", "list[ProtectedBranchSummary]", "items"]]
@@ -93583,7 +95372,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "protection_levels": ["READ_ONLY", "PULL_REQUEST_MERGE_ONLY"]
+        }
       },
       "PullRequest": {
         "attributes": [
@@ -93618,7 +95410,24 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ],
+          "lifecycle_details": [
+            "OPEN",
+            "CONFLICT",
+            "CLOSED",
+            "MERGING",
+            "MERGED"
+          ]
+        }
       },
       "PullRequestActivityCollection": {
         "attributes": [["items", "list[PullRequestActivitySummary]", "items"]]
@@ -93631,6 +95440,15 @@
           ["time_occurred", "datetime", "timeOccurred"],
           ["activity_type", "str", "activityType"]
         ],
+        "enums": {
+          "activity_type": [
+            "LIFECYCLE",
+            "APPROVAL",
+            "COMMIT",
+            "REVIEWER",
+            "COMMENT"
+          ]
+        },
         "discriminator": {
           "field": "activityType",
           "values": {
@@ -93693,7 +95511,12 @@
           ["updated_by", "PrincipalDetails", "updatedBy"],
           ["context_status", "str", "contextStatus"],
           ["comment_context", "list[DiffLineDetails]", "commentContext"]
-        ]
+        ],
+        "enums": {
+          "file_type": ["SOURCE", "DESTINATION"],
+          "status": ["ACTIVE", "OUTDATED"],
+          "context_status": ["PROCESSED", "NEEDS_PROCESSING"]
+        }
       },
       "PullRequestCommentCollection": {
         "attributes": [["items", "list[PullRequestCommentSummary]", "items"]]
@@ -93733,6 +95556,16 @@
           ["activity_type", "str", "activityType"],
           ["state", "str", "state"]
         ],
+        "enums": {
+          "activity_type": [
+            "LIFECYCLE",
+            "APPROVAL",
+            "COMMIT",
+            "REVIEWER",
+            "COMMENT"
+          ],
+          "state": ["OPENED", "CLOSED", "MERGED", "REOPENED"]
+        },
         "discriminator": "PullRequestActivitySummary"
       },
       "PullRequestNotificationPreference": {
@@ -93740,7 +95573,10 @@
           ["pull_request_id", "str", "pullRequestId"],
           ["user_id", "str", "userId"],
           ["notification_preference", "str", "notificationPreference"]
-        ]
+        ],
+        "enums": {
+          "notification_preference": ["WATCH", "IGNORE", "MENTION"]
+        }
       },
       "PullRequestSummary": {
         "attributes": [
@@ -93804,7 +95640,23 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "repository_type": ["MIRRORED", "HOSTED", "FORKED"],
+          "lifecycle_state": [
+            "ACTIVE",
+            "CREATING",
+            "DELETED",
+            "FAILED",
+            "DELETING"
+          ],
+          "trigger_build_events": [
+            "PUSH",
+            "PULL_REQUEST_CREATED",
+            "PULL_REQUEST_UPDATED",
+            "COMMIT_UPDATES"
+          ]
+        }
       },
       "RepositoryAuthorCollection": {
         "attributes": [["items", "list[RepositoryAuthorSummary]", "items"]]
@@ -93827,6 +95679,9 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["commit_id", "str", "commitId"]
         ],
+        "enums": {
+          "ref_type": ["BRANCH", "TAG"]
+        },
         "discriminator": "RepositoryRef"
       },
       "RepositoryBranchSummary": {
@@ -93908,7 +95763,22 @@
           ],
           ["count", "float", "count"],
           ["sum", "float", "sum"]
-        ]
+        ],
+        "enums": {
+          "metric_name": [
+            "COMMITS",
+            "LINES_ADDED",
+            "LINES_DELETED",
+            "PULL_REQUEST_CREATED",
+            "PULL_REQUEST_MERGED",
+            "PULL_REQUEST_DECLINED",
+            "PULL_REQUEST_REVIEW_START_DURATION_IN_DAYS",
+            "PULL_REQUEST_REVIEW_DURATION_IN_DAYS",
+            "PULL_REQUEST_APPROVED",
+            "PULL_REQUEST_REVIEWED",
+            "PULL_REQUEST_COMMENTS"
+          ]
+        }
       },
       "RepositoryMirrorRecord": {
         "attributes": [
@@ -93917,7 +95787,10 @@
           ["time_enqueued", "datetime", "timeEnqueued"],
           ["time_started", "datetime", "timeStarted"],
           ["time_ended", "datetime", "timeEnded"]
-        ]
+        ],
+        "enums": {
+          "mirror_status": ["NONE", "QUEUED", "RUNNING", "PASSED", "FAILED"]
+        }
       },
       "RepositoryMirrorRecordCollection": {
         "attributes": [
@@ -93934,14 +95807,20 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "mirror_status": ["NONE", "QUEUED", "RUNNING", "PASSED", "FAILED"]
+        }
       },
       "RepositoryNotificationPreference": {
         "attributes": [
           ["repository_id", "str", "repositoryId"],
           ["user_id", "str", "userId"],
           ["notification_preference", "str", "notificationPreference"]
-        ]
+        ],
+        "enums": {
+          "notification_preference": ["WATCH", "IGNORE", "MENTION", "INHERITED"]
+        }
       },
       "RepositoryObject": {
         "attributes": [
@@ -93949,7 +95828,10 @@
           ["size_in_bytes", "int", "sizeInBytes"],
           ["sha", "str", "sha"],
           ["is_binary", "bool", "isBinary"]
-        ]
+        ],
+        "enums": {
+          "type": ["BLOB", "TREE", "COMMIT"]
+        }
       },
       "RepositoryPathCollection": {
         "attributes": [["items", "list[RepositoryPathSummary]", "items"]]
@@ -93989,6 +95871,9 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
         ],
+        "enums": {
+          "ref_type": ["BRANCH", "TAG"]
+        },
         "discriminator": {
           "field": "refType",
           "values": {
@@ -94067,6 +95952,9 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["object_id", "str", "objectId"]
         ],
+        "enums": {
+          "ref_type": ["BRANCH", "TAG"]
+        },
         "discriminator": "RepositoryRef"
       },
       "RepositoryTagSummary": {
@@ -94091,7 +95979,12 @@
           ["principal_type", "str", "principalType"],
           ["principal_state", "str", "principalState"],
           ["status", "str", "status"]
-        ]
+        ],
+        "enums": {
+          "principal_type": ["SERVICE", "USER", "INSTANCE", "RESOURCE"],
+          "principal_state": ["ACTIVE", "INACTIVE", "SUPPRESSED"],
+          "status": ["APPROVED", "REVIEW_PENDING"]
+        }
       },
       "ReviewerActivitySummary": {
         "attributes": [
@@ -94103,6 +95996,15 @@
           ["reviewers_added", "list[PrincipalDetails]", "reviewersAdded"],
           ["reviewers_removed", "list[PrincipalDetails]", "reviewersRemoved"]
         ],
+        "enums": {
+          "activity_type": [
+            "LIFECYCLE",
+            "APPROVAL",
+            "COMMIT",
+            "REVIEWER",
+            "COMMENT"
+          ]
+        },
         "discriminator": "PullRequestActivitySummary"
       },
       "ServiceVnicChannel": {
@@ -94111,6 +96013,12 @@
           ["subnet_id", "str", "subnetId"],
           ["nsg_ids", "list[str]", "nsgIds"]
         ],
+        "enums": {
+          "network_channel_type": [
+            "PRIVATE_ENDPOINT_CHANNEL",
+            "SERVICE_VNIC_CHANNEL"
+          ]
+        },
         "discriminator": "NetworkChannel"
       },
       "ShapeConfig": {
@@ -94148,6 +96056,37 @@
           ],
           ["timeout_in_seconds", "int", "timeoutInSeconds"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "ShellDeployStageExecutionProgress": {
@@ -94169,6 +96108,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "ShellDeployStageSummary": {
@@ -94250,6 +96202,22 @@
           ["cm_url", "str", "cmUrl"],
           ["deploy_stage_id", "str", "deployStageId"]
         ],
+        "enums": {
+          "deployment_type": [
+            "PIPELINE_DEPLOYMENT",
+            "PIPELINE_REDEPLOYMENT",
+            "SINGLE_STAGE_DEPLOYMENT",
+            "SINGLE_STAGE_REDEPLOYMENT"
+          ],
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": "Deployment"
       },
       "SingleDeployStageDeploymentSummary": {
@@ -94335,6 +96303,22 @@
           ["previous_deployment_id", "str", "previousDeploymentId"],
           ["deploy_stage_id", "str", "deployStageId"]
         ],
+        "enums": {
+          "deployment_type": [
+            "PIPELINE_DEPLOYMENT",
+            "PIPELINE_REDEPLOYMENT",
+            "SINGLE_STAGE_DEPLOYMENT",
+            "SINGLE_STAGE_REDEPLOYMENT"
+          ],
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": "Deployment"
       },
       "SingleDeployStageRedeploymentSummary": {
@@ -94374,6 +96358,9 @@
       },
       "TlsVerifyConfig": {
         "attributes": [["tls_verify_mode", "str", "tlsVerifyMode"]],
+        "enums": {
+          "tls_verify_mode": ["CA_CERTIFICATE_VERIFY"]
+        },
         "discriminator": {
           "field": "tlsVerifyMode",
           "values": {
@@ -94399,6 +96386,18 @@
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": {
           "field": "triggerSource",
           "values": {
@@ -94418,6 +96417,9 @@
           ["type", "str", "type"],
           ["filter", "Filter", "filter"]
         ],
+        "enums": {
+          "type": ["TRIGGER_BUILD_PIPELINE"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -94432,6 +96434,9 @@
           ["filter", "Filter", "filter"],
           ["build_pipeline_id", "str", "buildPipelineId"]
         ],
+        "enums": {
+          "type": ["TRIGGER_BUILD_PIPELINE"]
+        },
         "discriminator": "TriggerAction"
       },
       "TriggerCollection": {
@@ -94493,6 +96498,16 @@
           ],
           ["deployment_id", "str", "deploymentId"]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": "BuildPipelineStageRunProgress"
       },
       "TriggerDeploymentStage": {
@@ -94523,6 +96538,22 @@
             "isPassAllParametersEnabled"
           ]
         ],
+        "enums": {
+          "build_pipeline_stage_type": [
+            "WAIT",
+            "BUILD",
+            "DELIVER_ARTIFACT",
+            "TRIGGER_DEPLOYMENT_PIPELINE"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "BuildPipelineStage"
       },
       "TriggerDeploymentStageSummary": {
@@ -94568,7 +96599,10 @@
         "attributes": [
           ["schedule_type", "str", "scheduleType"],
           ["custom_schedule", "str", "customSchedule"]
-        ]
+        ],
+        "enums": {
+          "schedule_type": ["NONE", "DEFAULT", "CUSTOM"]
+        }
       },
       "TriggerSummary": {
         "attributes": [
@@ -94605,6 +96639,9 @@
           ["wait_type", "str", "waitType"],
           ["wait_duration", "str", "waitDuration"]
         ],
+        "strictEnums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": "UpdateWaitCriteriaDetails"
       },
       "UpdateApprovalRuleDetails": {
@@ -94623,6 +96660,9 @@
       },
       "UpdateWaitCriteriaDetails": {
         "attributes": [["wait_type", "str", "waitType"]],
+        "strictEnums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": {
           "field": "waitType",
           "values": {
@@ -94645,6 +96685,13 @@
           ["verification_key_source_type", "str", "verificationKeySourceType"],
           ["vault_secret_id", "str", "vaultSecretId"]
         ],
+        "enums": {
+          "verification_key_source_type": [
+            "VAULT_SECRET",
+            "INLINE_PUBLIC_KEY",
+            "NONE"
+          ]
+        },
         "discriminator": "VerificationKeySource"
       },
       "VbsAccessTokenConnection": {
@@ -94670,6 +96717,17 @@
           ["access_token", "str", "accessToken"],
           ["base_url", "str", "baseUrl"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB_ACCESS_TOKEN",
+            "GITLAB_ACCESS_TOKEN",
+            "GITLAB_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_SERVER_ACCESS_TOKEN",
+            "BITBUCKET_CLOUD_APP_PASSWORD",
+            "VBS_ACCESS_TOKEN"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Connection"
       },
       "VbsAccessTokenConnectionSummary": {
@@ -94703,6 +96761,18 @@
           ["trigger_id", "str", "triggerId"],
           ["trigger_info", "TriggerInfo", "triggerInfo"]
         ],
+        "enums": {
+          "source_type": [
+            "MANUAL",
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildRunSource"
       },
       "VbsBuildSource": {
@@ -94713,6 +96783,17 @@
           ["branch", "str", "branch"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "connection_type": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "DEVOPS_CODE_REPOSITORY",
+            "VBS"
+          ]
+        },
         "discriminator": "BuildSource"
       },
       "VbsFilter": {
@@ -94722,6 +96803,14 @@
           ["include", "VbsFilterAttributes", "include"],
           ["exclude", "VbsFilterExclusionAttributes", "exclude"]
         ],
+        "enums": {
+          "events": [
+            "PUSH",
+            "MERGE_REQUEST_CREATED",
+            "MERGE_REQUEST_UPDATED",
+            "MERGE_REQUEST_MERGED"
+          ]
+        },
         "discriminator": "Filter"
       },
       "VbsFilterAttributes": {
@@ -94754,6 +96843,18 @@
           ["trigger_url", "str", "triggerUrl"],
           ["connection_id", "str", "connectionId"]
         ],
+        "enums": {
+          "trigger_source": [
+            "GITHUB",
+            "GITLAB",
+            "GITLAB_SERVER",
+            "BITBUCKET_CLOUD",
+            "BITBUCKET_SERVER",
+            "VBS",
+            "DEVOPS_CODE_REPOSITORY"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETING"]
+        },
         "discriminator": "Trigger"
       },
       "VbsTriggerCreateResult": {
@@ -94801,6 +96902,13 @@
         "attributes": [
           ["verification_key_source_type", "str", "verificationKeySourceType"]
         ],
+        "enums": {
+          "verification_key_source_type": [
+            "VAULT_SECRET",
+            "INLINE_PUBLIC_KEY",
+            "NONE"
+          ]
+        },
         "discriminator": {
           "field": "verificationKeySourceType",
           "values": {
@@ -94823,6 +96931,9 @@
       },
       "WaitCriteria": {
         "attributes": [["wait_type", "str", "waitType"]],
+        "enums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": {
           "field": "waitType",
           "values": {
@@ -94833,6 +96944,9 @@
       },
       "WaitCriteriaSummary": {
         "attributes": [["wait_type", "str", "waitType"]],
+        "enums": {
+          "wait_type": ["ABSOLUTE_WAIT"]
+        },
         "discriminator": {
           "field": "waitType",
           "values": {
@@ -94864,6 +96978,37 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["wait_criteria", "WaitCriteria", "waitCriteria"]
         ],
+        "enums": {
+          "deploy_stage_type": [
+            "WAIT",
+            "COMPUTE_INSTANCE_GROUP_ROLLING_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_BLUE_GREEN_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_DEPLOYMENT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_TRAFFIC_SHIFT",
+            "COMPUTE_INSTANCE_GROUP_CANARY_APPROVAL",
+            "OKE_BLUE_GREEN_DEPLOYMENT",
+            "OKE_BLUE_GREEN_TRAFFIC_SHIFT",
+            "OKE_CANARY_DEPLOYMENT",
+            "OKE_CANARY_TRAFFIC_SHIFT",
+            "OKE_CANARY_APPROVAL",
+            "OKE_DEPLOYMENT",
+            "DEPLOY_FUNCTION",
+            "INVOKE_FUNCTION",
+            "LOAD_BALANCER_TRAFFIC_SHIFT",
+            "MANUAL_APPROVAL",
+            "OKE_HELM_CHART_DEPLOYMENT",
+            "SHELL"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "DeployStage"
       },
       "WaitDeployStageExecutionProgress": {
@@ -94885,6 +97030,19 @@
             "deployStageExecutionProgressDetails"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "ROLLBACK_IN_PROGRESS",
+            "ROLLBACK_SUCCEEDED",
+            "ROLLBACK_FAILED"
+          ]
+        },
         "discriminator": "DeployStageExecutionProgress"
       },
       "WaitDeployStageSummary": {
@@ -94935,6 +97093,22 @@
           ["system_tags", "dict(str, dict(str, object))", "systemTags"],
           ["wait_criteria", "WaitCriteria", "waitCriteria"]
         ],
+        "enums": {
+          "build_pipeline_stage_type": [
+            "WAIT",
+            "BUILD",
+            "DELIVER_ARTIFACT",
+            "TRIGGER_DEPLOYMENT_PIPELINE"
+          ],
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        },
         "discriminator": "BuildPipelineStage"
       },
       "WaitStageRunProgress": {
@@ -94951,6 +97125,16 @@
             "buildPipelineStagePredecessors"
           ]
         ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        },
         "discriminator": "BuildPipelineStageRunProgress"
       },
       "WaitStageSummary": {
@@ -94989,7 +97173,66 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_PROJECT",
+            "UPDATE_PROJECT",
+            "DELETE_PROJECT",
+            "MOVE_PROJECT",
+            "CREATE_DEPLOY_PIPELINE",
+            "UPDATE_DEPLOY_PIPELINE",
+            "DELETE_DEPLOY_PIPELINE",
+            "CREATE_DEPLOY_STAGE",
+            "UPDATE_DEPLOY_STAGE",
+            "DELETE_DEPLOY_STAGE",
+            "CREATE_DEPLOY_ARTIFACT",
+            "UPDATE_DEPLOY_ARTIFACT",
+            "DELETE_DEPLOY_ARTIFACT",
+            "CREATE_DEPLOY_ENVIRONMENT",
+            "UPDATE_DEPLOY_ENVIRONMENT",
+            "DELETE_DEPLOY_ENVIRONMENT",
+            "CREATE_DEPLOYMENT",
+            "UPDATE_DEPLOYMENT",
+            "DELETE_DEPLOYMENT",
+            "CREATE_BUILD_PIPELINE",
+            "UPDATE_BUILD_PIPELINE",
+            "DELETE_BUILD_PIPELINE",
+            "CREATE_BUILD_PIPELINE_STAGE",
+            "UPDATE_BUILD_PIPELINE_STAGE",
+            "DELETE_BUILD_PIPELINE_STAGE",
+            "CREATE_CONNECTION",
+            "UPDATE_CONNECTION",
+            "DELETE_CONNECTION",
+            "CREATE_TRIGGER",
+            "UPDATE_TRIGGER",
+            "DELETE_TRIGGER",
+            "EXECUTE_TRIGGER",
+            "CREATE_REPOSITORY",
+            "UPDATE_REPOSITORY",
+            "DELETE_REPOSITORY",
+            "MIRROR_REPOSITORY",
+            "FORK_REPOSITORY",
+            "SYNC_FORK_REPOSITORY",
+            "SCHEDULE_CASCADING_PROJECT_DELETION",
+            "CANCEL_SCHEDULED_CASCADING_PROJECT_DELETION",
+            "CREATE_PULL_REQUEST",
+            "UPDATE_PULL_REQUEST",
+            "DELETE_PULL_REQUEST",
+            "MOVE_PULL_REQUEST",
+            "MERGE_PULL_REQUEST"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "WAITING",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "WorkRequestCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]
@@ -95019,7 +97262,17 @@
           ["action_type", "str", "actionType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED",
+            "FAILED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -95032,7 +97285,66 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_PROJECT",
+            "UPDATE_PROJECT",
+            "DELETE_PROJECT",
+            "MOVE_PROJECT",
+            "CREATE_DEPLOY_PIPELINE",
+            "UPDATE_DEPLOY_PIPELINE",
+            "DELETE_DEPLOY_PIPELINE",
+            "CREATE_DEPLOY_STAGE",
+            "UPDATE_DEPLOY_STAGE",
+            "DELETE_DEPLOY_STAGE",
+            "CREATE_DEPLOY_ARTIFACT",
+            "UPDATE_DEPLOY_ARTIFACT",
+            "DELETE_DEPLOY_ARTIFACT",
+            "CREATE_DEPLOY_ENVIRONMENT",
+            "UPDATE_DEPLOY_ENVIRONMENT",
+            "DELETE_DEPLOY_ENVIRONMENT",
+            "CREATE_DEPLOYMENT",
+            "UPDATE_DEPLOYMENT",
+            "DELETE_DEPLOYMENT",
+            "CREATE_BUILD_PIPELINE",
+            "UPDATE_BUILD_PIPELINE",
+            "DELETE_BUILD_PIPELINE",
+            "CREATE_BUILD_PIPELINE_STAGE",
+            "UPDATE_BUILD_PIPELINE_STAGE",
+            "DELETE_BUILD_PIPELINE_STAGE",
+            "CREATE_CONNECTION",
+            "UPDATE_CONNECTION",
+            "DELETE_CONNECTION",
+            "CREATE_TRIGGER",
+            "UPDATE_TRIGGER",
+            "DELETE_TRIGGER",
+            "EXECUTE_TRIGGER",
+            "CREATE_REPOSITORY",
+            "UPDATE_REPOSITORY",
+            "DELETE_REPOSITORY",
+            "MIRROR_REPOSITORY",
+            "FORK_REPOSITORY",
+            "SYNC_FORK_REPOSITORY",
+            "SCHEDULE_CASCADING_PROJECT_DELETION",
+            "CANCEL_SCHEDULED_CASCADING_PROJECT_DELETION",
+            "CREATE_PULL_REQUEST",
+            "UPDATE_PULL_REQUEST",
+            "DELETE_PULL_REQUEST",
+            "MOVE_PULL_REQUEST",
+            "MERGE_PULL_REQUEST"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "WAITING",
+            "NEEDS_ATTENTION"
+          ]
+        }
       }
     }
   }

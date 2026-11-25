@@ -11253,13 +11253,19 @@
           [
             "try",
             [
-              ["let", "myfile", ["fn", "open", ["var", "file"], "r"]],
-              ["let", "data", ["call", "read", ["var", "myfile"]]],
               [
-                "set",
-                ["var", "kwargs"],
-                "restore_key_from_file_details",
-                ["var", "data"]
+                "withOpen",
+                "myfile",
+                ["fn", "open", ["var", "file"], "r"],
+                [
+                  ["let", "data", ["call", "read", ["var", "myfile"]]],
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "restore_key_from_file_details",
+                    ["var", "data"]
+                  ]
+                ]
               ],
               ["invoke", [], ["var", "kwargs"]]
             ],
@@ -12279,6 +12285,7 @@
             ["call", "pop", ["var", "kwargs"], "key_version_id"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "cancel_key_version_deletion_extended"],
           [
             "if",
             [
@@ -12769,6 +12776,7 @@
             "external_key_version_id",
             ["call", "pop", ["var", "kwargs"], "external_key_version_id"]
           ],
+          ["checkNoExtraKwargs", "create_key_version_extended"],
           [
             "if",
             [
@@ -13935,6 +13943,7 @@
             ["call", "pop", ["var", "kwargs"], "time_of_deletion"]
           ],
           ["let", "if_match", ["call", "pop", ["var", "kwargs"], "if_match"]],
+          ["checkNoExtraKwargs", "schedule_key_version_deletion_extended"],
           [
             "if",
             [
@@ -17855,13 +17864,19 @@
           [
             "try",
             [
-              ["let", "myfile", ["fn", "open", ["var", "file"], "rb"]],
-              ["let", "data", ["call", "read", ["var", "myfile"]]],
               [
-                "set",
-                ["var", "kwargs"],
-                "restore_vault_from_file_details",
-                ["var", "data"]
+                "withOpen",
+                "myfile",
+                ["fn", "open", ["var", "file"], "rb"],
+                [
+                  ["let", "data", ["call", "read", ["var", "myfile"]]],
+                  [
+                    "set",
+                    ["var", "kwargs"],
+                    "restore_vault_from_file_details",
+                    ["var", "data"]
+                  ]
+                ]
               ],
               ["invoke", [], ["var", "kwargs"]]
             ],
@@ -19083,10 +19098,16 @@
           ["time_of_last_rotation", "datetime", "timeOfLastRotation"],
           ["last_rotation_status", "str", "lastRotationStatus"],
           ["last_rotation_message", "str", "lastRotationMessage"]
-        ]
+        ],
+        "enums": {
+          "last_rotation_status": ["SUCCESS", "FAILED", "IN_PROGRESS"]
+        }
       },
       "BackupLocation": {
         "attributes": [["destination", "str", "destination"]],
+        "strictEnums": {
+          "destination": ["BUCKET", "PRE_AUTHENTICATED_REQUEST_URI"]
+        },
         "discriminator": {
           "field": "destination",
           "values": {
@@ -19103,6 +19124,9 @@
           ["bucket_name", "str", "bucketName"],
           ["object_name", "str", "objectName"]
         ],
+        "strictEnums": {
+          "destination": ["BUCKET", "PRE_AUTHENTICATED_REQUEST_URI"]
+        },
         "discriminator": "BackupLocation"
       },
       "BackupLocationURI": {
@@ -19110,6 +19134,9 @@
           ["destination", "str", "destination"],
           ["uri", "str", "uri"]
         ],
+        "strictEnums": {
+          "destination": ["BUCKET", "PRE_AUTHENTICATED_REQUEST_URI"]
+        },
         "discriminator": "BackupLocation"
       },
       "DecryptedData": {
@@ -19119,7 +19146,14 @@
           ["key_id", "str", "keyId"],
           ["key_version_id", "str", "keyVersionId"],
           ["encryption_algorithm", "str", "encryptionAlgorithm"]
-        ]
+        ],
+        "enums": {
+          "encryption_algorithm": [
+            "AES_256_GCM",
+            "RSA_OAEP_SHA_1",
+            "RSA_OAEP_SHA_256"
+          ]
+        }
       },
       "EkmsPrivateEndpoint": {
         "attributes": [
@@ -19137,7 +19171,16 @@
           ["port", "int", "port"],
           ["ca_bundle", "str", "caBundle"],
           ["private_endpoint_ip", "str", "privateEndpointIp"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "EkmsPrivateEndpointSummary": {
         "attributes": [
@@ -19150,7 +19193,16 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "EnableAuditMgmtLogging": {
         "attributes": [
@@ -19160,7 +19212,18 @@
           ["namespace", "str", "namespace"],
           ["cluster_compartment_id", "str", "clusterCompartmentId"],
           ["audit_logging_status", "str", "auditLoggingStatus"]
-        ]
+        ],
+        "enums": {
+          "audit_logging_status": [
+            "CREATING",
+            "WAITING_FOR_CUSTOMER",
+            "VERIFYING",
+            "DISABLING_IN_PROGRESS",
+            "DISABLED_VALIDATED",
+            "ENABLED",
+            "DISABLED"
+          ]
+        }
       },
       "EncryptedData": {
         "attributes": [
@@ -19168,7 +19231,14 @@
           ["key_id", "str", "keyId"],
           ["key_version_id", "str", "keyVersionId"],
           ["encryption_algorithm", "str", "encryptionAlgorithm"]
-        ]
+        ],
+        "enums": {
+          "encryption_algorithm": [
+            "AES_256_GCM",
+            "RSA_OAEP_SHA_1",
+            "RSA_OAEP_SHA_256"
+          ]
+        }
       },
       "ExportedKeyData": {
         "attributes": [
@@ -19178,7 +19248,10 @@
           ["vault_id", "str", "vaultId"],
           ["encrypted_key", "str", "encryptedKey"],
           ["algorithm", "str", "algorithm"]
-        ]
+        ],
+        "enums": {
+          "algorithm": ["RSA_OAEP_AES_SHA256", "RSA_OAEP_SHA256"]
+        }
       },
       "ExternalKeyManagerMetadata": {
         "attributes": [
@@ -19233,7 +19306,22 @@
             "HsmClusterPendingInstructions",
             "pendingInstructions"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "INITIALIZATION_REQUIRED",
+            "INITIALIZING",
+            "ACTIVATION_REQUIRED",
+            "ACTIVATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION"
+          ]
+        }
       },
       "HsmClusterAuditLoggingInfo": {
         "attributes": [
@@ -19243,7 +19331,20 @@
           ["compartment_id", "str", "compartmentId"],
           ["dynamic_group_name", "str", "dynamicGroupName"],
           ["audit_log_lifecycle_state", "str", "auditLogLifecycleState"]
-        ]
+        ],
+        "enums": {
+          "audit_log_lifecycle_state": [
+            "CREATING",
+            "WAITING_FOR_CUSTOMER",
+            "VERIFYING",
+            "DISABLING_IN_PROGRESS",
+            "DISABLING_BROKEN",
+            "DISABLED_VALIDATED",
+            "FAILED",
+            "ENABLED",
+            "DISABLED"
+          ]
+        }
       },
       "HsmClusterCollection": {
         "attributes": [["items", "list[HsmClusterSummary]", "items"]]
@@ -19286,7 +19387,19 @@
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACTIVE",
+            "INACTIVE",
+            "ACTIVATING",
+            "ACTIVATION_REQUIRED",
+            "SCHEDULING_DELETION",
+            "PENDING_DELETION",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "HsmPartitionCollection": {
         "attributes": [["items", "list[HsmPartitionSummary]", "items"]]
@@ -19330,7 +19443,25 @@
             "ExternalKeyReferenceDetails",
             "externalKeyReferenceDetails"
           ]
-        ]
+        ],
+        "enums": {
+          "protection_mode": ["HSM", "SOFTWARE", "EXTERNAL"],
+          "lifecycle_state": [
+            "CREATING",
+            "ENABLING",
+            "ENABLED",
+            "DISABLING",
+            "DISABLED",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION",
+            "UPDATING",
+            "BACKUP_IN_PROGRESS",
+            "RESTORING"
+          ]
+        }
       },
       "KeyReplicaDetails": {
         "attributes": [["replication_id", "str", "replicationId"]]
@@ -19340,7 +19471,11 @@
           ["algorithm", "str", "algorithm"],
           ["length", "int", "length"],
           ["curve_id", "str", "curveId"]
-        ]
+        ],
+        "enums": {
+          "algorithm": ["AES", "RSA", "ECDSA"],
+          "curve_id": ["NIST_P256", "NIST_P384", "NIST_P521"]
+        }
       },
       "KeySummary": {
         "attributes": [
@@ -19360,7 +19495,26 @@
             "externalKeyReferenceDetails"
           ],
           ["is_auto_rotation_enabled", "bool", "isAutoRotationEnabled"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ENABLING",
+            "ENABLED",
+            "DISABLING",
+            "DISABLED",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION",
+            "UPDATING",
+            "BACKUP_IN_PROGRESS",
+            "RESTORING"
+          ],
+          "protection_mode": ["HSM", "SOFTWARE", "EXTERNAL"],
+          "algorithm": ["AES", "RSA", "ECDSA"]
+        }
       },
       "KeyVersion": {
         "attributes": [
@@ -19382,7 +19536,22 @@
             "externalKeyReferenceDetails"
           ],
           ["is_auto_rotated", "bool", "isAutoRotated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ENABLING",
+            "ENABLED",
+            "DISABLING",
+            "DISABLED",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION"
+          ],
+          "origin": ["INTERNAL", "EXTERNAL"]
+        }
       },
       "KeyVersionReplicaDetails": {
         "attributes": [["replication_id", "str", "replicationId"]]
@@ -19403,7 +19572,22 @@
             "externalKeyReferenceDetails"
           ],
           ["is_auto_rotated", "bool", "isAutoRotated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ENABLING",
+            "ENABLED",
+            "DISABLING",
+            "DISABLED",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION"
+          ],
+          "origin": ["INTERNAL", "EXTERNAL"]
+        }
       },
       "OauthMetadata": {
         "attributes": [
@@ -19422,7 +19606,10 @@
         "attributes": [
           ["port_number", "int", "portNumber"],
           ["port_type", "str", "portType"]
-        ]
+        ],
+        "enums": {
+          "port_type": ["CLIENTUTILITY", "MANAGEMENTUTILITY"]
+        }
       },
       "PreCoUserCredentials": {
         "attributes": [
@@ -19434,7 +19621,10 @@
         "attributes": [
           ["region", "str", "region"],
           ["status", "str", "status"]
-        ]
+        ],
+        "enums": {
+          "status": ["REPLICATING", "REPLICATED"]
+        }
       },
       "ReplicaExternalVaultMetadata": {
         "attributes": [
@@ -19442,10 +19632,16 @@
           ["private_endpoint_id", "str", "privateEndpointId"],
           ["idcs_account_name_url", "str", "idcsAccountNameUrl"]
         ],
+        "strictEnums": {
+          "vault_type": ["EXTERNAL"]
+        },
         "discriminator": "ReplicaVaultMetadata"
       },
       "ReplicaVaultMetadata": {
         "attributes": [["vault_type", "str", "vaultType"]],
+        "strictEnums": {
+          "vault_type": ["EXTERNAL"]
+        },
         "discriminator": {
           "field": "vaultType",
           "values": {
@@ -19465,7 +19661,22 @@
           ["key_version_id", "str", "keyVersionId"],
           ["signature", "str", "signature"],
           ["signing_algorithm", "str", "signingAlgorithm"]
-        ]
+        ],
+        "enums": {
+          "signing_algorithm": [
+            "SHA_224_RSA_PKCS_PSS",
+            "SHA_256_RSA_PKCS_PSS",
+            "SHA_384_RSA_PKCS_PSS",
+            "SHA_512_RSA_PKCS_PSS",
+            "SHA_224_RSA_PKCS1_V1_5",
+            "SHA_256_RSA_PKCS1_V1_5",
+            "SHA_384_RSA_PKCS1_V1_5",
+            "SHA_512_RSA_PKCS1_V1_5",
+            "ECDSA_SHA_256",
+            "ECDSA_SHA_384",
+            "ECDSA_SHA_512"
+          ]
+        }
       },
       "Vault": {
         "attributes": [
@@ -19490,7 +19701,22 @@
             "ExternalKeyManagerMetadataSummary",
             "externalKeyManagerMetadataSummary"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION",
+            "UPDATING",
+            "BACKUP_IN_PROGRESS",
+            "RESTORING"
+          ],
+          "vault_type": ["VIRTUAL_PRIVATE", "DEFAULT", "EXTERNAL"]
+        }
       },
       "VaultReplicaDetails": {
         "attributes": [["replication_id", "str", "replicationId"]]
@@ -19501,7 +19727,10 @@
           ["management_endpoint", "str", "managementEndpoint"],
           ["region", "str", "region"],
           ["status", "str", "status"]
-        ]
+        ],
+        "enums": {
+          "status": ["CREATING", "CREATED", "DELETING", "DELETED"]
+        }
       },
       "VaultSummary": {
         "attributes": [
@@ -19520,7 +19749,22 @@
             "ExternalKeyManagerMetadataSummary",
             "externalKeyManagerMetadataSummary"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION",
+            "UPDATING",
+            "BACKUP_IN_PROGRESS",
+            "RESTORING"
+          ],
+          "vault_type": ["VIRTUAL_PRIVATE", "EXTERNAL", "DEFAULT"]
+        }
       },
       "VaultUsage": {
         "attributes": [
@@ -19537,7 +19781,10 @@
         "attributes": [
           ["key_material", "str", "keyMaterial"],
           ["wrapping_algorithm", "str", "wrappingAlgorithm"]
-        ]
+        ],
+        "strictEnums": {
+          "wrapping_algorithm": ["RSA_OAEP_SHA256", "RSA_OAEP_AES_SHA256"]
+        }
       },
       "WrappingKey": {
         "attributes": [
@@ -19547,7 +19794,24 @@
           ["public_key", "str", "publicKey"],
           ["time_created", "datetime", "timeCreated"],
           ["vault_id", "str", "vaultId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ENABLING",
+            "ENABLED",
+            "DISABLING",
+            "DISABLED",
+            "DELETING",
+            "DELETED",
+            "PENDING_DELETION",
+            "SCHEDULING_DELETION",
+            "CANCELLING_DELETION",
+            "UPDATING",
+            "BACKUP_IN_PROGRESS",
+            "RESTORING"
+          ]
+        }
       }
     }
   }

@@ -12747,14 +12747,20 @@
         "body": [
           ["let", "upload_file", ["item", ["var", "kwargs"], "file"]],
           ["del", ["var", "kwargs"], "file"],
-          ["let", "ufile", ["fn", "open", ["var", "upload_file"], "rb"]],
           [
-            "set",
-            ["var", "kwargs"],
-            "upload_discovery_data_details",
-            ["var", "ufile"]
-          ],
-          ["invoke", [], ["var", "kwargs"]]
+            "withOpen",
+            "ufile",
+            ["fn", "open", ["var", "upload_file"], "rb"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "upload_discovery_data_details",
+                ["var", "ufile"]
+              ],
+              ["invoke", [], ["var", "kwargs"]]
+            ]
+          ]
         ],
         "wrapExceptions": true
       },
@@ -66139,14 +66145,20 @@
         "body": [
           ["let", "upload_file", ["item", ["var", "kwargs"], "file"]],
           ["del", ["var", "kwargs"], "file"],
-          ["let", "ufile", ["fn", "open", ["var", "upload_file"], "rb"]],
           [
-            "set",
-            ["var", "kwargs"],
-            "upload_log_events_file_details",
-            ["var", "ufile"]
-          ],
-          ["invoke", [], ["var", "kwargs"]]
+            "withOpen",
+            "ufile",
+            ["fn", "open", ["var", "upload_file"], "rb"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "upload_log_events_file_details",
+                ["var", "ufile"]
+              ],
+              ["invoke", [], ["var", "kwargs"]]
+            ]
+          ]
         ],
         "wrapExceptions": true
       },
@@ -66615,9 +66627,20 @@
         "body": [
           ["let", "upload_file", ["item", ["var", "kwargs"], "file"]],
           ["del", ["var", "kwargs"], "file"],
-          ["let", "ufile", ["fn", "open", ["var", "upload_file"], "rb"]],
-          ["set", ["var", "kwargs"], "upload_log_file_body", ["var", "ufile"]],
-          ["invoke", [], ["var", "kwargs"]]
+          [
+            "withOpen",
+            "ufile",
+            ["fn", "open", ["var", "upload_file"], "rb"],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "upload_log_file_body",
+                ["var", "ufile"]
+              ],
+              ["invoke", [], ["var", "kwargs"]]
+            ]
+          ]
         ],
         "wrapExceptions": true
       },
@@ -67319,29 +67342,41 @@
                   "application/json"
                 ],
                 [
-                  ["let", "ufile", ["fn", "open", ["var", "upload_file"], "r"]],
-                  ["let", "file_content", ["call", "read", ["var", "ufile"]]],
                   [
-                    "set",
-                    ["var", "kwargs"],
-                    "upload_otlp_logs_details",
-                    ["var", "file_content"]
-                  ],
-                  ["invoke", [], ["var", "kwargs"]]
+                    "withOpen",
+                    "ufile",
+                    ["fn", "open", ["var", "upload_file"], "r"],
+                    [
+                      [
+                        "let",
+                        "file_content",
+                        ["call", "read", ["var", "ufile"]]
+                      ],
+                      [
+                        "set",
+                        ["var", "kwargs"],
+                        "upload_otlp_logs_details",
+                        ["var", "file_content"]
+                      ],
+                      ["invoke", [], ["var", "kwargs"]]
+                    ]
+                  ]
                 ],
                 [
                   [
-                    "let",
+                    "withOpen",
                     "ufile",
-                    ["fn", "open", ["var", "upload_file"], "rb"]
-                  ],
-                  [
-                    "set",
-                    ["var", "kwargs"],
-                    "upload_otlp_logs_details",
-                    ["var", "ufile"]
-                  ],
-                  ["invoke", [], ["var", "kwargs"]]
+                    ["fn", "open", ["var", "upload_file"], "rb"],
+                    [
+                      [
+                        "set",
+                        ["var", "kwargs"],
+                        "upload_otlp_logs_details",
+                        ["var", "ufile"]
+                      ],
+                      ["invoke", [], ["var", "kwargs"]]
+                    ]
+                  ]
                 ]
               ]
             ],
@@ -131909,6 +131944,33 @@
           ["original_display_name", "str", "originalDisplayName"],
           ["internal_name", "str", "internalName"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -131937,6 +131999,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": {
           "field": "name",
           "values": {
@@ -132014,6 +132136,20 @@
           ["filter_query_string", "str", "filterQueryString"],
           ["unit_type", "str", "unitType"]
         ],
+        "enums": {
+          "name": ["FIELD", "FIELDS", "FUNCTION", "SORT"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": {
           "field": "name",
           "values": {
@@ -132074,6 +132210,9 @@
       },
       "Action": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["STREAM", "PURGE"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -132094,6 +132233,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["sub_queries", "list[ParseQueryOutput]", "subQueries"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "AddInsightsCommandDescriptor": {
@@ -132106,6 +132305,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "AnomalyCommandDescriptor": {
@@ -132118,6 +132377,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "ArchivingConfiguration": {
@@ -132133,6 +132452,9 @@
       },
       "Argument": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["FIELD", "LITERAL"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -132152,7 +132474,10 @@
           ["agent_id", "str", "agentId"],
           ["eligibility_status", "str", "eligibilityStatus"],
           ["ineligibility_details", "str", "ineligibilityDetails"]
-        ]
+        ],
+        "enums": {
+          "eligibility_status": ["ELIGIBLE", "INELIGIBLE"]
+        }
       },
       "AssociableEntityCollection": {
         "attributes": [["items", "list[AssociableEntity]", "items"]]
@@ -132190,6 +132515,10 @@
           ["query_offset_secs", "int", "queryOffsetSecs"],
           ["time_end", "datetime", "timeEnd"]
         ],
+        "enums": {
+          "type": ["FIXED_FREQUENCY", "CRON", "AUTO"],
+          "misfire_policy": ["RETRY_ONCE", "RETRY_INDEFINITELY", "SKIP"]
+        },
         "discriminator": "Schedule"
       },
       "BottomCommandDescriptor": {
@@ -132203,6 +132532,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["limit", "int", "limit"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "BucketCommandDescriptor": {
@@ -132219,6 +132608,66 @@
           ["ranges", "list[BucketRange]", "ranges"],
           ["default_value", "str", "defaultValue"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "BucketRange": {
@@ -132251,6 +132700,33 @@
           ["total_interval_counts", "list[int]", "totalIntervalCounts"],
           ["series", "list[ChartDataColumn]", "series"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "ChartDataColumn": {
@@ -132271,6 +132747,33 @@
           ["data_items", "list[object]", "dataItems"],
           ["filtered_data_items", "list[object]", "filteredDataItems"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "ClassifyColumn": {
@@ -132308,6 +132811,33 @@
             "classifyCorrelateResult"
           ]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "ClassifyCommandDescriptor": {
@@ -132323,6 +132853,66 @@
           ["bottom_count", "int", "bottomCount"],
           ["correlate", "list[FieldsAddRemoveField]", "correlate"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "ClusterCommandDescriptor": {
@@ -132335,6 +132925,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "ClusterCompareCommandDescriptor": {
@@ -132353,6 +133003,66 @@
           ["span", "str", "span"],
           ["baseline_query", "str", "baselineQuery"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "ClusterDetailsCommandDescriptor": {
@@ -132365,6 +133075,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "ClusterSplitCommandDescriptor": {
@@ -132377,6 +133147,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "Column": {
@@ -132395,6 +133225,33 @@
           ["original_display_name", "str", "originalDisplayName"],
           ["internal_name", "str", "internalName"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "ColumnName": {
@@ -132413,6 +133270,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "CompareCommandDescriptor": {
@@ -132425,6 +133342,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "CompareContentResult": {
@@ -132453,7 +133430,10 @@
           ["label_condition_value", "str", "labelConditionValue"],
           ["label_condition_values", "list[str]", "labelConditionValues"],
           ["condition_blocks", "list[ConditionBlock]", "conditionBlocks"]
-        ]
+        ],
+        "enums": {
+          "condition_blocks_operator": ["AND", "OR", "NOT_AND", "NOT_OR"]
+        }
       },
       "CreateTableCommandDescriptor": {
         "attributes": [
@@ -132466,6 +133446,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["table_name", "str", "tableName"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "CreateViewCommandDescriptor": {
@@ -132478,13 +133518,83 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "CreationSource": {
         "attributes": [
           ["type", "str", "type"],
           ["details", "str", "details"]
-        ]
+        ],
+        "enums": {
+          "type": [
+            "EM_BRIDGE",
+            "BULK_DISCOVERY",
+            "SERVICE_CONNECTOR_HUB",
+            "DISCOVERY",
+            "LOGGING_ANALYTICS",
+            "NONE"
+          ]
+        }
       },
       "CredentialEndpoint": {
         "attributes": [
@@ -132507,6 +133617,10 @@
           ["expression", "str", "expression"],
           ["time_zone", "str", "timeZone"]
         ],
+        "enums": {
+          "type": ["FIXED_FREQUENCY", "CRON", "AUTO"],
+          "misfire_policy": ["RETRY_ONCE", "RETRY_INDEFINITELY", "SKIP"]
+        },
         "discriminator": "Schedule"
       },
       "DedupCommandDescriptor": {
@@ -132519,6 +133633,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "DeleteCommandDescriptor": {
@@ -132532,6 +133706,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["is_dry_run", "bool", "isDryRun"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "DeleteLogAnalyticsAssociation": {
@@ -132556,6 +133790,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["step", "int", "step"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "DemoModeCommandDescriptor": {
@@ -132568,6 +133862,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "Dependency": {
@@ -132587,7 +133941,10 @@
           ["is_system", "bool", "isSystem"],
           ["parser_type", "str", "parserType"],
           ["dependencies", "list[Dependency]", "dependencies"]
-        ]
+        ],
+        "enums": {
+          "parser_type": ["XML", "JSON", "REGEX", "ODL", "DELIMITED"]
+        }
       },
       "DependentSource": {
         "attributes": [
@@ -132622,6 +133979,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "EfdRegexResult": {
@@ -132660,21 +134077,36 @@
           ["key_source", "str", "keySource"],
           ["key_id", "str", "keyId"],
           ["key_type", "str", "keyType"]
-        ]
+        ],
+        "enums": {
+          "key_source": ["ORACLE_MANAGED", "CUSTOMER_MANAGED"],
+          "key_type": ["ACTIVE_DATA", "ARCHIVAL_DATA", "ALL"]
+        }
       },
       "EndpointCredentials": {
         "attributes": [
           ["credential_type", "str", "credentialType"],
           ["credential_name", "str", "credentialName"],
           ["credential_endpoint", "CredentialEndpoint", "credentialEndpoint"]
-        ]
+        ],
+        "enums": {
+          "credential_type": [
+            "NONE",
+            "BASIC_AUTH",
+            "STATIC_TOKEN",
+            "DYNAMIC_TOKEN"
+          ]
+        }
       },
       "EndpointProxy": {
         "attributes": [
           ["url", "str", "url"],
           ["credential_name", "str", "credentialName"],
           ["credential_type", "str", "credentialType"]
-        ]
+        ],
+        "enums": {
+          "credential_type": ["NONE", "BASIC_AUTH", "TOKEN"]
+        }
       },
       "EndpointRequest": {
         "attributes": [
@@ -132684,7 +134116,10 @@
           ["payload", "str", "payload"],
           ["headers", "list[NameValuePair]", "headers"],
           ["form_parameters", "list[NameValuePair]", "formParameters"]
-        ]
+        ],
+        "enums": {
+          "method": ["GET", "POST"]
+        }
       },
       "EndpointResponse": {
         "attributes": [
@@ -132746,6 +134181,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "EventStatsCommandDescriptor": {
@@ -132760,6 +134255,66 @@
           ["group_by_fields", "list[AbstractField]", "groupByFields"],
           ["functions", "list[FunctionField]", "functions"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "EventType": {
@@ -132787,6 +134342,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "ExtractLogFieldResults": {
@@ -132819,6 +134434,20 @@
           ["filter_query_string", "str", "filterQueryString"],
           ["unit_type", "str", "unitType"]
         ],
+        "enums": {
+          "name": ["FIELD", "FIELDS", "FUNCTION", "SORT"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractField"
       },
       "FieldArgument": {
@@ -132826,6 +134455,9 @@
           ["type", "str", "type"],
           ["value", "AbstractField", "value"]
         ],
+        "enums": {
+          "type": ["FIELD", "LITERAL"]
+        },
         "discriminator": "Argument"
       },
       "FieldSummaryCommandDescriptor": {
@@ -132839,6 +134471,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["max_values", "int", "maxValues"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "FieldSummaryReport": {
@@ -132870,6 +134562,21 @@
           ["unit_type", "str", "unitType"],
           ["operation", "str", "operation"]
         ],
+        "enums": {
+          "name": ["FIELD", "FIELDS", "FUNCTION", "SORT"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ],
+          "operation": ["ADD", "REMOVE"]
+        },
         "discriminator": "AbstractField"
       },
       "FieldsCommandDescriptor": {
@@ -132882,6 +134589,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "FileValidationResponse": {
@@ -132896,7 +134663,29 @@
           ["field_name", "str", "fieldName"],
           ["values", "list[object]", "values"],
           ["operator", "str", "operator"]
-        ]
+        ],
+        "strictEnums": {
+          "operator": [
+            "CLEAR",
+            "REPLACE",
+            "EQUALS",
+            "NOT_EQUALS",
+            "STARTS_WITH",
+            "DOES_NOT_START_WITH",
+            "ENDS_WITH",
+            "DOES_NOT_END_WITH",
+            "CONTAINS",
+            "DOES_NOT_CONTAIN",
+            "IS_LESS_THAN",
+            "IS_LESS_THAN_OR_EQUAL_TO",
+            "IS_GREATER_THAN",
+            "IS_GREATER_THAN_OR_EQUAL_TO",
+            "IS_BETWEEN",
+            "IS_NOT_BETWEEN",
+            "ADD_SUBQUERY",
+            "CLEAR_SUBQUERY"
+          ]
+        }
       },
       "FilterOutput": {
         "attributes": [
@@ -132915,6 +134704,10 @@
           ["recurring_interval", "str", "recurringInterval"],
           ["repeat_count", "int", "repeatCount"]
         ],
+        "enums": {
+          "type": ["FIXED_FREQUENCY", "CRON", "AUTO"],
+          "misfire_policy": ["RETRY_ONCE", "RETRY_INDEFINITELY", "SKIP"]
+        },
         "discriminator": "Schedule"
       },
       "FrequentCommandDescriptor": {
@@ -132927,6 +134720,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "FunctionField": {
@@ -132945,6 +134798,20 @@
           ["function", "str", "function"],
           ["arguments", "list[Argument]", "arguments"]
         ],
+        "enums": {
+          "name": ["FIELD", "FIELDS", "FUNCTION", "SORT"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractField"
       },
       "GenericConditionBlock": {
@@ -132959,7 +134826,10 @@
             "list[GenericConditionBlock]",
             "genericConditionBlocks"
           ]
-        ]
+        ],
+        "enums": {
+          "condition_blocks_operator": ["AND", "OR", "NOT_AND", "NOT_OR"]
+        }
       },
       "GeoStatsCommandDescriptor": {
         "attributes": [
@@ -132979,6 +134849,67 @@
           ["group_by_fields", "list[AbstractField]", "groupByFields"],
           ["functions", "list[FunctionField]", "functions"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ],
+          "include": ["CLIENT", "SERVER", "CLIENT_AND_SERVER", "CUSTOM"]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "HeadCommandDescriptor": {
@@ -132992,6 +134923,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["limit", "int", "limit"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "HighlightCommandDescriptor": {
@@ -133007,6 +134998,66 @@
           ["fields", "list[str]", "fields"],
           ["keywords", "list[str]", "keywords"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "HighlightGroupsCommandDescriptor": {
@@ -133025,6 +135076,66 @@
           ["keywords", "list[str]", "keywords"],
           ["sub_queries", "list[ParseQueryOutput]", "subQueries"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "HighlightRowsCommandDescriptor": {
@@ -133039,6 +135150,66 @@
           ["color", "str", "color"],
           ["keywords", "list[str]", "keywords"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "Indexes": {
@@ -133061,10 +135232,16 @@
           ["is_enabled", "bool", "isEnabled"],
           ["conditions", "IngestTimeRuleCondition", "conditions"],
           ["actions", "list[IngestTimeRuleAction]", "actions"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "IngestTimeRuleAction": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["METRIC_EXTRACTION"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -133078,10 +135255,31 @@
           ["condition_field", "str", "conditionField"],
           ["condition_operator", "str", "conditionOperator"],
           ["condition_value", "str", "conditionValue"]
-        ]
+        ],
+        "enums": {
+          "condition_operator": [
+            "CONTAINS",
+            "CONTAINS_IGNORE_CASE",
+            "CONTAINS_REGEX",
+            "CONTAINS_ONEOF_REGEXES",
+            "ENDS_WITH",
+            "EQUAL",
+            "EQUAL_IGNORE_CASE",
+            "IN",
+            "IN_IGNORE_CASE",
+            "NOT_CONTAINS",
+            "NOT_EQUAL",
+            "NOT_IN",
+            "NOT_NULL",
+            "STARTS_WITH"
+          ]
+        }
       },
       "IngestTimeRuleCondition": {
         "attributes": [["kind", "str", "kind"]],
+        "enums": {
+          "kind": ["FIELD"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -133102,6 +135300,10 @@
             "additionalConditions"
           ]
         ],
+        "enums": {
+          "kind": ["FIELD"],
+          "field_operator": ["EQUAL"]
+        },
         "discriminator": "IngestTimeRuleCondition"
       },
       "IngestTimeRuleMetricExtractionAction": {
@@ -133113,6 +135315,9 @@
           ["resource_group", "str", "resourceGroup"],
           ["dimensions", "list[str]", "dimensions"]
         ],
+        "enums": {
+          "type": ["METRIC_EXTRACTION"]
+        },
         "discriminator": "IngestTimeRuleAction"
       },
       "IngestTimeRuleSummary": {
@@ -133130,7 +135335,11 @@
           ["condition_kind", "str", "conditionKind"],
           ["field_name", "str", "fieldName"],
           ["field_value", "str", "fieldValue"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"],
+          "condition_kind": ["FIELD"]
+        }
       },
       "IngestTimeRuleSummaryCollection": {
         "attributes": [["items", "list[IngestTimeRuleSummary]", "items"]]
@@ -133145,10 +135354,73 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "LabelPriority": {
-        "attributes": [["priority", "str", "priority"]]
+        "attributes": [["priority", "str", "priority"]],
+        "enums": {
+          "priority": ["NONE", "LOW", "MEDIUM", "HIGH"]
+        }
       },
       "LabelPriorityCollection": {
         "attributes": [["items", "list[LabelPriority]", "items"]]
@@ -133194,6 +135466,66 @@
           ["should_include_trends", "bool", "shouldIncludeTrends"],
           ["span", "str", "span"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "LinkDetailsCommandDescriptor": {
@@ -133206,6 +135538,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "LiteralArgument": {
@@ -133214,6 +135606,9 @@
           ["data_type", "str", "dataType"],
           ["value", "object", "value"]
         ],
+        "enums": {
+          "type": ["FIELD", "LITERAL"]
+        },
         "discriminator": "Argument"
       },
       "LogAnalyticsAssociatedEntity": {
@@ -133253,7 +135648,10 @@
             "list[AssociationProperty]",
             "associationProperties"
           ]
-        ]
+        ],
+        "enums": {
+          "life_cycle_state": ["ACCEPTED", "IN_PROGRESS", "SUCCEEDED", "FAILED"]
+        }
       },
       "LogAnalyticsAssociationCollection": {
         "attributes": [["items", "list[LogAnalyticsAssociation]", "items"]]
@@ -133275,7 +135673,10 @@
           ],
           ["missing_properties", "list[str]", "missingProperties"],
           ["required_properties", "list[str]", "requiredProperties"]
-        ]
+        ],
+        "enums": {
+          "status": ["SUCCEEDED", "FAILED"]
+        }
       },
       "LogAnalyticsAssociationParameterCollection": {
         "attributes": [
@@ -133305,7 +135706,19 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_finished", "datetime", "timeFinished"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_ASSOCIATIONS",
+            "DELETE_ASSOCIATIONS",
+            "APPEND_LOOKUP_DATA",
+            "UPDATE_LOOKUP_DATA",
+            "DELETE_LOOKUP",
+            "ENABLE_INGEST_TIME_RULE",
+            "DISABLE_INGEST_TIME_RULE"
+          ],
+          "lifecycle_state": ["ACCEPTED", "IN_PROGRESS", "SUCCEEDED", "FAILED"]
+        }
       },
       "LogAnalyticsConfigWorkRequestCollection": {
         "attributes": [
@@ -133329,7 +135742,19 @@
           ["time_finished", "datetime", "timeFinished"],
           ["time_accepted", "datetime", "timeAccepted"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "CREATE_ASSOCIATIONS",
+            "DELETE_ASSOCIATIONS",
+            "APPEND_LOOKUP_DATA",
+            "UPDATE_LOOKUP_DATA",
+            "DELETE_LOOKUP",
+            "ENABLE_INGEST_TIME_RULE",
+            "DISABLE_INGEST_TIME_RULE"
+          ],
+          "lifecycle_state": ["ACCEPTED", "IN_PROGRESS", "SUCCEEDED", "FAILED"]
+        }
       },
       "LogAnalyticsEmBridge": {
         "attributes": [
@@ -133361,7 +135786,22 @@
           ],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETED",
+            "NEEDS_ATTENTION"
+          ],
+          "last_import_processing_status": [
+            "NOT_STARTED",
+            "SUCCESS",
+            "IN_PROGRESS",
+            "FAILED",
+            "PARTIAL_SUCCESS"
+          ]
+        }
       },
       "LogAnalyticsEmBridgeCollection": {
         "attributes": [["items", "list[LogAnalyticsEmBridgeSummary]", "items"]]
@@ -133396,7 +135836,22 @@
           ],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETED",
+            "NEEDS_ATTENTION"
+          ],
+          "last_import_processing_status": [
+            "NOT_STARTED",
+            "SUCCESS",
+            "IN_PROGRESS",
+            "FAILED",
+            "PARTIAL_SUCCESS"
+          ]
+        }
       },
       "LogAnalyticsEmBridgeSummaryReport": {
         "attributes": [
@@ -133414,6 +135869,9 @@
       },
       "LogAnalyticsEndpoint": {
         "attributes": [["endpoint_type", "str", "endpointType"]],
+        "enums": {
+          "endpoint_type": ["LOG_LIST", "LOG"]
+        },
         "discriminator": {
           "field": "endpointType",
           "values": {
@@ -133457,7 +135915,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["associated_sources_count", "int", "associatedSourcesCount"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "LogAnalyticsEntityCollection": {
         "attributes": [["items", "list[LogAnalyticsEntitySummary]", "items"]]
@@ -133484,7 +135945,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["associated_sources_count", "int", "associatedSourcesCount"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "LogAnalyticsEntitySummaryReport": {
         "attributes": [
@@ -133542,7 +136006,16 @@
             "str",
             "managementAgentEligibilityStatus"
           ]
-        ]
+        ],
+        "enums": {
+          "cloud_type": ["CLOUD", "NON_CLOUD", "ALL"],
+          "lifecycle_state": ["ACTIVE", "DELETED"],
+          "management_agent_eligibility_status": [
+            "ELIGIBLE",
+            "INELIGIBLE",
+            "UNKNOWN"
+          ]
+        }
       },
       "LogAnalyticsEntityTypeCollection": {
         "attributes": [
@@ -133563,7 +136036,16 @@
             "str",
             "managementAgentEligibilityStatus"
           ]
-        ]
+        ],
+        "enums": {
+          "cloud_type": ["CLOUD", "NON_CLOUD", "ALL"],
+          "lifecycle_state": ["ACTIVE", "DELETED"],
+          "management_agent_eligibility_status": [
+            "ELIGIBLE",
+            "INELIGIBLE",
+            "UNKNOWN"
+          ]
+        }
       },
       "LogAnalyticsExtendedField": {
         "attributes": [
@@ -133697,7 +136179,11 @@
           ["type", "str", "type"],
           ["is_user_deleted", "bool", "isUserDeleted"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "priority": ["NONE", "LOW", "MEDIUM", "HIGH"],
+          "type": ["INFO", "PROBLEM"]
+        }
       },
       "LogAnalyticsLabelAlias": {
         "attributes": [
@@ -133707,7 +136193,10 @@
           ["display_name", "str", "displayName"],
           ["name", "str", "name"],
           ["priority", "str", "priority"]
-        ]
+        ],
+        "enums": {
+          "priority": ["NONE", "LOW", "MEDIUM", "HIGH"]
+        }
       },
       "LogAnalyticsLabelCollection": {
         "attributes": [["items", "list[LogAnalyticsLabelSummary]", "items"]]
@@ -133745,7 +136234,11 @@
           ["type", "str", "type"],
           ["is_user_deleted", "bool", "isUserDeleted"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "priority": ["NONE", "LOW", "MEDIUM", "HIGH"],
+          "type": ["INFO", "PROBLEM"]
+        }
       },
       "LogAnalyticsLabelView": {
         "attributes": [
@@ -133764,7 +136257,10 @@
           ["recommendation", "str", "recommendation"],
           ["type", "int", "type"],
           ["is_user_deleted", "bool", "isUserDeleted"]
-        ]
+        ],
+        "enums": {
+          "priority": ["NONE", "LOW", "MEDIUM", "HIGH"]
+        }
       },
       "LogAnalyticsLogGroup": {
         "attributes": [
@@ -133815,7 +136311,10 @@
           ["compartment_id", "str", "compartmentId"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "type": ["Lookup", "Dictionary", "Module"]
+        }
       },
       "LogAnalyticsLookupCollection": {
         "attributes": [["items", "list[LogAnalyticsLookup]", "items"]]
@@ -133925,7 +136424,23 @@
           ["time_updated", "datetime", "timeUpdated"],
           ["unit_type", "str", "unitType"],
           ["is_user_customized", "bool", "isUserCustomized"]
-        ]
+        ],
+        "enums": {
+          "metric_type": [
+            "COUNT",
+            "SUM",
+            "AVERAGE",
+            "COUNT_DISTRIBUTION",
+            "SUM_DISTRIBUTION",
+            "AVERAGE_DISTRIBUTION"
+          ],
+          "operator": [
+            "CONTAINS_IGNORE_CASE",
+            "IN_IGNORE_CASE",
+            "EQUAL_IGNORE_CASE",
+            "NOT_NULL"
+          ]
+        }
       },
       "LogAnalyticsObjectCollectionRule": {
         "attributes": [
@@ -133961,7 +136476,14 @@
           ["last_collected_object", "str", "lastCollectedObject"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["freeform_tags", "dict(str, str)", "freeformTags"]
-        ]
+        ],
+        "enums": {
+          "collection_type": ["LIVE", "HISTORIC", "HISTORIC_LIVE"],
+          "log_set_key": ["OBJECT_PATH"],
+          "lifecycle_state": ["ACTIVE", "DELETED", "INACTIVE"],
+          "log_type": ["LOG", "LOG_EVENTS"],
+          "stream_cursor_type": ["DEFAULT", "TRIM_HORIZON", "LATEST", "AT_TIME"]
+        }
       },
       "LogAnalyticsObjectCollectionRuleCollection": {
         "attributes": [
@@ -133987,7 +136509,12 @@
           ["stream_id", "str", "streamId"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["freeform_tags", "dict(str, str)", "freeformTags"]
-        ]
+        ],
+        "enums": {
+          "collection_type": ["LIVE", "HISTORIC", "HISTORIC_LIVE"],
+          "lifecycle_state": ["ACTIVE", "DELETED", "INACTIVE"],
+          "log_type": ["LOG", "LOG_EVENTS"]
+        }
       },
       "LogAnalyticsParameter": {
         "attributes": [
@@ -134044,7 +136571,10 @@
           ["is_position_aware", "bool", "isPositionAware"],
           ["dependent_sources", "list[DependentSource]", "dependentSources"],
           ["dependent_parsers", "list[DependentParser]", "dependentParsers"]
-        ]
+        ],
+        "enums": {
+          "type": ["XML", "JSON", "REGEX", "ODL", "DELIMITED"]
+        }
       },
       "LogAnalyticsParserCollection": {
         "attributes": [["items", "list[LogAnalyticsParserSummary]", "items"]]
@@ -134195,7 +136725,10 @@
           ["is_user_deleted", "bool", "isUserDeleted"],
           ["is_namespace_aware", "bool", "isNamespaceAware"],
           ["is_position_aware", "bool", "isPositionAware"]
-        ]
+        ],
+        "enums": {
+          "type": ["XML", "JSON", "REGEX", "ODL", "DELIMITED"]
+        }
       },
       "LogAnalyticsPatternFilter": {
         "attributes": [
@@ -134314,7 +136847,10 @@
             "sourceProperties"
           ],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "LogAnalyticsSourceCollection": {
         "attributes": [["items", "list[LogAnalyticsSourceSummary]", "items"]]
@@ -134335,7 +136871,10 @@
           ["replacement_string", "str", "replacementString"],
           ["source_id", "int", "sourceId"],
           ["filter_type", "str", "filterType"]
-        ]
+        ],
+        "enums": {
+          "filter_type": ["MASK", "HASH_MASK", "DROP_LOG_ENTRY", "DROP_STRING"]
+        }
       },
       "LogAnalyticsSourceEntityType": {
         "attributes": [
@@ -134394,7 +136933,10 @@
           ["lookup_mode", "int", "lookupMode"],
           ["lookup_table", "str", "lookupTable"],
           ["source_id", "int", "sourceId"]
-        ]
+        ],
+        "enums": {
+          "function_name": ["GEOLOCATION", "LOOKUP"]
+        }
       },
       "LogAnalyticsSourceLabelCondition": {
         "attributes": [
@@ -134565,7 +137107,10 @@
           ["parameters", "str", "parameters"],
           ["parameters_format", "str", "parametersFormat"],
           ["parameters_metadata", "str", "parametersMetadata"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "LogAnalyticsTemplateCollection": {
         "attributes": [["items", "list[LogAnalyticsTemplateSummary]", "items"]]
@@ -134584,7 +137129,10 @@
           ["is_system", "bool", "isSystem"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["facets", "list[TemplateFacet]", "facets"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        }
       },
       "LogAnalyticsWarning": {
         "attributes": [
@@ -134666,6 +137214,9 @@
           ["list_endpoint", "LogListEndpoint", "listEndpoint"],
           ["log_endpoints", "list[LogEndpoint]", "logEndpoints"]
         ],
+        "enums": {
+          "endpoint_type": ["LOG_LIST", "LOG"]
+        },
         "discriminator": "LogAnalyticsEndpoint"
       },
       "LogSetCollection": {
@@ -134679,6 +137230,9 @@
           ["endpoint_type", "str", "endpointType"],
           ["log_endpoint", "LogEndpoint", "logEndpoint"]
         ],
+        "enums": {
+          "endpoint_type": ["LOG_LIST", "LOG"]
+        },
         "discriminator": "LogAnalyticsEndpoint"
       },
       "LookupCommandDescriptor": {
@@ -134691,6 +137245,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "LookupField": {
@@ -134721,6 +137335,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "MapCommandDescriptor": {
@@ -134733,6 +137407,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "MatchInfo": {
@@ -134773,6 +137507,66 @@
           ["properties", "list[PropertyDefinition]", "properties"],
           ["arguments", "list[VariableDefinition]", "arguments"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "MultiSearchCommandDescriptor": {
@@ -134786,6 +137580,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["sub_queries", "list[ParseQueryOutput]", "subQueries"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "NameValuePair": {
@@ -134810,7 +137664,10 @@
           ["is_data_ever_ingested", "bool", "isDataEverIngested"],
           ["is_archiving_enabled", "bool", "isArchivingEnabled"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "INACTIVE"]
+        }
       },
       "NamespaceCollection": {
         "attributes": [["items", "list[NamespaceSummary]", "items"]]
@@ -134824,7 +137681,10 @@
           ["is_data_ever_ingested", "bool", "isDataEverIngested"],
           ["is_archiving_enabled", "bool", "isArchivingEnabled"],
           ["lifecycle_state", "str", "lifecycleState"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "INACTIVE"]
+        }
       },
       "NlpCommandDescriptor": {
         "attributes": [
@@ -134836,6 +137696,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "OutlierCommandDescriptor": {
@@ -134848,6 +137768,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "OverlappingRecallCollection": {
@@ -134865,7 +137845,10 @@
           ["created_by", "str", "createdBy"],
           ["collection_id", "int", "collectionId"],
           ["recall_id", "int", "recallId"]
-        ]
+        ],
+        "enums": {
+          "status": ["RECALLED", "PENDING", "FAILED", "PARTIAL_RECALLED"]
+        }
       },
       "ParseQueryOutput": {
         "attributes": [
@@ -134949,7 +137932,10 @@
           ["value", "str", "value"],
           ["type", "str", "type"],
           ["is_global", "bool", "isGlobal"]
-        ]
+        ],
+        "enums": {
+          "type": ["STRING", "DOUBLE", "FLOAT", "LONG", "INTEGER", "TIMESTAMP"]
+        }
       },
       "PropertyMetadataSummary": {
         "attributes": [
@@ -134980,6 +137966,10 @@
           ["purge_compartment_id", "str", "purgeCompartmentId"],
           ["compartment_id_in_subtree", "bool", "compartmentIdInSubtree"]
         ],
+        "enums": {
+          "type": ["STREAM", "PURGE"],
+          "data_type": ["LOG", "LOOKUP"]
+        },
         "discriminator": "Action"
       },
       "QueryAggregation": {
@@ -135017,7 +138007,19 @@
           ["sub_system", "str", "subSystem"],
           ["display_query_string", "str", "displayQueryString"],
           ["internal_query_string", "str", "internalQueryString"]
-        ]
+        ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "CANCELED",
+            "FAILED",
+            "IN_PROGRESS",
+            "SUCCEEDED"
+          ],
+          "operation_type": ["EXECUTE_QUERY_JOB", "EXECUTE_PURGE_JOB"],
+          "mode": ["FOREGROUND", "BACKGROUND"],
+          "sub_system": ["LOG"]
+        }
       },
       "QueryWorkRequestCollection": {
         "attributes": [["items", "list[QueryWorkRequestSummary]", "items"]]
@@ -135034,7 +138036,18 @@
           ["percent_complete", "int", "percentComplete"],
           ["status", "str", "status"],
           ["operation_type", "str", "operationType"]
-        ]
+        ],
+        "enums": {
+          "mode": ["FOREGROUND", "BACKGROUND"],
+          "status": [
+            "ACCEPTED",
+            "CANCELED",
+            "FAILED",
+            "IN_PROGRESS",
+            "SUCCEEDED"
+          ],
+          "operation_type": ["EXECUTE_QUERY_JOB", "EXECUTE_PURGE_JOB"]
+        }
       },
       "RareCommandDescriptor": {
         "attributes": [
@@ -135046,6 +138059,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "RecallCount": {
@@ -135080,7 +138153,10 @@
           ["time_recalled_data_started", "datetime", "timeRecalledDataStarted"],
           ["time_recalled_data_ended", "datetime", "timeRecalledDataEnded"],
           ["percentage_complete", "int", "percentageComplete"]
-        ]
+        ],
+        "enums": {
+          "status": ["RECALLED", "PENDING", "FAILED", "PARTIAL_RECALLED"]
+        }
       },
       "RecalledDataCollection": {
         "attributes": [["items", "list[RecalledData]", "items"]]
@@ -135108,7 +138184,10 @@
           ["collection_id", "int", "collectionId"],
           ["time_recalled_data_started", "datetime", "timeRecalledDataStarted"],
           ["time_recalled_data_ended", "datetime", "timeRecalledDataEnded"]
-        ]
+        ],
+        "enums": {
+          "status": ["RECALLED", "PENDING", "FAILED", "PARTIAL_RECALLED"]
+        }
       },
       "RecalledInfoCollection": {
         "attributes": [["items", "list[RecalledInfo]", "items"]]
@@ -135123,6 +138202,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "RegexMatchResult": {
@@ -135148,6 +138287,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "ResultColumn": {
@@ -135155,7 +138354,20 @@
           ["internal_name", "str", "internalName"],
           ["display_name", "str", "displayName"],
           ["value_type", "str", "valueType"]
-        ]
+        ],
+        "enums": {
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        }
       },
       "RuleSummary": {
         "attributes": [
@@ -135174,7 +138386,13 @@
           ["last_execution_status", "str", "lastExecutionStatus"],
           ["time_last_executed", "datetime", "timeLastExecuted"],
           ["task_status", "str", "taskStatus"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED"],
+          "kind": ["INGEST_TIME", "SAVED_SEARCH"],
+          "last_execution_status": ["FAILED", "SUCCEEDED"],
+          "task_status": ["READY", "PAUSED", "COMPLETED", "BLOCKED"]
+        }
       },
       "RuleSummaryCollection": {
         "attributes": [["items", "list[RuleSummary]", "items"]]
@@ -135194,6 +138412,10 @@
           ["query_offset_secs", "int", "queryOffsetSecs"],
           ["time_end", "datetime", "timeEnd"]
         ],
+        "enums": {
+          "type": ["FIXED_FREQUENCY", "CRON", "AUTO"],
+          "misfire_policy": ["RETRY_ONCE", "RETRY_INDEFINITELY", "SKIP"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -135225,6 +138447,22 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
         ],
+        "enums": {
+          "kind": ["ACCELERATION", "STANDARD"],
+          "task_type": ["SAVED_SEARCH", "ACCELERATION", "PURGE"],
+          "task_status": ["READY", "PAUSED", "COMPLETED", "BLOCKED"],
+          "pause_reason": [
+            "METRIC_EXTRACTION_NOT_VALID",
+            "SAVED_SEARCH_NOT_VALID",
+            "SAVED_SEARCH_NOT_FOUND",
+            "QUERY_STRING_NOT_VALID",
+            "USER_ACTION",
+            "TENANCY_LIFECYCLE",
+            "PURGE_RESOURCE_NOT_FOUND",
+            "LIMIT_EXCEEDED"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETED"]
+        },
         "discriminator": {
           "field": "kind",
           "values": {
@@ -135254,7 +138492,13 @@
           ["last_execution_status", "str", "lastExecutionStatus"],
           ["time_last_executed", "datetime", "timeLastExecuted"],
           ["schedule_type", "str", "scheduleType"]
-        ]
+        ],
+        "enums": {
+          "task_type": ["SAVED_SEARCH", "ACCELERATION", "PURGE"],
+          "task_status": ["READY", "PAUSED", "COMPLETED", "BLOCKED"],
+          "last_execution_status": ["FAILED", "SUCCEEDED"],
+          "schedule_type": ["FIXED_FREQUENCY", "CRON"]
+        }
       },
       "ScopeFilter": {
         "attributes": [
@@ -135273,6 +138517,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["sub_queries", "list[ParseQueryOutput]", "subQueries"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "SearchLookupCommandDescriptor": {
@@ -135285,6 +138589,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "SequenceCommandDescriptor": {
@@ -135297,6 +138661,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "SortCommandDescriptor": {
@@ -135309,6 +138733,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "SortField": {
@@ -135326,6 +138810,21 @@
           ["unit_type", "str", "unitType"],
           ["direction", "str", "direction"]
         ],
+        "enums": {
+          "name": ["FIELD", "FIELDS", "FUNCTION", "SORT"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ],
+          "direction": ["ASCENDING", "DESCENDING"]
+        },
         "discriminator": "AbstractField"
       },
       "SourceMappingResponse": {
@@ -135376,6 +138875,23 @@
           ["last_execution_status", "str", "lastExecutionStatus"],
           ["time_last_executed", "datetime", "timeLastExecuted"]
         ],
+        "enums": {
+          "kind": ["ACCELERATION", "STANDARD"],
+          "task_type": ["SAVED_SEARCH", "ACCELERATION", "PURGE"],
+          "task_status": ["READY", "PAUSED", "COMPLETED", "BLOCKED"],
+          "pause_reason": [
+            "METRIC_EXTRACTION_NOT_VALID",
+            "SAVED_SEARCH_NOT_VALID",
+            "SAVED_SEARCH_NOT_FOUND",
+            "QUERY_STRING_NOT_VALID",
+            "USER_ACTION",
+            "TENANCY_LIFECYCLE",
+            "PURGE_RESOURCE_NOT_FOUND",
+            "LIMIT_EXCEEDED"
+          ],
+          "lifecycle_state": ["ACTIVE", "DELETED"],
+          "last_execution_status": ["FAILED", "SUCCEEDED"]
+        },
         "discriminator": "ScheduledTask"
       },
       "StatsCommandDescriptor": {
@@ -135390,6 +138906,66 @@
           ["group_by_fields", "list[AbstractField]", "groupByFields"],
           ["functions", "list[FunctionField]", "functions"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "StatusSummary": {
@@ -135457,7 +139033,30 @@
           ["query", "str", "query"],
           ["is_recall_new_data_only", "bool", "isRecallNewDataOnly"],
           ["is_use_recommended_data_set", "bool", "isUseRecommendedDataSet"]
-        ]
+        ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "CANCELED",
+            "FAILED",
+            "IN_PROGRESS",
+            "SUCCEEDED"
+          ],
+          "data_type": ["LOG", "LOOKUP"],
+          "operation_type": [
+            "OFFBOARD_TENANCY",
+            "PURGE_STORAGE_DATA",
+            "RECALL_ARCHIVED_STORAGE_DATA",
+            "RELEASE_RECALLED_STORAGE_DATA",
+            "PURGE_ARCHIVAL_DATA",
+            "ARCHIVE_STORAGE_DATA",
+            "CLEANUP_ARCHIVAL_STORAGE_DATA",
+            "ENCRYPT_ACTIVE_DATA",
+            "ENCRYPT_ARCHIVAL_DATA",
+            "ENCRYPT_ALL_DATA"
+          ],
+          "key_type": ["ACTIVE_DATA", "ARCHIVAL_DATA", "ALL"]
+        }
       },
       "StorageWorkRequestCollection": {
         "attributes": [["items", "list[StorageWorkRequestSummary]", "items"]]
@@ -135490,7 +139089,30 @@
           ["query", "str", "query"],
           ["is_recall_new_data_only", "bool", "isRecallNewDataOnly"],
           ["is_use_recommended_data_set", "bool", "isUseRecommendedDataSet"]
-        ]
+        ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "CANCELED",
+            "FAILED",
+            "IN_PROGRESS",
+            "SUCCEEDED"
+          ],
+          "data_type": ["LOG", "LOOKUP"],
+          "operation_type": [
+            "OFFBOARD_TENANCY",
+            "PURGE_STORAGE_DATA",
+            "RECALL_ARCHIVED_STORAGE_DATA",
+            "RELEASE_RECALLED_STORAGE_DATA",
+            "PURGE_ARCHIVAL_DATA",
+            "ARCHIVE_STORAGE_DATA",
+            "CLEANUP_ARCHIVAL_STORAGE_DATA",
+            "ENCRYPT_ACTIVE_DATA",
+            "ENCRYPT_ARCHIVAL_DATA",
+            "ENCRYPT_ALL_DATA"
+          ],
+          "key_type": ["ACTIVE_DATA", "ARCHIVAL_DATA", "ALL"]
+        }
       },
       "StreamAction": {
         "attributes": [
@@ -135500,6 +139122,9 @@
           ["metric_extraction", "MetricExtraction", "metricExtraction"],
           ["saved_search_duration", "str", "savedSearchDuration"]
         ],
+        "enums": {
+          "type": ["STREAM", "PURGE"]
+        },
         "discriminator": "Action"
       },
       "Success": {
@@ -135535,6 +139160,33 @@
           ["result", "list[dict(str, object)]", "result"],
           ["are_partial_results", "bool", "arePartialResults"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "TailCommandDescriptor": {
@@ -135548,6 +139200,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["limit", "int", "limit"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "TemplateDetails": {
@@ -135589,6 +139301,33 @@
           ["clusters", "dict(str, TimeStatsCluster)", "clusters"],
           ["series", "list[TimeClusterDataColumn]", "series"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "TimeClusterCommandDescriptor": {
@@ -135605,6 +139344,66 @@
           ["group_by_fields", "list[AbstractField]", "groupByFields"],
           ["functions", "list[FunctionField]", "functions"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "TimeClusterDataColumn": {
@@ -135625,6 +139424,33 @@
           ["columns", "list[AbstractColumn]", "columns"],
           ["result", "list[dict(str, object)]", "result"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "TimeColumn": {
@@ -135645,6 +139471,33 @@
           ["span", "str", "span"],
           ["times", "list[int]", "times"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "TimeCompareCommandDescriptor": {
@@ -135657,6 +139510,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "TimeRange": {
@@ -135691,6 +139604,33 @@
           ["intervals", "list[int]", "intervals"],
           ["series", "list[TimeStatsDataColumn]", "series"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "TimeStatsCommandDescriptor": {
@@ -135707,6 +139647,66 @@
           ["group_by_fields", "list[AbstractField]", "groupByFields"],
           ["functions", "list[FunctionField]", "functions"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "TimeStatsDataColumn": {
@@ -135730,6 +139730,33 @@
           ["total_count", "int", "totalCount"],
           ["partial_results", "bool", "partialResults"]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "TimezoneCollection": {
@@ -135746,6 +139773,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["limit", "int", "limit"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "TrendColumn": {
@@ -135778,6 +139865,33 @@
             "intervalGroupCountsAfterFilter"
           ]
         ],
+        "enums": {
+          "type": [
+            "COLUMN",
+            "CHART_COLUMN",
+            "CHART_DATA_COLUMN",
+            "TIME_STATS_COLUMN",
+            "TIME_STATS_DATA_COLUMN",
+            "TIME_CLUSTER_COLUMN",
+            "TIME_CLUSTER_DATA_COLUMN",
+            "TABLE_COLUMN",
+            "TIME_COLUMN",
+            "TREND_COLUMN",
+            "CLASSIFY_COLUMN"
+          ],
+          "sub_system": ["LOG"],
+          "value_type": [
+            "BOOLEAN",
+            "STRING",
+            "DOUBLE",
+            "FLOAT",
+            "LONG",
+            "INTEGER",
+            "TIMESTAMP",
+            "FACET",
+            "TABLE"
+          ]
+        },
         "discriminator": "AbstractColumn"
       },
       "UiParserTestMetadata": {
@@ -135807,6 +139921,66 @@
           ["is_hidden", "bool", "isHidden"],
           ["table_name", "str", "tableName"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "Upload": {
@@ -135849,7 +140023,10 @@
           ["log_group_id", "str", "logGroupId"],
           ["log_group_name", "str", "logGroupName"],
           ["failure_details", "str", "failureDetails"]
-        ]
+        ],
+        "enums": {
+          "status": ["IN_PROGRESS", "SUCCESSFUL", "FAILED"]
+        }
       },
       "UploadSummary": {
         "attributes": [
@@ -135924,7 +140101,10 @@
           ["map_keys", "list[VariableDefinition]", "mapKeys"],
           ["default_value", "str", "defaultValue"],
           ["properties", "list[PropertyDefinition]", "properties"]
-        ]
+        ],
+        "enums": {
+          "type": ["NUMBER", "STRING", "TIMESTAMP"]
+        }
       },
       "VerifyOutput": {
         "attributes": [
@@ -135943,7 +140123,10 @@
           ["rule_name", "str", "ruleName"],
           ["rule_remediation", "str", "ruleRemediation"],
           ["rule_type", "str", "ruleType"]
-        ]
+        ],
+        "enums": {
+          "rule_type": ["WARN", "ERROR"]
+        }
       },
       "WhereCommandDescriptor": {
         "attributes": [
@@ -135955,6 +140138,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       },
       "WorkRequest": {
@@ -135968,7 +140211,18 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": ["CREATE_LOG_ANALYTICS", "DELETE_LOG_ANALYTICS"],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestCollection": {
         "attributes": [["items", "list[WorkRequestSummary]", "items"]]
@@ -135998,7 +140252,16 @@
           ["action_type", "str", "actionType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "IN_PROGRESS",
+            "RELATED"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -136009,7 +140272,16 @@
           ["time_finished", "datetime", "timeFinished"],
           ["percent_complete", "int", "percentComplete"],
           ["status", "str", "status"]
-        ]
+        ],
+        "enums": {
+          "status": [
+            "ACCEPTED",
+            "CANCELED",
+            "FAILED",
+            "IN_PROGRESS",
+            "SUCCEEDED"
+          ]
+        }
       },
       "XmlExtractCommandDescriptor": {
         "attributes": [
@@ -136021,6 +140293,66 @@
           ["declared_fields", "list[AbstractField]", "declaredFields"],
           ["is_hidden", "bool", "isHidden"]
         ],
+        "enums": {
+          "name": [
+            "COMMAND",
+            "SEARCH",
+            "STATS",
+            "GEO_STATS",
+            "TIME_STATS",
+            "SORT",
+            "FIELDS",
+            "ADD_FIELDS",
+            "LINK",
+            "LINK_DETAILS",
+            "CLUSTER",
+            "CLUSTER_DETAILS",
+            "CLUSTER_SPLIT",
+            "EVAL",
+            "EXTRACT",
+            "JSON_EXTRACT",
+            "XML_EXTRACT",
+            "EVENT_STATS",
+            "BUCKET",
+            "CLASSIFY",
+            "TOP",
+            "BOTTOM",
+            "HEAD",
+            "TAIL",
+            "FIELD_SUMMARY",
+            "REGEX",
+            "RENAME",
+            "TIME_COMPARE",
+            "WHERE",
+            "CLUSTER_COMPARE",
+            "DELETE",
+            "CREATETABLE",
+            "SEQUENCE",
+            "UPDATETABLE",
+            "DELTA",
+            "DISTINCT",
+            "SEARCH_LOOKUP",
+            "LOOKUP",
+            "DEMO_MODE",
+            "MACRO",
+            "MODULE",
+            "MULTI_SEARCH",
+            "HIGHLIGHT",
+            "HIGHLIGHT_ROWS",
+            "HIGHLIGHT_GROUPS",
+            "CREATE_VIEW",
+            "MAP",
+            "NLP",
+            "COMPARE",
+            "ADD_INSIGHTS",
+            "ANOMALY",
+            "DEDUP",
+            "TIME_CLUSTER",
+            "FREQUENT",
+            "RARE",
+            "OUTLIER"
+          ]
+        },
         "discriminator": "AbstractCommandDescriptor"
       }
     }

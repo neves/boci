@@ -7968,10 +7968,16 @@
             ],
             []
           ],
-          ["let", "file", ["fn", "open", ["var", "job_artifact_file"], "rb"]],
-          ["set", ["var", "kwargs"], "job_id", ["var", "job_id"]],
-          ["set", ["var", "kwargs"], "job_artifact", ["var", "file"]],
-          ["invoke", [], ["var", "kwargs"]]
+          [
+            "withOpen",
+            "file",
+            ["fn", "open", ["var", "job_artifact_file"], "rb"],
+            [
+              ["set", ["var", "kwargs"], "job_id", ["var", "job_id"]],
+              ["set", ["var", "kwargs"], "job_artifact", ["var", "file"]],
+              ["invoke", [], ["var", "kwargs"]]
+            ]
+          ]
         ],
         "wrapExceptions": true
       },
@@ -25617,10 +25623,16 @@
             ],
             []
           ],
-          ["let", "file", ["fn", "open", ["var", "model_artifact_file"], "rb"]],
-          ["set", ["var", "kwargs"], "model_id", ["var", "model_id"]],
-          ["set", ["var", "kwargs"], "model_artifact", ["var", "file"]],
-          ["invoke", [], ["var", "kwargs"]]
+          [
+            "withOpen",
+            "file",
+            ["fn", "open", ["var", "model_artifact_file"], "rb"],
+            [
+              ["set", ["var", "kwargs"], "model_id", ["var", "model_id"]],
+              ["set", ["var", "kwargs"], "model_artifact", ["var", "file"]],
+              ["invoke", [], ["var", "kwargs"]]
+            ]
+          ]
         ],
         "wrapExceptions": true
       },
@@ -51775,11 +51787,17 @@
             ],
             []
           ],
-          ["let", "file", ["fn", "open", ["var", "step_artifact"], "rb"]],
-          ["set", ["var", "kwargs"], "pipeline_id", ["var", "pipeline_id"]],
-          ["set", ["var", "kwargs"], "step_artifact", ["var", "file"]],
-          ["set", ["var", "kwargs"], "step_name", ["var", "step_name"]],
-          ["invoke", [], ["var", "kwargs"]]
+          [
+            "withOpen",
+            "file",
+            ["fn", "open", ["var", "step_artifact"], "rb"],
+            [
+              ["set", ["var", "kwargs"], "pipeline_id", ["var", "pipeline_id"]],
+              ["set", ["var", "kwargs"], "step_artifact", ["var", "file"]],
+              ["set", ["var", "kwargs"], "step_name", ["var", "step_name"]],
+              ["invoke", [], ["var", "kwargs"]]
+            ]
+          ]
         ],
         "wrapExceptions": true
       },
@@ -65188,6 +65206,15 @@
           ["name", "str", "name"],
           ["component_name", "str", "componentName"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_PIPELINE",
+            "DATA_SCIENCE_JOB",
+            "DATA_SCIENCE_MODEL",
+            "DATA_FLOW_APPLICATION",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -65202,6 +65229,9 @@
       },
       "ArtifactExportDetails": {
         "attributes": [["artifact_source_type", "str", "artifactSourceType"]],
+        "strictEnums": {
+          "artifact_source_type": ["ORACLE_OBJECT_STORAGE"]
+        },
         "discriminator": {
           "field": "artifactSourceType",
           "values": {
@@ -65218,10 +65248,16 @@
           ["source_object_name", "str", "sourceObjectName"],
           ["source_region", "str", "sourceRegion"]
         ],
+        "strictEnums": {
+          "artifact_source_type": ["ORACLE_OBJECT_STORAGE"]
+        },
         "discriminator": "ArtifactExportDetails"
       },
       "ArtifactImportDetails": {
         "attributes": [["artifact_source_type", "str", "artifactSourceType"]],
+        "strictEnums": {
+          "artifact_source_type": ["ORACLE_OBJECT_STORAGE"]
+        },
         "discriminator": {
           "field": "artifactSourceType",
           "values": {
@@ -65238,10 +65274,16 @@
           ["destination_object_name", "str", "destinationObjectName"],
           ["destination_region", "str", "destinationRegion"]
         ],
+        "strictEnums": {
+          "artifact_source_type": ["ORACLE_OBJECT_STORAGE"]
+        },
         "discriminator": "ArtifactImportDetails"
       },
       "AuthConfiguration": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["IAM"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -65261,12 +65303,18 @@
             "autoScalingPolicies"
           ]
         ],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": "ScalingPolicy"
       },
       "AutoScalingPolicyDetails": {
         "attributes": [
           ["auto_scaling_policy_type", "str", "autoScalingPolicyType"]
         ],
+        "enums": {
+          "auto_scaling_policy_type": ["THRESHOLD"]
+        },
         "discriminator": {
           "field": "autoScalingPolicyType",
           "values": {
@@ -65280,14 +65328,25 @@
           ["time_last_backup", "datetime", "timeLastBackup"],
           ["backup_state", "str", "backupState"],
           ["backup_state_details", "str", "backupStateDetails"]
-        ]
+        ],
+        "enums": {
+          "backup_state": ["PENDING", "FAILED", "SUCCEEDED"]
+        }
       },
       "BackupSetting": {
         "attributes": [
           ["is_backup_enabled", "bool", "isBackupEnabled"],
           ["backup_region", "str", "backupRegion"],
           ["customer_notification_type", "str", "customerNotificationType"]
-        ]
+        ],
+        "enums": {
+          "customer_notification_type": [
+            "NONE",
+            "ALL",
+            "ON_FAILURE",
+            "ON_SUCCESS"
+          ]
+        }
       },
       "CategoryLogDetails": {
         "attributes": [
@@ -65310,6 +65369,12 @@
             "patchModelGroupMemberModelDetails"
           ]
         ],
+        "strictEnums": {
+          "model_group_clone_source_type": [
+            "MODEL_GROUP",
+            "MODEL_GROUP_VERSION_HISTORY"
+          ]
+        },
         "discriminator": "ModelGroupCloneSourceDetails"
       },
       "CloneCreateFromModelGroupVersionHistoryDetails": {
@@ -65327,10 +65392,19 @@
             "patchModelGroupMemberModelDetails"
           ]
         ],
+        "strictEnums": {
+          "model_group_clone_source_type": [
+            "MODEL_GROUP",
+            "MODEL_GROUP_VERSION_HISTORY"
+          ]
+        },
         "discriminator": "ModelGroupCloneSourceDetails"
       },
       "ComputeConfigurationDetails": {
         "attributes": [["compute_type", "str", "computeType"]],
+        "enums": {
+          "compute_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": {
           "field": "computeType",
           "values": {
@@ -65362,7 +65436,18 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "UPDATING",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "ComputeTargetShapeSummary": {
         "attributes": [
@@ -65370,7 +65455,17 @@
           ["core_count", "int", "coreCount"],
           ["memory_in_gbs", "int", "memoryInGBs"],
           ["shape_series", "str", "shapeSeries"]
-        ]
+        ],
+        "enums": {
+          "shape_series": [
+            "AMD_ROME",
+            "INTEL_SKYLAKE",
+            "NVIDIA_GPU",
+            "GENERIC",
+            "LEGACY",
+            "ARM"
+          ]
+        }
       },
       "ComputeTargetSummary": {
         "attributes": [
@@ -65382,10 +65477,24 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "UPDATING",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "ComputeTargetSystemData": {
         "attributes": [["compute_type", "str", "computeType"]],
+        "enums": {
+          "compute_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": {
           "field": "computeType",
           "values": {
@@ -65409,7 +65518,10 @@
           ["default_value", "str", "defaultValue"],
           ["validation_regexp", "str", "validationRegexp"],
           ["sample_value", "str", "sampleValue"]
-        ]
+        ],
+        "enums": {
+          "value_type": ["STRING", "SECRET", "VAULT_SECRET_ID"]
+        }
       },
       "ContainerSummary": {
         "attributes": [
@@ -65434,7 +65546,18 @@
           ],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "target_workloads": ["MODEL_DEPLOYMENT", "JOB_RUN"],
+          "usages": [
+            "INFERENCE",
+            "FINE_TUNE",
+            "EVALUATION",
+            "BATCH_INFERENCE",
+            "OTHER"
+          ],
+          "lifecycle_state": ["ACTIVE", "INACTIVE"]
+        }
       },
       "CreateAuthConfigurationDetails": {
         "attributes": [["type", "str", "type"]],
@@ -65504,6 +65627,13 @@
             "createJobRunDetails"
           ]
         ],
+        "enums": {
+          "http_action_type": [
+            "CREATE_JOB_RUN",
+            "CREATE_PIPELINE_RUN",
+            "INVOKE_ML_APPLICATION_PROVIDER_TRIGGER"
+          ]
+        },
         "discriminator": "ScheduleHttpActionDetails"
       },
       "CreatePipelineRunDetails": {
@@ -65557,6 +65687,13 @@
             "createPipelineRunDetails"
           ]
         ],
+        "enums": {
+          "http_action_type": [
+            "CREATE_JOB_RUN",
+            "CREATE_PIPELINE_RUN",
+            "INVOKE_ML_APPLICATION_PROVIDER_TRIGGER"
+          ]
+        },
         "discriminator": "ScheduleHttpActionDetails"
       },
       "CustomExpressionQueryScalingConfiguration": {
@@ -65566,6 +65703,9 @@
           ["instance_count_adjustment", "int", "instanceCountAdjustment"],
           ["query", "str", "query"]
         ],
+        "enums": {
+          "scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": "ScalingConfiguration"
       },
       "CustomMetadata": {
@@ -65590,6 +65730,12 @@
             "scaleOutConfiguration"
           ]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "PREDEFINED_EXPRESSION",
+            "CUSTOM_EXPRESSION"
+          ]
+        },
         "discriminator": "MetricExpressionRule"
       },
       "DataFlowApplicationApplicationComponent": {
@@ -65599,6 +65745,15 @@
           ["component_name", "str", "componentName"],
           ["application_id", "str", "applicationId"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_PIPELINE",
+            "DATA_SCIENCE_JOB",
+            "DATA_SCIENCE_MODEL",
+            "DATA_FLOW_APPLICATION",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "ApplicationComponent"
       },
       "DataScienceJobApplicationComponent": {
@@ -65608,6 +65763,15 @@
           ["component_name", "str", "componentName"],
           ["job_id", "str", "jobId"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_PIPELINE",
+            "DATA_SCIENCE_JOB",
+            "DATA_SCIENCE_MODEL",
+            "DATA_FLOW_APPLICATION",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "ApplicationComponent"
       },
       "DataScienceModelApplicationComponent": {
@@ -65617,6 +65781,15 @@
           ["component_name", "str", "componentName"],
           ["model_id", "str", "modelId"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_PIPELINE",
+            "DATA_SCIENCE_JOB",
+            "DATA_SCIENCE_MODEL",
+            "DATA_FLOW_APPLICATION",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "ApplicationComponent"
       },
       "DataScienceModelDeploymentInstanceComponent": {
@@ -65627,6 +65800,16 @@
           ["prediction_use_case_name", "str", "predictionUseCaseName"],
           ["model_deployment_id", "str", "modelDeploymentId"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_MODEL_DEPLOYMENT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_OBJECT",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER",
+            "DATA_SCIENCE_SCHEDULE",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "InstanceComponent"
       },
       "DataSciencePipelineApplicationComponent": {
@@ -65636,6 +65819,15 @@
           ["component_name", "str", "componentName"],
           ["pipeline_id", "str", "pipelineId"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_PIPELINE",
+            "DATA_SCIENCE_JOB",
+            "DATA_SCIENCE_MODEL",
+            "DATA_FLOW_APPLICATION",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "ApplicationComponent"
       },
       "DataSciencePrivateEndpoint": {
@@ -65656,7 +65848,19 @@
           ["data_science_resource_type", "str", "dataScienceResourceType"],
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ],
+          "data_science_resource_type": ["NOTEBOOK_SESSION", "MODEL_DEPLOYMENT"]
+        }
       },
       "DataSciencePrivateEndpointSummary": {
         "attributes": [
@@ -65675,7 +65879,19 @@
           ["fqdn", "str", "fqdn"],
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "NEEDS_ATTENTION"
+          ],
+          "data_science_resource_type": ["NOTEBOOK_SESSION", "MODEL_DEPLOYMENT"]
+        }
       },
       "DataScienceScheduleInstanceComponent": {
         "attributes": [
@@ -65684,6 +65900,16 @@
           ["component_name", "str", "componentName"],
           ["schedule_id", "str", "scheduleId"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_MODEL_DEPLOYMENT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_OBJECT",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER",
+            "DATA_SCIENCE_SCHEDULE",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "InstanceComponent"
       },
       "DefaultJobConfigurationDetails": {
@@ -65694,6 +65920,9 @@
           ["maximum_runtime_in_minutes", "int", "maximumRuntimeInMinutes"],
           ["startup_probe_details", "JobProbeDetails", "startupProbeDetails"]
         ],
+        "enums": {
+          "job_type": ["DEFAULT", "EMPTY"]
+        },
         "discriminator": "JobConfigurationDetails"
       },
       "DefaultModelDeploymentEnvironmentConfigurationDetails": {
@@ -65705,16 +65934,31 @@
           ],
           ["environment_variables", "dict(str, str)", "environmentVariables"]
         ],
+        "enums": {
+          "environment_configuration_type": ["DEFAULT", "OCIR_CONTAINER"]
+        },
         "discriminator": "ModelDeploymentEnvironmentConfigurationDetails"
       },
       "EmptyJobConfigurationDetails": {
         "attributes": [["job_type", "str", "jobType"]],
+        "enums": {
+          "job_type": ["DEFAULT", "EMPTY"]
+        },
         "discriminator": "JobConfigurationDetails"
       },
       "EmptyJobInfrastructureConfigurationDetails": {
         "attributes": [
           ["job_infrastructure_type", "str", "jobInfrastructureType"]
         ],
+        "enums": {
+          "job_infrastructure_type": [
+            "STANDALONE",
+            "ME_STANDALONE",
+            "MULTI_NODE",
+            "EMPTY",
+            "MANAGED_COMPUTE_CLUSTER"
+          ]
+        },
         "discriminator": "JobInfrastructureConfigurationDetails"
       },
       "FastLaunchJobConfigSummary": {
@@ -65725,7 +65969,18 @@
           ["memory_in_gbs", "int", "memoryInGBs"],
           ["shape_series", "str", "shapeSeries"],
           ["managed_egress_support", "str", "managedEgressSupport"]
-        ]
+        ],
+        "enums": {
+          "shape_series": [
+            "AMD_ROME",
+            "INTEL_SKYLAKE",
+            "NVIDIA_GPU",
+            "GENERIC",
+            "LEGACY",
+            "ARM"
+          ],
+          "managed_egress_support": ["REQUIRED", "SUPPORTED", "UNSUPPORTED"]
+        }
       },
       "FileStorageMountConfigurationDetails": {
         "attributes": [
@@ -65735,6 +65990,9 @@
           ["mount_target_id", "str", "mountTargetId"],
           ["export_id", "str", "exportId"]
         ],
+        "enums": {
+          "storage_type": ["FILE_STORAGE", "OBJECT_STORAGE"]
+        },
         "discriminator": "StorageMountConfigurationDetails"
       },
       "FixedSizeScalingPolicy": {
@@ -65742,6 +66000,9 @@
           ["policy_type", "str", "policyType"],
           ["instance_count", "int", "instanceCount"]
         ],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": "ScalingPolicy"
       },
       "GenericJobRunUseCaseConfigurationDetails": {
@@ -65753,6 +66014,9 @@
             "additionalConfigurations"
           ]
         ],
+        "enums": {
+          "use_case_type": ["GENERIC"]
+        },
         "discriminator": "JobRunUseCaseConfigurationDetails"
       },
       "GenericOciResourceApplicationComponent": {
@@ -65763,6 +66027,15 @@
           ["id", "str", "id"],
           ["resource_type", "str", "resourceType"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_PIPELINE",
+            "DATA_SCIENCE_JOB",
+            "DATA_SCIENCE_MODEL",
+            "DATA_FLOW_APPLICATION",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "ApplicationComponent"
       },
       "GenericOciResourceInstanceComponent": {
@@ -65773,6 +66046,16 @@
           ["id", "str", "id"],
           ["resource_type", "str", "resourceType"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_MODEL_DEPLOYMENT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_OBJECT",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER",
+            "DATA_SCIENCE_SCHEDULE",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "InstanceComponent"
       },
       "HeterogeneousModelGroupDetails": {
@@ -65780,6 +66063,9 @@
           ["type", "str", "type"],
           ["custom_metadata_list", "list[CustomMetadata]", "customMetadataList"]
         ],
+        "enums": {
+          "type": ["HOMOGENEOUS", "HETEROGENEOUS", "STACKED"]
+        },
         "discriminator": "ModelGroupDetails"
       },
       "HomogeneousModelGroupDetails": {
@@ -65787,10 +66073,16 @@
           ["type", "str", "type"],
           ["custom_metadata_list", "list[CustomMetadata]", "customMetadataList"]
         ],
+        "enums": {
+          "type": ["HOMOGENEOUS", "HETEROGENEOUS", "STACKED"]
+        },
         "discriminator": "ModelGroupDetails"
       },
       "IamAuthConfiguration": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["IAM"]
+        },
         "discriminator": "AuthConfiguration"
       },
       "ImplementationLogDetails": {
@@ -65823,6 +66115,9 @@
       },
       "InfrastructureConfigurationDetails": {
         "attributes": [["infrastructure_type", "str", "infrastructureType"]],
+        "enums": {
+          "infrastructure_type": ["INSTANCE_POOL"]
+        },
         "discriminator": {
           "field": "infrastructureType",
           "values": {
@@ -65837,6 +66132,16 @@
           ["name", "str", "name"],
           ["component_name", "str", "componentName"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_MODEL_DEPLOYMENT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_OBJECT",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER",
+            "DATA_SCIENCE_SCHEDULE",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -65862,7 +66167,14 @@
           ["private_endpoint_id", "str", "privateEndpointId"],
           ["network_access_type", "str", "networkAccessType"],
           ["capacity_reservation_ids", "list[str]", "capacityReservationIds"]
-        ]
+        ],
+        "enums": {
+          "network_access_type": [
+            "MANAGED_NETWORKING_NO_INTERNET_ACCESS",
+            "MANAGED_NETWORKING_INTERNET_ACCESS",
+            "CUSTOM_NETWORKING"
+          ]
+        }
       },
       "InstancePoolInfrastructureConfigurationDetails": {
         "attributes": [
@@ -65876,6 +66188,9 @@
           ["bandwidth_mbps", "int", "bandwidthMbps"],
           ["maximum_bandwidth_mbps", "int", "maximumBandwidthMbps"]
         ],
+        "enums": {
+          "infrastructure_type": ["INSTANCE_POOL"]
+        },
         "discriminator": "InfrastructureConfigurationDetails"
       },
       "InstancePoolModelDeploymentSystemData": {
@@ -65884,6 +66199,10 @@
           ["model_type", "str", "modelType"],
           ["current_instance_count", "int", "currentInstanceCount"]
         ],
+        "enums": {
+          "system_infra_type": ["INSTANCE_POOL", "MANAGED_COMPUTE_CLUSTER"],
+          "model_type": ["MANAGED_MODEL"]
+        },
         "discriminator": "ModelDeploymentSystemData"
       },
       "InvokeMlApplicationProviderTriggerScheduleActionDetails": {
@@ -65900,6 +66219,13 @@
             "triggerMlApplicationInstanceViewFlowDetails"
           ]
         ],
+        "enums": {
+          "http_action_type": [
+            "CREATE_JOB_RUN",
+            "CREATE_PIPELINE_RUN",
+            "INVOKE_ML_APPLICATION_PROVIDER_TRIGGER"
+          ]
+        },
         "discriminator": "ScheduleHttpActionDetails"
       },
       "Job": {
@@ -65950,10 +66276,22 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "DELETED"
+          ]
+        }
       },
       "JobConfigurationDetails": {
         "attributes": [["job_type", "str", "jobType"]],
+        "enums": {
+          "job_type": ["DEFAULT", "EMPTY"]
+        },
         "discriminator": {
           "field": "jobType",
           "values": {
@@ -65968,14 +66306,23 @@
           ["job_network_type", "str", "jobNetworkType"],
           ["subnet_id", "str", "subnetId"]
         ],
+        "enums": {
+          "job_network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "JobNetworkConfiguration"
       },
       "JobDefaultNetworkConfiguration": {
         "attributes": [["job_network_type", "str", "jobNetworkType"]],
+        "enums": {
+          "job_network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "JobNetworkConfiguration"
       },
       "JobEnvironmentConfigurationDetails": {
         "attributes": [["job_environment_type", "str", "jobEnvironmentType"]],
+        "enums": {
+          "job_environment_type": ["OCIR_CONTAINER"]
+        },
         "discriminator": {
           "field": "jobEnvironmentType",
           "values": {
@@ -65992,12 +66339,24 @@
           ["failure_threshold", "int", "failureThreshold"],
           ["initial_delay_in_seconds", "int", "initialDelayInSeconds"]
         ],
+        "enums": {
+          "job_probe_check_type": ["EXEC"]
+        },
         "discriminator": "JobProbeDetails"
       },
       "JobInfrastructureConfigurationDetails": {
         "attributes": [
           ["job_infrastructure_type", "str", "jobInfrastructureType"]
         ],
+        "enums": {
+          "job_infrastructure_type": [
+            "STANDALONE",
+            "ME_STANDALONE",
+            "MULTI_NODE",
+            "EMPTY",
+            "MANAGED_COMPUTE_CLUSTER"
+          ]
+        },
         "discriminator": {
           "field": "jobInfrastructureType",
           "values": {
@@ -66020,6 +66379,9 @@
       },
       "JobNetworkConfiguration": {
         "attributes": [["job_network_type", "str", "jobNetworkType"]],
+        "enums": {
+          "job_network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": {
           "field": "jobNetworkType",
           "values": {
@@ -66031,6 +66393,9 @@
       },
       "JobNodeConfigurationDetails": {
         "attributes": [["job_node_type", "str", "jobNodeType"]],
+        "enums": {
+          "job_node_type": ["MULTI_NODE"]
+        },
         "discriminator": {
           "field": "jobNodeType",
           "values": {
@@ -66063,6 +66428,9 @@
       },
       "JobProbeDetails": {
         "attributes": [["job_probe_check_type", "str", "jobProbeCheckType"]],
+        "enums": {
+          "job_probe_check_type": ["EXEC"]
+        },
         "discriminator": {
           "field": "jobProbeCheckType",
           "values": {
@@ -66137,7 +66505,19 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "JobRunLogDetails": {
         "attributes": [
@@ -66160,10 +66540,25 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "JobRunUseCaseConfigurationDetails": {
         "attributes": [["use_case_type", "str", "useCaseType"]],
+        "enums": {
+          "use_case_type": ["GENERIC"]
+        },
         "discriminator": {
           "field": "useCaseType",
           "values": {
@@ -66181,6 +66576,9 @@
             "useCaseConfiguration"
           ]
         ],
+        "enums": {
+          "workload_type": ["MODEL_DEPLOYMENT", "JOB_RUN"]
+        },
         "discriminator": "WorkloadConfigurationDetails"
       },
       "JobShapeConfigDetails": {
@@ -66188,7 +66586,10 @@
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["cpu_baseline", "str", "cpuBaseline"]
-        ]
+        ],
+        "enums": {
+          "cpu_baseline": ["BASELINE_1_8", "BASELINE_1_2", "BASELINE_1_1"]
+        }
       },
       "JobShapeSummary": {
         "attributes": [
@@ -66196,7 +66597,17 @@
           ["core_count", "int", "coreCount"],
           ["memory_in_gbs", "int", "memoryInGBs"],
           ["shape_series", "str", "shapeSeries"]
-        ]
+        ],
+        "enums": {
+          "shape_series": [
+            "AMD_ROME",
+            "INTEL_SKYLAKE",
+            "NVIDIA_GPU",
+            "GENERIC",
+            "LEGACY",
+            "ARM"
+          ]
+        }
       },
       "JobSummary": {
         "attributes": [
@@ -66209,7 +66620,16 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "DELETED"
+          ]
+        }
       },
       "LogDetails": {
         "attributes": [
@@ -66228,12 +66648,18 @@
             "autoScalingPolicies"
           ]
         ],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": "ManagedComputeClusterScalingPolicy"
       },
       "ManagedComputeClusterAutoScalingPolicyDetails": {
         "attributes": [
           ["auto_scaling_policy_type", "str", "autoScalingPolicyType"]
         ],
+        "enums": {
+          "auto_scaling_policy_type": ["THRESHOLD"]
+        },
         "discriminator": {
           "field": "autoScalingPolicyType",
           "values": {
@@ -66256,6 +66682,9 @@
             "scalingPolicy"
           ]
         ],
+        "enums": {
+          "compute_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": "ComputeConfigurationDetails"
       },
       "ManagedComputeClusterCustomExpressionQueryScalingConfiguration": {
@@ -66265,6 +66694,9 @@
           ["instance_count_adjustment", "int", "instanceCountAdjustment"],
           ["query", "str", "query"]
         ],
+        "enums": {
+          "scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": "ManagedComputeClusterScalingConfiguration"
       },
       "ManagedComputeClusterCustomMetricExpressionRule": {
@@ -66281,6 +66713,12 @@
             "scaleOutConfiguration"
           ]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "PREDEFINED_EXPRESSION",
+            "CUSTOM_EXPRESSION"
+          ]
+        },
         "discriminator": "ManagedComputeClusterMetricExpressionRule"
       },
       "ManagedComputeClusterCustomNetworkConfigurationDetails": {
@@ -66288,10 +66726,16 @@
           ["network_type", "str", "networkType"],
           ["subnet_ids", "list[str]", "subnetIds"]
         ],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "ManagedComputeClusterNetworkConfigurationDetails"
       },
       "ManagedComputeClusterDefaultNetworkConfigurationDetails": {
         "attributes": [["network_type", "str", "networkType"]],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "ManagedComputeClusterNetworkConfigurationDetails"
       },
       "ManagedComputeClusterFixedSizeScalingPolicy": {
@@ -66299,6 +66743,9 @@
           ["policy_type", "str", "policyType"],
           ["instance_count", "int", "instanceCount"]
         ],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": "ManagedComputeClusterScalingPolicy"
       },
       "ManagedComputeClusterInstanceConfigurationDetails": {
@@ -66329,10 +66776,16 @@
           ["network_type", "str", "networkType"],
           ["subnet_id", "str", "subnetId"]
         ],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "ManagedComputeClusterJobNetworkConfiguration"
       },
       "ManagedComputeClusterJobDefaultNetworkConfiguration": {
         "attributes": [["network_type", "str", "networkType"]],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "ManagedComputeClusterJobNetworkConfiguration"
       },
       "ManagedComputeClusterJobInfrastructureConfigurationDetails": {
@@ -66350,10 +66803,22 @@
             "networkConfiguration"
           ]
         ],
+        "enums": {
+          "job_infrastructure_type": [
+            "STANDALONE",
+            "ME_STANDALONE",
+            "MULTI_NODE",
+            "EMPTY",
+            "MANAGED_COMPUTE_CLUSTER"
+          ]
+        },
         "discriminator": "JobInfrastructureConfigurationDetails"
       },
       "ManagedComputeClusterJobNetworkConfiguration": {
         "attributes": [["network_type", "str", "networkType"]],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": {
           "field": "networkType",
           "values": {
@@ -66381,6 +66846,12 @@
         "attributes": [
           ["metric_expression_rule_type", "str", "metricExpressionRuleType"]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "PREDEFINED_EXPRESSION",
+            "CUSTOM_EXPRESSION"
+          ]
+        },
         "discriminator": {
           "field": "metricExpressionRuleType",
           "values": {
@@ -66410,6 +66881,9 @@
             "networkConfiguration"
           ]
         ],
+        "enums": {
+          "infrastructure_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": "ModelDeployInfrastructureConfigurationDetails"
       },
       "ManagedComputeClusterModelDeploymentCustomNetworkConfiguration": {
@@ -66417,14 +66891,23 @@
           ["network_type", "str", "networkType"],
           ["subnet_id", "str", "subnetId"]
         ],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "ManagedComputeClusterModelDeploymentNetworkConfiguration"
       },
       "ManagedComputeClusterModelDeploymentDefaultNetworkConfiguration": {
         "attributes": [["network_type", "str", "networkType"]],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": "ManagedComputeClusterModelDeploymentNetworkConfiguration"
       },
       "ManagedComputeClusterModelDeploymentNetworkConfiguration": {
         "attributes": [["network_type", "str", "networkType"]],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": {
           "field": "networkType",
           "values": {
@@ -66454,10 +66937,17 @@
           ["model_type", "str", "modelType"],
           ["current_instance_count", "int", "currentInstanceCount"]
         ],
+        "enums": {
+          "system_infra_type": ["INSTANCE_POOL", "MANAGED_COMPUTE_CLUSTER"],
+          "model_type": ["MANAGED_MODEL"]
+        },
         "discriminator": "ModelDeploymentSystemData"
       },
       "ManagedComputeClusterNetworkConfigurationDetails": {
         "attributes": [["network_type", "str", "networkType"]],
+        "enums": {
+          "network_type": ["CUSTOM_NETWORK", "DEFAULT_NETWORK"]
+        },
         "discriminator": {
           "field": "networkType",
           "values": {
@@ -66474,6 +66964,9 @@
           ["instance_count_adjustment", "int", "instanceCountAdjustment"],
           ["threshold", "int", "threshold"]
         ],
+        "enums": {
+          "scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": "ManagedComputeClusterScalingConfiguration"
       },
       "ManagedComputeClusterPredefinedMetricExpressionRule": {
@@ -66491,6 +66984,13 @@
             "scaleOutConfiguration"
           ]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "PREDEFINED_EXPRESSION",
+            "CUSTOM_EXPRESSION"
+          ],
+          "metric_type": ["CPU_UTILIZATION", "MEMORY_UTILIZATION"]
+        },
         "discriminator": "ManagedComputeClusterMetricExpressionRule"
       },
       "ManagedComputeClusterScalingConfiguration": {
@@ -66499,6 +66999,9 @@
           ["pending_duration", "str", "pendingDuration"],
           ["instance_count_adjustment", "int", "instanceCountAdjustment"]
         ],
+        "enums": {
+          "scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": {
           "field": "scalingConfigurationType",
           "values": {
@@ -66510,6 +67013,9 @@
       },
       "ManagedComputeClusterScalingPolicy": {
         "attributes": [["policy_type", "str", "policyType"]],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": {
           "field": "policyType",
           "values": {
@@ -66524,6 +67030,9 @@
           ["compute_type", "str", "computeType"],
           ["current_instance_count", "int", "currentInstanceCount"]
         ],
+        "enums": {
+          "compute_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": "ComputeTargetSystemData"
       },
       "ManagedComputeClusterThresholdBasedAutoScalingPolicyDetails": {
@@ -66534,6 +67043,9 @@
           ["minimum_instance_count", "int", "minimumInstanceCount"],
           ["initial_instance_count", "int", "initialInstanceCount"]
         ],
+        "enums": {
+          "auto_scaling_policy_type": ["THRESHOLD"]
+        },
         "discriminator": "ManagedComputeClusterAutoScalingPolicyDetails"
       },
       "ManagedComputeClusterWorkloadAutoScalingPolicy": {
@@ -66546,12 +67058,18 @@
             "autoScalingPolicies"
           ]
         ],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": "ManagedComputeClusterWorkloadScalingPolicy"
       },
       "ManagedComputeClusterWorkloadAutoScalingPolicyDetails": {
         "attributes": [
           ["auto_scaling_policy_type", "str", "autoScalingPolicyType"]
         ],
+        "enums": {
+          "auto_scaling_policy_type": ["THRESHOLD"]
+        },
         "discriminator": {
           "field": "autoScalingPolicyType",
           "values": {
@@ -66565,12 +67083,21 @@
           ["policy_type", "str", "policyType"],
           ["instance_count", "int", "instanceCount"]
         ],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": "ManagedComputeClusterWorkloadScalingPolicy"
       },
       "ManagedComputeClusterWorkloadMetricExpressionRule": {
         "attributes": [
           ["metric_expression_rule_type", "str", "metricExpressionRuleType"]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "TARGET_PREDEFINED_EXPRESSION",
+            "TARGET_CUSTOM_EXPRESSION"
+          ]
+        },
         "discriminator": {
           "field": "metricExpressionRuleType",
           "values": {
@@ -66589,6 +67116,9 @@
       },
       "ManagedComputeClusterWorkloadScalingPolicy": {
         "attributes": [["policy_type", "str", "policyType"]],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": {
           "field": "policyType",
           "values": {
@@ -66620,6 +67150,9 @@
             "scaleOutPolicy"
           ]
         ],
+        "enums": {
+          "auto_scaling_policy_type": ["THRESHOLD"]
+        },
         "discriminator": "ManagedComputeClusterWorkloadAutoScalingPolicyDetails"
       },
       "ManagedEgressStandaloneJobInfrastructureConfigurationDetails": {
@@ -66634,6 +67167,15 @@
             "jobShapeConfigDetails"
           ]
         ],
+        "enums": {
+          "job_infrastructure_type": [
+            "STANDALONE",
+            "ME_STANDALONE",
+            "MULTI_NODE",
+            "EMPTY",
+            "MANAGED_COMPUTE_CLUSTER"
+          ]
+        },
         "discriminator": "JobInfrastructureConfigurationDetails"
       },
       "MemberModelDetails": {
@@ -66665,6 +67207,12 @@
         "attributes": [
           ["metric_expression_rule_type", "str", "metricExpressionRuleType"]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "PREDEFINED_EXPRESSION",
+            "CUSTOM_EXPRESSION"
+          ]
+        },
         "discriminator": {
           "field": "metricExpressionRuleType",
           "values": {
@@ -66687,7 +67235,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "FAILED"]
+        }
       },
       "MlApplicationCollection": {
         "attributes": [["items", "list[MlApplicationSummary]", "items"]]
@@ -66729,7 +67280,17 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "NEEDS_ATTENTION",
+            "FAILED",
+            "DELETING",
+            "UPDATING"
+          ]
+        }
       },
       "MlApplicationImplementationCollection": {
         "attributes": [
@@ -66801,7 +67362,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["CREATING", "ACTIVE", "FAILED", "DELETING"]
+        }
       },
       "MlApplicationImplementationVersionCollection": {
         "attributes": [
@@ -66871,7 +67435,34 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "NEEDS_ATTENTION",
+            "FAILED"
+          ],
+          "lifecycle_substate": [
+            "CREATING",
+            "UPDATING",
+            "UPGRADING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "NEEDS_ATTENTION",
+            "FAILED",
+            "NON_RECOVERABLE_PROVIDER_ISSUE",
+            "RECOVERABLE_PROVIDER_ISSUE",
+            "NON_RECOVERABLE_SERVICE_ISSUE",
+            "RECOVERABLE_SERVICE_ISSUE"
+          ]
+        }
       },
       "MlApplicationInstanceCollection": {
         "attributes": [["items", "list[MlApplicationInstanceSummary]", "items"]]
@@ -66884,6 +67475,16 @@
           ["trigger_definition", "str", "triggerDefinition"],
           ["is_enabled", "bool", "isEnabled"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_MODEL_DEPLOYMENT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_OBJECT",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER",
+            "DATA_SCIENCE_SCHEDULE",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "InstanceComponent"
       },
       "MlApplicationInstanceSummary": {
@@ -66955,7 +67556,34 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "UPDATING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "NEEDS_ATTENTION",
+            "FAILED"
+          ],
+          "lifecycle_substate": [
+            "CREATING",
+            "UPDATING",
+            "UPGRADING",
+            "ACTIVE",
+            "INACTIVE",
+            "DELETING",
+            "DELETED",
+            "NEEDS_ATTENTION",
+            "FAILED",
+            "NON_RECOVERABLE_PROVIDER_ISSUE",
+            "RECOVERABLE_PROVIDER_ISSUE",
+            "NON_RECOVERABLE_SERVICE_ISSUE",
+            "RECOVERABLE_SERVICE_ISSUE"
+          ]
+        }
       },
       "MlApplicationInstanceViewCollection": {
         "attributes": [
@@ -67002,7 +67630,10 @@
           ["description", "str", "description"],
           ["type", "str", "type"],
           ["is_mandatory", "bool", "isMandatory"]
-        ]
+        ],
+        "enums": {
+          "type": ["STRING", "OCID"]
+        }
       },
       "MlApplicationPackageArguments": {
         "attributes": [
@@ -67061,12 +67692,19 @@
             "BackupOperationDetails",
             "backupOperationDetails"
           ]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED", "FAILED", "INACTIVE"],
+          "category": ["USER", "SERVICE"]
+        }
       },
       "ModelArtifactReferenceDetails": {
         "attributes": [
           ["model_artifact_reference_type", "str", "modelArtifactReferenceType"]
         ],
+        "strictEnums": {
+          "model_artifact_reference_type": ["OSS"]
+        },
         "discriminator": {
           "field": "modelArtifactReferenceType",
           "values": {
@@ -67093,7 +67731,16 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "CREATING", "DELETED", "FAILED"],
+          "signing_algorithm": [
+            "SHA_224_RSA_PKCS_PSS",
+            "SHA_256_RSA_PKCS_PSS",
+            "SHA_384_RSA_PKCS_PSS",
+            "SHA_512_RSA_PKCS_PSS"
+          ]
+        }
       },
       "ModelArtifactSignatureSummary": {
         "attributes": [
@@ -67109,7 +67756,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "CREATING", "DELETED", "FAILED"]
+        }
       },
       "ModelConfigurationDetails": {
         "attributes": [
@@ -67127,6 +67777,9 @@
       },
       "ModelDeployInfrastructureConfigurationDetails": {
         "attributes": [["infrastructure_type", "str", "infrastructureType"]],
+        "enums": {
+          "infrastructure_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": {
           "field": "infrastructureType",
           "values": {
@@ -67147,6 +67800,9 @@
             "additionalConfigurations"
           ]
         ],
+        "enums": {
+          "workload_type": ["MODEL_DEPLOYMENT", "JOB_RUN"]
+        },
         "discriminator": "WorkloadConfigurationDetails"
       },
       "ModelDeployment": {
@@ -67174,10 +67830,29 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "INACTIVE",
+            "UPDATING",
+            "DELETED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "ModelDeploymentConfigurationDetails": {
         "attributes": [["deployment_type", "str", "deploymentType"]],
+        "enums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ]
+        },
         "discriminator": {
           "field": "deploymentType",
           "values": {
@@ -67196,6 +67871,9 @@
             "environmentConfigurationType"
           ]
         ],
+        "enums": {
+          "environment_configuration_type": ["DEFAULT", "OCIR_CONTAINER"]
+        },
         "discriminator": {
           "field": "environmentConfigurationType",
           "values": {
@@ -67210,7 +67888,10 @@
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["cpu_baseline", "str", "cpuBaseline"]
-        ]
+        ],
+        "enums": {
+          "cpu_baseline": ["BASELINE_1_8", "BASELINE_1_2", "BASELINE_1_1"]
+        }
       },
       "ModelDeploymentModelStateSummary": {
         "attributes": [
@@ -67222,7 +67903,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "state": ["SUCCESS", "FAILED", "INCONSISTENT"]
+        }
       },
       "ModelDeploymentShapeSummary": {
         "attributes": [
@@ -67230,7 +67914,17 @@
           ["core_count", "int", "coreCount"],
           ["memory_in_gbs", "int", "memoryInGBs"],
           ["shape_series", "str", "shapeSeries"]
-        ]
+        ],
+        "enums": {
+          "shape_series": [
+            "AMD_ROME",
+            "INTEL_SKYLAKE",
+            "NVIDIA_GPU",
+            "GENERIC",
+            "LEGACY",
+            "ARM"
+          ]
+        }
       },
       "ModelDeploymentSummary": {
         "attributes": [
@@ -67256,13 +67950,29 @@
           ],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "INACTIVE",
+            "UPDATING",
+            "DELETED",
+            "NEEDS_ATTENTION"
+          ]
+        }
       },
       "ModelDeploymentSystemData": {
         "attributes": [
           ["system_infra_type", "str", "systemInfraType"],
           ["model_type", "str", "modelType"]
         ],
+        "enums": {
+          "system_infra_type": ["INSTANCE_POOL", "MANAGED_COMPUTE_CLUSTER"],
+          "model_type": ["MANAGED_MODEL"]
+        },
         "discriminator": {
           "field": "systemInfraType",
           "values": {
@@ -67303,12 +68013,28 @@
           ["version_id", "int", "versionId"],
           ["create_type", "str", "createType"],
           ["source_model_group_id", "str", "sourceModelGroupId"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "FAILED",
+            "INACTIVE",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "ModelGroupCloneSourceDetails": {
         "attributes": [
           ["model_group_clone_source_type", "str", "modelGroupCloneSourceType"]
         ],
+        "strictEnums": {
+          "model_group_clone_source_type": [
+            "MODEL_GROUP",
+            "MODEL_GROUP_VERSION_HISTORY"
+          ]
+        },
         "discriminator": {
           "field": "modelGroupCloneSourceType",
           "values": {
@@ -67340,6 +68066,13 @@
             "environmentConfigurationDetails"
           ]
         ],
+        "enums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ]
+        },
         "discriminator": "ModelDeploymentConfigurationDetails"
       },
       "ModelGroupDetails": {
@@ -67347,6 +68080,9 @@
           ["type", "str", "type"],
           ["custom_metadata_list", "list[CustomMetadata]", "customMetadataList"]
         ],
+        "enums": {
+          "type": ["HOMOGENEOUS", "HETEROGENEOUS", "STACKED"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -67375,7 +68111,11 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED", "FAILED", "INACTIVE"],
+          "category": ["USER", "SERVICE"]
+        }
       },
       "ModelGroupSummary": {
         "attributes": [
@@ -67404,7 +68144,17 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "FAILED",
+            "INACTIVE",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "ModelGroupVersionHistory": {
         "attributes": [
@@ -67422,7 +68172,10 @@
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"],
           ["created_by", "str", "createdBy"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED", "FAILED", "DELETING"]
+        }
       },
       "ModelGroupVersionHistorySummary": {
         "attributes": [
@@ -67439,7 +68192,10 @@
           ["time_created", "datetime", "timeCreated"],
           ["time_updated", "datetime", "timeUpdated"],
           ["created_by", "str", "createdBy"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED", "FAILED", "DELETING"]
+        }
       },
       "ModelProvenance": {
         "attributes": [
@@ -67469,7 +68225,11 @@
           ["is_model_by_reference", "bool", "isModelByReference"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETED", "FAILED", "INACTIVE"],
+          "category": ["USER", "SERVICE"]
+        }
       },
       "ModelVersionSet": {
         "attributes": [
@@ -67486,7 +68246,11 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETING", "DELETED", "FAILED"],
+          "category": ["USER", "SERVICE"]
+        }
       },
       "ModelVersionSetSummary": {
         "attributes": [
@@ -67502,7 +68266,11 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETING", "DELETED", "FAILED"],
+          "category": ["USER", "SERVICE"]
+        }
       },
       "ModifyModelGroupDetails": {
         "attributes": [
@@ -67531,6 +68299,15 @@
             "jobShapeConfigDetails"
           ]
         ],
+        "enums": {
+          "job_infrastructure_type": [
+            "STANDALONE",
+            "ME_STANDALONE",
+            "MULTI_NODE",
+            "EMPTY",
+            "MANAGED_COMPUTE_CLUSTER"
+          ]
+        },
         "discriminator": "JobInfrastructureConfigurationDetails"
       },
       "MultiNodeJobNodeConfigurationDetails": {
@@ -67549,6 +68326,10 @@
             "jobNodeGroupConfigurationDetailsList"
           ]
         ],
+        "enums": {
+          "job_node_type": ["MULTI_NODE"],
+          "startup_order": ["IN_ORDER", "IN_PARALLEL"]
+        },
         "discriminator": "JobNodeConfigurationDetails"
       },
       "NodeGroupDetails": {
@@ -67556,7 +68337,16 @@
           ["name", "str", "name"],
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "NotebookSession": {
         "attributes": [
@@ -67591,7 +68381,18 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "INACTIVE",
+            "UPDATING"
+          ]
+        }
       },
       "NotebookSessionConfigDetails": {
         "attributes": [
@@ -67652,7 +68453,10 @@
           ["ocpus", "float", "ocpus"],
           ["memory_in_gbs", "float", "memoryInGBs"],
           ["cpu_baseline", "str", "cpuBaseline"]
-        ]
+        ],
+        "enums": {
+          "cpu_baseline": ["BASELINE_1_8", "BASELINE_1_2", "BASELINE_1_1"]
+        }
       },
       "NotebookSessionShapeSummary": {
         "attributes": [
@@ -67660,7 +68464,17 @@
           ["core_count", "int", "coreCount"],
           ["memory_in_gbs", "int", "memoryInGBs"],
           ["shape_series", "str", "shapeSeries"]
-        ]
+        ],
+        "enums": {
+          "shape_series": [
+            "AMD_ROME",
+            "INTEL_SKYLAKE",
+            "NVIDIA_GPU",
+            "GENERIC",
+            "LEGACY",
+            "ARM"
+          ]
+        }
       },
       "NotebookSessionSummary": {
         "attributes": [
@@ -67684,7 +68498,18 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "FAILED",
+            "INACTIVE",
+            "UPDATING"
+          ]
+        }
       },
       "OSSModelArtifactReferenceDetails": {
         "attributes": [
@@ -67697,6 +68522,9 @@
           ["bucket_name", "str", "bucketName"],
           ["prefix", "str", "prefix"]
         ],
+        "strictEnums": {
+          "model_artifact_reference_type": ["OSS"]
+        },
         "discriminator": "ModelArtifactReferenceDetails"
       },
       "ObjectStorageBucketInstanceComponent": {
@@ -67707,6 +68535,16 @@
           ["namespace", "str", "namespace"],
           ["bucket_id", "str", "bucketId"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_MODEL_DEPLOYMENT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_OBJECT",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER",
+            "DATA_SCIENCE_SCHEDULE",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "InstanceComponent"
       },
       "ObjectStorageMountConfigurationDetails": {
@@ -67718,6 +68556,9 @@
           ["bucket", "str", "bucket"],
           ["prefix", "str", "prefix"]
         ],
+        "enums": {
+          "storage_type": ["FILE_STORAGE", "OBJECT_STORAGE"]
+        },
         "discriminator": "StorageMountConfigurationDetails"
       },
       "ObjectStorageObjectInstanceComponent": {
@@ -67729,6 +68570,16 @@
           ["namespace", "str", "namespace"],
           ["bucket_name", "str", "bucketName"]
         ],
+        "enums": {
+          "type": [
+            "DATA_SCIENCE_MODEL_DEPLOYMENT",
+            "OBJECT_STORAGE_BUCKET",
+            "OBJECT_STORAGE_OBJECT",
+            "ML_APPLICATION_INSTANCE_INTERNAL_TRIGGER",
+            "DATA_SCIENCE_SCHEDULE",
+            "GENERIC_OCI_RESOURCE"
+          ]
+        },
         "discriminator": "InstanceComponent"
       },
       "OcirContainerJobEnvironmentConfigurationDetails": {
@@ -67740,6 +68591,9 @@
           ["image_digest", "str", "imageDigest"],
           ["image_signature_id", "str", "imageSignatureId"]
         ],
+        "enums": {
+          "job_environment_type": ["OCIR_CONTAINER"]
+        },
         "discriminator": "JobEnvironmentConfigurationDetails"
       },
       "OcirModelDeploymentEnvironmentConfigurationDetails": {
@@ -67769,6 +68623,9 @@
             "customHttpEndpoints"
           ]
         ],
+        "enums": {
+          "environment_configuration_type": ["DEFAULT", "OCIR_CONTAINER"]
+        },
         "discriminator": "ModelDeploymentEnvironmentConfigurationDetails"
       },
       "PatchInsertNewMemberModels": {
@@ -67776,10 +68633,16 @@
           ["operation", "str", "operation"],
           ["values", "list[MemberModelDetails]", "values"]
         ],
+        "strictEnums": {
+          "operation": ["INSERT", "REMOVE"]
+        },
         "discriminator": "PatchInstruction"
       },
       "PatchInstruction": {
         "attributes": [["operation", "str", "operation"]],
+        "strictEnums": {
+          "operation": ["INSERT", "REMOVE"]
+        },
         "discriminator": {
           "field": "operation",
           "values": {
@@ -67797,6 +68660,9 @@
           ["operation", "str", "operation"],
           ["values", "list[MemberModelDetails]", "values"]
         ],
+        "strictEnums": {
+          "operation": ["INSERT", "REMOVE"]
+        },
         "discriminator": "PatchInstruction"
       },
       "Pipeline": {
@@ -67841,10 +68707,22 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "DELETED"
+          ]
+        }
       },
       "PipelineConfigurationDetails": {
         "attributes": [["type", "str", "type"]],
+        "enums": {
+          "type": ["DEFAULT"]
+        },
         "discriminator": {
           "field": "type",
           "values": {
@@ -67855,6 +68733,9 @@
       },
       "PipelineContainerConfigurationDetails": {
         "attributes": [["container_type", "str", "containerType"]],
+        "enums": {
+          "container_type": ["OCIR_CONTAINER"]
+        },
         "discriminator": {
           "field": "containerType",
           "values": {
@@ -67892,6 +68773,9 @@
           ["is_artifact_uploaded", "bool", "isArtifactUploaded"],
           ["step_parameters", "PipelineStepParameterDetails", "stepParameters"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepDetails"
       },
       "PipelineContainerStepRun": {
@@ -67903,6 +68787,20 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"],
+          "lifecycle_state": [
+            "WAITING",
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETED",
+            "SKIPPED"
+          ]
+        },
         "discriminator": "PipelineStepRun"
       },
       "PipelineContainerStepUpdateDetails": {
@@ -67927,6 +68825,9 @@
           ],
           ["step_parameters", "PipelineStepParameterDetails", "stepParameters"]
         ],
+        "strictEnums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepUpdateDetails"
       },
       "PipelineCustomScriptStepDetails": {
@@ -67953,6 +68854,9 @@
           ["is_artifact_uploaded", "bool", "isArtifactUploaded"],
           ["step_parameters", "PipelineStepParameterDetails", "stepParameters"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepDetails"
       },
       "PipelineCustomScriptStepRun": {
@@ -67964,6 +68868,20 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"],
+          "lifecycle_state": [
+            "WAITING",
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETED",
+            "SKIPPED"
+          ]
+        },
         "discriminator": "PipelineStepRun"
       },
       "PipelineCustomScriptStepUpdateDetails": {
@@ -67988,6 +68906,9 @@
           ],
           ["step_parameters", "PipelineStepParameterDetails", "stepParameters"]
         ],
+        "strictEnums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepUpdateDetails"
       },
       "PipelineDataflowConfigurationDetails": {
@@ -68028,6 +68949,9 @@
             "stepDataflowConfigurationDetails"
           ]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepDetails"
       },
       "PipelineDataflowStepRun": {
@@ -68040,6 +68964,20 @@
           ["lifecycle_details", "str", "lifecycleDetails"],
           ["dataflow_run_id", "str", "dataflowRunId"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"],
+          "lifecycle_state": [
+            "WAITING",
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETED",
+            "SKIPPED"
+          ]
+        },
         "discriminator": "PipelineStepRun"
       },
       "PipelineDataflowStepUpdateDetails": {
@@ -68058,6 +68996,9 @@
             "stepDataflowConfigurationDetails"
           ]
         ],
+        "strictEnums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepUpdateDetails"
       },
       "PipelineDefaultConfigurationDetails": {
@@ -68067,6 +69008,9 @@
           ["environment_variables", "dict(str, str)", "environmentVariables"],
           ["command_line_arguments", "str", "commandLineArguments"]
         ],
+        "enums": {
+          "type": ["DEFAULT"]
+        },
         "discriminator": "PipelineConfigurationDetails"
       },
       "PipelineDefaultStepParameterDetails": {
@@ -68074,6 +69018,9 @@
           ["parameter_type", "str", "parameterType"],
           ["output", "PipelineStepOutputParameterDetails", "output"]
         ],
+        "enums": {
+          "parameter_type": ["DEFAULT"]
+        },
         "discriminator": "PipelineStepParameterDetails"
       },
       "PipelineInfrastructureConfigurationDetails": {
@@ -68100,6 +69047,9 @@
           ["parameter_names", "list[str]", "parameterNames"],
           ["output_file", "str", "outputFile"]
         ],
+        "enums": {
+          "output_parameter_type": ["JSON"]
+        },
         "discriminator": "PipelineStepOutputParameterDetails"
       },
       "PipelineLogConfigurationDetails": {
@@ -68125,6 +69075,9 @@
           ["step_run_name", "str", "stepRunName"],
           ["step_parameters", "PipelineStepParameterDetails", "stepParameters"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepDetails"
       },
       "PipelineMLJobStepRun": {
@@ -68138,6 +69091,20 @@
           ["job_run_id", "str", "jobRunId"],
           ["step_run_name", "str", "stepRunName"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"],
+          "lifecycle_state": [
+            "WAITING",
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETED",
+            "SKIPPED"
+          ]
+        },
         "discriminator": "PipelineStepRun"
       },
       "PipelineMLJobStepUpdateDetails": {
@@ -68153,6 +69120,9 @@
           ["step_run_name", "str", "stepRunName"],
           ["step_parameters", "PipelineStepParameterDetails", "stepParameters"]
         ],
+        "strictEnums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": "PipelineStepUpdateDetails"
       },
       "PipelineOcirContainerConfigurationDetails": {
@@ -68164,6 +69134,9 @@
           ["image_digest", "str", "imageDigest"],
           ["image_signature_id", "str", "imageSignatureId"]
         ],
+        "enums": {
+          "container_type": ["OCIR_CONTAINER"]
+        },
         "discriminator": "PipelineContainerConfigurationDetails"
       },
       "PipelineRun": {
@@ -68221,7 +69194,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "PipelineRunLogDetails": {
         "attributes": [
@@ -68246,7 +69231,19 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETING",
+            "DELETED"
+          ]
+        }
       },
       "PipelineShapeConfigDetails": {
         "attributes": [
@@ -68255,7 +69252,10 @@
           ["cpu_baseline", "str", "cpuBaseline"],
           ["ocpus_parameterized", "str", "ocpusParameterized"],
           ["memory_in_gbs_parameterized", "str", "memoryInGBsParameterized"]
-        ]
+        ],
+        "enums": {
+          "cpu_baseline": ["BASELINE_1_8", "BASELINE_1_2", "BASELINE_1_1"]
+        }
       },
       "PipelineStepConfigurationDetails": {
         "attributes": [
@@ -68276,6 +69276,9 @@
             "stepConfigurationDetails"
           ]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": {
           "field": "stepType",
           "values": {
@@ -68289,6 +69292,9 @@
       },
       "PipelineStepOutputParameterDetails": {
         "attributes": [["output_parameter_type", "str", "outputParameterType"]],
+        "enums": {
+          "output_parameter_type": ["JSON"]
+        },
         "discriminator": {
           "field": "outputParameterType",
           "values": {
@@ -68329,6 +69335,9 @@
       },
       "PipelineStepParameterDetails": {
         "attributes": [["parameter_type", "str", "parameterType"]],
+        "enums": {
+          "parameter_type": ["DEFAULT"]
+        },
         "discriminator": {
           "field": "parameterType",
           "values": {
@@ -68346,6 +69355,20 @@
           ["lifecycle_state", "str", "lifecycleState"],
           ["lifecycle_details", "str", "lifecycleDetails"]
         ],
+        "enums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"],
+          "lifecycle_state": [
+            "WAITING",
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "CANCELING",
+            "CANCELED",
+            "DELETED",
+            "SKIPPED"
+          ]
+        },
         "discriminator": {
           "field": "stepType",
           "values": {
@@ -68368,6 +69391,9 @@
             "stepConfigurationDetails"
           ]
         ],
+        "strictEnums": {
+          "step_type": ["ML_JOB", "CUSTOM_SCRIPT", "CONTAINER", "DATAFLOW"]
+        },
         "discriminator": {
           "field": "stepType",
           "values": {
@@ -68392,7 +69418,16 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "DELETED"
+          ]
+        }
       },
       "PredefinedExpressionThresholdScalingConfiguration": {
         "attributes": [
@@ -68401,6 +69436,9 @@
           ["instance_count_adjustment", "int", "instanceCountAdjustment"],
           ["threshold", "int", "threshold"]
         ],
+        "enums": {
+          "scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": "ScalingConfiguration"
       },
       "PredefinedMetricExpressionRule": {
@@ -68418,6 +69456,13 @@
             "scaleOutConfiguration"
           ]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "PREDEFINED_EXPRESSION",
+            "CUSTOM_EXPRESSION"
+          ],
+          "metric_type": ["CPU_UTILIZATION", "MEMORY_UTILIZATION"]
+        },
         "discriminator": "MetricExpressionRule"
       },
       "PredictionEndpointDetails": {
@@ -68444,7 +69489,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETING", "DELETED"]
+        }
       },
       "ProjectSummary": {
         "attributes": [
@@ -68458,7 +69506,10 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": ["ACTIVE", "DELETING", "DELETED"]
+        }
       },
       "ResourceLimitConfiguration": {
         "attributes": [
@@ -68481,14 +69532,26 @@
           ["delete_state", "str", "deleteState"],
           ["delete_state_details", "str", "deleteStateDetails"],
           ["time_deletion_scheduled", "datetime", "timeDeletionScheduled"]
-        ]
+        ],
+        "enums": {
+          "archive_state": ["PENDING", "FAILED", "SUCCEEDED"],
+          "delete_state": ["PENDING", "FAILED", "SUCCEEDED"]
+        }
       },
       "RetentionSetting": {
         "attributes": [
           ["archive_after_days", "int", "archiveAfterDays"],
           ["delete_after_days", "int", "deleteAfterDays"],
           ["customer_notification_type", "str", "customerNotificationType"]
-        ]
+        ],
+        "enums": {
+          "customer_notification_type": [
+            "NONE",
+            "ALL",
+            "ON_FAILURE",
+            "ON_SUCCESS"
+          ]
+        }
       },
       "ScalingConfiguration": {
         "attributes": [
@@ -68496,6 +69559,9 @@
           ["pending_duration", "str", "pendingDuration"],
           ["instance_count_adjustment", "int", "instanceCountAdjustment"]
         ],
+        "enums": {
+          "scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": {
           "field": "scalingConfigurationType",
           "values": {
@@ -68507,6 +69573,9 @@
       },
       "ScalingPolicy": {
         "attributes": [["policy_type", "str", "policyType"]],
+        "enums": {
+          "policy_type": ["FIXED_SIZE", "AUTOSCALING"]
+        },
         "discriminator": {
           "field": "policyType",
           "values": {
@@ -68537,10 +69606,24 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "INACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ScheduleAction": {
         "attributes": [["action_type", "str", "actionType"]],
+        "enums": {
+          "action_type": ["HTTP"]
+        },
         "discriminator": {
           "field": "actionType",
           "values": {
@@ -68556,6 +69639,9 @@
           ["time_end", "datetime", "timeEnd"],
           ["cron_expression", "str", "cronExpression"]
         ],
+        "enums": {
+          "trigger_type": ["CRON", "INTERVAL", "ICAL"]
+        },
         "discriminator": "ScheduleTrigger"
       },
       "ScheduleHttpAction": {
@@ -68563,10 +69649,20 @@
           ["action_type", "str", "actionType"],
           ["action_details", "ScheduleHttpActionDetails", "actionDetails"]
         ],
+        "enums": {
+          "action_type": ["HTTP"]
+        },
         "discriminator": "ScheduleAction"
       },
       "ScheduleHttpActionDetails": {
         "attributes": [["http_action_type", "str", "httpActionType"]],
+        "enums": {
+          "http_action_type": [
+            "CREATE_JOB_RUN",
+            "CREATE_PIPELINE_RUN",
+            "INVOKE_ML_APPLICATION_PROVIDER_TRIGGER"
+          ]
+        },
         "discriminator": {
           "field": "httpActionType",
           "values": {
@@ -68584,6 +69680,9 @@
           ["time_end", "datetime", "timeEnd"],
           ["recurrence", "str", "recurrence"]
         ],
+        "enums": {
+          "trigger_type": ["CRON", "INTERVAL", "ICAL"]
+        },
         "discriminator": "ScheduleTrigger"
       },
       "ScheduleIntervalTrigger": {
@@ -68596,6 +69695,10 @@
           ["initial_jitter_in_minutes", "int", "initialJitterInMinutes"],
           ["is_random_start_time", "bool", "isRandomStartTime"]
         ],
+        "enums": {
+          "trigger_type": ["CRON", "INTERVAL", "ICAL"],
+          "frequency": ["HOURLY", "DAILY"]
+        },
         "discriminator": "ScheduleTrigger"
       },
       "ScheduleLogDetails": {
@@ -68618,7 +69721,18 @@
           ["freeform_tags", "dict(str, str)", "freeformTags"],
           ["defined_tags", "dict(str, dict(str, object))", "definedTags"],
           ["system_tags", "dict(str, dict(str, object))", "systemTags"]
-        ]
+        ],
+        "enums": {
+          "lifecycle_state": [
+            "CREATING",
+            "ACTIVE",
+            "INACTIVE",
+            "UPDATING",
+            "DELETING",
+            "DELETED",
+            "FAILED"
+          ]
+        }
       },
       "ScheduleTrigger": {
         "attributes": [
@@ -68626,6 +69740,9 @@
           ["time_start", "datetime", "timeStart"],
           ["time_end", "datetime", "timeEnd"]
         ],
+        "enums": {
+          "trigger_type": ["CRON", "INTERVAL", "ICAL"]
+        },
         "discriminator": {
           "field": "triggerType",
           "values": {
@@ -68656,6 +69773,13 @@
             "environmentConfigurationDetails"
           ]
         ],
+        "enums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ]
+        },
         "discriminator": "ModelDeploymentConfigurationDetails"
       },
       "SingleModelDeploymentFlexConfigurationDetails": {
@@ -68677,6 +69801,13 @@
             "environmentConfigurationDetails"
           ]
         ],
+        "enums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ]
+        },
         "discriminator": "ModelDeploymentConfigurationDetails"
       },
       "StackedModelGroupDetails": {
@@ -68689,6 +69820,9 @@
           ],
           ["base_model_id", "str", "baseModelId"]
         ],
+        "enums": {
+          "type": ["HOMOGENEOUS", "HETEROGENEOUS", "STACKED"]
+        },
         "discriminator": "ModelGroupDetails"
       },
       "StandaloneJobInfrastructureConfigurationDetails": {
@@ -68704,6 +69838,15 @@
             "jobShapeConfigDetails"
           ]
         ],
+        "enums": {
+          "job_infrastructure_type": [
+            "STANDALONE",
+            "ME_STANDALONE",
+            "MULTI_NODE",
+            "EMPTY",
+            "MANAGED_COMPUTE_CLUSTER"
+          ]
+        },
         "discriminator": "JobInfrastructureConfigurationDetails"
       },
       "StorageMountConfigurationDetails": {
@@ -68712,6 +69855,9 @@
           ["destination_directory_name", "str", "destinationDirectoryName"],
           ["destination_path", "str", "destinationPath"]
         ],
+        "enums": {
+          "storage_type": ["FILE_STORAGE", "OBJECT_STORAGE"]
+        },
         "discriminator": {
           "field": "storageType",
           "values": {
@@ -68738,6 +69884,9 @@
           ["threshold", "float", "threshold"],
           ["metric_namespace", "str", "metricNamespace"]
         ],
+        "enums": {
+          "target_scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": "TargetScalingConfiguration"
       },
       "TargetCustomMetricExpressionRule": {
@@ -68749,6 +69898,12 @@
             "scaleConfiguration"
           ]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "TARGET_PREDEFINED_EXPRESSION",
+            "TARGET_CUSTOM_EXPRESSION"
+          ]
+        },
         "discriminator": "ManagedComputeClusterWorkloadMetricExpressionRule"
       },
       "TargetPredefinedExpressionThresholdScalingConfiguration": {
@@ -68760,6 +69915,9 @@
           ],
           ["threshold", "float", "threshold"]
         ],
+        "enums": {
+          "target_scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": "TargetScalingConfiguration"
       },
       "TargetPredefinedMetricExpressionRule": {
@@ -68772,6 +69930,13 @@
             "scaleConfiguration"
           ]
         ],
+        "enums": {
+          "metric_expression_rule_type": [
+            "TARGET_PREDEFINED_EXPRESSION",
+            "TARGET_CUSTOM_EXPRESSION"
+          ],
+          "metric_type": ["CPU_UTILIZATION", "MEMORY_UTILIZATION"]
+        },
         "discriminator": "ManagedComputeClusterWorkloadMetricExpressionRule"
       },
       "TargetScalingConfiguration": {
@@ -68782,6 +69947,9 @@
             "targetScalingConfigurationType"
           ]
         ],
+        "enums": {
+          "target_scaling_configuration_type": ["THRESHOLD", "QUERY"]
+        },
         "discriminator": {
           "field": "targetScalingConfigurationType",
           "values": {
@@ -68799,6 +69967,9 @@
           ["minimum_instance_count", "int", "minimumInstanceCount"],
           ["initial_instance_count", "int", "initialInstanceCount"]
         ],
+        "enums": {
+          "auto_scaling_policy_type": ["THRESHOLD"]
+        },
         "discriminator": "AutoScalingPolicyDetails"
       },
       "TriggerMlApplicationInstanceViewFlowDetails": {
@@ -68821,6 +69992,9 @@
       },
       "UpdateComputeConfigurationDetails": {
         "attributes": [["compute_type", "str", "computeType"]],
+        "strictEnums": {
+          "compute_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": {
           "field": "computeType",
           "values": {
@@ -68838,10 +70012,16 @@
           ],
           ["environment_variables", "dict(str, str)", "environmentVariables"]
         ],
+        "strictEnums": {
+          "environment_configuration_type": ["DEFAULT", "OCIR_CONTAINER"]
+        },
         "discriminator": "UpdateModelDeploymentEnvironmentConfigurationDetails"
       },
       "UpdateInfrastructureConfigurationDetails": {
         "attributes": [["infrastructure_type", "str", "infrastructureType"]],
+        "strictEnums": {
+          "infrastructure_type": ["INSTANCE_POOL"]
+        },
         "discriminator": {
           "field": "infrastructureType",
           "values": {
@@ -68862,6 +70042,9 @@
           ["bandwidth_mbps", "int", "bandwidthMbps"],
           ["maximum_bandwidth_mbps", "int", "maximumBandwidthMbps"]
         ],
+        "strictEnums": {
+          "infrastructure_type": ["INSTANCE_POOL"]
+        },
         "discriminator": "UpdateInfrastructureConfigurationDetails"
       },
       "UpdateManagedComputeClusterConfigurationDetails": {
@@ -68878,6 +70061,9 @@
             "scalingPolicy"
           ]
         ],
+        "strictEnums": {
+          "compute_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": "UpdateComputeConfigurationDetails"
       },
       "UpdateManagedComputeClusterInstanceConfigurationDetails": {
@@ -68912,6 +70098,9 @@
             "networkConfiguration"
           ]
         ],
+        "strictEnums": {
+          "infrastructure_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": "UpdateModelDeployInfrastructureConfigurationDetails"
       },
       "UpdateModelConfigurationDetails": {
@@ -68930,6 +70119,9 @@
       },
       "UpdateModelDeployInfrastructureConfigurationDetails": {
         "attributes": [["infrastructure_type", "str", "infrastructureType"]],
+        "strictEnums": {
+          "infrastructure_type": ["MANAGED_COMPUTE_CLUSTER"]
+        },
         "discriminator": {
           "field": "infrastructureType",
           "values": {
@@ -68940,6 +70132,13 @@
       },
       "UpdateModelDeploymentConfigurationDetails": {
         "attributes": [["deployment_type", "str", "deploymentType"]],
+        "strictEnums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ]
+        },
         "discriminator": {
           "field": "deploymentType",
           "values": {
@@ -68958,6 +70157,9 @@
             "environmentConfigurationType"
           ]
         ],
+        "strictEnums": {
+          "environment_configuration_type": ["DEFAULT", "OCIR_CONTAINER"]
+        },
         "discriminator": {
           "field": "environmentConfigurationType",
           "values": {
@@ -68990,6 +70192,14 @@
             "environmentConfigurationDetails"
           ]
         ],
+        "strictEnums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ],
+          "update_type": ["ZDT", "LIVE"]
+        },
         "discriminator": "UpdateModelDeploymentConfigurationDetails"
       },
       "UpdateOcirModelDeploymentEnvironmentConfigurationDetails": {
@@ -69014,6 +70224,9 @@
             "customHttpEndpoints"
           ]
         ],
+        "strictEnums": {
+          "environment_configuration_type": ["DEFAULT", "OCIR_CONTAINER"]
+        },
         "discriminator": "UpdateModelDeploymentEnvironmentConfigurationDetails"
       },
       "UpdateSingleModelConfigurationDetails": {
@@ -69036,6 +70249,13 @@
             "environmentConfigurationDetails"
           ]
         ],
+        "strictEnums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ]
+        },
         "discriminator": "UpdateModelDeploymentConfigurationDetails"
       },
       "UpdateSingleModelDeploymentFlexConfigurationDetails": {
@@ -69057,6 +70277,13 @@
             "environmentConfigurationDetails"
           ]
         ],
+        "strictEnums": {
+          "deployment_type": [
+            "SINGLE_MODEL",
+            "MODEL_GROUP",
+            "SINGLE_MODEL_FLEX"
+          ]
+        },
         "discriminator": "UpdateModelDeploymentConfigurationDetails"
       },
       "WorkRequest": {
@@ -69070,7 +70297,75 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "NOTEBOOK_SESSION_CREATE",
+            "NOTEBOOK_SESSION_DELETE",
+            "NOTEBOOK_SESSION_ACTIVATE",
+            "NOTEBOOK_SESSION_DEACTIVATE",
+            "MODELVERSIONSET_DELETE",
+            "EXPORT_MODEL_ARTIFACT",
+            "IMPORT_MODEL_ARTIFACT",
+            "MODEL_DEPLOYMENT_CREATE",
+            "MODEL_DEPLOYMENT_DELETE",
+            "MODEL_DEPLOYMENT_ACTIVATE",
+            "MODEL_DEPLOYMENT_DEACTIVATE",
+            "MODEL_DEPLOYMENT_UPDATE",
+            "PROJECT_DELETE",
+            "WORKREQUEST_CANCEL",
+            "JOB_DELETE",
+            "PIPELINE_CREATE",
+            "PIPELINE_DELETE",
+            "PIPELINE_RUN_CREATE",
+            "PIPELINE_RUN_CANCEL",
+            "PIPELINE_RUN_DELETE",
+            "ML_APPLICATION_PACKAGE_UPLOAD",
+            "ML_APPLICATION_TRIGGER_START",
+            "ML_APPLICATION_IMPLEMENTATION_DELETE",
+            "ML_APPLICATION_IMPLEMENTATION_UPDATE",
+            "ML_APPLICATION_IMPLEMENTATION_MOVE",
+            "ML_APPLICATION_INSTANCE_CREATE",
+            "ML_APPLICATION_INSTANCE_UPDATE",
+            "ML_APPLICATION_INSTANCE_DELETE",
+            "ML_APPLICATION_INSTANCE_MOVE",
+            "ML_APPLICATION_INSTANCE_VIEW_CREATE",
+            "ML_APPLICATION_INSTANCE_VIEW_UPDATE",
+            "ML_APPLICATION_INSTANCE_VIEW_DELETE",
+            "ML_APPLICATION_INSTANCE_VIEW_UPGRADE",
+            "ML_APPLICATION_INSTANCE_VIEW_MOVE",
+            "PRIVATE_ENDPOINT_CREATE",
+            "PRIVATE_ENDPOINT_DELETE",
+            "PRIVATE_ENDPOINT_MOVE",
+            "PRIVATE_ENDPOINT_UPDATE",
+            "SCHEDULE_CREATE",
+            "SCHEDULE_UPDATE",
+            "SCHEDULE_DELETE",
+            "SCHEDULE_MOVE",
+            "SCHEDULE_ACTIVATE",
+            "SCHEDULE_DEACTIVATE",
+            "REGISTER_MODEL_ARTIFACT",
+            "RESTORE_ARCHIVED_MODEL",
+            "COMPUTE_TARGET_CREATE",
+            "COMPUTE_TARGET_UPDATE",
+            "COMPUTE_TARGET_DELETE",
+            "MODEL_GROUP_CREATE",
+            "MODEL_GROUP_UPDATE",
+            "MODEL_GROUP_DELETE",
+            "MODEL_GROUP_VERSION_HISTORY_DELETE",
+            "CREATE_MODEL_ARTIFACT_SIGNATURE",
+            "VERIFY_MODEL_ARTIFACT_SIGNATURE"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "PARTIALLY_SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkRequestError": {
         "attributes": [
@@ -69091,7 +70386,16 @@
           ["entity_type", "str", "entityType"],
           ["identifier", "str", "identifier"],
           ["entity_uri", "str", "entityUri"]
-        ]
+        ],
+        "enums": {
+          "action_type": [
+            "CREATED",
+            "UPDATED",
+            "DELETED",
+            "RELATED",
+            "IN_PROGRESS"
+          ]
+        }
       },
       "WorkRequestSummary": {
         "attributes": [
@@ -69104,10 +70408,81 @@
           ["time_accepted", "datetime", "timeAccepted"],
           ["time_started", "datetime", "timeStarted"],
           ["time_finished", "datetime", "timeFinished"]
-        ]
+        ],
+        "enums": {
+          "operation_type": [
+            "NOTEBOOK_SESSION_CREATE",
+            "NOTEBOOK_SESSION_DELETE",
+            "NOTEBOOK_SESSION_ACTIVATE",
+            "NOTEBOOK_SESSION_DEACTIVATE",
+            "MODELVERSIONSET_DELETE",
+            "EXPORT_MODEL_ARTIFACT",
+            "IMPORT_MODEL_ARTIFACT",
+            "MODEL_DEPLOYMENT_CREATE",
+            "MODEL_DEPLOYMENT_DELETE",
+            "MODEL_DEPLOYMENT_ACTIVATE",
+            "MODEL_DEPLOYMENT_DEACTIVATE",
+            "MODEL_DEPLOYMENT_UPDATE",
+            "PROJECT_DELETE",
+            "WORKREQUEST_CANCEL",
+            "JOB_DELETE",
+            "PIPELINE_CREATE",
+            "PIPELINE_DELETE",
+            "PIPELINE_RUN_CREATE",
+            "PIPELINE_RUN_CANCEL",
+            "PIPELINE_RUN_DELETE",
+            "ML_APPLICATION_PACKAGE_UPLOAD",
+            "ML_APPLICATION_TRIGGER_START",
+            "ML_APPLICATION_IMPLEMENTATION_DELETE",
+            "ML_APPLICATION_IMPLEMENTATION_UPDATE",
+            "ML_APPLICATION_IMPLEMENTATION_MOVE",
+            "ML_APPLICATION_INSTANCE_CREATE",
+            "ML_APPLICATION_INSTANCE_UPDATE",
+            "ML_APPLICATION_INSTANCE_DELETE",
+            "ML_APPLICATION_INSTANCE_MOVE",
+            "ML_APPLICATION_INSTANCE_VIEW_CREATE",
+            "ML_APPLICATION_INSTANCE_VIEW_UPDATE",
+            "ML_APPLICATION_INSTANCE_VIEW_DELETE",
+            "ML_APPLICATION_INSTANCE_VIEW_UPGRADE",
+            "ML_APPLICATION_INSTANCE_VIEW_MOVE",
+            "PRIVATE_ENDPOINT_CREATE",
+            "PRIVATE_ENDPOINT_DELETE",
+            "PRIVATE_ENDPOINT_MOVE",
+            "PRIVATE_ENDPOINT_UPDATE",
+            "SCHEDULE_CREATE",
+            "SCHEDULE_UPDATE",
+            "SCHEDULE_DELETE",
+            "SCHEDULE_MOVE",
+            "SCHEDULE_ACTIVATE",
+            "SCHEDULE_DEACTIVATE",
+            "REGISTER_MODEL_ARTIFACT",
+            "RESTORE_ARCHIVED_MODEL",
+            "COMPUTE_TARGET_CREATE",
+            "COMPUTE_TARGET_UPDATE",
+            "COMPUTE_TARGET_DELETE",
+            "MODEL_GROUP_CREATE",
+            "MODEL_GROUP_UPDATE",
+            "MODEL_GROUP_DELETE",
+            "MODEL_GROUP_VERSION_HISTORY_DELETE",
+            "CREATE_MODEL_ARTIFACT_SIGNATURE",
+            "VERIFY_MODEL_ARTIFACT_SIGNATURE"
+          ],
+          "status": [
+            "ACCEPTED",
+            "IN_PROGRESS",
+            "FAILED",
+            "SUCCEEDED",
+            "PARTIALLY_SUCCEEDED",
+            "CANCELING",
+            "CANCELED"
+          ]
+        }
       },
       "WorkloadConfigurationDetails": {
         "attributes": [["workload_type", "str", "workloadType"]],
+        "enums": {
+          "workload_type": ["MODEL_DEPLOYMENT", "JOB_RUN"]
+        },
         "discriminator": {
           "field": "workloadType",
           "values": {

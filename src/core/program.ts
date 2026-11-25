@@ -739,6 +739,7 @@ export function serializeSdkBody(
 }
 
 function serializedTypeName(value: unknown): string {
+  if (value === null || value === undefined) return "NoneType";
   if (value instanceof ProgramModel) return value.name;
   if (Array.isArray(value)) return pyTuples.has(value) ? "tuple" : "list";
   if (typeof value === "number")
@@ -2419,6 +2420,20 @@ export function runProgram(
         } catch {
           throw new ProgramUnsupported("UnicodeDecodeError");
         }
+    }
+    if (
+      method === "get" &&
+      (Array.isArray(obj) ||
+        obj === null ||
+        obj === undefined ||
+        typeof obj === "string" ||
+        typeof obj === "number" ||
+        typeof obj === "boolean")
+    ) {
+      throw new ProgramRaise(
+        "AttributeError",
+        `'${serializedTypeName(obj)}' object has no attribute 'get'`,
+      );
     }
     throw new ProgramUnsupported(`${method}()`);
   };

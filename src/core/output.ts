@@ -2,6 +2,7 @@
 // call; otherwise the data/etag/opc-next-page document, filtered by --query (or an rc canned
 // query) and printed as JSON (keys sorted), a table, or --raw-output text.
 import { Exit, type Invocation } from "../lib/io.ts";
+import { formatAsciiTable } from "../utils/asciiTable.ts";
 import { inheritedDiscriminator, type Models } from "./camelize.ts";
 import type { OperationResult } from "./operation.ts";
 import {
@@ -390,6 +391,86 @@ function searchQuery(
   }
 }
 
+class TableRenderError extends Error {
+  constructor(
+    readonly pythonType: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+function pyTypeName(value: unknown): string {
+  if (value === null || value === undefined) return "NoneType";
+  if (typeof value === "boolean") return "bool";
+  if (typeof value === "number")
+    return Number.isInteger(value) ? "int" : "float";
+  if (typeof value === "string") return "str";
+  if (Array.isArray(value)) return "list";
+  return "dict";
+}
+
+function renderDisplayValue(
+  io: Invocation,
+  displayDict: unknown,
+  expression: CompiledExpression | null,
+  options: OutputOptions,
+): boolean {
+  const hasQuery = expression !== null;
+  const displayData = hasQuery
+    ? searchQuery(io, expression, displayDict)
+    : displayDict;
+  if (displayData === null || displayData === undefined) {
+    io.err("Query returned empty result, no output to show.\n");
+    return false;
+  }
+  const format = options.output ?? "json";
+  if (format === "table") {
+    // oci_cli.cli_util.render evaluates `if 'data' in display_data and not expression:`
+    // which raises TypeError when display_data is non-iterable (int, float, bool).
+    if (typeof displayData === "number" || typeof displayData === "boolean") {
+      io.err(
+        `TypeError: argument of type '${pyTypeName(displayData)}' is not iterable\n`,
+      );
+      throw new Exit(1);
+    }
+    let tableData: unknown = displayData;
+    if (!hasQuery) {
+      if (isPlainObject(displayData) && "data" in displayData) {
+        tableData = displayData.data;
+      } else if (
+        typeof displayData === "string" &&
+        displayData.includes("data")
+      ) {
+        io.err("TypeError: string indices must be integers, not 'str'\n");
+        throw new Exit(1);
+      } else if (Array.isArray(displayData) && displayData.includes("data")) {
+        io.err("TypeError: list indices must be integers or slices, not str\n");
+        throw new Exit(1);
+      }
+    }
+    try {
+      io.out(renderTable(tableData));
+    } catch (err) {
+      if (err instanceof TableRenderError) {
+        io.err(`${err.pythonType}: ${err.message}\n`);
+        throw new Exit(1);
+      }
+      throw err;
+    }
+    if (isPlainObject(displayDict) && "data" in displayDict) {
+      for (const [key, value] of Object.entries(displayDict)) {
+        if (key !== "data") io.err(`${key}: ${String(value)}\n`);
+      }
+    }
+  } else if (options.rawOutput && typeof displayData === "string") {
+    io.out(`${displayData}\n`);
+  } else {
+    io.out(`${JSON.stringify(sortJson(displayData), null, 2)}\n`);
+  }
+  return true;
+}
+
 /**
  * Matches `oci_cli.cli_util.render(data, headers, ctx, display_all_headers=False,
  * nest_data_in_data_attribute=True)`.
@@ -426,31 +507,8 @@ export function renderCliData(
     }
   }
   if (isDisplayTruthy(displayDict)) {
-    const hasQuery = expression !== null;
-    const displayData = hasQuery
-      ? searchQuery(io, expression, displayDict)
-      : displayDict;
-    if (displayData === null) {
-      io.err("Query returned empty result, no output to show.\n");
-      return;
-    }
-    const format = options.output ?? "json";
-    if (format === "table") {
-      const tableData =
-        !hasQuery && isPlainObject(displayData) && "data" in displayData
-          ? displayData.data
-          : displayData;
-      io.out(renderTable(tableData));
-      if (isPlainObject(displayDict) && "data" in displayDict) {
-        for (const [key, value] of Object.entries(displayDict)) {
-          if (key !== "data") io.err(`${key}: ${String(value)}\n`);
-        }
-      }
-    } else if (options.rawOutput && typeof displayData === "string") {
-      io.out(`${displayData}\n`);
-    } else {
-      io.out(`${JSON.stringify(sortJson(displayData), null, 2)}\n`);
-    }
+    const printed = renderDisplayValue(io, displayDict, expression, options);
+    if (!printed) return;
   }
   if (isDisplayTruthy(opcNextPage) && renderOpts.hasAllPagesParam) {
     io.err(
@@ -476,29 +534,7 @@ export function renderDocument(
       Object.keys(output).length === 0)
   )
     return true;
-  const hasQuery = expression !== null;
-  const rendered = hasQuery ? searchQuery(io, expression, output) : output;
-  if (rendered === null || (Array.isArray(rendered) && rendered.length === 0)) {
-    io.err("Query returned empty result, no output to show.\n");
-    return false;
-  } else {
-    const format = options.output ?? "json";
-    const tableValue =
-      !hasQuery && isPlainObject(rendered) && "data" in rendered
-        ? rendered.data
-        : rendered;
-    if (format === "table") {
-      io.out(renderTable(tableValue));
-      if (isPlainObject(output) && "data" in output) {
-        for (const [key, value] of Object.entries(output)) {
-          if (key !== "data") io.err(`${key}: ${String(value)}\n`);
-        }
-      }
-    } else if (options.rawOutput && typeof rendered === "string")
-      io.out(`${rendered}\n`);
-    else io.out(`${JSON.stringify(sortJson(rendered), null, 2)}\n`);
-  }
-  return true;
+  return renderDisplayValue(io, output, expression, options);
 }
 
 function compareCodepoints(a: string, b: string): number {
@@ -705,75 +741,92 @@ function formatTableCell(value: unknown, asFloat = false): string {
   return formatPythonRepr(value, asFloat);
 }
 
+/** Matches `oci_cli.cli_util.print_table(data)`. */
 function renderTable(value: unknown): string {
-  type Cell = { value: unknown; asFloat: boolean };
-  const rows: Cell[][] = [];
-  let headers: string[];
-  if (
-    Array.isArray(value) &&
-    value.length > 0 &&
-    value[0] &&
-    typeof value[0] === "object" &&
-    !Array.isArray(value[0])
-  ) {
-    const cols = new Set<string>();
-    for (const entry of value) {
-      if (entry && typeof entry === "object" && !Array.isArray(entry)) {
-        for (const key of Object.keys(entry as Record<string, unknown>))
-          cols.add(key);
+  const tableData: string[][] = [];
+
+  if (typeof value === "string") {
+    tableData.push(["Column1"]);
+    tableData.push([value]);
+  } else if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return "Command returned empty list, no table to display.\n";
+    }
+    const isFloatArr = floatArrays.has(value);
+    const first = value[0];
+    if (typeof first === "string") {
+      tableData.push(["Column1"]);
+      for (const row of value) {
+        tableData.push([formatTableCell(row, isFloatArr)]);
+      }
+    } else if (isPlainObject(first)) {
+      const cols = new Set<string>();
+      for (const entry of value) {
+        if (!isPlainObject(entry)) {
+          throw new TableRenderError(
+            "AttributeError",
+            `'${pyTypeName(entry)}' object has no attribute 'keys'`,
+          );
+        }
+        for (const key of Object.keys(entry)) cols.add(key);
+      }
+      const headers = [...cols].sort(compareCodepoints);
+      tableData.push(headers);
+      for (const entry of value) {
+        const rec = entry as Record<string, unknown>;
+        const isFloatDict = floatDicts.has(rec);
+        const floats = floatFields.get(rec);
+        tableData.push(
+          headers.map((key) =>
+            Object.hasOwn(rec, key)
+              ? formatTableCell(
+                  rec[key],
+                  isFloatDict || Boolean(floats?.has(key)),
+                )
+              : "",
+          ),
+        );
+      }
+    } else if (Array.isArray(first)) {
+      const headers = Array.from(
+        { length: first.length },
+        (_, i) => `Column${i + 1}`,
+      );
+      tableData.push(headers);
+      for (const row of value) {
+        if (Array.isArray(row)) {
+          const rowIsFloat = floatArrays.has(row);
+          tableData.push(row.map((cell) => formatTableCell(cell, rowIsFloat)));
+        } else if (typeof row === "string") {
+          tableData.push([...row]);
+        } else if (isPlainObject(row)) {
+          tableData.push(Object.keys(row));
+        } else {
+          throw new TableRenderError(
+            "TypeError",
+            `object of type '${pyTypeName(row)}' has no len()`,
+          );
+        }
+      }
+    } else {
+      tableData.push(["Column1"]);
+      for (const row of value) {
+        tableData.push([formatTableCell(row, isFloatArr)]);
       }
     }
-    headers = [...cols].sort(compareCodepoints);
-    for (const entry of value) {
-      const rec =
-        entry && typeof entry === "object" && !Array.isArray(entry)
-          ? (entry as Record<string, unknown>)
-          : {};
-      const isFloatDict = floatDicts.has(rec);
-      const floats = floatFields.get(rec);
-      rows.push(
-        headers.map((key) => ({
-          value: Object.hasOwn(rec, key) ? rec[key] : undefined,
-          asFloat: isFloatDict || Boolean(floats?.has(key)),
-        })),
-      );
-    }
-  } else if (value && typeof value === "object" && !Array.isArray(value)) {
-    const rec = value as Record<string, unknown>;
-    const isFloatDict = floatDicts.has(rec);
-    const floats = floatFields.get(rec);
-    headers = Object.keys(rec).sort(compareCodepoints);
-    rows.push(
-      headers.map((key) => ({
-        value: rec[key],
-        asFloat: isFloatDict || Boolean(floats?.has(key)),
-      })),
+  } else if (isPlainObject(value)) {
+    const isFloatDict = floatDicts.has(value);
+    const floats = floatFields.get(value);
+    const headers = Object.keys(value).sort(compareCodepoints);
+    tableData.push(headers);
+    tableData.push(
+      headers.map((key) =>
+        formatTableCell(value[key], isFloatDict || Boolean(floats?.has(key))),
+      ),
     );
   } else {
-    const rawRows: unknown[][] = Array.isArray(value)
-      ? value.map((item) => (Array.isArray(item) ? item : [item]))
-      : [Array.isArray(value) ? value : [value]];
-    const isFloatArr = Array.isArray(value) && floatArrays.has(value);
-    const width = rawRows.reduce((max, row) => Math.max(max, row.length), 0);
-    headers = Array.from({ length: width }, (_, i) => `Column${i + 1}`);
-    for (const row of rawRows) {
-      rows.push(row.map((cell) => ({ value: cell, asFloat: isFloatArr })));
-    }
+    return `Table format not supported for operation return type: ${formatTableCell(value)}\n`;
   }
-  const formatted = rows.map((row) =>
-    headers.map((_, i) => {
-      const cell = row[i];
-      return cell ? formatTableCell(cell.value, cell.asFloat) : "";
-    }),
-  );
-  const widths = headers.map((header, i) =>
-    Math.max(
-      [...header].length,
-      ...formatted.map((row) => [...(row[i] ?? "")].length),
-    ),
-  );
-  const border = `+${widths.map((w) => `-${"-".repeat(w)}-`).join("+")}+`;
-  const line = (values: string[]) =>
-    `| ${values.map((v, i) => v + " ".repeat(Math.max(0, (widths[i] ?? 0) - [...v].length))).join(" | ")} |`;
-  return `${border}\n${line(headers)}\n${border}\n${formatted.map((row) => line(row)).join("\n")}${formatted.length ? "\n" : ""}${border}\n`;
+
+  return formatAsciiTable(tableData);
 }

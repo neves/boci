@@ -405,7 +405,7 @@ test("query:// resolves an rc canned query; --raw-output prints strings bare", (
   expect(raw.out.join("")).toBe("a\n");
 });
 
-test("an undefined canned query or an empty result goes to stderr", () => {
+test("an undefined canned query or a null result goes to stderr; empty lists render per output format", () => {
   const missing = invocation();
   expect(() =>
     printResult(missing.io, result(things), { query: "query://nope", rc }),
@@ -413,11 +413,68 @@ test("an undefined canned query or an empty result goes to stderr", () => {
   expect(missing.err.join("")).toBe(
     `UsageError: Query nope is not defined in your OCI CLI configuration file: ${rc.path}\n`,
   );
-  const empty = invocation();
-  printResult(empty.io, result(things), { query: "data[?x]", rc });
-  expect(empty.out).toEqual([]);
-  expect(empty.err.join("")).toBe(
+  const emptyNull = invocation();
+  printResult(emptyNull.io, result(things), { query: "data[0].x", rc });
+  expect(emptyNull.out).toEqual([]);
+  expect(emptyNull.err.join("")).toBe(
     "Query returned empty result, no output to show.\n",
+  );
+  const emptyListJson = invocation();
+  printResult(emptyListJson.io, result(things), { query: "data[?x]", rc });
+  expect(emptyListJson.out.join("")).toBe("[]\n");
+  expect(emptyListJson.err).toEqual([]);
+  const emptyListTable = invocation();
+  printResult(emptyListTable.io, result(things), {
+    query: "data[?x]",
+    output: "table",
+    rc,
+  });
+  expect(emptyListTable.out.join("")).toBe(
+    "Command returned empty list, no table to display.\n",
+  );
+  expect(emptyListTable.err).toEqual([]);
+});
+
+test("table output matches oci_cli TypeError on non-iterable query results and table edge cases", () => {
+  for (const [query, pyType] of [
+    ["length(data)", "int"],
+    ["`1.5`", "float"],
+    ["`true`", "bool"],
+  ] as const) {
+    const run = invocation();
+    expect(() =>
+      printResult(run.io, result(things), { query, output: "table", rc }),
+    ).toThrow(Exit);
+    expect(run.out).toEqual([]);
+    expect(run.err.join("")).toBe(
+      `TypeError: argument of type '${pyType}' is not iterable\n`,
+    );
+  }
+
+  const emptyDict = invocation();
+  printResult(emptyDict.io, result(things), {
+    query: "`{}`",
+    output: "table",
+    rc,
+  });
+  expect(emptyDict.out.join("")).toBe("++\n||\n++\n||\n++\n");
+
+  const multiAndWide = invocation();
+  printResult(
+    multiAndWide.io,
+    result([{ displayName: "line1\nline2", lifecycleState: "日本語" }]),
+    { query: "data", output: "table", rc },
+  );
+  expect(multiAndWide.out.join("")).toBe(
+    [
+      "+--------------+-----------------+",
+      "| display-name | lifecycle-state |",
+      "+--------------+-----------------+",
+      "| line1        | 日本語          |",
+      "| line2        |                 |",
+      "+--------------+-----------------+",
+      "",
+    ].join("\n"),
   );
 });
 

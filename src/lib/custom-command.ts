@@ -3,6 +3,7 @@
 // `bun run scaffold <key>` generates commands on top of these.
 import {
   callOperation,
+  parseSdkResponseData,
   type GeneratedCommand,
   type OperationResult,
 } from "../core/operation.ts";
@@ -18,6 +19,7 @@ import {
   PythonTypeError,
   type CollectionAttribute as Attribute,
 } from "../core/pagination.ts";
+import { ProgramRaise } from "../core/program.ts";
 import type { CustomCommandContext } from "../core/registry.ts";
 import { loadService, type OperationSpec } from "../core/spec.ts";
 import { waitForState } from "../core/waiter.ts";
@@ -90,8 +92,8 @@ export async function callCommand(
   });
 }
 
-/** How the wrapper pages: cli_util's `list_call_get_*` or their `_multiple_keys` variants. */
-export type ListOptions = { multipleKeys?: boolean };
+/** Pagination variants and whether the wrapper consumes an SDK-deserialized list. */
+export type ListOptions = { multipleKeys?: boolean; sdkList?: boolean };
 
 /**
  * A paginated list call honoring --all, --limit and --page-size the way
@@ -104,7 +106,7 @@ export async function listPages(
   name: string,
   args: Record<string, unknown>,
   command?: GeneratedCommand,
-  { multipleKeys = false }: ListOptions = {},
+  { multipleKeys = false, sdkList = false }: ListOptions = {},
 ): Promise<{ items: unknown[]; lastResult: OperationResult }> {
   const options = outputOptions(ctx);
   const call = (values: Record<string, unknown>) =>
@@ -114,11 +116,28 @@ export async function listPages(
   const collection = responseType && !responseType.startsWith("list[");
   const all = args.all_pages === true;
   const limited = typeof args.limit === "number";
-  if ((!all && !limited) || (all && (!collection || limited))) {
+  const decodeItems = (result: OperationResult): unknown[] => {
+    if (!sdkList) return extractListItems(result.raw);
+    try {
+      const items = parseSdkResponseData(result);
+      if (Array.isArray(items)) return items;
+      if (all || limited)
+        throw new ProgramRaise(
+          "AttributeError",
+          "'NoneType' object has no attribute 'attribute_map'",
+        );
+      throw new ProgramRaise("TypeError", "'NoneType' object is not iterable");
+    } catch (e) {
+      if (!(e instanceof ProgramRaise)) throw e;
+      ctx.io.err(`${e.cls}: ${e.message}\n`);
+      throw new Exit(1);
+    }
+  };
+  if ((!all && !limited) || (all && !sdkList && (!collection || limited))) {
     const result = await call(args);
     if (!result.response.ok) printResult(ctx.io, result, options);
     return {
-      items: all ? result.pageItems : extractListItems(result.raw),
+      items: all ? result.pageItems : decodeItems(result),
       lastResult: result,
     };
   }
@@ -166,7 +185,7 @@ export async function listPages(
             fields.set(attribute.key, { attribute, value });
         }
       } else {
-        const items = extractListItems(result.raw);
+        const items = decodeItems(result);
         aggregated.push(...items);
         remaining -= items.length;
       }

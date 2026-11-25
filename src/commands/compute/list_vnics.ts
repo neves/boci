@@ -37,15 +37,21 @@ export async function runComputeInstanceListVnics(
   if (!compartmentId)
     compartmentId = await resolveInstanceCompartmentId(ctx, instanceId);
 
-  const { items: attachments } = await listPages(ctx, ATTACHMENTS, {
-    compartment_id: compartmentId,
-    availability_domain: values.availability_domain,
-    instance_id: instanceId,
-    limit: values.limit,
-    page: values.page,
-    page_size: values.page_size,
-    all_pages: values.all_pages,
-  });
+  const { items: attachments } = await listPages(
+    ctx,
+    ATTACHMENTS,
+    {
+      compartment_id: compartmentId,
+      availability_domain: values.availability_domain,
+      instance_id: instanceId,
+      limit: values.limit,
+      page: values.page,
+      page_size: values.page_size,
+      all_pages: values.all_pages,
+    },
+    undefined,
+    { sdkList: true },
+  );
 
   const result: unknown[] = [];
   for (const item of attachments) {

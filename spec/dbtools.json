@@ -1364,10 +1364,63 @@
         "locks": "database_tools:list[ResourceLock]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_generic_jdbc_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_generic_jdbc_details",
-        "renames": {},
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
@@ -1375,7 +1428,105 @@
           "user-password": "database_tools:DatabaseToolsUserPasswordDetails",
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStoreGenericJdbcDetails]"
-        }
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "locks",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_support",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_identity",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -1438,7 +1589,7 @@
           "bodyArg": "create_database_tools_connection_details",
           "key": ["userPassword"],
           "transform": "parse_json_parameter",
-          "value": null
+          "param": "user_password"
         },
         {
           "target": "body",
@@ -1965,10 +2116,63 @@
         "locks": "database_tools:list[ResourceLock]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_my_sql_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_my_sql_details",
-        "renames": {},
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
@@ -1977,7 +2181,117 @@
           "user-password": "database_tools:DatabaseToolsUserPasswordDetails",
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStoreMySqlDetails]"
-        }
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "locks",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_support",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_identity",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "related_resource",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -2040,7 +2354,7 @@
           "bodyArg": "create_database_tools_connection_details",
           "key": ["userPassword"],
           "transform": "parse_json_parameter",
-          "value": null
+          "param": "user_password"
         },
         {
           "target": "body",
@@ -2632,10 +2946,63 @@
         "locks": "database_tools:list[ResourceLock]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_oracle_database_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_oracle_database_details",
-        "renames": {},
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
@@ -2645,7 +3012,129 @@
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStoreDetails]",
           "proxy-client": "database_tools:DatabaseToolsConnectionOracleDatabaseProxyClientDetails"
-        }
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "locks",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_support",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_identity",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "related_resource",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "proxy_client",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "authentication_type",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -2749,6 +3238,14 @@
           "key": ["userName"],
           "param": "user_name",
           "when": "user_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "create_database_tools_connection_details",
+          "key": ["userPassword"],
+          "transform": "parse_json_parameter",
+          "param": "user_password",
+          "when": "user_password is not None"
         },
         {
           "target": "body",
@@ -3333,10 +3830,63 @@
         "locks": "database_tools:list[ResourceLock]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_postgresql_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.create_database_tools_connection_create_database_tools_connection_postgresql_details",
-        "renames": {},
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
@@ -3345,7 +3895,117 @@
           "user-password": "database_tools:DatabaseToolsUserPasswordDetails",
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStorePostgresqlDetails]"
-        }
+        },
+        "params": [
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "compartment_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "locks",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_support",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "runtime_identity",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "related_resource",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -3408,7 +4068,7 @@
           "bodyArg": "create_database_tools_connection_details",
           "key": ["userPassword"],
           "transform": "parse_json_parameter",
-          "value": null
+          "param": "user_password"
         },
         {
           "target": "body",
@@ -5296,19 +5956,183 @@
         "key-stores": "database_tools:list[DatabaseToolsKeyStoreDetails]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_generic_jdbc_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "connection_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_tools_connection_id",
+                ["item", ["var", "kwargs"], "connection_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "connection_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_generic_jdbc_details",
-        "renames": {
-          "database_tools_connection_id": "connection_id"
-        },
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
           "user-password": "database_tools:DatabaseToolsUserPasswordDetails",
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStoreGenericJdbcDetails]"
-        }
+        },
+        "params": [
+          {
+            "name": "database_tools_connection_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "url",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_lock_override",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -5320,7 +6144,7 @@
           "update_database_tools_connection_details"
         ],
         "pathParams": {
-          "databaseToolsConnectionId": "connection_id"
+          "databaseToolsConnectionId": "database_tools_connection_id"
         },
         "queryParams": {
           "isLockOverride": {
@@ -5355,7 +6179,7 @@
         {
           "target": "kwarg",
           "key": ["database_tools_connection_id"],
-          "param": "connection_id"
+          "param": "database_tools_connection_id"
         },
         {
           "target": "kwarg",
@@ -5410,6 +6234,14 @@
           "key": ["userName"],
           "param": "user_name",
           "when": "user_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_tools_connection_details",
+          "key": ["userPassword"],
+          "transform": "parse_json_parameter",
+          "param": "user_password",
+          "when": "user_password is not None"
         },
         {
           "target": "body",
@@ -5888,12 +6720,77 @@
         "key-stores": "database_tools:list[DatabaseToolsKeyStoreMySqlDetails]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_my_sql_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "connection_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_tools_connection_id",
+                ["item", ["var", "kwargs"], "connection_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "connection_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_my_sql_details",
-        "renames": {
-          "database_tools_connection_id": "connection_id"
-        },
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
@@ -5901,7 +6798,118 @@
           "user-password": "database_tools:DatabaseToolsUserPasswordDetails",
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStoreMySqlDetails]"
-        }
+        },
+        "params": [
+          {
+            "name": "database_tools_connection_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "related_resource",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_lock_override",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -5913,7 +6921,7 @@
           "update_database_tools_connection_details"
         ],
         "pathParams": {
-          "databaseToolsConnectionId": "connection_id"
+          "databaseToolsConnectionId": "database_tools_connection_id"
         },
         "queryParams": {
           "isLockOverride": {
@@ -5949,7 +6957,7 @@
         {
           "target": "kwarg",
           "key": ["database_tools_connection_id"],
-          "param": "connection_id"
+          "param": "database_tools_connection_id"
         },
         {
           "target": "kwarg",
@@ -6012,6 +7020,14 @@
           "key": ["userName"],
           "param": "user_name",
           "when": "user_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_tools_connection_details",
+          "key": ["userPassword"],
+          "transform": "parse_json_parameter",
+          "param": "user_password",
+          "when": "user_password is not None"
         },
         {
           "target": "body",
@@ -6542,12 +7558,77 @@
         "proxy-client": "database_tools:DatabaseToolsConnectionOracleDatabaseProxyClient"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_oracle_database_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "connection_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_tools_connection_id",
+                ["item", ["var", "kwargs"], "connection_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "connection_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_oracle_database_details",
-        "renames": {
-          "database_tools_connection_id": "connection_id"
-        },
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
@@ -6556,7 +7637,124 @@
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStoreDetails]",
           "proxy-client": "database_tools:DatabaseToolsConnectionOracleDatabaseProxyClientDetails"
-        }
+        },
+        "params": [
+          {
+            "name": "database_tools_connection_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "related_resource",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "proxy_client",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_lock_override",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -6568,7 +7766,7 @@
           "update_database_tools_connection_details"
         ],
         "pathParams": {
-          "databaseToolsConnectionId": "connection_id"
+          "databaseToolsConnectionId": "database_tools_connection_id"
         },
         "queryParams": {
           "isLockOverride": {
@@ -6605,7 +7803,7 @@
         {
           "target": "kwarg",
           "key": ["database_tools_connection_id"],
-          "param": "connection_id"
+          "param": "database_tools_connection_id"
         },
         {
           "target": "kwarg",
@@ -6668,6 +7866,14 @@
           "key": ["userName"],
           "param": "user_name",
           "when": "user_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_tools_connection_details",
+          "key": ["userPassword"],
+          "transform": "parse_json_parameter",
+          "param": "user_password",
+          "when": "user_password is not None"
         },
         {
           "target": "body",
@@ -7215,12 +8421,77 @@
         "key-stores": "database_tools:list[DatabaseToolsKeyStoreDetails]"
       },
       "kind": "custom",
-      "tier": "A",
-      "delegate": {
+      "tier": "B",
+      "patterns": ["fold-body", "json-dumps"],
+      "survey": {
+        "invokes": [
+          "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_postgresql_details"
+        ],
+        "folds": [
+          {
+            "target": "user_password",
+            "path": ["value-type"],
+            "options": [],
+            "value": "SECRETID"
+          },
+          {
+            "target": "user_password",
+            "path": ["secret-id"],
+            "options": ["user_password_secret_id"]
+          }
+        ]
+      },
+      "program": {
+        "body": [
+          [
+            "if",
+            ["cmp", "in", "connection_id", ["var", "kwargs"]],
+            [
+              [
+                "set",
+                ["var", "kwargs"],
+                "database_tools_connection_id",
+                ["item", ["var", "kwargs"], "connection_id"]
+              ],
+              ["do", ["call", "pop", ["var", "kwargs"], "connection_id"]]
+            ],
+            []
+          ],
+          [
+            "if",
+            ["item", ["var", "kwargs"], "user_password_secret_id"],
+            [
+              [
+                "let",
+                "user_password",
+                [
+                  "dict",
+                  ["value-type", "SECRETID"],
+                  [
+                    "secret-id",
+                    ["item", ["var", "kwargs"], "user_password_secret_id"]
+                  ]
+                ]
+              ],
+              [
+                "set",
+                ["var", "kwargs"],
+                "user_password",
+                ["fn", "dumps", ["var", "user_password"]]
+              ]
+            ],
+            []
+          ],
+          [
+            "do",
+            ["call", "pop", ["var", "kwargs"], "user_password_secret_id", null]
+          ],
+          ["invoke", [], ["var", "kwargs"]]
+        ],
+        "wrapExceptions": true
+      },
+      "generated": {
         "callback": "services.database_tools.src.oci_cli_database_tools.generated.databasetools_cli.update_database_tools_connection_update_database_tools_connection_postgresql_details",
-        "renames": {
-          "database_tools_connection_id": "connection_id"
-        },
         "complexTypes": {
           "defined-tags": "database_tools:dict(str, dict(str, object))",
           "freeform-tags": "database_tools:dict(str, string)",
@@ -7228,7 +8499,118 @@
           "user-password": "database_tools:DatabaseToolsUserPasswordDetails",
           "advanced-properties": "database_tools:dict(str, string)",
           "key-stores": "database_tools:list[DatabaseToolsKeyStorePostgresqlDetails]"
-        }
+        },
+        "params": [
+          {
+            "name": "database_tools_connection_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "display_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "defined_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "freeform_tags",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "related_resource",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "connection_string",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_name",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "user_password",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "advanced_properties",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "key_stores",
+            "typeClass": "oci_cli.custom_types.cli_complex_type.CliComplexType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "private_endpoint_id",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "if_match",
+            "typeClass": "click.types.StringParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "is_lock_override",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "force",
+            "typeClass": "click.types.BoolParamType",
+            "multiple": false,
+            "isFlag": true,
+            "default": false
+          },
+          {
+            "name": "wait_for_state",
+            "typeClass": "oci_cli.custom_types.cli_case_insensitive_choice.CliCaseInsensitiveChoice",
+            "multiple": true,
+            "isFlag": false
+          },
+          {
+            "name": "max_wait_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "wait_interval_seconds",
+            "typeClass": "click.types.IntParamType",
+            "multiple": false,
+            "isFlag": false
+          },
+          {
+            "name": "from_json",
+            "typeClass": "oci_cli.custom_types.cli_from_json.CliFromJson",
+            "multiple": false,
+            "isFlag": false
+          }
+        ]
       },
       "operation": {
         "client": "database_tools.database_tools",
@@ -7240,7 +8622,7 @@
           "update_database_tools_connection_details"
         ],
         "pathParams": {
-          "databaseToolsConnectionId": "connection_id"
+          "databaseToolsConnectionId": "database_tools_connection_id"
         },
         "queryParams": {
           "isLockOverride": {
@@ -7276,7 +8658,7 @@
         {
           "target": "kwarg",
           "key": ["database_tools_connection_id"],
-          "param": "connection_id"
+          "param": "database_tools_connection_id"
         },
         {
           "target": "kwarg",
@@ -7339,6 +8721,14 @@
           "key": ["userName"],
           "param": "user_name",
           "when": "user_name is not None"
+        },
+        {
+          "target": "body",
+          "bodyArg": "update_database_tools_connection_details",
+          "key": ["userPassword"],
+          "transform": "parse_json_parameter",
+          "param": "user_password",
+          "when": "user_password is not None"
         },
         {
           "target": "body",

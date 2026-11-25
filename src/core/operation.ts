@@ -361,7 +361,7 @@ function whenMatches(
       continue;
     }
     const val = values[clause.trim()];
-    if (val === undefined || val === null || val === false) return false;
+    if (!truthy(val)) return false;
   }
   return true;
 }
@@ -797,6 +797,132 @@ export async function createServiceClient(
   };
 }
 
+/** Python urllib.parse.quote_plus: unreserved A-Za-z0-9_.-~ stay literal, spaces become +. */
+function encodeQueryComponent(value: string): string {
+  return encodeURIComponent(value)
+    .replace(
+      /[!'()*]/g,
+      (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+    )
+    .replaceAll("%20", "+");
+}
+
+const FLOAT_TYPE_CLASSES = new Set([
+  "click.types.FloatParamType",
+  "click.types.FloatRange",
+]);
+
+/** Python str(float(n)) for request path/query/header encoding. */
+function formatPythonFloatParam(n: number): string {
+  if (Number.isNaN(n)) return "nan";
+  if (n === Infinity) return "inf";
+  if (n === -Infinity) return "-inf";
+  if (Object.is(n, -0)) return "-0.0";
+  const abs = Math.abs(n);
+  if (abs !== 0 && (abs >= 1e16 || abs < 1e-4)) {
+    return n.toExponential().replace(/e([+-])(\d)$/, "e$10$2");
+  }
+  const s = String(n);
+  return s.includes(".") || s.includes("e") ? s : `${s}.0`;
+}
+
+function isFloatArg(command: GeneratedCommand, arg: string): boolean {
+  const binding = command.bindings?.findLast(
+    (item) =>
+      item.target === "kwarg" &&
+      Array.isArray(item.key) &&
+      item.key[0] === arg &&
+      typeof item.param === "string",
+  );
+  const paramName = typeof binding?.param === "string" ? binding.param : arg;
+  const param = command.params?.find((p) => p.name === paramName);
+  return (
+    param?.typeClass !== undefined && FLOAT_TYPE_CLASSES.has(param.typeClass)
+  );
+}
+
+function formatScalarParam(
+  value: unknown,
+  isFloat: boolean,
+  lowercaseBool: boolean,
+): string {
+  if (typeof value === "boolean") {
+    return lowercaseBool
+      ? value
+        ? "true"
+        : "false"
+      : value
+        ? "True"
+        : "False";
+  }
+  if (typeof value === "number" && isFloat) {
+    return formatPythonFloatParam(value);
+  }
+  return String(value);
+}
+
+function formatPathValue(value: unknown, isFloat = false): string {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => formatScalarParam(item, isFloat, false))
+      .join(",");
+  }
+  return formatScalarParam(value, isFloat, false);
+}
+
+function formatHeaderValue(value: unknown, isFloat = false): string {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => formatScalarParam(item, isFloat, false))
+      .join(",");
+  }
+  return formatScalarParam(value, isFloat, false);
+}
+
+function appendQueryParam(
+  queryParams: [string, string][],
+  name: string,
+  value: unknown,
+  collectionFormat: string | undefined,
+  isFloat = false,
+): void {
+  if (value === undefined || value === null) return;
+  if (Array.isArray(value)) {
+    if (collectionFormat === "multi" || collectionFormat === undefined) {
+      for (const item of value) {
+        if (item === undefined || item === null) continue;
+        queryParams.push([name, formatScalarParam(item, isFloat, false)]);
+      }
+    } else {
+      const sep = COLLECTION_SEPARATORS[collectionFormat] ?? ",";
+      queryParams.push([
+        name,
+        value.map((item) => formatScalarParam(item, isFloat, false)).join(sep),
+      ]);
+    }
+    return;
+  }
+  if (typeof value === "object") {
+    for (const [innerKey, innerVal] of Object.entries(
+      value as Record<string, unknown>,
+    )) {
+      if (innerVal === undefined || innerVal === null) continue;
+      const dotted = `${name}.${innerKey}`;
+      if (Array.isArray(innerVal)) {
+        for (const item of innerVal) {
+          if (item !== undefined && item !== null) {
+            queryParams.push([dotted, formatScalarParam(item, false, false)]);
+          }
+        }
+      } else {
+        queryParams.push([dotted, formatScalarParam(innerVal, false, false)]);
+      }
+    }
+    return;
+  }
+  queryParams.push([name, formatScalarParam(value, isFloat, true)]);
+}
+
 /** Resolve endpoint + encoded path + query params for a service request. */
 export function buildServiceUrl(
   io: Invocation,
@@ -831,8 +957,14 @@ export function buildServiceUrl(
     path = path.replaceAll(`{${name}}`, replacement);
   }
   const url = new URL(`${resolved}${path}`);
-  for (const [name, value] of queryParams) {
-    url.searchParams.set(name, value);
+  if (queryParams.length > 0) {
+    const encoded = queryParams
+      .map(
+        ([name, value]) =>
+          `${encodeQueryComponent(name)}=${encodeQueryComponent(value)}`,
+      )
+      .join("&");
+    url.search = url.search ? `${url.search.slice(1)}&${encoded}` : encoded;
   }
   return url;
 }
@@ -1049,7 +1181,7 @@ export async function callOperation(
       );
       throw new Exit(1);
     }
-    pathParams[name] = String(value);
+    pathParams[name] = formatPathValue(value, isFloatArg(command, arg));
   }
   const queryOrder = Object.keys(operation.queryParams ?? {});
   const upsertQueryParam = (
@@ -1076,9 +1208,17 @@ export async function callOperation(
     params.push([key, val]);
   };
   const queryParams: [string, string][] = [];
-  for (const [name, { arg }] of Object.entries(operation.queryParams ?? {})) {
+  for (const [name, { arg, collectionFormat }] of Object.entries(
+    operation.queryParams ?? {},
+  )) {
     const value = arg ? boundValue(arg) : undefined;
-    if (value !== undefined) queryParams.push([name, String(value)]);
+    appendQueryParam(
+      queryParams,
+      name,
+      value,
+      collectionFormat,
+      arg ? isFloatArg(command, arg) : false,
+    );
   }
   const allPages = values.all_pages === true;
   const limit = values.limit;
@@ -1103,7 +1243,12 @@ export async function callOperation(
   for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
     const value =
       param.value ?? (param.arg ? boundValue(param.arg) : undefined);
-    if (value !== undefined) baseHeaders[name] = String(value);
+    if (value !== undefined && value !== null) {
+      baseHeaders[name] = formatHeaderValue(
+        value,
+        param.arg ? isFloatArg(command, param.arg) : false,
+      );
+    }
   }
   if (
     operation.headerParams?.["opc-retry-token"] &&
@@ -1324,24 +1469,15 @@ export async function callSdkOperation(
       continue;
     }
     const value = sdkArgs[arg];
-    if (value !== undefined && value !== null) pathParams[name] = String(value);
+    if (value !== undefined && value !== null)
+      pathParams[name] = formatPathValue(value);
   }
   const queryParams: [string, string][] = [];
   for (const [name, { arg, collectionFormat }] of Object.entries(
     operation.queryParams ?? {},
   )) {
     const value = arg ? sdkArgs[arg] : undefined;
-    if (value === undefined || value === null) continue;
-    if (Array.isArray(value)) {
-      if (collectionFormat === "multi") {
-        for (const item of value) queryParams.push([name, String(item)]);
-      } else {
-        const sep = COLLECTION_SEPARATORS[collectionFormat ?? "csv"] ?? ",";
-        queryParams.push([name, value.map(String).join(sep)]);
-      }
-    } else {
-      queryParams.push([name, String(value)]);
-    }
+    appendQueryParam(queryParams, name, value, collectionFormat);
   }
   const baseHeaders: Record<string, string> =
     operation.http === "GET"
@@ -1360,7 +1496,7 @@ export async function callSdkOperation(
   for (const [name, param] of Object.entries(operation.headerParams ?? {})) {
     const value = param.value ?? (param.arg ? sdkArgs[param.arg] : undefined);
     if (value !== undefined && value !== null)
-      baseHeaders[name] = String(value);
+      baseHeaders[name] = formatHeaderValue(value);
   }
   if (
     operation.headerParams?.["opc-retry-token"] &&
@@ -1464,7 +1600,7 @@ export async function callBaseClientApi(
   const pathParams: Record<string, string> = {};
   if (rawPathParams) {
     for (const [k, v] of Object.entries(rawPathParams)) {
-      if (v !== undefined && v !== null) pathParams[k] = String(v);
+      if (v !== undefined && v !== null) pathParams[k] = formatPathValue(v);
     }
   }
   const queryParams: [string, string][] = [];
@@ -1476,27 +1612,22 @@ export async function callBaseClientApi(
         pair[1] !== undefined &&
         pair[1] !== null
       ) {
-        queryParams.push([String(pair[0]), String(pair[1])]);
+        queryParams.push([
+          String(pair[0]),
+          formatScalarParam(pair[1], false, true),
+        ]);
       }
     }
   } else if (rawQueryParams) {
     for (const [k, v] of Object.entries(rawQueryParams)) {
-      if (v === undefined || v === null) continue;
-      if (Array.isArray(v)) {
-        for (const elem of v) {
-          if (elem !== undefined && elem !== null)
-            queryParams.push([k, String(elem)]);
-        }
-      } else {
-        queryParams.push([k, String(v)]);
-      }
+      appendQueryParam(queryParams, k, v, undefined);
     }
   }
   const headers: Record<string, string> = {};
   if (rawHeaderParams) {
     for (const [k, v] of Object.entries(rawHeaderParams)) {
       if (v !== undefined && v !== null) {
-        headers[k.toLowerCase()] = String(v);
+        headers[k.toLowerCase()] = formatHeaderValue(v);
       }
     }
   }

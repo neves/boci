@@ -559,3 +559,62 @@ test("does not retry non-transport fetch errors (invalid header value)", async (
     ),
   ).toBe(true);
 });
+
+test("encodes repeated multi/csv query params, wire quote_plus, boolean headers, and Python floats", async () => {
+  using fake = startFakeEndpoint();
+  const { io } = invocation();
+  const command = {
+    kind: "generated",
+    operation: {
+      client: "things",
+      method: "search_things",
+      http: "GET",
+      path: "/things/{score}",
+      pathParams: { score: "score" },
+      queryParams: {
+        tag: { arg: "tag", collectionFormat: "multi" },
+        cols: { arg: "cols", collectionFormat: "csv" },
+        pipes: { arg: "pipes", collectionFormat: "pipes" },
+        minVal: { arg: "min_val" },
+        raw: { arg: "raw" },
+        empty: { arg: "empty" },
+      },
+      headerParams: {
+        "is-dry-run": { arg: "is_dry_run" },
+        "x-list": { arg: "x_list" },
+      },
+    },
+    params: [
+      { name: "score", typeClass: "click.types.FloatParamType" },
+      { name: "min_val", typeClass: "click.types.FloatRange" },
+    ],
+  } as unknown as GeneratedCommand;
+
+  await callOperation(
+    io,
+    call(
+      fake.url,
+      {
+        score: 0,
+        tag: ["", "a,b", "slash/and?query=1&x"],
+        cols: ["one", "two"],
+        pipes: ["x", "y"],
+        min_val: 1e16,
+        raw: "a+b~c*d!'() e",
+        empty: "",
+        is_dry_run: true,
+        x_list: ["h1", "h2"],
+      },
+      {},
+      command,
+    ),
+  );
+
+  const req = fake.requests[0]!;
+  expect(req.path).toBe("/v1/things/0.0");
+  expect(req.rawQuery).toBe(
+    "tag=&tag=a%2Cb&tag=slash%2Fand%3Fquery%3D1%26x&cols=one%2Ctwo&pipes=x%7Cy&minVal=1e%2B16&raw=a%2Bb~c%2Ad%21%27%28%29+e&empty=",
+  );
+  expect(req.headers["is-dry-run"]).toBe("True");
+  expect(req.headers["x-list"]).toBe("h1,h2");
+});

@@ -1,9 +1,4 @@
-import {
-  createHash,
-  createPublicKey,
-  generateKeyPairSync,
-  type KeyObject,
-} from "node:crypto";
+import { createPublicKey, type KeyObject } from "node:crypto";
 import {
   appendFileSync,
   existsSync,
@@ -204,7 +199,7 @@ export async function promptClick<T = string>(
   const wrapExceptions = opts.wrapExceptions === true;
 
   while (true) {
-    let value = "";
+    let value: string;
     while (true) {
       if (hideInput) {
         value = await readHiddenLine(io, stdin, prompt, wrapExceptions);
@@ -492,7 +487,7 @@ function validatePrivateKeyPassphrase(
   passphrase: string,
 ): { passphrase: string; privateKey: KeyObject } {
   // Python cryptography encodes passphrase as ASCII; non-ASCII raises UnicodeEncodeError (ValueError).
-  if (/[^\x00-\x7f]/.test(passphrase)) {
+  if (/[^\p{ASCII}]/u.test(passphrase)) {
     throw new BadParameter(
       "Incorrect passphrase, could not decrypt private key",
     );

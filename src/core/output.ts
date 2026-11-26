@@ -82,12 +82,20 @@ export function printResult(
   result: OperationResult,
   options: OutputOptions,
 ): void {
-  const { operation, url, response, raw, targetService, requestId } = result;
+  const {
+    operation,
+    url,
+    endpointUrl,
+    response,
+    raw,
+    targetService,
+    requestId,
+  } = result;
   if (!response.ok) {
     io.err(
       formatServiceError(
         operation,
-        url,
+        endpointUrl ?? url,
         response,
         raw,
         targetService,
@@ -236,7 +244,15 @@ export function formatServiceError(
   const excName = isTransientServiceError(response.status, code, targetService)
     ? "TransientServiceError"
     : "ServiceError";
-  return `${excName}:\n${JSON.stringify(sortJson(serviceError), null, 4)}\n`;
+  return `${excName}:\n${escapeNonAscii(JSON.stringify(sortJson(serviceError), null, 4))}\n`;
+}
+
+/** Python `json.dumps(..., ensure_ascii=True)` escapes non-ASCII code units as `\uXXXX`. */
+function escapeNonAscii(s: string): string {
+  return s.replace(
+    /[\u0080-\uffff]/g,
+    (ch) => `\\u${ch.charCodeAt(0).toString(16).padStart(4, "0")}`,
+  );
 }
 
 function renderGeneratedResponse(
@@ -255,8 +271,15 @@ function renderGeneratedResponse(
     Boolean(operation.responseType) &&
     !operation.responseType!.startsWith("list[") &&
     Boolean(rawPages?.length);
+  const emptyModel =
+    !isWrappedCollectionAll &&
+    Boolean(operation.responseType) &&
+    raw.trim().length === 0 &&
+    Boolean(models?.[operation.responseType!]) &&
+    !models?.[operation.responseType!]?.discriminator;
   const hasBody =
     isWrappedCollectionAll ||
+    emptyModel ||
     (Boolean(operation.responseType) && raw.trim().length > 0);
   let value: unknown;
   if (isWrappedCollectionAll && rawPages) {
@@ -284,6 +307,8 @@ function renderGeneratedResponse(
       }
     }
     value = aggregated;
+  } else if (emptyModel) {
+    value = renderModel({}, operation.responseType!, models);
   } else if (hasBody) {
     let parsed: unknown;
     let parsedOk = false;
@@ -335,7 +360,7 @@ function renderGeneratedResponse(
     output[key] = headerVal;
   }
   const printed = renderDocument(io, output, options);
-  if (printed && response.headers.get("opc-next-page") !== null && !allPages) {
+  if (printed && Boolean(response.headers.get("opc-next-page")) && !allPages) {
     io.err(
       "WARNING: This operation supports pagination and not all resources were returned.  Re-run using the --all option to auto paginate and list all resources.\n",
     );
@@ -650,13 +675,16 @@ export function renderModel(
   if (typeof value !== "object") return value;
   if (Array.isArray(value)) {
     const element = /^list\[(.*)\]$/.exec(type)?.[1];
-    const mapped = element
-      ? value.map((item) => renderModel(item, element, models, snakeCase))
-      : value;
-    if (element === "float") floatArrays.add(mapped);
-    return mapped;
+    if (element) {
+      const mapped = value.map((item) =>
+        renderModel(item, element, models, snakeCase),
+      );
+      if (element === "float") floatArrays.add(mapped);
+      return mapped;
+    }
+    if (!models?.[type]) return value;
   }
-  const data = value as Record<string, unknown>;
+  const data = Array.isArray(value) ? {} : (value as Record<string, unknown>);
   const dictValue = /^dict\([^,]+, (.*)\)$/.exec(type)?.[1];
   if (dictValue) {
     const mapped = Object.fromEntries(

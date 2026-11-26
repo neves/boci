@@ -609,3 +609,105 @@ test("formatServiceError matches TransientServiceError, query stripping, non-JSO
   expect(extraEnv.target_service).toBe("object_storage");
   expect(extraEnv["opc-request-id"]).toBe("REQ-FALLBACK");
 });
+
+test("empty 204 body with a model responseType renders null-initialized model fields", () => {
+  const { io, out, err } = invocation();
+  const res = result(
+    "",
+    { status: 204 },
+    {
+      raw: "",
+      operation: {
+        client: "data_safe",
+        method: "list_finding_analytics",
+        http: "GET",
+        path: "/securityAssessments/findingAnalytics",
+        responseType: "FindingAnalyticsCollection",
+        queryParams: {},
+      },
+      responseModels: {
+        FindingAnalyticsCollection: {
+          attributes: [["items", "list[FindingAnalyticsSummary]", "items"]],
+        },
+      },
+    },
+  );
+  printResult(io, res, { rc });
+  expect(JSON.parse(out.join(""))).toEqual({ data: { items: null } });
+  expect(err).toEqual([]);
+
+  const arrIo = invocation();
+  const arrRes = result(
+    [],
+    { status: 200 },
+    {
+      operation: res.operation,
+      responseModels: res.responseModels,
+    },
+  );
+  printResult(arrIo.io, arrRes, { rc });
+  expect(JSON.parse(arrIo.out.join(""))).toEqual({ data: { items: null } });
+  expect(arrIo.err).toEqual([]);
+});
+
+test("empty opc-next-page header does not emit pagination warning", () => {
+  const { io, out, err } = invocation();
+  const res = result(
+    { items: [] },
+    { headers: { "opc-next-page": "" } },
+    {
+      operation: {
+        client: "ti",
+        method: "list_indicators",
+        http: "GET",
+        path: "/indicators",
+        responseType: "IndicatorCollection",
+        queryParams: {},
+      },
+      responseModels: {
+        IndicatorCollection: {
+          attributes: [["items", "list[Indicator]", "items"]],
+        },
+      },
+    },
+  );
+  printResult(io, res, { rc });
+  expect(JSON.parse(out.join(""))).toEqual({
+    data: { items: [] },
+    "opc-next-page": "",
+  });
+  expect(err).toEqual([]);
+});
+
+test("formatServiceError escapes non-ASCII characters and printResult preserves endpointUrl hostname casing", () => {
+  const { io, err } = invocation();
+  const res = result(
+    {
+      code: "InvalidParameter",
+      message: "Please provide one of these parameters – targetResourceId.",
+    },
+    { status: 400 },
+    {
+      url: new URL(
+        "https://clusterplacementgroups.us-ashburn-1.oci.oraclecloud.com/20230801/workRequests?x=1",
+      ),
+      endpointUrl:
+        "https://clusterPlacementGroups.us-ashburn-1.oci.oraclecloud.com/20230801/workRequests",
+      operation: {
+        client: "cpg",
+        method: "list_work_requests",
+        http: "GET",
+        path: "/workRequests",
+        queryParams: {},
+      },
+    },
+  );
+  expect(() => printResult(io, res, { rc })).toThrow(Exit);
+  const text = err.join("");
+  expect(text).toContain(
+    '"message": "Please provide one of these parameters \\u2013 targetResourceId."',
+  );
+  expect(text).toContain(
+    '"request_endpoint": "GET https://clusterPlacementGroups.us-ashburn-1.oci.oraclecloud.com/20230801/workRequests"',
+  );
+});

@@ -25,6 +25,7 @@ export type ClientInfo = {
   endpointServiceName?: string;
   endpointTemplatePerRealm?: Record<string, string>;
   regionalClient?: boolean;
+  dualStackByDefault?: boolean;
   serviceName?: string;
 };
 
@@ -35,7 +36,7 @@ export type EndpointOptions = {
   /** --endpoint (or config endpoint): used as the endpoint, base path appended if missing. */
   endpoint?: string | null;
   realmSpecific: boolean;
-  dualStack: boolean;
+  dualStack?: boolean;
   env?: Record<string, string | undefined>;
   regionMetadata?: RegionMetadata;
   /** Path/query values used by placeholders in realm-specific endpoint templates. */
@@ -142,10 +143,16 @@ export function resolveEndpoint(
       client.basePath,
     );
   }
+  const dualStack =
+    opts.dualStack !== undefined
+      ? opts.dualStack
+      : env.OCI_DUAL_STACK_ENDPOINT_ENABLED !== undefined
+        ? env.OCI_DUAL_STACK_ENDPOINT_ENABLED.toLowerCase() === "true"
+        : Boolean(client.dualStackByDefault);
   return {
     stored,
     resolved: applyServiceParams(
-      applyEndpointOptions(stored, opts.dualStack),
+      applyEndpointOptions(stored, dualStack),
       opts.serviceParams,
     ),
   };

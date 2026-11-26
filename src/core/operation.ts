@@ -88,6 +88,8 @@ export type OperationResult = {
   operation: OperationSpec;
   /** The first page's URL (a ServiceError's request_endpoint). */
   url: URL;
+  /** Original resolved endpoint + path preserving template hostname casing for ServiceError. */
+  endpointUrl?: string;
   /** The last response and its body. */
   response: Response;
   raw: string;
@@ -127,7 +129,7 @@ export type ServiceClient = {
   configRegion?: string;
   regionMetadata?: Awaited<ReturnType<typeof loadExternalRegionMetadata>>;
   realmSpecific: boolean;
-  dualStack: boolean;
+  dualStack?: boolean;
   connectionTimeout?: number;
   readTimeout?: number;
   maxAttempts: number;
@@ -150,6 +152,7 @@ export type ServiceRequestOptions = {
 
 export type ServiceResponse = {
   url: URL;
+  endpointUrl?: string;
   response: Response;
   raw: string;
   requestId?: string;
@@ -824,11 +827,12 @@ export async function createServiceClient(
         values.realm_specific_endpoint ??
         config.realm_specific_service_endpoint_template_enabled,
     ),
-    dualStack: configBool(
-      rootValues.enable_dual_stack ??
-        values.enable_dual_stack ??
-        config.dual_stack_endpoint_enabled,
-    ),
+    dualStack:
+      rootValues.enable_dual_stack === true || values.enable_dual_stack === true
+        ? true
+        : config.dual_stack_endpoint_enabled !== undefined
+          ? configBool(config.dual_stack_endpoint_enabled)
+          : undefined,
     connectionTimeout,
     readTimeout,
     maxAttempts,
@@ -962,13 +966,13 @@ function appendQueryParam(
 }
 
 /** Resolve endpoint + encoded path + query params for a service request. */
-export function buildServiceUrl(
+function buildServiceUrlParts(
   io: Invocation,
   sc: ServiceClient,
   pathTemplate: string,
   pathParams: Record<string, string> = {},
   queryParams: [string, string][] = [],
-): URL {
+): { url: URL; endpointUrl: string } {
   const serviceParams: Record<string, string> = { ...pathParams };
   for (const [k, v] of queryParams) serviceParams[k] = v;
   const { resolved } = resolveEndpoint(sc.client, sc.index.regions, {
@@ -994,7 +998,8 @@ export function buildServiceUrl(
         : encoded.replaceAll("%2F", "/");
     path = path.replaceAll(`{${name}}`, replacement);
   }
-  const url = new URL(`${resolved}${path}`);
+  const endpointUrl = `${resolved}${path}`;
+  const url = new URL(endpointUrl);
   if (queryParams.length > 0) {
     const encoded = queryParams
       .map(
@@ -1004,7 +1009,18 @@ export function buildServiceUrl(
       .join("&");
     url.search = url.search ? `${url.search.slice(1)}&${encoded}` : encoded;
   }
-  return url;
+  return { url, endpointUrl };
+}
+
+export function buildServiceUrl(
+  io: Invocation,
+  sc: ServiceClient,
+  pathTemplate: string,
+  pathParams: Record<string, string> = {},
+  queryParams: [string, string][] = [],
+): URL {
+  return buildServiceUrlParts(io, sc, pathTemplate, pathParams, queryParams)
+    .url;
 }
 
 /** Send one signed HTTP request with the client's timeouts, retries and debug logging. */
@@ -1013,7 +1029,7 @@ export async function sendServiceRequest(
   sc: ServiceClient,
   opts: ServiceRequestOptions,
 ): Promise<ServiceResponse> {
-  const url = buildServiceUrl(
+  const { url, endpointUrl } = buildServiceUrlParts(
     io,
     sc,
     opts.pathTemplate,
@@ -1141,7 +1157,13 @@ export async function sendServiceRequest(
     io.err(`DEBUG:oci.base_client: Request: ${req.method} ${req.url}\n`);
     io.err(`DEBUG:oci.base_client: Response status: ${response.status}\n`);
   }
-  return { url, response, raw, requestId: req.headers["opc-request-id"] };
+  return {
+    url,
+    endpointUrl,
+    response,
+    raw,
+    requestId: req.headers["opc-request-id"],
+  };
 }
 
 /** The file parameter and write mode for a download command's response body. */
@@ -1342,23 +1364,25 @@ export async function callOperation(
   const sendPage = async (
     params: [string, string][],
   ): Promise<OperationResult> => {
-    const { url, response, raw, requestId } = await sendServiceRequest(io, sc, {
-      method: operation.http,
-      pathTemplate: operation.path,
-      pathParams,
-      queryParams: params,
-      headers: baseHeaders,
-      body: requestBody,
-      requestIdHeader,
-      noRetry: hasNoneRetry,
-      // A download (`--file` bound to the output) streams a successful body to the file.
-      rawResponse: outputBinding(command) !== undefined,
-      enforceContentHeaders: operation.enforce_content_headers,
-    });
+    const { url, endpointUrl, response, raw, requestId } =
+      await sendServiceRequest(io, sc, {
+        method: operation.http,
+        pathTemplate: operation.path,
+        pathParams,
+        queryParams: params,
+        headers: baseHeaders,
+        body: requestBody,
+        requestIdHeader,
+        noRetry: hasNoneRetry,
+        // A download (`--file` bound to the output) streams a successful body to the file.
+        rawResponse: outputBinding(command) !== undefined,
+        enforceContentHeaders: operation.enforce_content_headers,
+      });
     return {
       operation,
       responseModels,
       url,
+      ...(endpointUrl !== undefined ? { endpointUrl } : {}),
       response,
       raw,
       allPages,

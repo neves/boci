@@ -63,3 +63,33 @@ test("endpoints match the SDK for every client, region form and flag combination
     });
   }
 });
+
+test("dualStack defaults to OCI_DUAL_STACK_ENDPOINT_ENABLED env var, then client.dualStackByDefault", () => {
+  const jms = clients["jms.java_management_service"] as ClientInfo;
+  expect(jms.dualStackByDefault).toBe(true);
+
+  expect(
+    resolveEndpoint(jms, index.regions, {
+      region: "us-ashburn-1",
+      realmSpecific: false,
+      env: {},
+    }).resolved,
+  ).toBe("https://javamanagement.us-ashburn-1.ds.oci.oraclecloud.com/20210610");
+
+  expect(
+    resolveEndpoint(jms, index.regions, {
+      region: "us-ashburn-1",
+      realmSpecific: false,
+      env: { OCI_DUAL_STACK_ENDPOINT_ENABLED: "false" },
+    }).resolved,
+  ).toBe("https://javamanagement.us-ashburn-1.oci.oraclecloud.com/20210610");
+
+  expect(
+    resolveEndpoint(jms, index.regions, {
+      region: "us-ashburn-1",
+      realmSpecific: false,
+      dualStack: false,
+      env: { OCI_DUAL_STACK_ENDPOINT_ENABLED: "true" },
+    }).resolved,
+  ).toBe("https://javamanagement.us-ashburn-1.oci.oraclecloud.com/20210610");
+});

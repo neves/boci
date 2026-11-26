@@ -80,12 +80,25 @@ describe("generated write pipeline", () => {
     expect(tableRun.stdout).toContain("ACTIVE");
   });
 
-  test("handles empty response body without printing empty data object", async () => {
+  test("handles empty 204 response body by rendering null-initialized model fields like oci", async () => {
     const run = await runCli(CLIS.boci, WRITE_ARGV, {
       replies: { status: 204, body: "" },
     });
     expect(run.exitCode).toBe(0);
-    expect(run.stdout).toBe("");
+    expect(JSON.parse(run.stdout)).toEqual({
+      data: {
+        "availability-domain": null,
+        "compartment-id": null,
+        "defined-tags": null,
+        "display-name": null,
+        "freeform-tags": null,
+        id: null,
+        "lifecycle-state": null,
+        "placement-constraint-details": null,
+        "time-created": null,
+        "time-updated": null,
+      },
+    });
     expect(run.stderr).toBe("");
   });
 

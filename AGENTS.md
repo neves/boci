@@ -1,13 +1,13 @@
 # boci
 
-A Bun drop-in for Oracle's `oci` CLI. Read [GLOSSARY.md](GLOSSARY.md) for vocabulary and [docs/adr/](docs/adr/) for the decisions that must not be "fixed". [PLAN.md](PLAN.md) is the Ladder.
+A Bun drop-in for Oracle's `oci` CLI (all 9,372 leaf commands verified against `oci-cli==3.96.3`; Ladder complete). Read [GLOSSARY.md](GLOSSARY.md) for vocabulary and [docs/adr/](docs/adr/) for the decisions that must not be "fixed". [PLAN.md](PLAN.md) is the Ladder.
 
 ## Ground rules
 
 - The Reference CLI is `oci-cli==3.96.3` on Python 3.12, installed with `uv tool install --python 3.12 oci-cli==3.96.3`. Its behavior defines correct. Never "improve" on it.
 - Bun-native code (use the `bun` skill). No runtime dependencies except a JMESPath library. No OCI SDK.
 - Put reusable code specific to boci in `src/lib/`. Put generic helpers that can be reused outside boci in `src/utils/`.
-- Checks: `bun run verify` (`bun fmt --check`, `bun check`, build, then `bun test` with every Parity case, generated ones included, against the compiled `dist/boci`; quiet). Add `bun lint` once the installed Bun has it.
+- Checks: `bun run verify` (`bun fmt --check`, `bun check`, build, then `bun test` with every Parity case, generated ones included, against the compiled `dist/boci`; quiet) and `mise exec -- bun lint` (Bun canary pinned in `mise.toml`; keep 0 warnings). CI runs `bun run verify` on Linux, macOS, and Windows.
 - Default `bun test` (unit tests + hand-written Parity cases, ~10 s) is offline and fast: never let it touch the network or the real `~/.oci`. Generated cases (`test/parity/cases/generated-*.json`) run only with `BOCI_PARITY_ALL=1`.
 - Live calls only through `bun run parity:live`, which reads `.env.test` (`BOCI_TEST_PROFILE=<your profile>`). Live tests may:
   - run any read-only command;
@@ -26,7 +26,7 @@ Every byte read stays in context and is re-sent on every later turn. Keep contex
 - **Tests while iterating:** run only what you touch: `bun test test/parity -t '<id or key>'` (prefix `BOCI_PARITY_ALL=1` for a `generated-*` case) or `bun test test/unit/<file>.test.ts`. Run the full `bun run verify` once, before the commit. Fix every error it reports before you re-run it.
 - **Fuzzing:** `bun run fuzz --seed <n> --command "<key>"` reproduces a Rung 9 finding; `--promote` turns its mismatches into Parity cases with goldens. It runs the Reference CLI, so it never runs inside `bun test`.
 - **Goldens:** `bun run golden --filter <id-prefix>`. Never pass `--force` without a reason. If a golden hangs, the Reference CLI is probably retrying with backoff (timeouts, 5xx, 429), so add `--no-retry` to the case unless retries are what it tests.
-- **Reading:** read line ranges of large files (`src/cli.ts` is about 900 lines). Cap searches with `rg -n -m 20 …` and long output with `| head -50`. Read GLOSSARY.md or an ADR only when the item touches that vocabulary or decision.
+- **Reading:** read line ranges of large files (`src/core/cli.ts` ~2,900 lines, `src/core/operation.ts` ~2,200 lines, `src/core/program.ts` ~4,400 lines). Cap searches with `rg -n -m 20 …` and long output with `| head -50`. Read GLOSSARY.md or an ADR only when the item touches that vocabulary or decision.
 - **No web search** for anything this repo already records (spec, goldens, recordings, DIVERGENCES.md).
 
 ## Resume requests

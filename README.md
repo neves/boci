@@ -2,10 +2,10 @@
 
 **The OCI CLI, without the wait.**
 
-boci is a drop-in replacement for Oracle's [`oci` CLI](https://github.com/oracle/oci-cli), built on [Bun](https://bun.sh). It has the same commands, the same flags and the same output, and it starts **32× faster** (13 ms vs 416 ms for `--version`). Swap `oci` for `boci` and your scripts keep working.
+boci is a drop-in replacement for Oracle's [`oci` CLI](https://github.com/oracle/oci-cli), built on [Bun](https://bun.sh). It has the same commands, the same flags and the same output, and it starts **10× faster** (41 ms vs 413 ms for `--version`, 53 ms vs 492 ms for `os ns get`). Swap `oci` for `boci` and your scripts keep working.
 
-> [!WARNING]
-> **Early development.** boci can't call OCI yet. Help, argument parsing, usage errors, config handling and request signing already match `oci` byte for byte, and endpoint resolution matches the SDK on 1,800 cases. See [Progress](#progress).
+> [!NOTE]
+> **100% parity verified.** All **9,372 of 9,372** leaf commands across 175 OCI services are implemented and parity-tested against `oci-cli==3.96.3` on Linux, macOS, and Windows (17 documented accepted divergences in [`DIVERGENCES.md`](DIVERGENCES.md), 0 unresolved). See [Progress](#progress).
 
 - One static binary
 - No Python, no venv
@@ -19,29 +19,26 @@ Before `oci` sends a single request, Python has to start and import the whole CL
 
 |                           |                  boci |                  oci |              |
 | ------------------------- | --------------------: | -------------------: | ------------ |
-| Start-up (`--version`)    |             **13 ms** |               416 ms | 32× faster   |
-| Peak memory (`--version`) |             **50 MB** |                69 MB | 28% less     |
-| Install size              | **106 MB** (one file) | 465 MB (Python venv) | 4.4× smaller |
+| Start-up (`--version`)    |             **41 ms** |               413 ms | 10.1× faster |
+| Peak memory (`--version`) |             **57 MB** |                66 MB | 14% less     |
+| Install size              | **108 MB** (one file) | 575 MB (Python venv) | 5.3× smaller |
 
 Where `oci`'s time goes today (median of 10 runs). Offline rows use a local fake endpoint, so they measure CLI overhead only:
 
-| Command                                |     oci | of which start-up | boci            |
-| -------------------------------------- | ------: | ----------------: | --------------- |
-| `oci --version`                        |  416 ms |              100% | **13 ms** (32×) |
-| `oci --help`                           |  434 ms |               96% | **21 ms** (21×) |
-| `oci os --help`                        |  454 ms |               92% | **18 ms** (25×) |
-| `oci compute instance launch --help`   |  723 ms |               58% | **26 ms** (28×) |
-| usage error (unknown flag)             |  456 ms |               91% | **18 ms** (25×) |
-| `oci os ns get`                        |  493 ms |               84% | coming          |
-| `oci iam region list`                  |  477 ms |               87% | coming          |
-| `oci os bucket list --all` (20 pages)  |  592 ms |               70% | coming          |
-| `oci compute instance list` (5k items) | 1480 ms |               28% | coming          |
-| … `--query` (5k items)                 | 1284 ms |               32% | coming          |
-| … `--output table` (5k items)          | 1332 ms |               31% | coming          |
-| live: `oci os ns get`                  |  572 ms |               73% | coming          |
-| live: `oci iam region list`            |  631 ms |               66% | coming          |
+| Command                                |     oci | of which start-up | boci              |
+| -------------------------------------- | ------: | ----------------: | ----------------- |
+| `oci --version`                        |  413 ms |              100% | **41 ms** (10.1×) |
+| `oci os --help`                        |  451 ms |               91% | **47 ms** (9.5×)  |
+| `oci compute instance launch --help`   |  716 ms |               58% | **59 ms** (12.2×) |
+| usage error (unknown flag)             |  455 ms |               91% | **48 ms** (9.6×)  |
+| `oci os ns get`                        |  492 ms |               84% | **53 ms** (9.3×)  |
+| `oci iam region list`                  |  474 ms |               87% | **56 ms** (8.4×)  |
+| `oci os bucket list --all` (20 pages)  |  594 ms |               69% | **113 ms** (5.3×) |
+| `oci compute instance list` (5k items) | 1482 ms |               28% | **307 ms** (4.8×) |
+| … `--query` (5k items)                 | 1283 ms |               32% | **177 ms** (7.2×) |
+| … `--output table` (5k items)          | 1320 ms |               31% | **189 ms** (7.0×) |
 
-Start-up share = oci's own start-up (416 ms) divided by the command's total. Measured on an Intel Core i3-7100 (4 threads), Linux, oci-cli 3.96.3 on Python 3.12, Bun 1.4.5. Peak memory is taken through a tiny C launcher so the parent process doesn't inflate it. Reproduce with `bun run bench`, or `bun run bench:live` to add real API calls. Results are written to [`bench/results/latest.md`](bench/results/latest.md). The boci column fills in as each command lands.
+Start-up share = oci's import floor (412 ms) divided by the command's total. Measured on an Intel Core i3-7100 (4 threads), Linux, oci-cli 3.96.3 on Python 3.12, Bun 1.4.5. Peak memory is taken through a tiny C launcher so the parent process doesn't inflate it. Reproduce with `bun run bench`, or `bun run bench:live` to add real API calls. Results are written to [`bench/results/latest.md`](bench/results/latest.md).
 
 ## Drop-in
 
@@ -79,19 +76,21 @@ $ bun run status            # live numbers: verified / implemented / missing per
 $ bun run status --service os
 ```
 
-Snapshot: **0 of 9,372 commands verified.**
+Snapshot: **9,372 of 9,372 commands verified (100.0%).** (8,184 generated, 1,188 custom · 17 accepted divergences, 0 unresolved.)
 
-| Rung                                             |  Done |
-| ------------------------------------------------ | ----: |
-| Foundations: extractor, status, test harness     | 13/13 |
-| Offline: version, help, parser, config, rc file  | 15/15 |
-| First signed request: `os ns get`                |   4/9 |
-| Generated reads (GET)                            |   0/3 |
-| Lists, pagination, `--query`, tables             |   0/5 |
-| Request bodies and writes                        |   0/5 |
-| Waiters: `--wait-for-state`                      |   0/2 |
-| Other auth methods                               |   0/4 |
-| Hand-written commands, interactive mode, Windows |   0/6 |
+| Rung                                            |    Done |
+| ----------------------------------------------- | ------: |
+| Rung -1 — Foundations (measure before building) |   13/13 |
+| Rung 0 — Offline behavior                       |   15/15 |
+| Rung 1 — First signed request                   |   18/18 |
+| Rung 2 — Generated GETs                         |     9/9 |
+| Rung 3 — Lists and output                       |     5/5 |
+| Rung 4 — Request bodies                         |   10/10 |
+| Rung 5 — Waiters                                |     3/3 |
+| Rung 6 — Other auth methods                     |     4/4 |
+| Rung 7 — Custom commands (hardest last)         |   18/18 |
+| Rung 8 — Remaining commands and Engine features | 211/211 |
+| Rung 9 — Differential fuzzing                   |   34/34 |
 
 ## Install
 
@@ -142,7 +141,7 @@ $ bun run status         # what works, what's missing
 $ bun test               # offline parity suite
 ```
 
-Once commands land, use it as `oci`:
+Use it as `oci`:
 
 ```console
 # boci reads your existing ~/.oci/config
@@ -151,20 +150,23 @@ $ boci os ns get --profile my-profile
 # or make it the default, scripts unchanged
 $ alias oci=boci
 
-# hand commands boci doesn't implement yet to the real oci (otherwise: exit code 3)
+# optional: fall back to the real oci on any unsupported edge case (otherwise: exit code 3)
 $ export BOCI_FALLBACK=oci
 ```
 
 ## Development
 
-| Command               | What it does                                                |
-| --------------------- | ----------------------------------------------------------- |
-| `bun run extract`     | Regenerate `spec/` from the pinned oci-cli (needs `uv`)     |
-| `bun run status`      | Parity progress per service and ladder rung                 |
-| `bun test`            | Offline test suite (never touches the network or `~/.oci`)  |
-| `bun run parity:live` | Record or confirm parity against the profile in `.env.test` |
-| `bun run bench`       | oci vs boci benchmark (`bench:live` adds real API calls)    |
-| `bun run build`       | Compile `dist/boci`                                         |
+| Command                 | What it does                                                |
+| ----------------------- | ----------------------------------------------------------- |
+| `bun run extract`       | Regenerate `spec/` from the pinned oci-cli (needs `uv`)     |
+| `bun run status`        | Parity progress per service and ladder rung                 |
+| `bun test`              | Offline test suite (never touches the network or `~/.oci`)  |
+| `bun run verify`        | Format, typecheck, build, and full parity suite             |
+| `mise exec -- bun lint` | Lint the codebase with Bun canary (`mise.toml`)             |
+| `bun run fuzz`          | Differential fuzzing against the reference `oci` CLI        |
+| `bun run parity:live`   | Record or confirm parity against the profile in `.env.test` |
+| `bun run bench`         | oci vs boci benchmark (`bench:live` adds real API calls)    |
+| `bun run build`         | Compile `dist/boci`                                         |
 
 The reference CLI is `oci-cli==3.96.3`. Install it with `uv tool install --python 3.12 oci-cli==3.96.3`.
 
@@ -174,13 +176,13 @@ The reference CLI is `oci-cli==3.96.3`. Install it with `uv tool install --pytho
 No. boci is an independent open-source project and isn't affiliated with or endorsed by Oracle. It talks to the same public OCI APIs the official CLI uses.
 
 **Will my scripts break?**
-That's the point of the parity tests: the same invocation should produce the same stdout, stderr error object and exit code. Commands boci doesn't support yet fail with a clear message. With `BOCI_FALLBACK=oci` set, they're handed to the real `oci` instead.
+That's the point of the parity tests: all 9,372 commands are verified against the reference CLI for stdout, stderr error shape, requests, and exit codes. The 17 known accepted divergences are documented in [`DIVERGENCES.md`](DIVERGENCES.md). With `BOCI_FALLBACK=oci` set, any unsupported edge case is handed to the real `oci`.
 
 **Why Bun?**
 Bun compiles TypeScript into one self-contained executable that starts in milliseconds, with fast built-in crypto, HTTP and JSON. boci also skips the OCI SDK and signs requests itself, so there's very little to load.
 
-**Why is the binary 106 MB?**
-Most of it is the Bun runtime, which every compiled Bun app embeds. The command data for all 9,372 commands adds only 2.3 MB compressed. It's still one file, under a quarter of the size of the Python install, with nothing else to set up.
+**Why is the binary 108 MB?**
+Most of it is the Bun runtime, which every compiled Bun app embeds. The command data for all 9,372 commands adds only 2.3 MB compressed. It's still one file, under a fifth of the size of the Python install, with nothing else to set up.
 
 **Which oci version does boci match?**
 oci-cli 3.96.3. Moving to a newer oci release regenerates the command data and shows exactly what changed.

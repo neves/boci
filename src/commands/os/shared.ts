@@ -1,37 +1,24 @@
 // Object Storage custom commands (`oci os object ...`), matching
 // services/object_storage/src/oci_cli_object_storage/objectstorage_cli_extended.py.
 import {
-  accessSync,
   closeSync,
-  constants as fsConstants,
   existsSync,
   lstatSync,
-  mkdirSync,
   openSync,
   readdirSync,
   readFileSync,
   readSync,
   realpathSync,
-  rmdirSync,
   statSync,
-  unlinkSync,
-  utimesSync,
-  writeSync,
 } from "node:fs";
-import { basename, extname, resolve } from "node:path";
-import { expandUser } from "../../core/config.ts";
+import { extname, resolve } from "node:path";
 import { writeAllBytes } from "../../utils/byte-writer.ts";
 import { normalizePosixPath } from "../../utils/posixPath.ts";
-import {
-  type OutputFileHandle,
-  openClickFileForWrite,
-} from "../../core/click-file.ts";
+import { type OutputFileHandle } from "../../core/click-file.ts";
 import { Exit, type Invocation } from "../../lib/io.ts";
-import { parseJsonParameter } from "../../core/json-input.ts";
 import {
   type ClientSettings,
   type ServiceClient,
-  createServiceClient,
   sendServiceRequest,
 } from "../../core/operation.ts";
 import {
@@ -39,7 +26,6 @@ import {
   formatServiceError,
   renderDocument,
 } from "../../core/output.ts";
-import { expandVars } from "../../core/rc.ts";
 import type { Index, ServiceSpec } from "../../core/spec.ts";
 
 export const SSE_ALGORITHM = "AES256";

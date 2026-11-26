@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { delimiter } from "node:path";
 
 /** Best-effort detached browser launch for `url` using `env.BROWSER` or platform opener. */
 export function openUrlInBrowser(
@@ -21,14 +22,14 @@ export function openUrlInBrowser(
   };
 
   if (env.BROWSER !== undefined) {
-    for (const rawEntry of env.BROWSER.split(":")) {
+    for (const rawEntry of env.BROWSER.split(delimiter)) {
       const entry = rawEntry.trim();
       if (!entry) continue;
       const parts = entry.split(/\s+/);
       const bin = parts[0];
       if (!bin) continue;
       const resolvedBin =
-        bin.includes("/") || existsSync(bin)
+        bin.includes("/") || bin.includes("\\") || existsSync(bin)
           ? existsSync(bin)
             ? bin
             : null

@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { expect, test } from "bun:test";
 import { run } from "../../src/core/cli.ts";
 import { startFakeEndpoint } from "../harness/fake-endpoint.ts";
@@ -65,7 +66,7 @@ test("function invoke reuses its cached endpoint and bypasses it when disabled o
   );
   expect(entry?.key).toEqual({
     auth: "api_key",
-    config_file: sandbox.configFile,
+    config_file: resolve(sandbox.configFile),
     enable_dual_stack: "",
     endpoint: endpoint.url,
     function_id: "function-id",

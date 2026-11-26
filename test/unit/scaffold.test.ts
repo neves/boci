@@ -35,7 +35,7 @@ describe("scaffold-lib", () => {
     const dir = await mkdtemp(tmpdir() + "/boci-scaffold-");
     try {
       const file = dir + "/handler.ts";
-      const src = resolve(import.meta.dir, "../../src");
+      const src = resolve(import.meta.dir, "../../src").replaceAll("\\", "/");
       await Bun.write(file, out.replaceAll('"../../', '"' + src + "/"));
       await Bun.$`bun check ${file}`.quiet();
     } finally {

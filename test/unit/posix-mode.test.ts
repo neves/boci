@@ -34,7 +34,9 @@ test("Windows permission modes are tied to the current filesystem object", () =>
 
   setPosixMode(path, 0o000);
   expect(getPosixMode(path)).toBe(0o000);
-  expect(statSync(path).mode & 0o777).toBe(0o000);
+  expect(statSync(path).mode & 0o777).toBe(
+    originalPlatform === "win32" ? 0o444 : 0o000,
+  );
 
   rmSync(path);
   writeFileSync(path, "replacement");
@@ -49,7 +51,9 @@ test("Windows directory modes do not survive directory recreation", () => {
 
   setPosixMode(path, 0o000);
   expect(getPosixMode(path)).toBe(0o000);
-  expect(statSync(path).mode & 0o777).toBe(0o000);
+  expect(statSync(path).mode & 0o777).toBe(
+    originalPlatform === "win32" ? 0o444 : 0o000,
+  );
 
   chmodSync(path, 0o700);
   rmSync(path, { recursive: true });

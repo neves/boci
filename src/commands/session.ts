@@ -1277,9 +1277,8 @@ export async function persistUserSession(
   const configLocation = opts.configLocation || defaultConfigLocation;
   const tokenDir = opts.tokenLocation ?? defaultTokenDir;
 
-  const sessionAuthLocation = resolve(
-    io.cwd,
-    `${tokenDir.replace(/[\\/]+$/, "")}/${profileName}`,
+  const sessionAuthLocation = normalizePosixPath(
+    resolve(io.cwd, `${tokenDir.replace(/[\\/]+$/, "")}/${profileName}`),
   );
   if (!existsSync(sessionAuthLocation)) {
     createDirectory(sessionAuthLocation);

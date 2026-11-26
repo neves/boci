@@ -65,8 +65,19 @@ const cases =
         prevResults,
       });
 
+const isPosixShellFixture = (c: (typeof cases)[number]) =>
+  Object.entries(c.sandbox?.files ?? {}).some(
+    ([rel, content]) =>
+      content.startsWith("#!/bin/sh") &&
+      ((c.sandbox?.fileModes?.[rel] ?? 0) & 0o111) !== 0,
+  );
+const skipOnPlatform = (c: (typeof cases)[number]) =>
+  process.platform === "win32" && isPosixShellFixture(c);
+
 const isImplemented = await implementedLookup(cases.map((c) => c.key));
-const runnableCases = cases.filter((c) => isImplemented(c.key));
+const runnableCases = cases.filter(
+  (c) => isImplemented(c.key) && !skipOnPlatform(c),
+);
 const missingCases = cases.length - runnableCases.length;
 const missingKeys = new Set(
   cases.filter((c) => !isImplemented(c.key)).map((c) => c.key),
@@ -251,7 +262,7 @@ async function runParityCase(c: (typeof cases)[number]) {
 describe.concurrent("parity", () => {
   for (const c of cases) {
     const implemented = isImplemented(c.key);
-    test.skipIf(!implemented)(
+    test.skipIf(!implemented || skipOnPlatform(c))(
       `${c.id} (${c.key})`,
       () => withBrowserCallbackPort(c, () => runParityCase(c)),
       c.key === "setup bootstrap" ? 30_000 : undefined,

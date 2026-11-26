@@ -10,6 +10,7 @@ import {
 } from "../../lib/configparser.ts";
 import { Exit } from "../../lib/io.ts";
 import { readConfigFile } from "../../utils/configFile.ts";
+import { normalizePosixPath } from "../../utils/posixPath.ts";
 import { promptSessionForProfile } from "../session.ts";
 import {
   applyUserOnlyAccessPermissions,
@@ -37,9 +38,11 @@ export async function runSetupPkcs11Auth(
   const defaultConfig = expandUser("~/.oci/config", io.env);
   const explicitProfile =
     typeof values.profile_name === "string" && values.profile_name;
-  const config = resolve(
-    io.cwd,
-    explicitProfile ? expandUser(settings.configFile, io.env) : defaultConfig,
+  const config = normalizePosixPath(
+    resolve(
+      io.cwd,
+      explicitProfile ? expandUser(settings.configFile, io.env) : defaultConfig,
+    ),
   );
   const rcFile = resolve(io.cwd, expandUser(rc.path, io.env));
 

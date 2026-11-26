@@ -13,6 +13,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { open } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { checkFileAccessibility } from "../lib/accessibility.ts";
 import { isZipBuffer } from "../utils/zip.ts";
@@ -2438,7 +2439,10 @@ function programFiles(
   let writeSeq = 0;
   return {
     open(path, mode) {
-      const resolved = resolve(io.cwd, path);
+      const resolved =
+        process.platform === "win32" && path.startsWith("/tmp/")
+          ? resolve(tmpdir(), path.slice("/tmp/".length))
+          : resolve(io.cwd, path);
       if (/[wax]/.test(mode)) {
         if (mode.includes("+"))
           throw new ProgramUnsupported("open() read/write mode");
@@ -2534,10 +2538,20 @@ function programFiles(
         throw new ProgramUnsupported("open()");
       }
     },
-    exists: (path) => path !== "" && existsSync(resolve(io.cwd, path)),
+    exists: (path) =>
+      path !== "" &&
+      existsSync(
+        process.platform === "win32" && path.startsWith("/tmp/")
+          ? resolve(tmpdir(), path.slice("/tmp/".length))
+          : resolve(io.cwd, path),
+      ),
     isfile: (path) => {
       try {
-        return path !== "" && statSync(resolve(io.cwd, path)).isFile();
+        const resolved =
+          process.platform === "win32" && path.startsWith("/tmp/")
+            ? resolve(tmpdir(), path.slice("/tmp/".length))
+            : resolve(io.cwd, path);
+        return path !== "" && statSync(resolved).isFile();
       } catch {
         return false;
       }
@@ -2546,7 +2560,10 @@ function programFiles(
     isZipfile: (path) => {
       if (!path) return false;
       try {
-        const resolved = resolve(io.cwd, path);
+        const resolved =
+          process.platform === "win32" && path.startsWith("/tmp/")
+            ? resolve(tmpdir(), path.slice("/tmp/".length))
+            : resolve(io.cwd, path);
         if (!statSync(resolved).isFile()) return false;
         return isZipBuffer(readFileSync(resolved));
       } catch {

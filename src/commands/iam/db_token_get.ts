@@ -1,5 +1,5 @@
 import { mkdir, open } from "node:fs/promises";
-import { join, normalize, resolve } from "node:path";
+import { normalize, resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
 import { callOperation } from "../../core/operation.ts";
 import { printResult } from "../../core/output.ts";
@@ -13,6 +13,7 @@ import { outputOptions, sdkCommand } from "../../lib/custom-command.ts";
 import { Exit } from "../../lib/io.ts";
 import { setPosixMode } from "../../lib/posixMode.ts";
 import { generateRsaKeyPair } from "../../utils/generateRsaKeyPair.ts";
+import { normalizePosixPath } from "../../utils/posixPath.ts";
 import { formatLocalTimestamp } from "../session.ts";
 
 const operation: OperationSpec = {
@@ -52,8 +53,10 @@ export async function runIamDbTokenGet(
   }
 
   const { privateKey, publicKey } = generateRsaKeyPair();
-  const directory = normalize(
-    expandUser(String(values.db_token_location ?? "~/.oci/db-token"), io.env),
+  const directory = normalizePosixPath(
+    normalize(
+      expandUser(String(values.db_token_location ?? "~/.oci/db-token"), io.env),
+    ),
   );
   await mkdir(resolve(io.cwd, directory), { recursive: true });
   const publicPem = publicKey.export({ type: "spki", format: "pem" }) as string;
@@ -79,7 +82,7 @@ export async function runIamDbTokenGet(
   });
   if (!result.response.ok) printResult(io, result, outputOptions(ctx));
 
-  const privatePath = join(directory, "oci_db_key.pem");
+  const privatePath = `${directory}/oci_db_key.pem`;
   const privatePem = privateKey.export({
     type: "pkcs8",
     format: "pem",
@@ -92,7 +95,7 @@ export async function runIamDbTokenGet(
     io.err("KeyError: 'token'\n");
     throw new Exit(1);
   }
-  const tokenPath = join(directory, "token");
+  const tokenPath = `${directory}/token`;
   await writePrivateFile(resolve(io.cwd, tokenPath), token);
   io.out(`db-token written at: ${tokenPath}\n`);
 

@@ -11,7 +11,7 @@ boci is a drop-in replacement for Oracle's [`oci` CLI](https://github.com/oracle
 - No Python, no venv
 - Parity-tested against the real `oci`
 
-Homepage: [neves.github.io/boci](https://neves.github.io/boci/) ([`site/index.html`](site/index.html))
+Homepage: [boci.pages.dev](https://boci.pages.dev) · [neves.github.io/boci](https://neves.github.io/boci/) ([`site/index.html`](site/index.html))
 
 ## Benchmarks
 

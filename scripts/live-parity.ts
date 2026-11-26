@@ -240,7 +240,7 @@ function printSummary(
     `Progress:   ${summary.completed}/${summary.totalPlanned} completed (${summary.remaining} remaining, ${summary.servicesTested} services)`,
   );
   console.log(
-    `Matches:    ${c.green(`${summary.matched} (${passRate}%)`)}  [ok: ${summary.matchedOk}, api-error: ${summary.matchedApiError}, usage-error: ${summary.matchedUsageError}]`,
+    `Matches:    ${c.green(`${summary.matched} (${passRate}%)`)}  [exact: ${summary.matchedExact}, live-volatile: ${summary.matchedVolatile} · ok: ${summary.matchedOk}, api-error: ${summary.matchedApiError}, usage-error: ${summary.matchedUsageError}]`,
   );
   console.log(
     `Diverged:   ${summary.diverged > 0 ? c.red(String(summary.diverged)) : c.green("0")}`,
@@ -270,6 +270,19 @@ if (flags.report) {
   if (existing.size === 0) {
     console.error(`No saved results found at ${resultsPath}`);
     process.exit(1);
+  }
+  // Re-evaluate saved raw outputs against current comparison rules.
+  for (const [key, rec] of existing) {
+    const cmp = compareLiveRuns(rec.oci, rec.boci);
+    existing.set(key, {
+      ...rec,
+      status: cmp.match ? "match" : "diverged",
+      outcome: cmp.outcome,
+      diffs: cmp.diffs,
+      ...(cmp.volatileReasons
+        ? { volatileReasons: cmp.volatileReasons }
+        : { volatileReasons: undefined }),
+    });
   }
   const summary = await writeReports(existing, existing.size);
   printSummary(summary);
@@ -497,6 +510,7 @@ for (const item of toRun) {
     status: cmp.match ? "match" : "diverged",
     outcome: cmp.outcome,
     diffs: cmp.diffs,
+    ...(cmp.volatileReasons ? { volatileReasons: cmp.volatileReasons } : {}),
   };
 
   await appendFile(resultsPath, `${JSON.stringify(record)}\n`);
@@ -508,7 +522,10 @@ for (const item of toRun) {
   const timing = `${ociSample.elapsedMs.toFixed(0)}ms → ${bociSample.elapsedMs.toFixed(0)}ms (${speedup.toFixed(1)}×)`;
   if (cmp.match) {
     const icon = cmp.outcome === "ok" ? c.green("✓") : c.dim("·");
-    const tag = cmp.outcome === "ok" ? "ok" : `exit ${ociSample.exitCode}`;
+    const baseTag = cmp.outcome === "ok" ? "ok" : `exit ${ociSample.exitCode}`;
+    const tag = cmp.volatileReasons?.length
+      ? `${baseTag}, volatile: ${cmp.volatileReasons.join("+")}`
+      : baseTag;
     process.stderr.write(
       `${prefix} ${icon} ${item.key} ${c.dim(`[${tag}] ${timing}`)}\n`,
     );

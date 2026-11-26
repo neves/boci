@@ -33,6 +33,7 @@ export type ComparisonResult = {
   match: boolean;
   outcome: OutcomeKind;
   diffs: string[];
+  volatileReasons?: string[];
 };
 
 export type LiveParityRecord = {
@@ -46,6 +47,7 @@ export type LiveParityRecord = {
   status: "match" | "diverged";
   outcome: OutcomeKind;
   diffs: string[];
+  volatileReasons?: string[];
 };
 
 export type LiveParitySummary = {
@@ -53,6 +55,8 @@ export type LiveParitySummary = {
   completed: number;
   remaining: number;
   matched: number;
+  matchedExact: number;
+  matchedVolatile: number;
   matchedOk: number;
   matchedApiError: number;
   matchedUsageError: number;
@@ -288,40 +292,202 @@ function classifyOutcome(exitCode: number): OutcomeKind {
   return "api-error";
 }
 
-/**
- * Check if two JSON stdout envelopes have identical `data` and differ ONLY in
- * per-request server tokens (`opc-next-page` or `etag`).
- */
-function differsOnlyInVolatileEnvelopeHeaders(a: string, b: string): boolean {
+const ISO_TIMESTAMP_RE =
+  /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+// Allows small live clock skew and backend replica drift (e.g. Cloud Guard managed recipes ~2.5m)
+// while still enforcing identical ISO-8601 format, precision, and timezone suffix.
+const LIVE_TIMESTAMP_SKEW_MS = 300_000;
+const LIVE_JWT_SKEW_SEC = 10;
+const JWT_TIME_CLAIMS = new Set(["iat", "nbf", "exp"]);
+
+function isSameFormatRecentTimestamp(a: string, b: string): boolean {
+  const ma = ISO_TIMESTAMP_RE.exec(a);
+  const mb = ISO_TIMESTAMP_RE.exec(b);
+  if (!ma || !mb) return false;
+  // Require identical precision and timezone suffix so datetime formatting bugs still fail.
+  if ((ma[2]?.length ?? 0) !== (mb[2]?.length ?? 0) || ma[3] !== mb[3]) {
+    return false;
+  }
+  const ta = Date.parse(a);
+  const tb = Date.parse(b);
+  if (Number.isNaN(ta) || Number.isNaN(tb)) return false;
+  return Math.abs(ta - tb) <= LIVE_TIMESTAMP_SKEW_MS;
+}
+
+function normalizeJwtSubValue(sub: string): unknown {
+  const normalized = sub
+    .replace(/(signature=\\?")[^"\\]+(\\?")/g, "$1<sig>$2")
+    .replace(
+      /\b[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT\b/g,
+      "<http-date>",
+    );
   try {
-    const oa = JSON.parse(a) as unknown;
-    const ob = JSON.parse(b) as unknown;
+    return JSON.parse(normalized) as unknown;
+  } catch {
+    return normalized;
+  }
+}
+
+function decodeBase64UrlJson(part: string): Record<string, unknown> | null {
+  try {
+    const padded = part
+      .replaceAll("-", "+")
+      .replaceAll("_", "/")
+      .padEnd(Math.ceil(part.length / 4) * 4, "=");
+    const parsed = JSON.parse(
+      Buffer.from(padded, "base64").toString("utf8"),
+    ) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function isEquivalentLiveJwt(a: string, b: string): boolean {
+  const partsA = a.split(".");
+  const partsB = b.split(".");
+  if (partsA.length !== 3 || partsB.length !== 3) return false;
+  if (!partsA[2] || !partsB[2]) return false;
+  const headerA = decodeBase64UrlJson(partsA[0]!);
+  const headerB = decodeBase64UrlJson(partsB[0]!);
+  const payloadA = decodeBase64UrlJson(partsA[1]!);
+  const payloadB = decodeBase64UrlJson(partsB[1]!);
+  if (!headerA || !headerB || !payloadA || !payloadB) return false;
+  if (canonicalJson(headerA) !== canonicalJson(headerB)) return false;
+  const keysA = Object.keys(payloadA).sort();
+  const keysB = Object.keys(payloadB).sort();
+  if (JSON.stringify(keysA) !== JSON.stringify(keysB)) return false;
+  for (const k of keysA) {
+    const va = payloadA[k];
+    const vb = payloadB[k];
     if (
-      !oa ||
-      !ob ||
-      typeof oa !== "object" ||
-      typeof ob !== "object" ||
-      Array.isArray(oa) ||
-      Array.isArray(ob)
+      JWT_TIME_CLAIMS.has(k) &&
+      typeof va === "number" &&
+      typeof vb === "number"
+    ) {
+      if (Math.abs(va - vb) > LIVE_JWT_SKEW_SEC) return false;
+      continue;
+    }
+    if (k === "sub" && typeof va === "string" && typeof vb === "string") {
+      const subReasons = new Set<string>();
+      if (
+        !compareJsonValues(
+          normalizeJwtSubValue(va),
+          normalizeJwtSubValue(vb),
+          "$.sub",
+          subReasons,
+        )
+      ) {
+        return false;
+      }
+      continue;
+    }
+    if (canonicalJson(va) !== canonicalJson(vb)) return false;
+  }
+  return true;
+}
+
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalJson).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>).sort(
+      ([a], [b]) => a.localeCompare(b),
+    );
+    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalJson(v)}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function compareJsonValues(
+  a: unknown,
+  b: unknown,
+  path: string,
+  reasons: Set<string>,
+): boolean {
+  if (a === b) return true;
+  if (typeof a === "string" && typeof b === "string") {
+    if (path === "$.opc-next-page" || path === "$.etag") {
+      reasons.add("envelope-token");
+      return true;
+    }
+    if (isSameFormatRecentTimestamp(a, b)) {
+      reasons.add("server-timestamp");
+      return true;
+    }
+    if (isEquivalentLiveJwt(a, b)) {
+      reasons.add("jwt-token");
+      return true;
+    }
+    return false;
+  }
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    const positionalReasons = new Set<string>();
+    let positionalOk = true;
+    for (let i = 0; i < a.length; i++) {
+      if (!compareJsonValues(a[i], b[i], `${path}[${i}]`, positionalReasons)) {
+        positionalOk = false;
+        break;
+      }
+    }
+    if (positionalOk) {
+      for (const r of positionalReasons) reasons.add(r);
+      return true;
+    }
+    // Check identical multiset (server-side nondeterministic array order).
+    const sortedA = a.map(canonicalJson).sort();
+    const sortedB = b.map(canonicalJson).sort();
+    if (sortedA.every((v, i) => v === sortedB[i])) {
+      reasons.add("array-order");
+      return true;
+    }
+    return false;
+  }
+  if (
+    a &&
+    b &&
+    typeof a === "object" &&
+    typeof b === "object" &&
+    !Array.isArray(a) &&
+    !Array.isArray(b)
+  ) {
+    const recA = a as Record<string, unknown>;
+    const recB = b as Record<string, unknown>;
+    const keysA = Object.keys(recA).sort();
+    const keysB = Object.keys(recB).sort();
+    if (
+      keysA.length !== keysB.length ||
+      !keysA.every((k, i) => k === keysB[i])
     ) {
       return false;
     }
-    const strip = (obj: Record<string, unknown>) => {
-      const out: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(obj)) {
-        if (k === "opc-next-page" || k === "etag") continue;
-        out[k] = v;
+    for (const k of keysA) {
+      if (!compareJsonValues(recA[k], recB[k], `${path}.${k}`, reasons)) {
+        return false;
       }
-      return out;
-    };
-    const recA = oa as Record<string, unknown>;
-    const recB = ob as Record<string, unknown>;
-    // Both must have the same presence of opc-next-page / etag (only values may differ).
-    if ("opc-next-page" in recA !== "opc-next-page" in recB) return false;
-    if ("etag" in recA !== "etag" in recB) return false;
-    return JSON.stringify(strip(recA)) === JSON.stringify(strip(recB));
+    }
+    return true;
+  }
+  return false;
+}
+
+function compareLiveJson(
+  a: string,
+  b: string,
+): { equivalent: boolean; reasons: string[] } {
+  try {
+    const oa = JSON.parse(a) as unknown;
+    const ob = JSON.parse(b) as unknown;
+    const reasons = new Set<string>();
+    const equivalent = compareJsonValues(oa, ob, "$", reasons);
+    return { equivalent, reasons: [...reasons].sort() };
   } catch {
-    return false;
+    return { equivalent: false, reasons: [] };
   }
 }
 
@@ -331,16 +497,19 @@ export function compareLiveRuns(
   boci: CliSample,
 ): ComparisonResult {
   const diffs: string[] = [];
+  const volatileReasons: string[] = [];
   if (oci.exitCode !== boci.exitCode) {
     diffs.push(`exitCode: oci=${oci.exitCode} vs boci=${boci.exitCode}`);
   }
   const ociOut = normalizeLiveOutput(oci.stdout, "stdout");
   const bociOut = normalizeLiveOutput(boci.stdout, "stdout");
-  if (
-    ociOut !== bociOut &&
-    !differsOnlyInVolatileEnvelopeHeaders(ociOut, bociOut)
-  ) {
-    diffs.push(`stdout (${firstDiffLine(ociOut, bociOut)})`);
+  if (ociOut !== bociOut) {
+    const jsonCmp = compareLiveJson(ociOut, bociOut);
+    if (jsonCmp.equivalent) {
+      volatileReasons.push(...jsonCmp.reasons);
+    } else {
+      diffs.push(`stdout (${firstDiffLine(ociOut, bociOut)})`);
+    }
   }
   const ociErr = normalizeLiveOutput(oci.stderr, "stderr");
   const bociErr = normalizeLiveOutput(boci.stderr, "stderr");
@@ -351,6 +520,7 @@ export function compareLiveRuns(
     match: diffs.length === 0,
     outcome: classifyOutcome(oci.exitCode),
     diffs,
+    ...(volatileReasons.length > 0 ? { volatileReasons } : {}),
   };
 }
 
@@ -395,6 +565,8 @@ export function summarizeRecords(
   totalPlanned: number,
 ): LiveParitySummary {
   let matched = 0;
+  let matchedExact = 0;
+  let matchedVolatile = 0;
   let matchedOk = 0;
   let matchedApiError = 0;
   let matchedUsageError = 0;
@@ -417,6 +589,11 @@ export function summarizeRecords(
 
     if (r.status === "match") {
       matched++;
+      if (r.volatileReasons && r.volatileReasons.length > 0) {
+        matchedVolatile++;
+      } else {
+        matchedExact++;
+      }
       if (r.outcome === "ok") matchedOk++;
       else if (r.outcome === "usage-error") matchedUsageError++;
       else matchedApiError++;
@@ -431,6 +608,8 @@ export function summarizeRecords(
     completed: records.length,
     remaining: Math.max(0, totalPlanned - records.length),
     matched,
+    matchedExact,
+    matchedVolatile,
     matchedOk,
     matchedApiError,
     matchedUsageError,
@@ -491,6 +670,8 @@ export function formatMarkdownReport(
     `| Progress | ${summary.completed} / ${summary.totalPlanned} (${summary.remaining} remaining) |`,
     `| Services tested | ${summary.servicesTested} |`,
     `| Matched | ${summary.matched} (${passRate}%) |`,
+    `| — Exact | ${summary.matchedExact} |`,
+    `| — Live-volatile (structurally identical) | ${summary.matchedVolatile} |`,
     `| — Matched (exit 0 / OK) | ${summary.matchedOk} |`,
     `| — Matched (API error) | ${summary.matchedApiError} |`,
     `| — Matched (usage error) | ${summary.matchedUsageError} |`,
@@ -517,6 +698,26 @@ export function formatMarkdownReport(
       const reason = r.diffs.join("; ").replaceAll("|", "\\|");
       lines.push(
         `| \`${r.key}\` | ${r.oci.exitCode} | ${r.boci.exitCode} | ${r.oci.elapsedMs.toFixed(0)} | ${r.boci.elapsedMs.toFixed(0)} | ${reason} |`,
+      );
+    }
+    lines.push("");
+  }
+
+  const volatile = records
+    .filter(
+      (r) =>
+        r.status === "match" &&
+        r.volatileReasons &&
+        r.volatileReasons.length > 0,
+    )
+    .sort((a, b) => a.key.localeCompare(b.key));
+  if (volatile.length > 0) {
+    lines.push("## Live-Volatile Matches", "");
+    lines.push("| Command | Volatile Reason(s) | oci ms | boci ms |");
+    lines.push("|---|---|---:|---:|");
+    for (const r of volatile) {
+      lines.push(
+        `| \`${r.key}\` | ${(r.volatileReasons ?? []).join(", ")} | ${r.oci.elapsedMs.toFixed(0)} | ${r.boci.elapsedMs.toFixed(0)} |`,
       );
     }
     lines.push("");

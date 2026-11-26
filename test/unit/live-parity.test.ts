@@ -380,6 +380,131 @@ describe("live output comparison & rate-limit detection", () => {
       },
     );
     expect(res.match).toBe(true);
+    expect(res.volatileReasons).toEqual(["envelope-token"]);
+  });
+
+  test("classifies recent same-format server timestamps, JWTs, and reordered arrays as live-volatile matches", () => {
+    const ts = compareLiveRuns(
+      {
+        exitCode: 0,
+        elapsedMs: 500,
+        stdout:
+          '{"data":{"time-created":"2026-11-26T19:07:22.760000+00:00"}}\n',
+        stderr: "",
+      },
+      {
+        exitCode: 0,
+        elapsedMs: 100,
+        stdout:
+          '{"data":{"time-created":"2026-11-26T19:07:23.184000+00:00"}}\n',
+        stderr: "",
+      },
+    );
+    expect(ts.match).toBe(true);
+    expect(ts.volatileReasons).toEqual(["server-timestamp"]);
+
+    // Different timestamp format MUST still diverge
+    const badTs = compareLiveRuns(
+      {
+        exitCode: 0,
+        elapsedMs: 500,
+        stdout:
+          '{"data":{"time-created":"2026-11-26T19:07:22.760000+00:00"}}\n',
+        stderr: "",
+      },
+      {
+        exitCode: 0,
+        elapsedMs: 100,
+        stdout: '{"data":{"time-created":"2026-11-26T19:07:22.760Z"}}\n',
+        stderr: "",
+      },
+    );
+    expect(badTs.match).toBe(false);
+
+    // Freshly minted JWT with identical header & non-time claims (including embedded request signature/date in sub)
+    const mkJwt = (iat: number, date: string, reqSig: string, sig: string) =>
+      `${Buffer.from('{"typ":"JWT","alg":"HS256"}').toString("base64url")}.${Buffer.from(
+        JSON.stringify({
+          sub: JSON.stringify({
+            userId: "u1",
+            claims: [
+              {
+                key: "authorization",
+                value: `Signature keyId="k",signature="${reqSig}",version="1"`,
+              },
+              { key: "h_date", value: date },
+            ],
+          }),
+          iat,
+          exp: iat + 3600,
+        }),
+      ).toString("base64url")}.${sig}`;
+    const jwt = compareLiveRuns(
+      {
+        exitCode: 0,
+        elapsedMs: 500,
+        stdout: JSON.stringify({
+          data: {
+            "access-token": mkJwt(
+              1795720052,
+              "Thu, 26 Nov 2026 19:28:56 GMT",
+              "reqSigA==",
+              "sigA",
+            ),
+          },
+        }),
+        stderr: "",
+      },
+      {
+        exitCode: 0,
+        elapsedMs: 100,
+        stdout: JSON.stringify({
+          data: {
+            "access-token": mkJwt(
+              1795720053,
+              "Thu, 26 Nov 2026 19:28:57 GMT",
+              "reqSigB==",
+              "sigB",
+            ),
+          },
+        }),
+        stderr: "",
+      },
+    );
+    expect(jwt.match).toBe(true);
+    expect(jwt.volatileReasons).toEqual(["jwt-token"]);
+
+    // Nondeterministic server array order -> volatile match when multiset is identical
+    const arr = compareLiveRuns(
+      {
+        exitCode: 0,
+        elapsedMs: 500,
+        stdout: JSON.stringify({
+          data: {
+            items: [
+              { type: "A", count: 1 },
+              { type: "B", count: 2 },
+            ],
+          },
+        }),
+        stderr: "",
+      },
+      {
+        exitCode: 0,
+        elapsedMs: 100,
+        stdout: JSON.stringify({
+          data: {
+            items: [
+              { type: "B", count: 2 },
+              { type: "A", count: 1 },
+            ],
+          },
+        }),
+        stderr: "",
+      },
+    );
+    expect(arr.match).toBe(true);
+    expect(arr.volatileReasons).toEqual(["array-order"]);
   });
 
   test("masks embedded opcRequestId inside ServiceError messages", () => {

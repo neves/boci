@@ -191,7 +191,7 @@ function sortListItems(
     };
   });
   keyed.sort((a, b) => {
-    let cmp = 0;
+    let cmp: number;
     if (attr === "time_created") {
       cmp = a.ms < b.ms ? -1 : a.ms > b.ms ? 1 : 0;
       if (cmp === 0) cmp = a.str < b.str ? -1 : a.str > b.str ? 1 : 0;

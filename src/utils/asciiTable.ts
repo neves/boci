@@ -1,6 +1,7 @@
 // Pure TypeScript port of Python's terminaltables.AsciiTable + visible_width.
 // Matches terminaltables 3.1.10 on Python 3.12 (East Asian Width 'F' and 'W').
 
+// eslint-disable-next-line no-control-regex
 const ANSI_COLOR_RE = /\x1b\[[\d;]+m/g;
 
 /** Unicode code point ranges with East Asian Width 'F' (Fullwidth) or 'W' (Wide) in Python 3.12. */
@@ -157,6 +158,7 @@ function splitCellLines(cell: string): string[] {
   if (cell.length === 0) return [""];
   // Python str.splitlines() splits on universal newlines; trailing \n adds an extra blank line.
   const parts = cell.split(
+    // eslint-disable-next-line no-control-regex
     /\r\n|\n|\r|\v|\f|\x1c|\x1d|\x1e|\x85|\u2028|\u2029/,
   );
   if (cell.endsWith("\n")) return parts;
@@ -164,6 +166,7 @@ function splitCellLines(cell: string): string[] {
   if (
     parts.length > 1 &&
     parts[parts.length - 1] === "" &&
+    // eslint-disable-next-line no-control-regex
     /[\r\v\f\x1c-\x1e\x85\u2028\u2029]$/.test(cell)
   ) {
     parts.pop();

@@ -1037,7 +1037,7 @@ export async function sendServiceRequest(
   };
   prepareContentLength(req);
   let wireBody = req.body;
-  if (typeof wireBody === "string" && /[^\x00-\x7f]/.test(wireBody)) {
+  if (typeof wireBody === "string" && /[\u0080-\uffff]/.test(wireBody)) {
     const bytes = new TextEncoder().encode(wireBody);
     const length = Number(req.headers["content-length"]);
     // requests frames a Python str by character count, while the SDK hashes
@@ -1047,7 +1047,7 @@ export async function sendServiceRequest(
   }
   const maxAttempts = opts.noRetry ? 1 : sc.maxAttempts;
   let response: Response;
-  let raw = "";
+  let raw: string;
   for (let attempt = 1; ; attempt++) {
     delete req.headers.date;
     delete req.headers.authorization;
@@ -1988,8 +1988,8 @@ export async function callRawSessionRequest(
       ? 1
       : sc.maxAttempts;
   let response: Response;
-  let content = new Uint8Array(0);
-  let text = "";
+  let content: Uint8Array;
+  let text: string;
   for (let attempt = 1; ; attempt++) {
     delete req.headers.date;
     delete req.headers.authorization;

@@ -59,6 +59,7 @@ export function loadPrivateKey(
       // in cryptography, then retries with None and raises this TypeError.
       throw new TypeError(
         "Password was not given but private key is encrypted",
+        { cause: e },
       );
     }
     if (isPublicKey(key)) {

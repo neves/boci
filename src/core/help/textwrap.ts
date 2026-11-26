@@ -50,8 +50,7 @@ function split(text: string): string[] {
   return text.split(WORDSEP).filter((c) => c !== undefined && c !== "");
 }
 
-const isBlank = (s: string) =>
-  s.trim() === "" && /^[\t\n\x0b\x0c\r ]*$/.test(s);
+const isBlank = (s: string) => s.trim() === "" && /^[\t\n\v\f\r ]*$/.test(s);
 
 export class TextWrapper {
   constructor(
@@ -85,10 +84,8 @@ export class TextWrapper {
         const last = [...(chunks[chunks.length - 1] as string)];
         cur.push(last.slice(0, spaceLeft).join(""));
         chunks[chunks.length - 1] = last.slice(spaceLeft).join("");
-        curLen = cur.reduce((a, c) => a + len(c), 0);
       }
       if (cur.length && isBlank(cur[cur.length - 1] as string)) {
-        curLen -= len(cur[cur.length - 1] as string);
         cur.pop();
       }
       if (cur.length) lines.push(indent + cur.join(""));
@@ -115,7 +112,8 @@ export class TextWrapper {
 
 // Built from a string: literal U+2028/U+2029 would end a regex literal.
 const LINE_BREAKS = new RegExp(
-  "\\r\\n|[\\n\\r\\x0b\\x0c\\x1c\\x1d\\x1e\\x85\\u2028\\u2029]",
+  // eslint-disable-next-line no-control-regex
+  "\\r\\n|[\\n\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028\\u2029]",
 );
 
 /** Python str.splitlines() (no keepends). */

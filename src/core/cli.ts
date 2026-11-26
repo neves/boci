@@ -13,7 +13,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { open } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { checkFileAccessibility } from "../lib/accessibility.ts";
 import { isZipBuffer } from "../utils/zip.ts";
 import {
@@ -708,7 +708,7 @@ async function main(io: Invocation): Promise<void> {
               "This command does not support writing data to stdout",
             );
           try {
-            await using handle = await open(resolve(io.cwd, file), "a+");
+            await using _handle = await open(resolve(io.cwd, file), "a+");
           } catch (e) {
             showPatched(
               io,
@@ -1769,10 +1769,6 @@ const STORAGE_UNIT_MAP: Record<string, string> = {
 };
 
 const DEFAULT_FILE_TRUTHY = new Set(["1", "y", "t", "yes", "true", "on"]);
-
-function toCamelCase(name: string): string {
-  return name.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
-}
 
 function sortJsonKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(sortJsonKeys);

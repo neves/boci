@@ -1795,7 +1795,7 @@ function pyDumpsOpts(
   const encodeStr = (s: string): string => {
     const raw = JSON.stringify(s);
     if (!escapeAscii) return raw;
-    return raw.replace(/[^\x00-\x7f]/g, (ch) => {
+    return raw.replace(/[\u0080-\uffff]/g, (ch) => {
       const cp = ch.codePointAt(0)!;
       if (cp <= 0xffff) return `\\u${cp.toString(16).padStart(4, "0")}`;
       const off = cp - 0x10000;
@@ -1933,7 +1933,7 @@ const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
  * the alphabet are skipped, a complete pad ends the input; errors raise like CPython.
  */
 export function pyB64decode(s: string): Uint8Array {
-  if (/[^\x00-\x7f]/.test(s))
+  if (/[\u0080-\uffff]/.test(s))
     throw new ProgramRaise(
       "ValueError",
       "string argument should contain only ASCII characters",
@@ -2220,7 +2220,7 @@ export function runProgram(
           const rawIdx = args.length === 0 ? obj.length - 1 : args[0];
           if (typeof rawIdx !== "number" || !Number.isInteger(rawIdx))
             throw new ProgramUnsupported("list.pop() index");
-          let idx = rawIdx < 0 ? rawIdx + obj.length : rawIdx;
+          const idx = rawIdx < 0 ? rawIdx + obj.length : rawIdx;
           if (idx < 0 || idx >= obj.length)
             throw new ProgramRaise("IndexError", "pop index out of range");
           const [removed] = obj.splice(idx, 1);
@@ -3391,7 +3391,7 @@ export function runProgram(
           if (raw === null || raw === undefined) return fallback;
           if (typeof raw !== "number" || !Number.isInteger(raw))
             throw new ProgramUnsupported("slice index");
-          let i = raw < 0 ? raw + len : raw;
+          const i = raw < 0 ? raw + len : raw;
           if (step > 0) return Math.max(0, Math.min(len, i));
           return Math.max(-1, Math.min(len - 1, i));
         };
@@ -4388,7 +4388,7 @@ export function runProgram(
           const headersVal = evaluate(rest[1] as Expr);
           const displayAllHeaders = pyTruthy(evaluate(rest[2] as Expr));
           const nestData = pyTruthy(evaluate(rest[3] as Expr));
-          let headers: ProgramHeaders | Dict | null = null;
+          let headers: ProgramHeaders | Dict | null;
           if (headersVal === null || headersVal === undefined) {
             headers = null;
           } else if (

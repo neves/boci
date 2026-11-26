@@ -29,6 +29,7 @@ const OPTCRE =
 
 /** Python str.strip() whitespace. */
 export const pyStrip = (s: string) =>
+  // eslint-disable-next-line no-control-regex
   s.replace(/^[\s\x1c-\x1f\x85]+|[\s\x1c-\x1f\x85]+$/gu, "");
 
 export function parseConfig(

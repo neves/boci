@@ -2,7 +2,6 @@
 // (inheriting [DEFAULT]) with configparser semantics, and validate it the same way.
 import type { Env } from "../lib/io.ts";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { homedir } from "node:os";
 import { resolve } from "node:path";
 import {
   ConfigParserError,

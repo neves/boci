@@ -56,7 +56,7 @@ export function loadRc(value: string, env: Env, cwd: string): Rc {
     parameterAliases: {},
   };
   if (!found) return rc;
-  let text = "";
+  let text: string;
   try {
     text = readFileSync(resolve(cwd, found), "utf8");
   } catch {

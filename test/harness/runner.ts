@@ -187,6 +187,10 @@ export async function runInProcess(
     argv.some(
       (a) =>
         a === "--cli-auto-prompt" ||
+        a === "--file" ||
+        a.startsWith("--file=") ||
+        a === "--output-file" ||
+        a.startsWith("--output-file=") ||
         (a.startsWith("-") && !a.startsWith("--") && a.includes("i")),
     );
   const isolated = Boolean(

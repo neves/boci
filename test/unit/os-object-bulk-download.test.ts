@@ -1,11 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  chmodSync,
-  mkdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import { buildBulkDownloadFilter, pyDirname } from "../../src/commands/os.ts";

@@ -331,15 +331,12 @@ describe("os object sync", () => {
       destDir,
     ];
 
-    let stdout1 = "";
     expect(
       await run({
         argv,
         env: sb.env,
         cwd: sb.home,
-        out: (s) => {
-          stdout1 += s;
-        },
+        out: () => {},
         err: () => {},
         isTTY: () => false,
         columns: () => 80,

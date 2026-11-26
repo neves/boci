@@ -88,10 +88,14 @@ class Zygote {
     this.dead = true;
     try {
       this.proc.stdin.end();
-    } catch {}
+    } catch {
+      /* process may already have exited */
+    }
     try {
       this.proc.kill("SIGKILL");
-    } catch {}
+    } catch {
+      /* process may already have exited */
+    }
     this.lines.cancel().catch(() => {});
     await this.proc.exited;
   }
@@ -100,7 +104,9 @@ class Zygote {
     this.dead = true;
     try {
       this.proc.stdin.end();
-    } catch {}
+    } catch {
+      /* process may already have exited */
+    }
     let timer: ReturnType<typeof setTimeout> | undefined;
     const exited = await Promise.race([
       this.proc.exited.then(() => true),
@@ -112,7 +118,9 @@ class Zygote {
     if (!exited) {
       try {
         this.proc.kill("SIGKILL");
-      } catch {}
+      } catch {
+        /* process may already have exited */
+      }
       this.lines.cancel().catch(() => {});
       await this.proc.exited;
     }

@@ -97,7 +97,9 @@ export const spawnLauncher: Launcher = async (
           timedOut = true;
           try {
             proc.kill("SIGKILL");
-          } catch {}
+          } catch {
+            /* process may already have exited */
+          }
         }, timeoutMs);
   const stdoutP = new Response(proc.stdout).text().catch(() => "");
   const stderrP = new Response(proc.stderr).text().catch(() => "");

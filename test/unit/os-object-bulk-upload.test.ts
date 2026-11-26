@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { chmodSync, mkdirSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { run } from "../../src/core/cli.ts";
 import {
@@ -237,7 +237,6 @@ describe("os object bulk-upload", () => {
     symlinkSync(srcDir, join(srcDir, "self-loop"));
 
     // 1. With --no-follow-symlinks: only real.txt is uploaded.
-    let stdout = "";
     const codeNoFollow = await run({
       argv: [
         "--endpoint",
@@ -257,9 +256,7 @@ describe("os object bulk-upload", () => {
       ],
       env: sb.env,
       cwd: sb.home,
-      out: (s) => {
-        stdout += s;
-      },
+      out: () => {},
       err: () => {},
       isTTY: () => false,
       columns: () => 80,
@@ -269,7 +266,6 @@ describe("os object bulk-upload", () => {
 
     // 2. Default (follow symlinks): uploads real.txt, link.txt, and linked-dir/ext-file.txt without infinite loop.
     uploaded.length = 0;
-    stdout = "";
     const codeFollow = await run({
       argv: [
         "--endpoint",
@@ -288,9 +284,7 @@ describe("os object bulk-upload", () => {
       ],
       env: sb.env,
       cwd: sb.home,
-      out: (s) => {
-        stdout += s;
-      },
+      out: () => {},
       err: () => {},
       isTTY: () => false,
       columns: () => 80,

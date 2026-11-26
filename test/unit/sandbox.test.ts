@@ -28,7 +28,7 @@ test("fingerprint is the colon-separated MD5 of the DER public key", async () =>
 });
 
 test("sandbox is removed on dispose", async () => {
-  let home = "";
+  let home: string;
   {
     await using sb = await createSandbox();
     home = sb.home;

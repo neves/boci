@@ -90,7 +90,7 @@ export function maskStderr(s: string): string {
       /^(?:TransientServiceError|ServiceError|RequestException|SSLException|ConnectTimeout):\n\{\n[\s\S]*?^\}/gm,
       (envelope) =>
         envelope.replace(
-          /^(    "timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?(?:\+00:00)?(",?)$/m,
+          /^( {4}"timestamp": ")\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?(?:\+00:00)?(",?)$/m,
           "$1<timestamp>$2",
         ),
     )
@@ -108,7 +108,7 @@ export function maskStderr(s: string): string {
 function maskExecCredential(s: string): string {
   if (!s.includes('"kind": "ExecCredential"')) return s;
   return s.replace(
-    /\{\n    "apiVersion": "client\.authentication\.k8s\.io\/v1beta1",\n    "kind": "ExecCredential",\n    "status": \{\n        "token": "([A-Za-z0-9_-]+={0,2})",\n        "expirationTimestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?Z"\n    \}\n\}/g,
+    /\{\n {4}"apiVersion": "client\.authentication\.k8s\.io\/v1beta1",\n {4}"kind": "ExecCredential",\n {4}"status": \{\n {8}"token": "([A-Za-z0-9_-]+={0,2})",\n {8}"expirationTimestamp": "\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{6})?Z"\n {4}\}\n\}/g,
     (match, token: string) => {
       if (token.length % 4 !== 0) return match;
       const decoded = Buffer.from(

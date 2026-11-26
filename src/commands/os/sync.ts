@@ -3,105 +3,55 @@
 import {
   closeSync,
   existsSync,
-  lstatSync,
   mkdirSync,
   openSync,
-  readdirSync,
   readFileSync,
-  readSync,
   rmdirSync,
   statSync,
   unlinkSync,
   utimesSync,
-  writeSync,
 } from "node:fs";
-import { basename, extname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { expandUser } from "../../core/config.ts";
 import {
   checkDirectoryReadable,
   checkDirectoryWritable,
 } from "../../lib/accessibility.ts";
-import {
-  type OutputFileHandle,
-  openClickFileForWrite,
-} from "../../core/click-file.ts";
 import { Exit, type Invocation } from "../../lib/io.ts";
 import { parseJsonParameter } from "../../core/json-input.ts";
 import {
-  type ClientSettings,
-  type ServiceClient,
   createServiceClient,
   sendServiceRequest,
 } from "../../core/operation.ts";
-import {
-  type OutputOptions,
-  formatServiceError,
-  renderDocument,
-} from "../../core/output.ts";
+import { formatServiceError, renderDocument } from "../../core/output.ts";
 import { expandVars } from "../../core/rc.ts";
-import type { Index, ServiceSpec } from "../../core/spec.ts";
 
 import {
-  BULK_PUT_DISPLAY_HEADERS,
-  type BottomUpDirEntry,
-  CRC32C_TABLE,
   DEFAULT_MULTIPART_DOWNLOAD_THRESHOLD_MIB,
-  DEFAULT_PARALLEL_DELETE_COUNT,
   DEFAULT_PARALLEL_DOWNLOAD_COUNT,
-  DEFAULT_PARALLEL_UPLOAD_COUNT,
-  DEFAULT_PART_SIZE_BYTES,
   type ListedObject,
-  MAX_MULTIPART_PARTS,
   MEBIBYTE,
-  MULTIPART_UPLOAD_ERROR_MESSAGE,
   OBJECT_LIST_PAGE_SIZE_BULK_OPERATIONS,
-  OBJECT_PUT_DISPLAY_HEADERS,
   OBJECT_STORAGE_CLIENT,
-  OCTET_STREAM_EXTENSIONS,
-  type OsObjectGetOptions,
   type OsObjectPutOptions,
-  PROGRESS_BAR_GRANULARITY,
-  SSE_ALGORITHM,
-  STREAMING_DEFAULT_PART_SIZE_BYTES,
-  type SyncWalkEntry,
-  type WalkEntry,
   buildBulkDownloadFilter,
-  buildMultipartGetRanges,
   buildMultipartPutParts,
-  computeCrc32cBase64,
-  computeMultipartMd5,
-  computePartChecksum,
-  confirmPrompt,
-  confirmPromptWithReader,
-  createChunkWriter,
-  createLineReader,
-  createNonTtyProgressTracker,
   filterBulkPutHeaders,
-  fnmatchToRegex,
   formatBulkProgressLabel,
-  guessContentType,
   guessContentTypeOptional,
   normalizeStringArray,
   parseIsoTimeTruncatedToSeconds,
-  promptOverwriteChoice,
   pyDirname,
-  pyFloatRepr,
   pyPathJoin,
   readEncryptionKeyHeaders,
   readPartFromFile,
-  readResponseBytes,
-  readStdinParts,
-  renderBulkDeleteOutput,
-  renderObjectPutHeaders,
   requiresSync,
   resolveMultipartPartSize,
   resolveOsNamespace,
   stripQuery,
   usageError,
   walkDirectoryBottomUpForDelete,
-  walkDirectoryForBulkUpload,
   walkDirectoryForSyncUpload,
-  writeAllToFd,
 } from "./shared.ts";
 import { createSyncDownloadTransferHelpers } from "./sync_download_transfers.ts";
 export async function runOsObjectSync(

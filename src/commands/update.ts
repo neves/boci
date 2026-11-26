@@ -351,7 +351,7 @@ export async function runUpdate(
     "download SHA256SUMS",
     (res) => res.text(),
   );
-  let expectedDigest: string | null = null;
+  let expectedDigest: string | null;
   try {
     expectedDigest = parseSha256Sums(sumsText)[assetName] ?? null;
   } catch (e) {

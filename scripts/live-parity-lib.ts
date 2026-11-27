@@ -199,7 +199,8 @@ export function buildReadCommandPlan(
       if (params.some((p) => (p.opts ?? []).includes("--file"))) continue;
 
       // Resolve all required parameters from the discovered read-only context.
-      const requiredFlags: string[] = [];
+      const flags: string[] = [];
+      let hasCompartmentId = false;
       let satisfiable = true;
       for (const param of params) {
         if (!param.required) continue;
@@ -209,16 +210,23 @@ export function buildReadCommandPlan(
           satisfiable = false;
           break;
         }
-        requiredFlags.push(resolved[0], resolved[1]);
+        if (resolved[0] === "--compartment-id") hasCompartmentId = true;
+        flags.push(resolved[0], resolved[1]);
       }
       if (!satisfiable) continue;
 
-      const argv = [
-        service,
-        ...cmdName.split(" "),
-        ...requiredFlags,
-        "--no-retry",
-      ];
+      // Many OCI list APIs mark --compartment-id optional (accepting either compartmentId
+      // or a resource ID), returning HTTP 400 MissingParameter if neither is provided.
+      if (
+        !hasCompartmentId &&
+        params.some(
+          (p) => !p.required && (p.opts ?? []).includes("--compartment-id"),
+        )
+      ) {
+        flags.push("--compartment-id", ctx.tenancy);
+      }
+
+      const argv = [service, ...cmdName.split(" "), ...flags, "--no-retry"];
 
       plan.push({
         key,

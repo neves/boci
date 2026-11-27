@@ -252,6 +252,42 @@ describe("buildReadCommandPlan", () => {
     ]);
   });
 
+  test("passes optional --compartment-id to avoid MissingParameter errors", () => {
+    const specs = [
+      makeSpec("adm", {
+        "knowledge-base list": {
+          hidden: false,
+          kind: "generated",
+          operation: {
+            client: "default",
+            method: "list_knowledge_bases",
+            http: "GET",
+            path: "/knowledgeBases",
+            queryParams: {},
+          },
+          params: [
+            {
+              name: "compartment_id",
+              opts: ["--compartment-id", "-c"],
+              required: false,
+            },
+            { name: "id", opts: ["--id"], required: false },
+          ],
+        },
+      }),
+    ];
+    const plan = buildReadCommandPlan(specs, ctx);
+    expect(plan).toHaveLength(1);
+    expect(plan[0]?.argv).toEqual([
+      "adm",
+      "knowledge-base",
+      "list",
+      "--compartment-id",
+      ctx.tenancy,
+      "--no-retry",
+    ]);
+  });
+
   test("excludes commands that have any non-GET/HEAD sdkOperation", () => {
     const specs = [
       makeSpec("compute", {

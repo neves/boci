@@ -288,6 +288,103 @@ describe("buildReadCommandPlan", () => {
     ]);
   });
 
+  test("uses enum choice for required choice params and supplies deterministic time-interval window", () => {
+    const specs = [
+      makeSpec("capacity-management", {
+        "occ-overview-collection list": {
+          hidden: false,
+          kind: "generated",
+          operation: {
+            client: "default",
+            method: "list_occ_overviews",
+            http: "GET",
+            path: "/namespace/{namespace}/occOverview",
+            queryParams: {},
+          },
+          params: [
+            {
+              name: "namespace",
+              opts: ["--namespace"],
+              required: true,
+              choices: ["COMPUTE"],
+            },
+            {
+              name: "compartment_id",
+              opts: ["--compartment-id"],
+              required: true,
+            },
+          ],
+        },
+      }),
+      makeSpec("opsi", {
+        "database-insights list-addm-db-findings-time-series": {
+          hidden: false,
+          kind: "generated",
+          operation: {
+            client: "default",
+            method: "list_addm",
+            http: "GET",
+            path: "/addm",
+            queryParams: {},
+          },
+          params: [
+            {
+              name: "compartment_id",
+              opts: ["--compartment-id"],
+              required: true,
+            },
+            {
+              name: "time_interval_start",
+              opts: ["--time-interval-start"],
+              required: false,
+            },
+            {
+              name: "time_interval_end",
+              opts: ["--time-interval-end"],
+              required: false,
+            },
+          ],
+        },
+      }),
+    ];
+    const plan = buildReadCommandPlan(specs, {
+      ...ctx,
+      windowStart: "2026-11-25T00:00:00Z",
+      windowEnd: "2026-11-26T00:00:00Z",
+    });
+    expect(
+      plan.find(
+        (p) => p.key === "capacity-management occ-overview-collection list",
+      )?.argv,
+    ).toEqual([
+      "capacity-management",
+      "occ-overview-collection",
+      "list",
+      "--namespace",
+      "COMPUTE",
+      "--compartment-id",
+      ctx.tenancy,
+      "--no-retry",
+    ]);
+    expect(
+      plan.find(
+        (p) =>
+          p.key === "opsi database-insights list-addm-db-findings-time-series",
+      )?.argv,
+    ).toEqual([
+      "opsi",
+      "database-insights",
+      "list-addm-db-findings-time-series",
+      "--compartment-id",
+      ctx.tenancy,
+      "--time-interval-start",
+      "2026-11-25T00:00:00Z",
+      "--time-interval-end",
+      "2026-11-26T00:00:00Z",
+      "--no-retry",
+    ]);
+  });
+
   test("excludes commands that have any non-GET/HEAD sdkOperation", () => {
     const specs = [
       makeSpec("compute", {
@@ -510,7 +607,7 @@ describe("live output comparison & rate-limit detection", () => {
     expect(jwt.match).toBe(true);
     expect(jwt.volatileReasons).toEqual(["jwt-token"]);
 
-    // Nondeterministic server array order -> volatile match when multiset is identical
+    // Nondeterministic server array order (including nested arrays) -> volatile match when multiset is identical
     const arr = compareLiveRuns(
       {
         exitCode: 0,
@@ -518,8 +615,8 @@ describe("live output comparison & rate-limit detection", () => {
         stdout: JSON.stringify({
           data: {
             items: [
-              { type: "A", count: 1 },
-              { type: "B", count: 2 },
+              { type: "A", props: [{ k: "1" }, { k: "2" }] },
+              { type: "B", props: [{ k: "3" }, { k: "4" }] },
             ],
           },
         }),
@@ -531,8 +628,8 @@ describe("live output comparison & rate-limit detection", () => {
         stdout: JSON.stringify({
           data: {
             items: [
-              { type: "B", count: 2 },
-              { type: "A", count: 1 },
+              { type: "B", props: [{ k: "4" }, { k: "3" }] },
+              { type: "A", props: [{ k: "2" }, { k: "1" }] },
             ],
           },
         }),

@@ -6,10 +6,13 @@ import { applyMasks, maskStderr } from "../test/harness/masks.ts";
 export type LiveContext = {
   profile: string;
   tenancy: string;
+  childCompartmentId?: string;
   user?: string;
   region?: string;
   namespace?: string;
   availabilityDomain?: string;
+  windowStart?: string;
+  windowEnd?: string;
 };
 
 export type ReadCommandPlan = {
@@ -106,7 +109,14 @@ export function parseOciProfile(
 function resolveRequiredOption(
   opts: string[],
   ctx: LiveContext,
+  choices?: string[],
 ): [string, string] | undefined {
+  // If the parameter has an explicit enum choice list (e.g. capacity-management --namespace COMPUTE),
+  // use the first valid choice rather than substituting an unrelated context value like OS namespace.
+  if (choices && choices.length > 0) {
+    const primary = opts.find((o) => o.startsWith("--")) ?? opts[0];
+    if (primary) return [primary, choices[0]!];
+  }
   for (const opt of opts) {
     if (opt === "--compartment-id" || opt === "-c") {
       return ["--compartment-id", ctx.tenancy];
@@ -131,6 +141,18 @@ function resolveRequiredOption(
     }
   }
   return undefined;
+}
+
+function defaultUtcWindow(): { start: string; end: string } {
+  const now = new Date();
+  const end = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+  const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
+  return {
+    start: start.toISOString().replace(".000Z", "Z"),
+    end: end.toISOString().replace(".000Z", "Z"),
+  };
 }
 
 function collectCommandOperations(
@@ -201,19 +223,41 @@ export function buildReadCommandPlan(
       // Resolve all required parameters from the discovered read-only context.
       const flags: string[] = [];
       let hasCompartmentId = false;
+      let hasTimeIntervalStart = false;
+      let hasTimeIntervalEnd = false;
       let satisfiable = true;
       for (const param of params) {
         if (!param.required) continue;
         const allOpts = [...(param.opts ?? []), ...(param.secondaryOpts ?? [])];
-        const resolved = resolveRequiredOption(allOpts, ctx);
+        const choices = Array.isArray((param as { choices?: unknown }).choices)
+          ? ((param as { choices?: string[] }).choices ?? undefined)
+          : undefined;
+        const resolved = resolveRequiredOption(allOpts, ctx, choices);
         if (!resolved) {
           satisfiable = false;
           break;
         }
         if (resolved[0] === "--compartment-id") hasCompartmentId = true;
+        if (resolved[0] === "--time-interval-start")
+          hasTimeIntervalStart = true;
+        if (resolved[0] === "--time-interval-end") hasTimeIntervalEnd = true;
         flags.push(resolved[0], resolved[1]);
       }
       if (!satisfiable) continue;
+
+      // Some multicloud anchor list commands reject root tenancy OCIDs; use a child compartment if available.
+      const preferChildCompartment =
+        service === "multicloud" &&
+        (cmdName.includes("network-anchor") ||
+          cmdName.includes("resource-anchor")) &&
+        Boolean(ctx.childCompartmentId);
+      const compartmentValue = preferChildCompartment
+        ? ctx.childCompartmentId!
+        : ctx.tenancy;
+      if (preferChildCompartment && hasCompartmentId) {
+        const idx = flags.indexOf("--compartment-id");
+        if (idx >= 0) flags[idx + 1] = compartmentValue;
+      }
 
       // Many OCI list APIs mark --compartment-id optional (accepting either compartmentId
       // or a resource ID), returning HTTP 400 MissingParameter if neither is provided.
@@ -223,7 +267,23 @@ export function buildReadCommandPlan(
           (p) => !p.required && (p.opts ?? []).includes("--compartment-id"),
         )
       ) {
-        flags.push("--compartment-id", ctx.tenancy);
+        flags.push("--compartment-id", compartmentValue);
+      }
+
+      // Supply a deterministic 24h UTC window for APIs with optional --time-interval-start
+      // (e.g. opsi ADDM/SQL insights), avoiding HTTP 400 MissingParameter and clock-skew diffs.
+      const acceptsStart = params.some(
+        (p) => !p.required && (p.opts ?? []).includes("--time-interval-start"),
+      );
+      if (acceptsStart && !hasTimeIntervalStart) {
+        const win = defaultUtcWindow();
+        flags.push("--time-interval-start", ctx.windowStart ?? win.start);
+        const acceptsEnd = params.some(
+          (p) => !p.required && (p.opts ?? []).includes("--time-interval-end"),
+        );
+        if (acceptsEnd && !hasTimeIntervalEnd) {
+          flags.push("--time-interval-end", ctx.windowEnd ?? win.end);
+        }
       }
 
       const argv = [service, ...cmdName.split(" "), ...flags, "--no-retry"];
@@ -411,6 +471,19 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value);
 }
 
+function canonicalUnorderedJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalUnorderedJson).sort().join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>).sort(
+      ([a], [b]) => a.localeCompare(b),
+    );
+    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalUnorderedJson(v)}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
 function compareJsonValues(
   a: unknown,
   b: unknown,
@@ -447,9 +520,9 @@ function compareJsonValues(
       for (const r of positionalReasons) reasons.add(r);
       return true;
     }
-    // Check identical multiset (server-side nondeterministic array order).
-    const sortedA = a.map(canonicalJson).sort();
-    const sortedB = b.map(canonicalJson).sort();
+    // Check identical multiset (server-side nondeterministic array order, including nested arrays).
+    const sortedA = a.map(canonicalUnorderedJson).sort();
+    const sortedB = b.map(canonicalUnorderedJson).sort();
     if (sortedA.every((v, i) => v === sortedB[i])) {
       reasons.add("array-order");
       return true;

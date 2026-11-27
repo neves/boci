@@ -201,9 +201,36 @@ async function discoverContext(
     }
   }
 
+  let childCompartmentId: string | undefined;
+  const compRun = await runCliCommand(
+    [
+      ociBin,
+      "iam",
+      "compartment",
+      "list",
+      "--compartment-id",
+      tenancy,
+      "--lifecycle-state",
+      "ACTIVE",
+      "--no-retry",
+    ],
+    env,
+  );
+  if (compRun.exitCode === 0 && compRun.stdout.trim()) {
+    try {
+      const parsed = JSON.parse(compRun.stdout) as {
+        data?: { id?: string }[];
+      };
+      childCompartmentId = parsed.data?.[0]?.id;
+    } catch {
+      // Leave undefined.
+    }
+  }
+
   const ctx: LiveContext = {
     profile,
     tenancy,
+    childCompartmentId,
     user,
     region,
     namespace,
@@ -219,7 +246,10 @@ async function writeReports(
   totalPlanned: number,
 ) {
   const records = [...recordsMap.values()];
-  const summary = summarizeRecords(records, totalPlanned);
+  const summary = summarizeRecords(
+    records,
+    Math.max(totalPlanned, records.length),
+  );
   await mkdir(outDir, { recursive: true });
   await Bun.write(summaryPath, `${JSON.stringify(summary, null, 2)}\n`);
   await Bun.write(reportPath, formatMarkdownReport(summary, records));
@@ -495,7 +525,27 @@ for (const item of toRun) {
     process.exit(2);
   }
 
-  const cmp = compareLiveRuns(ociSample, bociSample);
+  let cmp = compareLiveRuns(ociSample, bociSample);
+
+  // If both exited 0 but stdout differed (e.g. transient server mutation or lazy seeding
+  // between the two sequential calls), re-check once after a brief pause before flagging.
+  if (
+    !cmp.match &&
+    ociSample.exitCode === 0 &&
+    bociSample.exitCode === 0 &&
+    !stopRequested
+  ) {
+    await Bun.sleep(500);
+    const retryOci = await runCliCommand([ociBin, ...item.argv], liveEnv);
+    if (pairGapMs > 0) await Bun.sleep(pairGapMs);
+    const retryBoci = await runCliCommand([bociBin, ...item.argv], liveEnv);
+    if (!isRateLimited(retryOci) && !isRateLimited(retryBoci)) {
+      ociSample = retryOci;
+      bociSample = retryBoci;
+      cmp = compareLiveRuns(ociSample, bociSample);
+    }
+  }
+
   const speedup =
     bociSample.elapsedMs > 0 ? ociSample.elapsedMs / bociSample.elapsedMs : 0;
 

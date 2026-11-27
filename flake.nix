@@ -7,23 +7,23 @@
 
   outputs = { self, nixpkgs }:
     let
-      version = "0.0.1";
+      version = "0.0.2";
       sources = {
         x86_64-linux = {
           asset = "boci-linux-x64";
-          sha256 = "7af06751557a8d037eccdba3389963c879f8aa1f0619d9c5e36a608b71c19091";
+          sha256 = "dd42fad0dc04b8a5bf7896a2dddc2b8820d89f82be469dfd5df8f606e9b8f846";
         };
         aarch64-linux = {
           asset = "boci-linux-arm64";
-          sha256 = "01d714bdf086c87aa122dc506299848fc3efacadc9c5a0912c478fcaf0c0d642";
+          sha256 = "c806607753e016eb25c1f64d8f7ce938d4f9e97e74d9fcc2d4e7b912bdfb492e";
         };
         x86_64-darwin = {
           asset = "boci-darwin-x64";
-          sha256 = "05a950687dac97a42050561b813a100c2a9c5c77d2c8a6ee90ff6e3c68780a36";
+          sha256 = "11a85865ed4de0313f17b847b08319011c485d63e537829436098c620f0973ba";
         };
         aarch64-darwin = {
           asset = "boci-darwin-arm64";
-          sha256 = "0e824720e4d92728fdf4808078cabbf3d79db203ca543f9b383657116e310c17";
+          sha256 = "aee2883c2052985f74fa8d4df32663b6833087c68cd51bb0d7c383f7c2e2b79a";
         };
       };
       forAllSystems = f:
